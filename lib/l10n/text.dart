@@ -63,6 +63,7 @@ const _english = <String, String>{
   'Publikovat': 'Publish',
   'Shout může mít platnost minimálně 15 minut.':
       'A shout must last at least 15 minutes.',
+  'Rozumím': 'Got it',
   'Doplň nadpis, text a alespoň jednu kategorii.':
       'Add a title, text and at least one category.',
   'Obecné': 'General',
@@ -168,6 +169,7 @@ const _german = <String, String>{
   'Publikovat': 'Veröffentlichen',
   'Shout může mít platnost minimálně 15 minut.':
       'Ein Shout muss mindestens 15 Minuten gültig sein.',
+  'Rozumím': 'Verstanden',
   'Doplň nadpis, text a alespoň jednu kategorii.':
       'Füge einen Titel, Text und mindestens eine Kategorie hinzu.',
   'Obecné': 'Allgemein',
@@ -274,6 +276,7 @@ const _polish = <String, String>{
   'Publikovat': 'Opublikuj',
   'Shout může mít platnost minimálně 15 minut.':
       'Shout musi trwać co najmniej 15 minut.',
+  'Rozumím': 'Rozumiem',
   'Doplň nadpis, text a alespoň jednu kategorii.':
       'Dodaj tytuł, tekst i co najmniej jedną kategorię.',
   'Obecné': 'Ogólne',

@@ -1616,7 +1616,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Rozumím'),
+            child: Text(tr(context, 'Rozumím')),
           ),
         ],
       ),
