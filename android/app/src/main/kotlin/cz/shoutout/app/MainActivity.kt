@@ -1,4 +1,4 @@
-package com.example.shoutout
+package cz.shoutout.app
 
 import io.flutter.embedding.android.FlutterActivity
 

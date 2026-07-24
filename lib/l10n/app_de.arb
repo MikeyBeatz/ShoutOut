@@ -1,0 +1,14 @@
+{
+  "@@locale": "de",
+  "appTitle": "ShoutOut",
+  "profile": "Profil",
+  "language": "Sprache",
+  "czech": "Tschechisch",
+  "english": "Englisch",
+  "german": "Deutsch",
+  "polish": "Polnisch",
+  "changeNickname": "Spitznamen ändern",
+  "nicknameChangeHint": "Du kannst deinen Spitznamen in 30 Tagen wieder ändern.",
+  "logout": "Abmelden",
+  "deleteAccount": "Konto löschen"
+}

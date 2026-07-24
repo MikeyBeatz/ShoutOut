@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "696035472864",
+    "project_id": "shoutout-dev-46c81",
+    "storage_bucket": "shoutout-dev-46c81.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696035472864:android:3d39acb77ea7db701ae785",
+        "android_client_info": {
+          "package_name": "cz.shoutout.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "696035472864-4b479j1j0mmo0n38km4btif5skb10fui.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cz.shoutout.app",
+            "certificate_hash": "0ec6d8cd9c07898489a6719669aa2dfa6c1d67ed"
+          }
+        },
+        {
+          "client_id": "696035472864-hv3jkmb2ksjan0no8jlrflfghhuq9396.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGJJYc0wZP4nPqOegjbgn-7amTdkhlhhQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "696035472864-hv3jkmb2ksjan0no8jlrflfghhuq9396.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,99 @@
+import 'package:flutter/widgets.dart';
+
+/// Transitional helper for short UI strings. The canonical app translations
+/// remain in the ARB files; this keeps labels that are also stored in Firestore
+/// (such as categories) stable while presenting them in the selected language.
+String tr(BuildContext context, String czech) {
+  final languageCode = Localizations.localeOf(context).languageCode;
+  final translations = switch (languageCode) {
+    'en' => _english,
+    'de' => _german,
+    'pl' => _polish,
+    _ => null,
+  };
+  return translations?[czech] ?? czech;
+}
+
+const _english = <String, String>{
+  'Oznámení': 'Notifications', 'Přidat shout': 'Add shout',
+  'Co se děje v okolí?': 'What is happening nearby?',
+  'Okolí': 'Nearby', 'Uložené': 'Saved', 'Mé shouty': 'My shouts', 'Profil': 'Profile',
+  'Vzdálenost': 'Distance', 'Řazení': 'Sort', 'Nejbližší': 'Nearest',
+  'Nejoblíbenější': 'Most popular', 'Brzy končí': 'Ending soon',
+  'V tomto okolí zatím nejsou žádné shouty.': 'There are no shouts nearby yet.',
+  'Uložené shouty': 'Saved shouts', 'Zatím nemáš uložené žádné shouty.': 'You have no saved shouts yet.',
+  'Aktivní': 'Active', 'Expirované': 'Expired', 'Smazané': 'Deleted',
+  'V této části zatím nemáš žádné shouty.': 'You have no shouts in this section yet.',
+  'Odebrat z uložených': 'Remove from saved', 'Uložit shout': 'Save shout',
+  'Smazat shout?': 'Delete shout?', 'Shout zmizí z veřejného feedu.': 'The shout will disappear from the public feed.',
+  'Zrušit': 'Cancel', 'Smazat': 'Delete', 'Smazat shout': 'Delete shout',
+  'Shout': 'Shout', 'Nahlásit': 'Report', 'Komentáře': 'Comments',
+  'Autor': 'Author', 'Smazat komentář': 'Delete comment', 'Napiš veřejný komentář': 'Write a public comment',
+  'Nový shout': 'New shout', 'Nadpis': 'Title', 'Stručně, co se děje?': 'Briefly, what is happening?',
+  'Text': 'Text', 'Doplň podrobnosti…': 'Add details…', 'Kategorie (vyber nejvýše dvě)': 'Categories (choose up to two)',
+  'Platnost': 'Duration', 'Publikovat': 'Publish',
+  'Doplň nadpis, text a alespoň jednu kategorii.': 'Add a title, text and at least one category.',
+  'Obecné': 'General', 'Akce': 'Events', 'Sport': 'Sports', 'Zábava': 'Entertainment', 'Pomoc': 'Help',
+  'Upozornění': 'Alert', 'Dotaz': 'Question', 'Doprava': 'Transport', 'Jídlo a pití': 'Food & drink', 'Kultura': 'Culture',
+  'Vytvoř si účet pro dění v okolí.': 'Create an account for local activity.',
+  'Přihlas se a zjisti, co se děje v okolí.': 'Sign in and find out what is happening nearby.',
+  'E-mail': 'Email', 'Heslo': 'Password', 'Vytvořit účet': 'Create account', 'Přihlásit se': 'Sign in',
+  'Přihlášení': 'Sign in', 'Registrace': 'Create account',
+  'Už účet mám': 'I already have an account', 'Vytvořit nový účet': 'Create a new account', 'nebo': 'or',
+  'Pokračovat přes Google': 'Continue with Google',
+  'Odhlásit se': 'Log out',
+  'Tento e-mail už je zaregistrovaný.': 'This email is already registered.', 'Zvol silnější heslo.': 'Choose a stronger password.',
+  'E-mail nebo heslo nesedí.': 'The email or password is incorrect.', 'Akci se nepodařilo dokončit. Zkus to znovu.': 'The action could not be completed. Please try again.',
+  'Ověř svůj e-mail': 'Verify your email', 'Už jsem e-mail ověřil/a': 'I have verified my email',
+  'Ověřovací odkaz byl zaslán na adresu': 'A verification link was sent to', 'Po kliknutí se vrať sem.': 'Return here after clicking it.',
+  'Poslat ověřovací e-mail znovu': 'Resend verification email', 'Zpět a opravit e-mail': 'Go back and correct email',
+  'Ověřovací e-mail byl odeslán.': 'Verification email sent.', 'Účet se nepodařilo zrušit. Zkus to prosím znovu.': 'The account could not be cancelled. Please try again.',
+  'Vyber si přezdívku': 'Choose your nickname', 'Uvidí ji ostatní uživatelé místo tvého skutečného jména.': 'Other users will see it instead of your real name.',
+  'Přezdívka': 'Nickname', 'Přezdívka je volná': 'Nickname is available', 'Tato přezdívka je obsazená': 'This nickname is taken',
+  'Vygenerovat přezdívku': 'Generate nickname', 'Pokračovat': 'Continue',
+  'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.': 'Use 3–24 characters. Hyphens and underscores may only be between nickname parts.',
+  'Tato přezdívka už je obsazená.': 'This nickname is already taken.', 'Přezdívku se nepodařilo uložit.': 'The nickname could not be saved.',
+};
+
+const _german = <String, String>{
+  'Oznámení': 'Benachrichtigungen', 'Přidat shout': 'Shout hinzufügen',
+  'Co se děje v okolí?': 'Was passiert in deiner Nähe?',
+  'Okolí': 'In der Nähe', 'Uložené': 'Gespeichert', 'Mé shouty': 'Meine Shouts', 'Profil': 'Profil',
+  'Vzdálenost': 'Entfernung', 'Řazení': 'Sortierung', 'Nejbližší': 'Nächste', 'Nejoblíbenější': 'Beliebteste', 'Brzy končí': 'Endet bald',
+  'V tomto okolí zatím nejsou žádné shouty.': 'In deiner Nähe gibt es noch keine Shouts.',
+  'Uložené shouty': 'Gespeicherte Shouts', 'Zatím nemáš uložené žádné shouty.': 'Du hast noch keine gespeicherten Shouts.',
+  'Aktivní': 'Aktiv', 'Expirované': 'Abgelaufen', 'Smazané': 'Gelöscht', 'V této části zatím nemáš žádné shouty.': 'Du hast in diesem Bereich noch keine Shouts.',
+  'Odebrat z uložených': 'Aus Gespeicherten entfernen', 'Uložit shout': 'Shout speichern',
+  'Smazat shout?': 'Shout löschen?', 'Shout zmizí z veřejného feedu.': 'Der Shout verschwindet aus dem öffentlichen Feed.', 'Zrušit': 'Abbrechen', 'Smazat': 'Löschen', 'Smazat shout': 'Shout löschen',
+  'Shout': 'Shout', 'Nahlásit': 'Melden', 'Komentáře': 'Kommentare', 'Autor': 'Autor', 'Smazat komentář': 'Kommentar löschen', 'Napiš veřejný komentář': 'Öffentlichen Kommentar schreiben',
+  'Nový shout': 'Neuer Shout', 'Nadpis': 'Titel', 'Stručně, co se děje?': 'Kurz: Was ist los?', 'Text': 'Text', 'Doplň podrobnosti…': 'Details hinzufügen…', 'Kategorie (vyber nejvýše dvě)': 'Kategorien (maximal zwei wählen)', 'Platnost': 'Gültigkeit', 'Publikovat': 'Veröffentlichen',
+  'Doplň nadpis, text a alespoň jednu kategorii.': 'Füge einen Titel, Text und mindestens eine Kategorie hinzu.',
+  'Obecné': 'Allgemein', 'Akce': 'Veranstaltungen', 'Sport': 'Sport', 'Zábava': 'Unterhaltung', 'Pomoc': 'Hilfe', 'Upozornění': 'Hinweis', 'Dotaz': 'Frage', 'Doprava': 'Verkehr', 'Jídlo a pití': 'Essen & Trinken', 'Kultura': 'Kultur',
+  'Vytvoř si účet pro dění v okolí.': 'Erstelle ein Konto für lokale Aktivitäten.', 'Přihlas se a zjisti, co se děje v okolí.': 'Melde dich an und entdecke, was in deiner Nähe passiert.',
+  'E-mail': 'E-Mail', 'Heslo': 'Passwort', 'Vytvořit účet': 'Konto erstellen', 'Přihlásit se': 'Anmelden', 'Už účet mám': 'Ich habe bereits ein Konto', 'Vytvořit nový účet': 'Neues Konto erstellen', 'nebo': 'oder', 'Pokračovat přes Google': 'Mit Google fortfahren', 'Odhlásit se': 'Abmelden',
+  'Přihlášení': 'Anmelden', 'Registrace': 'Registrierung',
+  'Tento e-mail už je zaregistrovaný.': 'Diese E-Mail ist bereits registriert.', 'Zvol silnější heslo.': 'Wähle ein stärkeres Passwort.', 'E-mail nebo heslo nesedí.': 'E-Mail oder Passwort ist nicht korrekt.', 'Akci se nepodařilo dokončit. Zkus to znovu.': 'Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
+  'Ověř svůj e-mail': 'Bestätige deine E-Mail', 'Už jsem e-mail ověřil/a': 'Ich habe meine E-Mail bestätigt', 'Ověřovací odkaz byl zaslán na adresu': 'Ein Bestätigungslink wurde gesendet an', 'Po kliknutí se vrať sem.': 'Kehre nach dem Anklicken hierher zurück.', 'Poslat ověřovací e-mail znovu': 'Bestätigungs-E-Mail erneut senden', 'Zpět a opravit e-mail': 'Zurück und E-Mail korrigieren', 'Ověřovací e-mail byl odeslán.': 'Bestätigungs-E-Mail wurde gesendet.', 'Účet se nepodařilo zrušit. Zkus to prosím znovu.': 'Das Konto konnte nicht gelöscht werden. Bitte versuche es erneut.',
+  'Vyber si přezdívku': 'Wähle einen Spitznamen', 'Uvidí ji ostatní uživatelé místo tvého skutečného jména.': 'Andere Nutzer sehen ihn statt deines echten Namens.', 'Přezdívka': 'Spitzname', 'Přezdívka je volná': 'Spitzname ist verfügbar', 'Tato přezdívka je obsazená': 'Dieser Spitzname ist vergeben', 'Vygenerovat přezdívku': 'Spitznamen generieren', 'Pokračovat': 'Weiter',
+  'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.': 'Verwende 3–24 Zeichen. Bindestriche und Unterstriche dürfen nur zwischen Teilen des Spitznamens stehen.', 'Tato přezdívka už je obsazená.': 'Dieser Spitzname ist bereits vergeben.', 'Přezdívku se nepodařilo uložit.': 'Der Spitzname konnte nicht gespeichert werden.',
+};
+
+const _polish = <String, String>{
+  'Oznámení': 'Powiadomienia', 'Přidat shout': 'Dodaj shout', 'Okolí': 'W pobliżu', 'Uložené': 'Zapisane', 'Mé shouty': 'Moje shouty', 'Profil': 'Profil',
+  'Co se děje v okolí?': 'Co dzieje się w pobliżu?',
+  'Vzdálenost': 'Odległość', 'Řazení': 'Sortowanie', 'Nejbližší': 'Najbliższe', 'Nejoblíbenější': 'Najpopularniejsze', 'Brzy končí': 'Wkrótce wygasają',
+  'V tomto okolí zatím nejsou žádné shouty.': 'W tej okolicy nie ma jeszcze shoutów.', 'Uložené shouty': 'Zapisane shouty', 'Zatím nemáš uložené žádné shouty.': 'Nie masz jeszcze zapisanych shoutów.',
+  'Aktivní': 'Aktywne', 'Expirované': 'Wygasłe', 'Smazané': 'Usunięte', 'V této části zatím nemáš žádné shouty.': 'Nie masz jeszcze shoutów w tej sekcji.',
+  'Odebrat z uložených': 'Usuń z zapisanych', 'Uložit shout': 'Zapisz shout', 'Smazat shout?': 'Usunąć shout?', 'Shout zmizí z veřejného feedu.': 'Shout zniknie z publicznego kanału.', 'Zrušit': 'Anuluj', 'Smazat': 'Usuń', 'Smazat shout': 'Usuń shout',
+  'Shout': 'Shout', 'Nahlásit': 'Zgłoś', 'Komentáře': 'Komentarze', 'Autor': 'Autor', 'Smazat komentář': 'Usuń komentarz', 'Napiš veřejný komentář': 'Napisz publiczny komentarz',
+  'Nový shout': 'Nowy shout', 'Nadpis': 'Tytuł', 'Stručně, co se děje?': 'Krótko: co się dzieje?', 'Text': 'Tekst', 'Doplň podrobnosti…': 'Dodaj szczegóły…', 'Kategorie (vyber nejvýše dvě)': 'Kategorie (wybierz maksymalnie dwie)', 'Platnost': 'Czas trwania', 'Publikovat': 'Opublikuj',
+  'Doplň nadpis, text a alespoň jednu kategorii.': 'Dodaj tytuł, tekst i co najmniej jedną kategorię.',
+  'Obecné': 'Ogólne', 'Akce': 'Wydarzenia', 'Sport': 'Sport', 'Zábava': 'Rozrywka', 'Pomoc': 'Pomoc', 'Upozornění': 'Alert', 'Dotaz': 'Pytanie', 'Doprava': 'Transport', 'Jídlo a pití': 'Jedzenie i napoje', 'Kultura': 'Kultura',
+  'Vytvoř si účet pro dění v okolí.': 'Utwórz konto, aby śledzić lokalne wydarzenia.', 'Přihlas se a zjisti, co se děje v okolí.': 'Zaloguj się i sprawdź, co dzieje się w pobliżu.',
+  'E-mail': 'E-mail', 'Heslo': 'Hasło', 'Vytvořit účet': 'Utwórz konto', 'Přihlásit se': 'Zaloguj się', 'Už účet mám': 'Mam już konto', 'Vytvořit nový účet': 'Utwórz nowe konto', 'nebo': 'lub', 'Pokračovat přes Google': 'Kontynuuj z Google', 'Odhlásit se': 'Wyloguj się',
+  'Přihlášení': 'Logowanie', 'Registrace': 'Rejestracja',
+  'Tento e-mail už je zaregistrovaný.': 'Ten adres e-mail jest już zarejestrowany.', 'Zvol silnější heslo.': 'Wybierz silniejsze hasło.', 'E-mail nebo heslo nesedí.': 'Adres e-mail lub hasło są nieprawidłowe.', 'Akci se nepodařilo dokončit. Zkus to znovu.': 'Nie udało się ukończyć działania. Spróbuj ponownie.',
+  'Ověř svůj e-mail': 'Potwierdź swój e-mail', 'Už jsem e-mail ověřil/a': 'Potwierdziłem/am e-mail', 'Ověřovací odkaz byl zaslán na adresu': 'Link weryfikacyjny został wysłany na adres', 'Po kliknutí se vrať sem.': 'Wróć tutaj po kliknięciu linku.', 'Poslat ověřovací e-mail znovu': 'Wyślij e-mail weryfikacyjny ponownie', 'Zpět a opravit e-mail': 'Wróć i popraw e-mail', 'Ověřovací e-mail byl odeslán.': 'E-mail weryfikacyjny został wysłany.', 'Účet se nepodařilo zrušit. Zkus to prosím znovu.': 'Nie udało się usunąć konta. Spróbuj ponownie.',
+  'Vyber si přezdívku': 'Wybierz pseudonim', 'Uvidí ji ostatní uživatelé místo tvého skutečného jména.': 'Inni użytkownicy zobaczą go zamiast Twojego prawdziwego imienia.', 'Přezdívka': 'Pseudonim', 'Přezdívka je volná': 'Pseudonim jest dostępny', 'Tato přezdívka je obsazená': 'Ten pseudonim jest zajęty', 'Vygenerovat přezdívku': 'Wygeneruj pseudonim', 'Pokračovat': 'Kontynuuj',
+  'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.': 'Użyj 3–24 znaków. Myślniki i podkreślenia mogą znajdować się tylko między częściami pseudonimu.', 'Tato přezdívka už je obsazená.': 'Ten pseudonim jest już zajęty.', 'Přezdívku se nepodařilo uložit.': 'Nie udało się zapisać pseudonimu.',
+};

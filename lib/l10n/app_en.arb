@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "appTitle": "ShoutOut",
+  "profile": "Profile",
+  "language": "Language",
+  "czech": "Czech",
+  "english": "English",
+  "german": "German",
+  "polish": "Polish",
+  "changeNickname": "Change nickname",
+  "nicknameChangeHint": "You can change your nickname again in 30 days.",
+  "logout": "Log out",
+  "deleteAccount": "Delete account"
+}

@@ -1,0 +1,147 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function validProfile() {
+      return request.resource.data.keys().hasOnly([
+          'nickname',
+          'nicknameLower',
+          'createdAt',
+          'nicknameChangedAt',
+          'emailVerified',
+          'language'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'nickname',
+          'nicknameLower',
+          'createdAt',
+          'nicknameChangedAt',
+          'emailVerified',
+          'language'
+        ]) &&
+        request.resource.data.nickname is string &&
+        request.resource.data.nickname.size() >= 3 &&
+        request.resource.data.nickname.size() <= 24 &&
+        request.resource.data.nicknameLower is string &&
+        request.resource.data.emailVerified == true &&
+        request.resource.data.language in ['cs', 'en', 'de', 'pl'];
+    }
+
+    match /nicknames/{nicknameLower} {
+      allow get: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.keys().hasOnly([
+          'uid', 'nickname', 'nicknameLower', 'createdAt'
+        ]) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.nicknameLower == nicknameLower;
+      allow update, delete, list: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn() &&
+        request.auth.uid == userId &&
+        validProfile() &&
+        existsAfter(
+          /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
+        ).data.uid == request.auth.uid;
+      allow update: if signedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['language']) &&
+        request.resource.data.language in ['cs', 'en', 'de', 'pl'];
+      allow delete, list: if false;
+
+      match /blocked/{blockedUserId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create: if signedIn() &&
+          request.auth.uid == userId &&
+          request.resource.data.keys().hasOnly(['createdAt']) &&
+          blockedUserId != userId;
+        allow delete: if signedIn() && request.auth.uid == userId;
+        allow update: if false;
+      }
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn() &&
+        request.resource.data.keys().hasOnly([
+          'reporterId', 'shoutId', 'reason', 'createdAt', 'status'
+        ]) &&
+        request.resource.data.reporterId == request.auth.uid &&
+        request.resource.data.shoutId is string &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.status == 'open';
+      allow read, update, delete: if false;
+    }
+
+    match /shouts/{shoutId} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.authorId == request.auth.uid &&
+        request.resource.data.authorNickname is string &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 1 &&
+        request.resource.data.title.size() <= 60 &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() >= 1 &&
+        request.resource.data.text.size() <= 220 &&
+        request.resource.data.categories is list &&
+        request.resource.data.categories.size() >= 1 &&
+        request.resource.data.categories.size() <= 2 &&
+        request.resource.data.location is latlng &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.likesCount == 0 &&
+        request.resource.data.dislikesCount == 0 &&
+        request.resource.data.commentsCount == 0 &&
+        request.resource.data.savesCount == 0;
+      allow update: if signedIn() &&
+        resource.data.authorId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status']) &&
+        request.resource.data.status == 'deleted';
+      allow delete: if false;
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.authorNickname is string &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 220;
+        allow update: if false;
+        allow delete: if signedIn() &&
+          resource.data.authorId == request.auth.uid;
+      }
+
+      match /reactions/{userId} {
+        allow read: if signedIn();
+        allow create, update: if signedIn() &&
+          userId == request.auth.uid &&
+          request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
+          request.resource.data.type in ['like', 'dislike'];
+        allow delete: if signedIn() && userId == request.auth.uid;
+      }
+
+      match /saves/{userId} {
+        allow read: if signedIn();
+        allow create: if signedIn() &&
+          userId == request.auth.uid &&
+          request.resource.data.keys().hasOnly(['createdAt']);
+        allow delete: if signedIn() && userId == request.auth.uid;
+        allow update: if false;
+      }
+    }
+  }
+}
