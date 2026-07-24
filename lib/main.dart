@@ -127,12 +127,12 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       final distanceKm = location == null || _currentPosition == null
           ? 0.0
           : Geolocator.distanceBetween(
-                _currentPosition!.latitude,
-                _currentPosition!.longitude,
-                location.latitude,
-                location.longitude,
-              ) /
-              1000;
+                  _currentPosition!.latitude,
+                  _currentPosition!.longitude,
+                  location.latitude,
+                  location.longitude,
+                ) /
+                1000;
       return Shout(
         id: doc.id,
         authorId: data['authorId'] as String,
@@ -164,12 +164,17 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   Future<void> _loadInteractionState(Shout shout) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
-    final shoutRef = FirebaseFirestore.instance.collection('shouts').doc(shout.id);
+    final shoutRef = FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(shout.id);
     final results = await Future.wait([
       shoutRef.collection('reactions').doc(uid).get(),
       shoutRef.collection('saves').doc(uid).get(),
       shoutRef.collection('reactions').where('type', isEqualTo: 'like').get(),
-      shoutRef.collection('reactions').where('type', isEqualTo: 'dislike').get(),
+      shoutRef
+          .collection('reactions')
+          .where('type', isEqualTo: 'dislike')
+          .get(),
       shoutRef.collection('saves').get(),
     ]);
     final reaction = results[0] as DocumentSnapshot<Map<String, dynamic>>;
@@ -361,7 +366,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                   try {
                     await _addShout(shout);
                   } on StateError catch (error) {
-                    if (context.mounted && error.message == 'location-unavailable') {
+                    if (context.mounted &&
+                        error.message == 'location-unavailable') {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -544,7 +550,10 @@ class _FeedPageState extends State<FeedPage> {
               : shouts.isEmpty
               ? EmptyState(
                   icon: Icons.location_off_outlined,
-                  title: tr(context, 'V tomto okolí zatím nejsou žádné shouty.'),
+                  title: tr(
+                    context,
+                    'V tomto okolí zatím nejsou žádné shouty.',
+                  ),
                 )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
@@ -605,45 +614,176 @@ class MyShoutsPage extends StatefulWidget {
 }
 
 class _MyShoutsPageState extends State<MyShoutsPage> {
-  ShoutStatus _status = ShoutStatus.active;
+  _MyShoutsSection _section = _MyShoutsSection.active;
 
   @override
   Widget build(BuildContext context) {
-    final shouts = widget.shouts
-        .where((shout) => shout.status == _status)
+    final activeShouts = widget.shouts
+        .where((shout) => shout.effectiveStatus == ShoutStatus.active)
+        .toList();
+    final expiredShouts = widget.shouts
+        .where((shout) => shout.isRetainedExpired)
         .toList();
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: SegmentedButton<ShoutStatus>(
+          child: SegmentedButton<_MyShoutsSection>(
+            expandedInsets: EdgeInsets.zero,
             segments: [
-              ButtonSegment(value: ShoutStatus.active, label: Text(tr(context, 'Aktivní'))),
               ButtonSegment(
-                value: ShoutStatus.expired,
+                value: _MyShoutsSection.active,
+                label: Text(tr(context, 'Aktivní')),
+              ),
+              ButtonSegment(
+                value: _MyShoutsSection.expired,
                 label: Text(tr(context, 'Expirované')),
               ),
-              ButtonSegment(value: ShoutStatus.deleted, label: Text(tr(context, 'Smazané'))),
+              ButtonSegment(
+                value: _MyShoutsSection.comments,
+                label: Text(tr(context, 'Komentáře')),
+              ),
             ],
-            selected: {_status},
+            selected: {_section},
             onSelectionChanged: (values) =>
-                setState(() => _status = values.first),
+                setState(() => _section = values.first),
           ),
         ),
         Expanded(
-          child: ShoutListPage(
-            title: tr(context, 'Mé shouty'),
-            emptyText: tr(context, 'V této části zatím nemáš žádné shouty.'),
-            emptyIcon: Icons.campaign_outlined,
-            shouts: shouts,
-            onSave: widget.onSave,
-            onReaction: widget.onReaction,
-            showSaveCount: true,
-            showDeleteButton: true,
-            onDelete: widget.onDelete,
-          ),
+          child: switch (_section) {
+            _MyShoutsSection.comments => MyCommentsPage(
+              shouts: widget.shouts,
+              onSave: widget.onSave,
+              onReaction: widget.onReaction,
+            ),
+            _ => ShoutListPage(
+              title: tr(context, 'Mé shouty'),
+              emptyText: tr(context, 'V této části zatím nemáš žádné shouty.'),
+              emptyIcon: Icons.campaign_outlined,
+              shouts: _section == _MyShoutsSection.active
+                  ? activeShouts
+                  : expiredShouts,
+              onSave: widget.onSave,
+              onReaction: widget.onReaction,
+              showSaveCount: true,
+              showDeleteButton: true,
+              onDelete: widget.onDelete,
+            ),
+          },
         ),
       ],
+    );
+  }
+}
+
+enum _MyShoutsSection { active, expired, comments }
+
+class MyCommentsPage extends StatelessWidget {
+  const MyCommentsPage({
+    super.key,
+    required this.shouts,
+    required this.onSave,
+    required this.onReaction,
+  });
+
+  final List<Shout> shouts;
+  final ValueChanged<Shout> onSave;
+  final void Function(Shout shout, {required bool like}) onReaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final shoutsById = {for (final shout in shouts) shout.id: shout};
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collectionGroup('comments')
+          .where('authorId', isEqualTo: uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final comments =
+            (snapshot.data?.docs ?? []).where((comment) {
+              final shoutId = comment.reference.parent.parent?.id;
+              final shout = shoutId == null ? null : shoutsById[shoutId];
+              return shout != null &&
+                  shout.effectiveStatus != ShoutStatus.deleted &&
+                  !shout.isExpiredBeyondRetention;
+            }).toList()..sort((a, b) {
+              final aTime = a.data()['createdAt'] as Timestamp?;
+              final bTime = b.data()['createdAt'] as Timestamp?;
+              return (bTime?.millisecondsSinceEpoch ?? 0).compareTo(
+                aTime?.millisecondsSinceEpoch ?? 0,
+              );
+            });
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Text(
+                tr(context, 'Komentáře'),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Expanded(
+              child: snapshot.hasError
+                  ? EmptyState(
+                      icon: Icons.comment_outlined,
+                      title: tr(
+                        context,
+                        'Zatím jsi nenapsal/a žádný komentář.',
+                      ),
+                    )
+                  : !snapshot.hasData
+                  ? const Center(child: CircularProgressIndicator())
+                  : comments.isEmpty
+                  ? EmptyState(
+                      icon: Icons.comment_outlined,
+                      title: tr(
+                        context,
+                        'Zatím jsi nenapsal/a žádný komentář.',
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      itemCount: comments.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final comment = comments[index];
+                        final shout =
+                            shoutsById[comment.reference.parent.parent!.id]!;
+                        final data = comment.data();
+                        return Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.comment_outlined),
+                            title: Text(
+                              shout.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(data['text'] as String),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ShoutDetailPage(
+                                  shout: shout,
+                                  onSave: () => onSave(shout),
+                                  onReaction: (like) =>
+                                      onReaction(shout, like: like),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -698,7 +838,9 @@ class ShoutListPage extends StatelessWidget {
                   onReaction: (like) => onReaction(shouts[index], like: like),
                   showSaveCount: showSaveCount,
                   showDeleteButton: showDeleteButton,
-                  onDelete: onDelete == null ? null : () => onDelete!(shouts[index]),
+                  onDelete: onDelete == null
+                      ? null
+                      : () => onDelete!(shouts[index]),
                 ),
               ),
       ),
@@ -751,14 +893,14 @@ class ProfilePage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.language_outlined),
               title: Text(l10n.language),
-              trailing: Text(
-                switch (Localizations.localeOf(context).languageCode) {
-                  'en' => l10n.english,
-                  'de' => l10n.german,
-                  'pl' => l10n.polish,
-                  _ => l10n.czech,
-                },
-              ),
+              trailing: Text(switch (Localizations.localeOf(
+                context,
+              ).languageCode) {
+                'en' => l10n.english,
+                'de' => l10n.german,
+                'pl' => l10n.polish,
+                _ => l10n.czech,
+              }),
               onTap: () async {
                 final language = await showModalBottomSheet<String>(
                   context: context,
@@ -856,6 +998,7 @@ class ShoutCard extends StatelessWidget {
         ),
       );
     }
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -1073,39 +1216,35 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            ...comments.map(
-              (comment) {
-                final data = comment.data();
-                final isOwnComment =
-                    data['authorId'] == FirebaseAuth.instance.currentUser?.uid;
-                return ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.person_outline),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(data['authorNickname'] as String),
-                      if (data['authorId'] == widget.shout.authorId)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 6),
-                          child: Chip(
-                            label: Text(tr(context, 'Autor')),
-                            visualDensity: VisualDensity.compact,
-                          ),
+            ...comments.map((comment) {
+              final data = comment.data();
+              final isOwnComment =
+                  data['authorId'] == FirebaseAuth.instance.currentUser?.uid;
+              return ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.person_outline)),
+                title: Row(
+                  children: [
+                    Text(data['authorNickname'] as String),
+                    if (data['authorId'] == widget.shout.authorId)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: Chip(
+                          label: Text(tr(context, 'Autor')),
+                          visualDensity: VisualDensity.compact,
                         ),
-                    ],
-                  ),
-                  subtitle: Text(data['text'] as String),
-                  trailing: isOwnComment
-                      ? IconButton(
-                          tooltip: tr(context, 'Smazat komentář'),
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => comment.reference.delete(),
-                        )
-                      : null,
-                );
-              },
-            ),
+                      ),
+                  ],
+                ),
+                subtitle: Text(data['text'] as String),
+                trailing: isOwnComment
+                    ? IconButton(
+                        tooltip: tr(context, 'Smazat komentář'),
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => comment.reference.delete(),
+                      )
+                    : null,
+              );
+            }),
           ],
         );
       },
@@ -1156,9 +1295,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   );
 
   Future<void> _deleteShout() async {
-    await FirebaseFirestore.instance.collection('shouts').doc(widget.shout.id).update({
-      'status': 'deleted',
-    });
+    await FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(widget.shout.id)
+        .update({'status': 'deleted'});
     widget.shout.status = ShoutStatus.deleted;
     if (mounted) Navigator.pop(context, true);
   }
@@ -1168,7 +1308,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Blokovat autora?'),
-        content: const Text('Jeho Shouty se přestanou zobrazovat ve tvém feedu.'),
+        content: const Text(
+          'Jeho Shouty se přestanou zobrazovat ve tvém feedu.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1227,9 +1369,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       'status': 'open',
     });
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hlášení bylo odesláno.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Hlášení bylo odesláno.')));
     }
   }
 }
@@ -1350,7 +1492,10 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(tr(context, 'Platnost'), style: Theme.of(context).textTheme.labelLarge),
+              Text(
+                tr(context, 'Platnost'),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
               Text(
                 durationLabel(_duration),
                 style: Theme.of(
@@ -1362,7 +1507,9 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           Container(
             height: 140,
             decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1402,7 +1549,9 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
     if (_title.text.trim().isEmpty ||
         _text.text.trim().isEmpty ||
         _selected.isEmpty) {
-      _showMessage(tr(context, 'Doplň nadpis, text a alespoň jednu kategorii.'));
+      _showMessage(
+        tr(context, 'Doplň nadpis, text a alespoň jednu kategorii.'),
+      );
       return;
     }
     final now = DateTime.now();
@@ -1487,25 +1636,25 @@ class _DurationWheel extends StatelessWidget {
         },
       ),
       child: CupertinoPicker(
-            scrollController: controller,
-            itemExtent: 36,
-            useMagnifier: true,
-            magnification: 1.08,
-            selectionOverlay: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(
-                  alpha: .7,
-                ),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).colorScheme.primary),
-              ),
-            ),
-            onSelectedItemChanged: (index) => onChanged(values[index]),
-            children: values.map((value) {
-              final label = twoDigits ? value.toString().padLeft(2, '0') : '$value';
-              return Center(child: Text('$label $suffix'));
-            }).toList(),
+        scrollController: controller,
+        itemExtent: 36,
+        useMagnifier: true,
+        magnification: 1.08,
+        selectionOverlay: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: .7),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
+        onSelectedItemChanged: (index) => onChanged(values[index]),
+        children: values.map((value) {
+          final label = twoDigits ? value.toString().padLeft(2, '0') : '$value';
+          return Center(child: Text('$label $suffix'));
+        }).toList(),
       ),
     ),
   );
@@ -1576,6 +1725,8 @@ extension on FeedOrder {
 
 enum ShoutStatus { active, expired, deleted }
 
+const _expiredShoutRetention = Duration(days: 7);
+
 class Shout {
   Shout({
     required this.id,
@@ -1610,8 +1761,21 @@ class Shout {
   bool isLiked = false;
   bool isDisliked = false;
   ShoutStatus status;
-  bool get isActive =>
-      status == ShoutStatus.active && expiresAt.isAfter(DateTime.now());
+  ShoutStatus get effectiveStatus {
+    if (status == ShoutStatus.deleted) return ShoutStatus.deleted;
+    return expiresAt.isAfter(DateTime.now())
+        ? ShoutStatus.active
+        : ShoutStatus.expired;
+  }
+
+  bool get isActive => effectiveStatus == ShoutStatus.active;
+
+  bool get isExpiredBeyondRetention =>
+      effectiveStatus == ShoutStatus.expired &&
+      DateTime.now().isAfter(expiresAt.add(_expiredShoutRetention));
+
+  bool get isRetainedExpired =>
+      effectiveStatus == ShoutStatus.expired && !isExpiredBeyondRetention;
   String get distanceLabel => distanceKm < 1
       ? '${(distanceKm * 1000).round()} m'
       : '${distanceKm.toStringAsFixed(1).replaceAll('.0', '')} km';
@@ -1620,8 +1784,13 @@ class Shout {
     return minutes < 1 ? 'teď' : 'před $minutes min';
   }
 
-  String get expiryLabel =>
-      'končí za ${durationLabel(expiresAt.difference(DateTime.now()))}';
+  String get expiryLabel {
+    final difference = expiresAt.difference(DateTime.now());
+    if (!difference.isNegative) {
+      return 'končí za ${durationLabel(difference)}';
+    }
+    return 'expiroval ${pastDurationLabel(difference.abs())}';
+  }
 }
 
 String durationLabel(Duration duration) {
@@ -1630,4 +1799,20 @@ String durationLabel(Duration duration) {
   }
   if (duration.inHours >= 1) return '${duration.inHours} h';
   return '${duration.inMinutes} min';
+}
+
+String pastDurationLabel(Duration duration) {
+  if (duration.inDays >= 1) {
+    final hours = duration.inHours.remainder(24);
+    return hours == 0
+        ? 'před ${duration.inDays} dny'
+        : 'před ${duration.inDays} dny $hours h';
+  }
+  if (duration.inHours >= 1) {
+    final minutes = duration.inMinutes.remainder(60);
+    return minutes == 0
+        ? 'před ${duration.inHours} h'
+        : 'před ${duration.inHours} h $minutes min';
+  }
+  return 'před ${duration.inMinutes} min';
 }
