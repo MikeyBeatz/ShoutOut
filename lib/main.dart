@@ -133,21 +133,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                   location.longitude,
                 ) /
                 1000;
-      return Shout(
-        id: doc.id,
-        authorId: data['authorId'] as String,
-        author: data['authorNickname'] as String,
-        title: data['title'] as String,
-        text: data['text'] as String,
-        categories: List<String>.from(data['categories'] as List),
-        distanceKm: distanceKm,
-        createdAt: (data['createdAt'] as Timestamp).toDate(),
-        expiresAt: (data['expiresAt'] as Timestamp).toDate(),
-        likes: data['likesCount'] as int? ?? 0,
-        dislikes: data['dislikesCount'] as int? ?? 0,
-        comments: data['commentsCount'] as int? ?? 0,
-        saves: data['savesCount'] as int? ?? 0,
-      );
+      return Shout.fromDocument(doc, distanceKm: distanceKm);
     }).toList();
     await Future.wait(shouts.map(_loadInteractionState));
     if (mounted) {
@@ -652,7 +638,6 @@ class _MyShoutsPageState extends State<MyShoutsPage> {
         Expanded(
           child: switch (_section) {
             _MyShoutsSection.comments => MyCommentsPage(
-              shouts: widget.shouts,
               onSave: widget.onSave,
               onReaction: widget.onReaction,
             ),
@@ -681,18 +666,15 @@ enum _MyShoutsSection { active, expired, comments }
 class MyCommentsPage extends StatelessWidget {
   const MyCommentsPage({
     super.key,
-    required this.shouts,
     required this.onSave,
     required this.onReaction,
   });
 
-  final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
   final void Function(Shout shout, {required bool like}) onReaction;
 
   @override
   Widget build(BuildContext context) {
-    final shoutsById = {for (final shout in shouts) shout.id: shout};
     final uid = FirebaseAuth.instance.currentUser!.uid;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
@@ -700,21 +682,6 @@ class MyCommentsPage extends StatelessWidget {
           .where('authorId', isEqualTo: uid)
           .snapshots(),
       builder: (context, snapshot) {
-        final comments =
-            (snapshot.data?.docs ?? []).where((comment) {
-              final shoutId = comment.reference.parent.parent?.id;
-              final shout = shoutId == null ? null : shoutsById[shoutId];
-              return shout != null &&
-                  shout.effectiveStatus != ShoutStatus.deleted &&
-                  !shout.isExpiredBeyondRetention;
-            }).toList()..sort((a, b) {
-              final aTime = a.data()['createdAt'] as Timestamp?;
-              final bTime = b.data()['createdAt'] as Timestamp?;
-              return (bTime?.millisecondsSinceEpoch ?? 0).compareTo(
-                aTime?.millisecondsSinceEpoch ?? 0,
-              );
-            });
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -733,50 +700,71 @@ class MyCommentsPage extends StatelessWidget {
                       icon: Icons.comment_outlined,
                       title: tr(
                         context,
-                        'Zatím jsi nenapsal/a žádný komentář.',
+                        'Komentáře se nepodařilo načíst. Zkus to prosím znovu.',
                       ),
                     )
                   : !snapshot.hasData
                   ? const Center(child: CircularProgressIndicator())
-                  : comments.isEmpty
-                  ? EmptyState(
-                      icon: Icons.comment_outlined,
-                      title: tr(
-                        context,
-                        'Zatím jsi nenapsal/a žádný komentář.',
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      itemCount: comments.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final comment = comments[index];
-                        final shout =
-                            shoutsById[comment.reference.parent.parent!.id]!;
-                        final data = comment.data();
-                        return Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.comment_outlined),
-                            title: Text(
-                              shout.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(data['text'] as String),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () => Navigator.push(
+                  : FutureBuilder<List<_CommentWithShout>>(
+                      future: _loadComments(snapshot.data!.docs),
+                      builder: (context, commentsSnapshot) {
+                        if (commentsSnapshot.hasError) {
+                          return EmptyState(
+                            icon: Icons.comment_outlined,
+                            title: tr(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => ShoutDetailPage(
-                                  shout: shout,
-                                  onSave: () => onSave(shout),
-                                  onReaction: (like) =>
-                                      onReaction(shout, like: like),
+                              'Komentáře se nepodařilo načíst. Zkus to prosím znovu.',
+                            ),
+                          );
+                        }
+                        if (!commentsSnapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        final comments = commentsSnapshot.data!;
+                        if (comments.isEmpty) {
+                          return EmptyState(
+                            icon: Icons.comment_outlined,
+                            title: tr(
+                              context,
+                              'Zatím jsi nenapsal/a žádný komentář.',
+                            ),
+                          );
+                        }
+                        return ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                          itemCount: comments.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final item = comments[index];
+                            return Card(
+                              child: ListTile(
+                                leading: const Icon(Icons.comment_outlined),
+                                title: Text(
+                                  item.shout.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  item.comment.data()['text'] as String,
+                                ),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ShoutDetailPage(
+                                      shout: item.shout,
+                                      onSave: () => onSave(item.shout),
+                                      onReaction: (like) =>
+                                          onReaction(item.shout, like: like),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -786,6 +774,39 @@ class MyCommentsPage extends StatelessWidget {
       },
     );
   }
+
+  Future<List<_CommentWithShout>> _loadComments(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> comments,
+  ) async {
+    final items = await Future.wait(
+      comments.map((comment) async {
+        final shoutDocument = await comment.reference.parent.parent!.get();
+        if (!shoutDocument.exists) return null;
+        final shout = Shout.fromDocument(shoutDocument);
+        if (shout.effectiveStatus == ShoutStatus.deleted ||
+            shout.isExpiredBeyondRetention) {
+          return null;
+        }
+        return _CommentWithShout(comment: comment, shout: shout);
+      }),
+    );
+    final visibleItems = items.whereType<_CommentWithShout>().toList()
+      ..sort((a, b) {
+        final aTime = a.comment.data()['createdAt'] as Timestamp?;
+        final bTime = b.comment.data()['createdAt'] as Timestamp?;
+        return (bTime?.millisecondsSinceEpoch ?? 0).compareTo(
+          aTime?.millisecondsSinceEpoch ?? 0,
+        );
+      });
+    return visibleItems;
+  }
+}
+
+class _CommentWithShout {
+  const _CommentWithShout({required this.comment, required this.shout});
+
+  final QueryDocumentSnapshot<Map<String, dynamic>> comment;
+  final Shout shout;
 }
 
 class ShoutListPage extends StatelessWidget {
@@ -1744,6 +1765,33 @@ class Shout {
     this.saves = 0,
     this.status = ShoutStatus.active,
   });
+
+  factory Shout.fromDocument(
+    DocumentSnapshot<Map<String, dynamic>> document, {
+    double distanceKm = 0,
+  }) {
+    final data = document.data()!;
+    return Shout(
+      id: document.id,
+      authorId: data['authorId'] as String,
+      author: data['authorNickname'] as String,
+      title: data['title'] as String,
+      text: data['text'] as String,
+      categories: List<String>.from(data['categories'] as List),
+      distanceKm: distanceKm,
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      expiresAt: (data['expiresAt'] as Timestamp).toDate(),
+      likes: data['likesCount'] as int? ?? 0,
+      dislikes: data['dislikesCount'] as int? ?? 0,
+      comments: data['commentsCount'] as int? ?? 0,
+      saves: data['savesCount'] as int? ?? 0,
+      status: switch (data['status']) {
+        'deleted' => ShoutStatus.deleted,
+        'expired' => ShoutStatus.expired,
+        _ => ShoutStatus.active,
+      },
+    );
+  }
   final String id;
   final String authorId;
   final String author;
