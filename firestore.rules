@@ -85,6 +85,12 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // Required for collectionGroup('comments') queries used by the user's
+    // comment history. The write rules remain scoped below to Shouts only.
+    match /{path=**}/comments/{commentId} {
+      allow read: if signedIn();
+    }
+
     match /shouts/{shoutId} {
       allow read: if signedIn();
       allow create: if signedIn() &&

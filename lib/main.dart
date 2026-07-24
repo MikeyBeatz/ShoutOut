@@ -1596,7 +1596,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
     if (hours == 24) validMinutes = 0;
     if (hours == 0 && validMinutes == 0) {
       validMinutes = 15;
-      _showMessage('Shout může mít platnost minimálně 15 minut.');
+      _showMessage(tr(context, 'Shout může mít platnost minimálně 15 minut.'));
     }
     setState(() {
       _hours = hours;
