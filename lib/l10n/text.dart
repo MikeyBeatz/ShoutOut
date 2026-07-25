@@ -157,6 +157,29 @@ const _english = <String, String>{
   'Reakce na mé Shouty': 'Reactions to my shouts',
   'Nové Shouty v okolí': 'New shouts nearby',
   'Nápověda': 'Help',
+  'Pravidla komunity': 'Community rules',
+  'Bezpečné používání ShoutOutu pro všechny.':
+      'Using ShoutOut safely for everyone.',
+  'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.':
+      'ShoutOut is a community space for people aged 16 and over. Help keep the feed useful and safe.',
+  'Respektuj ostatní': 'Respect others',
+  'Neobtěžuj, nevyhrožuj, neponižuj ani nediskriminuj jiné lidi.':
+      'Do not harass, threaten, humiliate or discriminate against other people.',
+  'Chraň soukromí': 'Protect privacy',
+  'Nezveřejňuj cizí osobní údaje, kontakty, přesnou adresu ani soukromé zprávy.':
+      'Do not publish another person’s personal data, contacts, exact address or private messages.',
+  'Žádný nelegální obsah': 'No illegal content',
+  'Nezveřejňuj nabídky drog, zbraní, podvodů ani jinou nezákonnou činnost.':
+      'Do not publish offers of drugs, weapons, scams or other illegal activity.',
+  '16+ bez explicitního obsahu': '16+ without explicit content',
+  'Flirt a neexplicitní debata jsou v pořádku. Pornografie, nahota, sexuální nabídky, obtěžování a obsah týkající se nezletilých jsou zakázané.':
+      'Flirting and non-explicit discussion are fine. Pornography, nudity, sexual offers, harassment and content involving minors are prohibited.',
+  'Piš veřejně a férově': 'Post publicly and fairly',
+  'Shouty a komentáře jsou veřejné. Neposílej spam, manipuluj s hodnocením ani neobcházej blokování a bany.':
+      'Shouts and comments are public. Do not spam, manipulate ratings or evade blocks and bans.',
+  'Nahlaš problém': 'Report a problem',
+  'Nevhodný Shout nebo komentář nahlas. Autora můžeš také zablokovat. Závažné či opakované porušení může vést k omezení nebo trvalému zablokování účtu.':
+      'Report an unsuitable shout or comment. You can also block its author. Serious or repeated violations may lead to account restrictions or a permanent ban.',
   'Jak fungují Shouty?': 'How do shouts work?',
   'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
       'A shout is shown to people nearby for the duration you choose when publishing.',
@@ -321,6 +344,29 @@ const _german = <String, String>{
   'Reakce na mé Shouty': 'Reaktionen auf meine Shouts',
   'Nové Shouty v okolí': 'Neue Shouts in der Nähe',
   'Nápověda': 'Hilfe',
+  'Pravidla komunity': 'Community-Regeln',
+  'Bezpečné používání ShoutOutu pro všechny.':
+      'ShoutOut sicher für alle nutzen.',
+  'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.':
+      'ShoutOut ist ein Community-Bereich für Menschen ab 16 Jahren. Hilf mit, den Feed nützlich und sicher zu halten.',
+  'Respektuj ostatní': 'Respektiere andere',
+  'Neobtěžuj, nevyhrožuj, neponižuj ani nediskriminuj jiné lidi.':
+      'Belästige, bedrohe, demütige oder diskriminiere keine anderen Menschen.',
+  'Chraň soukromí': 'Schütze die Privatsphäre',
+  'Nezveřejňuj cizí osobní údaje, kontakty, přesnou adresu ani soukromé zprávy.':
+      'Veröffentliche keine persönlichen Daten, Kontakte, genaue Adresse oder private Nachrichten anderer.',
+  'Žádný nelegální obsah': 'Keine illegalen Inhalte',
+  'Nezveřejňuj nabídky drog, zbraní, podvodů ani jinou nezákonnou činnost.':
+      'Veröffentliche keine Angebote zu Drogen, Waffen, Betrug oder anderen illegalen Aktivitäten.',
+  '16+ bez explicitního obsahu': '16+ ohne explizite Inhalte',
+  'Flirt a neexplicitní debata jsou v pořádku. Pornografie, nahota, sexuální nabídky, obtěžování a obsah týkající se nezletilých jsou zakázané.':
+      'Flirten und nicht explizite Gespräche sind in Ordnung. Pornografie, Nacktheit, sexuelle Angebote, Belästigung und Inhalte über Minderjährige sind verboten.',
+  'Piš veřejně a férově': 'Veröffentliche fair',
+  'Shouty a komentáře jsou veřejné. Neposílej spam, manipuluj s hodnocením ani neobcházej blokování a bany.':
+      'Shouts und Kommentare sind öffentlich. Spamme nicht, manipuliere keine Bewertungen und umgehe keine Sperren oder Bans.',
+  'Nahlaš problém': 'Problem melden',
+  'Nevhodný Shout nebo komentář nahlas. Autora můžeš také zablokovat. Závažné či opakované porušení může vést k omezení nebo trvalému zablokování účtu.':
+      'Melde ungeeignete Shouts oder Kommentare. Du kannst den Autor auch blockieren. Schwere oder wiederholte Verstöße können zu Einschränkungen oder einer dauerhaften Kontosperre führen.',
   'Jak fungují Shouty?': 'Wie funktionieren Shouts?',
   'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
       'Ein Shout wird Personen in der Nähe für die beim Veröffentlichen gewählte Dauer angezeigt.',
@@ -481,6 +527,29 @@ const _polish = <String, String>{
   'Reakce na mé Shouty': 'Reakcje na moje shouty',
   'Nové Shouty v okolí': 'Nowe shouty w pobliżu',
   'Nápověda': 'Pomoc',
+  'Pravidla komunity': 'Zasady społeczności',
+  'Bezpečné používání ShoutOutu pro všechny.':
+      'Bezpieczne korzystanie z ShoutOut dla wszystkich.',
+  'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.':
+      'ShoutOut to przestrzeń społecznościowa dla osób od 16 lat. Pomóż utrzymać użyteczny i bezpieczny feed.',
+  'Respektuj ostatní': 'Szanuj innych',
+  'Neobtěžuj, nevyhrožuj, neponižuj ani nediskriminuj jiné lidi.':
+      'Nie nękaj, nie groź, nie poniżaj ani nie dyskryminuj innych osób.',
+  'Chraň soukromí': 'Chroń prywatność',
+  'Nezveřejňuj cizí osobní údaje, kontakty, přesnou adresu ani soukromé zprávy.':
+      'Nie publikuj cudzych danych osobowych, kontaktów, dokładnego adresu ani prywatnych wiadomości.',
+  'Žádný nelegální obsah': 'Zakaz nielegalnych treści',
+  'Nezveřejňuj nabídky drog, zbraní, podvodů ani jinou nezákonnou činnost.':
+      'Nie publikuj ofert narkotyków, broni, oszustw ani innej nielegalnej działalności.',
+  '16+ bez explicitního obsahu': '16+ bez treści eksplicitnych',
+  'Flirt a neexplicitní debata jsou v pořádku. Pornografie, nahota, sexuální nabídky, obtěžování a obsah týkající se nezletilých jsou zakázané.':
+      'Flirt i nieeksplicytna rozmowa są w porządku. Pornografia, nagość, oferty seksualne, nękanie i treści dotyczące osób niepełnoletnich są zabronione.',
+  'Piš veřejně a férově': 'Publikuj uczciwie',
+  'Shouty a komentáře jsou veřejné. Neposílej spam, manipuluj s hodnocením ani neobcházej blokování a bany.':
+      'Shouty i komentarze są publiczne. Nie spamuj, nie manipuluj ocenami ani nie omijaj blokad i banów.',
+  'Nahlaš problém': 'Zgłoś problem',
+  'Nevhodný Shout nebo komentář nahlas. Autora můžeš také zablokovat. Závažné či opakované porušení může vést k omezení nebo trvalému zablokování účtu.':
+      'Zgłoś nieodpowiedni shout lub komentarz. Możesz też zablokować autora. Poważne lub powtarzające się naruszenia mogą prowadzić do ograniczeń lub trwałej blokady konta.',
   'Jak fungují Shouty?': 'Jak działają shouty?',
   'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
       'Shout jest widoczny dla osób w pobliżu przez czas wybrany podczas publikacji.',

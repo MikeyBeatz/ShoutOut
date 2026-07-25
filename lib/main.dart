@@ -1311,22 +1311,109 @@ class HelpPage extends StatelessWidget {
       appBar: AppBar(title: Text(tr(context, 'Nápověda'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: topics
-            .map(
-              (topic) => Card(
-                child: ExpansionTile(
-                  title: Text(tr(context, topic.$1)),
-                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(tr(context, topic.$2)),
+        children:
+            topics
+                .map(
+                  (topic) => Card(
+                    child: ExpansionTile(
+                      title: Text(tr(context, topic.$1)),
+                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(tr(context, topic.$2)),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                )
+                .toList()
+              ..add(
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.gavel_outlined),
+                    title: Text(tr(context, 'Pravidla komunity')),
+                    subtitle: Text(
+                      tr(context, 'Bezpečné používání ShoutOutu pro všechny.'),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CommunityRulesPage(),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            )
-            .toList(),
+      ),
+    );
+  }
+}
+
+class CommunityRulesPage extends StatelessWidget {
+  const CommunityRulesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final rules = [
+      (
+        Icons.people_outline,
+        'Respektuj ostatní',
+        'Neobtěžuj, nevyhrožuj, neponižuj ani nediskriminuj jiné lidi.',
+      ),
+      (
+        Icons.no_accounts_outlined,
+        'Chraň soukromí',
+        'Nezveřejňuj cizí osobní údaje, kontakty, přesnou adresu ani soukromé zprávy.',
+      ),
+      (
+        Icons.block_outlined,
+        'Žádný nelegální obsah',
+        'Nezveřejňuj nabídky drog, zbraní, podvodů ani jinou nezákonnou činnost.',
+      ),
+      (
+        Icons.favorite_border,
+        '16+ bez explicitního obsahu',
+        'Flirt a neexplicitní debata jsou v pořádku. Pornografie, nahota, sexuální nabídky, obtěžování a obsah týkající se nezletilých jsou zakázané.',
+      ),
+      (
+        Icons.forum_outlined,
+        'Piš veřejně a férově',
+        'Shouty a komentáře jsou veřejné. Neposílej spam, manipuluj s hodnocením ani neobcházej blokování a bany.',
+      ),
+      (
+        Icons.flag_outlined,
+        'Nahlaš problém',
+        'Nevhodný Shout nebo komentář nahlas. Autora můžeš také zablokovat. Závažné či opakované porušení může vést k omezení nebo trvalému zablokování účtu.',
+      ),
+    ];
+    return Scaffold(
+      appBar: AppBar(title: Text(tr(context, 'Pravidla komunity'))),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            tr(
+              context,
+              'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.',
+            ),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 12),
+          ...rules.map(
+            (rule) => Card(
+              child: ListTile(
+                leading: Icon(rule.$1),
+                title: Text(tr(context, rule.$2)),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(tr(context, rule.$3)),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
