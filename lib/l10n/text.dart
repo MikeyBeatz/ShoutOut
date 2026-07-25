@@ -141,6 +141,34 @@ const _english = <String, String>{
   'Shout s nízkým hodnocením': 'Low-rated shout',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'This shout was collapsed because of strongly negative ratings.',
+  'Změnit heslo': 'Change password',
+  'Aktuální heslo': 'Current password',
+  'Nové heslo': 'New password',
+  'Potvrdit nové heslo': 'Confirm new password',
+  'Hesla se neshodují.': 'Passwords do not match.',
+  'Heslo se nepodařilo změnit. Zkontroluj aktuální heslo.':
+      'The password could not be changed. Check your current password.',
+  'Heslo účtu Google změň přímo u Google.':
+      'Change a Google account password directly with Google.',
+  'Nastavení notifikací': 'Notification settings',
+  'Uložené preference se použijí po zapnutí oznámení.':
+      'Saved preferences will apply when notifications are enabled.',
+  'Odpovědi na komentáře': 'Replies to comments',
+  'Reakce na mé Shouty': 'Reactions to my shouts',
+  'Nové Shouty v okolí': 'New shouts nearby',
+  'Nápověda': 'Help',
+  'Jak fungují Shouty?': 'How do shouts work?',
+  'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
+      'A shout is shown to people nearby for the duration you choose when publishing.',
+  'Jak fungují komentáře?': 'How do comments work?',
+  'Na komentář můžeš odpovědět přes @přezdívku, hodnotit ho nebo nahlásit.':
+      'You can reply to a comment with @nickname, rate it, or report it.',
+  'Bezpečnost a pravidla': 'Safety and rules',
+  'Nesdílej veřejně citlivé kontakty. Nevhodný obsah nahlas nebo autora zablokuj.':
+      'Do not share sensitive contact details publicly. Report unsuitable content or block its author.',
+  'Účet a soukromí': 'Account and privacy',
+  'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
+      'We use a nickname instead of your real name. Find account settings in your profile.',
 };
 
 const _german = <String, String>{
@@ -277,6 +305,34 @@ const _german = <String, String>{
   'Shout s nízkým hodnocením': 'Shout mit niedriger Bewertung',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Dieser Shout wurde wegen stark negativer Bewertungen eingeklappt.',
+  'Změnit heslo': 'Passwort ändern',
+  'Aktuální heslo': 'Aktuelles Passwort',
+  'Nové heslo': 'Neues Passwort',
+  'Potvrdit nové heslo': 'Neues Passwort bestätigen',
+  'Hesla se neshodují.': 'Die Passwörter stimmen nicht überein.',
+  'Heslo se nepodařilo změnit. Zkontroluj aktuální heslo.':
+      'Das Passwort konnte nicht geändert werden. Prüfe dein aktuelles Passwort.',
+  'Heslo účtu Google změň přímo u Google.':
+      'Ändere das Passwort eines Google-Kontos direkt bei Google.',
+  'Nastavení notifikací': 'Benachrichtigungseinstellungen',
+  'Uložené preference se použijí po zapnutí oznámení.':
+      'Gespeicherte Einstellungen werden nach dem Aktivieren von Benachrichtigungen verwendet.',
+  'Odpovědi na komentáře': 'Antworten auf Kommentare',
+  'Reakce na mé Shouty': 'Reaktionen auf meine Shouts',
+  'Nové Shouty v okolí': 'Neue Shouts in der Nähe',
+  'Nápověda': 'Hilfe',
+  'Jak fungují Shouty?': 'Wie funktionieren Shouts?',
+  'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
+      'Ein Shout wird Personen in der Nähe für die beim Veröffentlichen gewählte Dauer angezeigt.',
+  'Jak fungují komentáře?': 'Wie funktionieren Kommentare?',
+  'Na komentář můžeš odpovědět přes @přezdívku, hodnotit ho nebo nahlásit.':
+      'Du kannst auf einen Kommentar mit @Spitzname antworten, ihn bewerten oder melden.',
+  'Bezpečnost a pravidla': 'Sicherheit und Regeln',
+  'Nesdílej veřejně citlivé kontakty. Nevhodný obsah nahlas nebo autora zablokuj.':
+      'Teile keine sensiblen Kontaktdaten öffentlich. Melde ungeeignete Inhalte oder blockiere den Autor.',
+  'Účet a soukromí': 'Konto und Datenschutz',
+  'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
+      'Wir verwenden einen Spitznamen statt deines echten Namens. Kontoeinstellungen findest du im Profil.',
 };
 
 const _polish = <String, String>{
@@ -409,4 +465,32 @@ const _polish = <String, String>{
   'Shout s nízkým hodnocením': 'Shout z niską oceną',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Ten shout został zwinięty z powodu bardzo negatywnych ocen.',
+  'Změnit heslo': 'Zmień hasło',
+  'Aktuální heslo': 'Aktualne hasło',
+  'Nové heslo': 'Nowe hasło',
+  'Potvrdit nové heslo': 'Potwierdź nowe hasło',
+  'Hesla se neshodují.': 'Hasła nie są takie same.',
+  'Heslo se nepodařilo změnit. Zkontroluj aktuální heslo.':
+      'Nie udało się zmienić hasła. Sprawdź aktualne hasło.',
+  'Heslo účtu Google změň přímo u Google.':
+      'Hasło do konta Google zmień bezpośrednio w Google.',
+  'Nastavení notifikací': 'Ustawienia powiadomień',
+  'Uložené preference se použijí po zapnutí oznámení.':
+      'Zapisane preferencje będą użyte po włączeniu powiadomień.',
+  'Odpovědi na komentáře': 'Odpowiedzi na komentarze',
+  'Reakce na mé Shouty': 'Reakcje na moje shouty',
+  'Nové Shouty v okolí': 'Nowe shouty w pobliżu',
+  'Nápověda': 'Pomoc',
+  'Jak fungují Shouty?': 'Jak działają shouty?',
+  'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.':
+      'Shout jest widoczny dla osób w pobliżu przez czas wybrany podczas publikacji.',
+  'Jak fungují komentáře?': 'Jak działają komentarze?',
+  'Na komentář můžeš odpovědět přes @přezdívku, hodnotit ho nebo nahlásit.':
+      'Na komentarz możesz odpowiedzieć przez @pseudonim, ocenić go lub zgłosić.',
+  'Bezpečnost a pravidla': 'Bezpieczeństwo i zasady',
+  'Nesdílej veřejně citlivé kontakty. Nevhodný obsah nahlas nebo autora zablokuj.':
+      'Nie udostępniaj publicznie wrażliwych danych kontaktowych. Zgłoś nieodpowiednią treść lub zablokuj autora.',
+  'Účet a soukromí': 'Konto i prywatność',
+  'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
+      'Używamy pseudonimu zamiast prawdziwego imienia. Ustawienia konta znajdziesz w profilu.',
 };

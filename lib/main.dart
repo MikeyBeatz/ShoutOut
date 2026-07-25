@@ -1060,6 +1060,32 @@ class ProfilePage extends StatelessWidget {
                 }
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: Text(tr(context, 'Změnit heslo')),
+              onTap: () => showDialog<void>(
+                context: context,
+                builder: (_) => const ChangePasswordDialog(),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_outlined),
+              title: Text(tr(context, 'Nastavení notifikací')),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NotificationSettingsPage(userId: uid),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline),
+              title: Text(tr(context, 'Nápověda')),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpPage()),
+              ),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -1077,6 +1103,231 @@ class ProfilePage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class ChangePasswordDialog extends StatefulWidget {
+  const ChangePasswordDialog({super.key});
+
+  @override
+  State<ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+}
+
+class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
+  final _currentPassword = TextEditingController();
+  final _newPassword = TextEditingController();
+  final _confirmPassword = TextEditingController();
+  String? _error;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _currentPassword.dispose();
+    _newPassword.dispose();
+    _confirmPassword.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(tr(context, 'Změnit heslo')),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _currentPassword,
+          obscureText: true,
+          decoration: InputDecoration(labelText: tr(context, 'Aktuální heslo')),
+        ),
+        TextField(
+          controller: _newPassword,
+          obscureText: true,
+          decoration: InputDecoration(labelText: tr(context, 'Nové heslo')),
+        ),
+        TextField(
+          controller: _confirmPassword,
+          obscureText: true,
+          decoration: InputDecoration(
+            labelText: tr(context, 'Potvrdit nové heslo'),
+          ),
+        ),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              _error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: _saving ? null : () => Navigator.pop(context),
+        child: Text(tr(context, 'Zrušit')),
+      ),
+      FilledButton(
+        onPressed: _saving ? null : _changePassword,
+        child: Text(tr(context, 'Uložit')),
+      ),
+    ],
+  );
+
+  Future<void> _changePassword() async {
+    final user = FirebaseAuth.instance.currentUser!;
+    final hasPasswordProvider = user.providerData.any(
+      (provider) => provider.providerId == 'password',
+    );
+    if (!hasPasswordProvider || user.email == null) {
+      setState(
+        () => _error = tr(context, 'Heslo účtu Google změň přímo u Google.'),
+      );
+      return;
+    }
+    if (_newPassword.text.length < 6) {
+      setState(() => _error = tr(context, 'Zvol silnější heslo.'));
+      return;
+    }
+    if (_newPassword.text != _confirmPassword.text) {
+      setState(() => _error = tr(context, 'Hesla se neshodují.'));
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: _currentPassword.text,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(_newPassword.text);
+      if (mounted) Navigator.pop(context);
+    } on FirebaseAuthException {
+      if (mounted) {
+        setState(
+          () => _error = tr(
+            context,
+            'Heslo se nepodařilo změnit. Zkontroluj aktuální heslo.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+}
+
+class NotificationSettingsPage extends StatelessWidget {
+  const NotificationSettingsPage({super.key, required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    final reference = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('notifications');
+    return Scaffold(
+      appBar: AppBar(title: Text(tr(context, 'Nastavení notifikací'))),
+      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: reference.snapshots(),
+        builder: (context, snapshot) {
+          final settings = snapshot.data?.data();
+          final replies = settings?['replies'] as bool? ?? true;
+          final reactions = settings?['reactions'] as bool? ?? true;
+          final nearbyShouts = settings?['nearbyShouts'] as bool? ?? true;
+          Future<void> save({
+            bool? nextReplies,
+            bool? nextReactions,
+            bool? nextNearby,
+          }) => reference.set({
+            'replies': nextReplies ?? replies,
+            'reactions': nextReactions ?? reactions,
+            'nearbyShouts': nextNearby ?? nearbyShouts,
+          });
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                tr(
+                  context,
+                  'Uložené preference se použijí po zapnutí oznámení.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                value: replies,
+                onChanged: (value) => save(nextReplies: value),
+                title: Text(tr(context, 'Odpovědi na komentáře')),
+              ),
+              SwitchListTile(
+                value: reactions,
+                onChanged: (value) => save(nextReactions: value),
+                title: Text(tr(context, 'Reakce na mé Shouty')),
+              ),
+              SwitchListTile(
+                value: nearbyShouts,
+                onChanged: (value) => save(nextNearby: value),
+                title: Text(tr(context, 'Nové Shouty v okolí')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class HelpPage extends StatelessWidget {
+  const HelpPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final topics = [
+      (
+        'Jak fungují Shouty?',
+        'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.',
+      ),
+      (
+        'Jak fungují komentáře?',
+        'Na komentář můžeš odpovědět přes @přezdívku, hodnotit ho nebo nahlásit.',
+      ),
+      (
+        'Bezpečnost a pravidla',
+        'Nesdílej veřejně citlivé kontakty. Nevhodný obsah nahlas nebo autora zablokuj.',
+      ),
+      (
+        'Účet a soukromí',
+        'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.',
+      ),
+    ];
+    return Scaffold(
+      appBar: AppBar(title: Text(tr(context, 'Nápověda'))),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: topics
+            .map(
+              (topic) => Card(
+                child: ExpansionTile(
+                  title: Text(tr(context, topic.$1)),
+                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(tr(context, topic.$2)),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }
