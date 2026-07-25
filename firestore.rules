@@ -21,7 +21,7 @@ service cloud.firestore {
       allow list, delete: if false;
     }
     match /warnings/{warningId} {
-      allow get: if signedIn() && (resource.data.userId == request.auth.uid || isModerator());
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isModerator());
       allow create: if isModerator() && request.resource.data.keys().hasOnly([
         'userId', 'reason', 'createdAt', 'moderatorId'
       ]);
