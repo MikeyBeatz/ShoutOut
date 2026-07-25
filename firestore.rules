@@ -125,6 +125,36 @@ service cloud.firestore {
           request.resource.data.nearbyShouts is bool;
         allow delete: if false;
       }
+
+      match /legal/{documentId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create: if signedIn() &&
+          request.auth.uid == userId &&
+          documentId == 'acceptance_2026_07_25' &&
+          request.resource.data.keys().hasOnly([
+            'termsVersion',
+            'privacyVersion',
+            'communityRulesVersion',
+            'ageConfirmed',
+            'acceptedAt',
+            'acceptedLanguage'
+          ]) &&
+          request.resource.data.keys().hasAll([
+            'termsVersion',
+            'privacyVersion',
+            'communityRulesVersion',
+            'ageConfirmed',
+            'acceptedAt',
+            'acceptedLanguage'
+          ]) &&
+          request.resource.data.termsVersion == '2026-07-25' &&
+          request.resource.data.privacyVersion == '2026-07-25' &&
+          request.resource.data.communityRulesVersion == '2026-07-25' &&
+          request.resource.data.ageConfirmed == true &&
+          request.resource.data.acceptedAt == request.time &&
+          request.resource.data.acceptedLanguage in ['cs', 'en', 'de', 'pl'];
+        allow update, delete: if false;
+      }
     }
 
     match /reports/{reportId} {

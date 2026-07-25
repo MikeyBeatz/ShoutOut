@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'app_locale.dart';
+import 'legal.dart';
 import 'l10n/text.dart';
 
 class AuthGate extends StatelessWidget {
@@ -48,7 +49,10 @@ class ProfileGate extends StatelessWidget {
             return const _LoadingPage();
           }
           if (!snapshot.data!.exists) {
-            return NicknamePage(user: user);
+            return LegalAcceptanceGate(
+              user: user,
+              child: NicknamePage(user: user),
+            );
           }
           final language = snapshot.data!.data()?['language'] as String?;
           if (language != null && appLocale.value?.languageCode != language) {
@@ -56,7 +60,7 @@ class ProfileGate extends StatelessWidget {
               appLocale.value = Locale(language);
             });
           }
-          return child;
+          return LegalAcceptanceGate(user: user, child: child);
         },
       );
 }

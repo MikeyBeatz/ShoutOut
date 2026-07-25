@@ -157,6 +157,19 @@ const _english = <String, String>{
   'Reakce na mé Shouty': 'Reactions to my shouts',
   'Nové Shouty v okolí': 'New shouts nearby',
   'Nápověda': 'Help',
+  'Právní informace': 'Legal information',
+  'Podmínky použití': 'Terms of use',
+  'Zásady ochrany soukromí': 'Privacy policy',
+  'Než začneš': 'Before you start',
+  'ShoutOut je veřejný komunitní prostor. Před prvním použitím potvrď věk a seznam se s pravidly.':
+      'ShoutOut is a public community space. Before using it for the first time, confirm your age and read the rules.',
+  'Potvrzuji, že je mi alespoň 16 let.':
+      'I confirm that I am at least 16 years old.',
+  'Souhlasím s Podmínkami použití a beru na vědomí Zásady ochrany soukromí.':
+      'I agree to the Terms of use and acknowledge the Privacy policy.',
+  'Verze': 'Version',
+  'Souhlas se nepodařilo uložit. Zkus to znovu.':
+      'Your acceptance could not be saved. Try again.',
   'Pravidla komunity': 'Community rules',
   'Bezpečné používání ShoutOutu pro všechny.':
       'Using ShoutOut safely for everyone.',
@@ -344,6 +357,19 @@ const _german = <String, String>{
   'Reakce na mé Shouty': 'Reaktionen auf meine Shouts',
   'Nové Shouty v okolí': 'Neue Shouts in der Nähe',
   'Nápověda': 'Hilfe',
+  'Právní informace': 'Rechtliche Informationen',
+  'Podmínky použití': 'Nutzungsbedingungen',
+  'Zásady ochrany soukromí': 'Datenschutzerklärung',
+  'Než začneš': 'Bevor du beginnst',
+  'ShoutOut je veřejný komunitní prostor. Před prvním použitím potvrď věk a seznam se s pravidly.':
+      'ShoutOut ist ein öffentlicher Community-Bereich. Bestätige vor der ersten Nutzung dein Alter und lies die Regeln.',
+  'Potvrzuji, že je mi alespoň 16 let.':
+      'Ich bestätige, dass ich mindestens 16 Jahre alt bin.',
+  'Souhlasím s Podmínkami použití a beru na vědomí Zásady ochrany soukromí.':
+      'Ich stimme den Nutzungsbedingungen zu und nehme die Datenschutzerklärung zur Kenntnis.',
+  'Verze': 'Version',
+  'Souhlas se nepodařilo uložit. Zkus to znovu.':
+      'Deine Zustimmung konnte nicht gespeichert werden. Versuche es erneut.',
   'Pravidla komunity': 'Community-Regeln',
   'Bezpečné používání ShoutOutu pro všechny.':
       'ShoutOut sicher für alle nutzen.',
@@ -527,6 +553,19 @@ const _polish = <String, String>{
   'Reakce na mé Shouty': 'Reakcje na moje shouty',
   'Nové Shouty v okolí': 'Nowe shouty w pobliżu',
   'Nápověda': 'Pomoc',
+  'Právní informace': 'Informacje prawne',
+  'Podmínky použití': 'Warunki korzystania',
+  'Zásady ochrany soukromí': 'Polityka prywatności',
+  'Než začneš': 'Zanim zaczniesz',
+  'ShoutOut je veřejný komunitní prostor. Před prvním použitím potvrď věk a seznam se s pravidly.':
+      'ShoutOut to publiczna przestrzeń społecznościowa. Przed pierwszym użyciem potwierdź wiek i zapoznaj się z zasadami.',
+  'Potvrzuji, že je mi alespoň 16 let.':
+      'Potwierdzam, że mam co najmniej 16 lat.',
+  'Souhlasím s Podmínkami použití a beru na vědomí Zásady ochrany soukromí.':
+      'Akceptuję Warunki korzystania i przyjmuję do wiadomości Politykę prywatności.',
+  'Verze': 'Wersja',
+  'Souhlas se nepodařilo uložit. Zkus to znovu.':
+      'Nie udało się zapisać akceptacji. Spróbuj ponownie.',
   'Pravidla komunity': 'Zasady społeczności',
   'Bezpečné používání ShoutOutu pro všechny.':
       'Bezpieczne korzystanie z ShoutOut dla wszystkich.',

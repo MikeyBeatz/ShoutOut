@@ -13,6 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'auth_gate.dart';
 import 'app_locale.dart';
 import 'firebase_options.dart';
+import 'legal.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 
@@ -1086,6 +1087,14 @@ class ProfilePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const HelpPage()),
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.policy_outlined),
+              title: Text(tr(context, 'Právní informace')),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LegalHubPage()),
+              ),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -1311,41 +1320,64 @@ class HelpPage extends StatelessWidget {
       appBar: AppBar(title: Text(tr(context, 'Nápověda'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children:
-            topics
-                .map(
-                  (topic) => Card(
-                    child: ExpansionTile(
-                      title: Text(tr(context, topic.$1)),
-                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(tr(context, topic.$2)),
-                        ),
-                      ],
-                    ),
+        children: [
+          ...topics.map(
+            (topic) => Card(
+              child: ExpansionTile(
+                title: Text(tr(context, topic.$1)),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(tr(context, topic.$2)),
                   ),
-                )
-                .toList()
-              ..add(
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.gavel_outlined),
-                    title: Text(tr(context, 'Pravidla komunity')),
-                    subtitle: Text(
-                      tr(context, 'Bezpečné používání ShoutOutu pro všechny.'),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CommunityRulesPage(),
-                      ),
-                    ),
-                  ),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.gavel_outlined),
+              title: Text(tr(context, 'Pravidla komunity')),
+              subtitle: Text(
+                tr(context, 'Bezpečné používání ShoutOutu pro všechny.'),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CommunityRulesPage()),
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: Text(tr(context, 'Podmínky použití')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const LegalDocumentPage(type: LegalDocumentType.terms),
                 ),
               ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: Text(tr(context, 'Zásady ochrany soukromí')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const LegalDocumentPage(type: LegalDocumentType.privacy),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
