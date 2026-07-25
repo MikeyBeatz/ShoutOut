@@ -1089,6 +1089,16 @@ class ProfilePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const HelpPage()),
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.warning_amber_outlined),
+              title: Text(tr(context, 'Moje varování')),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WarningHistoryPage(userId: uid),
+                ),
+              ),
+            ),
             StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection('moderators')
@@ -1265,12 +1275,47 @@ class _ReportList extends StatelessWidget {
         'moderatorId': FirebaseAuth.instance.currentUser!.uid,
       });
     }
-    if (action != 'resolve' && action != 'remove') return;
     await report.reference.update({
       'status': 'resolved',
       'resolvedAt': FieldValue.serverTimestamp(),
     });
   }
+}
+
+class WarningHistoryPage extends StatelessWidget {
+  const WarningHistoryPage({super.key, required this.userId});
+  final String userId;
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(tr(context, 'Moje varování'))),
+    body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('warnings')
+          .where('userId', isEqualTo: userId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
+        final warnings = snapshot.data!.docs;
+        if (warnings.isEmpty)
+          return Center(child: Text(tr(context, 'Nemáš žádná varování.')));
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: warnings.length,
+          itemBuilder: (context, index) {
+            final warning = warnings[index].data();
+            return Card(
+              child: ListTile(
+                leading: const Icon(Icons.warning_amber_outlined),
+                title: Text(warning['reason'] as String? ?? ''),
+                subtitle: Text(tr(context, 'Varování od moderace')),
+              ),
+            );
+          },
+        );
+      },
+    ),
+  );
 }
 
 class ChangePasswordDialog extends StatefulWidget {
