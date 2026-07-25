@@ -1392,10 +1392,12 @@ class ShoutDetailPage extends StatefulWidget {
 
 class _ShoutDetailPageState extends State<ShoutDetailPage> {
   final _commentController = TextEditingController();
+  final _commentFocusNode = FocusNode();
 
   @override
   void dispose() {
     _commentController.dispose();
+    _commentFocusNode.dispose();
     super.dispose();
   }
 
@@ -1456,32 +1458,11 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             ),
             const SizedBox(height: 8),
             ...comments.map((comment) {
-              final data = comment.data();
-              final isOwnComment =
-                  data['authorId'] == FirebaseAuth.instance.currentUser?.uid;
-              return ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-                title: Row(
-                  children: [
-                    Text(data['authorNickname'] as String),
-                    if (data['authorId'] == widget.shout.authorId)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: Chip(
-                          label: Text(tr(context, 'Autor')),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                  ],
-                ),
-                subtitle: Text(data['text'] as String),
-                trailing: isOwnComment
-                    ? IconButton(
-                        tooltip: tr(context, 'Smazat komentář'),
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => comment.reference.delete(),
-                      )
-                    : null,
+              return CommentTile(
+                comment: comment,
+                shoutAuthorId: widget.shout.authorId,
+                onReply: _replyTo,
+                onReport: () => _reportComment(comment),
               );
             }),
           ],
@@ -1496,6 +1477,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             Expanded(
               child: TextField(
                 controller: _commentController,
+                focusNode: _commentFocusNode,
                 maxLength: 220,
                 decoration: InputDecoration(
                   hintText: tr(context, 'Napiš veřejný komentář'),
@@ -1532,6 +1514,13 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ),
     ),
   );
+
+  void _replyTo(String nickname) {
+    _commentController
+      ..text = '@$nickname '
+      ..selection = TextSelection.collapsed(offset: nickname.length + 2);
+    FocusScope.of(context).requestFocus(_commentFocusNode);
+  }
 
   Future<void> _deleteShout() async {
     await FirebaseFirestore.instance
@@ -1611,6 +1600,206 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Hlášení bylo odesláno.')));
+    }
+  }
+
+  Future<void> _reportComment(
+    QueryDocumentSnapshot<Map<String, dynamic>> comment,
+  ) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(tr(dialogContext, 'Nahlásit komentář')),
+        content: TextField(
+          controller: controller,
+          maxLength: 500,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: tr(dialogContext, 'Stručně popiš důvod hlášení'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(tr(dialogContext, 'Zrušit')),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: Text(tr(dialogContext, 'Odeslat')),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (reason == null || reason.isEmpty) return;
+    await FirebaseFirestore.instance.collection('commentReports').add({
+      'reporterId': FirebaseAuth.instance.currentUser!.uid,
+      'shoutId': widget.shout.id,
+      'commentId': comment.id,
+      'reason': reason,
+      'createdAt': FieldValue.serverTimestamp(),
+      'status': 'open',
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr(context, 'Hlášení bylo odesláno.'))),
+      );
+    }
+  }
+}
+
+class CommentTile extends StatefulWidget {
+  const CommentTile({
+    super.key,
+    required this.comment,
+    required this.shoutAuthorId,
+    required this.onReply,
+    required this.onReport,
+  });
+
+  final QueryDocumentSnapshot<Map<String, dynamic>> comment;
+  final String shoutAuthorId;
+  final ValueChanged<String> onReply;
+  final VoidCallback onReport;
+
+  @override
+  State<CommentTile> createState() => _CommentTileState();
+}
+
+class _CommentTileState extends State<CommentTile> {
+  bool _revealed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.comment.data();
+    final ownComment =
+        data['authorId'] == FirebaseAuth.instance.currentUser?.uid;
+    final reactions = widget.comment.reference.collection('reactions');
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: reactions.snapshots(),
+      builder: (context, snapshot) {
+        final reactionDocs = snapshot.data?.docs ?? [];
+        final likes = reactionDocs
+            .where((doc) => doc.data()['type'] == 'like')
+            .length;
+        final dislikes = reactionDocs
+            .where((doc) => doc.data()['type'] == 'dislike')
+            .length;
+        String? ownType;
+        for (final doc in reactionDocs) {
+          if (doc.id == FirebaseAuth.instance.currentUser?.uid) {
+            ownType = doc.data()['type'] as String?;
+            break;
+          }
+        }
+        final total = likes + dislikes;
+        final hidden = !ownComment && total >= 10 && dislikes / total >= .7;
+        if (hidden && !_revealed) {
+          return Card(
+            child: ListTile(
+              leading: const Icon(Icons.visibility_off_outlined),
+              title: Text(tr(context, 'Skrytý komentář')),
+              subtitle: Text(
+                tr(context, 'Komentář byl skryt kvůli negativnímu hodnocení.'),
+              ),
+              trailing: TextButton(
+                onPressed: () => setState(() => _revealed = true),
+                child: Text(tr(context, 'Zobrazit')),
+              ),
+            ),
+          );
+        }
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 16,
+                      child: Icon(Icons.person_outline),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        children: [
+                          Text(
+                            data['authorNickname'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          if (data['authorId'] == widget.shoutAuthorId)
+                            Chip(
+                              label: Text(tr(context, 'Autor')),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (ownComment)
+                      IconButton(
+                        tooltip: tr(context, 'Smazat komentář'),
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => widget.comment.reference.delete(),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(data['text'] as String),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 14,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    ReactionButton(
+                      icon: Icons.thumb_up_outlined,
+                      value: likes,
+                      selected: ownType == 'like',
+                      onPressed: () => _toggleReaction('like'),
+                    ),
+                    ReactionButton(
+                      icon: Icons.thumb_down_outlined,
+                      value: dislikes,
+                      selected: ownType == 'dislike',
+                      onPressed: () => _toggleReaction('dislike'),
+                    ),
+                    TextButton.icon(
+                      onPressed: () =>
+                          widget.onReply(data['authorNickname'] as String),
+                      icon: const Icon(Icons.reply_outlined, size: 18),
+                      label: Text(tr(context, 'Odpovědět')),
+                    ),
+                    TextButton.icon(
+                      onPressed: widget.onReport,
+                      icon: const Icon(Icons.flag_outlined, size: 18),
+                      label: Text(tr(context, 'Nahlásit')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _toggleReaction(String type) async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final reference = widget.comment.reference.collection('reactions').doc(uid);
+    final current = await reference.get();
+    if (current.data()?['type'] == type) {
+      await reference.delete();
+    } else {
+      await reference.set({
+        'type': type,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     }
   }
 }

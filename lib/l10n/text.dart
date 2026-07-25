@@ -126,6 +126,15 @@ const _english = <String, String>{
   'Další změna přezdívky bude možná':
       'Your next nickname change will be available',
   'Přezdívku se nepodařilo změnit.': 'The nickname could not be changed.',
+  'Odpovědět': 'Reply',
+  'Nahlásit komentář': 'Report comment',
+  'Stručně popiš důvod hlášení': 'Briefly describe the reason for the report',
+  'Odeslat': 'Send',
+  'Hlášení bylo odesláno.': 'Report sent.',
+  'Skrytý komentář': 'Hidden comment',
+  'Komentář byl skryt kvůli negativnímu hodnocení.':
+      'This comment was hidden because of negative ratings.',
+  'Zobrazit': 'Show',
 };
 
 const _german = <String, String>{
@@ -247,6 +256,15 @@ const _german = <String, String>{
       'Die nächste Änderung deines Spitznamens ist möglich ab',
   'Přezdívku se nepodařilo změnit.':
       'Der Spitzname konnte nicht geändert werden.',
+  'Odpovědět': 'Antworten',
+  'Nahlásit komentář': 'Kommentar melden',
+  'Stručně popiš důvod hlášení': 'Beschreibe kurz den Grund für die Meldung',
+  'Odeslat': 'Senden',
+  'Hlášení bylo odesláno.': 'Meldung wurde gesendet.',
+  'Skrytý komentář': 'Ausgeblendeter Kommentar',
+  'Komentář byl skryt kvůli negativnímu hodnocení.':
+      'Dieser Kommentar wurde wegen negativer Bewertungen ausgeblendet.',
+  'Zobrazit': 'Anzeigen',
 };
 
 const _polish = <String, String>{
@@ -364,4 +382,13 @@ const _polish = <String, String>{
   'Další změna přezdívky bude možná':
       'Kolejna zmiana pseudonimu będzie możliwa',
   'Přezdívku se nepodařilo změnit.': 'Nie udało się zmienić pseudonimu.',
+  'Odpovědět': 'Odpowiedz',
+  'Nahlásit komentář': 'Zgłoś komentarz',
+  'Stručně popiš důvod hlášení': 'Krótko opisz powód zgłoszenia',
+  'Odeslat': 'Wyślij',
+  'Hlášení bylo odesláno.': 'Zgłoszenie zostało wysłane.',
+  'Skrytý komentář': 'Ukryty komentarz',
+  'Komentář byl skryt kvůli negativnímu hodnocení.':
+      'Ten komentarz został ukryty z powodu negatywnych ocen.',
+  'Zobrazit': 'Pokaż',
 };
