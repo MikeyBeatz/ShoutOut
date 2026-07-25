@@ -1089,6 +1089,24 @@ class ProfilePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const HelpPage()),
               ),
             ),
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('moderators')
+                  .doc(uid)
+                  .snapshots(),
+              builder: (context, moderator) => moderator.data?.exists == true
+                  ? ListTile(
+                      leading: const Icon(Icons.admin_panel_settings_outlined),
+                      title: Text(tr(context, 'Moderace')),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ModerationPage(),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             ListTile(
               leading: const Icon(Icons.policy_outlined),
               title: Text(tr(context, 'Právní informace')),
@@ -1116,6 +1134,79 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+}
+
+class ModerationPage extends StatelessWidget {
+  const ModerationPage({super.key});
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 2,
+    child: Scaffold(
+      appBar: AppBar(
+        title: Text(tr(context, 'Moderace')),
+        bottom: TabBar(
+          tabs: [
+            Tab(text: tr(context, 'Shouty')),
+            Tab(text: tr(context, 'Komentáře')),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        children: [
+          _ReportList(collection: 'reports'),
+          _ReportList(collection: 'commentReports'),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ReportList extends StatelessWidget {
+  const _ReportList({required this.collection});
+  final String collection;
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection(collection)
+            .where('status', isEqualTo: 'open')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError)
+            return Center(
+              child: Text(tr(context, 'Hlášení se nepodařilo načíst.')),
+            );
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
+          final reports = snapshot.data!.docs;
+          if (reports.isEmpty)
+            return Center(child: Text(tr(context, 'Žádná otevřená hlášení.')));
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: reports.length,
+            itemBuilder: (context, index) {
+              final report = reports[index];
+              final data = report.data();
+              return Card(
+                child: ListTile(
+                  title: Text(data['reason'] as String? ?? ''),
+                  subtitle: Text(
+                    '${tr(context, 'Nahlásil/a')}: ${data['reporterId'] ?? ''}',
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.done_outline),
+                    tooltip: tr(context, 'Označit jako vyřešené'),
+                    onPressed: () => report.reference.update({
+                      'status': 'resolved',
+                      'resolvedAt': FieldValue.serverTimestamp(),
+                    }),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
 }
 
 class ChangePasswordDialog extends StatefulWidget {

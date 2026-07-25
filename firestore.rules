@@ -5,6 +5,14 @@ service cloud.firestore {
     function signedIn() {
       return request.auth != null;
     }
+    function isModerator() {
+      return signedIn() && exists(/databases/$(database)/documents/moderators/$(request.auth.uid));
+    }
+
+    match /moderators/{moderatorId} {
+      allow get: if signedIn() && request.auth.uid == moderatorId;
+      allow list, create, update, delete: if false;
+    }
 
     function validProfile() {
       return request.resource.data.keys().hasOnly([
@@ -168,7 +176,10 @@ service cloud.firestore {
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
         request.resource.data.status == 'open';
-      allow read, update, delete: if false;
+      allow read: if isModerator();
+      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+      allow delete: if false;
     }
 
     match /commentReports/{reportId} {
@@ -183,7 +194,10 @@ service cloud.firestore {
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
         request.resource.data.status == 'open';
-      allow read, update, delete: if false;
+      allow read: if isModerator();
+      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+      allow delete: if false;
     }
 
     // Required for collectionGroup('comments') queries used by the user's
@@ -213,7 +227,7 @@ service cloud.firestore {
         request.resource.data.commentsCount == 0 &&
         request.resource.data.savesCount == 0;
       allow update: if signedIn() &&
-        resource.data.authorId == request.auth.uid &&
+        (resource.data.authorId == request.auth.uid || isModerator()) &&
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['status']) &&
         request.resource.data.status == 'deleted';
@@ -237,7 +251,7 @@ service cloud.firestore {
             request.resource.data.replyToNickname is string);
         allow update: if false;
         allow delete: if signedIn() &&
-          resource.data.authorId == request.auth.uid;
+          (resource.data.authorId == request.auth.uid || isModerator());
 
         match /reactions/{userId} {
           allow read: if signedIn();
