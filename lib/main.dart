@@ -1137,7 +1137,45 @@ class ProfilePage extends StatelessWidget {
                 l10n.deleteAccount,
                 style: TextStyle(color: Colors.red),
               ),
-              onTap: () {},
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(tr(dialogContext, 'Smazat účet?')),
+                    content: Text(
+                      tr(
+                        dialogContext,
+                        'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: Text(tr(dialogContext, 'Zrušit')),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: Text(tr(dialogContext, 'Požádat o smazání')),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed != true || !context.mounted) return;
+                final user = FirebaseAuth.instance.currentUser!;
+                await FirebaseFirestore.instance
+                    .collection('accountDeletionRequests')
+                    .doc(user.uid)
+                    .set({
+                      'userId': user.uid,
+                      'email': user.email,
+                      'requestedAt': FieldValue.serverTimestamp(),
+                      'retainUntil': Timestamp.fromDate(
+                        DateTime.now().add(const Duration(days: 60)),
+                      ),
+                      'status': 'pending',
+                    });
+                await FirebaseAuth.instance.signOut();
+              },
             ),
           ],
         );

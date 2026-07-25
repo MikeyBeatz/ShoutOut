@@ -158,6 +158,13 @@ const _english = <String, String>{
   'Nové Shouty v okolí': 'New shouts nearby',
   'Nápověda': 'Help',
   'Moderace': 'Moderation',
+  'Smazat účet?': 'Delete account?',
+  'Požádat o smazání': 'Request deletion',
+  'Účet čeká na smazání': 'Account pending deletion',
+  'Žádost byla přijata. Účet nelze používat a bude zpracován serverovou automatizací.':
+      'Your request was received. The account cannot be used and will be processed by server automation.',
+  'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.':
+      'Public content will be hidden during server processing. Necessary security records will be retained for 60 days, then deleted or anonymised.',
   'Moje varování': 'My warnings',
   'Nemáš žádná varování.': 'You have no warnings.',
   'Varování od moderace': 'Moderation warning',
@@ -380,6 +387,13 @@ const _german = <String, String>{
   'Nové Shouty v okolí': 'Neue Shouts in der Nähe',
   'Nápověda': 'Hilfe',
   'Moderace': 'Moderation',
+  'Smazat účet?': 'Konto löschen?',
+  'Požádat o smazání': 'Löschung beantragen',
+  'Účet čeká na smazání': 'Konto wartet auf Löschung',
+  'Žádost byla přijata. Účet nelze používat a bude zpracován serverovou automatizací.':
+      'Dein Antrag wurde angenommen. Das Konto kann nicht genutzt werden und wird durch Serverautomatisierung verarbeitet.',
+  'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.':
+      'Öffentliche Inhalte werden bei der Serververarbeitung verborgen. Notwendige Sicherheitsdaten bleiben 60 Tage erhalten und werden danach gelöscht oder anonymisiert.',
   'Moje varování': 'Meine Verwarnungen',
   'Nemáš žádná varování.': 'Du hast keine Verwarnungen.',
   'Varování od moderace': 'Verwarnung durch Moderation',
@@ -598,6 +612,13 @@ const _polish = <String, String>{
   'Nové Shouty v okolí': 'Nowe shouty w pobliżu',
   'Nápověda': 'Pomoc',
   'Moderace': 'Moderacja',
+  'Smazat účet?': 'Usunąć konto?',
+  'Požádat o smazání': 'Poproś o usunięcie',
+  'Účet čeká na smazání': 'Konto oczekuje na usunięcie',
+  'Žádost byla přijata. Účet nelze používat a bude zpracován serverovou automatizací.':
+      'Twoje żądanie zostało przyjęte. Konto nie może być używane i zostanie przetworzone przez automatyzację serwera.',
+  'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.':
+      'Publiczne treści zostaną ukryte podczas przetwarzania na serwerze. Niezbędne dane bezpieczeństwa będą przechowywane przez 60 dni, a następnie usunięte lub zanonimizowane.',
   'Moje varování': 'Moje ostrzeżenia',
   'Nemáš žádná varování.': 'Nie masz ostrzeżeń.',
   'Varování od moderace': 'Ostrzeżenie od moderacji',
