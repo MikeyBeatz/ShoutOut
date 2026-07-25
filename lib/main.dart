@@ -2082,33 +2082,8 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _reportShout() async {
-    final controller = TextEditingController();
-    final reason = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Nahlásit Shout'),
-        content: TextField(
-          controller: controller,
-          maxLength: 500,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Stručně popiš důvod hlášení',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Zrušit'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Odeslat'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (reason == null || reason.isEmpty) return;
+    final reason = await _askReportReason('Nahlásit Shout');
+    if (reason == null) return;
     await FirebaseFirestore.instance.collection('reports').add({
       'reporterId': FirebaseAuth.instance.currentUser!.uid,
       'shoutId': widget.shout.id,
@@ -2126,34 +2101,8 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   Future<void> _reportComment(
     QueryDocumentSnapshot<Map<String, dynamic>> comment,
   ) async {
-    final controller = TextEditingController();
-    final reason = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(tr(dialogContext, 'Nahlásit komentář')),
-        content: TextField(
-          controller: controller,
-          maxLength: 500,
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: tr(dialogContext, 'Stručně popiš důvod hlášení'),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(tr(dialogContext, 'Zrušit')),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, controller.text.trim()),
-            child: Text(tr(dialogContext, 'Odeslat')),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (reason == null || reason.isEmpty) return;
+    final reason = await _askReportReason('Nahlásit komentář');
+    if (reason == null) return;
     await FirebaseFirestore.instance.collection('commentReports').add({
       'reporterId': FirebaseAuth.instance.currentUser!.uid,
       'shoutId': widget.shout.id,
@@ -2167,6 +2116,72 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         SnackBar(content: Text(tr(context, 'Hlášení bylo odesláno.'))),
       );
     }
+  }
+
+  Future<String?> _askReportReason(String title) async {
+    const reasons = [
+      'Nelegální obsah nebo drogy',
+      'Obtěžování, nenávist nebo vyhrožování',
+      'Osobní údaje nebo soukromí',
+      'Spam, podvod nebo manipulace',
+      'Explicitní nebo nevhodný obsah',
+      'Jiné',
+    ];
+    final detail = TextEditingController();
+    var selected = reasons.first;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(tr(context, title)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: selected,
+                items: reasons
+                    .map(
+                      (reason) => DropdownMenuItem(
+                        value: reason,
+                        child: Text(tr(context, reason)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setDialogState(() => selected = value!),
+                decoration: InputDecoration(
+                  labelText: tr(context, 'Důvod hlášení'),
+                ),
+              ),
+              TextField(
+                controller: detail,
+                maxLength: 400,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: tr(context, 'Volitelně doplň podrobnosti'),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(tr(context, 'Zrušit')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                context,
+                detail.text.trim().isEmpty
+                    ? selected
+                    : '$selected: ${detail.text.trim()}',
+              ),
+              child: Text(tr(context, 'Odeslat')),
+            ),
+          ],
+        ),
+      ),
+    );
+    detail.dispose();
+    return result;
   }
 }
 
