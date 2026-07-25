@@ -354,18 +354,19 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'ShoutOut',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        toolbarHeight: 52,
+        centerTitle: true,
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.campaign_rounded, size: 21),
+            SizedBox(width: 7),
+            Text(
+              'ShoutOut',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            tooltip: tr(context, 'Oznámení'),
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
-          ),
-          const SizedBox(width: 4),
-        ],
       ),
       body: switch (_tab) {
         0 => FeedPage(
@@ -426,6 +427,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             )
           : null,
       bottomNavigationBar: NavigationBar(
+        height: 64,
         selectedIndex: _tab,
         onDestinationSelected: (index) => setState(() => _tab = index),
         destinations: [
@@ -513,16 +515,7 @@ class _FeedPageState extends State<FeedPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-          child: Text(
-            tr(context, 'Co se děje v okolí?'),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
           child: Row(
             children: [
               Expanded(
@@ -532,6 +525,10 @@ class _FeedPageState extends State<FeedPage> {
                     labelText: tr(context, 'Vzdálenost'),
                     border: OutlineInputBorder(),
                     isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 9,
+                    ),
                   ),
                   items: const [1, 3, 5, 10, 20, 50]
                       .map(
@@ -552,6 +549,10 @@ class _FeedPageState extends State<FeedPage> {
                     labelText: tr(context, 'Řazení'),
                     border: OutlineInputBorder(),
                     isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 9,
+                    ),
                   ),
                   items: FeedOrder.values
                       .map(
@@ -567,11 +568,11 @@ class _FeedPageState extends State<FeedPage> {
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 4),
         SizedBox(
-          height: 40,
+          height: 36,
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             scrollDirection: Axis.horizontal,
             itemCount: _categories.length,
             separatorBuilder: (_, _) => const SizedBox(width: 8),
@@ -589,7 +590,7 @@ class _FeedPageState extends State<FeedPage> {
             },
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Expanded(
           child: widget.isLoading
               ? const Center(child: CircularProgressIndicator())
