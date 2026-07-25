@@ -60,7 +60,55 @@ class ProfileGate extends StatelessWidget {
               appLocale.value = Locale(language);
             });
           }
-          return LegalAcceptanceGate(user: user, child: child);
+          return BanGate(
+            user: user,
+            child: LegalAcceptanceGate(user: user, child: child),
+          );
+        },
+      );
+}
+
+class BanGate extends StatelessWidget {
+  const BanGate({super.key, required this.user, required this.child});
+  final User user;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('bans')
+            .doc(user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          final ban = snapshot.data?.data();
+          final expiry = (ban?['expiresAt'] as Timestamp?)?.toDate();
+          final active =
+              ban != null && (expiry == null || expiry.isAfter(DateTime.now()));
+          if (!active) return child;
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.block, size: 56),
+                    const SizedBox(height: 12),
+                    Text(
+                      tr(context, 'Účet je omezen'),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(ban['reason'] as String? ?? ''),
+                    TextButton(
+                      onPressed: FirebaseAuth.instance.signOut,
+                      child: Text(tr(context, 'Odhlásit se')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         },
       );
 }

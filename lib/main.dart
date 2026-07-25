@@ -1193,13 +1193,30 @@ class _ReportList extends StatelessWidget {
                   subtitle: Text(
                     '${tr(context, 'Nahlásil/a')}: ${data['reporterId'] ?? ''}',
                   ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.done_outline),
-                    tooltip: tr(context, 'Označit jako vyřešené'),
-                    onPressed: () => report.reference.update({
-                      'status': 'resolved',
-                      'resolvedAt': FieldValue.serverTimestamp(),
-                    }),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (action) => _act(context, report, action),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'resolve',
+                        child: Text(tr(context, 'Označit jako vyřešené')),
+                      ),
+                      PopupMenuItem(
+                        value: 'remove',
+                        child: Text(tr(context, 'Odstranit z veřejnosti')),
+                      ),
+                      PopupMenuItem(
+                        value: 'warning',
+                        child: Text(tr(context, 'Udělit varování')),
+                      ),
+                      PopupMenuItem(
+                        value: 'ban1d',
+                        child: Text(tr(context, 'Ban na 1 den')),
+                      ),
+                      PopupMenuItem(
+                        value: 'banPermanent',
+                        child: Text(tr(context, 'Trvalý ban')),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -1207,6 +1224,53 @@ class _ReportList extends StatelessWidget {
           );
         },
       );
+
+  Future<void> _act(
+    BuildContext context,
+    QueryDocumentSnapshot<Map<String, dynamic>> report,
+    String action,
+  ) async {
+    final data = report.data();
+    final shoutRef = FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(data['shoutId'] as String);
+    final target = collection == 'reports'
+        ? shoutRef
+        : shoutRef.collection('comments').doc(data['commentId'] as String);
+    final targetSnapshot = await target.get();
+    final authorId = targetSnapshot.data()?['authorId'] as String?;
+    if (action == 'remove') {
+      if (collection == 'reports') {
+        await target.update({'status': 'deleted'});
+      } else {
+        await target.delete();
+      }
+    }
+    if (authorId != null && action == 'warning') {
+      await FirebaseFirestore.instance.collection('warnings').add({
+        'userId': authorId,
+        'reason': data['reason'],
+        'createdAt': FieldValue.serverTimestamp(),
+        'moderatorId': FirebaseAuth.instance.currentUser!.uid,
+      });
+    }
+    if (authorId != null && action.startsWith('ban')) {
+      await FirebaseFirestore.instance.collection('bans').doc(authorId).set({
+        'userId': authorId,
+        'reason': data['reason'],
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': action == 'ban1d'
+            ? Timestamp.fromDate(DateTime.now().add(const Duration(days: 1)))
+            : null,
+        'moderatorId': FirebaseAuth.instance.currentUser!.uid,
+      });
+    }
+    if (action != 'resolve' && action != 'remove') return;
+    await report.reference.update({
+      'status': 'resolved',
+      'resolvedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }
 
 class ChangePasswordDialog extends StatefulWidget {

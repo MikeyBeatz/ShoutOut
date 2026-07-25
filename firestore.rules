@@ -13,6 +13,20 @@ service cloud.firestore {
       allow get: if signedIn() && request.auth.uid == moderatorId;
       allow list, create, update, delete: if false;
     }
+    match /bans/{userId} {
+      allow get: if signedIn() && (request.auth.uid == userId || isModerator());
+      allow create, update: if isModerator() && request.resource.data.keys().hasOnly([
+        'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
+      ]) && request.resource.data.userId == userId;
+      allow list, delete: if false;
+    }
+    match /warnings/{warningId} {
+      allow get: if signedIn() && (resource.data.userId == request.auth.uid || isModerator());
+      allow create: if isModerator() && request.resource.data.keys().hasOnly([
+        'userId', 'reason', 'createdAt', 'moderatorId'
+      ]);
+      allow list, update, delete: if false;
+    }
 
     function validProfile() {
       return request.resource.data.keys().hasOnly([
