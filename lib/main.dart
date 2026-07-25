@@ -84,8 +84,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _initializeFeed() async {
     _startFeedListeners();
-    await _refreshLocation();
-    await _loadShouts();
+    // Location improves distance sorting but must never hold up the feed.
+    unawaited(_refreshLocation().then((_) => _loadShouts()));
   }
 
   void _startFeedListeners() {
@@ -130,7 +130,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.low,
         ),
-      );
+      ).timeout(const Duration(seconds: 4));
     } catch (_) {
       // The feed can still be used without location permission.
     }
@@ -176,7 +176,6 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                 1000;
       return Shout.fromDocument(doc, distanceKm: distanceKm);
     }).toList();
-    await Future.wait(shouts.map(_loadInteractionState));
     if (mounted) {
       setState(() {
         _shouts
@@ -185,6 +184,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         if (blockedUserIds != null) _blockedUserIds = blockedUserIds;
         _isLoadingShouts = false;
       });
+    }
+    // Reaction and save details are secondary UI data. Fetch them after the
+    // feed is visible instead of delaying the first screen by many requests.
+    for (final shout in shouts) {
+      unawaited(
+        _loadInteractionState(shout).then((_) {
+          if (mounted) setState(() {});
+        }),
+      );
     }
   }
 
