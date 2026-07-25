@@ -728,14 +728,23 @@ class _FeedPageState extends State<FeedPage> {
                             Row(
                               children: [
                                 Expanded(
+                                  flex: 4,
                                   child: DropdownButtonFormField<double>(
                                     initialValue: _radius,
                                     isExpanded: true,
+                                    iconSize: 20,
                                     alignment: AlignmentDirectional.center,
                                     style: filterValueStyle,
                                     decoration: InputDecoration(
                                       hintText: tr(context, 'Vzdálenost'),
                                       hintStyle: filterLabelStyle,
+                                      prefixIcon: const Icon(
+                                        Icons.location_on_outlined,
+                                        color: _shoutPrimary,
+                                        size: 18,
+                                      ),
+                                      prefixIconConstraints:
+                                          const BoxConstraints(minWidth: 26),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -745,7 +754,7 @@ class _FeedPageState extends State<FeedPage> {
                                       isDense: true,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                            horizontal: 9,
+                                            horizontal: 5,
                                             vertical: 8,
                                           ),
                                     ),
@@ -757,6 +766,8 @@ class _FeedPageState extends State<FeedPage> {
                                               child: Text(
                                                 '$value km',
                                                 style: filterValueStyle,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ),
@@ -768,14 +779,23 @@ class _FeedPageState extends State<FeedPage> {
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
+                                  flex: 4,
                                   child: DropdownButtonFormField<FeedOrder>(
                                     initialValue: _order,
                                     isExpanded: true,
+                                    iconSize: 20,
                                     alignment: AlignmentDirectional.center,
                                     style: filterValueStyle,
                                     decoration: InputDecoration(
                                       hintText: tr(context, 'Řazení'),
                                       hintStyle: filterLabelStyle,
+                                      prefixIcon: const Icon(
+                                        Icons.schedule_outlined,
+                                        color: _shoutPrimary,
+                                        size: 18,
+                                      ),
+                                      prefixIconConstraints:
+                                          const BoxConstraints(minWidth: 26),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -785,10 +805,23 @@ class _FeedPageState extends State<FeedPage> {
                                       isDense: true,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                            horizontal: 9,
+                                            horizontal: 5,
                                             vertical: 8,
                                           ),
                                     ),
+                                    selectedItemBuilder: (context) => FeedOrder
+                                        .values
+                                        .map(
+                                          (value) => Center(
+                                            child: Text(
+                                              tr(context, value.compactLabel),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: filterValueStyle,
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
                                     items: FeedOrder.values
                                         .map(
                                           (value) => DropdownMenuItem(
@@ -797,6 +830,8 @@ class _FeedPageState extends State<FeedPage> {
                                               child: Text(
                                                 tr(context, value.label),
                                                 style: filterValueStyle,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ),
@@ -808,14 +843,23 @@ class _FeedPageState extends State<FeedPage> {
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
+                                  flex: 5,
                                   child: DropdownButtonFormField<String?>(
                                     initialValue: _selectedCategory,
                                     isExpanded: true,
+                                    iconSize: 20,
                                     alignment: AlignmentDirectional.center,
                                     style: filterValueStyle,
                                     decoration: InputDecoration(
                                       hintText: tr(context, 'Kategorie'),
                                       hintStyle: filterLabelStyle,
+                                      prefixIcon: const Icon(
+                                        Icons.grid_view_rounded,
+                                        color: _shoutPrimary,
+                                        size: 18,
+                                      ),
+                                      prefixIconConstraints:
+                                          const BoxConstraints(minWidth: 26),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -825,7 +869,7 @@ class _FeedPageState extends State<FeedPage> {
                                       isDense: true,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                            horizontal: 9,
+                                            horizontal: 5,
                                             vertical: 8,
                                           ),
                                     ),
@@ -836,6 +880,8 @@ class _FeedPageState extends State<FeedPage> {
                                           child: Text(
                                             tr(context, 'Vše'),
                                             style: filterValueStyle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ),
@@ -846,6 +892,8 @@ class _FeedPageState extends State<FeedPage> {
                                             child: Text(
                                               tr(context, category),
                                               style: filterValueStyle,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ),
@@ -4288,6 +4336,12 @@ extension on FeedOrder {
     FeedOrder.nearest => 'Nejbližší',
     FeedOrder.popular => 'Oblíbené',
     FeedOrder.endingSoon => 'Brzy končí',
+  };
+
+  String get compactLabel => switch (this) {
+    FeedOrder.nearest => 'Nejblíž',
+    FeedOrder.popular => 'Top',
+    FeedOrder.endingSoon => 'Končící',
   };
 }
 
