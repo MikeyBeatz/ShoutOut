@@ -27,6 +27,7 @@ const _english = <String, String>{
   'Kategorie': 'Category',
   'Vše': 'All',
   'Změnit avatar': 'Change avatar',
+  'Upravit profil': 'Edit profile',
   'Vyber si avatar': 'Choose an avatar',
   'Zatím nemáš žádná oznámení.': 'You have no notifications yet.',
   'Nejbližší': 'Nearest',
@@ -156,6 +157,7 @@ const _english = <String, String>{
   'Heslo účtu Google změň přímo u Google.':
       'Change a Google account password directly with Google.',
   'Nastavení notifikací': 'Notification settings',
+  'Notifikace': 'Notifications',
   'Uložené preference se použijí po zapnutí oznámení.':
       'Saved preferences will apply when notifications are enabled.',
   'Odpovědi na komentáře': 'Replies to comments',
@@ -192,6 +194,8 @@ const _english = <String, String>{
   'Důvod hlášení': 'Report reason',
   'Volitelně doplň podrobnosti': 'Optionally add details',
   'Právní informace': 'Legal information',
+  'Právní info': 'Legal info',
+  'Varování': 'Warnings',
   'Podmínky použití': 'Terms of use',
   'Zásady ochrany soukromí': 'Privacy policy',
   'Než začneš': 'Before you start',
@@ -254,6 +258,7 @@ const _german = <String, String>{
   'Kategorie': 'Kategorie',
   'Vše': 'Alle',
   'Změnit avatar': 'Avatar ändern',
+  'Upravit profil': 'Profil bearbeiten',
   'Vyber si avatar': 'Wähle einen Avatar',
   'Zatím nemáš žádná oznámení.': 'Du hast noch keine Benachrichtigungen.',
   'Nejbližší': 'Nächste',
@@ -390,6 +395,7 @@ const _german = <String, String>{
   'Heslo účtu Google změň přímo u Google.':
       'Ändere das Passwort eines Google-Kontos direkt bei Google.',
   'Nastavení notifikací': 'Benachrichtigungseinstellungen',
+  'Notifikace': 'Benachrichtigungen',
   'Uložené preference se použijí po zapnutí oznámení.':
       'Gespeicherte Einstellungen werden nach dem Aktivieren von Benachrichtigungen verwendet.',
   'Odpovědi na komentáře': 'Antworten auf Kommentare',
@@ -426,6 +432,8 @@ const _german = <String, String>{
   'Důvod hlášení': 'Meldegrund',
   'Volitelně doplň podrobnosti': 'Optional Details ergänzen',
   'Právní informace': 'Rechtliche Informationen',
+  'Právní info': 'Rechtliches',
+  'Varování': 'Warnungen',
   'Podmínky použití': 'Nutzungsbedingungen',
   'Zásady ochrany soukromí': 'Datenschutzerklärung',
   'Než začneš': 'Bevor du beginnst',
@@ -488,6 +496,7 @@ const _polish = <String, String>{
   'Kategorie': 'Kategoria',
   'Vše': 'Wszystkie',
   'Změnit avatar': 'Zmień awatar',
+  'Upravit profil': 'Edytuj profil',
   'Vyber si avatar': 'Wybierz awatar',
   'Zatím nemáš žádná oznámení.': 'Nie masz jeszcze żadnych powiadomień.',
   'Nejbližší': 'Najbliższe',
@@ -620,6 +629,7 @@ const _polish = <String, String>{
   'Heslo účtu Google změň přímo u Google.':
       'Hasło do konta Google zmień bezpośrednio w Google.',
   'Nastavení notifikací': 'Ustawienia powiadomień',
+  'Notifikace': 'Powiadomienia',
   'Uložené preference se použijí po zapnutí oznámení.':
       'Zapisane preferencje będą użyte po włączeniu powiadomień.',
   'Odpovědi na komentáře': 'Odpowiedzi na komentarze',
@@ -656,6 +666,8 @@ const _polish = <String, String>{
   'Důvod hlášení': 'Powód zgłoszenia',
   'Volitelně doplň podrobnosti': 'Opcjonalnie dodaj szczegóły',
   'Právní informace': 'Informacje prawne',
+  'Právní info': 'Informacje prawne',
+  'Varování': 'Ostrzeżenia',
   'Podmínky použití': 'Warunki korzystania',
   'Zásady ochrany soukromí': 'Polityka prywatności',
   'Než začneš': 'Zanim zaczniesz',

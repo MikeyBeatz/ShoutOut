@@ -17,6 +17,16 @@ import 'legal.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 
+const _shoutPrimary = Color(0xFF0A6371);
+const _shoutPrimaryDark = Color(0xFF074B57);
+const _shoutAccent = Color(0xFF0E8EA0);
+const _shoutAccentLight = Color(0xFFDDF5F6);
+const _shoutBackground = Color(0xFFFAFDFD);
+const _shoutSurface = Color(0xFFFFFFFF);
+const _shoutBorder = Color(0xFFE3EEEE);
+const _shoutText = Color(0xFF1F2933);
+const _shoutSecondaryText = Color(0xFF697A84);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -29,7 +39,6 @@ class ShoutOutApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const seed = Color(0xFFFF5A5F);
     return ValueListenableBuilder<Locale?>(
       valueListenable: appLocale,
       builder: (context, locale, _) => MaterialApp(
@@ -44,9 +53,85 @@ class ShoutOutApp extends StatelessWidget {
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: seed),
+          colorScheme: const ColorScheme.light(
+            primary: _shoutPrimary,
+            onPrimary: Colors.white,
+            primaryContainer: _shoutAccentLight,
+            onPrimaryContainer: _shoutPrimaryDark,
+            secondary: _shoutAccent,
+            onSecondary: Colors.white,
+            secondaryContainer: Color(0xFFEEF8F8),
+            onSecondaryContainer: _shoutPrimaryDark,
+            tertiary: _shoutPrimary,
+            onTertiary: Colors.white,
+            error: Color(0xFFB3261E),
+            onError: Colors.white,
+            surface: _shoutSurface,
+            onSurface: _shoutText,
+            onSurfaceVariant: _shoutSecondaryText,
+            outline: Color(0xFFCDE7E7),
+            outlineVariant: _shoutBorder,
+          ),
           useMaterial3: true,
+          scaffoldBackgroundColor: _shoutBackground,
+          dividerColor: const Color(0xFFE6F1F1),
+          cardTheme: CardThemeData(
+            color: _shoutSurface,
+            elevation: 1,
+            shadowColor: const Color(0x0D000000),
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+              side: const BorderSide(color: Color(0xFFE4F1F2)),
+            ),
+          ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: _shoutAccent,
+            foregroundColor: Colors.white,
+            elevation: 5,
+            focusElevation: 6,
+            hoverElevation: 6,
+          ),
+          navigationBarTheme: NavigationBarThemeData(
+            height: 64,
+            backgroundColor: _shoutSurface,
+            elevation: 0,
+            indicatorColor: _shoutAccentLight,
+            surfaceTintColor: Colors.transparent,
+            iconTheme: WidgetStateProperty.resolveWith(
+              (states) => IconThemeData(
+                color: states.contains(WidgetState.selected)
+                    ? _shoutPrimary
+                    : const Color(0xFF8A9AA3),
+              ),
+            ),
+            labelTextStyle: WidgetStateProperty.resolveWith(
+              (states) => TextStyle(
+                color: states.contains(WidgetState.selected)
+                    ? _shoutPrimary
+                    : const Color(0xFF697A84),
+                fontSize: 11,
+                fontWeight: states.contains(WidgetState.selected)
+                    ? FontWeight.w700
+                    : FontWeight.w500,
+              ),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: _shoutSurface,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFCDE7E7)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: _shoutAccent, width: 1.5),
+            ),
+          ),
           appBarTheme: const AppBarTheme(
+            backgroundColor: _shoutBackground,
+            foregroundColor: _shoutText,
             elevation: 0,
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,
@@ -353,38 +438,36 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .toList();
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: switch (_tab) {
-          0 => FeedPage(
-            shouts: activeShouts,
-            isLoading: _isLoadingShouts,
-            onSave: _toggleSaved,
-            onReaction: _toggleReaction,
-            onNotifications: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsPage()),
-            ),
+      extendBodyBehindAppBar: _tab == 0,
+      body: switch (_tab) {
+        0 => FeedPage(
+          shouts: activeShouts,
+          isLoading: _isLoadingShouts,
+          onSave: _toggleSaved,
+          onReaction: _toggleReaction,
+          onNotifications: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationsPage()),
           ),
-          1 => SavedPage(
-            shouts: activeShouts.where((shout) => shout.isSaved).toList(),
-            onSave: _toggleSaved,
-            onReaction: _toggleReaction,
-          ),
-          2 => MyShoutsPage(
-            shouts: _shouts
-                .where(
-                  (shout) =>
-                      shout.authorId == FirebaseAuth.instance.currentUser?.uid,
-                )
-                .toList(),
-            onSave: _toggleSaved,
-            onReaction: _toggleReaction,
-            onDelete: _deleteShout,
-          ),
-          _ => const ProfilePage(),
-        },
-      ),
+        ),
+        1 => SavedPage(
+          shouts: activeShouts.where((shout) => shout.isSaved).toList(),
+          onSave: _toggleSaved,
+          onReaction: _toggleReaction,
+        ),
+        2 => MyShoutsPage(
+          shouts: _shouts
+              .where(
+                (shout) =>
+                    shout.authorId == FirebaseAuth.instance.currentUser?.uid,
+              )
+              .toList(),
+          onSave: _toggleSaved,
+          onReaction: _toggleReaction,
+          onDelete: _deleteShout,
+        ),
+        _ => const ProfilePage(),
+      },
       floatingActionButton: _tab == 0
           ? FloatingActionButton.extended(
               onPressed: () async {
@@ -418,30 +501,77 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
               label: Text(tr(context, 'Přidat shout')),
             )
           : null,
-      bottomNavigationBar: NavigationBar(
-        height: 64,
-        selectedIndex: _tab,
-        onDestinationSelected: (index) => setState(() => _tab = index),
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.near_me_outlined),
-            selectedIcon: Icon(Icons.near_me),
-            label: tr(context, 'Okolí'),
+      bottomNavigationBar: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: -10,
+            child: IgnorePointer(
+              child: SizedBox(
+                height: 10,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Color(0x18074B57),
+                        Color(0x38074B57),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_outline),
-            selectedIcon: Icon(Icons.bookmark),
-            label: tr(context, 'Uložené'),
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.campaign_outlined),
-            selectedIcon: Icon(Icons.campaign),
-            label: tr(context, 'Mé shouty'),
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: tr(context, 'Profil'),
+          Material(
+            color: _shoutSurface,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const DecoratedBox(
+                  decoration: BoxDecoration(color: _shoutAccent),
+                  child: SizedBox(height: 1),
+                ),
+                NavigationBar(
+                  height: 64,
+                  selectedIndex: _tab,
+                  onDestinationSelected: (index) =>
+                      setState(() => _tab = index),
+                  destinations: [
+                    NavigationDestination(
+                      icon: Transform.rotate(
+                        angle: -.14,
+                        child: const Icon(Icons.campaign_outlined),
+                      ),
+                      selectedIcon: Transform.rotate(
+                        angle: -.14,
+                        child: const Icon(Icons.campaign_rounded),
+                      ),
+                      label: tr(context, 'Shouty'),
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.bookmark_outline),
+                      selectedIcon: Icon(Icons.bookmark),
+                      label: tr(context, 'Uložené'),
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.campaign_outlined),
+                      selectedIcon: Icon(Icons.campaign),
+                      label: tr(context, 'Mé shouty'),
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.person_outline),
+                      selectedIcon: Icon(Icons.person),
+                      label: tr(context, 'Profil'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -515,220 +645,422 @@ class _FeedPageState extends State<FeedPage> {
       ...filteredShouts.where((shout) => shout.isLowRated),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.primaryContainer,
-              borderRadius: BorderRadius.circular(18),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: _shoutSurface,
+      ),
+      child: CustomScrollView(
+        clipBehavior: Clip.none,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFF1496A8),
+                          _shoutPrimary,
+                          _shoutPrimaryDark,
+                        ],
+                        stops: [0, .4, 1],
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
+                        child: Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Transform.rotate(
+                                        angle: -.14,
+                                        child: const Icon(
+                                          Icons.campaign_rounded,
+                                          size: 26,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(width: 7),
+                                      Text(
+                                        'ShoutOut',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 24,
+                                          letterSpacing: -.5,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: IconButton(
+                                    tooltip: tr(context, 'Oznámení'),
+                                    onPressed: widget.onNotifications,
+                                    icon: const Icon(
+                                      Icons.notifications_none_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Divider(
+                              height: 1,
+                              color: Colors.white.withValues(alpha: .2),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: DropdownButtonFormField<double>(
+                                    initialValue: _radius,
+                                    isExpanded: true,
+                                    alignment: AlignmentDirectional.center,
+                                    style: filterValueStyle,
+                                    decoration: InputDecoration(
+                                      hintText: tr(context, 'Vzdálenost'),
+                                      hintStyle: filterLabelStyle,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      isDense: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 9,
+                                            vertical: 8,
+                                          ),
+                                    ),
+                                    items: const [1, 3, 5, 10, 20, 50]
+                                        .map(
+                                          (value) => DropdownMenuItem(
+                                            value: value.toDouble(),
+                                            child: Center(
+                                              child: Text(
+                                                '$value km',
+                                                style: filterValueStyle,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) =>
+                                        setState(() => _radius = value!),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: DropdownButtonFormField<FeedOrder>(
+                                    initialValue: _order,
+                                    isExpanded: true,
+                                    alignment: AlignmentDirectional.center,
+                                    style: filterValueStyle,
+                                    decoration: InputDecoration(
+                                      hintText: tr(context, 'Řazení'),
+                                      hintStyle: filterLabelStyle,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      isDense: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 9,
+                                            vertical: 8,
+                                          ),
+                                    ),
+                                    items: FeedOrder.values
+                                        .map(
+                                          (value) => DropdownMenuItem(
+                                            value: value,
+                                            child: Center(
+                                              child: Text(
+                                                tr(context, value.label),
+                                                style: filterValueStyle,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) =>
+                                        setState(() => _order = value!),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: DropdownButtonFormField<String?>(
+                                    initialValue: _selectedCategory,
+                                    isExpanded: true,
+                                    alignment: AlignmentDirectional.center,
+                                    style: filterValueStyle,
+                                    decoration: InputDecoration(
+                                      hintText: tr(context, 'Kategorie'),
+                                      hintStyle: filterLabelStyle,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      isDense: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 9,
+                                            vertical: 8,
+                                          ),
+                                    ),
+                                    items: [
+                                      DropdownMenuItem<String?>(
+                                        value: null,
+                                        child: Center(
+                                          child: Text(
+                                            tr(context, 'Vše'),
+                                            style: filterValueStyle,
+                                          ),
+                                        ),
+                                      ),
+                                      ..._categories.map(
+                                        (category) => DropdownMenuItem<String?>(
+                                          value: category,
+                                          child: Center(
+                                            child: Text(
+                                              tr(context, category),
+                                              style: filterValueStyle,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    onChanged: (value) => setState(
+                                      () => _selectedCategory = value,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    height: 36,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _shoutBackground,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 24,
+                  child: IgnorePointer(
+                    child: Container(
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x40074B57), Colors.transparent],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+
+          if (widget.isLoading)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (shouts.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: EmptyState(
+                icon: Icons.location_off_outlined,
+                title: tr(context, 'V tomto okolí zatím nejsou žádné shouty.'),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 180),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index.isOdd) return const SizedBox(height: 12);
+                  final shout = shouts[index ~/ 2];
+                  return RatedShoutCard(
+                    shout: shout,
+                    onSave: () => widget.onSave(shout),
+                    onReaction: (like) => widget.onReaction(shout, like: like),
+                  );
+                }, childCount: shouts.length * 2 - 1),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class TealSectionHeader extends StatelessWidget {
+  const TealSectionHeader({
+    super.key,
+    required this.title,
+    required this.icon,
+    this.controls,
+  });
+
+  final String title;
+  final IconData icon;
+  final Widget? controls;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 18),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1496A8), _shoutPrimary, _shoutPrimaryDark],
+              stops: [0, .4, 1],
+            ),
+          ),
+          child: SafeArea(
+            bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                6,
+                20,
+                controls == null ? 20 : 28,
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.campaign_rounded, size: 26),
-                          SizedBox(width: 7),
-                          Text(
-                            'ShoutOut',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 24,
-                              letterSpacing: -.5,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Transform.rotate(
+                              angle: -.14,
+                              child: Icon(icon, color: Colors.white, size: 25),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 24,
+                                letterSpacing: -.5,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: IconButton(
                           tooltip: tr(context, 'Oznámení'),
-                          onPressed: widget.onNotifications,
-                          icon: const Icon(Icons.notifications_none_rounded),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsPage(),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Divider(
-                    height: 1,
-                    color: colors.onPrimaryContainer.withValues(alpha: .14),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField<double>(
-                          initialValue: _radius,
-                          isExpanded: true,
-                          alignment: AlignmentDirectional.center,
-                          style: filterValueStyle,
-                          decoration: InputDecoration(
-                            hintText: tr(context, 'Vzdálenost'),
-                            hintStyle: filterLabelStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(
-                              context,
-                            ).colorScheme.surface.withValues(alpha: .72),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 8,
-                            ),
-                          ),
-                          items: const [1, 3, 5, 10, 20, 50]
-                              .map(
-                                (value) => DropdownMenuItem(
-                                  value: value.toDouble(),
-                                  child: Center(
-                                    child: Text(
-                                      '$value km',
-                                      style: filterValueStyle,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) =>
-                              setState(() => _radius = value!),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: DropdownButtonFormField<FeedOrder>(
-                          initialValue: _order,
-                          isExpanded: true,
-                          alignment: AlignmentDirectional.center,
-                          style: filterValueStyle,
-                          decoration: InputDecoration(
-                            hintText: tr(context, 'Řazení'),
-                            hintStyle: filterLabelStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(
-                              context,
-                            ).colorScheme.surface.withValues(alpha: .72),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 8,
-                            ),
-                          ),
-                          items: FeedOrder.values
-                              .map(
-                                (value) => DropdownMenuItem(
-                                  value: value,
-                                  child: Center(
-                                    child: Text(
-                                      tr(context, value.label),
-                                      style: filterValueStyle,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) => setState(() => _order = value!),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: DropdownButtonFormField<String?>(
-                          initialValue: _selectedCategory,
-                          isExpanded: true,
-                          alignment: AlignmentDirectional.center,
-                          style: filterValueStyle,
-                          decoration: InputDecoration(
-                            hintText: tr(context, 'Kategorie'),
-                            hintStyle: filterLabelStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(
-                              context,
-                            ).colorScheme.surface.withValues(alpha: .72),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 8,
-                            ),
-                          ),
-                          items: [
-                            DropdownMenuItem<String?>(
-                              value: null,
-                              child: Center(
-                                child: Text(
-                                  tr(context, 'Vše'),
-                                  style: filterValueStyle,
-                                ),
-                              ),
-                            ),
-                            ..._categories.map(
-                              (category) => DropdownMenuItem<String?>(
-                                value: category,
-                                child: Center(
-                                  child: Text(
-                                    tr(context, category),
-                                    style: filterValueStyle,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) =>
-                              setState(() => _selectedCategory = value),
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 4),
+                  Divider(height: 1, color: Colors.white.withValues(alpha: .2)),
+                  if (controls != null) ...[
+                    const SizedBox(height: 10),
+                    controls!,
+                  ],
                 ],
               ),
             ),
           ),
         ),
-        Expanded(
-          child: widget.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : shouts.isEmpty
-              ? EmptyState(
-                  icon: Icons.location_off_outlined,
-                  title: tr(
-                    context,
-                    'V tomto okolí zatím nejsou žádné shouty.',
-                  ),
-                )
-              : ListView.separated(
-                  // Keep the final card clear of the extended action button.
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 180),
-                  itemCount: shouts.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) => RatedShoutCard(
-                    shout: shouts[index],
-                    onSave: () => widget.onSave(shouts[index]),
-                    onReaction: (like) =>
-                        widget.onReaction(shouts[index], like: like),
-                  ),
-                ),
+      ),
+      const Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: SizedBox(
+          height: 36,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: _shoutBackground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+          ),
         ),
-      ],
-    );
-  }
+      ),
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 24,
+        child: IgnorePointer(
+          child: Container(
+            height: 12,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x40074B57), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 class SavedPage extends StatelessWidget {
@@ -744,13 +1076,23 @@ class SavedPage extends StatelessWidget {
   final void Function(Shout shout, {required bool like}) onReaction;
 
   @override
-  Widget build(BuildContext context) => ShoutListPage(
-    title: tr(context, 'Uložené shouty'),
-    emptyText: tr(context, 'Zatím nemáš uložené žádné shouty.'),
-    emptyIcon: Icons.bookmark_border,
-    shouts: shouts,
-    onSave: onSave,
-    onReaction: onReaction,
+  Widget build(BuildContext context) => Column(
+    children: [
+      TealSectionHeader(
+        title: tr(context, 'Uložené shouty'),
+        icon: Icons.bookmark_rounded,
+      ),
+      Expanded(
+        child: ShoutListPage(
+          title: null,
+          emptyText: tr(context, 'Zatím nemáš uložené žádné shouty.'),
+          emptyIcon: Icons.bookmark_border,
+          shouts: shouts,
+          onSave: onSave,
+          onReaction: onReaction,
+        ),
+      ),
+    ],
   );
 }
 
@@ -785,22 +1127,26 @@ class _MyShoutsPageState extends State<MyShoutsPage> {
         .toList();
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              tr(context, 'Mé shouty'),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: SegmentedButton<_MyShoutsSection>(
+        TealSectionHeader(
+          title: tr(context, 'Mé shouty'),
+          icon: Icons.campaign_rounded,
+          controls: SegmentedButton<_MyShoutsSection>(
             expandedInsets: EdgeInsets.zero,
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? _shoutPrimaryDark
+                    : Colors.white,
+              ),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: .08),
+              ),
+              side: const WidgetStatePropertyAll(
+                BorderSide(color: Color(0x99FFFFFF)),
+              ),
+            ),
             segments: [
               ButtonSegment(
                 value: _MyShoutsSection.active,
@@ -1205,6 +1551,648 @@ class NotificationsPage extends StatelessWidget {
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data?.data();
+        final nickname = profile?['nickname'] as String? ?? 'Načítání…';
+        final avatarId = profile?['avatarId'] as String? ?? 'fox';
+        final l10n = AppLocalizations.of(context)!;
+        return Column(
+          children: [
+            ProfileHeader(
+              nickname: nickname,
+              avatarId: avatarId,
+              onEdit: profile == null
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditProfilePage(userId: uid),
+                      ),
+                    ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
+                children: [
+                  ProfileTileGrid(userId: uid),
+                  const SizedBox(height: 18),
+                ],
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                child: _ProfileWideAction(
+                  icon: Icons.logout_rounded,
+                  title: l10n.logout,
+                  color: _shoutPrimary,
+                  onTap: FirebaseAuth.instance.signOut,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ProfileHeader extends StatelessWidget {
+  const ProfileHeader({
+    super.key,
+    required this.nickname,
+    required this.avatarId,
+    this.onEdit,
+  });
+
+  final String nickname;
+  final String avatarId;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: 18),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1496A8), _shoutPrimary, _shoutPrimaryDark],
+              stops: [0, .4, 1],
+            ),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 38),
+              child: Row(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.white70, width: 2),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: AvatarImage(avatarId: avatarId, radius: 34),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nickname,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 24,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        TextButton.icon(
+                          onPressed: onEdit,
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          icon: const Icon(Icons.edit_outlined, size: 17),
+                          label: Text(tr(context, 'Upravit profil')),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      const Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: SizedBox(
+          height: 36,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: _shoutBackground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 24,
+        child: IgnorePointer(
+          child: Container(
+            height: 12,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x40074B57), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class ProfileTileGrid extends StatelessWidget {
+  const ProfileTileGrid({super.key, required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('moderators')
+            .doc(userId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          final l10n = AppLocalizations.of(context)!;
+          final tiles = <Widget>[
+            ProfileActionTile(
+              icon: Icons.language_outlined,
+              title: l10n.language,
+              onTap: () => _selectProfileLanguage(context, userId),
+            ),
+            ProfileActionTile(
+              icon: Icons.lock_outline,
+              title: tr(context, 'Změnit heslo'),
+              onTap: () => showDialog<void>(
+                context: context,
+                builder: (_) => const ChangePasswordDialog(),
+              ),
+            ),
+            ProfileActionTile(
+              icon: Icons.notifications_outlined,
+              title: tr(context, 'Notifikace'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NotificationSettingsPage(userId: userId),
+                ),
+              ),
+            ),
+            ProfileActionTile(
+              icon: Icons.help_outline,
+              title: tr(context, 'Nápověda'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpPage()),
+              ),
+            ),
+            ProfileActionTile(
+              icon: Icons.warning_amber_outlined,
+              title: tr(context, 'Varování'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WarningHistoryPage(userId: userId),
+                ),
+              ),
+            ),
+            ProfileActionTile(
+              icon: Icons.policy_outlined,
+              title: tr(context, 'Právní info'),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LegalHubPage()),
+              ),
+            ),
+          ];
+          if (snapshot.data?.exists == true) {
+            tiles.add(
+              ProfileActionTile(
+                icon: Icons.admin_panel_settings_outlined,
+                title: tr(context, 'Moderace'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ModerationPage()),
+                ),
+              ),
+            );
+          }
+          if (tiles.length % 3 != 0) {
+            final last = tiles.removeLast();
+            tiles.addAll([
+              const SizedBox.shrink(),
+              last,
+              const SizedBox.shrink(),
+            ]);
+          }
+          return LayoutBuilder(
+            builder: (context, constraints) => Center(
+              child: SizedBox(
+                width: constraints.maxWidth > 317 ? 317 : constraints.maxWidth,
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  mainAxisExtent: 92,
+                  children: tiles,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+}
+
+class ProfileActionTile extends StatelessWidget {
+  const ProfileActionTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: _shoutSurface,
+    borderRadius: BorderRadius.circular(18),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _shoutBorder),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, color: _shoutPrimary, size: 22),
+            const SizedBox(height: 7),
+            Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                height: 1.1,
+                fontSize: 12,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 3),
+              Text(
+                subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: _shoutSecondaryText,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _ModeratorProfileTile extends StatelessWidget {
+  const _ModeratorProfileTile({required this.userId});
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('moderators')
+            .doc(userId)
+            .snapshots(),
+        builder: (context, snapshot) => snapshot.data?.exists == true
+            ? ProfileActionTile(
+                icon: Icons.admin_panel_settings_outlined,
+                title: tr(context, 'Moderace'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ModerationPage()),
+                ),
+              )
+            : const SizedBox.shrink(),
+      );
+}
+
+class _ProfileWideAction extends StatelessWidget {
+  const _ProfileWideAction({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String title;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: _shoutSurface,
+    borderRadius: BorderRadius.circular(18),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _shoutBorder),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 14),
+            Text(
+              title,
+              style: TextStyle(color: color, fontWeight: FontWeight.w700),
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right_rounded, color: color),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class EditProfilePage extends StatelessWidget {
+  const EditProfilePage({super.key, required this.userId});
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(tr(context, 'Upravit profil'))),
+    body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data?.data();
+        final nickname = profile?['nickname'] as String? ?? 'Načítání…';
+        final avatarId = profile?['avatarId'] as String? ?? 'fox';
+        return Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  Center(child: AvatarImage(avatarId: avatarId, radius: 58)),
+                  const SizedBox(height: 12),
+                  Text(
+                    nickname,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.face_retouching_natural_outlined,
+                      ),
+                      title: Text(tr(context, 'Změnit avatar')),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: profile == null
+                          ? null
+                          : () async {
+                              final selected =
+                                  await showModalBottomSheet<String>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (_) =>
+                                        AvatarPickerSheet(selectedId: avatarId),
+                                  );
+                              if (selected == null || selected == avatarId) {
+                                return;
+                              }
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(userId)
+                                  .update({'avatarId': selected});
+                            },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.edit_outlined),
+                      title: Text(AppLocalizations.of(context)!.changeNickname),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: profile == null
+                          ? null
+                          : () => _showNicknameChange(
+                              context,
+                              profile,
+                              nickname,
+                              userId,
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                child: _ProfileWideAction(
+                  icon: Icons.delete_outline,
+                  title: AppLocalizations.of(context)!.deleteAccount,
+                  color: Colors.red.shade700,
+                  onTap: () => _requestAccountDeletion(context),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+String _languageName(BuildContext context, AppLocalizations l10n) =>
+    switch (Localizations.localeOf(context).languageCode) {
+      'en' => l10n.english,
+      'de' => l10n.german,
+      'pl' => l10n.polish,
+      _ => l10n.czech,
+    };
+
+Future<void> _selectProfileLanguage(BuildContext context, String userId) async {
+  final l10n = AppLocalizations.of(context)!;
+  final language = await showModalBottomSheet<String>(
+    context: context,
+    builder: (sheetContext) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text(l10n.czech),
+            trailing: const Text('CS'),
+            onTap: () => Navigator.pop(sheetContext, 'cs'),
+          ),
+          ListTile(
+            title: Text(l10n.english),
+            trailing: const Text('EN'),
+            onTap: () => Navigator.pop(sheetContext, 'en'),
+          ),
+          ListTile(
+            title: Text(l10n.german),
+            trailing: const Text('DE'),
+            onTap: () => Navigator.pop(sheetContext, 'de'),
+          ),
+          ListTile(
+            title: Text(l10n.polish),
+            trailing: const Text('PL'),
+            onTap: () => Navigator.pop(sheetContext, 'pl'),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (language == null) return;
+  await FirebaseFirestore.instance.collection('users').doc(userId).update({
+    'language': language,
+  });
+  appLocale.value = Locale(language);
+}
+
+Future<void> _showNicknameChange(
+  BuildContext context,
+  Map<String, dynamic> profile,
+  String nickname,
+  String userId,
+) async {
+  if (!_nicknameChangeAvailable(profile)) {
+    final changedAt = (profile['nicknameChangedAt'] as Timestamp?)?.toDate();
+    final nextDate = changedAt?.add(const Duration(days: 30));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          nextDate == null
+              ? tr(context, 'Přezdívku zatím nelze změnit.')
+              : '${tr(context, 'Další změna přezdívky bude možná')} ${_shortDate(nextDate)}.',
+        ),
+      ),
+    );
+    return;
+  }
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(AppLocalizations.of(dialogContext)!.changeNickname),
+      content: Text(
+        tr(
+          dialogContext,
+          'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(tr(dialogContext, 'Zrušit')),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(tr(dialogContext, 'Ano')),
+        ),
+      ],
+    ),
+  );
+  if (confirmed == true && context.mounted) {
+    await showDialog<void>(
+      context: context,
+      builder: (_) =>
+          ChangeNicknameDialog(currentNickname: nickname, userId: userId),
+    );
+  }
+}
+
+Future<void> _requestAccountDeletion(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(tr(dialogContext, 'Smazat účet?')),
+      content: Text(
+        tr(
+          dialogContext,
+          'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dnů, potom budou odstraněny nebo anonymizovány.',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(tr(dialogContext, 'Zrušit')),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(tr(dialogContext, 'Požádat o smazání')),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+  final user = FirebaseAuth.instance.currentUser!;
+  await FirebaseFirestore.instance
+      .collection('accountDeletionRequests')
+      .doc(user.uid)
+      .set({
+        'userId': user.uid,
+        'email': user.email,
+        'requestedAt': FieldValue.serverTimestamp(),
+        'retainUntil': Timestamp.fromDate(
+          DateTime.now().add(const Duration(days: 60)),
+        ),
+        'status': 'pending',
+      });
+  await FirebaseAuth.instance.signOut();
+}
+
+class LegacyProfilePage extends StatelessWidget {
+  const LegacyProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1685,21 +2673,30 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     content: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TextField(
-          controller: _currentPassword,
-          obscureText: true,
-          decoration: InputDecoration(labelText: tr(context, 'Aktuální heslo')),
+        SizedBox(
+          height: 46,
+          child: TextField(
+            controller: _currentPassword,
+            obscureText: true,
+            decoration: _passwordDecoration(tr(context, 'Aktuální heslo')),
+          ),
         ),
-        TextField(
-          controller: _newPassword,
-          obscureText: true,
-          decoration: InputDecoration(labelText: tr(context, 'Nové heslo')),
+        const SizedBox(height: 9),
+        SizedBox(
+          height: 46,
+          child: TextField(
+            controller: _newPassword,
+            obscureText: true,
+            decoration: _passwordDecoration(tr(context, 'Nové heslo')),
+          ),
         ),
-        TextField(
-          controller: _confirmPassword,
-          obscureText: true,
-          decoration: InputDecoration(
-            labelText: tr(context, 'Potvrdit nové heslo'),
+        const SizedBox(height: 9),
+        SizedBox(
+          height: 46,
+          child: TextField(
+            controller: _confirmPassword,
+            obscureText: true,
+            decoration: _passwordDecoration(tr(context, 'Potvrdit nové heslo')),
           ),
         ),
         if (_error != null)
@@ -1722,6 +2719,13 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
         child: Text(tr(context, 'Uložit')),
       ),
     ],
+  );
+
+  InputDecoration _passwordDecoration(String label) => InputDecoration(
+    labelText: label,
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
   );
 
   Future<void> _changePassword() async {
