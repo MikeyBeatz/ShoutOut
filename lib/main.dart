@@ -238,8 +238,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       'text': shout.text,
       'categories': shout.categories,
       'location': GeoPoint(
-        _roundCoordinate(position.latitude),
-        _roundCoordinate(position.longitude),
+        _publicLocationCoordinate(position.latitude),
+        _publicLocationCoordinate(position.longitude),
       ),
       'createdAt': Timestamp.fromDate(shout.createdAt),
       'expiresAt': Timestamp.fromDate(shout.expiresAt),
@@ -252,8 +252,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     await _loadShouts();
   }
 
-  double _roundCoordinate(double coordinate) =>
-      (coordinate * 1000).roundToDouble() / 1000;
+  // A public Shout is associated with an approximately one-kilometre grid,
+  // never with the author's precise device position.
+  double _publicLocationCoordinate(double coordinate) =>
+      (coordinate * 100).roundToDouble() / 100;
 
   Future<void> _deleteShout(Shout shout) async {
     await FirebaseFirestore.instance.collection('shouts').doc(shout.id).update({
