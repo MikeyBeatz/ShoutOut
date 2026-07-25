@@ -46,6 +46,11 @@ class ShoutOutApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: seed),
           useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            surfaceTintColor: Colors.transparent,
+          ),
         ),
         home: const AuthGate(signedInChild: ShoutOutHome()),
       ),
