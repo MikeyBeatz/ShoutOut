@@ -36,3 +36,12 @@ reactions and a comment that meets the automatic-hide threshold:
 ```powershell
 node .\seed_test_users.mjs --with-demo-data
 ```
+
+## Add a live test interaction
+
+Use this while the app is open to add a new nearby test Shout, comments and
+reactions under several existing demo Shouts:
+
+```powershell
+node .\seed_test_users.mjs --live-activity
+```

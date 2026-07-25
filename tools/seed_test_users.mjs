@@ -95,6 +95,10 @@ if (process.argv.includes('--with-demo-data')) {
   await seedDemoData();
 }
 
+if (process.argv.includes('--live-activity')) {
+  await addLiveActivity();
+}
+
 async function seedDemoData() {
   // Litoměřice city centre. The offsets below intentionally cover several
   // distance filters in the app, from nearby posts to wider surroundings.
@@ -179,4 +183,78 @@ async function seedDemoData() {
   }
 
   console.log(`Seeded ${demoShouts.length} Litoměřice demo Shouts, comments and reactions.`);
+}
+
+async function addLiveActivity() {
+  const now = Date.now();
+  const liveId = `live_${now}`;
+  const author = users[7];
+  const shoutRef = db.collection('shouts').doc(`demo_litomerice_${liveId}`);
+  await shoutRef.set({
+    authorId: `test_${author.id}`,
+    authorNickname: author.nickname,
+    title: '[TEST] Káva po práci?',
+    text: 'Je někdo poblíž centra Litoměřic a nechce se na chvíli zastavit na kávu?',
+    categories: ['Akce', 'Jídlo a pití'],
+    location: new GeoPoint(50.5408, 14.1301),
+    createdAt: Timestamp.fromMillis(now),
+    expiresAt: Timestamp.fromMillis(now + 3 * 60 * 60 * 1000),
+    status: 'active',
+    likesCount: 0,
+    dislikesCount: 0,
+    commentsCount: 0,
+    savesCount: 0,
+    isTest: true,
+  });
+
+  const conversations = [
+    {
+      shout: 'demo_litomerice_market',
+      author: users[5],
+      text: 'Byl jsem tam dopoledne, doporučuji hlavně stánek s pečivem.',
+    },
+    {
+      shout: 'demo_litomerice_walk',
+      author: users[8],
+      text: '@SunnyOtter Zní to dobře, v kolik chceš vyrazit?',
+    },
+    {
+      shout: 'demo_litomerice_football',
+      author: users[9],
+      text: 'Pokud bude ještě místo, rád se přidám.',
+    },
+    {
+      shout: `demo_litomerice_${liveId}`,
+      author: users[1],
+      text: 'Mám čas asi za dvacet minut, můžu dorazit.',
+    },
+  ];
+
+  for (let index = 0; index < conversations.length; index += 1) {
+    const item = conversations[index];
+    const commentRef = db.collection('shouts').doc(item.shout)
+      .collection('comments').doc(`${liveId}_${index}`);
+    await commentRef.set({
+      authorId: `test_${item.author.id}`,
+      authorNickname: item.author.nickname,
+      text: item.text,
+      createdAt: Timestamp.fromMillis(now + index * 1000),
+      isTest: true,
+    });
+    await commentRef.collection('reactions').doc(`test_${author.id}`).set({
+      type: 'like',
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  await shoutRef.collection('reactions').doc(`test_${users[1].id}`).set({
+    type: 'like',
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  await shoutRef.collection('reactions').doc(`test_${users[4].id}`).set({
+    type: 'like',
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  console.log('Added live Litoměřice test activity.');
 }
