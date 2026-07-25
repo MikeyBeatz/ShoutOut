@@ -211,7 +211,9 @@ async function addLiveActivity() {
     {
       shout: 'demo_litomerice_market',
       author: users[5],
-      text: 'Byl jsem tam dopoledne, doporučuji hlavně stánek s pečivem.',
+      text: '@SunnyOtter Byl jsem tam dopoledne, doporučuji hlavně stánek s pečivem.',
+      replyToCommentId: 'demo_1',
+      replyToNickname: 'SunnyOtter',
     },
     {
       shout: 'demo_litomerice_walk',
@@ -239,6 +241,10 @@ async function addLiveActivity() {
       authorNickname: item.author.nickname,
       text: item.text,
       createdAt: Timestamp.fromMillis(now + index * 1000),
+      ...(item.replyToCommentId ? {
+        replyToCommentId: item.replyToCommentId,
+        replyToNickname: item.replyToNickname,
+      } : {}),
       isTest: true,
     });
     await commentRef.collection('reactions').doc(`test_${author.id}`).set({

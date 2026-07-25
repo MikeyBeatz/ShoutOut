@@ -438,7 +438,7 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    final shouts =
+    final filteredShouts =
         widget.shouts.where((shout) {
           return shout.distanceKm <= _radius &&
               (_selectedCategories.isEmpty ||
@@ -450,6 +450,10 @@ class _FeedPageState extends State<FeedPage> {
             FeedOrder.endingSoon => a.expiresAt.compareTo(b.expiresAt),
           },
         );
+    final shouts = [
+      ...filteredShouts.where((shout) => !shout.isLowRated),
+      ...filteredShouts.where((shout) => shout.isLowRated),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,7 +551,7 @@ class _FeedPageState extends State<FeedPage> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                   itemCount: shouts.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) => ShoutCard(
+                  itemBuilder: (context, index) => RatedShoutCard(
                     shout: shouts[index],
                     onSave: () => widget.onSave(shouts[index]),
                     onReaction: (like) =>
@@ -1201,6 +1205,55 @@ bool _isValidNickname(String nickname) => RegExp(
   r'^(?=.{3,24}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$',
 ).hasMatch(nickname);
 
+class RatedShoutCard extends StatefulWidget {
+  const RatedShoutCard({
+    super.key,
+    required this.shout,
+    required this.onSave,
+    required this.onReaction,
+  });
+
+  final Shout shout;
+  final VoidCallback onSave;
+  final ValueChanged<bool> onReaction;
+
+  @override
+  State<RatedShoutCard> createState() => _RatedShoutCardState();
+}
+
+class _RatedShoutCardState extends State<RatedShoutCard> {
+  bool _revealed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isAuthor =
+        widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid;
+    if (widget.shout.isHiddenByRating && !isAuthor && !_revealed) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.visibility_off_outlined),
+          title: Text(tr(context, 'Shout s nízkým hodnocením')),
+          subtitle: Text(
+            tr(
+              context,
+              'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.',
+            ),
+          ),
+          trailing: TextButton(
+            onPressed: () => setState(() => _revealed = true),
+            child: Text(tr(context, 'Zobrazit')),
+          ),
+        ),
+      );
+    }
+    return ShoutCard(
+      shout: widget.shout,
+      onSave: widget.onSave,
+      onReaction: widget.onReaction,
+    );
+  }
+}
+
 class ShoutCard extends StatelessWidget {
   const ShoutCard({
     super.key,
@@ -1393,6 +1446,9 @@ class ShoutDetailPage extends StatefulWidget {
 class _ShoutDetailPageState extends State<ShoutDetailPage> {
   final _commentController = TextEditingController();
   final _commentFocusNode = FocusNode();
+  final Map<String, GlobalKey<_CommentTileState>> _commentKeys = {};
+  String? _replyToCommentId;
+  String? _replyToNickname;
 
   @override
   void dispose() {
@@ -1459,10 +1515,12 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             const SizedBox(height: 8),
             ...comments.map((comment) {
               return CommentTile(
+                key: _commentKey(comment.id),
                 comment: comment,
                 shoutAuthorId: widget.shout.authorId,
                 onReply: _replyTo,
                 onReport: () => _reportComment(comment),
+                onJumpToReply: _jumpToComment,
               );
             }),
           ],
@@ -1472,42 +1530,40 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     bottomNavigationBar: SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: TextField(
-                controller: _commentController,
-                focusNode: _commentFocusNode,
-                maxLength: 220,
-                decoration: InputDecoration(
-                  hintText: tr(context, 'Napiš veřejný komentář'),
-                  border: OutlineInputBorder(),
-                  counterText: '',
+            if (_replyToNickname != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InputChip(
+                  label: Text('${tr(context, 'Odpovídáš')} @$_replyToNickname'),
+                  onDeleted: () => setState(() {
+                    _replyToCommentId = null;
+                    _replyToNickname = null;
+                    _commentController.clear();
+                  }),
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: () async {
-                final comment = _commentController.text.trim();
-                if (comment.isEmpty) return;
-                final user = FirebaseAuth.instance.currentUser!;
-                final profile = await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.uid)
-                    .get();
-                await FirebaseFirestore.instance
-                    .collection('shouts')
-                    .doc(widget.shout.id)
-                    .collection('comments')
-                    .add({
-                      'authorId': user.uid,
-                      'authorNickname': profile.data()!['nickname'],
-                      'text': comment,
-                      'createdAt': FieldValue.serverTimestamp(),
-                    });
-                _commentController.clear();
-              },
-              icon: const Icon(Icons.send_outlined),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    focusNode: _commentFocusNode,
+                    maxLength: 220,
+                    decoration: InputDecoration(
+                      hintText: tr(context, 'Napiš veřejný komentář'),
+                      border: const OutlineInputBorder(),
+                      counterText: '',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _sendComment,
+                  icon: const Icon(Icons.send_outlined),
+                ),
+              ],
             ),
           ],
         ),
@@ -1515,11 +1571,65 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     ),
   );
 
-  void _replyTo(String nickname) {
+  GlobalKey<_CommentTileState> _commentKey(String commentId) =>
+      _commentKeys.putIfAbsent(commentId, GlobalKey<_CommentTileState>.new);
+
+  void _replyTo(String commentId, String nickname) {
+    setState(() {
+      _replyToCommentId = commentId;
+      _replyToNickname = nickname;
+    });
     _commentController
       ..text = '@$nickname '
       ..selection = TextSelection.collapsed(offset: nickname.length + 2);
     FocusScope.of(context).requestFocus(_commentFocusNode);
+  }
+
+  Future<void> _jumpToComment(String commentId) async {
+    final target = _commentKeys[commentId]?.currentContext;
+    if (target == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr(context, 'Odkazovaný komentář už není dostupný.')),
+        ),
+      );
+      return;
+    }
+    await Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+      alignment: .25,
+    );
+    _commentKeys[commentId]?.currentState?.highlight();
+  }
+
+  Future<void> _sendComment() async {
+    final comment = _commentController.text.trim();
+    if (comment.isEmpty) return;
+    final user = FirebaseAuth.instance.currentUser!;
+    final profile = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    await FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(widget.shout.id)
+        .collection('comments')
+        .add({
+          'authorId': user.uid,
+          'authorNickname': profile.data()!['nickname'],
+          'text': comment,
+          'createdAt': FieldValue.serverTimestamp(),
+          if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
+          if (_replyToNickname != null) 'replyToNickname': _replyToNickname,
+        });
+    if (!mounted) return;
+    setState(() {
+      _commentController.clear();
+      _replyToCommentId = null;
+      _replyToNickname = null;
+    });
   }
 
   Future<void> _deleteShout() async {
@@ -1657,12 +1767,14 @@ class CommentTile extends StatefulWidget {
     required this.shoutAuthorId,
     required this.onReply,
     required this.onReport,
+    required this.onJumpToReply,
   });
 
   final QueryDocumentSnapshot<Map<String, dynamic>> comment;
   final String shoutAuthorId;
-  final ValueChanged<String> onReply;
+  final void Function(String commentId, String nickname) onReply;
   final VoidCallback onReport;
+  final ValueChanged<String> onJumpToReply;
 
   @override
   State<CommentTile> createState() => _CommentTileState();
@@ -1670,6 +1782,17 @@ class CommentTile extends StatefulWidget {
 
 class _CommentTileState extends State<CommentTile> {
   bool _revealed = false;
+  bool _highlighted = false;
+
+  void highlight() {
+    setState(() {
+      _revealed = true;
+      _highlighted = true;
+    });
+    Future<void>.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) setState(() => _highlighted = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1712,6 +1835,9 @@ class _CommentTileState extends State<CommentTile> {
           );
         }
         return Card(
+          color: _highlighted
+              ? Theme.of(context).colorScheme.primaryContainer
+              : null,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
             child: Column(
@@ -1750,7 +1876,7 @@ class _CommentTileState extends State<CommentTile> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(data['text'] as String),
+                _commentText(context, data),
                 const SizedBox(height: 4),
                 Wrap(
                   spacing: 14,
@@ -1769,8 +1895,10 @@ class _CommentTileState extends State<CommentTile> {
                       onPressed: () => _toggleReaction('dislike'),
                     ),
                     TextButton.icon(
-                      onPressed: () =>
-                          widget.onReply(data['authorNickname'] as String),
+                      onPressed: () => widget.onReply(
+                        widget.comment.id,
+                        data['authorNickname'] as String,
+                      ),
                       icon: const Icon(Icons.reply_outlined, size: 18),
                       label: Text(tr(context, 'Odpovědět')),
                     ),
@@ -1801,6 +1929,39 @@ class _CommentTileState extends State<CommentTile> {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     }
+  }
+
+  Widget _commentText(BuildContext context, Map<String, dynamic> data) {
+    final text = data['text'] as String;
+    final replyToNickname = data['replyToNickname'] as String?;
+    final replyToCommentId = data['replyToCommentId'] as String?;
+    if (replyToNickname == null || replyToCommentId == null) {
+      return Text(text);
+    }
+    final prefix = '@$replyToNickname';
+    final remainingText = text.startsWith(prefix)
+        ? text.substring(prefix.length).trimLeft()
+        : text;
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        InkWell(
+          onTap: () => widget.onJumpToReply(replyToCommentId),
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+            child: Text(
+              prefix,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        if (remainingText.isNotEmpty) Text(' $remainingText'),
+      ],
+    );
   }
 }
 
@@ -2242,6 +2403,11 @@ class Shout {
 
   bool get isRetainedExpired =>
       effectiveStatus == ShoutStatus.expired && !isExpiredBeyondRetention;
+
+  int get reactionCount => likes + dislikes;
+  double get dislikeRatio => reactionCount == 0 ? 0 : dislikes / reactionCount;
+  bool get isLowRated => reactionCount >= 10 && dislikeRatio >= .7;
+  bool get isHiddenByRating => reactionCount >= 50 && dislikeRatio >= .8;
   String get distanceLabel => distanceKm < 1
       ? '${(distanceKm * 1000).round()} m'
       : '${distanceKm.toStringAsFixed(1).replaceAll('.0', '')} km';

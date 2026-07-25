@@ -175,11 +175,19 @@ service cloud.firestore {
       match /comments/{commentId} {
         allow read: if signedIn();
         allow create: if signedIn() &&
+          request.resource.data.keys().hasOnly([
+            'authorId', 'authorNickname', 'text', 'createdAt',
+            'replyToCommentId', 'replyToNickname'
+          ]) &&
           request.resource.data.authorId == request.auth.uid &&
           request.resource.data.authorNickname is string &&
           request.resource.data.text is string &&
           request.resource.data.text.size() >= 1 &&
-          request.resource.data.text.size() <= 220;
+          request.resource.data.text.size() <= 220 &&
+          (!request.resource.data.keys().hasAll(['replyToCommentId']) ||
+            request.resource.data.replyToCommentId is string) &&
+          (!request.resource.data.keys().hasAll(['replyToNickname']) ||
+            request.resource.data.replyToNickname is string);
         allow update: if false;
         allow delete: if signedIn() &&
           resource.data.authorId == request.auth.uid;

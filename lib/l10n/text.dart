@@ -135,6 +135,12 @@ const _english = <String, String>{
   'Komentář byl skryt kvůli negativnímu hodnocení.':
       'This comment was hidden because of negative ratings.',
   'Zobrazit': 'Show',
+  'Odpovídáš': 'Replying to',
+  'Odkazovaný komentář už není dostupný.':
+      'The linked comment is no longer available.',
+  'Shout s nízkým hodnocením': 'Low-rated shout',
+  'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
+      'This shout was collapsed because of strongly negative ratings.',
 };
 
 const _german = <String, String>{
@@ -265,6 +271,12 @@ const _german = <String, String>{
   'Komentář byl skryt kvůli negativnímu hodnocení.':
       'Dieser Kommentar wurde wegen negativer Bewertungen ausgeblendet.',
   'Zobrazit': 'Anzeigen',
+  'Odpovídáš': 'Antwort an',
+  'Odkazovaný komentář už není dostupný.':
+      'Der verlinkte Kommentar ist nicht mehr verfügbar.',
+  'Shout s nízkým hodnocením': 'Shout mit niedriger Bewertung',
+  'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
+      'Dieser Shout wurde wegen stark negativer Bewertungen eingeklappt.',
 };
 
 const _polish = <String, String>{
@@ -391,4 +403,10 @@ const _polish = <String, String>{
   'Komentář byl skryt kvůli negativnímu hodnocení.':
       'Ten komentarz został ukryty z powodu negatywnych ocen.',
   'Zobrazit': 'Pokaż',
+  'Odpovídáš': 'Odpowiadasz do',
+  'Odkazovaný komentář už není dostupný.':
+      'Komentarz, do którego prowadzi link, nie jest już dostępny.',
+  'Shout s nízkým hodnocením': 'Shout z niską oceną',
+  'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
+      'Ten shout został zwinięty z powodu bardzo negatywnych ocen.',
 };
