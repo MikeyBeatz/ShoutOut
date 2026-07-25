@@ -116,6 +116,15 @@ const _english = <String, String>{
       'Use 3–24 characters. Hyphens and underscores may only be between nickname parts.',
   'Tato přezdívka už je obsazená.': 'This nickname is already taken.',
   'Přezdívku se nepodařilo uložit.': 'The nickname could not be saved.',
+  'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
+      'This change can only be made once every 30 days. Do you want to continue?',
+  'Ano': 'Yes',
+  'Uložit': 'Save',
+  'Zadej jinou přezdívku.': 'Enter a different nickname.',
+  'Přezdívku zatím nelze změnit.': 'The nickname cannot be changed yet.',
+  'Další změna přezdívky bude možná':
+      'Your next nickname change will be available',
+  'Přezdívku se nepodařilo změnit.': 'The nickname could not be changed.',
 };
 
 const _german = <String, String>{
@@ -225,6 +234,17 @@ const _german = <String, String>{
   'Tato přezdívka už je obsazená.': 'Dieser Spitzname ist bereits vergeben.',
   'Přezdívku se nepodařilo uložit.':
       'Der Spitzname konnte nicht gespeichert werden.',
+  'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
+      'Diese Änderung ist nur einmal alle 30 Tage möglich. Möchtest du fortfahren?',
+  'Ano': 'Ja',
+  'Uložit': 'Speichern',
+  'Zadej jinou přezdívku.': 'Gib einen anderen Spitznamen ein.',
+  'Přezdívku zatím nelze změnit.':
+      'Der Spitzname kann noch nicht geändert werden.',
+  'Další změna přezdívky bude možná':
+      'Die nächste Änderung deines Spitznamens ist möglich ab',
+  'Přezdívku se nepodařilo změnit.':
+      'Der Spitzname konnte nicht geändert werden.',
 };
 
 const _polish = <String, String>{
@@ -332,4 +352,13 @@ const _polish = <String, String>{
       'Użyj 3–24 znaków. Myślniki i podkreślenia mogą znajdować się tylko między częściami pseudonimu.',
   'Tato přezdívka už je obsazená.': 'Ten pseudonim jest już zajęty.',
   'Přezdívku se nepodařilo uložit.': 'Nie udało się zapisać pseudonimu.',
+  'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
+      'Ta zmiana jest możliwa tylko raz na 30 dni. Czy chcesz kontynuować?',
+  'Ano': 'Tak',
+  'Uložit': 'Zapisz',
+  'Zadej jinou přezdívku.': 'Wpisz inny pseudonim.',
+  'Přezdívku zatím nelze změnit.': 'Pseudonimu nie można jeszcze zmienić.',
+  'Další změna přezdívky bude možná':
+      'Kolejna zmiana pseudonimu będzie możliwa',
+  'Přezdívku se nepodařilo změnit.': 'Nie udało się zmienić pseudonimu.',
 };

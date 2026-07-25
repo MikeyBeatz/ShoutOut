@@ -12,6 +12,7 @@ service cloud.firestore {
           'nicknameLower',
           'createdAt',
           'nicknameChangedAt',
+          'nicknameChangeCount',
           'emailVerified',
           'language'
         ]) &&
@@ -20,6 +21,7 @@ service cloud.firestore {
           'nicknameLower',
           'createdAt',
           'nicknameChangedAt',
+          'nicknameChangeCount',
           'emailVerified',
           'language'
         ]) &&
@@ -27,8 +29,36 @@ service cloud.firestore {
         request.resource.data.nickname.size() >= 3 &&
         request.resource.data.nickname.size() <= 24 &&
         request.resource.data.nicknameLower is string &&
+        request.resource.data.nicknameChangeCount == 0 &&
         request.resource.data.emailVerified == true &&
         request.resource.data.language in ['cs', 'en', 'de', 'pl'];
+    }
+
+    function validNicknameChange(userId) {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['nickname', 'nicknameLower', 'nicknameChangedAt', 'nicknameChangeCount']) &&
+        request.resource.data.nickname is string &&
+        request.resource.data.nickname.size() >= 3 &&
+        request.resource.data.nickname.size() <= 24 &&
+        request.resource.data.nicknameLower is string &&
+        request.resource.data.nicknameChangedAt == request.time &&
+        existsAfter(
+          /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
+        ).data.uid == request.auth.uid &&
+        (
+          (!resource.data.keys().hasAll(['nicknameChangeCount']) &&
+            request.resource.data.nicknameChangeCount == 1) ||
+          (resource.data.keys().hasAll(['nicknameChangeCount']) &&
+            request.resource.data.nicknameChangeCount == resource.data.nicknameChangeCount + 1)
+        ) &&
+        (
+          !resource.data.keys().hasAll(['nicknameChangeCount']) ||
+          resource.data.nicknameChangeCount == 0 ||
+          request.time >= resource.data.nicknameChangedAt + duration.value(30, 'd')
+        );
     }
 
     match /nicknames/{nicknameLower} {
@@ -38,8 +68,14 @@ service cloud.firestore {
           'uid', 'nickname', 'nicknameLower', 'createdAt'
         ]) &&
         request.resource.data.uid == request.auth.uid &&
-        request.resource.data.nicknameLower == nicknameLower;
-      allow update, delete, list: if false;
+        request.resource.data.nicknameLower == nicknameLower &&
+        existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nicknameLower == nicknameLower;
+      allow delete: if signedIn() &&
+        resource.data.uid == request.auth.uid &&
+        existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nicknameLower != nicknameLower;
+      allow update, list: if false;
     }
 
     match /users/{userId} {
@@ -55,9 +91,12 @@ service cloud.firestore {
         ).data.uid == request.auth.uid;
       allow update: if signedIn() &&
         request.auth.uid == userId &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['language']) &&
-        request.resource.data.language in ['cs', 'en', 'de', 'pl'];
+        (
+          (request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['language']) &&
+            request.resource.data.language in ['cs', 'en', 'de', 'pl']) ||
+          validNicknameChange(userId)
+        );
       allow delete, list: if false;
 
       match /blocked/{blockedUserId} {

@@ -51,8 +51,7 @@ class ProfileGate extends StatelessWidget {
             return NicknamePage(user: user);
           }
           final language = snapshot.data!.data()?['language'] as String?;
-          if (language != null &&
-              appLocale.value?.languageCode != language) {
+          if (language != null && appLocale.value?.languageCode != language) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               appLocale.value = Locale(language);
             });
@@ -108,9 +107,9 @@ class _SignInPageState extends State<SignInPage> {
                 Text(
                   tr(context, _register ? 'Registrace' : 'Přihlášení'),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -140,13 +139,20 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _busy ? null : _emailAuth,
-                  child: Text(tr(context, _register ? 'Vytvořit účet' : 'Přihlásit se')),
+                  child: Text(
+                    tr(context, _register ? 'Vytvořit účet' : 'Přihlásit se'),
+                  ),
                 ),
                 TextButton(
                   onPressed: _busy
                       ? null
                       : () => setState(() => _register = !_register),
-                  child: Text(tr(context, _register ? 'Už účet mám' : 'Vytvořit nový účet')),
+                  child: Text(
+                    tr(
+                      context,
+                      _register ? 'Už účet mám' : 'Vytvořit nový účet',
+                    ),
+                  ),
                 ),
                 Row(
                   children: [
@@ -295,7 +301,9 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr(context, 'Účet se nepodařilo zrušit. Zkus to prosím znovu.')),
+            content: Text(
+              tr(context, 'Účet se nepodařilo zrušit. Zkus to prosím znovu.'),
+            ),
           ),
         );
       }
@@ -473,7 +481,10 @@ class _NicknamePageState extends State<NicknamePage> {
             ),
             const SizedBox(height: 8),
             Text(
-              tr(context, 'Uvidí ji ostatní uživatelé místo tvého skutečného jména.'),
+              tr(
+                context,
+                'Uvidí ji ostatní uživatelé místo tvého skutečného jména.',
+              ),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -525,7 +536,10 @@ class _NicknamePageState extends State<NicknamePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            tr(context, 'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.'),
+            tr(
+              context,
+              'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.',
+            ),
           ),
         ),
       );
@@ -554,6 +568,7 @@ class _NicknamePageState extends State<NicknamePage> {
             'nicknameLower': normalized,
             'createdAt': FieldValue.serverTimestamp(),
             'nicknameChangedAt': FieldValue.serverTimestamp(),
+            'nicknameChangeCount': 0,
             'emailVerified': true,
             'language': 'cs',
           },
@@ -562,13 +577,17 @@ class _NicknamePageState extends State<NicknamePage> {
     } on StateError catch (error) {
       if (mounted && error.message == 'taken') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(context, 'Tato přezdívka už je obsazená.'))),
+          SnackBar(
+            content: Text(tr(context, 'Tato přezdívka už je obsazená.')),
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr(context, 'Přezdívku se nepodařilo uložit.'))),
+          SnackBar(
+            content: Text(tr(context, 'Přezdívku se nepodařilo uložit.')),
+          ),
         );
       }
     } finally {

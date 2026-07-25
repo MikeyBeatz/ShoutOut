@@ -882,8 +882,8 @@ class ProfilePage extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         final l10n = AppLocalizations.of(context)!;
-        final nickname =
-            snapshot.data?.data()?['nickname'] as String? ?? 'Načítání…';
+        final profile = snapshot.data?.data();
+        final nickname = profile?['nickname'] as String? ?? 'Načítání…';
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -907,9 +907,63 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             ListTile(
-              leading: Icon(Icons.edit_outlined),
+              leading: const Icon(Icons.edit_outlined),
               title: Text(l10n.changeNickname),
-              enabled: false,
+              onTap: profile == null
+                  ? null
+                  : () async {
+                      if (!_nicknameChangeAvailable(profile)) {
+                        final changedAt =
+                            (profile['nicknameChangedAt'] as Timestamp?)
+                                ?.toDate();
+                        final nextDate = changedAt?.add(
+                          const Duration(days: 30),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              nextDate == null
+                                  ? tr(context, 'Přezdívku zatím nelze změnit.')
+                                  : '${tr(context, 'Další změna přezdívky bude možná')} ${_shortDate(nextDate)}.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: Text(l10n.changeNickname),
+                          content: Text(
+                            tr(
+                              dialogContext,
+                              'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?',
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pop(dialogContext, false),
+                              child: Text(tr(dialogContext, 'Zrušit')),
+                            ),
+                            FilledButton(
+                              onPressed: () =>
+                                  Navigator.pop(dialogContext, true),
+                              child: Text(tr(dialogContext, 'Ano')),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed == true && context.mounted) {
+                        await showDialog<void>(
+                          context: context,
+                          builder: (_) => ChangeNicknameDialog(
+                            currentNickname: nickname,
+                            userId: uid,
+                          ),
+                        );
+                      }
+                    },
             ),
             ListTile(
               leading: const Icon(Icons.language_outlined),
@@ -983,6 +1037,168 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
+bool _nicknameChangeAvailable(Map<String, dynamic> profile) {
+  final count = profile['nicknameChangeCount'] as int? ?? 0;
+  if (count == 0) return true;
+  final changedAt = (profile['nicknameChangedAt'] as Timestamp?)?.toDate();
+  return changedAt != null &&
+      !DateTime.now().isBefore(changedAt.add(const Duration(days: 30)));
+}
+
+String _shortDate(DateTime date) =>
+    '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+
+class ChangeNicknameDialog extends StatefulWidget {
+  const ChangeNicknameDialog({
+    super.key,
+    required this.currentNickname,
+    required this.userId,
+  });
+
+  final String currentNickname;
+  final String userId;
+
+  @override
+  State<ChangeNicknameDialog> createState() => _ChangeNicknameDialogState();
+}
+
+class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
+  final _controller = TextEditingController();
+  Timer? _availabilityTimer;
+  bool? _isAvailable;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _availabilityTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(AppLocalizations.of(context)!.changeNickname),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      maxLength: 24,
+      onChanged: _checkAvailabilityLater,
+      decoration: InputDecoration(
+        labelText: tr(context, 'Přezdívka'),
+        border: const OutlineInputBorder(),
+        helperText: _isAvailable == null
+            ? null
+            : _isAvailable!
+            ? tr(context, 'Přezdívka je volná')
+            : tr(context, 'Tato přezdívka je obsazená'),
+        helperStyle: TextStyle(
+          color: _isAvailable == false ? Colors.red : Colors.green,
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: _saving ? null : () => Navigator.pop(context),
+        child: Text(tr(context, 'Zrušit')),
+      ),
+      FilledButton(
+        onPressed: _saving ? null : _save,
+        child: Text(tr(context, 'Uložit')),
+      ),
+    ],
+  );
+
+  void _checkAvailabilityLater(String value) {
+    _availabilityTimer?.cancel();
+    final normalized = value.trim().toLowerCase();
+    if (!_isValidNickname(value.trim()) ||
+        normalized == widget.currentNickname.toLowerCase()) {
+      setState(() => _isAvailable = null);
+      return;
+    }
+    _availabilityTimer = Timer(const Duration(milliseconds: 350), () async {
+      final exists = await FirebaseFirestore.instance
+          .collection('nicknames')
+          .doc(normalized)
+          .get();
+      if (mounted && _controller.text.trim().toLowerCase() == normalized) {
+        setState(() => _isAvailable = !exists.exists);
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    final nickname = _controller.text.trim();
+    if (!_isValidNickname(nickname)) {
+      _showError(
+        tr(
+          context,
+          'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.',
+        ),
+      );
+      return;
+    }
+    final nicknameLower = nickname.toLowerCase();
+    if (nicknameLower == widget.currentNickname.toLowerCase()) {
+      _showError(tr(context, 'Zadej jinou přezdívku.'));
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final db = FirebaseFirestore.instance;
+        final userRef = db.collection('users').doc(widget.userId);
+        final newNicknameRef = db.collection('nicknames').doc(nicknameLower);
+        final oldNicknameRef = db
+            .collection('nicknames')
+            .doc(widget.currentNickname.toLowerCase());
+        if ((await transaction.get(newNicknameRef)).exists) {
+          throw StateError('taken');
+        }
+        transaction.set(newNicknameRef, {
+          'uid': widget.userId,
+          'nickname': nickname,
+          'nicknameLower': nicknameLower,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        transaction.delete(oldNicknameRef);
+        transaction.update(userRef, {
+          'nickname': nickname,
+          'nicknameLower': nicknameLower,
+          'nicknameChangedAt': FieldValue.serverTimestamp(),
+          'nicknameChangeCount': FieldValue.increment(1),
+        });
+      });
+      if (!mounted) return;
+      Navigator.pop(context);
+    } on StateError catch (error) {
+      if (!mounted) return;
+      if (error.message == 'taken') {
+        _showError(tr(context, 'Tato přezdívka už je obsazená.'));
+      } else {
+        _showError(tr(context, 'Přezdívku se nepodařilo změnit.'));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _showError(tr(context, 'Přezdívku se nepodařilo změnit.'));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+bool _isValidNickname(String nickname) => RegExp(
+  r'^(?=.{3,24}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$',
+).hasMatch(nickname);
+
 class ShoutCard extends StatelessWidget {
   const ShoutCard({
     super.key,
@@ -1045,7 +1261,7 @@ class ShoutCard extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         Text(
-                          '${shout.distanceLabel} · ${shout.ageLabel} · ${shout.expiryLabel}',
+                          '${shout.distanceLabel} · ${shout.ageLabel} · ${shout.expiryLabel(context)}',
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
@@ -1518,7 +1734,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(
-                durationLabel(_duration),
+                localizedDurationLabel(context, _duration),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -1832,35 +2048,43 @@ class Shout {
     return minutes < 1 ? 'teď' : 'před $minutes min';
   }
 
-  String get expiryLabel {
+  String expiryLabel(BuildContext context) {
     final difference = expiresAt.difference(DateTime.now());
     if (!difference.isNegative) {
-      return 'končí za ${durationLabel(difference)}';
+      return switch (Localizations.localeOf(context).languageCode) {
+        'en' => 'ending in ${localizedDurationLabel(context, difference)}',
+        'de' => 'endet in ${localizedDurationLabel(context, difference)}',
+        'pl' => 'wygasa za ${localizedDurationLabel(context, difference)}',
+        _ => 'končí za ${localizedDurationLabel(context, difference)}',
+      };
     }
-    return 'expiroval ${pastDurationLabel(difference.abs())}';
+    final past = localizedDurationLabel(context, difference.abs());
+    return switch (Localizations.localeOf(context).languageCode) {
+      'en' => 'expired $past ago',
+      'de' => 'vor $past abgelaufen',
+      'pl' => 'wygasł $past temu',
+      _ => 'expiroval před $past',
+    };
   }
 }
 
-String durationLabel(Duration duration) {
-  if (duration.inHours >= 1 && duration.inMinutes.remainder(60) > 0) {
-    return '${duration.inHours} h ${duration.inMinutes.remainder(60)} min';
-  }
-  if (duration.inHours >= 1) return '${duration.inHours} h';
-  return '${duration.inMinutes} min';
-}
-
-String pastDurationLabel(Duration duration) {
+String localizedDurationLabel(BuildContext context, Duration duration) {
+  final language = Localizations.localeOf(context).languageCode;
+  final (days, hours, minutes) = switch (language) {
+    'en' => ('days', 'h', 'min'),
+    'de' => ('Tagen', 'Std.', 'Min.'),
+    'pl' => ('dni', 'godz.', 'min'),
+    _ => ('dny', 'h', 'min'),
+  };
   if (duration.inDays >= 1) {
-    final hours = duration.inHours.remainder(24);
-    return hours == 0
-        ? 'před ${duration.inDays} dny'
-        : 'před ${duration.inDays} dny $hours h';
+    final remainingHours = duration.inHours.remainder(24);
+    return remainingHours == 0
+        ? '${duration.inDays} $days'
+        : '${duration.inDays} $days $remainingHours $hours';
   }
-  if (duration.inHours >= 1) {
-    final minutes = duration.inMinutes.remainder(60);
-    return minutes == 0
-        ? 'před ${duration.inHours} h'
-        : 'před ${duration.inHours} h $minutes min';
+  if (duration.inHours >= 1 && duration.inMinutes.remainder(60) > 0) {
+    return '${duration.inHours} $hours ${duration.inMinutes.remainder(60)} $minutes';
   }
-  return 'před ${duration.inMinutes} min';
+  if (duration.inHours >= 1) return '${duration.inHours} $hours';
+  return '${duration.inMinutes} $minutes';
 }
