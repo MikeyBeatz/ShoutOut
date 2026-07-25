@@ -589,7 +589,8 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  // Keep the final card clear of the extended action button.
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 180),
                   itemCount: shouts.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) => RatedShoutCard(
