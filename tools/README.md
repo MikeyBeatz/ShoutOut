@@ -26,3 +26,13 @@ node .\seed_test_users.mjs
 
 The accounts can then sign in normally in the ShoutOut app. Never use this
 tool or these accounts in a production Firebase project.
+
+## Optional Litoměřice demo activity
+
+Append `--with-demo-data` to create active test Shouts from approximately
+0.4 km to 32 km around Litoměřice, including comments, @-style replies,
+reactions and a comment that meets the automatic-hide threshold:
+
+```powershell
+node .\seed_test_users.mjs --with-demo-data
+```
