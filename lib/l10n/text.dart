@@ -119,6 +119,7 @@ const _english = <String, String>{
   'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
       'This change can only be made once every 30 days. Do you want to continue?',
   'Ano': 'Yes',
+  'Zavřít': 'Close',
   'Uložit': 'Save',
   'Zadej jinou přezdívku.': 'Enter a different nickname.',
   'Přezdívku zatím nelze změnit.': 'The nickname cannot be changed yet.',
@@ -237,6 +238,7 @@ const _german = <String, String>{
   'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
       'Diese Änderung ist nur einmal alle 30 Tage möglich. Möchtest du fortfahren?',
   'Ano': 'Ja',
+  'Zavřít': 'Schließen',
   'Uložit': 'Speichern',
   'Zadej jinou přezdívku.': 'Gib einen anderen Spitznamen ein.',
   'Přezdívku zatím nelze změnit.':
@@ -355,6 +357,7 @@ const _polish = <String, String>{
   'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
       'Ta zmiana jest możliwa tylko raz na 30 dni. Czy chcesz kontynuować?',
   'Ano': 'Tak',
+  'Zavřít': 'Zamknij',
   'Uložit': 'Zapisz',
   'Zadej jinou přezdívku.': 'Wpisz inny pseudonim.',
   'Přezdívku zatím nelze změnit.': 'Pseudonimu nie można jeszcze zmienić.',
