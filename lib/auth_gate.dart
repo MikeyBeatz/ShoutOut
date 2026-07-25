@@ -678,6 +678,7 @@ class _NicknamePageState extends State<NicknamePage> {
             'nicknameChangeCount': 0,
             'emailVerified': true,
             'language': 'cs',
+            'avatarId': 'fox',
           },
         );
       });

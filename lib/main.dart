@@ -356,6 +356,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       appBar: AppBar(
         toolbarHeight: 52,
         centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -488,7 +491,7 @@ class _FeedPageState extends State<FeedPage> {
     'Jídlo a pití',
     'Kultura',
   ];
-  final Set<String> _selectedCategories = {};
+  String? _selectedCategory;
   double _radius = 5;
   FeedOrder _order = FeedOrder.nearest;
 
@@ -497,8 +500,8 @@ class _FeedPageState extends State<FeedPage> {
     final filteredShouts =
         widget.shouts.where((shout) {
           return shout.distanceKm <= _radius &&
-              (_selectedCategories.isEmpty ||
-                  shout.categories.any(_selectedCategories.contains));
+              (_selectedCategory == null ||
+                  shout.categories.contains(_selectedCategory));
         }).toList()..sort(
           (a, b) => switch (_order) {
             FeedOrder.nearest => a.distanceKm.compareTo(b.distanceKm),
@@ -514,83 +517,95 @@ class _FeedPageState extends State<FeedPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<double>(
-                  initialValue: _radius,
-                  decoration: InputDecoration(
-                    labelText: tr(context, 'Vzdálenost'),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 9,
+        Material(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<double>(
+                    initialValue: _radius,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: tr(context, 'Vzdálenost'),
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
                     ),
+                    items: const [1, 3, 5, 10, 20, 50]
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value.toDouble(),
+                            child: Text('$value km'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _radius = value!),
                   ),
-                  items: const [1, 3, 5, 10, 20, 50]
-                      .map(
-                        (value) => DropdownMenuItem(
-                          value: value.toDouble(),
-                          child: Text('$value km'),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) => setState(() => _radius = value!),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButtonFormField<FeedOrder>(
-                  initialValue: _order,
-                  decoration: InputDecoration(
-                    labelText: tr(context, 'Řazení'),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 9,
+                const SizedBox(width: 6),
+                Expanded(
+                  child: DropdownButtonFormField<FeedOrder>(
+                    initialValue: _order,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: tr(context, 'Řazení'),
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
                     ),
+                    items: FeedOrder.values
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(tr(context, value.label)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => _order = value!),
                   ),
-                  items: FeedOrder.values
-                      .map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(tr(context, value.label)),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) => setState(() => _order = value!),
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    initialValue: _selectedCategory,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: tr(context, 'Kategorie'),
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text(tr(context, 'Vše')),
+                      ),
+                      ..._categories.map(
+                        (category) => DropdownMenuItem<String?>(
+                          value: category,
+                          child: Text(tr(context, category)),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) =>
+                        setState(() => _selectedCategory = value),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 36,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            scrollDirection: Axis.horizontal,
-            itemCount: _categories.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final category = _categories[index];
-              return FilterChip(
-                label: Text(tr(context, category)),
-                selected: _selectedCategories.contains(category),
-                onSelected: (selected) => setState(() {
-                  selected
-                      ? _selectedCategories.add(category)
-                      : _selectedCategories.remove(category);
-                }),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 2),
         Expanded(
           child: widget.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -931,6 +946,120 @@ class ShoutListPage extends StatelessWidget {
   );
 }
 
+class AvatarImage extends StatelessWidget {
+  const AvatarImage({super.key, required this.avatarId, this.radius = 24});
+
+  final String avatarId;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => CircleAvatar(
+    radius: radius,
+    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+    child: ClipOval(
+      child: Image.asset(
+        'assets/avatars/avatar_$avatarId.png',
+        width: radius * 2,
+        height: radius * 2,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Icon(Icons.person_outline, size: radius),
+      ),
+    ),
+  );
+}
+
+class AvatarPickerSheet extends StatelessWidget {
+  const AvatarPickerSheet({super.key, required this.selectedId});
+
+  static const avatarIds = [
+    'fox',
+    'owl',
+    'otter',
+    'raccoon',
+    'robot',
+    'astronaut',
+    'cactus',
+    'mushroom',
+    'moon',
+    'comet',
+    'cat',
+    'dragon',
+    'mountain',
+    'lightning',
+    'controller',
+    'octopus',
+  ];
+  final String selectedId;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: FractionallySizedBox(
+      heightFactor: .72,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              tr(context, 'Vyber si avatar'),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                ),
+                itemCount: avatarIds.length,
+                itemBuilder: (context, index) {
+                  final avatarId = avatarIds[index];
+                  final selected = avatarId == selectedId;
+                  return Semantics(
+                    button: true,
+                    selected: selected,
+                    label: avatarId,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => Navigator.pop(context, avatarId),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: selected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.transparent,
+                            width: 3,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(3),
+                          child: AvatarImage(avatarId: avatarId, radius: 32),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -946,13 +1075,11 @@ class ProfilePage extends StatelessWidget {
         final l10n = AppLocalizations.of(context)!;
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';
+        final avatarId = profile?['avatarId'] as String? ?? 'fox';
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const CircleAvatar(
-              radius: 34,
-              child: Icon(Icons.person_outline, size: 34),
-            ),
+            Center(child: AvatarImage(avatarId: avatarId, radius: 40)),
             const SizedBox(height: 12),
             Text(
               nickname,
@@ -961,11 +1088,27 @@ class ProfilePage extends StatelessWidget {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.nicknameChangeHint,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: 8),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: profile == null
+                    ? null
+                    : () async {
+                        final selected = await showModalBottomSheet<String>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) =>
+                              AvatarPickerSheet(selectedId: avatarId),
+                        );
+                        if (selected == null || selected == avatarId) return;
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(uid)
+                            .update({'avatarId': selected});
+                      },
+                icon: const Icon(Icons.face_retouching_natural_outlined),
+                label: Text(tr(context, 'Změnit avatar')),
+              ),
             ),
             const SizedBox(height: 28),
             ListTile(

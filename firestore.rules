@@ -45,7 +45,8 @@ service cloud.firestore {
           'nicknameChangedAt',
           'nicknameChangeCount',
           'emailVerified',
-          'language'
+          'language',
+          'avatarId'
         ]) &&
         request.resource.data.keys().hasAll([
           'nickname',
@@ -54,7 +55,8 @@ service cloud.firestore {
           'nicknameChangedAt',
           'nicknameChangeCount',
           'emailVerified',
-          'language'
+          'language',
+          'avatarId'
         ]) &&
         request.resource.data.nickname is string &&
         request.resource.data.nickname.size() >= 3 &&
@@ -62,7 +64,16 @@ service cloud.firestore {
         request.resource.data.nicknameLower is string &&
         request.resource.data.nicknameChangeCount == 0 &&
         request.resource.data.emailVerified == true &&
-        request.resource.data.language in ['cs', 'en', 'de', 'pl'];
+        request.resource.data.language in ['cs', 'en', 'de', 'pl'] &&
+        validAvatarId(request.resource.data.avatarId);
+    }
+
+    function validAvatarId(avatarId) {
+      return avatarId in [
+        'fox', 'owl', 'otter', 'raccoon', 'robot', 'astronaut', 'cactus',
+        'mushroom', 'moon', 'comet', 'cat', 'dragon', 'mountain',
+        'lightning', 'controller', 'octopus'
+      ];
     }
 
     function validNicknameChange(userId) {
@@ -126,6 +137,9 @@ service cloud.firestore {
           (request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['language']) &&
             request.resource.data.language in ['cs', 'en', 'de', 'pl']) ||
+          (request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['avatarId']) &&
+            validAvatarId(request.resource.data.avatarId)) ||
           validNicknameChange(userId)
         );
       allow delete, list: if false;
