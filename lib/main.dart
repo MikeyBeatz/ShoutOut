@@ -64,6 +64,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   Set<String> _blockedUserIds = {};
   Position? _currentPosition;
   bool _isLoadingShouts = true;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _shoutSubscription;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _blockedSubscription;
 
   int _tab = 0;
   late final Timer _expiryTimer;
@@ -80,9 +82,36 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   }
 
   Future<void> _initializeFeed() async {
-    await _loadShouts();
+    _startFeedListeners();
     await _refreshLocation();
     await _loadShouts();
+  }
+
+  void _startFeedListeners() {
+    final firestore = FirebaseFirestore.instance;
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    _shoutSubscription = firestore
+        .collection('shouts')
+        .where('status', isEqualTo: 'active')
+        .snapshots()
+        .listen(
+          (snapshot) => _applyShoutDocuments(snapshot.docs),
+          onError: (_) {
+            if (mounted) setState(() => _isLoadingShouts = false);
+          },
+        );
+    _blockedSubscription = firestore
+        .collection('users')
+        .doc(uid)
+        .collection('blocked')
+        .snapshots()
+        .listen((snapshot) {
+          if (mounted) {
+            setState(() {
+              _blockedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
+            });
+          }
+        });
   }
 
   Future<void> _refreshLocation() async {
@@ -109,6 +138,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   @override
   void dispose() {
     _expiryTimer.cancel();
+    _shoutSubscription?.cancel();
+    _blockedSubscription?.cancel();
     super.dispose();
   }
 
@@ -123,7 +154,14 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .collection('shouts')
         .where('status', isEqualTo: 'active')
         .get();
-    final shouts = snapshot.docs.map((doc) {
+    await _applyShoutDocuments(snapshot.docs, blockedUserIds: blockedUserIds);
+  }
+
+  Future<void> _applyShoutDocuments(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents, {
+    Set<String>? blockedUserIds,
+  }) async {
+    final shouts = documents.map((doc) {
       final data = doc.data();
       final location = data['location'] as GeoPoint?;
       final distanceKm = location == null || _currentPosition == null
@@ -143,7 +181,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         _shouts
           ..clear()
           ..addAll(shouts);
-        _blockedUserIds = blockedUserIds;
+        if (blockedUserIds != null) _blockedUserIds = blockedUserIds;
         _isLoadingShouts = false;
       });
     }
