@@ -72,7 +72,8 @@ The main header and authentication header use the gradient
 ## Splash screen
 
 - solid background: `#0A6371`;
-- centered transparent mark;
+- adaptive icon background: `#0A6371`, visually merging with the screen;
+- centered transparent foreground mark with a `15dp` inset;
 - no white field;
 - no separate circular or square icon background.
 

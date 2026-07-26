@@ -39,7 +39,9 @@
     },
     "splash": {
       "background": "#0A6371",
-      "usesTransparentMark": true
+      "usesTransparentMark": true,
+      "usesAdaptiveIcon": true,
+      "foregroundInsetDp": 15
     }
   },
   "watermark": {
