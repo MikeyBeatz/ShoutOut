@@ -197,35 +197,87 @@ class _SignInPageState extends State<SignInPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(
-                  Icons.campaign_rounded,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'ShoutOut',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF1496A8),
+                        Color(0xFF0A6371),
+                        Color(0xFF074B57),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x24074B57),
+                        blurRadius: 24,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Image.asset(
+                          'assets/branding/app_icon.png',
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          cacheWidth: 320,
+                          filterQuality: FilterQuality.high,
+                          semanticLabel: 'ShoutOut',
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ShoutOut',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -.5,
+                                  ),
+                            ),
+                            const SizedBox(height: 7),
+                            Text(
+                              _register
+                                  ? tr(
+                                      context,
+                                      'Vytvoř si účet pro dění v okolí.',
+                                    )
+                                  : tr(
+                                      context,
+                                      'Přihlas se a zjisti, co se děje v okolí.',
+                                    ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: .84),
+                                    height: 1.3,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 26),
                 Text(
                   tr(context, _register ? 'Registrace' : 'Přihlášení'),
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _register
-                      ? tr(context, 'Vytvoř si účet pro dění v okolí.')
-                      : tr(context, 'Přihlas se a zjisti, co se děje v okolí.'),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 22),
                 TextField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
