@@ -111,7 +111,11 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 
 ## Struktura projektu
 
-- `lib/` – aplikace, autentizace, právní texty a lokalizace
+- `lib/main.dart` – inicializace aplikace, společné téma a registrace částí
+- `lib/src/` – feed, profil, moderace, Shouty, komentáře a sdílené modely
+- `lib/auth_gate.dart` – přihlášení, registrace a vstupní uživatelské brány
+- `lib/legal.dart` – právní souhlasy a dokumenty
+- `lib/l10n/` – stávající lokalizační vrstva
 - `assets/avatars/` – vestavěné uživatelské avatary
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
