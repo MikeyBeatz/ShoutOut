@@ -1,0 +1,59 @@
+{
+  "colors": {
+    "primary": "#0A6371",
+    "primaryDark": "#074B57",
+    "accent": "#0E8EA0",
+    "headerHighlight": "#1496A8",
+    "accentLight": "#DDF5F6",
+    "secondaryContainer": "#EEF8F8",
+    "background": "#FAFDFD",
+    "surface": "#FFFFFF",
+    "border": "#E3EEEE",
+    "outline": "#CDE7E7",
+    "divider": "#E6F1F1",
+    "cardBorder": "#E4F1F2",
+    "text": "#1F2933",
+    "secondaryText": "#697A84",
+    "inactiveIcon": "#8A9AA3",
+    "error": "#B3261E"
+  },
+  "gradients": {
+    "primaryHeader": [
+      "#1496A8",
+      "#0A6371",
+      "#074B57"
+    ]
+  },
+  "typography": {
+    "wordmark": {
+      "family": "Urbanist",
+      "weight": 500,
+      "fontSizeSp": 28,
+      "letterSpacing": -0.8
+    }
+  },
+  "android": {
+    "adaptiveIcon": {
+      "background": "#0A6371",
+      "foregroundInsetDp": 14
+    },
+    "splash": {
+      "background": "#0A6371",
+      "usesTransparentMark": true
+    }
+  },
+  "watermark": {
+    "color": "#0A6371",
+    "opacity": 0.03,
+    "widthFactor": 0.75,
+    "alignment": {
+      "x": 2.2,
+      "y": 0.35
+    }
+  },
+  "shape": {
+    "cardRadiusDp": 22,
+    "inputRadiusDp": 14,
+    "authContainerRadiusDp": 30
+  }
+}
