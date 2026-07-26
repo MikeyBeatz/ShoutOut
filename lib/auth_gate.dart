@@ -206,8 +206,8 @@ class _SignInPageState extends State<SignInPage> {
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x1F074B57),
-                    blurRadius: 30,
-                    offset: Offset(0, 12),
+                    blurRadius: 15,
+                    offset: Offset(0, 6),
                   ),
                 ],
               ),
@@ -306,10 +306,10 @@ class _SignInPageState extends State<SignInPage> {
                       Positioned(
                         left: 0,
                         right: 0,
-                        bottom: 20,
+                        bottom: 25,
                         child: IgnorePointer(
                           child: Container(
-                            height: 10,
+                            height: 5,
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -346,6 +346,7 @@ class _SignInPageState extends State<SignInPage> {
                         TextField(
                           controller: _password,
                           obscureText: _obscurePassword,
+                          obscuringCharacter: '•',
                           decoration: InputDecoration(
                             labelText: tr(context, 'Heslo'),
                             border: OutlineInputBorder(),
@@ -361,8 +362,8 @@ class _SignInPageState extends State<SignInPage> {
                               ),
                               icon: Icon(
                                 _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
                               ),
                             ),
                           ),
