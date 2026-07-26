@@ -296,35 +296,37 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
     return Scaffold(
       extendBodyBehindAppBar: _tab == 0,
-      body: switch (_tab) {
-        0 => FeedPage(
-          shouts: activeShouts,
-          isLoading: _isLoadingShouts,
-          onSave: _toggleSaved,
-          onReaction: _toggleReaction,
-          onNotifications: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const NotificationsPage()),
+      body: _BrandedTabBackground(
+        child: switch (_tab) {
+          0 => FeedPage(
+            shouts: activeShouts,
+            isLoading: _isLoadingShouts,
+            onSave: _toggleSaved,
+            onReaction: _toggleReaction,
+            onNotifications: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsPage()),
+            ),
           ),
-        ),
-        1 => SavedPage(
-          shouts: activeShouts.where((shout) => shout.isSaved).toList(),
-          onSave: _toggleSaved,
-          onReaction: _toggleReaction,
-        ),
-        2 => MyShoutsPage(
-          shouts: _shouts
-              .where(
-                (shout) =>
-                    shout.authorId == FirebaseAuth.instance.currentUser?.uid,
-              )
-              .toList(),
-          onSave: _toggleSaved,
-          onReaction: _toggleReaction,
-          onDelete: _deleteShout,
-        ),
-        _ => const ProfilePage(),
-      },
+          1 => SavedPage(
+            shouts: activeShouts.where((shout) => shout.isSaved).toList(),
+            onSave: _toggleSaved,
+            onReaction: _toggleReaction,
+          ),
+          2 => MyShoutsPage(
+            shouts: _shouts
+                .where(
+                  (shout) =>
+                      shout.authorId == FirebaseAuth.instance.currentUser?.uid,
+                )
+                .toList(),
+            onSave: _toggleSaved,
+            onReaction: _toggleReaction,
+            onDelete: _deleteShout,
+          ),
+          _ => const ProfilePage(),
+        },
+      ),
       floatingActionButton: _tab == 0
           ? FloatingActionButton.extended(
               onPressed: () async {
@@ -434,4 +436,43 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       ),
     );
   }
+}
+
+class _BrandedTabBackground extends StatelessWidget {
+  const _BrandedTabBackground({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      const ColoredBox(color: _shoutBackground),
+      IgnorePointer(
+        child: ExcludeSemantics(
+          child: Align(
+            alignment: const Alignment(2.2, .35),
+            child: FractionallySizedBox(
+              widthFactor: .75,
+              child: Opacity(
+                opacity: .03,
+                child: ColorFiltered(
+                  colorFilter: const ColorFilter.mode(
+                    _shoutPrimary,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'assets/branding/feed_mark.png',
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      child,
+    ],
+  );
 }
