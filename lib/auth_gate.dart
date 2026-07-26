@@ -176,18 +176,36 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
+  final _emailFieldKey = GlobalKey<FormFieldState<String>>();
+  final _passwordFieldKey = GlobalKey<FormFieldState<String>>();
+  final _confirmPasswordFieldKey = GlobalKey<FormFieldState<String>>();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
+  bool _emailValidationActive = false;
+  bool _passwordValidationActive = false;
+  bool _confirmPasswordValidationActive = false;
   bool _register = false;
   bool _busy = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailFocus.addListener(_handleEmailFocusChange);
+    _passwordFocus.addListener(_handlePasswordFocusChange);
+    _confirmPasswordFocus.addListener(_handleConfirmPasswordFocusChange);
+  }
+
   @override
   void dispose() {
+    _emailFocus.removeListener(_handleEmailFocusChange);
+    _passwordFocus.removeListener(_handlePasswordFocusChange);
+    _confirmPasswordFocus.removeListener(_handleConfirmPasswordFocusChange);
     _email.dispose();
     _password.dispose();
     _confirmPassword.dispose();
@@ -351,12 +369,18 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             const SizedBox(height: 20),
                             TextFormField(
+                              key: _emailFieldKey,
                               controller: _email,
                               focusNode: _emailFocus,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               autofillHints: const [AutofillHints.email],
                               validator: _validateEmail,
+                              onChanged: (_) {
+                                if (_emailValidationActive) {
+                                  _emailFieldKey.currentState?.validate();
+                                }
+                              },
                               decoration: InputDecoration(
                                 labelText: tr(context, 'E-mail'),
                                 border: OutlineInputBorder(),
@@ -364,6 +388,7 @@ class _SignInPageState extends State<SignInPage> {
                             ),
                             const SizedBox(height: 12),
                             TextFormField(
+                              key: _passwordFieldKey,
                               controller: _password,
                               focusNode: _passwordFocus,
                               obscureText: _obscurePassword,
@@ -377,6 +402,15 @@ class _SignInPageState extends State<SignInPage> {
                                     : AutofillHints.password,
                               ],
                               validator: _validatePassword,
+                              onChanged: (_) {
+                                if (_passwordValidationActive) {
+                                  _passwordFieldKey.currentState?.validate();
+                                }
+                                if (_confirmPasswordValidationActive) {
+                                  _confirmPasswordFieldKey.currentState
+                                      ?.validate();
+                                }
+                              },
                               onFieldSubmitted: _register || _busy
                                   ? null
                                   : (_) => _emailAuth(),
@@ -407,6 +441,7 @@ class _SignInPageState extends State<SignInPage> {
                             if (_register) ...[
                               const SizedBox(height: 12),
                               TextFormField(
+                                key: _confirmPasswordFieldKey,
                                 controller: _confirmPassword,
                                 focusNode: _confirmPasswordFocus,
                                 obscureText: _obscureConfirmPassword,
@@ -416,6 +451,12 @@ class _SignInPageState extends State<SignInPage> {
                                   AutofillHints.newPassword,
                                 ],
                                 validator: _validateConfirmedPassword,
+                                onChanged: (_) {
+                                  if (_confirmPasswordValidationActive) {
+                                    _confirmPasswordFieldKey.currentState
+                                        ?.validate();
+                                  }
+                                },
                                 onFieldSubmitted: _busy
                                     ? null
                                     : (_) => _emailAuth(),
@@ -534,10 +575,34 @@ class _SignInPageState extends State<SignInPage> {
     return null;
   }
 
+  void _handleEmailFocusChange() {
+    if (_emailFocus.hasFocus) return;
+    _emailValidationActive = true;
+    _emailFieldKey.currentState?.validate();
+  }
+
+  void _handlePasswordFocusChange() {
+    if (_passwordFocus.hasFocus) return;
+    _passwordValidationActive = true;
+    _passwordFieldKey.currentState?.validate();
+    if (_confirmPassword.text.isNotEmpty) {
+      _confirmPasswordValidationActive = true;
+      _confirmPasswordFieldKey.currentState?.validate();
+    }
+  }
+
+  void _handleConfirmPasswordFocusChange() {
+    if (_confirmPasswordFocus.hasFocus) return;
+    _confirmPasswordValidationActive = true;
+    _confirmPasswordFieldKey.currentState?.validate();
+  }
+
   void _toggleRegistration() {
     setState(() {
       _register = !_register;
       _confirmPassword.clear();
+      _passwordValidationActive = false;
+      _confirmPasswordValidationActive = false;
       _obscurePassword = true;
       _obscureConfirmPassword = true;
     });
