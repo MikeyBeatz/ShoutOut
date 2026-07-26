@@ -1,11 +1,11 @@
 {
-    "name": "shoutout",
-    "short_name": "shoutout",
+    "name": "ShoutOut",
+    "short_name": "ShoutOut",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FAFDFD",
+    "theme_color": "#0A6371",
+    "description": "Local community messages, reactions, and conversations.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
