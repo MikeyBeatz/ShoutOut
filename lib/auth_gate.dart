@@ -179,6 +179,7 @@ class _SignInPageState extends State<SignInPage> {
   final _password = TextEditingController();
   bool _register = false;
   bool _busy = false;
+  bool _obscurePassword = true;
   @override
   void dispose() {
     _email.dispose();
@@ -213,75 +214,116 @@ class _SignInPageState extends State<SignInPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF1496A8),
-                          Color(0xFF0A6371),
-                          Color(0xFF074B57),
-                        ],
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            'assets/branding/app_icon.png',
-                            width: 88,
-                            height: 88,
-                            fit: BoxFit.cover,
-                            cacheWidth: 320,
-                            filterQuality: FilterQuality.high,
-                            semanticLabel: 'ShoutOut',
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ShoutOut',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -.5,
-                                    ),
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                _register
-                                    ? tr(
-                                        context,
-                                        'Vytvoř si účet pro dění v okolí.',
-                                      )
-                                    : tr(
-                                        context,
-                                        'Přihlas se a zjisti, co se děje v okolí.',
-                                      ),
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Colors.white.withValues(
-                                        alpha: .84,
-                                      ),
-                                      height: 1.3,
-                                    ),
-                              ),
+                  Stack(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 38),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF1496A8),
+                              Color(0xFF0A6371),
+                              Color(0xFF074B57),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                'assets/branding/app_icon.png',
+                                width: 88,
+                                height: 88,
+                                fit: BoxFit.cover,
+                                cacheWidth: 320,
+                                filterQuality: FilterQuality.high,
+                                semanticLabel: 'ShoutOut',
+                              ),
+                            ),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'ShoutOut',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -.5,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 7),
+                                  Text(
+                                    _register
+                                        ? tr(
+                                            context,
+                                            'Vytvoř si účet pro dění v okolí.',
+                                          )
+                                        : tr(
+                                            context,
+                                            'Přihlas se a zjisti, co se děje v okolí.',
+                                          ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: .84,
+                                          ),
+                                          height: 1.3,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: SizedBox(
+                          height: 32,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(28),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 20,
+                        child: IgnorePointer(
+                          child: Container(
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0x30074B57), Colors.transparent],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -303,10 +345,26 @@ class _SignInPageState extends State<SignInPage> {
                         const SizedBox(height: 12),
                         TextField(
                           controller: _password,
-                          obscureText: true,
+                          obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             labelText: tr(context, 'Heslo'),
                             border: OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              tooltip: tr(
+                                context,
+                                _obscurePassword
+                                    ? 'Zobrazit heslo'
+                                    : 'Skrýt heslo',
+                              ),
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
