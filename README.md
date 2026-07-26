@@ -156,6 +156,7 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `lib/legal.dart` – právní souhlasy a dokumenty
 - `lib/l10n/` – stávající lokalizační vrstva
 - `assets/avatars/` – vestavěné uživatelské avatary
+- `promo/` – samostatný balíček značky, screenshotů a zadání pro promo video
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
