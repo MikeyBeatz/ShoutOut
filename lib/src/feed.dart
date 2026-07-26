@@ -108,10 +108,10 @@ class _FeedPageState extends State<FeedPage> {
                                     children: [
                                       Image.asset(
                                         'assets/branding/feed_mark.png',
-                                        width: 34,
-                                        height: 34,
+                                        width: 44,
+                                        height: 44,
                                         fit: BoxFit.contain,
-                                        cacheWidth: 128,
+                                        cacheWidth: 160,
                                         filterQuality: FilterQuality.high,
                                         semanticLabel: 'ShoutOut',
                                       ),
@@ -119,9 +119,9 @@ class _FeedPageState extends State<FeedPage> {
                                       Text(
                                         'ShoutOut',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 24,
-                                          letterSpacing: -.5,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 28,
+                                          letterSpacing: -.8,
                                           color: Colors.white,
                                         ),
                                       ),
