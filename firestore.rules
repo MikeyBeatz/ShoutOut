@@ -237,6 +237,33 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // A report contains a verified snapshot of a private reply so moderation
+    // can review reported content without broad access to private threads.
+    match /privateReplyReports/{reportId} {
+      allow create: if signedIn() &&
+        request.resource.data.keys().hasOnly([
+          'reporterId', 'shoutId', 'privateReplyId', 'authorId', 'text',
+          'reason', 'createdAt', 'status', 'priority'
+        ]) &&
+        request.resource.data.reporterId == request.auth.uid &&
+        request.resource.data.shoutId is string &&
+        request.resource.data.privateReplyId is string &&
+        request.resource.data.authorId is string &&
+        request.resource.data.text is string &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.priority == 'high' &&
+        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.recipientId == request.auth.uid &&
+        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.authorId == request.resource.data.authorId &&
+        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.text == request.resource.data.text;
+      allow read: if isModerator();
+      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+      allow delete: if false;
+    }
+
     // Required for collectionGroup('comments') queries used by the user's
     // comment history. The write rules remain scoped below to Shouts only.
     match /{path=**}/comments/{commentId} {
@@ -298,6 +325,36 @@ service cloud.firestore {
             request.resource.data.type in ['like', 'dislike'];
           allow delete: if signedIn() && userId == request.auth.uid;
         }
+      }
+
+      match /privateReplies/{replyId} {
+        // Keep private threads private.  The two explicit fields also let
+        // Firestore safely evaluate the two simple client queries below.
+        allow read: if signedIn() &&
+          (resource.data.authorId == request.auth.uid ||
+           resource.data.recipientId == request.auth.uid);
+        allow create: if signedIn() &&
+          request.resource.data.keys().hasOnly([
+            'authorId', 'authorNickname', 'recipientId', 'recipientNickname',
+            'participants', 'text', 'createdAt', 'targetType', 'parentCommentId'
+          ]) &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.authorNickname is string &&
+          request.resource.data.recipientId is string &&
+          request.resource.data.recipientId != request.auth.uid &&
+          request.resource.data.recipientNickname is string &&
+          request.resource.data.participants is list &&
+          request.resource.data.participants.size() == 2 &&
+          request.resource.data.participants[0] == request.auth.uid &&
+          request.resource.data.participants[1] == request.resource.data.recipientId &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() >= 1 &&
+          request.resource.data.text.size() <= 220 &&
+          request.resource.data.targetType in ['shout', 'comment', 'privateReply'] &&
+          (!request.resource.data.keys().hasAll(['parentCommentId']) || request.resource.data.parentCommentId is string);
+        allow update: if false;
+        allow delete: if signedIn() &&
+          (resource.data.authorId == request.auth.uid || isModerator());
       }
 
       match /reactions/{userId} {

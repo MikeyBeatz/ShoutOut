@@ -2525,7 +2525,7 @@ class ModerationPage extends StatelessWidget {
   const ModerationPage({super.key});
   @override
   Widget build(BuildContext context) => DefaultTabController(
-    length: 2,
+    length: 3,
     child: Scaffold(
       appBar: AppBar(
         title: Text(tr(context, 'Moderace')),
@@ -2533,6 +2533,7 @@ class ModerationPage extends StatelessWidget {
           tabs: [
             Tab(text: tr(context, 'Shouty')),
             Tab(text: tr(context, 'Komentáře')),
+            Tab(text: tr(context, 'Soukromé')),
           ],
         ),
       ),
@@ -2540,10 +2541,77 @@ class ModerationPage extends StatelessWidget {
         children: [
           _ReportList(collection: 'reports'),
           _ReportList(collection: 'commentReports'),
+          const _PrivateReplyReportList(),
         ],
       ),
     ),
   );
+}
+
+class _PrivateReplyReportList extends StatelessWidget {
+  const _PrivateReplyReportList();
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('privateReplyReports')
+            .where('status', isEqualTo: 'open')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final reports = snapshot.data!.docs;
+          if (reports.isEmpty) {
+            return Center(child: Text(tr(context, 'Žádná otevřená hlášení.')));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: reports.length,
+            itemBuilder: (context, index) {
+              final report = reports[index];
+              final data = report.data();
+              return Card(
+                color: const Color(0xFFFFF4E5),
+                child: ListTile(
+                  leading: const Icon(Icons.priority_high_rounded),
+                  title: Text(data['reason'] as String? ?? ''),
+                  subtitle: Text(
+                    '${tr(context, 'Soukromá odpověď')}: ${data['text'] ?? ''}',
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (action) async {
+                      if (action == 'remove') {
+                        await FirebaseFirestore.instance
+                            .collection('shouts')
+                            .doc(data['shoutId'] as String)
+                            .collection('privateReplies')
+                            .doc(data['privateReplyId'] as String)
+                            .delete();
+                      }
+                      await report.reference.update({
+                        'status': 'resolved',
+                        'resolvedAt': FieldValue.serverTimestamp(),
+                      });
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'resolve',
+                        child: Text(tr(context, 'Označit jako vyřešené')),
+                      ),
+                      PopupMenuItem(
+                        value: 'remove',
+                        child: Text(tr(context, 'Odstranit z veřejnosti')),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
 }
 
 class _ReportList extends StatelessWidget {
@@ -3265,6 +3333,7 @@ class ShoutCard extends StatelessWidget {
     this.showDeleteButton = false,
     this.onDelete,
     this.openOnTap = true,
+    this.onPrivateReply,
   });
 
   final Shout shout;
@@ -3274,6 +3343,7 @@ class ShoutCard extends StatelessWidget {
   final bool showDeleteButton;
   final Future<void> Function()? onDelete;
   final bool openOnTap;
+  final VoidCallback? onPrivateReply;
 
   @override
   Widget build(BuildContext context) {
@@ -3386,33 +3456,55 @@ class ShoutCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  ReactionButton(
-                    icon: Icons.thumb_up_outlined,
-                    value: shout.likes,
-                    selected: shout.isLiked,
-                    onPressed: () => onReaction(true),
-                  ),
-                  const SizedBox(width: 12),
-                  ReactionButton(
-                    icon: Icons.thumb_down_outlined,
-                    value: shout.dislikes,
-                    selected: shout.isDisliked,
-                    onPressed: () => onReaction(false),
-                  ),
-                  const SizedBox(width: 12),
-                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('shouts')
-                        .doc(shout.id)
-                        .collection('comments')
-                        .snapshots(),
-                    builder: (context, snapshot) => ReactionButton(
-                      icon: Icons.chat_bubble_outline,
-                      value: snapshot.data?.docs.length ?? shout.comments,
-                      onPressed: openComments,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ReactionButton(
+                              icon: Icons.thumb_up_outlined,
+                              value: shout.likes,
+                              selected: shout.isLiked,
+                              onPressed: () => onReaction(true),
+                            ),
+                            const SizedBox(width: 4),
+                            ReactionButton(
+                              icon: Icons.thumb_down_outlined,
+                              value: shout.dislikes,
+                              selected: shout.isDisliked,
+                              onPressed: () => onReaction(false),
+                            ),
+                            const SizedBox(width: 8),
+                            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('shouts')
+                                  .doc(shout.id)
+                                  .collection('comments')
+                                  .snapshots(),
+                              builder: (context, snapshot) => ReactionButton(
+                                icon: Icons.chat_bubble_outline,
+                                value:
+                                    snapshot.data?.docs.length ??
+                                    shout.comments,
+                                onPressed: openComments,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  const Spacer(),
+                  if (onPrivateReply != null)
+                    IconButton(
+                      onPressed: onPrivateReply,
+                      tooltip: tr(context, 'SoukromÄ› odpovÄ›dÄ›t'),
+                      icon: const Icon(Icons.lock_outline, size: 18),
+                      visualDensity: VisualDensity.compact,
+                    ),
                   if (showSaveCount)
                     Text(
                       '${shout.saves} ${tr(context, 'Uložené')}',
@@ -3447,19 +3539,26 @@ class ShoutDetailPage extends StatefulWidget {
 class _ShoutDetailPageState extends State<ShoutDetailPage> {
   final _commentController = TextEditingController();
   final _commentFocusNode = FocusNode();
+  final _commentsScrollController = ScrollController();
   final Map<String, GlobalKey<_CommentTileState>> _commentKeys = {};
+  List<String> _commentIds = const [];
   String? _replyToCommentId;
   String? _replyToNickname;
+  String? _privateRecipientId;
+  String? _privateRecipientNickname;
+  String? _privateTargetType;
 
   @override
   void dispose() {
     _commentController.dispose();
     _commentFocusNode.dispose();
+    _commentsScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    resizeToAvoidBottomInset: true,
     appBar: AppBar(
       title: Text(tr(context, 'Shout')),
       actions: [
@@ -3491,7 +3590,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           .snapshots(),
       builder: (context, snapshot) {
         final comments = snapshot.data?.docs ?? [];
+        _commentIds = comments.map((comment) => comment.id).toList();
         return ListView(
+          controller: _commentsScrollController,
           padding: const EdgeInsets.all(16),
           children: [
             ShoutCard(
@@ -3505,7 +3606,29 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 setState(() {});
               },
               openOnTap: false,
+              onPrivateReply:
+                  widget.shout.authorId !=
+                      FirebaseAuth.instance.currentUser?.uid
+                  ? () => _replyPrivately(
+                      recipientId: widget.shout.authorId,
+                      recipientNickname: widget.shout.author,
+                      targetType: 'shout',
+                    )
+                  : null,
             ),
+            if (false)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => _replyPrivately(
+                    recipientId: widget.shout.authorId,
+                    recipientNickname: widget.shout.author,
+                    targetType: 'shout',
+                  ),
+                  icon: const Icon(Icons.lock_outline, size: 18),
+                  label: Text(tr(context, 'Soukromě odpovědět')),
+                ),
+              ),
             const SizedBox(height: 16),
             Text(
               '${tr(context, 'Komentáře')} (${comments.length})',
@@ -3520,53 +3643,87 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 comment: comment,
                 shoutAuthorId: widget.shout.authorId,
                 onReply: _replyTo,
+                onPrivateReply: (recipientId, nickname, commentId) =>
+                    _replyPrivately(
+                      recipientId: recipientId,
+                      recipientNickname: nickname,
+                      targetType: 'comment',
+                      parentCommentId: commentId,
+                    ),
                 onReport: () => _reportComment(comment),
                 onJumpToReply: _jumpToComment,
               );
             }),
+            PrivateReplyList(
+              shoutId: widget.shout.id,
+              onReply: _replyPrivately,
+              onReport: _reportPrivateReply,
+              onJumpToComment: _jumpToComment,
+            ),
           ],
         );
       },
     ),
-    bottomNavigationBar: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_replyToNickname != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InputChip(
-                  label: Text('${tr(context, 'Odpovídáš')} @$_replyToNickname'),
-                  onDeleted: () => setState(() {
-                    _replyToCommentId = null;
-                    _replyToNickname = null;
-                    _commentController.clear();
-                  }),
-                ),
-              ),
-            Row(
+    bottomNavigationBar: Builder(
+      builder: (context) => AnimatedPadding(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    focusNode: _commentFocusNode,
-                    maxLength: 220,
-                    decoration: InputDecoration(
-                      hintText: tr(context, 'Napiš veřejný komentář'),
-                      border: const OutlineInputBorder(),
-                      counterText: '',
+                if (_privateRecipientNickname != null ||
+                    _replyToNickname != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: InputChip(
+                      label: Text(
+                        _privateRecipientNickname != null
+                            ? '${tr(context, 'Soukromá odpověď')} · @$_privateRecipientNickname'
+                            : '${tr(context, 'Odpovídáš')} @$_replyToNickname',
+                      ),
+                      onDeleted: () => setState(() {
+                        _replyToCommentId = null;
+                        _replyToNickname = null;
+                        _privateRecipientId = null;
+                        _privateRecipientNickname = null;
+                        _privateTargetType = null;
+                        _commentController.clear();
+                      }),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: _sendComment,
-                  icon: const Icon(Icons.send_outlined),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _commentController,
+                        focusNode: _commentFocusNode,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.send,
+                        onTap: _openCommentKeyboard,
+                        onSubmitted: (_) => _sendComment(),
+                        maxLines: 1,
+                        maxLength: 220,
+                        decoration: InputDecoration(
+                          hintText: _privateRecipientId == null
+                              ? tr(context, 'Napiš veřejný komentář')
+                              : tr(context, 'Napiš soukromou odpověď'),
+                          border: const OutlineInputBorder(),
+                          counterText: '',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     ),
@@ -3586,8 +3743,51 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     FocusScope.of(context).requestFocus(_commentFocusNode);
   }
 
+  void _replyPrivately({
+    required String recipientId,
+    required String recipientNickname,
+    required String targetType,
+    String? parentCommentId,
+  }) {
+    setState(() {
+      _privateRecipientId = recipientId;
+      _privateRecipientNickname = recipientNickname;
+      _privateTargetType = targetType;
+      _replyToCommentId = parentCommentId;
+      _replyToNickname = null;
+      _commentController.clear();
+    });
+    FocusScope.of(context).requestFocus(_commentFocusNode);
+  }
+
+  void _openCommentKeyboard() {
+    FocusScope.of(context).requestFocus(_commentFocusNode);
+    Future<void>.delayed(const Duration(milliseconds: 80), () {
+      if (mounted && _commentFocusNode.hasFocus) {
+        SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+      }
+    });
+  }
+
   Future<void> _jumpToComment(String commentId) async {
-    final target = _commentKeys[commentId]?.currentContext;
+    BuildContext? target = _commentKeys[commentId]?.currentContext;
+    if (target == null && _commentsScrollController.hasClients) {
+      final commentIndex = _commentIds.indexOf(commentId);
+      if (commentIndex >= 0) {
+        // The target may be outside ListView's currently built area. Move to
+        // its estimated position first; then ensureVisible provides the exact
+        // final placement once its widget exists.
+        final estimate = 360.0 + (commentIndex * 190.0);
+        final maxExtent = _commentsScrollController.position.maxScrollExtent;
+        await _commentsScrollController.animateTo(
+          estimate.clamp(0.0, maxExtent),
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeInOut,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        target = _commentKeys[commentId]?.currentContext;
+      }
+    }
     if (target == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -3613,23 +3813,56 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         .collection('users')
         .doc(user.uid)
         .get();
-    await FirebaseFirestore.instance
+    final authorNickname = profile.data()!['nickname'] as String;
+    final shoutRef = FirebaseFirestore.instance
         .collection('shouts')
-        .doc(widget.shout.id)
-        .collection('comments')
-        .add({
+        .doc(widget.shout.id);
+    try {
+      if (_privateRecipientId != null) {
+        final recipientId = _privateRecipientId!;
+        final recipientNickname = _privateRecipientNickname!;
+        final targetType = _privateTargetType!;
+        await shoutRef.collection('privateReplies').add({
           'authorId': user.uid,
-          'authorNickname': profile.data()!['nickname'],
+          'authorNickname': authorNickname,
+          'recipientId': recipientId,
+          'recipientNickname': recipientNickname,
+          'participants': [user.uid, recipientId],
+          'text': comment,
+          'createdAt': FieldValue.serverTimestamp(),
+          'targetType': targetType,
+          if (_replyToCommentId != null) 'parentCommentId': _replyToCommentId,
+        });
+      } else {
+        await shoutRef.collection('comments').add({
+          'authorId': user.uid,
+          'authorNickname': authorNickname,
           'text': comment,
           'createdAt': FieldValue.serverTimestamp(),
           if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
           if (_replyToNickname != null) 'replyToNickname': _replyToNickname,
         });
+      }
+    } on FirebaseException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _commentController.clear();
       _replyToCommentId = null;
       _replyToNickname = null;
+      _privateRecipientId = null;
+      _privateRecipientNickname = null;
+      _privateTargetType = null;
     });
   }
 
@@ -3709,6 +3942,30 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     }
   }
 
+  Future<void> _reportPrivateReply(
+    QueryDocumentSnapshot<Map<String, dynamic>> reply,
+  ) async {
+    final reason = await _askReportReason('Nahlásit soukromou odpověď');
+    if (reason == null) return;
+    final data = reply.data();
+    await FirebaseFirestore.instance.collection('privateReplyReports').add({
+      'reporterId': FirebaseAuth.instance.currentUser!.uid,
+      'shoutId': widget.shout.id,
+      'privateReplyId': reply.id,
+      'authorId': data['authorId'],
+      'text': data['text'],
+      'reason': reason,
+      'createdAt': FieldValue.serverTimestamp(),
+      'status': 'open',
+      'priority': 'high',
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr(context, 'Hlásení bylo odesláno.'))),
+      );
+    }
+  }
+
   Future<String?> _askReportReason(String title) async {
     const reasons = [
       'Nelegální obsah nebo drogy',
@@ -3776,12 +4033,221 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 }
 
+class PrivateReplyList extends StatelessWidget {
+  const PrivateReplyList({
+    super.key,
+    required this.shoutId,
+    required this.onReply,
+    required this.onReport,
+    required this.onJumpToComment,
+  });
+
+  final String shoutId;
+  final void Function({
+    required String recipientId,
+    required String recipientNickname,
+    required String targetType,
+    String? parentCommentId,
+  })
+  onReply;
+  final Future<void> Function(QueryDocumentSnapshot<Map<String, dynamic>> reply)
+  onReport;
+  final ValueChanged<String> onJumpToComment;
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final replies = FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(shoutId)
+        .collection('privateReplies');
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: replies.where('authorId', isEqualTo: uid).snapshots(),
+      builder: (context, authoredSnapshot) =>
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: replies.where('recipientId', isEqualTo: uid).snapshots(),
+            builder: (context, receivedSnapshot) {
+              final replyById =
+                  <String, QueryDocumentSnapshot<Map<String, dynamic>>>{
+                    for (final reply in authoredSnapshot.data?.docs ?? [])
+                      reply.id: reply,
+                    for (final reply in receivedSnapshot.data?.docs ?? [])
+                      reply.id: reply,
+                  };
+              final privateReplies = replyById.values.toList();
+              privateReplies.sort((a, b) {
+                final aTime = a.data()['createdAt'] as Timestamp?;
+                final bTime = b.data()['createdAt'] as Timestamp?;
+                return (aTime?.millisecondsSinceEpoch ?? 0).compareTo(
+                  bTime?.millisecondsSinceEpoch ?? 0,
+                );
+              });
+              return Column(
+                children: privateReplies
+                    .map(
+                      (reply) => PrivateReplyTile(
+                        reply: reply,
+                        onReply: () {
+                          final data = reply.data();
+                          if (data['authorId'] == uid) return;
+                          onReply(
+                            recipientId: data['authorId'] as String,
+                            recipientNickname: data['authorNickname'] as String,
+                            targetType: 'privateReply',
+                            parentCommentId: data['parentCommentId'] as String?,
+                          );
+                        },
+                        onReport: () => onReport(reply),
+                        onJumpToComment: onJumpToComment,
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+    );
+  }
+}
+
+class PrivateReplyTile extends StatelessWidget {
+  const PrivateReplyTile({
+    super.key,
+    required this.reply,
+    required this.onReply,
+    required this.onReport,
+    required this.onJumpToComment,
+  });
+
+  final QueryDocumentSnapshot<Map<String, dynamic>> reply;
+  final VoidCallback onReply;
+  final VoidCallback onReport;
+  final ValueChanged<String> onJumpToComment;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = reply.data();
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final own = data['authorId'] == uid;
+    final recipient = data['recipientId'] == uid;
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+      decoration: BoxDecoration(
+        color: _shoutAccentLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFCDE7E7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.lock_outline, color: _shoutPrimary, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                tr(context, 'Soukromá odpověď'),
+                style: const TextStyle(
+                  color: _shoutPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
+              ),
+              const Spacer(),
+              if (own)
+                IconButton(
+                  tooltip: tr(context, 'Smazat'),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => reply.reference.delete(),
+                  icon: const Icon(Icons.delete_outline, size: 19),
+                ),
+            ],
+          ),
+          _privateReplyText(context, data),
+          if (!own || recipient)
+            Wrap(
+              spacing: 8,
+              children: [
+                if (!own)
+                  TextButton.icon(
+                    onPressed: onReply,
+                    icon: const Icon(Icons.lock_outline, size: 17),
+                    label: Text(tr(context, 'Odpovědět soukromě')),
+                  ),
+                if (recipient)
+                  TextButton.icon(
+                    onPressed: onReport,
+                    icon: const Icon(Icons.flag_outlined, size: 17),
+                    label: Text(tr(context, 'Nahlásit')),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _privateReplyText(BuildContext context, Map<String, dynamic> data) {
+    final text = data['text'] as String;
+    final nickname = data['recipientNickname'] as String?;
+    final parentCommentId = data['parentCommentId'] as String?;
+    if (data['targetType'] == 'shout' ||
+        nickname == null ||
+        parentCommentId == null) {
+      return Text(text, style: const TextStyle(color: _shoutText));
+    }
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        InkWell(
+          onTap: () => onJumpToComment(parentCommentId),
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+            child: Text(
+              '@$nickname',
+              style: const TextStyle(
+                color: _shoutPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+        if (text.isNotEmpty) Text(' $text'),
+      ],
+    );
+  }
+}
+
+class _CommentActionButton extends StatelessWidget {
+  const _CommentActionButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => TextButton.icon(
+    onPressed: onPressed,
+    style: TextButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      visualDensity: VisualDensity.compact,
+    ),
+    icon: Icon(icon, size: 17),
+    label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+  );
+}
+
 class CommentTile extends StatefulWidget {
   const CommentTile({
     super.key,
     required this.comment,
     required this.shoutAuthorId,
     required this.onReply,
+    required this.onPrivateReply,
     required this.onReport,
     required this.onJumpToReply,
   });
@@ -3789,6 +4255,8 @@ class CommentTile extends StatefulWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> comment;
   final String shoutAuthorId;
   final void Function(String commentId, String nickname) onReply;
+  final void Function(String recipientId, String nickname, String commentId)
+  onPrivateReply;
   final VoidCallback onReport;
   final ValueChanged<String> onJumpToReply;
 
@@ -3894,34 +4362,65 @@ class _CommentTileState extends State<CommentTile> {
                 const SizedBox(height: 8),
                 _commentText(context, data),
                 const SizedBox(height: 4),
-                Wrap(
-                  spacing: 14,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                Row(
                   children: [
-                    ReactionButton(
-                      icon: Icons.thumb_up_outlined,
-                      value: likes,
-                      selected: ownType == 'like',
-                      onPressed: () => _toggleReaction('like'),
-                    ),
-                    ReactionButton(
-                      icon: Icons.thumb_down_outlined,
-                      value: dislikes,
-                      selected: ownType == 'dislike',
-                      onPressed: () => _toggleReaction('dislike'),
-                    ),
-                    TextButton.icon(
-                      onPressed: () => widget.onReply(
-                        widget.comment.id,
-                        data['authorNickname'] as String,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ReactionButton(
+                            icon: Icons.thumb_up_outlined,
+                            value: likes,
+                            selected: ownType == 'like',
+                            onPressed: () => _toggleReaction('like'),
+                          ),
+                          const SizedBox(width: 4),
+                          ReactionButton(
+                            icon: Icons.thumb_down_outlined,
+                            value: dislikes,
+                            selected: ownType == 'dislike',
+                            onPressed: () => _toggleReaction('dislike'),
+                          ),
+                        ],
                       ),
-                      icon: const Icon(Icons.reply_outlined, size: 18),
-                      label: Text(tr(context, 'Odpovědět')),
                     ),
-                    TextButton.icon(
-                      onPressed: widget.onReport,
-                      icon: const Icon(Icons.flag_outlined, size: 18),
-                      label: Text(tr(context, 'Nahlásit')),
+                    const Spacer(),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: tr(context, 'Odpovědět'),
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () => widget.onReply(
+                              widget.comment.id,
+                              data['authorNickname'] as String,
+                            ),
+                            icon: const Icon(Icons.reply_outlined, size: 20),
+                          ),
+                          if (!ownComment)
+                            IconButton(
+                              tooltip: tr(context, 'Soukromě'),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => widget.onPrivateReply(
+                                data['authorId'] as String,
+                                data['authorNickname'] as String,
+                                widget.comment.id,
+                              ),
+                              icon: const Icon(Icons.lock_outline, size: 20),
+                            ),
+                          IconButton(
+                            tooltip: tr(context, 'Nahlásit'),
+                            visualDensity: VisualDensity.compact,
+                            onPressed: widget.onReport,
+                            icon: const Icon(Icons.flag_outlined, size: 20),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
