@@ -510,7 +510,9 @@ class _SignInPageState extends State<SignInPage> {
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
     if (email.isEmpty) return null;
-    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$').hasMatch(email)) {
+    if (!RegExp(
+      r'^[^\s@.]+(?:\.[^\s@.]+)*@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$',
+    ).hasMatch(email)) {
       return tr(context, 'Zadej platný e-mail.');
     }
     return null;
