@@ -68,6 +68,11 @@ flutter:
   assets:
     - assets/avatars/
     - assets/branding/
+  fonts:
+    - family: Urbanist
+      fonts:
+        - asset: assets/fonts/Urbanist-Medium.ttf
+          weight: 500
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

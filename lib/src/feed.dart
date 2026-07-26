@@ -119,7 +119,8 @@ class _FeedPageState extends State<FeedPage> {
                                       Text(
                                         'ShoutOut',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w800,
+                                          fontFamily: 'Urbanist',
+                                          fontWeight: FontWeight.w500,
                                           fontSize: 28,
                                           letterSpacing: -.8,
                                           color: Colors.white,
