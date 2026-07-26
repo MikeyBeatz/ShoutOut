@@ -38,6 +38,15 @@ implementovaný.
   - Před implementací připravit přehled variant ke schválení.
   - Doplnit assety, výběr v profilu a případné lokalizované názvy či popisy.
 
+- [ ] **Doplnit validaci a zobrazení hesel na obrazovce změny hesla.**
+  - Nové heslo a jeho potvrzení zvýraznit červeně pouze tehdy, když se po
+    zadání neshodují.
+  - Chybový stav zobrazit při opuštění pole i při pokusu o potvrzení změny.
+  - K oběma polím přidat ikonu oka se stejným chováním jako při registraci:
+    heslo je ve výchozím stavu skryté a oko přeškrtnuté; po aktivaci je text
+    čitelný a oko nepřeškrtnuté.
+  - Zachovat stávající pravidla síly hesla a lokalizovat chybové i pomocné texty.
+
 ### Lokalizace
 
 - [ ] **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
