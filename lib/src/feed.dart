@@ -106,13 +106,14 @@ class _FeedPageState extends State<FeedPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Transform.rotate(
-                                        angle: -.14,
-                                        child: const Icon(
-                                          Icons.campaign_rounded,
-                                          size: 26,
-                                          color: Colors.white,
-                                        ),
+                                      Image.asset(
+                                        'assets/branding/feed_mark.png',
+                                        width: 34,
+                                        height: 34,
+                                        fit: BoxFit.contain,
+                                        cacheWidth: 128,
+                                        filterQuality: FilterQuality.high,
+                                        semanticLabel: 'ShoutOut',
                                       ),
                                       SizedBox(width: 7),
                                       Text(
