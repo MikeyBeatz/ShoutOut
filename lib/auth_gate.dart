@@ -194,142 +194,167 @@ class _SignInPageState extends State<SignInPage> {
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF1496A8),
-                        Color(0xFF0A6371),
-                        Color(0xFF074B57),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1F074B57),
+                    blurRadius: 30,
+                    offset: Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF1496A8),
+                          Color(0xFF0A6371),
+                          Color(0xFF074B57),
+                        ],
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            'assets/branding/app_icon.png',
+                            width: 88,
+                            height: 88,
+                            fit: BoxFit.cover,
+                            cacheWidth: 320,
+                            filterQuality: FilterQuality.high,
+                            semanticLabel: 'ShoutOut',
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ShoutOut',
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -.5,
+                                    ),
+                              ),
+                              const SizedBox(height: 7),
+                              Text(
+                                _register
+                                    ? tr(
+                                        context,
+                                        'Vytvoř si účet pro dění v okolí.',
+                                      )
+                                    : tr(
+                                        context,
+                                        'Přihlas se a zjisti, co se děje v okolí.',
+                                      ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: .84,
+                                      ),
+                                      height: 1.3,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x24074B57),
-                        blurRadius: 24,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
                   ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
-                        child: Image.asset(
-                          'assets/branding/app_icon.png',
-                          width: 96,
-                          height: 96,
-                          fit: BoxFit.cover,
-                          cacheWidth: 320,
-                          filterQuality: FilterQuality.high,
-                          semanticLabel: 'ShoutOut',
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          tr(context, _register ? 'Registrace' : 'Přihlášení'),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
                         ),
-                      ),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: tr(context, 'E-mail'),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _password,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: tr(context, 'Heslo'),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            alignment: Alignment.center,
+                            minimumSize: const Size.fromHeight(48),
+                          ),
+                          onPressed: _busy ? null : _emailAuth,
+                          child: Text(
+                            tr(
+                              context,
+                              _register ? 'Vytvořit účet' : 'Přihlásit se',
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => setState(() => _register = !_register),
+                          child: Text(
+                            tr(
+                              context,
+                              _register ? 'Už účet mám' : 'Vytvořit nový účet',
+                            ),
+                          ),
+                        ),
+                        Row(
                           children: [
-                            Text(
-                              'ShoutOut',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -.5,
-                                  ),
+                            Expanded(child: Divider()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(tr(context, 'nebo')),
                             ),
-                            const SizedBox(height: 7),
-                            Text(
-                              _register
-                                  ? tr(
-                                      context,
-                                      'Vytvoř si účet pro dění v okolí.',
-                                    )
-                                  : tr(
-                                      context,
-                                      'Přihlas se a zjisti, co se děje v okolí.',
-                                    ),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: .84),
-                                    height: 1.3,
-                                  ),
-                            ),
+                            Expanded(child: Divider()),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 26),
-                Text(
-                  tr(context, _register ? 'Registrace' : 'Přihlášení'),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 22),
-                TextField(
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: tr(context, 'E-mail'),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _password,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: tr(context, 'Heslo'),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: _busy ? null : _emailAuth,
-                  child: Text(
-                    tr(context, _register ? 'Vytvořit účet' : 'Přihlásit se'),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _busy
-                      ? null
-                      : () => setState(() => _register = !_register),
-                  child: Text(
-                    tr(
-                      context,
-                      _register ? 'Už účet mám' : 'Vytvořit nový účet',
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: _busy ? null : _googleAuth,
+                          icon: const Icon(Icons.g_mobiledata),
+                          label: Text(tr(context, 'Pokračovat přes Google')),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    Expanded(child: Divider()),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(tr(context, 'nebo')),
-                    ),
-                    Expanded(child: Divider()),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _busy ? null : _googleAuth,
-                  icon: const Icon(Icons.g_mobiledata),
-                  label: Text(tr(context, 'Pokračovat přes Google')),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
