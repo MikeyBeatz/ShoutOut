@@ -1938,30 +1938,6 @@ class ProfileActionTile extends StatelessWidget {
   );
 }
 
-class _ModeratorProfileTile extends StatelessWidget {
-  const _ModeratorProfileTile({required this.userId});
-  final String userId;
-
-  @override
-  Widget build(BuildContext context) =>
-      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('moderators')
-            .doc(userId)
-            .snapshots(),
-        builder: (context, snapshot) => snapshot.data?.exists == true
-            ? ProfileActionTile(
-                icon: Icons.admin_panel_settings_outlined,
-                title: tr(context, 'Moderace'),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ModerationPage()),
-                ),
-              )
-            : const SizedBox.shrink(),
-      );
-}
-
 class _ProfileWideAction extends StatelessWidget {
   const _ProfileWideAction({
     required this.icon,
@@ -2100,14 +2076,6 @@ class EditProfilePage extends StatelessWidget {
     ),
   );
 }
-
-String _languageName(BuildContext context, AppLocalizations l10n) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'en' => l10n.english,
-      'de' => l10n.german,
-      'pl' => l10n.polish,
-      _ => l10n.czech,
-    };
 
 Future<void> _selectProfileLanguage(BuildContext context, String userId) async {
   final l10n = AppLocalizations.of(context)!;
@@ -2625,15 +2593,18 @@ class _ReportList extends StatelessWidget {
             .where('status', isEqualTo: 'open')
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError)
+          if (snapshot.hasError) {
             return Center(
               child: Text(tr(context, 'Hlášení se nepodařilo načíst.')),
             );
-          if (!snapshot.hasData)
+          }
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          }
           final reports = snapshot.data!.docs;
-          if (reports.isEmpty)
+          if (reports.isEmpty) {
             return Center(child: Text(tr(context, 'Žádná otevřená hlášení.')));
+          }
           return ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: reports.length,
@@ -2737,11 +2708,13 @@ class WarningHistoryPage extends StatelessWidget {
           .where('userId', isEqualTo: userId)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
         final warnings = snapshot.data!.docs;
-        if (warnings.isEmpty)
+        if (warnings.isEmpty) {
           return Center(child: Text(tr(context, 'Nemáš žádná varování.')));
+        }
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: warnings.length,
@@ -3616,19 +3589,6 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                     )
                   : null,
             ),
-            if (false)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () => _replyPrivately(
-                    recipientId: widget.shout.authorId,
-                    recipientNickname: widget.shout.author,
-                    targetType: 'shout',
-                  ),
-                  icon: const Icon(Icons.lock_outline, size: 18),
-                  label: Text(tr(context, 'Soukromě odpovědět')),
-                ),
-              ),
             const SizedBox(height: 16),
             Text(
               '${tr(context, 'Komentáře')} (${comments.length})',
@@ -3770,8 +3730,21 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _jumpToComment(String commentId) async {
-    BuildContext? target = _commentKeys[commentId]?.currentContext;
-    if (target == null && _commentsScrollController.hasClients) {
+    final visibleTarget = _commentKeys[commentId]?.currentContext;
+    if (visibleTarget != null) {
+      await Scrollable.ensureVisible(
+        visibleTarget,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        alignment: .25,
+      );
+      if (mounted) {
+        _commentKeys[commentId]?.currentState?.highlight();
+      }
+      return;
+    }
+
+    if (_commentsScrollController.hasClients) {
       final commentIndex = _commentIds.indexOf(commentId);
       if (commentIndex >= 0) {
         // The target may be outside ListView's currently built area. Move to
@@ -3784,10 +3757,14 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           duration: const Duration(milliseconds: 360),
           curve: Curves.easeInOut,
         );
+        if (!mounted) return;
         await Future<void>.delayed(const Duration(milliseconds: 80));
-        target = _commentKeys[commentId]?.currentContext;
+        if (!mounted) return;
       }
     }
+
+    if (!mounted) return;
+    final target = _commentKeys[commentId]?.currentContext;
     if (target == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -3796,6 +3773,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       );
       return;
     }
+    if (!target.mounted) return;
     await Scrollable.ensureVisible(
       target,
       duration: const Duration(milliseconds: 350),
@@ -4216,29 +4194,6 @@ class PrivateReplyTile extends StatelessWidget {
       ],
     );
   }
-}
-
-class _CommentActionButton extends StatelessWidget {
-  const _CommentActionButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => TextButton.icon(
-    onPressed: onPressed,
-    style: TextButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      visualDensity: VisualDensity.compact,
-    ),
-    icon: Icon(icon, size: 17),
-    label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-  );
 }
 
 class CommentTile extends StatefulWidget {
