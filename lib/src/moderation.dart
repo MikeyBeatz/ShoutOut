@@ -36,6 +36,7 @@ class _PrivateReplyReportList extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('privateReplyReports')
             .where('status', isEqualTo: 'open')
+            .limit(_moderationPageSize)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -102,6 +103,7 @@ class _ReportList extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection(collection)
             .where('status', isEqualTo: 'open')
+            .limit(_moderationPageSize)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -178,7 +180,7 @@ class _ReportList extends StatelessWidget {
       if (collection == 'reports') {
         await target.update({'status': 'deleted'});
       } else {
-        await target.delete();
+        await _deleteCommentWithCounter(target);
       }
     }
     if (authorId != null && action == 'warning') {
@@ -217,6 +219,7 @@ class WarningHistoryPage extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('warnings')
           .where('userId', isEqualTo: userId)
+          .limit(_moderationPageSize)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

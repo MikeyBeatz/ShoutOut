@@ -45,3 +45,28 @@ reactions under several existing demo Shouts:
 ```powershell
 node .\seed_test_users.mjs --live-activity
 ```
+
+## Reconcile development counters
+
+Po přechodu na souhrnné čítače spusťte jednorázově následující příkaz. Skript
+odvodí počty reakcí, komentářů a uložení ze skutečných podkolekcí a zároveň
+zaokrouhlí veřejné souřadnice. Má pevnou pojistku a odmítne jiný projekt než
+`shoutout-dev-46c81`.
+
+```powershell
+$env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
+npm run reconcile:data
+```
+
+## Firestore Rules tests
+
+Testy používají pouze lokální Firestore Emulator a projekt
+`shoutout-rules-test`; žádná vzdálená data nemění:
+
+```powershell
+npm ci
+npm run test:rules
+```
+
+Je potřeba Java 21 nebo kompatibilní verze v `PATH`. Pokud není instalovaná
+samostatně, lze použít `jbr\bin` z Android Studia.

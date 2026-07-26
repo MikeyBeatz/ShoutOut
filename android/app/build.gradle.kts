@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -5,6 +8,14 @@ plugins {
     // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val shoutOutKeystoreProperties = Properties()
+val shoutOutKeystorePropertiesFile = rootProject.file("key.properties")
+if (shoutOutKeystorePropertiesFile.exists()) {
+    FileInputStream(shoutOutKeystorePropertiesFile).use {
+        shoutOutKeystoreProperties.load(it)
+    }
 }
 
 android {
@@ -27,11 +38,22 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (shoutOutKeystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = shoutOutKeystoreProperties.getProperty("keyAlias")
+                keyPassword = shoutOutKeystoreProperties.getProperty("keyPassword")
+                storeFile = file(shoutOutKeystoreProperties.getProperty("storeFile"))
+                storePassword = shoutOutKeystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Never sign a distributable build with Flutter's shared debug key.
+            // A missing key.properties intentionally produces an unsigned build.
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 }

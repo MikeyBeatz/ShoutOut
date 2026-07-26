@@ -5,36 +5,83 @@ service cloud.firestore {
     function signedIn() {
       return request.auth != null;
     }
-    function isModerator() {
-      return signedIn() && exists(/databases/$(database)/documents/moderators/$(request.auth.uid));
+
+    function verifiedIdentity() {
+      return signedIn() &&
+        request.auth.token.email_verified == true &&
+        request.auth.token.email is string;
     }
 
-    match /moderators/{moderatorId} {
-      allow get: if signedIn() && request.auth.uid == moderatorId;
-      allow list, create, update, delete: if false;
+    function isModerator() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/moderators/$(request.auth.uid));
     }
-    match /bans/{userId} {
-      allow get: if signedIn() && (request.auth.uid == userId || isModerator());
-      allow create, update: if isModerator() && request.resource.data.keys().hasOnly([
-        'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
-      ]) && request.resource.data.userId == userId;
-      allow list, delete: if false;
+
+    function hasProfile() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
-    match /warnings/{warningId} {
-      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isModerator());
-      allow create: if isModerator() && request.resource.data.keys().hasOnly([
-        'userId', 'reason', 'createdAt', 'moderatorId'
-      ]);
-      allow list, update, delete: if false;
+
+    function hasAcceptedLegal() {
+      return signedIn() &&
+        exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)/legal/acceptance_2026_07_25
+        );
     }
-    match /accountDeletionRequests/{userId} {
-      allow get: if signedIn() && (request.auth.uid == userId || isModerator());
-      allow create: if signedIn() && request.auth.uid == userId &&
-        request.resource.data.keys().hasOnly(['userId', 'email', 'requestedAt', 'retainUntil', 'status']) &&
-        request.resource.data.userId == userId &&
-        request.resource.data.email == request.auth.token.email &&
-        request.resource.data.status == 'pending';
-      allow list, update, delete: if false;
+
+    function hasActiveBan() {
+      let banPath =
+        /databases/$(database)/documents/bans/$(request.auth.uid);
+      return signedIn() &&
+        exists(banPath) &&
+        (
+          get(banPath).data.expiresAt == null ||
+          get(banPath).data.expiresAt > request.time
+        );
+    }
+
+    function deletionPending() {
+      return signedIn() &&
+        exists(
+          /databases/$(database)/documents/accountDeletionRequests/$(request.auth.uid)
+        );
+    }
+
+    function eligibleUser() {
+      return verifiedIdentity() &&
+        hasProfile() &&
+        hasAcceptedLegal() &&
+        !hasActiveBan() &&
+        !deletionPending();
+    }
+
+    function eligibleModerator() {
+      return eligibleUser() && isModerator();
+    }
+
+    function limited(maximum) {
+      return request.query.limit != null &&
+        request.query.limit > 0 &&
+        request.query.limit <= maximum;
+    }
+
+    function validAvatarId(avatarId) {
+      return avatarId in [
+        'fox', 'owl', 'otter', 'raccoon', 'robot', 'astronaut', 'cactus',
+        'mushroom', 'moon', 'comet', 'cat', 'dragon', 'mountain',
+        'lightning', 'controller', 'octopus'
+      ];
+    }
+
+    function validNickname(nickname, nicknameLower) {
+      return nickname is string &&
+        nickname.size() >= 3 &&
+        nickname.size() <= 24 &&
+        nickname.matches('^[a-zA-Z0-9]+([-_][a-zA-Z0-9]+)*$') &&
+        nicknameLower is string &&
+        nicknameLower.size() >= 3 &&
+        nicknameLower.size() <= 24 &&
+        nicknameLower.matches('^[a-z0-9]+([-_][a-z0-9]+)*$');
     }
 
     function validProfile() {
@@ -58,31 +105,31 @@ service cloud.firestore {
           'language',
           'avatarId'
         ]) &&
-        request.resource.data.nickname is string &&
-        request.resource.data.nickname.size() >= 3 &&
-        request.resource.data.nickname.size() <= 24 &&
-        request.resource.data.nicknameLower is string &&
+        validNickname(
+          request.resource.data.nickname,
+          request.resource.data.nicknameLower
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.nicknameChangedAt == request.time &&
         request.resource.data.nicknameChangeCount == 0 &&
-        request.resource.data.emailVerified == true &&
+        request.resource.data.emailVerified ==
+          request.auth.token.email_verified &&
         request.resource.data.language in ['cs', 'en', 'de', 'pl'] &&
         validAvatarId(request.resource.data.avatarId);
     }
 
-    function validAvatarId(avatarId) {
-      return avatarId in [
-        'fox', 'owl', 'otter', 'raccoon', 'robot', 'astronaut', 'cactus',
-        'mushroom', 'moon', 'comet', 'cat', 'dragon', 'mountain',
-        'lightning', 'controller', 'octopus'
-      ];
-    }
-
-    function validNicknameChange(userId) {
+    function validNicknameChange() {
       return request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['nickname', 'nicknameLower', 'nicknameChangedAt', 'nicknameChangeCount']) &&
-        request.resource.data.nickname is string &&
-        request.resource.data.nickname.size() >= 3 &&
-        request.resource.data.nickname.size() <= 24 &&
-        request.resource.data.nicknameLower is string &&
+          .hasOnly([
+            'nickname',
+            'nicknameLower',
+            'nicknameChangedAt',
+            'nicknameChangeCount'
+          ]) &&
+        validNickname(
+          request.resource.data.nickname,
+          request.resource.data.nicknameLower
+        ) &&
         request.resource.data.nicknameChangedAt == request.time &&
         existsAfter(
           /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
@@ -94,35 +141,236 @@ service cloud.firestore {
           (!resource.data.keys().hasAll(['nicknameChangeCount']) &&
             request.resource.data.nicknameChangeCount == 1) ||
           (resource.data.keys().hasAll(['nicknameChangeCount']) &&
-            request.resource.data.nicknameChangeCount == resource.data.nicknameChangeCount + 1)
+            request.resource.data.nicknameChangeCount ==
+              resource.data.nicknameChangeCount + 1)
         ) &&
         (
           !resource.data.keys().hasAll(['nicknameChangeCount']) ||
           resource.data.nicknameChangeCount == 0 ||
-          request.time >= resource.data.nicknameChangedAt + duration.value(30, 'd')
+          request.time >=
+            resource.data.nicknameChangedAt + duration.value(30, 'd')
         );
     }
 
-    match /nicknames/{nicknameLower} {
-      allow get: if signedIn();
-      allow create: if signedIn() &&
+    function rateCooldown(action) {
+      return action == 'shout'
+        ? duration.value(2, 'm')
+        : action == 'report'
+          ? duration.value(1, 'm')
+          : action in ['comment', 'privateReply']
+            ? duration.value(10, 's')
+            : duration.value(1, 's');
+    }
+
+    function rateWindow(action) {
+      return action in ['shout', 'report']
+        ? duration.value(1, 'd')
+        : duration.value(1, 'h');
+    }
+
+    function rateMaximum(action) {
+      return action == 'shout'
+        ? 10
+        : action == 'report'
+          ? 20
+          : action in ['comment', 'privateReply']
+            ? 60
+            : 120;
+    }
+
+    function validRateDocument(action) {
+      return action in [
+          'shout', 'comment', 'privateReply', 'report', 'interaction', 'delete'
+        ] &&
         request.resource.data.keys().hasOnly([
+          'lastAt', 'lastEventId', 'windowStartedAt', 'count'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'lastAt', 'lastEventId', 'windowStartedAt', 'count'
+        ]) &&
+        request.resource.data.lastAt == request.time &&
+        request.resource.data.lastEventId is string &&
+        request.resource.data.lastEventId.size() >= 1 &&
+        request.resource.data.lastEventId.size() <= 500 &&
+        request.resource.data.windowStartedAt is timestamp &&
+        request.resource.data.count is int &&
+        request.resource.data.count >= 1 &&
+        request.resource.data.count <= rateMaximum(action);
+    }
+
+    function validRateCreate(action) {
+      return validRateDocument(action) &&
+        request.resource.data.windowStartedAt == request.time &&
+        request.resource.data.count == 1;
+    }
+
+    function validRateUpdate(action) {
+      return validRateDocument(action) &&
+        resource.data.lastAt is timestamp &&
+        resource.data.windowStartedAt is timestamp &&
+        resource.data.count is int &&
+        request.time >= resource.data.lastAt + rateCooldown(action) &&
+        (
+          (
+            request.time <
+              resource.data.windowStartedAt + rateWindow(action) &&
+            request.resource.data.windowStartedAt ==
+              resource.data.windowStartedAt &&
+            request.resource.data.count == resource.data.count + 1
+          ) ||
+          (
+            request.time >=
+              resource.data.windowStartedAt + rateWindow(action) &&
+            request.resource.data.windowStartedAt == request.time &&
+            request.resource.data.count == 1
+          )
+        );
+    }
+
+    function consumedRate(action, eventId) {
+      let ratePath =
+        /databases/$(database)/documents/rateLimits/$(request.auth.uid)/actions/$(action);
+      return existsAfter(ratePath) &&
+        getAfter(ratePath).data.lastAt == request.time &&
+        getAfter(ratePath).data.lastEventId == eventId;
+    }
+
+    function canonicalNickname(data) {
+      return data.authorNickname ==
+        get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.nickname;
+    }
+
+    function activeShout(shoutId) {
+      let shoutPath =
+        /databases/$(database)/documents/shouts/$(shoutId);
+      return exists(shoutPath) &&
+        get(shoutPath).data.status == 'active' &&
+        get(shoutPath).data.expiresAt > request.time;
+    }
+
+    match /moderators/{moderatorId} {
+      allow get: if signedIn() && request.auth.uid == moderatorId;
+      allow list, create, update, delete: if false;
+    }
+
+    match /bans/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || isModerator());
+      allow create, update: if eligibleModerator() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
+        ]) &&
+        request.resource.data.userId == userId &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        (
+          request.resource.data.expiresAt == null ||
+          request.resource.data.expiresAt is timestamp
+        ) &&
+        request.resource.data.moderatorId == request.auth.uid;
+      allow list, delete: if false;
+    }
+
+    match /warnings/{warningId} {
+      allow get: if signedIn() &&
+        (
+          resource.data.userId == request.auth.uid ||
+          eligibleModerator()
+        );
+      allow list: if signedIn() &&
+        (
+          resource.data.userId == request.auth.uid ||
+          eligibleModerator()
+        ) &&
+        limited(50);
+      allow create: if eligibleModerator() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'reason', 'createdAt', 'moderatorId'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'reason', 'createdAt', 'moderatorId'
+        ]) &&
+        request.resource.data.userId is string &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.moderatorId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /accountDeletionRequests/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || isModerator());
+      allow create: if verifiedIdentity() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'email', 'requestedAt', 'retainUntil', 'status'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'email', 'requestedAt', 'retainUntil', 'status'
+        ]) &&
+        request.resource.data.userId == userId &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.requestedAt == request.time &&
+        request.resource.data.retainUntil >=
+          request.time + duration.value(59, 'd') &&
+        request.resource.data.retainUntil <=
+          request.time + duration.value(61, 'd') &&
+        request.resource.data.status == 'pending';
+      allow list, update, delete: if false;
+    }
+
+    match /nicknames/{nicknameLower} {
+      allow get: if verifiedIdentity() && hasAcceptedLegal();
+      allow create: if verifiedIdentity() &&
+        hasAcceptedLegal() &&
+        request.resource.data.keys().hasOnly([
+          'uid', 'nickname', 'nicknameLower', 'createdAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
           'uid', 'nickname', 'nicknameLower', 'createdAt'
         ]) &&
         request.resource.data.uid == request.auth.uid &&
         request.resource.data.nicknameLower == nicknameLower &&
-        existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nicknameLower == nicknameLower;
-      allow delete: if signedIn() &&
+        validNickname(
+          request.resource.data.nickname,
+          request.resource.data.nicknameLower
+        ) &&
+        request.resource.data.createdAt == request.time &&
+        existsAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.nickname == request.resource.data.nickname &&
+        getAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.nicknameLower == nicknameLower;
+      allow delete: if eligibleUser() &&
         resource.data.uid == request.auth.uid &&
-        existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nicknameLower != nicknameLower;
+        existsAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ) &&
+        getAfter(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.nicknameLower != nicknameLower;
       allow update, list: if false;
     }
 
     match /users/{userId} {
-      allow get: if signedIn() && request.auth.uid == userId;
-      allow create: if signedIn() &&
+      allow get: if verifiedIdentity() && request.auth.uid == userId;
+      allow create: if verifiedIdentity() &&
+        hasAcceptedLegal() &&
+        !hasActiveBan() &&
+        !deletionPending() &&
         request.auth.uid == userId &&
         validProfile() &&
         existsAfter(
@@ -131,32 +379,41 @@ service cloud.firestore {
         getAfter(
           /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
         ).data.uid == request.auth.uid;
-      allow update: if signedIn() &&
+      allow update: if eligibleUser() &&
         request.auth.uid == userId &&
         (
-          (request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['language']) &&
-            request.resource.data.language in ['cs', 'en', 'de', 'pl']) ||
-          (request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['avatarId']) &&
-            validAvatarId(request.resource.data.avatarId)) ||
-          validNicknameChange(userId)
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['language']) &&
+            request.resource.data.language in ['cs', 'en', 'de', 'pl']
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['avatarId']) &&
+            validAvatarId(request.resource.data.avatarId)
+          ) ||
+          validNicknameChange()
         );
       allow delete, list: if false;
 
       match /blocked/{blockedUserId} {
-        allow read: if signedIn() && request.auth.uid == userId;
-        allow create: if signedIn() &&
+        allow get: if eligibleUser() && request.auth.uid == userId;
+        allow list: if eligibleUser() &&
+          request.auth.uid == userId &&
+          limited(200);
+        allow create: if eligibleUser() &&
           request.auth.uid == userId &&
           request.resource.data.keys().hasOnly(['createdAt']) &&
+          request.resource.data.keys().hasAll(['createdAt']) &&
+          request.resource.data.createdAt == request.time &&
           blockedUserId != userId;
-        allow delete: if signedIn() && request.auth.uid == userId;
+        allow delete: if eligibleUser() && request.auth.uid == userId;
         allow update: if false;
       }
 
       match /settings/{settingId} {
-        allow read: if signedIn() && request.auth.uid == userId;
-        allow create, update: if signedIn() &&
+        allow read: if eligibleUser() && request.auth.uid == userId;
+        allow create, update: if eligibleUser() &&
           request.auth.uid == userId &&
           settingId == 'notifications' &&
           request.resource.data.keys().hasOnly([
@@ -172,9 +429,11 @@ service cloud.firestore {
       }
 
       match /legal/{documentId} {
-        allow read: if signedIn() && request.auth.uid == userId;
-        allow create: if signedIn() &&
+        allow read: if verifiedIdentity() && request.auth.uid == userId;
+        allow create: if verifiedIdentity() &&
           request.auth.uid == userId &&
+          !hasActiveBan() &&
+          !deletionPending() &&
           documentId == 'acceptance_2026_07_25' &&
           request.resource.data.keys().hasOnly([
             'termsVersion',
@@ -202,46 +461,107 @@ service cloud.firestore {
       }
     }
 
+    match /rateLimits/{userId}/actions/{action} {
+      allow get: if eligibleUser() && request.auth.uid == userId;
+      allow create: if eligibleUser() &&
+        request.auth.uid == userId &&
+        validRateCreate(action);
+      allow update: if eligibleUser() &&
+        request.auth.uid == userId &&
+        validRateUpdate(action);
+      allow list, delete: if false;
+    }
+
+    function validReportUpdate() {
+      return eligibleModerator() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'moderatorNote', 'resolvedAt']) &&
+        request.resource.data.status == 'resolved' &&
+        request.resource.data.resolvedAt == request.time &&
+        (
+          !request.resource.data.keys().hasAll(['moderatorNote']) ||
+          (
+            request.resource.data.moderatorNote is string &&
+            request.resource.data.moderatorNote.size() <= 500
+          )
+        );
+    }
+
     match /reports/{reportId} {
-      allow create: if signedIn() &&
+      allow create: if eligibleUser() &&
+        reportId ==
+          request.auth.uid + '_' + request.resource.data.shoutId &&
+        consumedRate('report', reportId) &&
         request.resource.data.keys().hasOnly([
+          'reporterId', 'shoutId', 'reason', 'createdAt', 'status'
+        ]) &&
+        request.resource.data.keys().hasAll([
           'reporterId', 'shoutId', 'reason', 'createdAt', 'status'
         ]) &&
         request.resource.data.reporterId == request.auth.uid &&
         request.resource.data.shoutId is string &&
+        exists(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)
+        ) &&
+        get(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)
+        ).data.authorId != request.auth.uid &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
         request.resource.data.status == 'open';
-      allow read: if isModerator();
-      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow update: if validReportUpdate();
       allow delete: if false;
     }
 
     match /commentReports/{reportId} {
-      allow create: if signedIn() &&
+      allow create: if eligibleUser() &&
+        reportId ==
+          request.auth.uid + '_' +
+          request.resource.data.shoutId + '_' +
+          request.resource.data.commentId &&
+        consumedRate('report', reportId) &&
         request.resource.data.keys().hasOnly([
+          'reporterId', 'shoutId', 'commentId', 'reason', 'createdAt', 'status'
+        ]) &&
+        request.resource.data.keys().hasAll([
           'reporterId', 'shoutId', 'commentId', 'reason', 'createdAt', 'status'
         ]) &&
         request.resource.data.reporterId == request.auth.uid &&
         request.resource.data.shoutId is string &&
         request.resource.data.commentId is string &&
+        exists(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/comments/$(request.resource.data.commentId)
+        ) &&
+        get(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/comments/$(request.resource.data.commentId)
+        ).data.authorId != request.auth.uid &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
         request.resource.data.status == 'open';
-      allow read: if isModerator();
-      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow update: if validReportUpdate();
       allow delete: if false;
     }
 
-    // A report contains a verified snapshot of a private reply so moderation
-    // can review reported content without broad access to private threads.
     match /privateReplyReports/{reportId} {
-      allow create: if signedIn() &&
+      allow create: if eligibleUser() &&
+        reportId ==
+          request.auth.uid + '_' +
+          request.resource.data.shoutId + '_' +
+          request.resource.data.privateReplyId &&
+        consumedRate('report', reportId) &&
         request.resource.data.keys().hasOnly([
+          'reporterId', 'shoutId', 'privateReplyId', 'authorId', 'text',
+          'reason', 'createdAt', 'status', 'priority'
+        ]) &&
+        request.resource.data.keys().hasAll([
           'reporterId', 'shoutId', 'privateReplyId', 'authorId', 'text',
           'reason', 'createdAt', 'status', 'priority'
         ]) &&
@@ -253,28 +573,38 @@ service cloud.firestore {
         request.resource.data.reason is string &&
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
         request.resource.data.status == 'open' &&
         request.resource.data.priority == 'high' &&
-        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.recipientId == request.auth.uid &&
-        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.authorId == request.resource.data.authorId &&
-        get(/databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)).data.text == request.resource.data.text;
-      allow read: if isModerator();
-      allow update: if isModerator() && request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['status', 'moderatorNote', 'resolvedAt']);
+        get(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)
+        ).data.recipientId == request.auth.uid &&
+        get(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)
+        ).data.authorId == request.resource.data.authorId &&
+        get(
+          /databases/$(database)/documents/shouts/$(request.resource.data.shoutId)/privateReplies/$(request.resource.data.privateReplyId)
+        ).data.text == request.resource.data.text;
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow update: if validReportUpdate();
       allow delete: if false;
     }
 
-    // Required for collectionGroup('comments') queries used by the user's
-    // comment history. The write rules remain scoped below to Shouts only.
-    match /{path=**}/comments/{commentId} {
-      allow read: if signedIn();
-    }
-
-    match /shouts/{shoutId} {
-      allow read: if signedIn();
-      allow create: if signedIn() &&
+    function validShoutCreate() {
+      return request.resource.data.keys().hasOnly([
+          'authorId', 'authorNickname', 'title', 'text', 'categories',
+          'location', 'createdAt', 'expiresAt', 'status', 'likesCount',
+          'dislikesCount', 'commentsCount', 'savesCount'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'authorId', 'authorNickname', 'title', 'text', 'categories',
+          'location', 'createdAt', 'expiresAt', 'status', 'likesCount',
+          'dislikesCount', 'commentsCount', 'savesCount'
+        ]) &&
         request.resource.data.authorId == request.auth.uid &&
         request.resource.data.authorNickname is string &&
+        canonicalNickname(request.resource.data) &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 1 &&
         request.resource.data.title.size() <= 60 &&
@@ -284,95 +614,339 @@ service cloud.firestore {
         request.resource.data.categories is list &&
         request.resource.data.categories.size() >= 1 &&
         request.resource.data.categories.size() <= 2 &&
+        request.resource.data.categories.hasOnly([
+          'Obecné', 'Akce', 'Sport', 'Zábava', 'Pomoc', 'Upozornění',
+          'Dotaz', 'Doprava', 'Jídlo a pití', 'Kultura'
+        ]) &&
         request.resource.data.location is latlng &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.expiresAt >=
+          request.time + duration.value(14, 'm') &&
+        request.resource.data.expiresAt <=
+          request.time + duration.value(1441, 'm') &&
         request.resource.data.status == 'active' &&
         request.resource.data.likesCount == 0 &&
         request.resource.data.dislikesCount == 0 &&
         request.resource.data.commentsCount == 0 &&
         request.resource.data.savesCount == 0;
-      allow update: if signedIn() &&
-        (resource.data.authorId == request.auth.uid || isModerator()) &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status']) &&
-        request.resource.data.status == 'deleted';
+    }
+
+    function validShoutReactionCounters(shoutId) {
+      let reactionPath =
+        /databases/$(database)/documents/shouts/$(shoutId)/reactions/$(request.auth.uid);
+      let oldType = exists(reactionPath) ? get(reactionPath).data.type : '';
+      let newType =
+        existsAfter(reactionPath) ? getAfter(reactionPath).data.type : '';
+      return consumedRate(
+          'interaction',
+          'shoutReaction_' + shoutId
+        ) &&
+        request.resource.data.likesCount ==
+          resource.data.get('likesCount', 0) +
+          (newType == 'like' ? 1 : 0) -
+          (oldType == 'like' ? 1 : 0) &&
+        request.resource.data.dislikesCount ==
+          resource.data.get('dislikesCount', 0) +
+          (newType == 'dislike' ? 1 : 0) -
+          (oldType == 'dislike' ? 1 : 0);
+    }
+
+    function validSaveCounter(shoutId) {
+      let savePath =
+        /databases/$(database)/documents/shouts/$(shoutId)/saves/$(request.auth.uid);
+      return consumedRate('interaction', 'save_' + shoutId) &&
+        request.resource.data.savesCount ==
+          resource.data.get('savesCount', 0) +
+          (existsAfter(savePath) ? 1 : 0) -
+          (exists(savePath) ? 1 : 0);
+    }
+
+    function validCommentCountIncrease(shoutId) {
+      let ratePath =
+        /databases/$(database)/documents/rateLimits/$(request.auth.uid)/actions/comment;
+      let commentId = getAfter(ratePath).data.lastEventId;
+      let commentPath =
+        /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId);
+      return consumedRate('comment', commentId) &&
+        existsAfter(commentPath) &&
+        getAfter(commentPath).data.createdAt == request.time &&
+        getAfter(commentPath).data.authorId == request.auth.uid &&
+        request.resource.data.commentsCount ==
+          resource.data.get('commentsCount', 0) + 1;
+    }
+
+    function validCommentCountDecrease(shoutId) {
+      let ratePath =
+        /databases/$(database)/documents/rateLimits/$(request.auth.uid)/actions/delete;
+      let commentId = getAfter(ratePath).data.lastEventId;
+      let commentPath =
+        /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId);
+      return consumedRate('delete', commentId) &&
+        exists(commentPath) &&
+        !existsAfter(commentPath) &&
+        request.resource.data.commentsCount ==
+          (
+            resource.data.get('commentsCount', 0) > 0
+              ? resource.data.get('commentsCount', 0) - 1
+              : 0
+          );
+    }
+
+    function validShoutCounterUpdate(shoutId) {
+      return request.resource.data.likesCount is int &&
+        request.resource.data.dislikesCount is int &&
+        request.resource.data.commentsCount is int &&
+        request.resource.data.savesCount is int &&
+        request.resource.data.likesCount >= 0 &&
+        request.resource.data.dislikesCount >= 0 &&
+        request.resource.data.commentsCount >= 0 &&
+        request.resource.data.savesCount >= 0 &&
+        (
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['likesCount', 'dislikesCount']) &&
+            validShoutReactionCounters(shoutId)
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['savesCount']) &&
+            validSaveCounter(shoutId)
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['commentsCount']) &&
+            (
+              validCommentCountIncrease(shoutId) ||
+              validCommentCountDecrease(shoutId)
+            )
+          )
+        );
+    }
+
+    match /{path=**}/comments/{commentId} {
+      allow list: if eligibleUser() && limited(50);
+    }
+
+    match /shouts/{shoutId} {
+      allow get: if eligibleUser();
+      allow list: if eligibleUser() && limited(50);
+      allow create: if eligibleUser() &&
+        consumedRate('shout', shoutId) &&
+        validShoutCreate();
+      allow update: if eligibleUser() &&
+        (
+          (
+            (resource.data.authorId == request.auth.uid || isModerator()) &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status']) &&
+            request.resource.data.status == 'deleted'
+          ) ||
+          validShoutCounterUpdate(shoutId)
+        );
       allow delete: if false;
 
       match /comments/{commentId} {
-        allow read: if signedIn();
-        allow create: if signedIn() &&
+        function validCommentReactionCounters() {
+          let reactionPath =
+            /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId)/reactions/$(request.auth.uid);
+          let oldType =
+            exists(reactionPath) ? get(reactionPath).data.type : '';
+          let newType =
+            existsAfter(reactionPath) ? getAfter(reactionPath).data.type : '';
+          return consumedRate(
+              'interaction',
+              'commentReaction_' + shoutId + '_' + commentId
+            ) &&
+            request.resource.data.likesCount ==
+              resource.data.get('likesCount', 0) +
+              (newType == 'like' ? 1 : 0) -
+              (oldType == 'like' ? 1 : 0) &&
+            request.resource.data.dislikesCount ==
+              resource.data.get('dislikesCount', 0) +
+              (newType == 'dislike' ? 1 : 0) -
+              (oldType == 'dislike' ? 1 : 0);
+        }
+
+        allow get: if eligibleUser();
+        allow list: if eligibleUser() && limited(50);
+        allow create: if eligibleUser() &&
+          activeShout(shoutId) &&
+          consumedRate('comment', commentId) &&
           request.resource.data.keys().hasOnly([
             'authorId', 'authorNickname', 'text', 'createdAt',
-            'replyToCommentId', 'replyToNickname'
+            'likesCount', 'dislikesCount', 'replyToCommentId',
+            'replyToNickname'
+          ]) &&
+          request.resource.data.keys().hasAll([
+            'authorId', 'authorNickname', 'text', 'createdAt',
+            'likesCount', 'dislikesCount'
           ]) &&
           request.resource.data.authorId == request.auth.uid &&
           request.resource.data.authorNickname is string &&
+          canonicalNickname(request.resource.data) &&
           request.resource.data.text is string &&
           request.resource.data.text.size() >= 1 &&
           request.resource.data.text.size() <= 220 &&
-          (!request.resource.data.keys().hasAll(['replyToCommentId']) ||
-            request.resource.data.replyToCommentId is string) &&
-          (!request.resource.data.keys().hasAll(['replyToNickname']) ||
-            request.resource.data.replyToNickname is string);
-        allow update: if false;
-        allow delete: if signedIn() &&
-          (resource.data.authorId == request.auth.uid || isModerator());
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.likesCount == 0 &&
+          request.resource.data.dislikesCount == 0 &&
+          (
+            (
+              !request.resource.data.keys().hasAll(['replyToCommentId']) &&
+              !request.resource.data.keys().hasAll(['replyToNickname'])
+            ) ||
+            (
+              request.resource.data.replyToCommentId is string &&
+              request.resource.data.replyToNickname is string &&
+              exists(
+                /databases/$(database)/documents/shouts/$(shoutId)/comments/$(request.resource.data.replyToCommentId)
+              ) &&
+              get(
+                /databases/$(database)/documents/shouts/$(shoutId)/comments/$(request.resource.data.replyToCommentId)
+              ).data.authorNickname == request.resource.data.replyToNickname
+            )
+          ) &&
+          getAfter(
+            /databases/$(database)/documents/shouts/$(shoutId)
+          ).data.commentsCount ==
+            get(
+              /databases/$(database)/documents/shouts/$(shoutId)
+            ).data.get('commentsCount', 0) + 1;
+        allow update: if eligibleUser() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['likesCount', 'dislikesCount']) &&
+          request.resource.data.likesCount is int &&
+          request.resource.data.dislikesCount is int &&
+          request.resource.data.likesCount >= 0 &&
+          request.resource.data.dislikesCount >= 0 &&
+          validCommentReactionCounters();
+        allow delete: if eligibleUser() &&
+          (resource.data.authorId == request.auth.uid || isModerator()) &&
+          consumedRate('delete', commentId) &&
+          getAfter(
+            /databases/$(database)/documents/shouts/$(shoutId)
+          ).data.commentsCount ==
+            (
+              get(
+                /databases/$(database)/documents/shouts/$(shoutId)
+              ).data.get('commentsCount', 0) > 0
+                ? get(
+                    /databases/$(database)/documents/shouts/$(shoutId)
+                  ).data.get('commentsCount', 0) - 1
+                : 0
+            );
 
         match /reactions/{userId} {
-          allow read: if signedIn();
-          allow create, update: if signedIn() &&
+          allow get: if eligibleUser() && userId == request.auth.uid;
+          allow create, update: if eligibleUser() &&
             userId == request.auth.uid &&
+            consumedRate(
+              'interaction',
+              'commentReaction_' + shoutId + '_' + commentId
+            ) &&
             request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
-            request.resource.data.type in ['like', 'dislike'];
-          allow delete: if signedIn() && userId == request.auth.uid;
+            request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
+            request.resource.data.type in ['like', 'dislike'] &&
+            request.resource.data.updatedAt == request.time;
+          allow delete: if eligibleUser() &&
+            userId == request.auth.uid &&
+            consumedRate(
+              'interaction',
+              'commentReaction_' + shoutId + '_' + commentId
+            );
+          allow list: if false;
         }
       }
 
       match /privateReplies/{replyId} {
-        // Keep private threads private.  The two explicit fields also let
-        // Firestore safely evaluate the two simple client queries below.
-        allow read: if signedIn() &&
-          (resource.data.authorId == request.auth.uid ||
-           resource.data.recipientId == request.auth.uid);
-        allow create: if signedIn() &&
+        allow get: if eligibleUser() &&
+          (
+            resource.data.authorId == request.auth.uid ||
+            resource.data.recipientId == request.auth.uid
+          );
+        allow list: if eligibleUser() &&
+          limited(50) &&
+          (
+            resource.data.authorId == request.auth.uid ||
+            resource.data.recipientId == request.auth.uid
+          );
+        allow create: if eligibleUser() &&
+          activeShout(shoutId) &&
+          consumedRate('privateReply', replyId) &&
           request.resource.data.keys().hasOnly([
             'authorId', 'authorNickname', 'recipientId', 'recipientNickname',
-            'participants', 'text', 'createdAt', 'targetType', 'parentCommentId'
+            'participants', 'text', 'createdAt', 'targetType',
+            'parentCommentId'
+          ]) &&
+          request.resource.data.keys().hasAll([
+            'authorId', 'authorNickname', 'recipientId', 'recipientNickname',
+            'participants', 'text', 'createdAt', 'targetType'
           ]) &&
           request.resource.data.authorId == request.auth.uid &&
           request.resource.data.authorNickname is string &&
+          canonicalNickname(request.resource.data) &&
           request.resource.data.recipientId is string &&
           request.resource.data.recipientId != request.auth.uid &&
-          request.resource.data.recipientNickname is string &&
+          exists(
+            /databases/$(database)/documents/users/$(request.resource.data.recipientId)
+          ) &&
+          request.resource.data.recipientNickname ==
+            get(
+              /databases/$(database)/documents/users/$(request.resource.data.recipientId)
+            ).data.nickname &&
           request.resource.data.participants is list &&
           request.resource.data.participants.size() == 2 &&
           request.resource.data.participants[0] == request.auth.uid &&
-          request.resource.data.participants[1] == request.resource.data.recipientId &&
+          request.resource.data.participants[1] ==
+            request.resource.data.recipientId &&
           request.resource.data.text is string &&
           request.resource.data.text.size() >= 1 &&
           request.resource.data.text.size() <= 220 &&
-          request.resource.data.targetType in ['shout', 'comment', 'privateReply'] &&
-          (!request.resource.data.keys().hasAll(['parentCommentId']) || request.resource.data.parentCommentId is string);
+          request.resource.data.createdAt == request.time &&
+          request.resource.data.targetType in [
+            'shout', 'comment', 'privateReply'
+          ] &&
+          (
+            !request.resource.data.keys().hasAll(['parentCommentId']) ||
+            (
+              request.resource.data.parentCommentId is string &&
+              exists(
+                /databases/$(database)/documents/shouts/$(shoutId)/comments/$(request.resource.data.parentCommentId)
+              )
+            )
+          );
         allow update: if false;
-        allow delete: if signedIn() &&
+        allow delete: if eligibleUser() &&
           (resource.data.authorId == request.auth.uid || isModerator());
       }
 
       match /reactions/{userId} {
-        allow read: if signedIn();
-        allow create, update: if signedIn() &&
+        allow get: if eligibleUser() && userId == request.auth.uid;
+        allow create, update: if eligibleUser() &&
           userId == request.auth.uid &&
+          consumedRate('interaction', 'shoutReaction_' + shoutId) &&
           request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
-          request.resource.data.type in ['like', 'dislike'];
-        allow delete: if signedIn() && userId == request.auth.uid;
+          request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
+          request.resource.data.type in ['like', 'dislike'] &&
+          request.resource.data.updatedAt == request.time;
+        allow delete: if eligibleUser() &&
+          userId == request.auth.uid &&
+          consumedRate('interaction', 'shoutReaction_' + shoutId);
+        allow list: if false;
       }
 
       match /saves/{userId} {
-        allow read: if signedIn();
-        allow create: if signedIn() &&
+        allow get: if eligibleUser() && userId == request.auth.uid;
+        allow create: if eligibleUser() &&
           userId == request.auth.uid &&
-          request.resource.data.keys().hasOnly(['createdAt']);
-        allow delete: if signedIn() && userId == request.auth.uid;
-        allow update: if false;
+          consumedRate('interaction', 'save_' + shoutId) &&
+          request.resource.data.keys().hasOnly(['createdAt']) &&
+          request.resource.data.keys().hasAll(['createdAt']) &&
+          request.resource.data.createdAt == request.time;
+        allow delete: if eligibleUser() &&
+          userId == request.auth.uid &&
+          consumedRate('interaction', 'save_' + shoutId);
+        allow update, list: if false;
       }
     }
   }

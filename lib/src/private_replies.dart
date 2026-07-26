@@ -29,10 +29,16 @@ class PrivateReplyList extends StatelessWidget {
         .doc(shoutId)
         .collection('privateReplies');
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: replies.where('authorId', isEqualTo: uid).snapshots(),
+      stream: replies
+          .where('authorId', isEqualTo: uid)
+          .limit(_privateReplyPageSize)
+          .snapshots(),
       builder: (context, authoredSnapshot) =>
           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: replies.where('recipientId', isEqualTo: uid).snapshots(),
+            stream: replies
+                .where('recipientId', isEqualTo: uid)
+                .limit(_privateReplyPageSize)
+                .snapshots(),
             builder: (context, receivedSnapshot) {
               final replyById =
                   <String, QueryDocumentSnapshot<Map<String, dynamic>>>{

@@ -41,6 +41,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     _shoutSubscription = firestore
         .collection('shouts')
         .where('status', isEqualTo: 'active')
+        .orderBy('createdAt', descending: true)
+        .limit(_feedPageSize)
         .snapshots()
         .listen(
           (snapshot) => _applyShoutDocuments(snapshot.docs),
@@ -52,6 +54,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .collection('users')
         .doc(uid)
         .collection('blocked')
+        .limit(_blockedUsersPageSize)
         .snapshots()
         .listen((snapshot) {
           if (mounted) {
@@ -96,11 +99,14 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('blocked')
+        .limit(_blockedUsersPageSize)
         .get();
     final blockedUserIds = blocked.docs.map((doc) => doc.id).toSet();
     final snapshot = await FirebaseFirestore.instance
         .collection('shouts')
         .where('status', isEqualTo: 'active')
+        .orderBy('createdAt', descending: true)
+        .limit(_feedPageSize)
         .get();
     await _applyShoutDocuments(snapshot.docs, blockedUserIds: blockedUserIds);
   }
@@ -152,26 +158,14 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     final results = await Future.wait([
       shoutRef.collection('reactions').doc(uid).get(),
       shoutRef.collection('saves').doc(uid).get(),
-      shoutRef.collection('reactions').where('type', isEqualTo: 'like').get(),
-      shoutRef
-          .collection('reactions')
-          .where('type', isEqualTo: 'dislike')
-          .get(),
-      shoutRef.collection('saves').get(),
     ]);
-    final reaction = results[0] as DocumentSnapshot<Map<String, dynamic>>;
-    final save = results[1] as DocumentSnapshot<Map<String, dynamic>>;
-    final likes = results[2] as QuerySnapshot<Map<String, dynamic>>;
-    final dislikes = results[3] as QuerySnapshot<Map<String, dynamic>>;
-    final saves = results[4] as QuerySnapshot<Map<String, dynamic>>;
+    final reaction = results[0];
+    final save = results[1];
     final type = reaction.data()?['type'] as String?;
     shout
       ..isLiked = type == 'like'
       ..isDisliked = type == 'dislike'
-      ..isSaved = save.exists
-      ..likes = likes.docs.length
-      ..dislikes = dislikes.docs.length
-      ..saves = saves.docs.length;
+      ..isSaved = save.exists;
   }
 
   Future<void> _addShout(Shout shout) async {
@@ -181,30 +175,43 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       throw StateError('location-unavailable');
     }
     final user = FirebaseAuth.instance.currentUser!;
-    final profile = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    final nickname = profile.data()!['nickname'] as String;
-    await FirebaseFirestore.instance.collection('shouts').doc(shout.id).set({
-      'authorId': user.uid,
-      'authorNickname': nickname,
-      'title': shout.title,
-      'text': shout.text,
-      'categories': shout.categories,
-      'location': GeoPoint(
-        _publicLocationCoordinate(position.latitude),
-        _publicLocationCoordinate(position.longitude),
-      ),
-      'createdAt': Timestamp.fromDate(shout.createdAt),
-      'expiresAt': Timestamp.fromDate(shout.expiresAt),
-      'status': 'active',
-      'likesCount': 0,
-      'dislikesCount': 0,
-      'commentsCount': 0,
-      'savesCount': 0,
+    final firestore = FirebaseFirestore.instance;
+    final shoutReference = firestore.collection('shouts').doc(shout.id);
+    final profileReference = firestore.collection('users').doc(user.uid);
+    final rateReference = _rateLimitReference('shout');
+    final duration = shout.expiresAt.difference(shout.createdAt);
+    await firestore.runTransaction((transaction) async {
+      final profile = await transaction.get(profileReference);
+      final rateSnapshot = await transaction.get(rateReference);
+      final nickname = profile.data()!['nickname'] as String;
+      transaction
+        ..set(shoutReference, {
+          'authorId': user.uid,
+          'authorNickname': nickname,
+          'title': shout.title,
+          'text': shout.text,
+          'categories': shout.categories,
+          'location': GeoPoint(
+            _publicLocationCoordinate(position.latitude),
+            _publicLocationCoordinate(position.longitude),
+          ),
+          'createdAt': FieldValue.serverTimestamp(),
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(duration)),
+          'status': 'active',
+          'likesCount': 0,
+          'dislikesCount': 0,
+          'commentsCount': 0,
+          'savesCount': 0,
+        })
+        ..set(
+          rateReference,
+          _nextRateLimitData(
+            snapshot: rateSnapshot,
+            eventId: shout.id,
+            window: _shoutRateWindow,
+          ),
+        );
     });
-    await _loadShouts();
   }
 
   // A public Shout is associated with an approximately one-kilometre grid,
@@ -221,68 +228,137 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _toggleSaved(Shout shout) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    final saveRef = FirebaseFirestore.instance
-        .collection('shouts')
-        .doc(shout.id)
-        .collection('saves')
-        .doc(uid);
-    if (shout.isSaved) {
-      await saveRef.delete();
-    } else {
-      await saveRef.set({'createdAt': FieldValue.serverTimestamp()});
+    final firestore = FirebaseFirestore.instance;
+    final shoutRef = firestore.collection('shouts').doc(shout.id);
+    final actualSaveRef = shoutRef.collection('saves').doc(uid);
+    final rateRef = _rateLimitReference('interaction');
+    final eventId = _saveEventId(shout.id);
+    try {
+      await firestore.runTransaction((transaction) async {
+        final rateSnapshot = await transaction.get(rateRef);
+        final shoutSnapshot = await transaction.get(shoutRef);
+        final saveSnapshot = await transaction.get(actualSaveRef);
+        final currentSaves = shoutSnapshot.data()?['savesCount'] as int? ?? 0;
+        if (saveSnapshot.exists) {
+          transaction
+            ..delete(actualSaveRef)
+            ..update(shoutRef, {
+              'savesCount': currentSaves > 0 ? currentSaves - 1 : 0,
+            });
+        } else {
+          transaction
+            ..set(actualSaveRef, {'createdAt': FieldValue.serverTimestamp()})
+            ..update(shoutRef, {'savesCount': currentSaves + 1});
+        }
+        transaction.set(
+          rateRef,
+          _nextRateLimitData(
+            snapshot: rateSnapshot,
+            eventId: eventId,
+            window: _interactionRateWindow,
+          ),
+        );
+      });
+    } on FirebaseException {
+      _showWriteFailure();
+      return;
     }
     setState(() {
       shout.isSaved = !shout.isSaved;
-      shout.saves += shout.isSaved ? 1 : -1;
+      if (shout.isSaved) {
+        shout.saves++;
+      } else if (shout.saves > 0) {
+        shout.saves--;
+      }
     });
   }
 
   Future<void> _toggleReaction(Shout shout, {required bool like}) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    final reactionRef = FirebaseFirestore.instance
-        .collection('shouts')
-        .doc(shout.id)
-        .collection('reactions')
-        .doc(uid);
+    final firestore = FirebaseFirestore.instance;
+    final shoutRef = firestore.collection('shouts').doc(shout.id);
+    final reactionRef = shoutRef.collection('reactions').doc(uid);
+    final rateRef = _rateLimitReference('interaction');
+    final eventId = _shoutReactionEventId(shout.id);
     final currentType = shout.isLiked
         ? 'like'
         : shout.isDisliked
         ? 'dislike'
         : null;
     final nextType = like ? 'like' : 'dislike';
-    if (currentType == nextType) {
-      await reactionRef.delete();
-    } else {
-      await reactionRef.set({
-        'type': nextType,
-        'updatedAt': FieldValue.serverTimestamp(),
+    try {
+      await firestore.runTransaction((transaction) async {
+        final rateSnapshot = await transaction.get(rateRef);
+        final shoutSnapshot = await transaction.get(shoutRef);
+        final reactionSnapshot = await transaction.get(reactionRef);
+        final storedType = reactionSnapshot.data()?['type'] as String?;
+        var likes = shoutSnapshot.data()?['likesCount'] as int? ?? 0;
+        var dislikes = shoutSnapshot.data()?['dislikesCount'] as int? ?? 0;
+        if (storedType == nextType) {
+          if (storedType == 'like' && likes > 0) likes--;
+          if (storedType == 'dislike' && dislikes > 0) dislikes--;
+          transaction.delete(reactionRef);
+        } else {
+          if (storedType == 'like' && likes > 0) likes--;
+          if (storedType == 'dislike' && dislikes > 0) dislikes--;
+          if (nextType == 'like') likes++;
+          if (nextType == 'dislike') dislikes++;
+          transaction.set(reactionRef, {
+            'type': nextType,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+        transaction
+          ..update(shoutRef, {'likesCount': likes, 'dislikesCount': dislikes})
+          ..set(
+            rateRef,
+            _nextRateLimitData(
+              snapshot: rateSnapshot,
+              eventId: eventId,
+              window: _interactionRateWindow,
+            ),
+          );
       });
+    } on FirebaseException {
+      _showWriteFailure();
+      return;
     }
     setState(() {
       if (currentType == nextType) {
         if (like) {
           shout.isLiked = false;
-          shout.likes--;
+          if (shout.likes > 0) shout.likes--;
         } else {
           shout.isDisliked = false;
-          shout.dislikes--;
+          if (shout.dislikes > 0) shout.dislikes--;
         }
       } else if (like) {
         shout.isLiked = true;
         shout.likes++;
         if (shout.isDisliked) {
           shout.isDisliked = false;
-          shout.dislikes--;
+          if (shout.dislikes > 0) shout.dislikes--;
         }
       } else {
         shout.isDisliked = true;
         shout.dislikes++;
         if (shout.isLiked) {
           shout.isLiked = false;
-          shout.likes--;
+          if (shout.likes > 0) shout.likes--;
         }
       }
     });
+  }
+
+  void _showWriteFailure() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+        ),
+      ),
+    );
   }
 
   @override
@@ -349,6 +425,19 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                         const SnackBar(
                           content: Text(
                             'Pro publikování Shoutu povol přístup k poloze.',
+                          ),
+                        ),
+                      );
+                    }
+                  } on FirebaseException {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            tr(
+                              context,
+                              'Akci se nepodařilo dokončit. Zkus to znovu.',
+                            ),
                           ),
                         ),
                       );

@@ -151,6 +151,7 @@ class MyCommentsPage extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collectionGroup('comments')
           .where('authorId', isEqualTo: uid)
+          .limit(_profileHistoryPageSize)
           .snapshots(),
       builder: (context, snapshot) {
         return Column(

@@ -43,23 +43,13 @@ class _CommentTileState extends State<CommentTile> {
     final ownComment =
         data['authorId'] == FirebaseAuth.instance.currentUser?.uid;
     final reactions = widget.comment.reference.collection('reactions');
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: reactions.snapshots(),
+    final ownReaction = reactions.doc(FirebaseAuth.instance.currentUser!.uid);
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: ownReaction.snapshots(),
       builder: (context, snapshot) {
-        final reactionDocs = snapshot.data?.docs ?? [];
-        final likes = reactionDocs
-            .where((doc) => doc.data()['type'] == 'like')
-            .length;
-        final dislikes = reactionDocs
-            .where((doc) => doc.data()['type'] == 'dislike')
-            .length;
-        String? ownType;
-        for (final doc in reactionDocs) {
-          if (doc.id == FirebaseAuth.instance.currentUser?.uid) {
-            ownType = doc.data()['type'] as String?;
-            break;
-          }
-        }
+        final likes = data['likesCount'] as int? ?? 0;
+        final dislikes = data['dislikesCount'] as int? ?? 0;
+        final ownType = snapshot.data?.data()?['type'] as String?;
         final total = likes + dislikes;
         final hidden = !ownComment && total >= 10 && dislikes / total >= .7;
         if (hidden && !_revealed) {
@@ -114,7 +104,7 @@ class _CommentTileState extends State<CommentTile> {
                       IconButton(
                         tooltip: tr(context, 'Smazat komentář'),
                         icon: const Icon(Icons.delete_outline),
-                        onPressed: () => widget.comment.reference.delete(),
+                        onPressed: _deleteComment,
                       ),
                   ],
                 ),
@@ -172,12 +162,13 @@ class _CommentTileState extends State<CommentTile> {
                               ),
                               icon: const Icon(Icons.lock_outline, size: 20),
                             ),
-                          IconButton(
-                            tooltip: tr(context, 'Nahlásit'),
-                            visualDensity: VisualDensity.compact,
-                            onPressed: widget.onReport,
-                            icon: const Icon(Icons.flag_outlined, size: 20),
-                          ),
+                          if (!ownComment)
+                            IconButton(
+                              tooltip: tr(context, 'Nahlásit'),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: widget.onReport,
+                              icon: const Icon(Icons.flag_outlined, size: 20),
+                            ),
                         ],
                       ),
                     ),
@@ -193,16 +184,72 @@ class _CommentTileState extends State<CommentTile> {
 
   Future<void> _toggleReaction(String type) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
+    final firestore = FirebaseFirestore.instance;
     final reference = widget.comment.reference.collection('reactions').doc(uid);
-    final current = await reference.get();
-    if (current.data()?['type'] == type) {
-      await reference.delete();
-    } else {
-      await reference.set({
-        'type': type,
-        'updatedAt': FieldValue.serverTimestamp(),
+    final shoutReference = widget.comment.reference.parent.parent!;
+    final rateReference = _rateLimitReference('interaction');
+    final eventId = _commentReactionEventId(
+      shoutReference.id,
+      widget.comment.id,
+    );
+    try {
+      await firestore.runTransaction((transaction) async {
+        final rateSnapshot = await transaction.get(rateReference);
+        final commentSnapshot = await transaction.get(widget.comment.reference);
+        final reactionSnapshot = await transaction.get(reference);
+        final currentType = reactionSnapshot.data()?['type'] as String?;
+        var likes = commentSnapshot.data()?['likesCount'] as int? ?? 0;
+        var dislikes = commentSnapshot.data()?['dislikesCount'] as int? ?? 0;
+        if (currentType == type) {
+          if (currentType == 'like' && likes > 0) likes--;
+          if (currentType == 'dislike' && dislikes > 0) dislikes--;
+          transaction.delete(reference);
+        } else {
+          if (currentType == 'like' && likes > 0) likes--;
+          if (currentType == 'dislike' && dislikes > 0) dislikes--;
+          if (type == 'like') likes++;
+          if (type == 'dislike') dislikes++;
+          transaction.set(reference, {
+            'type': type,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+        transaction
+          ..update(widget.comment.reference, {
+            'likesCount': likes,
+            'dislikesCount': dislikes,
+          })
+          ..set(
+            rateReference,
+            _nextRateLimitData(
+              snapshot: rateSnapshot,
+              eventId: eventId,
+              window: _interactionRateWindow,
+            ),
+          );
       });
+    } on FirebaseException {
+      _showWriteFailure();
     }
+  }
+
+  Future<void> _deleteComment() async {
+    try {
+      await _deleteCommentWithCounter(widget.comment.reference);
+    } on FirebaseException {
+      _showWriteFailure();
+    }
+  }
+
+  void _showWriteFailure() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+        ),
+      ),
+    );
   }
 
   Widget _commentText(BuildContext context, Map<String, dynamic> data) {

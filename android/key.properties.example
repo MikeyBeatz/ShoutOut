@@ -1,0 +1,6 @@
+# Copy this file to android/key.properties and replace every placeholder.
+# The real file and the .jks keystore are intentionally ignored by Git.
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=shoutout
+storeFile=C:\\secure\\path\\shoutout-release.jks

@@ -35,5 +35,16 @@ jobs:
       - name: Test
         run: flutter test
 
+      - name: Install Firestore Rules test dependencies
+        working-directory: tools
+        run: npm ci
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@15.24.0
+
+      - name: Test Firestore Rules
+        working-directory: tools
+        run: npm run test:rules
+
       - name: Build web
         run: flutter build web --debug

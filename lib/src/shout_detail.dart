@@ -54,11 +54,12 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             tooltip: tr(context, 'Smazat shout'),
             icon: const Icon(Icons.delete_outline),
           ),
-        IconButton(
-          onPressed: _reportShout,
-          tooltip: tr(context, 'Nahlásit'),
-          icon: const Icon(Icons.flag_outlined),
-        ),
+        if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
+          IconButton(
+            onPressed: _reportShout,
+            tooltip: tr(context, 'Nahlásit'),
+            icon: const Icon(Icons.flag_outlined),
+          ),
       ],
     ),
     body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -67,6 +68,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           .doc(widget.shout.id)
           .collection('comments')
           .orderBy('createdAt')
+          .limitToLast(_commentPageSize)
           .snapshots(),
       builder: (context, snapshot) {
         final comments = snapshot.data?.docs ?? [];
@@ -294,39 +296,76 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     final comment = _commentController.text.trim();
     if (comment.isEmpty) return;
     final user = FirebaseAuth.instance.currentUser!;
-    final profile = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    final authorNickname = profile.data()!['nickname'] as String;
-    final shoutRef = FirebaseFirestore.instance
-        .collection('shouts')
-        .doc(widget.shout.id);
+    final firestore = FirebaseFirestore.instance;
+    final profileRef = firestore.collection('users').doc(user.uid);
+    final shoutRef = firestore.collection('shouts').doc(widget.shout.id);
     try {
       if (_privateRecipientId != null) {
         final recipientId = _privateRecipientId!;
         final recipientNickname = _privateRecipientNickname!;
         final targetType = _privateTargetType!;
-        await shoutRef.collection('privateReplies').add({
-          'authorId': user.uid,
-          'authorNickname': authorNickname,
-          'recipientId': recipientId,
-          'recipientNickname': recipientNickname,
-          'participants': [user.uid, recipientId],
-          'text': comment,
-          'createdAt': FieldValue.serverTimestamp(),
-          'targetType': targetType,
-          if (_replyToCommentId != null) 'parentCommentId': _replyToCommentId,
+        final replyRef = shoutRef.collection('privateReplies').doc();
+        final rateRef = _rateLimitReference('privateReply');
+        await firestore.runTransaction((transaction) async {
+          final profile = await transaction.get(profileRef);
+          final rateSnapshot = await transaction.get(rateRef);
+          await transaction.get(shoutRef);
+          final authorNickname = profile.data()!['nickname'] as String;
+          transaction
+            ..set(replyRef, {
+              'authorId': user.uid,
+              'authorNickname': authorNickname,
+              'recipientId': recipientId,
+              'recipientNickname': recipientNickname,
+              'participants': [user.uid, recipientId],
+              'text': comment,
+              'createdAt': FieldValue.serverTimestamp(),
+              'targetType': targetType,
+              if (_replyToCommentId != null)
+                'parentCommentId': _replyToCommentId,
+            })
+            ..set(
+              rateRef,
+              _nextRateLimitData(
+                snapshot: rateSnapshot,
+                eventId: replyRef.id,
+                window: _privateReplyRateWindow,
+              ),
+            );
         });
       } else {
-        await shoutRef.collection('comments').add({
-          'authorId': user.uid,
-          'authorNickname': authorNickname,
-          'text': comment,
-          'createdAt': FieldValue.serverTimestamp(),
-          if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
-          if (_replyToNickname != null) 'replyToNickname': _replyToNickname,
+        final commentRef = shoutRef.collection('comments').doc();
+        final rateRef = _rateLimitReference('comment');
+        await firestore.runTransaction((transaction) async {
+          final profile = await transaction.get(profileRef);
+          final rateSnapshot = await transaction.get(rateRef);
+          final shoutSnapshot = await transaction.get(shoutRef);
+          final authorNickname = profile.data()!['nickname'] as String;
+          final commentsCount =
+              shoutSnapshot.data()?['commentsCount'] as int? ?? 0;
+          transaction
+            ..set(commentRef, {
+              'authorId': user.uid,
+              'authorNickname': authorNickname,
+              'text': comment,
+              'createdAt': FieldValue.serverTimestamp(),
+              'likesCount': 0,
+              'dislikesCount': 0,
+              if (_replyToCommentId != null)
+                'replyToCommentId': _replyToCommentId,
+              if (_replyToNickname != null) 'replyToNickname': _replyToNickname,
+            })
+            ..update(shoutRef, {'commentsCount': commentsCount + 1})
+            ..set(
+              rateRef,
+              _nextRateLimitData(
+                snapshot: rateSnapshot,
+                eventId: commentRef.id,
+                window: _commentRateWindow,
+              ),
+            );
         });
+        widget.shout.comments++;
       }
     } on FirebaseException {
       if (mounted) {
@@ -393,13 +432,16 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   Future<void> _reportShout() async {
     final reason = await _askReportReason('Nahlásit Shout');
     if (reason == null) return;
-    await FirebaseFirestore.instance.collection('reports').add({
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final reportId = '${uid}_${widget.shout.id}';
+    if (!await _createReport('reports', reportId, {
       'reporterId': FirebaseAuth.instance.currentUser!.uid,
       'shoutId': widget.shout.id,
       'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
       'status': 'open',
-    });
+    })) {
+      return;
+    }
     if (mounted) {
       ScaffoldMessenger.of(
         context,
@@ -412,14 +454,17 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   ) async {
     final reason = await _askReportReason('Nahlásit komentář');
     if (reason == null) return;
-    await FirebaseFirestore.instance.collection('commentReports').add({
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final reportId = '${uid}_${widget.shout.id}_${comment.id}';
+    if (!await _createReport('commentReports', reportId, {
       'reporterId': FirebaseAuth.instance.currentUser!.uid,
       'shoutId': widget.shout.id,
       'commentId': comment.id,
       'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
       'status': 'open',
-    });
+    })) {
+      return;
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(context, 'Hlášení bylo odesláno.'))),
@@ -433,21 +478,61 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     final reason = await _askReportReason('Nahlásit soukromou odpověď');
     if (reason == null) return;
     final data = reply.data();
-    await FirebaseFirestore.instance.collection('privateReplyReports').add({
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final reportId = '${uid}_${widget.shout.id}_${reply.id}';
+    if (!await _createReport('privateReplyReports', reportId, {
       'reporterId': FirebaseAuth.instance.currentUser!.uid,
       'shoutId': widget.shout.id,
       'privateReplyId': reply.id,
       'authorId': data['authorId'],
       'text': data['text'],
       'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
       'status': 'open',
       'priority': 'high',
-    });
+    })) {
+      return;
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr(context, 'Hlásení bylo odesláno.'))),
       );
+    }
+  }
+
+  Future<bool> _createReport(
+    String collection,
+    String reportId,
+    Map<String, Object?> data,
+  ) async {
+    final firestore = FirebaseFirestore.instance;
+    final reportRef = firestore.collection(collection).doc(reportId);
+    final rateRef = _rateLimitReference('report');
+    try {
+      await firestore.runTransaction((transaction) async {
+        final rateSnapshot = await transaction.get(rateRef);
+        transaction
+          ..set(reportRef, {...data, 'createdAt': FieldValue.serverTimestamp()})
+          ..set(
+            rateRef,
+            _nextRateLimitData(
+              snapshot: rateSnapshot,
+              eventId: reportId,
+              window: _reportRateWindow,
+            ),
+          );
+      });
+      return true;
+    } on FirebaseException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+            ),
+          ),
+        );
+      }
+      return false;
     }
   }
 

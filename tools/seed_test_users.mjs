@@ -13,8 +13,10 @@ if (!serviceAccountPath || !password) {
   );
 }
 
-if (password.length < 6) {
-  throw new Error('SHOUTOUT_TEST_PASSWORD must contain at least 6 characters.');
+if (password.length < 10 || !/\d/.test(password)) {
+  throw new Error(
+    'SHOUTOUT_TEST_PASSWORD must contain at least 10 characters and a number.',
+  );
 }
 
 const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
@@ -82,8 +84,18 @@ for (const testUser of users) {
       nicknameChangeCount: 0,
       emailVerified: true,
       language: testUser.language,
+      avatarId: 'fox',
       isTest: true,
     }, { merge: true }),
+    db.collection('users').doc(uid).collection('legal')
+      .doc('acceptance_2026_07_25').set({
+        termsVersion: '2026-07-25',
+        privacyVersion: '2026-07-25',
+        communityRulesVersion: '2026-07-25',
+        ageConfirmed: true,
+        acceptedAt: FieldValue.serverTimestamp(),
+        acceptedLanguage: testUser.language,
+      }),
   ]);
 
   console.log(`Ready: ${email} (${testUser.nickname})`);

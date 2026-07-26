@@ -74,6 +74,10 @@ není dostupná, feed se stále načte, pouze nemá přesný výpočet vzdáleno
 dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
+Push-Location tools
+npm ci
+npm run test:rules
+Pop-Location
 flutter build web --debug
 ```
 
@@ -100,6 +104,41 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 Před nasazením vždy ověřte, že Firebase CLI míří na správný projekt. Produkční
 pravidla se nemají nasazovat z neověřené pracovní větve.
+
+### Bezpečnostní pravidla a lokální emulátor
+
+Testy v `tools/rules` spouštějí Firestore Emulator proti izolovanému projektu
+`shoutout-rules-test`; nemění vývojová ani produkční data:
+
+```powershell
+Push-Location tools
+npm ci
+npm run test:rules
+Pop-Location
+```
+
+Firebase Emulator vyžaduje Javu 21 nebo kompatibilní verzi v `PATH`. Android
+Studio ji standardně obsahuje ve složce `jbr`.
+
+Zápisy obsahu a interakcí používají atomické rate-limit dokumenty. Proto musí
+být změny klienta a `firestore.rules` nasazeny společně až po průchodu testů.
+Před zpřísněním pravidel nad existujícími vývojovými daty spusťte jednorázové
+srovnání veřejných čítačů podle návodu v `tools/README.md`.
+
+### Firebase App Check
+
+Android debug build používá App Check debug provider, release build používá
+Play Integrity. Vynucení App Check se nesmí zapnout naslepo: nejdřív
+zaregistrujte pouze vlastní debug tokeny, ověřte metriky a až potom zapínejte
+enforcement po jednotlivých Firebase službách. Webový provider a produkční
+enforcement jsou zapsané v `BACKEND_TODO.md`.
+
+### Android release podpis
+
+Release build už nikdy nepoužívá společný Flutter debug klíč. Pro podepsaný
+release zkopírujte `android/key.properties.example` na
+`android/key.properties`, doplňte cestu k vlastnímu `.jks` a hesla. Skutečný
+soubor i keystore jsou ignorované Gitem a musí mít samostatnou bezpečnou zálohu.
 
 ## Vývojová testovací data
 

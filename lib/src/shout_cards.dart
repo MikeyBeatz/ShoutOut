@@ -205,19 +205,10 @@ class ShoutCard extends StatelessWidget {
                               onPressed: () => onReaction(false),
                             ),
                             const SizedBox(width: 8),
-                            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('shouts')
-                                  .doc(shout.id)
-                                  .collection('comments')
-                                  .snapshots(),
-                              builder: (context, snapshot) => ReactionButton(
-                                icon: Icons.chat_bubble_outline,
-                                value:
-                                    snapshot.data?.docs.length ??
-                                    shout.comments,
-                                onPressed: openComments,
-                              ),
+                            ReactionButton(
+                              icon: Icons.chat_bubble_outline,
+                              value: shout.comments,
+                              onPressed: openComments,
                             ),
                           ],
                         ),
