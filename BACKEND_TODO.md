@@ -1,9 +1,67 @@
-# ShoutOut – serverový a produkční backlog
+# ShoutOut – společný projektový backlog
 
-Tento dokument je závazný seznam věcí, které nelze spolehlivě dokončit pouze
-ve Flutter klientovi nebo vyžadují produkční Firebase/Google Cloud konfiguraci.
-Serverová část je vědomě odložená až na závěr projektu. Klientský kód není
-důvěryhodná bezpečnostní hranice a upravená aplikace jej může obejít.
+Toto je jediné místo pro otevřené produktové, grafické, lokalizační, serverové
+a produkční úkoly projektu. Samotné zapsání bodu neznamená, že je
+implementovaný.
+
+## Aktuální produktové úpravy
+
+### Vzhled a grafika
+
+- [ ] **Odstranit světlý proužek kolem ikony na ploše Androidu.**
+  - V seznamu aplikací je ikona zobrazena správně, ale na ploše emulátoru má
+    po obvodu světlý proužek.
+  - Prověřit adaptive icon foreground/background, safe zone a masku launcheru.
+  - Ověřit na ploše i v seznamu aplikací, ideálně alespoň na dvou tvarech masek.
+
+- [ ] **Sjednotit logo na přihlašovací a registrační obrazovce se záhlavím
+  feedu.**
+  - Odstranit současný tmavší podklad loga.
+  - Použít aktuální barvy a současný font logotypu ze záhlaví feedu.
+  - Zkontrolovat přihlášení i registraci v češtině a angličtině.
+
+- [ ] **Navrhnout nový font záhlaví karet Uloženo, Mé Shouty a Profil.**
+  - Připravit několik náhledů před změnou.
+  - Posoudit variantu se stejným fontem jako logotyp i samostatný, lehčí font.
+  - Zachovat čitelnost delších překladů a jednotnou velikost záhlaví.
+
+### Profil a avatary
+
+- [ ] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
+  - Po otevření Profilu se nejdřív ukáže liška a až potom správně uložená sova.
+  - Prověřit výchozí hodnotu, lokální cache a asynchronní načtení profilu.
+  - Během načítání nezobrazovat jiného avatara; použít neutrální placeholder
+    nebo poslední skutečně uloženou hodnotu.
+
+- [ ] **Vytvořit a přidat více avatarů.**
+  - Zachovat současný vizuální styl, rozměry a bezpečné okraje.
+  - Před implementací připravit přehled variant ke schválení.
+  - Doplnit assety, výběr v profilu a případné lokalizované názvy či popisy.
+
+### Lokalizace
+
+- [ ] **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
+  - Doplnit nové locale do aplikace i do nabídky jazyků.
+  - Zachovat automatickou volbu podle jazyka zařízení a funkční ruční přepnutí.
+  - Ověřit fallback pro zařízení s nepodporovaným jazykem.
+
+- [ ] **Provést kompletní audit překladů.**
+  - Najít texty zapsané přímo ve widgetech a přesunout je do lokalizace.
+  - Porovnat úplnost všech klíčů pro češtinu, angličtinu, němčinu, polštinu,
+    slovenštinu, ukrajinštinu a vietnamštinu.
+  - Zkontrolovat přihlášení, registraci, validace, feed, detail Shoutu,
+    komentáře, soukromé odpovědi, uložené položky, Mé Shouty, profil,
+    nastavení, právní obrazovky, moderaci, dialogy a chybové hlášky.
+  - Ověřit přetékání textů, diakritiku, množná čísla a texty na menším displeji.
+  - Při testování lokalizace zachovat funkční načítání Shoutů podle polohy
+    v emulátoru.
+
+## Odložená serverová a produkční část
+
+Následující body nelze spolehlivě dokončit pouze ve Flutter klientovi nebo
+vyžadují produkční Firebase/Google Cloud konfiguraci. Serverová část je vědomě
+odložená až na závěr projektu. Klientský kód není důvěryhodná bezpečnostní
+hranice a upravená aplikace jej může obejít.
 
 ## Co je už hotové bez vlastního serveru
 

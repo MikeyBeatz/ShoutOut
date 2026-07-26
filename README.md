@@ -159,7 +159,7 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
-- `BACKEND_TODO.md` – funkce odložené do serverové části
+- `BACKEND_TODO.md` – jediný společný projektový backlog
 
 ## Lokalizace
 
