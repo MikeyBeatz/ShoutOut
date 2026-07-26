@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app_locale.dart';
 import 'legal.dart';
@@ -22,6 +23,13 @@ class AuthGate extends StatelessWidget {
       }
       final user = snapshot.data;
       if (user == null) {
+        if (appLocale.value != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (FirebaseAuth.instance.currentUser == null) {
+              appLocale.value = null;
+            }
+          });
+        }
         return const SignInPage();
       }
       if (!user.emailVerified) {
@@ -623,12 +631,14 @@ class _SignInPageState extends State<SignInPage> {
               email: _email.text.trim(),
               password: _password.text,
             );
+        TextInput.finishAutofillContext(shouldSave: true);
         await credential.user?.sendEmailVerification();
       } else {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _email.text.trim(),
           password: _password.text,
         );
+        TextInput.finishAutofillContext(shouldSave: true);
       }
     } on FirebaseAuthException catch (error) {
       if (mounted) _message(_authMessage(error.code));
@@ -1048,6 +1058,7 @@ class _NicknamePageState extends State<NicknamePage> {
       );
       return;
     }
+    final initialLanguage = Localizations.localeOf(context).languageCode;
     setState(() => _busy = true);
     try {
       final normalized = name.toLowerCase();
@@ -1073,7 +1084,7 @@ class _NicknamePageState extends State<NicknamePage> {
             'nicknameChangedAt': FieldValue.serverTimestamp(),
             'nicknameChangeCount': 0,
             'emailVerified': true,
-            'language': 'cs',
+            'language': initialLanguage,
             'avatarId': 'fox',
           },
         );
