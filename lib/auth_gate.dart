@@ -175,15 +175,19 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
   bool _register = false;
   bool _busy = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -324,92 +328,165 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          tr(context, _register ? 'Registrace' : 'Přihlášení'),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _email,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: tr(context, 'E-mail'),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _password,
-                          obscureText: _obscurePassword,
-                          obscuringCharacter: '•',
-                          decoration: InputDecoration(
-                            labelText: tr(context, 'Heslo'),
-                            border: OutlineInputBorder(),
-                            suffixIcon: IconButton(
-                              tooltip: tr(
-                                context,
-                                _obscurePassword
-                                    ? 'Zobrazit heslo'
-                                    : 'Skrýt heslo',
-                              ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            alignment: Alignment.center,
-                            minimumSize: const Size.fromHeight(48),
-                          ),
-                          onPressed: _busy ? null : _emailAuth,
-                          child: Text(
-                            tr(
-                              context,
-                              _register ? 'Vytvořit účet' : 'Přihlásit se',
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: _busy
-                              ? null
-                              : () => setState(() => _register = !_register),
-                          child: Text(
-                            tr(
-                              context,
-                              _register ? 'Už účet mám' : 'Vytvořit nový účet',
-                            ),
-                          ),
-                        ),
-                        Row(
+                    child: Form(
+                      key: _formKey,
+                      child: AutofillGroup(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(child: Divider()),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(tr(context, 'nebo')),
+                            Text(
+                              tr(
+                                context,
+                                _register ? 'Registrace' : 'Přihlášení',
+                              ),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
                             ),
-                            Expanded(child: Divider()),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _email,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const [AutofillHints.email],
+                              validator: _validateEmail,
+                              decoration: InputDecoration(
+                                labelText: tr(context, 'E-mail'),
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _password,
+                              obscureText: _obscurePassword,
+                              obscuringCharacter: '•',
+                              textInputAction: _register
+                                  ? TextInputAction.next
+                                  : TextInputAction.done,
+                              autofillHints: [
+                                _register
+                                    ? AutofillHints.newPassword
+                                    : AutofillHints.password,
+                              ],
+                              validator: _validatePassword,
+                              onFieldSubmitted: _register || _busy
+                                  ? null
+                                  : (_) => _emailAuth(),
+                              decoration: InputDecoration(
+                                labelText: tr(context, 'Heslo'),
+                                helperText: _register
+                                    ? tr(context, 'Alespoň 10 znaků')
+                                    : null,
+                                border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  tooltip: tr(
+                                    context,
+                                    _obscurePassword
+                                        ? 'Zobrazit heslo'
+                                        : 'Skrýt heslo',
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (_register) ...[
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _confirmPassword,
+                                obscureText: _obscureConfirmPassword,
+                                obscuringCharacter: '•',
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
+                                validator: _validateConfirmedPassword,
+                                onFieldSubmitted: _busy
+                                    ? null
+                                    : (_) => _emailAuth(),
+                                decoration: InputDecoration(
+                                  labelText: tr(context, 'Zopakovat heslo'),
+                                  border: const OutlineInputBorder(),
+                                  suffixIcon: IconButton(
+                                    tooltip: tr(
+                                      context,
+                                      _obscureConfirmPassword
+                                          ? 'Zobrazit heslo'
+                                          : 'Skrýt heslo',
+                                    ),
+                                    onPressed: () => setState(
+                                      () => _obscureConfirmPassword =
+                                          !_obscureConfirmPassword,
+                                    ),
+                                    icon: Icon(
+                                      _obscureConfirmPassword
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (!_register)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: _busy ? null : _sendPasswordReset,
+                                  child: Text(tr(context, 'Zapomenuté heslo?')),
+                                ),
+                              ),
+                            const SizedBox(height: 16),
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                alignment: Alignment.center,
+                                minimumSize: const Size.fromHeight(48),
+                              ),
+                              onPressed: _busy ? null : _emailAuth,
+                              child: Text(
+                                tr(
+                                  context,
+                                  _register ? 'Vytvořit účet' : 'Přihlásit se',
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _busy ? null : _toggleRegistration,
+                              child: Text(
+                                tr(
+                                  context,
+                                  _register
+                                      ? 'Už účet mám'
+                                      : 'Vytvořit nový účet',
+                                ),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Expanded(child: Divider()),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  child: Text(tr(context, 'nebo')),
+                                ),
+                                Expanded(child: Divider()),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed: _busy ? null : _googleAuth,
+                              icon: const Icon(Icons.g_mobiledata),
+                              label: Text(
+                                tr(context, 'Pokračovat přes Google'),
+                              ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: _busy ? null : _googleAuth,
-                          icon: const Icon(Icons.g_mobiledata),
-                          label: Text(tr(context, 'Pokračovat přes Google')),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
@@ -420,7 +497,42 @@ class _SignInPageState extends State<SignInPage> {
       ),
     ),
   );
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+      return tr(context, 'Zadej platný e-mail.');
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    final password = value ?? '';
+    if (password.isEmpty) return tr(context, 'Zadej heslo.');
+    if (_register && password.length < 10) {
+      return tr(context, 'Heslo musí mít alespoň 10 znaků.');
+    }
+    return null;
+  }
+
+  String? _validateConfirmedPassword(String? value) {
+    if (!_register) return null;
+    if ((value ?? '').isEmpty) return tr(context, 'Zopakuj heslo.');
+    if (value != _password.text) return tr(context, 'Hesla se neshodují.');
+    return null;
+  }
+
+  void _toggleRegistration() {
+    setState(() {
+      _register = !_register;
+      _confirmPassword.clear();
+      _obscurePassword = true;
+      _obscureConfirmPassword = true;
+    });
+  }
+
   Future<void> _emailAuth() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _busy = true);
     try {
       if (_register) {
@@ -442,6 +554,41 @@ class _SignInPageState extends State<SignInPage> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
+  Future<void> _sendPasswordReset() async {
+    if (_validateEmail(_email.text) != null) {
+      _formKey.currentState?.validate();
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _email.text.trim(),
+      );
+      if (mounted) _passwordResetConfirmation();
+    } on FirebaseAuthException catch (error) {
+      if (mounted) {
+        if (error.code == 'invalid-email') {
+          _formKey.currentState?.validate();
+        } else if (error.code == 'user-not-found') {
+          _passwordResetConfirmation();
+        } else {
+          _message(
+            tr(context, 'E-mail pro změnu hesla se nepodařilo odeslat.'),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _passwordResetConfirmation() => _message(
+    tr(
+      context,
+      'Pokud pro tento e-mail existuje účet, poslali jsme odkaz pro změnu hesla.',
+    ),
+  );
 
   Future<void> _googleAuth() async {
     setState(() => _busy = true);

@@ -94,8 +94,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       );
       return;
     }
-    if (_newPassword.text.length < 6) {
-      setState(() => _error = tr(context, 'Zvol silnější heslo.'));
+    if (_newPassword.text.length < 10) {
+      setState(() => _error = tr(context, 'Heslo musí mít alespoň 10 znaků.'));
       return;
     }
     if (_newPassword.text != _confirmPassword.text) {
