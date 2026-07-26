@@ -99,10 +99,8 @@ const _english = <String, String>{
   'Zopakovat heslo': 'Repeat password',
   'Alespoň 10 znaků': 'At least 10 characters',
   'Zadej platný e-mail.': 'Enter a valid email address.',
-  'Zadej heslo.': 'Enter your password.',
   'Heslo musí mít alespoň 10 znaků.':
       'The password must be at least 10 characters long.',
-  'Zopakuj heslo.': 'Repeat your password.',
   'Zapomenuté heslo?': 'Forgot password?',
   'Pokud pro tento e-mail existuje účet, poslali jsme odkaz pro změnu hesla.':
       'If an account exists for this email, we sent a password reset link.',
@@ -357,10 +355,8 @@ const _german = <String, String>{
   'Zopakovat heslo': 'Passwort wiederholen',
   'Alespoň 10 znaků': 'Mindestens 10 Zeichen',
   'Zadej platný e-mail.': 'Gib eine gültige E-Mail-Adresse ein.',
-  'Zadej heslo.': 'Gib dein Passwort ein.',
   'Heslo musí mít alespoň 10 znaků.':
       'Das Passwort muss mindestens 10 Zeichen lang sein.',
-  'Zopakuj heslo.': 'Wiederhole dein Passwort.',
   'Zapomenuté heslo?': 'Passwort vergessen?',
   'Pokud pro tento e-mail existuje účet, poslali jsme odkaz pro změnu hesla.':
       'Falls für diese E-Mail ein Konto existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.',
@@ -617,9 +613,7 @@ const _polish = <String, String>{
   'Zopakovat heslo': 'Powtórz hasło',
   'Alespoň 10 znaků': 'Co najmniej 10 znaków',
   'Zadej platný e-mail.': 'Wpisz prawidłowy adres e-mail.',
-  'Zadej heslo.': 'Wpisz hasło.',
   'Heslo musí mít alespoň 10 znaků.': 'Hasło musi mieć co najmniej 10 znaków.',
-  'Zopakuj heslo.': 'Powtórz hasło.',
   'Zapomenuté heslo?': 'Nie pamiętasz hasła?',
   'Pokud pro tento e-mail existuje účet, poslali jsme odkaz pro změnu hesla.':
       'Jeśli istnieje konto dla tego adresu e-mail, wysłaliśmy link do zmiany hasła.',

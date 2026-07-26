@@ -179,6 +179,9 @@ class _SignInPageState extends State<SignInPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
   bool _register = false;
   bool _busy = false;
   bool _obscurePassword = true;
@@ -188,6 +191,9 @@ class _SignInPageState extends State<SignInPage> {
     _email.dispose();
     _password.dispose();
     _confirmPassword.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -346,6 +352,7 @@ class _SignInPageState extends State<SignInPage> {
                             const SizedBox(height: 20),
                             TextFormField(
                               controller: _email,
+                              focusNode: _emailFocus,
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               autofillHints: const [AutofillHints.email],
@@ -358,6 +365,7 @@ class _SignInPageState extends State<SignInPage> {
                             const SizedBox(height: 12),
                             TextFormField(
                               controller: _password,
+                              focusNode: _passwordFocus,
                               obscureText: _obscurePassword,
                               obscuringCharacter: '•',
                               textInputAction: _register
@@ -400,6 +408,7 @@ class _SignInPageState extends State<SignInPage> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _confirmPassword,
+                                focusNode: _confirmPasswordFocus,
                                 obscureText: _obscureConfirmPassword,
                                 obscuringCharacter: '•',
                                 textInputAction: TextInputAction.done,
@@ -500,7 +509,8 @@ class _SignInPageState extends State<SignInPage> {
 
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
-    if (email.isEmpty || !email.contains('@') || !email.contains('.')) {
+    if (email.isEmpty) return null;
+    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]{2,}$').hasMatch(email)) {
       return tr(context, 'Zadej platný e-mail.');
     }
     return null;
@@ -508,7 +518,7 @@ class _SignInPageState extends State<SignInPage> {
 
   String? _validatePassword(String? value) {
     final password = value ?? '';
-    if (password.isEmpty) return tr(context, 'Zadej heslo.');
+    if (password.isEmpty) return null;
     if (_register && password.length < 10) {
       return tr(context, 'Heslo musí mít alespoň 10 znaků.');
     }
@@ -517,7 +527,7 @@ class _SignInPageState extends State<SignInPage> {
 
   String? _validateConfirmedPassword(String? value) {
     if (!_register) return null;
-    if ((value ?? '').isEmpty) return tr(context, 'Zopakuj heslo.');
+    if ((value ?? '').isEmpty) return null;
     if (value != _password.text) return tr(context, 'Hesla se neshodují.');
     return null;
   }
@@ -532,7 +542,12 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Future<void> _emailAuth() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      _focusFirstInvalidField();
+      return;
+    }
+    if (_focusFirstMissingField()) return;
     setState(() => _busy = true);
     try {
       if (_register) {
@@ -556,8 +571,13 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Future<void> _sendPasswordReset() async {
-    if (_validateEmail(_email.text) != null) {
-      _formKey.currentState?.validate();
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (_email.text.trim().isEmpty) {
+      _emailFocus.requestFocus();
+      return;
+    }
+    if (!isValid) {
+      _emailFocus.requestFocus();
       return;
     }
     setState(() => _busy = true);
@@ -580,6 +600,32 @@ class _SignInPageState extends State<SignInPage> {
       }
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  bool _focusFirstMissingField() {
+    if (_email.text.trim().isEmpty) {
+      _emailFocus.requestFocus();
+      return true;
+    }
+    if (_password.text.isEmpty) {
+      _passwordFocus.requestFocus();
+      return true;
+    }
+    if (_register && _confirmPassword.text.isEmpty) {
+      _confirmPasswordFocus.requestFocus();
+      return true;
+    }
+    return false;
+  }
+
+  void _focusFirstInvalidField() {
+    if (_validateEmail(_email.text) != null) {
+      _emailFocus.requestFocus();
+    } else if (_validatePassword(_password.text) != null) {
+      _passwordFocus.requestFocus();
+    } else if (_validateConfirmedPassword(_confirmPassword.text) != null) {
+      _confirmPasswordFocus.requestFocus();
     }
   }
 
