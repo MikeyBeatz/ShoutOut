@@ -65,6 +65,13 @@ implementovaný.
   - Při testování lokalizace zachovat funkční načítání Shoutů podle polohy
     v emulátoru.
 
+### Business účty a webová správa
+
+- [ ] **Vytvořit business účet.**
+- [ ] **Přidat zvýrazněné Shouty.**
+- [ ] **Přidat propagační okénko.**
+- [ ] **Vytvořit webové rozhraní pro administrátory a moderátory.**
+
 ## Odložená serverová a produkční část
 
 Následující body nelze spolehlivě dokončit pouze ve Flutter klientovi nebo
