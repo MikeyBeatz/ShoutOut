@@ -38,7 +38,7 @@ implementovaný.
   - Před implementací připravit přehled variant ke schválení.
   - Doplnit assety, výběr v profilu a případné lokalizované názvy či popisy.
 
-- [ ] **Doplnit validaci a zobrazení hesel na obrazovce změny hesla.**
+- [x] **Doplnit validaci a zobrazení hesel na obrazovce změny hesla.**
   - Nové heslo a jeho potvrzení zvýraznit červeně pouze tehdy, když se po
     zadání neshodují.
   - Chybový stav zobrazit při opuštění pole i při pokusu o potvrzení změny.

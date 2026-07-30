@@ -32,4 +32,38 @@ void main() {
     expect(find.byIcon(Icons.person_outline), findsNothing);
     expect(find.byType(Image), findsOneWidget);
   });
+
+  testWidgets('change password validates mismatch and toggles visibility', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('cs'),
+        home: Scaffold(body: ChangePasswordDialog()),
+      ),
+    );
+
+    expect(find.byIcon(Icons.visibility_off_outlined), findsNWidgets(2));
+
+    final passwordFields = find.byType(TextFormField);
+    await tester.enterText(passwordFields.at(0), 'abcdefghij');
+    await tester.enterText(passwordFields.at(1), 'abcdefghik');
+    await tester.tap(find.byType(FilledButton));
+    await tester.pump();
+
+    final newPasswordState = tester.state<FormFieldState<String>>(
+      passwordFields.at(0),
+    );
+    final confirmationState = tester.state<FormFieldState<String>>(
+      passwordFields.at(1),
+    );
+    expect(newPasswordState.errorText, 'Passwords do not match.');
+    expect(confirmationState.errorText, 'Passwords do not match.');
+
+    await tester.tap(find.byIcon(Icons.visibility_off_outlined).first);
+    await tester.pump();
+
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+  });
 }

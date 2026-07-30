@@ -8,61 +8,98 @@ class ChangePasswordDialog extends StatefulWidget {
 }
 
 class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
   final _currentPassword = TextEditingController();
   final _newPassword = TextEditingController();
   final _confirmPassword = TextEditingController();
+  final _newPasswordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
   String? _error;
   bool _saving = false;
+  bool _validationActive = false;
+  bool _submitted = false;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _newPasswordFocus.addListener(_handleNewPasswordFocusChange);
+    _confirmPasswordFocus.addListener(_handleConfirmPasswordFocusChange);
+  }
 
   @override
   void dispose() {
+    _newPasswordFocus.removeListener(_handleNewPasswordFocusChange);
+    _confirmPasswordFocus.removeListener(_handleConfirmPasswordFocusChange);
     _currentPassword.dispose();
     _newPassword.dispose();
     _confirmPassword.dispose();
+    _newPasswordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Text(tr(context, 'Změnit heslo')),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: 46,
-          child: TextField(
+    content: Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
             controller: _currentPassword,
             obscureText: true,
             decoration: _passwordDecoration(tr(context, 'Aktuální heslo')),
           ),
-        ),
-        const SizedBox(height: 9),
-        SizedBox(
-          height: 46,
-          child: TextField(
+          const SizedBox(height: 12),
+          TextFormField(
             controller: _newPassword,
-            obscureText: true,
-            decoration: _passwordDecoration(tr(context, 'Nové heslo')),
-          ),
-        ),
-        const SizedBox(height: 9),
-        SizedBox(
-          height: 46,
-          child: TextField(
-            controller: _confirmPassword,
-            obscureText: true,
-            decoration: _passwordDecoration(tr(context, 'Potvrdit nové heslo')),
-          ),
-        ),
-        if (_error != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            focusNode: _newPasswordFocus,
+            obscureText: _obscureNewPassword,
+            obscuringCharacter: '•',
+            autofillHints: const [AutofillHints.newPassword],
+            textInputAction: TextInputAction.next,
+            validator: _validateNewPassword,
+            onChanged: (_) => _validateActiveFields(),
+            decoration: _passwordDecoration(
+              tr(context, 'Nové heslo'),
+              obscure: _obscureNewPassword,
+              onToggleVisibility: () =>
+                  setState(() => _obscureNewPassword = !_obscureNewPassword),
+              helperText: tr(context, 'Alespoň 10 znaků'),
             ),
           ),
-      ],
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _confirmPassword,
+            focusNode: _confirmPasswordFocus,
+            obscureText: _obscureConfirmPassword,
+            obscuringCharacter: '•',
+            autofillHints: const [AutofillHints.newPassword],
+            textInputAction: TextInputAction.done,
+            validator: _validateConfirmedPassword,
+            onChanged: (_) => _validateActiveFields(),
+            onFieldSubmitted: _saving ? null : (_) => _changePassword(),
+            decoration: _passwordDecoration(
+              tr(context, 'Potvrdit nové heslo'),
+              obscure: _obscureConfirmPassword,
+              onToggleVisibility: () => setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
+              ),
+            ),
+          ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ),
+        ],
+      ),
     ),
     actions: [
       TextButton(
@@ -76,14 +113,72 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     ],
   );
 
-  InputDecoration _passwordDecoration(String label) => InputDecoration(
+  InputDecoration _passwordDecoration(
+    String label, {
+    bool? obscure,
+    VoidCallback? onToggleVisibility,
+    String? helperText,
+  }) => InputDecoration(
     labelText: label,
+    helperText: helperText,
     isDense: true,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+    suffixIcon: onToggleVisibility == null
+        ? null
+        : IconButton(
+            tooltip: tr(context, obscure! ? 'Zobrazit heslo' : 'Skrýt heslo'),
+            onPressed: onToggleVisibility,
+            icon: Icon(
+              obscure
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+            ),
+          ),
   );
 
+  String? _validateNewPassword(String? value) {
+    final password = value ?? '';
+    if (password.length < 10) {
+      return tr(context, 'Heslo musí mít alespoň 10 znaků.');
+    }
+    if (_shouldShowMismatch) return tr(context, 'Hesla se neshodují.');
+    return null;
+  }
+
+  String? _validateConfirmedPassword(String? value) {
+    if (_shouldShowMismatch) return tr(context, 'Hesla se neshodují.');
+    return null;
+  }
+
+  bool get _shouldShowMismatch =>
+      (_submitted || _confirmPassword.text.isNotEmpty) &&
+      _newPassword.text != _confirmPassword.text;
+
+  void _handleNewPasswordFocusChange() {
+    if (_newPasswordFocus.hasFocus) return;
+    _activateValidation();
+  }
+
+  void _handleConfirmPasswordFocusChange() {
+    if (_confirmPasswordFocus.hasFocus) return;
+    _activateValidation();
+  }
+
+  void _activateValidation() {
+    _validationActive = true;
+    _formKey.currentState?.validate();
+  }
+
+  void _validateActiveFields() {
+    if (_validationActive) _formKey.currentState?.validate();
+  }
+
   Future<void> _changePassword() async {
+    _submitted = true;
+    _validationActive = true;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
     final user = FirebaseAuth.instance.currentUser!;
     final hasPasswordProvider = user.providerData.any(
       (provider) => provider.providerId == 'password',
@@ -92,14 +187,6 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       setState(
         () => _error = tr(context, 'Heslo účtu Google změň přímo u Google.'),
       );
-      return;
-    }
-    if (_newPassword.text.length < 10) {
-      setState(() => _error = tr(context, 'Heslo musí mít alespoň 10 znaků.'));
-      return;
-    }
-    if (_newPassword.text != _confirmPassword.text) {
-      setState(() => _error = tr(context, 'Hesla se neshodují.'));
       return;
     }
     setState(() {
