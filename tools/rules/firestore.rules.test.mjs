@@ -73,6 +73,9 @@ async function seedEligibleUser(uid, nickname = `User_${uid}`) {
       emailVerified: true,
       language: 'cs',
       avatarId: 'fox',
+      avatarBackgroundStart: 'teal',
+      avatarBackgroundEnd: 'navy',
+      avatarGradientDirection: 'diagonal',
     });
     await setDoc(doc(db, 'users', uid, 'legal', legalDocument), {
       termsVersion: '2026-07-25',
@@ -175,8 +178,39 @@ describe('identity and account gates', () => {
       emailVerified: true,
       language: 'cs',
       avatarId: 'fox',
+      avatarBackgroundStart: 'teal',
+      avatarBackgroundEnd: 'navy',
+      avatarGradientDirection: 'diagonal',
     });
     await assertSucceeds(batch.commit());
+  });
+
+  test('user can update a complete valid avatar style', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    await assertSucceeds(
+      updateDoc(doc(authenticatedDb('reader'), 'users', 'reader'), {
+        avatarId: 'owl',
+        avatarBackgroundStart: 'purple',
+        avatarBackgroundEnd: 'gold',
+        avatarGradientDirection: 'vertical',
+      }),
+    );
+  });
+
+  test('avatar style accepts identical colors but rejects unknown directions', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    const profile = doc(authenticatedDb('reader'), 'users', 'reader');
+    await assertSucceeds(
+      updateDoc(profile, {
+        avatarBackgroundStart: 'teal',
+        avatarBackgroundEnd: 'teal',
+      }),
+    );
+    await assertFails(
+      updateDoc(profile, {
+        avatarGradientDirection: 'reverse-diagonal',
+      }),
+    );
   });
 
   test('unverified onboarding cannot forge an email-verified profile', async () => {

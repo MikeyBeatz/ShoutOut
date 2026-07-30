@@ -460,10 +460,11 @@ class TealSectionHeader extends StatelessWidget {
                             Text(
                               title,
                               style: const TextStyle(
+                                fontFamily: 'Urbanist',
                                 color: Colors.white,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w500,
                                 fontSize: 24,
-                                letterSpacing: -.5,
+                                letterSpacing: -.2,
                               ),
                             ),
                           ],

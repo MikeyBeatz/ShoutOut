@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'auth_gate.dart';
 import 'app_locale.dart';
+import 'avatar_style.dart';
 import 'firebase_options.dart';
 import 'legal.dart';
 import 'l10n/app_localizations.dart';

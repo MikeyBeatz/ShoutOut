@@ -85,6 +85,9 @@ for (const testUser of users) {
       emailVerified: true,
       language: testUser.language,
       avatarId: 'fox',
+      avatarBackgroundStart: 'teal',
+      avatarBackgroundEnd: 'navy',
+      avatarGradientDirection: 'diagonal',
       isTest: true,
     }, { merge: true }),
     db.collection('users').doc(uid).collection('legal')

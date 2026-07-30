@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_locale.dart';
+import 'avatar_style.dart';
 import 'legal.dart';
 import 'l10n/text.dart';
 
@@ -266,59 +267,50 @@ class _SignInPageState extends State<SignInPage> {
                             ],
                           ),
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                'assets/branding/app_icon.png',
-                                width: 88,
-                                height: 88,
-                                fit: BoxFit.cover,
-                                cacheWidth: 320,
-                                filterQuality: FilterQuality.high,
-                                semanticLabel: 'ShoutOut',
-                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  'assets/branding/feed_mark.png',
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.contain,
+                                  cacheWidth: 160,
+                                  filterQuality: FilterQuality.high,
+                                  semanticLabel: 'ShoutOut',
+                                ),
+                                const SizedBox(width: 7),
+                                const Text(
+                                  'ShoutOut',
+                                  style: TextStyle(
+                                    fontFamily: 'Urbanist',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 28,
+                                    letterSpacing: -.8,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'ShoutOut',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -.5,
-                                        ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _register
+                                  ? tr(
+                                      context,
+                                      'Vytvoř si účet pro dění v okolí.',
+                                    )
+                                  : tr(
+                                      context,
+                                      'Přihlas se a zjisti, co se děje v okolí.',
+                                    ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: .84),
+                                    height: 1.3,
                                   ),
-                                  const SizedBox(height: 7),
-                                  Text(
-                                    _register
-                                        ? tr(
-                                            context,
-                                            'Vytvoř si účet pro dění v okolí.',
-                                          )
-                                        : tr(
-                                            context,
-                                            'Přihlas se a zjisti, co se děje v okolí.',
-                                          ),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.white.withValues(
-                                            alpha: .84,
-                                          ),
-                                          height: 1.3,
-                                        ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ],
                         ),
@@ -838,6 +830,7 @@ class _NicknamePageState extends State<NicknamePage> {
   bool _busy = false;
   bool? _isAvailable;
   Timer? _availabilityTimer;
+  AvatarStyle _avatarStyle = AvatarStyle.random();
   static const _adjectives = [
     'Amber',
     'Bright',
@@ -980,67 +973,119 @@ class _NicknamePageState extends State<NicknamePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Center(
-      child: Padding(
+    body: SafeArea(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              tr(context, 'Vyber si přezdívku'),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              tr(
-                context,
-                'Uvidí ji ostatní uživatelé místo tvého skutečného jména.',
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _nickname,
-              maxLength: 24,
-              onChanged: _scheduleAvailabilityCheck,
-              decoration: InputDecoration(
-                labelText: tr(context, 'Přezdívka'),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            if (_isAvailable != null)
-              Row(
-                children: [
-                  Icon(
-                    _isAvailable! ? Icons.check_circle : Icons.cancel,
-                    color: _isAvailable! ? Colors.green : Colors.red,
-                    size: 18,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  tr(context, 'Vyber si přezdívku'),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _isAvailable!
-                        ? tr(context, 'Přezdívka je volná')
-                        : tr(context, 'Tato přezdívka je obsazená'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  tr(
+                    context,
+                    'Uvidí ji ostatní uživatelé místo tvého skutečného jména.',
                   ),
-                ],
-              ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _busy ? null : _generateNickname,
-              icon: const Icon(Icons.casino_outlined),
-              label: Text(tr(context, 'Vygenerovat přezdívku')),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _nickname,
+                  maxLength: 24,
+                  onChanged: _scheduleAvailabilityCheck,
+                  decoration: InputDecoration(
+                    labelText: tr(context, 'Přezdívka'),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                if (_isAvailable != null)
+                  Row(
+                    children: [
+                      Icon(
+                        _isAvailable! ? Icons.check_circle : Icons.cancel,
+                        color: _isAvailable! ? Colors.green : Colors.red,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _isAvailable!
+                            ? tr(context, 'Přezdívka je volná')
+                            : tr(context, 'Tato přezdívka je obsazená'),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _busy ? null : _generateNickname,
+                  icon: const Icon(Icons.casino_outlined),
+                  label: Text(tr(context, 'Vygenerovat přezdívku')),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  tr(context, 'Tvůj avatar'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                AvatarImage(
+                  avatarId: _avatarStyle.avatarId,
+                  style: _avatarStyle,
+                  radius: 48,
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _busy ? null : _selectAvatar,
+                      icon: const Icon(Icons.palette_outlined),
+                      label: Text(tr(context, 'Upravit avatar')),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _busy
+                          ? null
+                          : () => setState(
+                              () => _avatarStyle = AvatarStyle.random(),
+                            ),
+                      icon: const Icon(Icons.casino_outlined),
+                      label: Text(tr(context, 'Náhodný avatar')),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _busy ? null : _save,
+                  child: Text(tr(context, 'Pokračovat')),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            FilledButton(
-              onPressed: _busy ? null : _save,
-              child: Text(tr(context, 'Pokračovat')),
-            ),
-          ],
+          ),
         ),
       ),
     ),
   );
+
+  Future<void> _selectAvatar() async {
+    final selected = await showModalBottomSheet<AvatarStyle>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => AvatarPickerSheet(initialStyle: _avatarStyle),
+    );
+    if (selected != null && mounted) {
+      setState(() => _avatarStyle = selected);
+    }
+  }
+
   Future<void> _save() async {
     final name = _nickname.text.trim();
     if (!RegExp(
@@ -1085,7 +1130,7 @@ class _NicknamePageState extends State<NicknamePage> {
             'nicknameChangeCount': 0,
             'emailVerified': true,
             'language': initialLanguage,
-            'avatarId': 'fox',
+            ..._avatarStyle.toFirestore(),
           },
         );
       });

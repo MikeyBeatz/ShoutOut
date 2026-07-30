@@ -8,32 +8,32 @@ implementovaný.
 
 ### Vzhled a grafika
 
-- [ ] **Odstranit světlý proužek kolem ikony na ploše Androidu.**
+- [x] **Odstranit světlý proužek kolem ikony na ploše Androidu.**
   - V seznamu aplikací je ikona zobrazena správně, ale na ploše emulátoru má
     po obvodu světlý proužek.
   - Prověřit adaptive icon foreground/background, safe zone a masku launcheru.
   - Ověřit na ploše i v seznamu aplikací, ideálně alespoň na dvou tvarech masek.
 
-- [ ] **Sjednotit logo na přihlašovací a registrační obrazovce se záhlavím
+- [x] **Sjednotit logo na přihlašovací a registrační obrazovce se záhlavím
   feedu.**
   - Odstranit současný tmavší podklad loga.
   - Použít aktuální barvy a současný font logotypu ze záhlaví feedu.
   - Zkontrolovat přihlášení i registraci v češtině a angličtině.
 
-- [ ] **Navrhnout nový font záhlaví karet Uloženo, Mé Shouty a Profil.**
+- [x] **Navrhnout nový font záhlaví karet Uloženo, Mé Shouty a Profil.**
   - Připravit několik náhledů před změnou.
   - Posoudit variantu se stejným fontem jako logotyp i samostatný, lehčí font.
   - Zachovat čitelnost delších překladů a jednotnou velikost záhlaví.
 
 ### Profil a avatary
 
-- [ ] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
+- [x] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
   - Po otevření Profilu se nejdřív ukáže liška a až potom správně uložená sova.
   - Prověřit výchozí hodnotu, lokální cache a asynchronní načtení profilu.
   - Během načítání nezobrazovat jiného avatara; použít neutrální placeholder
     nebo poslední skutečně uloženou hodnotu.
 
-- [ ] **Vytvořit a přidat více avatarů.**
+- [x] **Vytvořit a přidat více avatarů.**
   - Zachovat současný vizuální styl, rozměry a bezpečné okraje.
   - Před implementací připravit přehled variant ke schválení.
   - Doplnit assety, výběr v profilu a případné lokalizované názvy či popisy.

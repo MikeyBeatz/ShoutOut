@@ -69,8 +69,23 @@ service cloud.firestore {
       return avatarId in [
         'fox', 'owl', 'otter', 'raccoon', 'robot', 'astronaut', 'cactus',
         'mushroom', 'moon', 'comet', 'cat', 'dragon', 'mountain',
-        'lightning', 'controller', 'octopus'
+        'lightning', 'controller', 'octopus', 'bear', 'panda', 'rabbit',
+        'penguin', 'frog', 'dog', 'hedgehog', 'parrot'
       ];
+    }
+
+    function validAvatarColor(colorId) {
+      return colorId in [
+        'teal', 'navy', 'aqua', 'purple', 'coral', 'gold', 'green', 'rose',
+        'sky', 'indigo', 'pink', 'orange', 'lime', 'mint', 'brown', 'slate'
+      ];
+    }
+
+    function validAvatarStyle(data) {
+      return validAvatarId(data.avatarId) &&
+        validAvatarColor(data.avatarBackgroundStart) &&
+        validAvatarColor(data.avatarBackgroundEnd) &&
+        data.avatarGradientDirection in ['horizontal', 'diagonal', 'vertical'];
     }
 
     function validNickname(nickname, nicknameLower) {
@@ -93,7 +108,10 @@ service cloud.firestore {
           'nicknameChangeCount',
           'emailVerified',
           'language',
-          'avatarId'
+          'avatarId',
+          'avatarBackgroundStart',
+          'avatarBackgroundEnd',
+          'avatarGradientDirection'
         ]) &&
         request.resource.data.keys().hasAll([
           'nickname',
@@ -103,7 +121,10 @@ service cloud.firestore {
           'nicknameChangeCount',
           'emailVerified',
           'language',
-          'avatarId'
+          'avatarId',
+          'avatarBackgroundStart',
+          'avatarBackgroundEnd',
+          'avatarGradientDirection'
         ]) &&
         validNickname(
           request.resource.data.nickname,
@@ -115,7 +136,7 @@ service cloud.firestore {
         request.resource.data.emailVerified ==
           request.auth.token.email_verified &&
         request.resource.data.language in ['cs', 'en', 'de', 'pl'] &&
-        validAvatarId(request.resource.data.avatarId);
+        validAvatarStyle(request.resource.data);
     }
 
     function validNicknameChange() {
@@ -389,8 +410,13 @@ service cloud.firestore {
           ) ||
           (
             request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['avatarId']) &&
-            validAvatarId(request.resource.data.avatarId)
+              .hasOnly([
+                'avatarId',
+                'avatarBackgroundStart',
+                'avatarBackgroundEnd',
+                'avatarGradientDirection'
+              ]) &&
+            validAvatarStyle(request.resource.data)
           ) ||
           validNicknameChange()
         );

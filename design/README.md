@@ -12,6 +12,8 @@ decisions used by the application. Runtime files stay in `assets/` and
 - `fonts/OFL-Urbanist.txt` — SIL Open Font License for Urbanist.
 - `brand-tokens.json` — exact colors and reusable design measurements.
 - `previews/` — approved emulator references and the font comparison.
+- `avatars/original/` — original opaque avatar artwork before background
+  extraction.
 
 ## Logo usage
 
@@ -33,9 +35,10 @@ The current Android launcher is built as a true adaptive icon instead:
 
 - background: `#0A6371`;
 - transparent foreground mark;
-- Android foreground inset: `14dp`.
+- Android foreground inset: `18dp`.
 
-This keeps the upper arc and lower point inside circular launcher masks.
+This leaves a visible background margin around the upper arc and lower point,
+including on circular and rounded-square launcher masks.
 
 ## Typography
 
@@ -90,6 +93,22 @@ The feed, Saved, My Shouts, and Profile share one fixed background layer:
 - alignment: x `2.2`, y `0.35`;
 - partially cropped at the right edge;
 - placed behind content, never inside individual Shout cards.
+
+## Avatars
+
+Runtime avatars in `assets/avatars/` have transparent backgrounds. Their
+original opaque artwork is preserved in `avatars/original/`.
+
+Each profile combines one of 24 avatar images with:
+
+- two colors from the curated 16-color palette (the same color creates a
+  solid background);
+- a horizontal, diagonal, or vertical gradient;
+- the reverse direction by swapping the first and second colors.
+
+New profiles start with a random valid combination and can customize it during
+onboarding. Existing profiles without gradient fields use the teal-to-navy
+diagonal fallback until the user saves a new combination.
 
 ## Runtime asset map
 

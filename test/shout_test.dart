@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shoutout/avatar_style.dart';
 import 'package:shoutout/main.dart';
 
 Shout _shout({
@@ -23,6 +24,45 @@ Shout _shout({
 );
 
 void main() {
+  group('Avatar style', () {
+    test('offers twenty-four avatars and sixteen background colors', () {
+      expect(AvatarStyle.avatarIds, hasLength(24));
+      expect(AvatarStyle.colors, hasLength(16));
+      expect(AvatarStyle.avatarIds, containsAll(['bear', 'parrot']));
+      expect(AvatarStyle.colors.keys, containsAll(['sky', 'slate']));
+    });
+
+    test('random styles always use supported colors', () {
+      for (var index = 0; index < 100; index++) {
+        final style = AvatarStyle.random();
+        expect(AvatarStyle.avatarIds, contains(style.avatarId));
+        expect(AvatarStyle.colors, contains(style.startColorId));
+        expect(AvatarStyle.colors, contains(style.endColorId));
+      }
+    });
+
+    test('a solid single-color background is supported', () {
+      const style = AvatarStyle(
+        avatarId: 'fox',
+        startColorId: 'teal',
+        endColorId: 'teal',
+        direction: AvatarGradientDirection.horizontal,
+      );
+
+      expect(style.startColor, style.endColor);
+      expect(style.toFirestore()['avatarBackgroundStart'], 'teal');
+      expect(style.toFirestore()['avatarBackgroundEnd'], 'teal');
+    });
+
+    test('legacy profiles receive a compatible gradient', () {
+      final style = AvatarStyle.fromProfile({'avatarId': 'owl'});
+
+      expect(style.avatarId, 'owl');
+      expect(style.startColorId, AvatarStyle.fallback.startColorId);
+      expect(style.endColorId, AvatarStyle.fallback.endColorId);
+    });
+  });
+
   group('Shout status', () {
     test('future shout is active', () {
       final shout = _shout(

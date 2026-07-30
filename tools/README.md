@@ -27,6 +27,8 @@ node .\seed_test_users.mjs
 The accounts can then sign in normally in the ShoutOut app. Never use this
 tool or these accounts in a production Firebase project.
 
+Seeded profiles receive the default teal-to-navy diagonal avatar background.
+
 ## Optional Litoměřice demo activity
 
 Append `--with-demo-data` to create active test Shouts from approximately

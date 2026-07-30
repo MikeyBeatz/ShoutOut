@@ -14,13 +14,17 @@ class ProfilePage extends StatelessWidget {
       builder: (context, snapshot) {
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';
-        final avatarId = profile?['avatarId'] as String? ?? 'fox';
+        final avatarId = profile?['avatarId'] as String?;
+        final avatarStyle = profile == null
+            ? null
+            : AvatarStyle.fromProfile(profile);
         final l10n = AppLocalizations.of(context)!;
         return Column(
           children: [
             ProfileHeader(
               nickname: nickname,
               avatarId: avatarId,
+              avatarStyle: avatarStyle,
               onEdit: profile == null
                   ? null
                   : () => Navigator.push(
@@ -63,11 +67,13 @@ class ProfileHeader extends StatelessWidget {
     super.key,
     required this.nickname,
     required this.avatarId,
+    required this.avatarStyle,
     this.onEdit,
   });
 
   final String nickname;
-  final String avatarId;
+  final String? avatarId;
+  final AvatarStyle? avatarStyle;
   final VoidCallback? onEdit;
 
   @override
@@ -98,7 +104,11 @@ class ProfileHeader extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(5),
-                      child: AvatarImage(avatarId: avatarId, radius: 34),
+                      child: AvatarImage(
+                        avatarId: avatarId,
+                        style: avatarStyle,
+                        radius: 34,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -112,9 +122,11 @@ class ProfileHeader extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
+                            fontFamily: 'Urbanist',
                             color: Colors.white,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w500,
                             fontSize: 24,
+                            letterSpacing: -.2,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -398,14 +410,23 @@ class EditProfilePage extends StatelessWidget {
       builder: (context, snapshot) {
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';
-        final avatarId = profile?['avatarId'] as String? ?? 'fox';
+        final avatarId = profile?['avatarId'] as String?;
+        final avatarStyle = profile == null
+            ? null
+            : AvatarStyle.fromProfile(profile);
         return Column(
           children: [
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
-                  Center(child: AvatarImage(avatarId: avatarId, radius: 58)),
+                  Center(
+                    child: AvatarImage(
+                      avatarId: avatarId,
+                      style: avatarStyle,
+                      radius: 58,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     nickname,
@@ -426,19 +447,18 @@ class EditProfilePage extends StatelessWidget {
                           ? null
                           : () async {
                               final selected =
-                                  await showModalBottomSheet<String>(
+                                  await showModalBottomSheet<AvatarStyle>(
                                     context: context,
                                     isScrollControlled: true,
-                                    builder: (_) =>
-                                        AvatarPickerSheet(selectedId: avatarId),
+                                    builder: (_) => AvatarPickerSheet(
+                                      initialStyle: avatarStyle!,
+                                    ),
                                   );
-                              if (selected == null || selected == avatarId) {
-                                return;
-                              }
+                              if (selected == null) return;
                               await FirebaseFirestore.instance
                                   .collection('users')
                                   .doc(userId)
-                                  .update({'avatarId': selected});
+                                  .update(selected.toFirestore());
                             },
                     ),
                   ),
