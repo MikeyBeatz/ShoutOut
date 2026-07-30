@@ -23,14 +23,23 @@ OUTPUTS = {
 NAMES = {"sk": "slovakTranslations", "uk": "ukrainianTranslations", "vi": "vietnameseTranslations"}
 OVERRIDES = {
     "sk": {
+        "Nearby": "Blízko",
+        "Top": "Top",
+        "Ending": "Končí",
         "My shouts": "Moje Shouty",
         "Shouts": "Shouty",
     },
     "uk": {
+        "Nearby": "Поруч",
+        "Top": "Топ",
+        "Ending": "Кінець",
         "My shouts": "Мої Shouts",
         "Shouts": "Shouts",
     },
     "vi": {
+        "Nearby": "Gần",
+        "Top": "Top",
+        "Ending": "Sắp hết",
         "My shouts": "Shout của tôi",
         "Shouts": "Shout",
     },

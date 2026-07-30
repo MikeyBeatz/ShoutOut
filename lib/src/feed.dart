@@ -20,6 +20,68 @@ class FeedPage extends StatefulWidget {
   State<FeedPage> createState() => _FeedPageState();
 }
 
+class _CompactFilterDropdown<T> extends StatelessWidget {
+  const _CompactFilterDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.hint,
+    required this.prefixIcon,
+    required this.style,
+    required this.hintStyle,
+    required this.menuWidth,
+    this.selectedItemBuilder,
+  });
+
+  final T value;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?> onChanged;
+  final String hint;
+  final IconData prefixIcon;
+  final TextStyle style;
+  final TextStyle hintStyle;
+  final double menuWidth;
+  final DropdownButtonBuilder? selectedItemBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return InputDecorator(
+      isEmpty: false,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: hintStyle,
+        prefixIcon: Icon(prefixIcon, color: _shoutPrimary, size: 18),
+        prefixIconConstraints: const BoxConstraints(minWidth: 26),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          items: items,
+          selectedItemBuilder: selectedItemBuilder,
+          onChanged: onChanged,
+          isExpanded: true,
+          isDense: true,
+          itemHeight: 48,
+          menuWidth: menuWidth,
+          borderRadius: BorderRadius.circular(14),
+          dropdownColor: Colors.white,
+          iconSize: 20,
+          alignment: AlignmentDirectional.center,
+          style: style,
+        ),
+      ),
+    );
+  }
+}
+
 class _FeedPageState extends State<FeedPage> {
   static const _categories = [
     'Obecné',
@@ -36,6 +98,19 @@ class _FeedPageState extends State<FeedPage> {
   String? _selectedCategory;
   double _radius = 5;
   FeedOrder _order = FeedOrder.nearest;
+
+  double _categoryMenuWidth(BuildContext context, TextStyle style) {
+    var widest = 0.0;
+    for (final category in ['Vše', ..._categories]) {
+      final painter = TextPainter(
+        text: TextSpan(text: tr(context, category), style: style),
+        textDirection: Directionality.of(context),
+        maxLines: 1,
+      )..layout();
+      if (painter.width > widest) widest = painter.width;
+    }
+    return (widest + 32).clamp(112.0, 168.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,35 +227,13 @@ class _FeedPageState extends State<FeedPage> {
                               children: [
                                 Expanded(
                                   flex: 4,
-                                  child: DropdownButtonFormField<double>(
-                                    initialValue: _radius,
-                                    isExpanded: true,
-                                    iconSize: 20,
-                                    alignment: AlignmentDirectional.center,
+                                  child: _CompactFilterDropdown<double>(
+                                    value: _radius,
+                                    menuWidth: 104,
+                                    hint: tr(context, 'Vzdálenost'),
+                                    prefixIcon: Icons.location_on_outlined,
                                     style: filterValueStyle,
-                                    decoration: InputDecoration(
-                                      hintText: tr(context, 'Vzdálenost'),
-                                      hintStyle: filterLabelStyle,
-                                      prefixIcon: const Icon(
-                                        Icons.location_on_outlined,
-                                        color: _shoutPrimary,
-                                        size: 18,
-                                      ),
-                                      prefixIconConstraints:
-                                          const BoxConstraints(minWidth: 26),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                            vertical: 8,
-                                          ),
-                                    ),
+                                    hintStyle: filterLabelStyle,
                                     items: const [1, 3, 5, 10, 20, 50]
                                         .map(
                                           (value) => DropdownMenuItem(
@@ -203,41 +256,19 @@ class _FeedPageState extends State<FeedPage> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   flex: 4,
-                                  child: DropdownButtonFormField<FeedOrder>(
-                                    initialValue: _order,
-                                    isExpanded: true,
-                                    iconSize: 20,
-                                    alignment: AlignmentDirectional.center,
+                                  child: _CompactFilterDropdown<FeedOrder>(
+                                    value: _order,
+                                    menuWidth: 112,
+                                    hint: tr(context, 'Řazení'),
+                                    prefixIcon: Icons.schedule_outlined,
                                     style: filterValueStyle,
-                                    decoration: InputDecoration(
-                                      hintText: tr(context, 'Řazení'),
-                                      hintStyle: filterLabelStyle,
-                                      prefixIcon: const Icon(
-                                        Icons.schedule_outlined,
-                                        color: _shoutPrimary,
-                                        size: 18,
-                                      ),
-                                      prefixIconConstraints:
-                                          const BoxConstraints(minWidth: 26),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                            vertical: 8,
-                                          ),
-                                    ),
+                                    hintStyle: filterLabelStyle,
                                     selectedItemBuilder: (context) => FeedOrder
                                         .values
                                         .map(
                                           (value) => Center(
                                             child: Text(
-                                              tr(context, value.compactLabel),
+                                              tr(context, value.label),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: filterValueStyle,
@@ -267,35 +298,16 @@ class _FeedPageState extends State<FeedPage> {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   flex: 5,
-                                  child: DropdownButtonFormField<String?>(
-                                    initialValue: _selectedCategory,
-                                    isExpanded: true,
-                                    iconSize: 20,
-                                    alignment: AlignmentDirectional.center,
-                                    style: filterValueStyle,
-                                    decoration: InputDecoration(
-                                      hintText: tr(context, 'Kategorie'),
-                                      hintStyle: filterLabelStyle,
-                                      prefixIcon: const Icon(
-                                        Icons.grid_view_rounded,
-                                        color: _shoutPrimary,
-                                        size: 18,
-                                      ),
-                                      prefixIconConstraints:
-                                          const BoxConstraints(minWidth: 26),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                            vertical: 8,
-                                          ),
+                                  child: _CompactFilterDropdown<String?>(
+                                    value: _selectedCategory,
+                                    menuWidth: _categoryMenuWidth(
+                                      context,
+                                      filterValueStyle,
                                     ),
+                                    hint: tr(context, 'Kategorie'),
+                                    prefixIcon: Icons.grid_view_rounded,
+                                    style: filterValueStyle,
+                                    hintStyle: filterLabelStyle,
                                     items: [
                                       DropdownMenuItem<String?>(
                                         value: null,

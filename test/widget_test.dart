@@ -11,7 +11,7 @@ void main() {
     );
 
     expect(find.text('ShoutOut'), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<double>), findsOneWidget);
+    expect(find.byType(DropdownButton<double>), findsOneWidget);
   });
 
   testWidgets('replaces the avatar placeholder with the stored avatar', (

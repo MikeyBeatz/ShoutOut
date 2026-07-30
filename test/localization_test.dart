@@ -60,6 +60,41 @@ void main() {
     });
   }
 
+  for (final expectation in <(String, (String, String, String))>[
+    ('cs', ('Nejblíž', 'Top', 'Končící')),
+    ('en', ('Nearby', 'Top', 'Ending')),
+    ('de', ('Nähe', 'Top', 'Endet')),
+    ('pl', ('Blisko', 'Top', 'Koniec')),
+    ('sk', ('Blízko', 'Top', 'Končí')),
+    ('uk', ('Поруч', 'Топ', 'Кінець')),
+    ('vi', ('Gần', 'Top', 'Sắp hết')),
+  ]) {
+    testWidgets('uses compact feed filters in ${expectation.$1}', (
+      tester,
+    ) async {
+      late BuildContext localizedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(expectation.$1),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) {
+              localizedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect((
+        tr(localizedContext, 'Nejblíž'),
+        tr(localizedContext, 'Top'),
+        tr(localizedContext, 'Končící'),
+      ), expectation.$2);
+    });
+  }
+
   testWidgets('falls back to Czech for an unsupported language', (
     tester,
   ) async {

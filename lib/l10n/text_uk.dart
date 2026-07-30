@@ -29,7 +29,7 @@ const ukrainianTranslations = <String, String>{
   'Brzy končí': 'Скоро закінчиться',
   'Nejblíž': 'Поруч',
   'Top': 'Топ',
-  'Končící': 'Закінчення',
+  'Končící': 'Кінець',
   'V tomto okolí zatím nejsou žádné shouty.': 'Немає shouts ще поруч.',
   'Uložené shouty': 'Збережено shouts',
   'Zatím nemáš uložené žádné shouty.': 'У вас немає збереження shouts ще.',

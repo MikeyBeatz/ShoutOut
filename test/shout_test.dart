@@ -24,6 +24,14 @@ Shout _shout({
 );
 
 void main() {
+  test('feed order uses one compact label in the menu and selected state', () {
+    expect(FeedOrder.values.map((order) => order.label), [
+      'Nejblíž',
+      'Top',
+      'Končící',
+    ]);
+  });
+
   group('Avatar style', () {
     test('offers twenty-four avatars and sixteen background colors', () {
       expect(AvatarStyle.avatarIds, hasLength(24));

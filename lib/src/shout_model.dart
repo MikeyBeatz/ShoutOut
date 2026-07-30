@@ -2,14 +2,8 @@ part of '../main.dart';
 
 enum FeedOrder { nearest, popular, endingSoon }
 
-extension on FeedOrder {
+extension FeedOrderLabels on FeedOrder {
   String get label => switch (this) {
-    FeedOrder.nearest => 'Nejbližší',
-    FeedOrder.popular => 'Oblíbené',
-    FeedOrder.endingSoon => 'Brzy končí',
-  };
-
-  String get compactLabel => switch (this) {
     FeedOrder.nearest => 'Nejblíž',
     FeedOrder.popular => 'Top',
     FeedOrder.endingSoon => 'Končící',
