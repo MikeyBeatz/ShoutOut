@@ -49,7 +49,7 @@ implementovaný.
 
 ### Lokalizace
 
-- [ ] **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
+- [x] **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
   - Doplnit nové locale do aplikace i do nabídky jazyků.
   - Zachovat automatickou volbu podle jazyka zařízení a funkční ruční přepnutí.
   - Ověřit fallback pro zařízení s nepodporovaným jazykem.

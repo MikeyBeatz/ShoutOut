@@ -528,15 +528,41 @@ Future<void> _selectProfileLanguage(BuildContext context, String userId) async {
             trailing: const Text('PL'),
             onTap: () => Navigator.pop(sheetContext, 'pl'),
           ),
+          ListTile(
+            title: Text(l10n.slovak),
+            trailing: const Text('SK'),
+            onTap: () => Navigator.pop(sheetContext, 'sk'),
+          ),
+          ListTile(
+            title: Text(l10n.ukrainian),
+            trailing: const Text('UK'),
+            onTap: () => Navigator.pop(sheetContext, 'uk'),
+          ),
+          ListTile(
+            title: Text(l10n.vietnamese),
+            trailing: const Text('VI'),
+            onTap: () => Navigator.pop(sheetContext, 'vi'),
+          ),
         ],
       ),
     ),
   );
   if (language == null) return;
-  await FirebaseFirestore.instance.collection('users').doc(userId).update({
-    'language': language,
-  });
-  appLocale.value = Locale(language);
+  try {
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'language': language,
+    });
+    appLocale.value = Locale(language);
+  } on FirebaseException {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+        ),
+      ),
+    );
+  }
 }
 
 Future<void> _showNicknameChange(

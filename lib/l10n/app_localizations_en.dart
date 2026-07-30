@@ -30,6 +30,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get polish => 'Polish';
 
   @override
+  String get slovak => 'Slovak';
+
+  @override
+  String get ukrainian => 'Ukrainian';
+
+  @override
+  String get vietnamese => 'Vietnamese';
+
+  @override
   String get changeNickname => 'Change nickname';
 
   @override

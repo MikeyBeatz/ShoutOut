@@ -1,0 +1,17 @@
+{
+  "@@locale": "uk",
+  "appTitle": "ShoutOut",
+  "profile": "Профіль",
+  "language": "Мова",
+  "czech": "Чеська",
+  "english": "Англійська",
+  "german": "Німецька",
+  "polish": "Польська",
+  "slovak": "Словацька",
+  "ukrainian": "Українська",
+  "vietnamese": "В’єтнамська",
+  "changeNickname": "Змінити псевдонім",
+  "nicknameChangeHint": "Псевдонім можна буде знову змінити через 30 днів.",
+  "logout": "Вийти",
+  "deleteAccount": "Видалити обліковий запис"
+}

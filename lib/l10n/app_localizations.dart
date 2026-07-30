@@ -9,6 +9,9 @@ import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_pl.dart';
+import 'app_localizations_sk.dart';
+import 'app_localizations_uk.dart';
+import 'app_localizations_vi.dart';
 
 // ignore_for_file: type=lint
 
@@ -100,6 +103,9 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('pl'),
+    Locale('sk'),
+    Locale('uk'),
+    Locale('vi'),
   ];
 
   /// No description provided for @appTitle.
@@ -144,6 +150,24 @@ abstract class AppLocalizations {
   /// **'Polština'**
   String get polish;
 
+  /// No description provided for @slovak.
+  ///
+  /// In cs, this message translates to:
+  /// **'Slovenština'**
+  String get slovak;
+
+  /// No description provided for @ukrainian.
+  ///
+  /// In cs, this message translates to:
+  /// **'Ukrajinština'**
+  String get ukrainian;
+
+  /// No description provided for @vietnamese.
+  ///
+  /// In cs, this message translates to:
+  /// **'Vietnamština'**
+  String get vietnamese;
+
   /// No description provided for @changeNickname.
   ///
   /// In cs, this message translates to:
@@ -179,8 +203,15 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['cs', 'de', 'en', 'pl'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'cs',
+    'de',
+    'en',
+    'pl',
+    'sk',
+    'uk',
+    'vi',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -197,6 +228,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'pl':
       return AppLocalizationsPl();
+    case 'sk':
+      return AppLocalizationsSk();
+    case 'uk':
+      return AppLocalizationsUk();
+    case 'vi':
+      return AppLocalizationsVi();
   }
 
   throw FlutterError(

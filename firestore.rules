@@ -135,7 +135,7 @@ service cloud.firestore {
         request.resource.data.nicknameChangeCount == 0 &&
         request.resource.data.emailVerified ==
           request.auth.token.email_verified &&
-        request.resource.data.language in ['cs', 'en', 'de', 'pl'] &&
+        request.resource.data.language in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi'] &&
         validAvatarStyle(request.resource.data);
     }
 
@@ -406,7 +406,7 @@ service cloud.firestore {
           (
             request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['language']) &&
-            request.resource.data.language in ['cs', 'en', 'de', 'pl']
+            request.resource.data.language in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi']
           ) ||
           (
             request.resource.data.diff(resource.data).affectedKeys()
@@ -482,7 +482,7 @@ service cloud.firestore {
           request.resource.data.communityRulesVersion == '2026-07-25' &&
           request.resource.data.ageConfirmed == true &&
           request.resource.data.acceptedAt == request.time &&
-          request.resource.data.acceptedLanguage in ['cs', 'en', 'de', 'pl'];
+          request.resource.data.acceptedLanguage in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi'];
         allow update, delete: if false;
       }
     }

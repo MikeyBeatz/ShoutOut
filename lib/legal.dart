@@ -270,6 +270,9 @@ List<LegalSection> _document(String language, LegalDocumentType type) {
   if (language == 'en') return terms ? _enTerms : _enPrivacy;
   if (language == 'de') return terms ? _deTerms : _dePrivacy;
   if (language == 'pl') return terms ? _plTerms : _plPrivacy;
+  if (language == 'sk' || language == 'uk' || language == 'vi') {
+    return terms ? _enTerms : _enPrivacy;
+  }
   return terms ? _csTerms : _csPrivacy;
 }
 

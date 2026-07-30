@@ -1,5 +1,9 @@
 import 'package:flutter/widgets.dart';
 
+import 'text_sk.dart';
+import 'text_uk.dart';
+import 'text_vi.dart';
+
 /// Transitional helper for short UI strings. The canonical app translations
 /// remain in the ARB files; this keeps labels that are also stored in Firestore
 /// (such as categories) stable while presenting them in the selected language.
@@ -9,6 +13,9 @@ String tr(BuildContext context, String czech) {
     'en' => _english,
     'de' => _german,
     'pl' => _polish,
+    'sk' => slovakTranslations,
+    'uk' => ukrainianTranslations,
+    'vi' => vietnameseTranslations,
     _ => null,
   };
   return translations?[czech] ?? czech;

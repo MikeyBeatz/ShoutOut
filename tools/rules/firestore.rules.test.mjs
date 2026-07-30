@@ -213,6 +213,15 @@ describe('identity and account gates', () => {
     );
   });
 
+  test('profile accepts the new languages and rejects unknown language codes', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    const profile = doc(authenticatedDb('reader'), 'users', 'reader');
+    for (const language of ['sk', 'uk', 'vi']) {
+      await assertSucceeds(updateDoc(profile, { language }));
+    }
+    await assertFails(updateDoc(profile, { language: 'fr' }));
+  });
+
   test('unverified onboarding cannot forge an email-verified profile', async () => {
     const db = authenticatedDb('new-user', { emailVerified: false });
     await assertFails(

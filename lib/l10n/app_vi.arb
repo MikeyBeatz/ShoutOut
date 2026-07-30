@@ -1,0 +1,17 @@
+{
+  "@@locale": "vi",
+  "appTitle": "ShoutOut",
+  "profile": "Hồ sơ",
+  "language": "Ngôn ngữ",
+  "czech": "Tiếng Séc",
+  "english": "Tiếng Anh",
+  "german": "Tiếng Đức",
+  "polish": "Tiếng Ba Lan",
+  "slovak": "Tiếng Slovakia",
+  "ukrainian": "Tiếng Ukraina",
+  "vietnamese": "Tiếng Việt",
+  "changeNickname": "Đổi biệt danh",
+  "nicknameChangeHint": "Có thể đổi lại biệt danh sau 30 ngày.",
+  "logout": "Đăng xuất",
+  "deleteAccount": "Xóa tài khoản"
+}

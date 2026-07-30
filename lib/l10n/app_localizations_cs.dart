@@ -30,6 +30,15 @@ class AppLocalizationsCs extends AppLocalizations {
   String get polish => 'Polština';
 
   @override
+  String get slovak => 'Slovenština';
+
+  @override
+  String get ukrainian => 'Ukrajinština';
+
+  @override
+  String get vietnamese => 'Vietnamština';
+
+  @override
   String get changeNickname => 'Změnit přezdívku';
 
   @override

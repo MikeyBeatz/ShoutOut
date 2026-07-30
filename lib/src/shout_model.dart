@@ -116,6 +116,10 @@ class Shout {
         'en' => 'ending in ${localizedDurationLabel(context, difference)}',
         'de' => 'endet in ${localizedDurationLabel(context, difference)}',
         'pl' => 'wygasa za ${localizedDurationLabel(context, difference)}',
+        'sk' => 'končí o ${localizedDurationLabel(context, difference)}',
+        'uk' =>
+          'завершується через ${localizedDurationLabel(context, difference)}',
+        'vi' => 'kết thúc sau ${localizedDurationLabel(context, difference)}',
         _ => 'končí za ${localizedDurationLabel(context, difference)}',
       };
     }
@@ -124,6 +128,9 @@ class Shout {
       'en' => 'expired $past ago',
       'de' => 'vor $past abgelaufen',
       'pl' => 'wygasł $past temu',
+      'sk' => 'platnosť vypršala pred $past',
+      'uk' => 'термін дії минув $past тому',
+      'vi' => 'đã hết hạn $past trước',
       _ => 'expiroval před $past',
     };
   }
@@ -135,6 +142,9 @@ String localizedDurationLabel(BuildContext context, Duration duration) {
     'en' => ('days', 'h', 'min'),
     'de' => ('Tagen', 'Std.', 'Min.'),
     'pl' => ('dni', 'godz.', 'min'),
+    'sk' => ('dní', 'h', 'min'),
+    'uk' => ('дн.', 'год', 'хв'),
+    'vi' => ('ngày', 'giờ', 'phút'),
     _ => ('dny', 'h', 'min'),
   };
   if (duration.inDays >= 1) {
