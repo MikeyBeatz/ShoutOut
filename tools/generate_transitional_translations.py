@@ -89,12 +89,15 @@ def translate(text: str, language: str) -> str:
     # Shout/Shouts is a product term throughout the app, not the ordinary verb.
     # Translate only the surrounding text so the service cannot alter the brand.
     protected = re.split(r"(\bShoutOut\b|\bShouts?\b)", text, flags=re.IGNORECASE)
-    return "".join(
+    translated = "".join(
         part
         if re.fullmatch(r"\b(?:ShoutOut|Shouts?)\b", part, re.IGNORECASE)
         else translate_segment(part, language)
         for part in protected
     )
+    if text[:1].isupper() and translated[:1].islower():
+        translated = translated[:1].upper() + translated[1:]
+    return translated
 
 
 def dart_quote(value: str) -> str:

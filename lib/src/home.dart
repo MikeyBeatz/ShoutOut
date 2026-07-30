@@ -422,9 +422,12 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                     if (context.mounted &&
                         error.message == 'location-unavailable') {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Pro publikování Shoutu povol přístup k poloze.',
+                            tr(
+                              context,
+                              'Pro publikování Shoutu povol přístup k poloze.',
+                            ),
                           ),
                         ),
                       );

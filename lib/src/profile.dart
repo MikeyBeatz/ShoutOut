@@ -624,7 +624,7 @@ Future<void> _requestAccountDeletion(BuildContext context) async {
       content: Text(
         tr(
           dialogContext,
-          'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dnů, potom budou odstraněny nebo anonymizovány.',
+          'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
         ),
       ),
       actions: [

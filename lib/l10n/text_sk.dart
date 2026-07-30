@@ -38,7 +38,7 @@ const slovakTranslations = <String, String>{
   'Expirované': 'Platnosť vypršala',
   'Smazané': 'Odstránené',
   'V této části zatím nemáš žádné shouty.':
-      'ty nemáš shouts ešte v tejto sekcii.',
+      'Ty nemáš shouts ešte v tejto sekcii.',
   'Odebrat z uložených': 'Odstrániť z uložených',
   'Uložit shout': 'Uložiť shout',
   'Smazat shout?': 'Odstrániť shout?',
@@ -76,7 +76,7 @@ const slovakTranslations = <String, String>{
   'Rozumím': 'Dobre',
   'Doplň nadpis, text a alespoň jednu kategorii.':
       'Pridajte názov, text a aspoň jednu kategóriu.',
-  'Obecné': 'generál',
+  'Obecné': 'Generál',
   'Akce': 'Udalosti',
   'Sport': 'Šport',
   'Zábava': 'Zábava',
@@ -90,7 +90,7 @@ const slovakTranslations = <String, String>{
   'Přihlas se a zjisti, co se děje v okolí.':
       'Prihláste sa a zistite, čo sa deje v okolí.',
   'E-mail': 'Email',
-  'Heslo': 'heslo',
+  'Heslo': 'Heslo',
   'Zopakovat heslo': 'Zopakujte heslo',
   'Alespoň 10 znaků': 'Minimálne 10 znakov',
   'Zadej platný e-mail.': 'Zadajte platnú e-mailovú adresu.',
@@ -129,7 +129,7 @@ const slovakTranslations = <String, String>{
   'Vyber si přezdívku': 'Vyberte si prezývku',
   'Uvidí ji ostatní uživatelé místo tvého skutečného jména.':
       'Ostatní používatelia ho uvidia namiesto vášho skutočného mena.',
-  'Přezdívka': 'prezývka',
+  'Přezdívka': 'Prezývka',
   'Přezdívka je volná': 'Prezývka je k dispozícii',
   'Tato přezdívka je obsazená': 'Táto prezývka je prevzatá',
   'Vygenerovat přezdívku': 'Vygenerovať prezývku',
@@ -140,7 +140,7 @@ const slovakTranslations = <String, String>{
   'Přezdívku se nepodařilo uložit.': 'Prezývku sa nepodarilo uložiť.',
   'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
       'Túto zmenu je možné vykonať iba raz za 30 dní. Chcete pokračovať?',
-  'Ano': 'áno',
+  'Ano': 'Áno',
   'Zavřít': 'Zavrieť',
   'Uložit': 'Uložiť',
   'Zadej jinou přezdívku.': 'Zadajte inú prezývku.',
@@ -226,7 +226,7 @@ const slovakTranslations = <String, String>{
   'Verze': 'Verzia',
   'Souhlas se nepodařilo uložit. Zkus to znovu.':
       'Vaše prijatie sa nepodarilo uložiť. Skúste to znova.',
-  'Pravidla komunity': 'pravidlá Spoločenstva',
+  'Pravidla komunity': 'Pravidlá Spoločenstva',
   'Bezpečné používání ShoutOutu pro všechny.':
       'Používanie ShoutOut bezpečne pre každého.',
   'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.':
@@ -261,4 +261,11 @@ const slovakTranslations = <String, String>{
   'Účet a soukromí': 'Účet a súkromie',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'Namiesto vášho skutočného mena používame prezývku. Nastavenia účtu nájdete vo svojom profile.',
+  'Blokovat autora': 'Blokovať autora',
+  'Blokovat autora?': 'Blokovať autora?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Ich Shouts sa už nebude zobrazovať vo vašom informačnom kanáli.',
+  'Blokovat': 'Blokovať',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Povoliť prístup k polohe na zverejnenie a Shout.',
 };

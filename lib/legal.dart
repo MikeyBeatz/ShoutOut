@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'l10n/legal_translations.dart';
 import 'l10n/text.dart';
 
 const legalVersion = '2026-07-25';
@@ -270,11 +271,21 @@ List<LegalSection> _document(String language, LegalDocumentType type) {
   if (language == 'en') return terms ? _enTerms : _enPrivacy;
   if (language == 'de') return terms ? _deTerms : _dePrivacy;
   if (language == 'pl') return terms ? _plTerms : _plPrivacy;
-  if (language == 'sk' || language == 'uk' || language == 'vi') {
-    return terms ? _enTerms : _enPrivacy;
+  if (language == 'sk') {
+    return _legalSections(terms ? legalSkTerms : legalSkPrivacy);
+  }
+  if (language == 'uk') {
+    return _legalSections(terms ? legalUkTerms : legalUkPrivacy);
+  }
+  if (language == 'vi') {
+    return _legalSections(terms ? legalViTerms : legalViPrivacy);
   }
   return terms ? _csTerms : _csPrivacy;
 }
+
+List<LegalSection> _legalSections(List<(String, String)> sections) => sections
+    .map((section) => LegalSection(section.$1, section.$2))
+    .toList(growable: false);
 
 const _csTerms = [
   LegalSection(

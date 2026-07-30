@@ -45,7 +45,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
           IconButton(
             onPressed: _blockAuthor,
-            tooltip: 'Blokovat autora',
+            tooltip: tr(context, 'Blokovat autora'),
             icon: const Icon(Icons.person_off_outlined),
           ),
         if (widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid)
@@ -403,18 +403,18 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Blokovat autora?'),
-        content: const Text(
-          'Jeho Shouty se přestanou zobrazovat ve tvém feedu.',
+        title: Text(tr(context, 'Blokovat autora?')),
+        content: Text(
+          tr(context, 'Jeho Shouty se přestanou zobrazovat ve tvém feedu.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Zrušit'),
+            child: Text(tr(context, 'Zrušit')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Blokovat'),
+            child: Text(tr(context, 'Blokovat')),
           ),
         ],
       ),
@@ -443,9 +443,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       return;
     }
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Hlášení bylo odesláno.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr(context, 'Hlášení bylo odesláno.'))),
+      );
     }
   }
 
@@ -494,7 +494,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(context, 'Hlásení bylo odesláno.'))),
+        SnackBar(content: Text(tr(context, 'Hlášení bylo odesláno.'))),
       );
     }
   }

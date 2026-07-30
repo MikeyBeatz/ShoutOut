@@ -54,7 +54,7 @@ implementovaný.
   - Zachovat automatickou volbu podle jazyka zařízení a funkční ruční přepnutí.
   - Ověřit fallback pro zařízení s nepodporovaným jazykem.
 
-- [ ] **Provést kompletní audit překladů.**
+- [x] **Provést kompletní audit překladů.**
   - Najít texty zapsané přímo ve widgetech a přesunout je do lokalizace.
   - Porovnat úplnost všech klíčů pro češtinu, angličtinu, němčinu, polštinu,
     slovenštinu, ukrajinštinu a vietnamštinu.

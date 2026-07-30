@@ -1,7 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
   'Oznámení': 'Сповіщення',
-  'Přidat shout': 'додати shout',
+  'Přidat shout': 'Додати shout',
   'Co se děje v okolí?': 'Що відбувається поруч?',
   'Okolí': 'Поруч',
   'Uložené': 'Збережено',
@@ -10,7 +10,7 @@ const ukrainianTranslations = <String, String>{
   'Vzdálenost': 'Відстань',
   'Řazení': 'Сортувати',
   'Kategorie': 'Категорія',
-  'Vše': 'всі',
+  'Vše': 'Всі',
   'Změnit avatar': 'Змінити аватар',
   'Upravit profil': 'Редагувати профіль',
   'Vyber si avatar': 'Виберіть аватар',
@@ -30,7 +30,7 @@ const ukrainianTranslations = <String, String>{
   'Nejblíž': 'Поруч',
   'Top': 'Топ',
   'Končící': 'Закінчення',
-  'V tomto okolí zatím nejsou žádné shouty.': 'немає shouts ще поруч.',
+  'V tomto okolí zatím nejsou žádné shouty.': 'Немає shouts ще поруч.',
   'Uložené shouty': 'Збережено shouts',
   'Zatím nemáš uložené žádné shouty.': 'У вас немає збереження shouts ще.',
   'Aktivní': 'Активний',
@@ -39,7 +39,7 @@ const ukrainianTranslations = <String, String>{
   'V této části zatím nemáš žádné shouty.':
       'У вас немає shouts в цьому розділі ще.',
   'Odebrat z uložených': 'Видалити зі збережених',
-  'Uložit shout': 'зберегти shout',
+  'Uložit shout': 'Зберегти shout',
   'Smazat shout?': 'Видалити shout?',
   'Shout zmizí z veřejného feedu.':
       'The shout зникне з загальнодоступної стрічки.',
@@ -47,7 +47,7 @@ const ukrainianTranslations = <String, String>{
   'Smazat': 'Видалити',
   'Smazat shout': 'Видалити shout',
   'Shout': 'Shout',
-  'Nahlásit': 'звіт',
+  'Nahlásit': 'Звіт',
   'Komentáře': 'Коментарі',
   'Soukromě': 'Приватний',
   'Soukromě odpovědět': 'Відповісти приватно',
@@ -61,22 +61,22 @@ const ukrainianTranslations = <String, String>{
   'Zatím jsi nenapsal/a žádný komentář.': 'Ви ще не написали коментарів.',
   'Komentáře se nepodařilo načíst. Zkus to prosím znovu.':
       'Не вдалося завантажити коментарі. Спробуйте ще раз.',
-  'Nový shout': 'новий shout',
+  'Nový shout': 'Новий shout',
   'Nadpis': 'Назва',
   'Stručně, co se děje?': 'Коротко, що відбувається?',
-  'Text': 'текст',
+  'Text': 'Текст',
   'Doplň podrobnosti…': 'Додати деталі…',
   'Kategorie (vyber nejvýše dvě)': 'Категорії (виберіть до двох)',
   'Platnost': 'Тривалість',
   'Publikovat': 'Опублікувати',
   'Shout může mít platnost minimálně 15 minut.':
       'А shout має тривати не менше 15 хвилин.',
-  'Rozumím': 'зрозумів',
+  'Rozumím': 'Зрозумів',
   'Doplň nadpis, text a alespoň jednu kategorii.':
       'Додайте назву, текст і принаймні одну категорію.',
   'Obecné': 'Загальний',
   'Akce': 'Події',
-  'Sport': 'спорт',
+  'Sport': 'Спорт',
   'Zábava': 'Розваги',
   'Pomoc': 'Довідка',
   'Upozornění': 'Попередження',
@@ -131,7 +131,7 @@ const ukrainianTranslations = <String, String>{
   'Vyber si přezdívku': 'Виберіть свій псевдонім',
   'Uvidí ji ostatní uživatelé místo tvého skutečného jména.':
       'Інші користувачі бачитимуть його замість вашого справжнього імені.',
-  'Přezdívka': 'псевдонім',
+  'Přezdívka': 'Псевдонім',
   'Přezdívka je volná': 'Нік доступний',
   'Tato přezdívka je obsazená': 'Цей псевдонім прийнято',
   'Vygenerovat přezdívku': 'Згенерувати нікнейм',
@@ -142,9 +142,9 @@ const ukrainianTranslations = <String, String>{
   'Přezdívku se nepodařilo uložit.': 'Не вдалося зберегти псевдонім.',
   'Tuto změnu je možné provést pouze jednou za 30 dní. Chceš pokračovat?':
       'Цю зміну можна вносити лише раз на 30 днів. Ви хочете продовжити?',
-  'Ano': 'так',
+  'Ano': 'Так',
   'Zavřít': 'Закрити',
-  'Uložit': 'зберегти',
+  'Uložit': 'Зберегти',
   'Zadej jinou přezdívku.': 'Введіть інший псевдонім.',
   'Přezdívku zatím nelze změnit.': 'Псевдонім ще не можна змінити.',
   'Další změna přezdívky bude možná': 'Ваш наступний псевдонім буде доступним',
@@ -179,7 +179,7 @@ const ukrainianTranslations = <String, String>{
       'Збережені параметри застосовуватимуться, коли сповіщення ввімкнено.',
   'Odpovědi na komentáře': 'Відповіді на коментарі',
   'Reakce na mé Shouty': 'Реакції на мої shouts',
-  'Nové Shouty v okolí': 'новий shouts неподалік',
+  'Nové Shouty v okolí': 'Новий shouts неподалік',
   'Nápověda': 'Довідка',
   'Moderace': 'Модерація',
   'Soukromé': 'Приватний',
@@ -209,7 +209,7 @@ const ukrainianTranslations = <String, String>{
   'Osobní údaje nebo soukromí': 'Особисті дані або конфіденційність',
   'Spam, podvod nebo manipulace': 'Спам, шахрайство або маніпуляції',
   'Explicitní nebo nevhodný obsah': 'Відвертий або неприйнятний вміст',
-  'Jiné': 'інше',
+  'Jiné': 'Інше',
   'Důvod hlášení': 'Повідомити про причину',
   'Volitelně doplň podrobnosti': 'За бажанням додайте деталі',
   'Právní informace': 'Правова інформація',
@@ -262,4 +262,11 @@ const ukrainianTranslations = <String, String>{
   'Účet a soukromí': 'Обліковий запис і конфіденційність',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'Ми використовуємо псевдонім замість вашого справжнього імені. Знайдіть налаштування облікового запису у своєму профілі.',
+  'Blokovat autora': 'Заблокувати автора',
+  'Blokovat autora?': 'Заблокувати автора?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Їх Shouts більше не відображатиметься у вашій стрічці.',
+  'Blokovat': 'Блокувати',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Дозволити доступ до місцезнаходження для публікації a Shout.',
 };

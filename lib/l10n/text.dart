@@ -281,6 +281,13 @@ const _english = <String, String>{
   'Účet a soukromí': 'Account and privacy',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'We use a nickname instead of your real name. Find account settings in your profile.',
+  'Blokovat autora': 'Block author',
+  'Blokovat autora?': 'Block author?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Their Shouts will no longer appear in your feed.',
+  'Blokovat': 'Block',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Allow location access to publish a Shout.',
 };
 
 const _german = <String, String>{
@@ -550,6 +557,13 @@ const _german = <String, String>{
   'Účet a soukromí': 'Konto und Datenschutz',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'Wir verwenden einen Spitznamen statt deines echten Namens. Kontoeinstellungen findest du im Profil.',
+  'Blokovat autora': 'Autor blockieren',
+  'Blokovat autora?': 'Autor blockieren?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Seine Shouts werden nicht mehr in deinem Feed angezeigt.',
+  'Blokovat': 'Blockieren',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Erlaube den Standortzugriff, um einen Shout zu veröffentlichen.',
 };
 
 const _polish = <String, String>{
@@ -814,4 +828,11 @@ const _polish = <String, String>{
   'Účet a soukromí': 'Konto i prywatność',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'Używamy pseudonimu zamiast prawdziwego imienia. Ustawienia konta znajdziesz w profilu.',
+  'Blokovat autora': 'Zablokuj autora',
+  'Blokovat autora?': 'Zablokować autora?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Jego shouty przestaną pojawiać się w Twoim kanale.',
+  'Blokovat': 'Zablokuj',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Zezwól na dostęp do lokalizacji, aby opublikować shout.',
 };

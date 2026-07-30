@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/l10n/app_localizations.dart';
+import 'package:shoutout/l10n/legal_translations.dart';
 import 'package:shoutout/l10n/text.dart';
 
 void main() {
@@ -9,6 +10,27 @@ void main() {
       AppLocalizations.supportedLocales.map((locale) => locale.languageCode),
       containsAll(<String>['cs', 'de', 'en', 'pl', 'sk', 'uk', 'vi']),
     );
+  });
+
+  test('new languages have complete legal documents', () {
+    for (final document in <List<(String, String)>>[
+      legalSkTerms,
+      legalUkTerms,
+      legalViTerms,
+    ]) {
+      expect(document, hasLength(5));
+      expect(document.every((section) => section.$2.isNotEmpty), isTrue);
+      expect(document.first.$1, isNot('1. Service and age'));
+    }
+    for (final document in <List<(String, String)>>[
+      legalSkPrivacy,
+      legalUkPrivacy,
+      legalViPrivacy,
+    ]) {
+      expect(document, hasLength(4));
+      expect(document.every((section) => section.$2.isNotEmpty), isTrue);
+      expect(document.first.$1, isNot('1. Who processes the data'));
+    }
   });
 
   for (final expectation in <(String, String)>[

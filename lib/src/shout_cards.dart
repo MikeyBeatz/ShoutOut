@@ -218,7 +218,7 @@ class ShoutCard extends StatelessWidget {
                   if (onPrivateReply != null)
                     IconButton(
                       onPressed: onPrivateReply,
-                      tooltip: tr(context, 'SoukromÄ› odpovÄ›dÄ›t'),
+                      tooltip: tr(context, 'Soukromě odpovědět'),
                       icon: const Icon(Icons.lock_outline, size: 18),
                       visualDensity: VisualDensity.compact,
                     ),

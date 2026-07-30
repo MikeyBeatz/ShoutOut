@@ -3,7 +3,7 @@ const vietnameseTranslations = <String, String>{
   'Oznámení': 'Thông báo',
   'Přidat shout': 'Thêm vào shout',
   'Co se děje v okolí?': 'Điều gì đang xảy ra gần đó?',
-  'Okolí': 'lân cận',
+  'Okolí': 'Lân cận',
   'Uložené': 'Đã lưu',
   'Mé shouty': 'Shout của tôi',
   'Profil': 'Hồ sơ',
@@ -27,22 +27,22 @@ const vietnameseTranslations = <String, String>{
   'Nejbližší': 'Gần nhất',
   'Oblíbené': 'Phổ biến',
   'Brzy končí': 'Sắp kết thúc',
-  'Nejblíž': 'lân cận',
+  'Nejblíž': 'Lân cận',
   'Top': 'Đứng đầu',
   'Končící': 'Kết thúc',
-  'V tomto okolí zatím nejsou žádné shouty.': 'không có shouts gần đó chưa.',
+  'V tomto okolí zatím nejsou žádné shouty.': 'Không có shouts gần đó chưa.',
   'Uložené shouty': 'Đã lưu shouts',
   'Zatím nemáš uložené žádné shouty.': 'Bạn chưa lưu shouts chưa.',
   'Aktivní': 'Tích cực',
   'Expirované': 'Hết hạn',
   'Smazané': 'Đã xóa',
   'V této části zatím nemáš žádné shouty.':
-      'bạn không có shouts trong phần này chưa.',
+      'Bạn không có shouts trong phần này chưa.',
   'Odebrat z uložených': 'Xóa khỏi đã lưu',
   'Uložit shout': 'Cứu shout',
   'Smazat shout?': 'Xóa bỏ shout?',
   'Shout zmizí z veřejného feedu.':
-      'các shout sẽ biến mất khỏi nguồn cấp dữ liệu công cộng.',
+      'Các shout sẽ biến mất khỏi nguồn cấp dữ liệu công cộng.',
   'Zrušit': 'Hủy bỏ',
   'Smazat': 'Xóa bỏ',
   'Smazat shout': 'Xóa bỏ shout',
@@ -226,7 +226,7 @@ const vietnameseTranslations = <String, String>{
       'Sự chấp nhận của bạn không thể được lưu lại. Hãy thử lại.',
   'Pravidla komunity': 'Quy tắc cộng đồng',
   'Bezpečné používání ShoutOutu pro všechny.':
-      'sử dụng ShoutOut an toàn cho mọi người.',
+      'Sử dụng ShoutOut an toàn cho mọi người.',
   'ShoutOut je komunitní prostor pro lidi od 16 let. Pomoz udržet feed užitečný a bezpečný.':
       'ShoutOut là không gian cộng đồng dành cho những người từ 16 tuổi trở lên. Giúp giữ cho nguồn cấp dữ liệu hữu ích và an toàn.',
   'Respektuj ostatní': 'Tôn trọng người khác',
@@ -259,4 +259,11 @@ const vietnameseTranslations = <String, String>{
   'Účet a soukromí': 'Tài khoản và quyền riêng tư',
   'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.':
       'Chúng tôi sử dụng biệt danh thay vì tên thật của bạn. Tìm cài đặt tài khoản trong hồ sơ của bạn.',
+  'Blokovat autora': 'Chặn tác giả',
+  'Blokovat autora?': 'Chặn tác giả?',
+  'Jeho Shouty se přestanou zobrazovat ve tvém feedu.':
+      'Của họ Shouts sẽ không còn xuất hiện trong nguồn cấp dữ liệu của bạn nữa.',
+  'Blokovat': 'Khối',
+  'Pro publikování Shoutu povol přístup k poloze.':
+      'Cho phép truy cập vị trí để xuất bản một Shout.',
 };
