@@ -73,7 +73,10 @@ class ProfileGate extends StatelessWidget {
             user: user,
             child: BanGate(
               user: user,
-              child: LegalAcceptanceGate(user: user, child: child),
+              child: ContentRestrictionGate(
+                user: user,
+                child: LegalAcceptanceGate(user: user, child: child),
+              ),
             ),
           );
         },
@@ -137,44 +140,122 @@ class BanGate extends StatelessWidget {
   final User user;
   final Widget child;
   @override
-  Widget build(BuildContext context) =>
-      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('bans')
-            .doc(user.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          final ban = snapshot.data?.data();
-          final expiry = (ban?['expiresAt'] as Timestamp?)?.toDate();
-          final active =
-              ban != null && (expiry == null || expiry.isAfter(DateTime.now()));
-          if (!active) return child;
-          return Scaffold(
-            body: Center(
+  Widget build(
+    BuildContext context,
+  ) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('bans')
+        .doc(user.uid)
+        .snapshots(),
+    builder: (context, snapshot) {
+      final ban = snapshot.data?.data();
+      final expiry = (ban?['expiresAt'] as Timestamp?)?.toDate();
+      final active =
+          ban != null && (expiry == null || expiry.isAfter(DateTime.now()));
+      if (!active) return child;
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.block, size: 56),
+                const SizedBox(height: 12),
+                Text(
+                  'Účet byl zablokován',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  ban['reason'] as String? ?? '',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  expiry == null
+                      ? 'Blokace je trvalá.'
+                      : 'Blokace končí ${MaterialLocalizations.of(context).formatMediumDate(expiry)} '
+                            'v ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(expiry))}.',
+                  textAlign: TextAlign.center,
+                ),
+                if (ban['sanctionId'] is String) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Číslo rozhodnutí: ${ban['sanctionId']}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                TextButton(
+                  onPressed: FirebaseAuth.instance.signOut,
+                  child: Text(tr(context, 'Odhlásit se')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class ContentRestrictionGate extends StatelessWidget {
+  const ContentRestrictionGate({
+    super.key,
+    required this.user,
+    required this.child,
+  });
+
+  final User user;
+  final Widget child;
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('contentRestrictions')
+        .doc(user.uid)
+        .snapshots(),
+    builder: (context, snapshot) {
+      final restriction = snapshot.data?.data();
+      final expiry = (restriction?['expiresAt'] as Timestamp?)?.toDate();
+      if (restriction == null ||
+          expiry == null ||
+          !expiry.isAfter(DateTime.now())) {
+        return child;
+      }
+      return Column(
+        children: [
+          Material(
+            color: Theme.of(context).colorScheme.errorContainer,
+            child: SafeArea(
+              bottom: false,
               child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                padding: const EdgeInsets.all(12),
+                child: Row(
                   children: [
-                    const Icon(Icons.block, size: 56),
-                    const SizedBox(height: 12),
-                    Text(
-                      tr(context, 'Účet je omezen'),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(ban['reason'] as String? ?? ''),
-                    TextButton(
-                      onPressed: FirebaseAuth.instance.signOut,
-                      child: Text(tr(context, 'Odhlásit se')),
+                    const Icon(Icons.edit_off_outlined),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Tvorba Shoutů, komentářů a soukromých odpovědí '
+                        'je omezena do '
+                        '${MaterialLocalizations.of(context).formatMediumDate(expiry)}. '
+                        'Důvod: ${restriction['reason'] ?? ''}',
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+          Expanded(child: child),
+        ],
       );
+    },
+  );
 }
 
 class SignInPage extends StatefulWidget {

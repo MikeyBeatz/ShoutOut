@@ -72,3 +72,40 @@ npm run test:rules
 
 Je potřeba Java 21 nebo kompatibilní verze v `PATH`. Pokud není instalovaná
 samostatně, lze použít `jbr\bin` z Android Studia.
+
+## Vývojové přiřazení role
+
+Role jsou uloženy v `accountRoles/{uid}` a klient je nemůže vytvářet ani měnit.
+Vývojovou roli lze nastavit pouze Admin SDK skriptem a pouze v projektu
+`shoutout-dev-46c81`:
+
+```powershell
+$env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
+npm run set:role -- user@example.com moderator
+```
+
+Povolené hodnoty jsou `user`, `business`, `moderator`, `seniorModerator`,
+`administrator` a `owner`. Nastavení `user` odstraní privilegovaný dokument role.
+Skript `set_moderator.mjs` zůstává jako kompatibilní zkratka pro úroveň 3.
+
+Moderátorské regiony se přiřazují jako ISO kódy:
+
+```powershell
+npm run set:role -- moderator@example.com moderator --countries=CZ,DE --subdivisions=CZ-10
+```
+
+Administrátor a owner dostanou globální rozsah automaticky. Moderátor a senior
+moderátor bez regionu neuvidí regionální pracovní frontu.
+
+## Doplnění geografických údajů
+
+Po nasazení geografického modelu doplní starší shouty:
+
+```powershell
+$env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\secure\service-account.json'
+$env:GOOGLE_MAPS_API_KEY = 'serverovy-klic'
+npm run backfill:geography
+```
+
+Nástroj zapisuje `geohash` a `geography`, klíč nevypisuje a odmítne jiný projekt
+než `shoutout-dev-46c81`.

@@ -12,9 +12,10 @@ if (!email || !serviceAccountPath) {
 
 initializeApp({ credential: cert(JSON.parse(readFileSync(serviceAccountPath, 'utf8'))) });
 const user = await getAuth().getUserByEmail(email);
-await getFirestore().collection('moderators').doc(user.uid).set({
-  email: user.email,
-  role: 'owner',
+await getFirestore().collection('accountRoles').doc(user.uid).set({
+  role: 'moderator',
+  level: 3,
+  assignedBy: 'set_moderator.mjs',
   createdAt: FieldValue.serverTimestamp(),
 }, { merge: true });
 console.log(`Moderator role set for ${user.uid}`);

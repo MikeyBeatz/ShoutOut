@@ -4,6 +4,12 @@
   "type": "module",
   "scripts": {
     "reconcile:data": "node reconcile_counters.mjs",
+    "set:role": "node set_role.mjs",
+    "backfill:geography": "node backfill_shout_geography.mjs",
+    "reset:integration": "node reset_integration_scenario.mjs",
+    "inspect:integration": "node inspect_integration_scenario.mjs",
+    "verify:moderator-client": "node verify_moderator_client_access.mjs",
+    "seed:moderation-queue": "node seed_moderation_queue.mjs",
     "test:rules": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test rules/firestore.rules.test.mjs\""
   },
   "devDependencies": {

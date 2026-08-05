@@ -190,103 +190,99 @@ class ProfileTileGrid extends StatelessWidget {
   final String userId;
 
   @override
-  Widget build(BuildContext context) =>
-      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('moderators')
-            .doc(userId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          final l10n = AppLocalizations.of(context)!;
-          final tiles = <Widget>[
-            ProfileActionTile(
-              icon: Icons.language_outlined,
-              title: l10n.language,
-              onTap: () => _selectProfileLanguage(context, userId),
+  Widget build(BuildContext context) => StreamBuilder<AccountRole>(
+    stream: _watchAccountRole(userId),
+    builder: (context, snapshot) {
+      final l10n = AppLocalizations.of(context)!;
+      final tiles = <Widget>[
+        ProfileActionTile(
+          icon: Icons.language_outlined,
+          title: l10n.language,
+          onTap: () => _selectProfileLanguage(context, userId),
+        ),
+        ProfileActionTile(
+          icon: Icons.lock_outline,
+          title: tr(context, 'Změnit heslo'),
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (_) => const ChangePasswordDialog(),
+          ),
+        ),
+        ProfileActionTile(
+          icon: Icons.notifications_outlined,
+          title: tr(context, 'Notifikace'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => NotificationSettingsPage(userId: userId),
             ),
-            ProfileActionTile(
-              icon: Icons.lock_outline,
-              title: tr(context, 'Změnit heslo'),
-              onTap: () => showDialog<void>(
-                context: context,
-                builder: (_) => const ChangePasswordDialog(),
-              ),
+          ),
+        ),
+        ProfileActionTile(
+          icon: Icons.help_outline,
+          title: tr(context, 'Nápověda'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HelpPage()),
+          ),
+        ),
+        ProfileActionTile(
+          icon: Icons.warning_amber_outlined,
+          title: tr(context, 'Varování'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WarningHistoryPage(userId: userId),
             ),
-            ProfileActionTile(
-              icon: Icons.notifications_outlined,
-              title: tr(context, 'Notifikace'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NotificationSettingsPage(userId: userId),
-                ),
-              ),
+          ),
+        ),
+        ProfileActionTile(
+          icon: Icons.policy_outlined,
+          title: tr(context, 'Právní info'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LegalHubPage()),
+          ),
+        ),
+      ];
+      if ((snapshot.data ?? AccountRole.user).isAtLeast(
+        AccountRole.moderator,
+      )) {
+        tiles.add(
+          ProfileActionTile(
+            icon: Icons.admin_panel_settings_outlined,
+            title: tr(context, 'Moderace'),
+            onTap: () => kIsWeb
+                ? Navigator.pushNamed(context, '/admin')
+                : Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ModerationPage()),
+                  ),
+          ),
+        );
+      }
+      if (tiles.length % 3 != 0) {
+        final last = tiles.removeLast();
+        tiles.addAll([const SizedBox.shrink(), last, const SizedBox.shrink()]);
+      }
+      return LayoutBuilder(
+        builder: (context, constraints) => Center(
+          child: SizedBox(
+            width: constraints.maxWidth > 317 ? 317 : constraints.maxWidth,
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              mainAxisExtent: 92,
+              children: tiles,
             ),
-            ProfileActionTile(
-              icon: Icons.help_outline,
-              title: tr(context, 'Nápověda'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HelpPage()),
-              ),
-            ),
-            ProfileActionTile(
-              icon: Icons.warning_amber_outlined,
-              title: tr(context, 'Varování'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WarningHistoryPage(userId: userId),
-                ),
-              ),
-            ),
-            ProfileActionTile(
-              icon: Icons.policy_outlined,
-              title: tr(context, 'Právní info'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LegalHubPage()),
-              ),
-            ),
-          ];
-          if (snapshot.data?.exists == true) {
-            tiles.add(
-              ProfileActionTile(
-                icon: Icons.admin_panel_settings_outlined,
-                title: tr(context, 'Moderace'),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ModerationPage()),
-                ),
-              ),
-            );
-          }
-          if (tiles.length % 3 != 0) {
-            final last = tiles.removeLast();
-            tiles.addAll([
-              const SizedBox.shrink(),
-              last,
-              const SizedBox.shrink(),
-            ]);
-          }
-          return LayoutBuilder(
-            builder: (context, constraints) => Center(
-              child: SizedBox(
-                width: constraints.maxWidth > 317 ? 317 : constraints.maxWidth,
-                child: GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  mainAxisExtent: 92,
-                  children: tiles,
-                ),
-              ),
-            ),
-          );
-        },
+          ),
+        ),
       );
+    },
+  );
 }
 
 class ProfileActionTile extends StatelessWidget {

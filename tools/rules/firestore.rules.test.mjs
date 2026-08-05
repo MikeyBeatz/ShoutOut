@@ -93,6 +93,7 @@ async function seedShout({
   authorId = 'author',
   authorNickname = 'Author',
   commentsCount = 0,
+  countryCode,
 } = {}) {
   await testEnvironment.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), 'shouts', id), {
@@ -102,6 +103,14 @@ async function seedShout({
       text: 'Obsah testovacího Shoutu.',
       categories: ['Obecné'],
       location: new GeoPoint(50.54, 14.13),
+      geohash: 'u2fkbnh',
+      ...(countryCode ? {
+        geography: {
+          schemaVersion: 1,
+          geohash: 'u2fkbnh',
+          countryCode,
+        },
+      } : {}),
       createdAt: now(),
       expiresAt: future(2 * 60 * 60 * 1000),
       status: 'active',
@@ -126,10 +135,15 @@ function shoutData(uid, nickname, overrides = {}) {
   return {
     authorId: uid,
     authorNickname: nickname,
+    avatarId: 'fox',
+    avatarBackgroundStart: 'teal',
+    avatarBackgroundEnd: 'navy',
+    avatarGradientDirection: 'diagonal',
     title: 'Nový Shout',
     text: 'Text bezpečného testovacího Shoutu.',
     categories: ['Obecné'],
     location: new GeoPoint(50.54, 14.13),
+    geohash: 'u2fkbnh',
     createdAt: serverTimestamp(),
     expiresAt: future(2 * 60 * 60 * 1000),
     status: 'active',
@@ -311,6 +325,34 @@ describe('identity and account gates', () => {
         'SafeWriter',
         'deleted-user',
       ),
+    );
+  });
+
+  test('content restriction blocks creating content until it expires', async () => {
+    await seedEligibleUser('writer', 'SafeWriter');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'contentRestrictions', 'writer'), {
+        userId: 'writer',
+        reason: 'test',
+        createdAt: now(),
+        expiresAt: future(24 * 60 * 60 * 1000),
+        moderatorId: 'moderator',
+        sanctionId: 'sanction-1',
+      });
+    });
+    const db = authenticatedDb('writer');
+    await assertFails(
+      createShoutBatch(db, 'writer', 'SafeWriter', 'restricted'),
+    );
+
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await updateDoc(
+        doc(context.firestore(), 'contentRestrictions', 'writer'),
+        { expiresAt: Timestamp.fromMillis(Date.now() - 1000) },
+      );
+    });
+    await assertSucceeds(
+      createShoutBatch(db, 'writer', 'SafeWriter', 'restriction-expired'),
     );
   });
 });
@@ -622,6 +664,327 @@ describe('comments, reactions, saves and reports', () => {
 });
 
 describe('moderation access', () => {
+  test('moderator revokes own temporary sanction but not another moderator sanction', async () => {
+    await seedEligibleUser('moderator', 'SafeModerator');
+    await seedEligibleUser('other-moderator', 'OtherModerator');
+    await seedEligibleUser('senior', 'SafeSenior');
+    await seedEligibleUser('target', 'SafeTarget');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'accountRoles', 'other-moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'accountRoles', 'senior'), {
+        role: 'seniorModerator', level: 4, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'sanctions', 'own-temp'), {
+        userId: 'target', type: 'accountBan', permanent: false,
+        moderatorId: 'moderator', purgeAt: future(1000000),
+      });
+      await setDoc(doc(db, 'bans', 'target'), {
+        userId: 'target', reason: 'test', createdAt: now(),
+        expiresAt: future(1000000), moderatorId: 'moderator',
+        sanctionId: 'own-temp',
+      });
+    });
+
+    const db = authenticatedDb('moderator');
+    const allowed = writeBatch(db);
+    allowed.set(doc(db, 'sanctionRevocations', 'own-temp'), {
+      userId: 'target', sanctionId: 'own-temp', originalType: 'accountBan',
+      reason: 'Mistake', createdAt: serverTimestamp(), revokedBy: 'moderator',
+      purgeAt: future(1000000),
+    });
+    allowed.delete(doc(db, 'bans', 'target'));
+    await assertSucceeds(allowed.commit());
+
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore();
+      await setDoc(doc(adminDb, 'sanctions', 'other-temp'), {
+        userId: 'target', type: 'contentRestriction', permanent: false,
+        moderatorId: 'other-moderator', purgeAt: future(1000000),
+      });
+      await setDoc(doc(adminDb, 'contentRestrictions', 'target'), {
+        userId: 'target', reason: 'test', createdAt: now(),
+        expiresAt: future(1000000), moderatorId: 'other-moderator',
+        sanctionId: 'other-temp',
+      });
+    });
+    const forbidden = writeBatch(db);
+    forbidden.set(doc(db, 'sanctionRevocations', 'other-temp'), {
+      userId: 'target', sanctionId: 'other-temp',
+      originalType: 'contentRestriction', reason: 'Not mine',
+      createdAt: serverTimestamp(), revokedBy: 'moderator',
+      purgeAt: future(1000000),
+    });
+    forbidden.delete(doc(db, 'contentRestrictions', 'target'));
+    await assertFails(forbidden.commit());
+
+    const seniorDb = authenticatedDb('senior');
+    const seniorAllowed = writeBatch(seniorDb);
+    seniorAllowed.set(doc(seniorDb, 'sanctionRevocations', 'other-temp'), {
+      userId: 'target', sanctionId: 'other-temp',
+      originalType: 'contentRestriction', reason: 'Senior review',
+      createdAt: serverTimestamp(), revokedBy: 'senior',
+      purgeAt: future(1000000),
+    });
+    seniorAllowed.delete(doc(seniorDb, 'contentRestrictions', 'target'));
+    await assertSucceeds(seniorAllowed.commit());
+  });
+
+  test('moderator observation stores a snapshot and respects role hierarchy', async () => {
+    await seedEligibleUser('moderator', 'SafeModerator');
+    await seedEligibleUser('target', 'SafeTarget');
+    await seedEligibleUser('senior', 'SafeSenior');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'accountRoles', 'senior'), {
+        role: 'seniorModerator', level: 4, createdAt: now(), assignedBy: 'test',
+      });
+    });
+
+    const db = authenticatedDb('moderator');
+    const allowed = writeBatch(db);
+    allowed.set(doc(db, 'sanctions', 'observed-warning'), {
+      userId: 'target', type: 'warning', reason: 'Observed violation',
+      createdAt: serverTimestamp(), expiresAt: null, permanent: false,
+      moderatorId: 'moderator', status: 'active', sourceReportId: '',
+      previousSanctionsCount: 0,
+      purgeAt: future(180 * 24 * 60 * 60 * 1000),
+      sourceType: 'moderatorObservation', sourceContentType: 'comment',
+      sourceContentId: 'comment-1', contentSnapshot: { text: 'violation' },
+    });
+    allowed.set(doc(db, 'warnings', 'observed-warning'), {
+      userId: 'target', reason: 'Observed violation',
+      createdAt: serverTimestamp(), moderatorId: 'moderator',
+      sanctionId: 'observed-warning',
+    });
+    await assertSucceeds(allowed.commit());
+
+    const forbidden = writeBatch(db);
+    forbidden.set(doc(db, 'sanctions', 'senior-warning'), {
+      userId: 'senior', type: 'warning', reason: 'Invalid hierarchy',
+      createdAt: serverTimestamp(), expiresAt: null, permanent: false,
+      moderatorId: 'moderator', status: 'active', sourceReportId: '',
+      previousSanctionsCount: 0,
+      purgeAt: future(180 * 24 * 60 * 60 * 1000),
+      sourceType: 'moderatorObservation', sourceContentType: 'shout',
+      sourceContentId: 'shout-1', contentSnapshot: { text: 'test' },
+    });
+    forbidden.set(doc(db, 'warnings', 'senior-warning'), {
+      userId: 'senior', reason: 'Invalid hierarchy',
+      createdAt: serverTimestamp(), moderatorId: 'moderator',
+      sanctionId: 'senior-warning',
+    });
+    await assertFails(forbidden.commit());
+  });
+
+  test('users can read only their own role and cannot assign roles', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    await seedEligibleUser('other', 'SafeOther');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'accountRoles', 'reader'), {
+        role: 'business',
+        level: 2,
+        createdAt: now(),
+        assignedBy: 'test',
+      });
+    });
+
+    const db = authenticatedDb('reader');
+    await assertSucceeds(getDoc(doc(db, 'accountRoles', 'reader')));
+    await assertFails(getDoc(doc(db, 'accountRoles', 'other')));
+    await assertFails(setDoc(doc(db, 'accountRoles', 'reader'), {
+      role: 'owner',
+      level: 6,
+      createdAt: serverTimestamp(),
+      assignedBy: 'reader',
+    }));
+  });
+
+  test('moderator sanctions are limited to assigned countries', async () => {
+    await seedEligibleUser('scoped-moderator', 'ScopedModerator');
+    await seedEligibleUser('target', 'ScopedTarget');
+    await seedShout({ id: 'cz-shout', authorId: 'target', countryCode: 'CZ' });
+    await seedShout({ id: 'de-shout', authorId: 'target', countryCode: 'DE' });
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'accountRoles', 'scoped-moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+        moderationScope: {
+          global: false, countries: ['CZ'], subdivisions: [],
+        },
+      });
+    });
+
+    const db = authenticatedDb('scoped-moderator');
+    const warningBatch = (id, shoutId) => {
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'sanctions', id), {
+        userId: 'target', type: 'warning', reason: 'Regional violation',
+        createdAt: serverTimestamp(), expiresAt: null, permanent: false,
+        moderatorId: 'scoped-moderator', status: 'active', sourceReportId: '',
+        previousSanctionsCount: 0,
+        purgeAt: future(180 * 24 * 60 * 60 * 1000),
+        sourceType: 'moderatorObservation', sourceContentType: 'shout',
+        sourceContentId: shoutId, contentSnapshot: { text: 'test' },
+      });
+      batch.set(doc(db, 'warnings', id), {
+        userId: 'target', reason: 'Regional violation',
+        createdAt: serverTimestamp(), moderatorId: 'scoped-moderator',
+        sanctionId: id,
+      });
+      return batch;
+    };
+
+    await assertSucceeds(warningBatch('cz-warning', 'cz-shout').commit());
+    await assertFails(warningBatch('de-warning', 'de-shout').commit());
+  });
+
+  test('approved content cannot be reported again and reports can escalate', async () => {
+    await seedEligibleUser('moderator', 'ReviewModerator');
+    await seedEligibleUser('author', 'ReviewAuthor');
+    await seedEligibleUser('reporter', 'ReviewReporter');
+    await seedEligibleUser('second-reporter', 'SecondReporter');
+    await seedShout({ id: 'review-shout', authorId: 'author', countryCode: 'CZ' });
+    await seedShout({ id: 'escalate-shout', authorId: 'author', countryCode: 'CZ' });
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+        moderationScope: {
+          global: false, countries: ['CZ'], subdivisions: [],
+        },
+      });
+      await setDoc(doc(db, 'reports', 'reporter_review-shout'), {
+        reporterId: 'reporter', shoutId: 'review-shout', reason: 'Review me',
+        createdAt: now(), status: 'open',
+      });
+      await setDoc(doc(db, 'reports', 'reporter_escalate-shout'), {
+        reporterId: 'reporter', shoutId: 'escalate-shout', reason: 'Escalate me',
+        createdAt: now(), status: 'open',
+      });
+    });
+
+    const moderatorDb = authenticatedDb('moderator');
+    const approval = writeBatch(moderatorDb);
+    approval.set(
+      doc(moderatorDb, 'moderationClearances', 'shout_review-shout'),
+      {
+        targetType: 'shout', shoutId: 'review-shout',
+        contentId: 'review-shout', createdAt: serverTimestamp(),
+        moderatorId: 'moderator', reason: 'Content is allowed',
+        sourceReportIds: ['reporter_review-shout'],
+      },
+    );
+    approval.update(doc(moderatorDb, 'reports', 'reporter_review-shout'), {
+      status: 'resolved', resolution: 'contentApproved',
+      resolvedAt: serverTimestamp(),
+    });
+    await assertSucceeds(approval.commit());
+
+    const secondReporterDb = authenticatedDb('second-reporter');
+    const repeatReport = writeBatch(secondReporterDb);
+    repeatReport.set(
+      doc(secondReporterDb, 'rateLimits', 'second-reporter', 'actions', 'report'),
+      rateData('second-reporter_review-shout'),
+    );
+    repeatReport.set(
+      doc(secondReporterDb, 'reports', 'second-reporter_review-shout'),
+      {
+        reporterId: 'second-reporter', shoutId: 'review-shout',
+        reason: 'Trying again', createdAt: serverTimestamp(), status: 'open',
+      },
+    );
+    await assertFails(repeatReport.commit());
+
+    await assertSucceeds(updateDoc(
+      doc(moderatorDb, 'reports', 'reporter_escalate-shout'),
+      {
+        status: 'escalated', assignedRole: 'seniorModerator',
+        escalatedAt: serverTimestamp(), escalatedBy: 'moderator',
+        escalationNote: 'Needs senior review',
+      },
+    ));
+  });
+
+  test('business cannot moderate and permanent bans require level four', async () => {
+    await seedEligibleUser('business', 'SafeBusiness');
+    await seedEligibleUser('moderator', 'SafeModerator');
+    await seedEligibleUser('senior', 'SafeSenior');
+    await seedEligibleUser('target', 'SafeTarget');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'business'), {
+        role: 'business', level: 2, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'accountRoles', 'moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'accountRoles', 'senior'), {
+        role: 'seniorModerator', level: 4, createdAt: now(), assignedBy: 'test',
+      });
+      await setDoc(doc(db, 'reports', 'role-report'), {
+        reporterId: 'target', shoutId: 'shout-1', reason: 'Spam',
+        createdAt: now(), status: 'open',
+      });
+    });
+
+    await assertFails(getDocs(query(
+      collection(authenticatedDb('business'), 'reports'), limit(50),
+    )));
+    const moderatorDb = authenticatedDb('moderator');
+    const moderatorPermanentBatch = writeBatch(moderatorDb);
+    moderatorPermanentBatch.set(
+      doc(moderatorDb, 'sanctions', 'moderator-permanent'),
+      {
+        userId: 'target', type: 'accountBan', reason: 'Permanent',
+        createdAt: serverTimestamp(), expiresAt: null, permanent: true,
+        moderatorId: 'moderator', status: 'active',
+        sourceReportId: 'role-report', previousSanctionsCount: 0,
+        purgeAt: future(730 * 24 * 60 * 60 * 1000),
+        sourceType: 'report', sourceContentType: 'shout',
+        sourceContentId: 'shout-1', contentSnapshot: { text: 'test' },
+      },
+    );
+    moderatorPermanentBatch.set(doc(moderatorDb, 'bans', 'target'), {
+      userId: 'target', reason: 'Permanent',
+      createdAt: serverTimestamp(), expiresAt: null,
+      moderatorId: 'moderator', sanctionId: 'moderator-permanent',
+    });
+    await assertFails(moderatorPermanentBatch.commit());
+    const seniorDb = authenticatedDb('senior');
+    const permanentBatch = writeBatch(seniorDb);
+    permanentBatch.set(doc(seniorDb, 'sanctions', 'senior-permanent'), {
+      userId: 'target',
+      type: 'accountBan',
+      reason: 'Permanent',
+      createdAt: serverTimestamp(),
+      expiresAt: null,
+      permanent: true,
+      moderatorId: 'senior',
+      status: 'active',
+      sourceReportId: 'role-report',
+      previousSanctionsCount: 0,
+      purgeAt: future(730 * 24 * 60 * 60 * 1000),
+      sourceType: 'report',
+      sourceContentType: 'shout',
+      sourceContentId: 'shout-1',
+      contentSnapshot: { text: 'test' },
+    });
+    permanentBatch.set(doc(seniorDb, 'bans', 'target'), {
+      userId: 'target', reason: 'Permanent',
+      createdAt: serverTimestamp(), expiresAt: null,
+      moderatorId: 'senior', sanctionId: 'senior-permanent',
+    });
+    await assertSucceeds(permanentBatch.commit());
+  });
+
   test('only an eligible moderator can list and resolve reports', async () => {
     await seedEligibleUser('moderator', 'SafeModerator');
     await seedEligibleUser('reader', 'SafeReader');

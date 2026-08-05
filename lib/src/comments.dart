@@ -169,6 +169,42 @@ class _CommentTileState extends State<CommentTile> {
                               onPressed: widget.onReport,
                               icon: const Icon(Icons.flag_outlined, size: 20),
                             ),
+                          if (!ownComment)
+                            StreamBuilder<AccountRole>(
+                              stream: _watchAccountRole(
+                                FirebaseAuth.instance.currentUser!.uid,
+                              ),
+                              builder: (context, snapshot) {
+                                final role = snapshot.data ?? AccountRole.user;
+                                if (!role.isAtLeast(AccountRole.moderator)) {
+                                  return const SizedBox.shrink();
+                                }
+                                return IconButton(
+                                  tooltip: 'Moderovat',
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () => _showDirectModerationDialog(
+                                    context,
+                                    role: role,
+                                    userId: data['authorId'] as String,
+                                    sourceContentType: 'comment',
+                                    sourceContentId: widget.comment.id,
+                                    contentSnapshot: {
+                                      ...data,
+                                      'shoutId': widget
+                                          .comment
+                                          .reference
+                                          .parent
+                                          .parent!
+                                          .id,
+                                    },
+                                  ),
+                                  icon: const Icon(
+                                    Icons.security_outlined,
+                                    size: 20,
+                                  ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),

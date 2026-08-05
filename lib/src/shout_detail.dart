@@ -6,11 +6,15 @@ class ShoutDetailPage extends StatefulWidget {
     required this.shout,
     required this.onSave,
     required this.onReaction,
+    this.focusCommentId,
+    this.focusCommentCreatedAt,
   });
 
   final Shout shout;
   final VoidCallback onSave;
   final ValueChanged<bool> onReaction;
+  final String? focusCommentId;
+  final Timestamp? focusCommentCreatedAt;
 
   @override
   State<ShoutDetailPage> createState() => _ShoutDetailPageState();
@@ -27,6 +31,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   String? _privateRecipientId;
   String? _privateRecipientNickname;
   String? _privateTargetType;
+  bool _initialFocusScheduled = false;
 
   @override
   void dispose() {
@@ -42,6 +47,40 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     appBar: AppBar(
       title: Text(tr(context, 'Shout')),
       actions: [
+        if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
+          StreamBuilder<AccountRole>(
+            stream: _watchAccountRole(FirebaseAuth.instance.currentUser!.uid),
+            builder: (context, snapshot) {
+              final role = snapshot.data ?? AccountRole.user;
+              if (!role.isAtLeast(AccountRole.moderator)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                onPressed: () => _showDirectModerationDialog(
+                  context,
+                  role: role,
+                  userId: widget.shout.authorId,
+                  sourceContentType: 'shout',
+                  sourceContentId: widget.shout.id,
+                  contentSnapshot: {
+                    'authorId': widget.shout.authorId,
+                    'authorNickname': widget.shout.author,
+                    'title': widget.shout.title,
+                    'text': widget.shout.text,
+                    'categories': widget.shout.categories,
+                    'createdAt': Timestamp.fromDate(widget.shout.createdAt),
+                    'geography': {
+                      'countryCode': widget.shout.geography.countryCode,
+                      'subdivisionCode': widget.shout.geography.subdivisionCode,
+                      'localityName': widget.shout.geography.localityName,
+                    },
+                  },
+                ),
+                tooltip: 'Moderovat',
+                icon: const Icon(Icons.security_outlined),
+              );
+            },
+          ),
         if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
           IconButton(
             onPressed: _blockAuthor,
@@ -63,16 +102,18 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ],
     ),
     body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('shouts')
-          .doc(widget.shout.id)
-          .collection('comments')
-          .orderBy('createdAt')
-          .limitToLast(_commentPageSize)
-          .snapshots(),
+      stream: _commentsQuery().snapshots(),
       builder: (context, snapshot) {
         final comments = snapshot.data?.docs ?? [];
         _commentIds = comments.map((comment) => comment.id).toList();
+        if (!_initialFocusScheduled &&
+            widget.focusCommentId != null &&
+            comments.any((comment) => comment.id == widget.focusCommentId)) {
+          _initialFocusScheduled = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _jumpToComment(widget.focusCommentId!);
+          });
+        }
         return ListView(
           controller: _commentsScrollController,
           padding: const EdgeInsets.all(16),
@@ -197,6 +238,19 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ),
     ),
   );
+
+  Query<Map<String, dynamic>> _commentsQuery() {
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(widget.shout.id)
+        .collection('comments')
+        .orderBy('createdAt');
+    final focusedAt = widget.focusCommentCreatedAt;
+    if (focusedAt != null) {
+      return query.startAt([focusedAt]).limit(_commentPageSize);
+    }
+    return query.limitToLast(_commentPageSize);
+  }
 
   GlobalKey<_CommentTileState> _commentKey(String commentId) =>
       _commentKeys.putIfAbsent(commentId, GlobalKey<_CommentTileState>.new);

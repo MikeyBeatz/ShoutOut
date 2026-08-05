@@ -1,5 +1,21 @@
 # ShoutOut – společný projektový backlog
 
+Interní pravidla rolí, pravomocí a postihů jsou vedena v
+`docs/INTERNAL_MODERATION.md`. Změny moderace musí aktualizovat také tento
+dokument, pravidla, testy a případně veřejné právní texty.
+
+## Geografie a globální moderace
+
+- [x] Geohash nových shoutů a model `geography`.
+- [x] Google reverse-geocoding trigger s tajným serverovým API klíčem.
+- [x] ISO země/oblasti, moderátorské rozsahy, webový filtr a kontrola postihu.
+- [x] Migrační nástroj pro existující shouty.
+- [ ] Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
+  a nasadit Functions, pravidla a indexy.
+- [ ] Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
+  případné mapování udržovat v serverové vrstvě.
+- [ ] Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
+
 Toto je jediné místo pro otevřené produktové, grafické, lokalizační, serverové
 a produkční úkoly projektu. Samotné zapsání bodu neznamená, že je
 implementovaný.
@@ -26,6 +42,13 @@ implementovaný.
   - Zachovat čitelnost delších překladů a jednotnou velikost záhlaví.
 
 ### Profil a avatary
+
+- [x] **Zobrazovat avatar autora na kartách Shoutů.**
+  - Nové Shouty ukládají ověřený veřejný snímek avataru a barevného stylu.
+  - Firestore Rules porovnají snímek s profilem autora a nedovolí podvržení.
+  - Starší Shouty bez snímku používají bezpečný výchozí avatar.
+- [ ] Doplnit stejný veřejný avatarový snímek také ke komentářům a soukromým
+  odpovědím a připravit řízený backfill starších Shoutů.
 
 - [x] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
   - Po otevření Profilu se nejdřív ukáže liška a až potom správně uložená sova.
@@ -70,7 +93,37 @@ implementovaný.
 - [ ] **Vytvořit business účet.**
 - [ ] **Přidat zvýrazněné Shouty.**
 - [ ] **Přidat propagační okénko.**
-- [ ] **Vytvořit webové rozhraní pro administrátory a moderátory.**
+- [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
+  - Jednotné přihlášení a navigace podle role 3–6.
+  - Regionální přehled Shoutů, společná fronta hlášení, seskupování a řazení.
+  - Detail případu, rozhodovací roletka, postihy, schválení obsahu a eskalace
+    senior moderátorovi.
+  - Přímé otevření nahlášeného komentáře v kontextu vlákna se zvýrazněním.
+  - Historie postihů, uživatelský detail a zrušení oprávněného aktivního postihu.
+
+### Demo a distribuce
+
+- [x] Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
+- [x] Ověřit přihlášení na preview doméně a nasadit aktuální Firestore Rules.
+- [ ] Přidat viditelné označení **DEMO** a pevnou demo polohu Litoměřice pouze
+  pro preview sestavení, aby všichni testeři viděli a vytvářeli obsah ve stejném
+  okolí bez závislosti na poloze zařízení.
+- [ ] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
+  App Check enforcement, rozpočtových alertech a odstranění testovacích účtů.
+- [ ] Optimalizovat webové assety, zejména avatary; současný release balíček má
+  přibližně 63 MB (odhad přenosu po gzip kompresi přibližně 35 MB).
+
+### Navazující ruční test moderace
+
+- [ ] Udělit varování běžnému uživateli a ověřit záznam v historii postihů.
+- [ ] Udělit dočasné omezení tvorby a ověřit blokaci Shoutů i komentářů.
+- [ ] Skrýt závadný komentář a ověřit jeho stav ve vlákně.
+- [ ] Eskalovat případ senior moderátorovi a ověřit oddělení obou front.
+- [ ] Senior rolí ověřit 90denní a trvalý ban.
+- [ ] Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
+- [ ] Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
+- [ ] Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
+  standardně nevytvářely účty moderátora, seniora, administrátora ani ownera.
 
 ## Odložená serverová a produkční část
 
@@ -192,6 +245,12 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
 - ukládat vysvětlitelný důvod automatického zásahu a umožnit odvolání,
 - měřit falešně pozitivní zásahy a pravidla upravovat podle dat,
 - nikdy nespoléhat pouze na klientské skrytí obsahu nebo počet dislike.
+- pravidelně deaktivovat a následně mazat záznamy postihů podle `purgeAt`;
+  aktivní omezení tvorby uchovávat v `contentRestrictions/{uid}` a úplné blokace
+  v `bans/{uid}` pouze po dobu jejich platnosti,
+- po smazání detailu postihu přepočítat klouzavé počty za 30, 180 a 365 dní;
+  dlouhodobé statistiky uchovávat jen anonymně bez vazby na konkrétní účet,
+- sladit retenční lhůty postihů s právními dokumenty před produkčním nasazením.
 
 ## 5. Důvěryhodné moderátorské operace a audit
 

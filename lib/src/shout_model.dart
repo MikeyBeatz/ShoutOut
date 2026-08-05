@@ -30,6 +30,8 @@ class Shout {
     this.comments = 0,
     this.saves = 0,
     this.status = ShoutStatus.active,
+    this.geography = const ShoutGeography(geohash: ''),
+    this.authorAvatarStyle = AvatarStyle.fallback,
   });
 
   factory Shout.fromDocument(
@@ -56,6 +58,11 @@ class Shout {
         'expired' => ShoutStatus.expired,
         _ => ShoutStatus.active,
       },
+      geography: ShoutGeography.fromData({
+        ...?data['geography'] as Map<String, dynamic>?,
+        'geohash': data['geohash'],
+      }),
+      authorAvatarStyle: AvatarStyle.fromProfile(data),
     );
   }
   final String id;
@@ -75,6 +82,8 @@ class Shout {
   bool isLiked = false;
   bool isDisliked = false;
   ShoutStatus status;
+  final ShoutGeography geography;
+  final AvatarStyle authorAvatarStyle;
   ShoutStatus get effectiveStatus {
     if (status == ShoutStatus.deleted) return ShoutStatus.deleted;
     return expiresAt.isAfter(DateTime.now())

@@ -74,7 +74,6 @@ class ShoutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = theme.colorScheme.primary;
     void openComments() {
       Navigator.push(
         context,
@@ -99,9 +98,10 @@ class ShoutCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: accent.withValues(alpha: .14),
-                    child: Icon(Icons.person_outline, color: accent),
+                  AvatarImage(
+                    avatarId: shout.authorAvatarStyle.avatarId,
+                    style: shout.authorAvatarStyle,
+                    radius: 20,
                   ),
                   const SizedBox(width: 10),
                   Expanded(

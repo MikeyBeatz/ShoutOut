@@ -12,9 +12,27 @@ service cloud.firestore {
         request.auth.token.email is string;
     }
 
-    function isModerator() {
+    function hasRoleLevel(minimumLevel) {
+      let rolePath =
+        /databases/$(database)/documents/accountRoles/$(request.auth.uid);
       return signedIn() &&
-        exists(/databases/$(database)/documents/moderators/$(request.auth.uid));
+        (
+          (
+            exists(rolePath) &&
+            get(rolePath).data.level is int &&
+            get(rolePath).data.level >= minimumLevel
+          ) ||
+          (
+            minimumLevel <= 3 &&
+            exists(
+              /databases/$(database)/documents/moderators/$(request.auth.uid)
+            )
+          )
+        );
+    }
+
+    function isModerator() {
+      return hasRoleLevel(3);
     }
 
     function hasProfile() {
@@ -57,6 +75,97 @@ service cloud.firestore {
 
     function eligibleModerator() {
       return eligibleUser() && isModerator();
+    }
+
+    function eligibleSeniorModerator() {
+      return eligibleUser() && hasRoleLevel(4);
+    }
+
+    function hasActiveContentRestriction() {
+      let restrictionPath =
+        /databases/$(database)/documents/contentRestrictions/$(request.auth.uid);
+      return signedIn() &&
+        exists(restrictionPath) &&
+        get(restrictionPath).data.expiresAt > request.time;
+    }
+
+    function canCreateContent() {
+      return eligibleUser() && !hasActiveContentRestriction();
+    }
+
+    function validSanctionLink(userId, type, sanctionId) {
+      let sanctionPath =
+        /databases/$(database)/documents/sanctions/$(sanctionId);
+      return sanctionId is string &&
+        existsAfter(sanctionPath) &&
+        getAfter(sanctionPath).data.userId == userId &&
+        getAfter(sanctionPath).data.type == type &&
+        getAfter(sanctionPath).data.moderatorId == request.auth.uid &&
+        getAfter(sanctionPath).data.createdAt == request.time;
+    }
+
+    function targetRoleLevel(userId) {
+      let rolePath = /databases/$(database)/documents/accountRoles/$(userId);
+      return exists(rolePath) && get(rolePath).data.level is int
+        ? get(rolePath).data.level
+        : exists(/databases/$(database)/documents/moderators/$(userId))
+          ? 3
+          : 1;
+    }
+
+    function canSanctionUser(userId) {
+      return userId != request.auth.uid &&
+        targetRoleLevel(userId) < targetRoleLevel(request.auth.uid);
+    }
+
+    function moderationScopeAllowsShout(shoutId) {
+      let rolePath =
+        /databases/$(database)/documents/accountRoles/$(request.auth.uid);
+      let shoutPath = /databases/$(database)/documents/shouts/$(shoutId);
+      let role = exists(rolePath) ? get(rolePath).data : {};
+      let scope = role.get('moderationScope', {});
+      let geography = exists(shoutPath)
+        ? get(shoutPath).data.get('geography', {})
+        : {};
+      return role.get('level', 0) >= 5 ||
+        !('moderationScope' in role) ||
+        scope.get('global', false) == true ||
+        geography.get('countryCode', '') in scope.get('countries', []) ||
+        geography.get('subdivisionCode', '') in
+          scope.get('subdivisions', []);
+    }
+
+    function moderationScopeAllowsSanction() {
+      return request.resource.data.sourceContentType == 'shout'
+        ? moderationScopeAllowsShout(request.resource.data.sourceContentId)
+        : moderationScopeAllowsShout(
+            request.resource.data.contentSnapshot.get('shoutId', '')
+          );
+    }
+
+    function canRevokeSanction(sanctionId) {
+      let sanctionPath =
+        /databases/$(database)/documents/sanctions/$(sanctionId);
+      return eligibleModerator() &&
+        exists(sanctionPath) &&
+        canSanctionUser(get(sanctionPath).data.userId) &&
+        (
+          eligibleSeniorModerator() ||
+          (
+            get(sanctionPath).data.moderatorId == request.auth.uid &&
+            get(sanctionPath).data.permanent == false
+          )
+        );
+    }
+
+    function validRevocation(sanctionId, userId) {
+      let revocationPath =
+        /databases/$(database)/documents/sanctionRevocations/$(sanctionId);
+      return existsAfter(revocationPath) &&
+        getAfter(revocationPath).data.userId == userId &&
+        getAfter(revocationPath).data.sanctionId == sanctionId &&
+        getAfter(revocationPath).data.revokedBy == request.auth.uid &&
+        getAfter(revocationPath).data.createdAt == request.time;
     }
 
     function limited(maximum) {
@@ -276,15 +385,170 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
+    match /accountRoles/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || eligibleModerator());
+      allow list, create, update, delete: if false;
+    }
+
+    match /contentRestrictions/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || isModerator());
+      allow create, update: if eligibleModerator() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
+          'sanctionId'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
+          'sanctionId'
+        ]) &&
+        request.resource.data.userId == userId &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.expiresAt is timestamp &&
+        request.resource.data.expiresAt > request.time &&
+        request.resource.data.expiresAt <=
+          request.time + duration.value(90, 'd') &&
+        (
+          hasRoleLevel(4) ||
+          request.resource.data.expiresAt <=
+            request.time + duration.value(30, 'd')
+        ) &&
+        request.resource.data.moderatorId == request.auth.uid &&
+        validSanctionLink(
+          userId,
+          'contentRestriction',
+          request.resource.data.sanctionId
+        );
+      allow list: if false;
+      allow delete: if eligibleModerator() &&
+        validRevocation(resource.data.sanctionId, userId);
+    }
+
+    match /sanctions/{sanctionId} {
+      allow get: if signedIn() &&
+        (resource.data.userId == request.auth.uid || eligibleModerator());
+      allow list: if eligibleModerator() && limited(50);
+      allow create: if eligibleModerator() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'type', 'reason', 'createdAt', 'expiresAt', 'permanent',
+          'moderatorId', 'status', 'sourceReportId', 'previousSanctionsCount',
+          'purgeAt', 'sourceType', 'sourceContentType', 'sourceContentId',
+          'contentSnapshot'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'type', 'reason', 'createdAt', 'expiresAt', 'permanent',
+          'moderatorId', 'status', 'sourceReportId', 'previousSanctionsCount',
+          'purgeAt', 'sourceType', 'sourceContentType', 'sourceContentId',
+          'contentSnapshot'
+        ]) &&
+        request.resource.data.userId is string &&
+        canSanctionUser(request.resource.data.userId) &&
+        moderationScopeAllowsSanction() &&
+        request.resource.data.type in [
+          'warning', 'contentRestriction', 'accountBan'
+        ] &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.moderatorId == request.auth.uid &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.sourceReportId is string &&
+        request.resource.data.sourceType in ['report', 'moderatorObservation'] &&
+        request.resource.data.sourceContentType in [
+          'shout', 'comment', 'privateReply'
+        ] &&
+        request.resource.data.sourceContentId is string &&
+        request.resource.data.contentSnapshot is map &&
+        request.resource.data.previousSanctionsCount is int &&
+        request.resource.data.previousSanctionsCount >= 0 &&
+        request.resource.data.purgeAt is timestamp &&
+        request.resource.data.purgeAt > request.time &&
+        (
+          (
+            request.resource.data.type == 'warning' &&
+            request.resource.data.expiresAt == null &&
+            request.resource.data.permanent == false
+          ) ||
+          (
+            request.resource.data.type in [
+              'contentRestriction', 'accountBan'
+            ] &&
+            (
+              (
+                request.resource.data.expiresAt is timestamp &&
+                request.resource.data.expiresAt > request.time &&
+                request.resource.data.expiresAt <=
+                  request.time + duration.value(90, 'd') &&
+                request.resource.data.permanent == false &&
+                (
+                  hasRoleLevel(4) ||
+                  request.resource.data.expiresAt <=
+                    request.time + duration.value(30, 'd')
+                )
+              ) ||
+              (
+                request.resource.data.type == 'accountBan' &&
+                request.resource.data.expiresAt == null &&
+                request.resource.data.permanent == true &&
+                eligibleSeniorModerator()
+              )
+            )
+          )
+        );
+      allow update, delete: if false;
+    }
+
+    match /sanctionRevocations/{sanctionId} {
+      allow get: if signedIn() &&
+        (resource.data.userId == request.auth.uid || eligibleModerator());
+      allow list: if eligibleModerator() && limited(50);
+      allow create: if canRevokeSanction(sanctionId) &&
+        !exists(
+          /databases/$(database)/documents/sanctionRevocations/$(sanctionId)
+        ) &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'sanctionId', 'originalType', 'reason', 'createdAt',
+          'revokedBy', 'purgeAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'sanctionId', 'originalType', 'reason', 'createdAt',
+          'revokedBy', 'purgeAt'
+        ]) &&
+        request.resource.data.userId ==
+          get(
+            /databases/$(database)/documents/sanctions/$(sanctionId)
+          ).data.userId &&
+        request.resource.data.sanctionId == sanctionId &&
+        request.resource.data.originalType ==
+          get(
+            /databases/$(database)/documents/sanctions/$(sanctionId)
+          ).data.type &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.revokedBy == request.auth.uid &&
+        request.resource.data.purgeAt is timestamp &&
+        request.resource.data.purgeAt > request.time;
+      allow update, delete: if false;
+    }
+
     match /bans/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || isModerator());
       allow create, update: if eligibleModerator() &&
         request.resource.data.keys().hasOnly([
-          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
+          'sanctionId'
         ]) &&
         request.resource.data.keys().hasAll([
-          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId'
+          'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
+          'sanctionId'
         ]) &&
         request.resource.data.userId == userId &&
         request.resource.data.reason is string &&
@@ -295,8 +559,19 @@ service cloud.firestore {
           request.resource.data.expiresAt == null ||
           request.resource.data.expiresAt is timestamp
         ) &&
-        request.resource.data.moderatorId == request.auth.uid;
-      allow list, delete: if false;
+        request.resource.data.moderatorId == request.auth.uid &&
+        validSanctionLink(
+          userId,
+          'accountBan',
+          request.resource.data.sanctionId
+        ) &&
+        (
+          request.resource.data.expiresAt != null ||
+          eligibleSeniorModerator()
+        );
+      allow list: if false;
+      allow delete: if eligibleModerator() &&
+        validRevocation(resource.data.sanctionId, userId);
     }
 
     match /warnings/{warningId} {
@@ -313,17 +588,22 @@ service cloud.firestore {
         limited(50);
       allow create: if eligibleModerator() &&
         request.resource.data.keys().hasOnly([
-          'userId', 'reason', 'createdAt', 'moderatorId'
+          'userId', 'reason', 'createdAt', 'moderatorId', 'sanctionId'
         ]) &&
         request.resource.data.keys().hasAll([
-          'userId', 'reason', 'createdAt', 'moderatorId'
+          'userId', 'reason', 'createdAt', 'moderatorId', 'sanctionId'
         ]) &&
         request.resource.data.userId is string &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() >= 1 &&
         request.resource.data.reason.size() <= 500 &&
         request.resource.data.createdAt == request.time &&
-        request.resource.data.moderatorId == request.auth.uid;
+        request.resource.data.moderatorId == request.auth.uid &&
+        validSanctionLink(
+          request.resource.data.userId,
+          'warning',
+          request.resource.data.sanctionId
+        );
       allow update, delete: if false;
     }
 
@@ -387,7 +667,8 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow get: if verifiedIdentity() && request.auth.uid == userId;
+      allow get: if verifiedIdentity() &&
+        (request.auth.uid == userId || eligibleModerator());
       allow create: if verifiedIdentity() &&
         hasAcceptedLegal() &&
         !hasActiveBan() &&
@@ -490,6 +771,10 @@ service cloud.firestore {
     match /rateLimits/{userId}/actions/{action} {
       allow get: if eligibleUser() && request.auth.uid == userId;
       allow create: if eligibleUser() &&
+        (
+          !(action in ['shout', 'comment', 'privateReply']) ||
+          !hasActiveContentRestriction()
+        ) &&
         request.auth.uid == userId &&
         validRateCreate(action);
       allow update: if eligibleUser() &&
@@ -498,23 +783,100 @@ service cloud.firestore {
       allow list, delete: if false;
     }
 
-    function validReportUpdate() {
+    function validApprovedReport(reportId, clearanceId) {
+      let clearancePath =
+        /databases/$(database)/documents/moderationClearances/$(clearanceId);
+      return request.resource.data.get('resolution', '') == 'contentApproved' &&
+        existsAfter(clearancePath) &&
+        getAfter(clearancePath).data.moderatorId == request.auth.uid &&
+        getAfter(clearancePath).data.createdAt == request.time &&
+        reportId in getAfter(clearancePath).data.sourceReportIds;
+    }
+
+    function validReportUpdate(reportId, clearanceId) {
       return eligibleModerator() &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'moderatorNote', 'resolvedAt']) &&
-        request.resource.data.status == 'resolved' &&
-        request.resource.data.resolvedAt == request.time &&
         (
-          !request.resource.data.keys().hasAll(['moderatorNote']) ||
           (
-            request.resource.data.moderatorNote is string &&
-            request.resource.data.moderatorNote.size() <= 500
+            resource.data.status in ['open', 'escalated'] &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status', 'moderatorNote', 'resolvedAt', 'resolution']) &&
+            request.resource.data.status == 'resolved' &&
+            request.resource.data.resolvedAt == request.time &&
+            (
+              !request.resource.data.keys().hasAll(['moderatorNote']) ||
+              (
+                request.resource.data.moderatorNote is string &&
+                request.resource.data.moderatorNote.size() <= 500
+              )
+            ) &&
+            (
+              !request.resource.data.keys().hasAll(['resolution']) ||
+              request.resource.data.resolution in [
+                'contentApproved', 'noAction', 'contentRemoved', 'sanctioned'
+              ]
+            ) &&
+            (
+              request.resource.data.get('resolution', '') !=
+                'contentApproved' ||
+              validApprovedReport(reportId, clearanceId)
+            )
+          ) ||
+          (
+            resource.data.status == 'open' &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly([
+                'status', 'assignedRole', 'escalatedAt', 'escalatedBy',
+                'escalationNote'
+              ]) &&
+            request.resource.data.status == 'escalated' &&
+            request.resource.data.assignedRole == 'seniorModerator' &&
+            request.resource.data.escalatedAt == request.time &&
+            request.resource.data.escalatedBy == request.auth.uid &&
+            (
+              !request.resource.data.keys().hasAll(['escalationNote']) ||
+              (
+                request.resource.data.escalationNote is string &&
+                request.resource.data.escalationNote.size() <= 500
+              )
+            )
           )
         );
     }
 
+    match /moderationClearances/{clearanceId} {
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow create: if eligibleModerator() &&
+        request.resource.data.keys().hasOnly([
+          'targetType', 'shoutId', 'contentId', 'createdAt', 'moderatorId',
+          'reason', 'sourceReportIds'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'targetType', 'shoutId', 'contentId', 'createdAt', 'moderatorId',
+          'reason', 'sourceReportIds'
+        ]) &&
+        request.resource.data.targetType in [
+          'shout', 'comment', 'privateReply'
+        ] &&
+        request.resource.data.shoutId is string &&
+        request.resource.data.contentId is string &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.moderatorId == request.auth.uid &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 1 &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.sourceReportIds is list &&
+        request.resource.data.sourceReportIds.size() >= 1 &&
+        request.resource.data.sourceReportIds.size() <= 50 &&
+        moderationScopeAllowsShout(request.resource.data.shoutId);
+      allow update, delete: if false;
+    }
+
     match /reports/{reportId} {
       allow create: if eligibleUser() &&
+        !exists(
+          /databases/$(database)/documents/moderationClearances/$('shout_' + request.resource.data.shoutId)
+        ) &&
         reportId ==
           request.auth.uid + '_' + request.resource.data.shoutId &&
         consumedRate('report', reportId) &&
@@ -539,12 +901,18 @@ service cloud.firestore {
         request.resource.data.status == 'open';
       allow get: if eligibleModerator();
       allow list: if eligibleModerator() && limited(50);
-      allow update: if validReportUpdate();
+      allow update: if validReportUpdate(
+        reportId,
+        'shout_' + resource.data.shoutId
+      );
       allow delete: if false;
     }
 
     match /commentReports/{reportId} {
       allow create: if eligibleUser() &&
+        !exists(
+          /databases/$(database)/documents/moderationClearances/$('comment_' + request.resource.data.shoutId + '_' + request.resource.data.commentId)
+        ) &&
         reportId ==
           request.auth.uid + '_' +
           request.resource.data.shoutId + '_' +
@@ -572,12 +940,18 @@ service cloud.firestore {
         request.resource.data.status == 'open';
       allow get: if eligibleModerator();
       allow list: if eligibleModerator() && limited(50);
-      allow update: if validReportUpdate();
+      allow update: if validReportUpdate(
+        reportId,
+        'comment_' + resource.data.shoutId + '_' + resource.data.commentId
+      );
       allow delete: if false;
     }
 
     match /privateReplyReports/{reportId} {
       allow create: if eligibleUser() &&
+        !exists(
+          /databases/$(database)/documents/moderationClearances/$('privateReply_' + request.resource.data.shoutId + '_' + request.resource.data.privateReplyId)
+        ) &&
         reportId ==
           request.auth.uid + '_' +
           request.resource.data.shoutId + '_' +
@@ -613,24 +987,43 @@ service cloud.firestore {
         ).data.text == request.resource.data.text;
       allow get: if eligibleModerator();
       allow list: if eligibleModerator() && limited(50);
-      allow update: if validReportUpdate();
+      allow update: if validReportUpdate(
+        reportId,
+        'privateReply_' + resource.data.shoutId + '_' +
+          resource.data.privateReplyId
+      );
       allow delete: if false;
     }
 
     function validShoutCreate() {
       return request.resource.data.keys().hasOnly([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
-          'location', 'createdAt', 'expiresAt', 'status', 'likesCount',
-          'dislikesCount', 'commentsCount', 'savesCount'
+          'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
+          'dislikesCount', 'commentsCount', 'savesCount', 'avatarId',
+          'avatarBackgroundStart', 'avatarBackgroundEnd',
+          'avatarGradientDirection'
         ]) &&
         request.resource.data.keys().hasAll([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
-          'location', 'createdAt', 'expiresAt', 'status', 'likesCount',
+          'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
           'dislikesCount', 'commentsCount', 'savesCount'
         ]) &&
         request.resource.data.authorId == request.auth.uid &&
         request.resource.data.authorNickname is string &&
         canonicalNickname(request.resource.data) &&
+        request.resource.data.keys().hasAll([
+          'avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd',
+          'avatarGradientDirection'
+        ]) &&
+        validAvatarStyle(request.resource.data) &&
+        request.resource.data.avatarId ==
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarId &&
+        request.resource.data.avatarBackgroundStart ==
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarBackgroundStart &&
+        request.resource.data.avatarBackgroundEnd ==
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarBackgroundEnd &&
+        request.resource.data.avatarGradientDirection ==
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarGradientDirection &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 1 &&
         request.resource.data.title.size() <= 60 &&
@@ -645,6 +1038,8 @@ service cloud.firestore {
           'Dotaz', 'Doprava', 'Jídlo a pití', 'Kultura'
         ]) &&
         request.resource.data.location is latlng &&
+        request.resource.data.geohash is string &&
+        request.resource.data.geohash.size() == 7 &&
         request.resource.data.createdAt == request.time &&
         request.resource.data.expiresAt >=
           request.time + duration.value(14, 'm') &&
@@ -756,7 +1151,7 @@ service cloud.firestore {
     match /shouts/{shoutId} {
       allow get: if eligibleUser();
       allow list: if eligibleUser() && limited(50);
-      allow create: if eligibleUser() &&
+      allow create: if canCreateContent() &&
         consumedRate('shout', shoutId) &&
         validShoutCreate();
       allow update: if eligibleUser() &&
@@ -795,7 +1190,7 @@ service cloud.firestore {
 
         allow get: if eligibleUser();
         allow list: if eligibleUser() && limited(50);
-        allow create: if eligibleUser() &&
+        allow create: if canCreateContent() &&
           activeShout(shoutId) &&
           consumedRate('comment', commentId) &&
           request.resource.data.keys().hasOnly([
@@ -896,7 +1291,7 @@ service cloud.firestore {
             resource.data.authorId == request.auth.uid ||
             resource.data.recipientId == request.auth.uid
           );
-        allow create: if eligibleUser() &&
+        allow create: if canCreateContent() &&
           activeShout(shoutId) &&
           consumedRate('privateReply', replyId) &&
           request.resource.data.keys().hasOnly([

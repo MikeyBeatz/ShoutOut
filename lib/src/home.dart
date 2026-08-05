@@ -188,10 +188,18 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         ..set(shoutReference, {
           'authorId': user.uid,
           'authorNickname': nickname,
+          'avatarId': profile.data()!['avatarId'],
+          'avatarBackgroundStart': profile.data()!['avatarBackgroundStart'],
+          'avatarBackgroundEnd': profile.data()!['avatarBackgroundEnd'],
+          'avatarGradientDirection': profile.data()!['avatarGradientDirection'],
           'title': shout.title,
           'text': shout.text,
           'categories': shout.categories,
           'location': GeoPoint(
+            _publicLocationCoordinate(position.latitude),
+            _publicLocationCoordinate(position.longitude),
+          ),
+          'geohash': encodeGeohash(
             _publicLocationCoordinate(position.latitude),
             _publicLocationCoordinate(position.longitude),
           ),

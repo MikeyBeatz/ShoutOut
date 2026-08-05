@@ -13,6 +13,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'auth_gate.dart';
+import 'account_role.dart';
+import 'geography.dart';
 import 'app_locale.dart';
 import 'avatar_style.dart';
 import 'firebase_options.dart';
@@ -22,6 +24,7 @@ import 'l10n/text.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';
+part 'src/account_roles.dart';
 part 'src/feed.dart';
 part 'src/firestore_security.dart';
 part 'src/home.dart';
@@ -31,6 +34,10 @@ part 'src/profile.dart';
 part 'src/profile_support.dart';
 part 'src/profile_settings.dart';
 part 'src/saved.dart';
+part 'src/staff_workspace.dart';
+part 'src/staff_users.dart';
+part 'src/staff_shouts.dart';
+part 'src/staff_reports.dart';
 part 'src/shout_cards.dart';
 part 'src/shout_detail.dart';
 part 'src/shout_model.dart';
@@ -163,6 +170,9 @@ class ShoutOutApp extends StatelessWidget {
           ),
         ),
         home: const AuthGate(signedInChild: ShoutOutHome()),
+        routes: {
+          '/admin': (_) => const AuthGate(signedInChild: StaffWorkspace()),
+        },
       ),
     );
   }

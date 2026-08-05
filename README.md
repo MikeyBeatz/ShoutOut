@@ -65,8 +65,31 @@ Spusťte webovou variantu:
 flutter run -d chrome
 ```
 
+Pracovní prostředí moderátorů a administrátorů je po přihlášení dostupné na
+pojmenované trase `/admin` (ve výchozím Flutter web režimu `/#/admin`); jeho
+obsah se řídí rolí v `accountRoles/{uid}`.
+
 Aplikace žádá o přístup k poloze. Pokud uživatel oprávnění nepovolí nebo poloha
 není dostupná, feed se stále načte, pouze nemá přesný výpočet vzdálenosti.
+
+### Geografické regiony
+
+Nové shouty ukládají sedmimístný `geohash`. Firebase Function
+`enrichShoutGeography` následně pomocí Google Geocoding API doplní pole
+`geography`: ISO 3166-1 `countryCode`, ISO 3166-2 `subdivisionCode`, název
+lokality a pomocné Google Place ID. Place ID není trvalou identitou ani základem
+oprávnění.
+
+Před nasazením povolte Geocoding API, nastavte Functions secret a nasaďte
+Functions, pravidla a indexy:
+
+```powershell
+firebase functions:secrets:set GOOGLE_MAPS_API_KEY
+firebase deploy --only functions,firestore:rules,firestore:indexes
+```
+
+Klíč omezte na Geocoding API a nevkládejte ho do Flutter aplikace. Starší shouty
+lze obohatit příkazem `npm run backfill:geography` ve složce `tools`.
 
 ## Kontroly před commitem
 
@@ -91,6 +114,8 @@ Hlavní kolekce ve Firestore:
 - `shouts` s podkolekcemi `comments`, `privateReplies`, `reactions` a `saves`
 - `reports`, `commentReports`, `privateReplyReports`
 - `moderators`, `warnings`, `bans`
+- `accountRoles` – serverově přidělované role business a správcovských účtů
+- `contentRestrictions`, `sanctions` – aktivní omezení tvorby a audit postihů
 - `accountDeletionRequests`
 
 Bezpečnostní pravidla jsou v `firestore.rules` a indexy v
@@ -161,6 +186,7 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
 - `BACKEND_TODO.md` – jediný společný projektový backlog
+- `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace
 
