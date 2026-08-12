@@ -1,33 +1,83 @@
 part of '../main.dart';
 
-class SavedPage extends StatelessWidget {
-  const SavedPage({
+enum _FollowedSection { shouts, profiles }
+
+class FollowedPage extends StatefulWidget {
+  const FollowedPage({
     super.key,
     required this.shouts,
     required this.onSave,
     required this.onReaction,
+    required this.followedUserIds,
   });
 
   final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
-  final void Function(Shout shout, {required bool like}) onReaction;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
+  final Set<String> followedUserIds;
+
+  @override
+  State<FollowedPage> createState() => _FollowedPageState();
+}
+
+class _FollowedPageState extends State<FollowedPage> {
+  _FollowedSection _section = _FollowedSection.shouts;
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
       TealSectionHeader(
-        title: tr(context, 'Uložené shouty'),
+        title: tr(context, 'Sledované'),
         icon: Icons.bookmark_rounded,
+        onSave: widget.onSave,
+        onReaction: widget.onReaction,
+        controls: SegmentedButton<_FollowedSection>(
+          expandedInsets: EdgeInsets.zero,
+          style: ButtonStyle(
+            foregroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? _shoutPrimaryDark
+                  : Colors.white,
+            ),
+            backgroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: .08),
+            ),
+            side: const WidgetStatePropertyAll(
+              BorderSide(color: Color(0x99FFFFFF)),
+            ),
+          ),
+          segments: [
+            ButtonSegment(
+              value: _FollowedSection.shouts,
+              label: Text(tr(context, 'Shouty')),
+            ),
+            ButtonSegment(
+              value: _FollowedSection.profiles,
+              label: Text(tr(context, 'Profily')),
+            ),
+          ],
+          selected: {_section},
+          onSelectionChanged: (values) =>
+              setState(() => _section = values.first),
+        ),
       ),
       Expanded(
-        child: ShoutListPage(
-          title: null,
-          emptyText: tr(context, 'Zatím nemáš uložené žádné shouty.'),
-          emptyIcon: Icons.bookmark_border,
-          shouts: shouts,
-          onSave: onSave,
-          onReaction: onReaction,
-        ),
+        child: _section == _FollowedSection.shouts
+            ? ShoutListPage(
+                title: null,
+                emptyText: tr(context, 'Zatím nemáš uložené žádné shouty.'),
+                emptyIcon: Icons.bookmark_border,
+                shouts: widget.shouts,
+                onSave: widget.onSave,
+                onReaction: widget.onReaction,
+              )
+            : FollowedProfilesList(
+                followedUserIds: widget.followedUserIds,
+                onSave: widget.onSave,
+                onReaction: widget.onReaction,
+              ),
       ),
     ],
   );
@@ -44,7 +94,7 @@ class MyShoutsPage extends StatefulWidget {
 
   final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
-  final void Function(Shout shout, {required bool like}) onReaction;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final Future<void> Function(Shout shout) onDelete;
 
   @override
@@ -67,6 +117,8 @@ class _MyShoutsPageState extends State<MyShoutsPage> {
         TealSectionHeader(
           title: tr(context, 'Mé shouty'),
           icon: Icons.campaign_rounded,
+          onSave: widget.onSave,
+          onReaction: widget.onReaction,
           controls: SegmentedButton<_MyShoutsSection>(
             expandedInsets: EdgeInsets.zero,
             style: ButtonStyle(
@@ -141,7 +193,7 @@ class MyCommentsPage extends StatelessWidget {
   });
 
   final ValueChanged<Shout> onSave;
-  final void Function(Shout shout, {required bool like}) onReaction;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final bool showTitle;
 
   @override
@@ -301,7 +353,7 @@ class ShoutListPage extends StatelessWidget {
   final IconData emptyIcon;
   final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
-  final void Function(Shout shout, {required bool like}) onReaction;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final bool showSaveCount;
   final bool showDeleteButton;
   final Future<void> Function(Shout shout)? onDelete;

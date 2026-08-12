@@ -579,7 +579,7 @@ class _ReportDetailDialog extends StatelessWidget {
                       builder: (_) => ShoutDetailPage(
                         shout: shout,
                         onSave: () {},
-                        onReaction: (_) {},
+                        onReaction: (_) async {},
                         focusCommentId: snapshot.data!.focusCommentId,
                         focusCommentCreatedAt:
                             snapshot.data!.focusCommentCreatedAt,

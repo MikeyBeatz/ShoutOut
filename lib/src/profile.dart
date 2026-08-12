@@ -15,6 +15,7 @@ class ProfilePage extends StatelessWidget {
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';
         final avatarId = profile?['avatarId'] as String?;
+        final createdAt = (profile?['createdAt'] as Timestamp?)?.toDate();
         final avatarStyle = profile == null
             ? null
             : AvatarStyle.fromProfile(profile);
@@ -25,6 +26,7 @@ class ProfilePage extends StatelessWidget {
               nickname: nickname,
               avatarId: avatarId,
               avatarStyle: avatarStyle,
+              createdAt: createdAt,
               onEdit: profile == null
                   ? null
                   : () => Navigator.push(
@@ -68,12 +70,14 @@ class ProfileHeader extends StatelessWidget {
     required this.nickname,
     required this.avatarId,
     required this.avatarStyle,
+    required this.createdAt,
     this.onEdit,
   });
 
   final String nickname;
   final String? avatarId;
   final AvatarStyle? avatarStyle;
+  final DateTime? createdAt;
   final VoidCallback? onEdit;
 
   @override
@@ -129,6 +133,16 @@ class ProfileHeader extends StatelessWidget {
                             letterSpacing: -.2,
                           ),
                         ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _profileCreatedLabel(context, createdAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         TextButton.icon(
                           onPressed: onEdit,
@@ -149,7 +163,7 @@ class ProfileHeader extends StatelessWidget {
           ),
         ),
       ),
-      const Positioned(
+      Positioned(
         left: 0,
         right: 0,
         bottom: 0,
@@ -157,7 +171,7 @@ class ProfileHeader extends StatelessWidget {
           height: 36,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: _shoutBackground,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
           ),
@@ -184,6 +198,34 @@ class ProfileHeader extends StatelessWidget {
   );
 }
 
+String _profileCreatedLabel(BuildContext context, DateTime? createdAt) {
+  final languageCode = Localizations.localeOf(context).languageCode;
+  if (createdAt == null) {
+    return switch (languageCode) {
+      'cs' => 'Datum založení profilu není dostupné',
+      'de' => 'Profilerstellungsdatum nicht verfügbar',
+      'pl' => 'Data utworzenia profilu jest niedostępna',
+      'sk' => 'Dátum vytvorenia profilu nie je dostupný',
+      'uk' => 'Дата створення профілю недоступна',
+      'vi' => 'Không có ngày tạo hồ sơ',
+      _ => 'Profile creation date unavailable',
+    };
+  }
+
+  final date = MaterialLocalizations.of(
+    context,
+  ).formatCompactDate(createdAt.toLocal());
+  return switch (languageCode) {
+    'cs' => 'Členem od $date',
+    'de' => 'Mitglied seit $date',
+    'pl' => 'Użytkownik od $date',
+    'sk' => 'Členom od $date',
+    'uk' => 'Учасник із $date',
+    'vi' => 'Thành viên từ $date',
+    _ => 'Member since $date',
+  };
+}
+
 class ProfileTileGrid extends StatelessWidget {
   const ProfileTileGrid({super.key, required this.userId});
 
@@ -193,31 +235,7 @@ class ProfileTileGrid extends StatelessWidget {
   Widget build(BuildContext context) => StreamBuilder<AccountRole>(
     stream: _watchAccountRole(userId),
     builder: (context, snapshot) {
-      final l10n = AppLocalizations.of(context)!;
       final tiles = <Widget>[
-        ProfileActionTile(
-          icon: Icons.language_outlined,
-          title: l10n.language,
-          onTap: () => _selectProfileLanguage(context, userId),
-        ),
-        ProfileActionTile(
-          icon: Icons.lock_outline,
-          title: tr(context, 'Změnit heslo'),
-          onTap: () => showDialog<void>(
-            context: context,
-            builder: (_) => const ChangePasswordDialog(),
-          ),
-        ),
-        ProfileActionTile(
-          icon: Icons.notifications_outlined,
-          title: tr(context, 'Notifikace'),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => NotificationSettingsPage(userId: userId),
-            ),
-          ),
-        ),
         ProfileActionTile(
           icon: Icons.help_outline,
           title: tr(context, 'Nápověda'),
@@ -244,10 +262,31 @@ class ProfileTileGrid extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const LegalHubPage()),
           ),
         ),
+        ProfileActionTile(
+          icon: Icons.settings_outlined,
+          title: _systemSettingsTitle(context),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SystemSettingsPage(userId: userId),
+            ),
+          ),
+        ),
       ];
-      if ((snapshot.data ?? AccountRole.user).isAtLeast(
-        AccountRole.moderator,
-      )) {
+      final role = snapshot.data ?? AccountRole.user;
+      if (role == AccountRole.business) {
+        tiles.add(
+          ProfileActionTile(
+            icon: Icons.storefront_outlined,
+            title: 'Business',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BusinessPage(userId: userId)),
+            ),
+          ),
+        );
+      }
+      if (role.isAtLeast(AccountRole.moderator)) {
         tiles.add(
           ProfileActionTile(
             icon: Icons.admin_panel_settings_outlined,
@@ -261,9 +300,13 @@ class ProfileTileGrid extends StatelessWidget {
           ),
         );
       }
-      if (tiles.length % 3 != 0) {
+      if (tiles.length % 3 == 1) {
         final last = tiles.removeLast();
         tiles.addAll([const SizedBox.shrink(), last, const SizedBox.shrink()]);
+      } else if (tiles.length % 3 == 2) {
+        final last = tiles.removeLast();
+        final previous = tiles.removeLast();
+        tiles.addAll([previous, const SizedBox.shrink(), last]);
       }
       return LayoutBuilder(
         builder: (context, constraints) => Center(
@@ -285,6 +328,156 @@ class ProfileTileGrid extends StatelessWidget {
   );
 }
 
+class SystemSettingsPage extends StatelessWidget {
+  const SystemSettingsPage({super.key, required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(_systemSettingsTitle(context))),
+    body: ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.language_outlined),
+            title: Text(AppLocalizations.of(context)!.language),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _selectProfileLanguage(context, userId),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: Text(tr(context, 'Změnit heslo')),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => showDialog<void>(
+              context: context,
+              builder: (_) => const ChangePasswordDialog(),
+            ),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: Text(tr(context, 'Notifikace')),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => NotificationSettingsPage(userId: userId),
+              ),
+            ),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.dark_mode_outlined),
+            title: Text(_themeSettingsTitle(context)),
+            subtitle: ValueListenableBuilder<ThemeMode>(
+              valueListenable: appThemeMode,
+              builder: (context, mode, _) =>
+                  Text(_themeModeLabel(context, mode)),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _selectThemeMode(context, userId),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _systemSettingsTitle(BuildContext context) =>
+    switch (Localizations.localeOf(context).languageCode) {
+      'cs' => 'Systém',
+      'de' => 'System',
+      'pl' => 'System',
+      'sk' => 'Systém',
+      'uk' => 'Система',
+      'vi' => 'Hệ thống',
+      _ => 'System',
+    };
+
+Future<void> _selectThemeMode(BuildContext context, String userId) async {
+  final selected = await showDialog<ThemeMode>(
+    context: context,
+    builder: (dialogContext) => SimpleDialog(
+      title: Text(_themeSettingsTitle(context)),
+      children: ThemeMode.values
+          .map(
+            (mode) => ListTile(
+              title: Text(_themeModeLabel(context, mode)),
+              trailing: appThemeMode.value == mode
+                  ? const Icon(Icons.check_rounded)
+                  : null,
+              onTap: () => Navigator.pop(dialogContext, mode),
+            ),
+          )
+          .toList(),
+    ),
+  );
+  if (selected == null) return;
+  final previous = appThemeMode.value;
+  appThemeMode.value = selected;
+  try {
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'themeMode': profileValueFromThemeMode(selected),
+    });
+  } catch (_) {
+    appThemeMode.value = previous;
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_themeSaveFailed(context))));
+    }
+  }
+}
+
+String _themeSettingsTitle(BuildContext context) =>
+    switch (Localizations.localeOf(context).languageCode) {
+      'cs' => 'Vzhled aplikace',
+      'de' => 'Erscheinungsbild',
+      'pl' => 'Wygląd aplikacji',
+      'sk' => 'Vzhľad aplikácie',
+      'uk' => 'Вигляд застосунку',
+      'vi' => 'Giao diện ứng dụng',
+      _ => 'App appearance',
+    };
+
+String _themeModeLabel(BuildContext context, ThemeMode mode) {
+  final language = Localizations.localeOf(context).languageCode;
+  return switch ((language, mode)) {
+    ('cs', ThemeMode.system) => 'Podle systému',
+    ('cs', ThemeMode.light) => 'Světlý',
+    ('cs', ThemeMode.dark) => 'Tmavý',
+    ('de', ThemeMode.system) => 'Systemeinstellung',
+    ('de', ThemeMode.light) => 'Hell',
+    ('de', ThemeMode.dark) => 'Dunkel',
+    ('pl', ThemeMode.system) => 'Ustawienie systemowe',
+    ('pl', ThemeMode.light) => 'Jasny',
+    ('pl', ThemeMode.dark) => 'Ciemny',
+    ('sk', ThemeMode.system) => 'Podľa systému',
+    ('sk', ThemeMode.light) => 'Svetlý',
+    ('sk', ThemeMode.dark) => 'Tmavý',
+    ('uk', ThemeMode.system) => 'Як у системі',
+    ('uk', ThemeMode.light) => 'Світла',
+    ('uk', ThemeMode.dark) => 'Темна',
+    ('vi', ThemeMode.system) => 'Theo hệ thống',
+    ('vi', ThemeMode.light) => 'Sáng',
+    ('vi', ThemeMode.dark) => 'Tối',
+    (_, ThemeMode.system) => 'System default',
+    (_, ThemeMode.light) => 'Light',
+    (_, ThemeMode.dark) => 'Dark',
+  };
+}
+
+String _themeSaveFailed(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'cs'
+    ? 'Nastavení vzhledu se nepodařilo uložit.'
+    : 'The appearance setting could not be saved.';
+
 class ProfileActionTile extends StatelessWidget {
   const ProfileActionTile({
     super.key,
@@ -301,7 +494,7 @@ class ProfileActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: _shoutSurface,
+    color: Theme.of(context).colorScheme.surface,
     borderRadius: BorderRadius.circular(18),
     child: InkWell(
       borderRadius: BorderRadius.circular(18),
@@ -363,7 +556,7 @@ class _ProfileWideAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: _shoutSurface,
+    color: Theme.of(context).colorScheme.surface,
     borderRadius: BorderRadius.circular(18),
     child: InkWell(
       onTap: onTap,
@@ -451,10 +644,37 @@ class EditProfilePage extends StatelessWidget {
                                     ),
                                   );
                               if (selected == null) return;
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(userId)
-                                  .update(selected.toFirestore());
+                              try {
+                                final db = FirebaseFirestore.instance;
+                                final batch = db.batch()
+                                  ..update(
+                                    db.collection('users').doc(userId),
+                                    selected.toFirestore(),
+                                  )
+                                  ..set(
+                                    db.collection('publicProfiles').doc(userId),
+                                    selected.publicProfileData(nickname),
+                                  );
+                                await batch.commit();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        tr(context, 'Avatar byl uložen.'),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } on FirebaseException catch (error) {
+                                if (!context.mounted) return;
+                                final message =
+                                    error.code == 'permission-denied'
+                                    ? 'Avatar se nepodařilo uložit kvůli oprávnění. Aktualizuj aplikaci a zkus to znovu.'
+                                    : 'Avatar se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(tr(context, message))),
+                                );
+                              }
                             },
                     ),
                   ),

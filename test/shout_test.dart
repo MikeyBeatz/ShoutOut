@@ -24,11 +24,22 @@ Shout _shout({
 );
 
 void main() {
+  test('normalizes only a lowercase initial title character', () {
+    expect(
+      titleWithInitialCapital('  sousedská slavnost  '),
+      'Sousedská slavnost',
+    );
+    expect(titleWithInitialCapital('GPS nefunguje'), 'GPS nefunguje');
+    expect(titleWithInitialCapital('🛩️ letadlo'), '🛩️ letadlo');
+    expect(titleWithInitialCapital('Žluté kolo'), 'Žluté kolo');
+  });
+
   test('feed order uses one compact label in the menu and selected state', () {
     expect(FeedOrder.values.map((order) => order.label), [
       'Nejblíž',
       'Top',
       'Končící',
+      'Sledované',
     ]);
   });
 

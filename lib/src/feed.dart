@@ -1,5 +1,11 @@
 part of '../main.dart';
 
+class FeedFilters {
+  String? selectedCategory;
+  double radius = 5;
+  FeedOrder order = FeedOrder.nearest;
+}
+
 class FeedPage extends StatefulWidget {
   const FeedPage({
     super.key,
@@ -8,13 +14,17 @@ class FeedPage extends StatefulWidget {
     required this.onSave,
     required this.onReaction,
     required this.onNotifications,
+    required this.filters,
+    required this.followedUserIds,
   });
 
   final List<Shout> shouts;
   final bool isLoading;
   final ValueChanged<Shout> onSave;
-  final void Function(Shout shout, {required bool like}) onReaction;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final VoidCallback onNotifications;
+  final FeedFilters filters;
+  final Set<String> followedUserIds;
 
   @override
   State<FeedPage> createState() => _FeedPageState();
@@ -57,7 +67,7 @@ class _CompactFilterDropdown<T> extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).colorScheme.surface,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
       ),
@@ -72,7 +82,7 @@ class _CompactFilterDropdown<T> extends StatelessWidget {
           itemHeight: 48,
           menuWidth: menuWidth,
           borderRadius: BorderRadius.circular(14),
-          dropdownColor: Colors.white,
+          dropdownColor: Theme.of(context).colorScheme.surface,
           iconSize: 20,
           alignment: AlignmentDirectional.center,
           style: style,
@@ -95,10 +105,6 @@ class _FeedPageState extends State<FeedPage> {
     'Jídlo a pití',
     'Kultura',
   ];
-  String? _selectedCategory;
-  double _radius = 5;
-  FeedOrder _order = FeedOrder.nearest;
-
   double _categoryMenuWidth(BuildContext context, TextStyle style) {
     var widest = 0.0;
     for (final category in ['Vše', ..._categories]) {
@@ -126,26 +132,40 @@ class _FeedPageState extends State<FeedPage> {
     );
     final filteredShouts =
         widget.shouts.where((shout) {
-          return shout.distanceKm <= _radius &&
-              (_selectedCategory == null ||
-                  shout.categories.contains(_selectedCategory));
-        }).toList()..sort(
-          (a, b) => switch (_order) {
+          return shout.distanceKm <= widget.filters.radius &&
+              (widget.filters.selectedCategory == null ||
+                  shout.categories.contains(widget.filters.selectedCategory));
+        }).toList()..sort((a, b) {
+          return switch (widget.filters.order) {
             FeedOrder.nearest => a.distanceKm.compareTo(b.distanceKm),
             FeedOrder.popular => b.likes.compareTo(a.likes),
             FeedOrder.endingSoon => a.expiresAt.compareTo(b.expiresAt),
-          },
-        );
+            FeedOrder.followed => () {
+              final followedOrder =
+                  (widget.followedUserIds.contains(b.authorId) ? 1 : 0)
+                      .compareTo(
+                        widget.followedUserIds.contains(a.authorId) ? 1 : 0,
+                      );
+              return followedOrder != 0
+                  ? followedOrder
+                  : a.distanceKm.compareTo(b.distanceKm);
+            }(),
+          };
+        });
     final shouts = [
       ...filteredShouts.where((shout) => !shout.isLowRated),
       ...filteredShouts.where((shout) => shout.isLowRated),
     ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: _shoutSurface,
-      ),
+      value:
+          (Theme.of(context).brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark)
+              .copyWith(
+                statusBarColor: Colors.transparent,
+                systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+              ),
       child: CustomScrollView(
         clipBehavior: Clip.none,
         slivers: [
@@ -206,13 +226,8 @@ class _FeedPageState extends State<FeedPage> {
                                 ),
                                 Align(
                                   alignment: Alignment.centerRight,
-                                  child: IconButton(
-                                    tooltip: tr(context, 'Oznámení'),
+                                  child: NotificationBellButton(
                                     onPressed: widget.onNotifications,
-                                    icon: const Icon(
-                                      Icons.notifications_none_rounded,
-                                      color: Colors.white,
-                                    ),
                                   ),
                                 ),
                               ],
@@ -228,7 +243,7 @@ class _FeedPageState extends State<FeedPage> {
                                 Expanded(
                                   flex: 4,
                                   child: _CompactFilterDropdown<double>(
-                                    value: _radius,
+                                    value: widget.filters.radius,
                                     menuWidth: 104,
                                     hint: tr(context, 'Vzdálenost'),
                                     prefixIcon: Icons.location_on_outlined,
@@ -249,15 +264,16 @@ class _FeedPageState extends State<FeedPage> {
                                           ),
                                         )
                                         .toList(),
-                                    onChanged: (value) =>
-                                        setState(() => _radius = value!),
+                                    onChanged: (value) => setState(
+                                      () => widget.filters.radius = value!,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   flex: 4,
                                   child: _CompactFilterDropdown<FeedOrder>(
-                                    value: _order,
+                                    value: widget.filters.order,
                                     menuWidth: 112,
                                     hint: tr(context, 'Řazení'),
                                     prefixIcon: Icons.schedule_outlined,
@@ -291,15 +307,16 @@ class _FeedPageState extends State<FeedPage> {
                                           ),
                                         )
                                         .toList(),
-                                    onChanged: (value) =>
-                                        setState(() => _order = value!),
+                                    onChanged: (value) => setState(
+                                      () => widget.filters.order = value!,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   flex: 5,
                                   child: _CompactFilterDropdown<String?>(
-                                    value: _selectedCategory,
+                                    value: widget.filters.selectedCategory,
                                     menuWidth: _categoryMenuWidth(
                                       context,
                                       filterValueStyle,
@@ -335,7 +352,8 @@ class _FeedPageState extends State<FeedPage> {
                                       ),
                                     ],
                                     onChanged: (value) => setState(
-                                      () => _selectedCategory = value,
+                                      () => widget.filters.selectedCategory =
+                                          value,
                                     ),
                                   ),
                                 ),
@@ -347,7 +365,7 @@ class _FeedPageState extends State<FeedPage> {
                     ),
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   left: 0,
                   right: 0,
                   bottom: 0,
@@ -355,7 +373,7 @@ class _FeedPageState extends State<FeedPage> {
                     height: 36,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: _shoutBackground,
+                        color: Theme.of(context).scaffoldBackgroundColor,
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(28),
                         ),
@@ -423,11 +441,15 @@ class TealSectionHeader extends StatelessWidget {
     super.key,
     required this.title,
     required this.icon,
+    required this.onSave,
+    required this.onReaction,
     this.controls,
   });
 
   final String title;
   final IconData icon;
+  final ValueChanged<Shout> onSave;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final Widget? controls;
 
   @override
@@ -484,17 +506,15 @@ class TealSectionHeader extends StatelessWidget {
                       ),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: tr(context, 'Oznámení'),
+                        child: NotificationBellButton(
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const NotificationsPage(),
+                              builder: (_) => NotificationsPage(
+                                onSave: onSave,
+                                onReaction: onReaction,
+                              ),
                             ),
-                          ),
-                          icon: const Icon(
-                            Icons.notifications_none_rounded,
-                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -512,7 +532,7 @@ class TealSectionHeader extends StatelessWidget {
           ),
         ),
       ),
-      const Positioned(
+      Positioned(
         left: 0,
         right: 0,
         bottom: 0,
@@ -520,7 +540,7 @@ class TealSectionHeader extends StatelessWidget {
           height: 36,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: _shoutBackground,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
           ),

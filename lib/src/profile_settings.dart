@@ -236,14 +236,21 @@ class NotificationSettingsPage extends StatelessWidget {
           final settings = snapshot.data?.data();
           final replies = settings?['replies'] as bool? ?? true;
           final reactions = settings?['reactions'] as bool? ?? true;
+          final privateReplies = settings?['privateReplies'] as bool? ?? true;
+          final followedProfiles =
+              settings?['followedProfiles'] as bool? ?? true;
           final nearbyShouts = settings?['nearbyShouts'] as bool? ?? true;
           Future<void> save({
             bool? nextReplies,
             bool? nextReactions,
+            bool? nextPrivateReplies,
+            bool? nextFollowedProfiles,
             bool? nextNearby,
           }) => reference.set({
             'replies': nextReplies ?? replies,
             'reactions': nextReactions ?? reactions,
+            'privateReplies': nextPrivateReplies ?? privateReplies,
+            'followedProfiles': nextFollowedProfiles ?? followedProfiles,
             'nearbyShouts': nextNearby ?? nearbyShouts,
           });
           return ListView(
@@ -266,6 +273,16 @@ class NotificationSettingsPage extends StatelessWidget {
                 value: reactions,
                 onChanged: (value) => save(nextReactions: value),
                 title: Text(tr(context, 'Reakce na mé Shouty')),
+              ),
+              SwitchListTile(
+                value: privateReplies,
+                onChanged: (value) => save(nextPrivateReplies: value),
+                title: Text(tr(context, 'Soukromé odpovědi')),
+              ),
+              SwitchListTile(
+                value: followedProfiles,
+                onChanged: (value) => save(nextFollowedProfiles: value),
+                title: Text(tr(context, 'Nové Shouty sledovaných profilů')),
               ),
               SwitchListTile(
                 value: nearbyShouts,
@@ -308,6 +325,17 @@ class HelpPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.explore_outlined),
+              title: Text(tr(context, 'Průvodce aplikací')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OnboardingHelpPage()),
+              ),
+            ),
+          ),
           ...topics.map(
             (topic) => Card(
               child: ExpansionTile(
@@ -324,43 +352,12 @@ class HelpPage extends StatelessWidget {
           ),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.gavel_outlined),
-              title: Text(tr(context, 'Pravidla komunity')),
-              subtitle: Text(
-                tr(context, 'Bezpečné používání ShoutOutu pro všechny.'),
-              ),
-              trailing: const Icon(Icons.chevron_right),
+              leading: const Icon(Icons.bug_report_outlined),
+              title: Text(tr(context, 'Nahlásit chybu')),
+              trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const CommunityRulesPage()),
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.article_outlined),
-              title: Text(tr(context, 'Podmínky použití')),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const LegalDocumentPage(type: LegalDocumentType.terms),
-                ),
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined),
-              title: Text(tr(context, 'Zásady ochrany soukromí')),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const LegalDocumentPage(type: LegalDocumentType.privacy),
-                ),
+                MaterialPageRoute(builder: (_) => const BugReportPage()),
               ),
             ),
           ),
@@ -550,11 +547,16 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         final db = FirebaseFirestore.instance;
         final userRef = db.collection('users').doc(widget.userId);
+        final publicProfileRef = db
+            .collection('publicProfiles')
+            .doc(widget.userId);
         final newNicknameRef = db.collection('nicknames').doc(nicknameLower);
         final oldNicknameRef = db
             .collection('nicknames')
             .doc(widget.currentNickname.toLowerCase());
-        if ((await transaction.get(newNicknameRef)).exists) {
+        final newNickname = await transaction.get(newNicknameRef);
+        final currentProfile = await transaction.get(userRef);
+        if (newNickname.exists) {
           throw StateError('taken');
         }
         transaction.set(newNicknameRef, {
@@ -569,6 +571,15 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
           'nicknameLower': nicknameLower,
           'nicknameChangedAt': FieldValue.serverTimestamp(),
           'nicknameChangeCount': FieldValue.increment(1),
+        });
+        transaction.set(publicProfileRef, {
+          'nickname': nickname,
+          'avatarId': currentProfile.data()!['avatarId'],
+          'avatarBackgroundStart': currentProfile
+              .data()!['avatarBackgroundStart'],
+          'avatarBackgroundEnd': currentProfile.data()!['avatarBackgroundEnd'],
+          'avatarGradientDirection': currentProfile
+              .data()!['avatarGradientDirection'],
         });
       });
       if (!mounted) return;

@@ -135,6 +135,26 @@ class PrivateReplyTile extends StatelessWidget {
                 ),
             ],
           ),
+          PublicIdentityBuilder(
+            userId: data['authorId'] as String,
+            fallbackNickname: data['authorNickname'] as String,
+            fallbackAvatarStyle: AvatarStyle.fallback,
+            builder: (context, identity) => Row(
+              children: [
+                AvatarImage(
+                  avatarId: identity.avatarStyle.avatarId,
+                  style: identity.avatarStyle,
+                  radius: 15,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  identity.nickname,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
           _privateReplyText(context, data),
           if (!own || recipient)
             Wrap(

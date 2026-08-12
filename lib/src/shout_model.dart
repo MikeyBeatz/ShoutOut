@@ -1,12 +1,13 @@
 part of '../main.dart';
 
-enum FeedOrder { nearest, popular, endingSoon }
+enum FeedOrder { nearest, popular, endingSoon, followed }
 
 extension FeedOrderLabels on FeedOrder {
   String get label => switch (this) {
     FeedOrder.nearest => 'Nejblíž',
     FeedOrder.popular => 'Top',
     FeedOrder.endingSoon => 'Končící',
+    FeedOrder.followed => 'Sledované',
   };
 }
 
@@ -32,6 +33,7 @@ class Shout {
     this.status = ShoutStatus.active,
     this.geography = const ShoutGeography(geohash: ''),
     this.authorAvatarStyle = AvatarStyle.fallback,
+    this.businessLocationId,
   });
 
   factory Shout.fromDocument(
@@ -84,6 +86,7 @@ class Shout {
   ShoutStatus status;
   final ShoutGeography geography;
   final AvatarStyle authorAvatarStyle;
+  final String? businessLocationId;
   ShoutStatus get effectiveStatus {
     if (status == ShoutStatus.deleted) return ShoutStatus.deleted;
     return expiresAt.isAfter(DateTime.now())
@@ -107,10 +110,8 @@ class Shout {
   String get distanceLabel => distanceKm < 1
       ? '${(distanceKm * 1000).round()} m'
       : '${distanceKm.toStringAsFixed(1).replaceAll('.0', '')} km';
-  String get ageLabel {
-    final minutes = DateTime.now().difference(createdAt).inMinutes;
-    return minutes < 1 ? 'teď' : 'před $minutes min';
-  }
+  String createdDateLabel(BuildContext context) =>
+      MaterialLocalizations.of(context).formatMediumDate(createdAt.toLocal());
 
   String expiryLabel(BuildContext context) {
     final difference = expiresAt.difference(DateTime.now());
@@ -137,6 +138,16 @@ class Shout {
       _ => 'expiroval před $past',
     };
   }
+}
+
+String titleWithInitialCapital(String value) {
+  final title = value.trim();
+  if (title.isEmpty) return title;
+  final firstRune = title.runes.first;
+  final firstCharacter = String.fromCharCode(firstRune);
+  final uppercase = firstCharacter.toUpperCase();
+  if (uppercase == firstCharacter) return title;
+  return '$uppercase${title.substring(firstCharacter.length)}';
 }
 
 String localizedDurationLabel(BuildContext context, Duration duration) {

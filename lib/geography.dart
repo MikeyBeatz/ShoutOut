@@ -38,6 +38,15 @@ class ShoutGeography {
 /// Encodes a point into a provider-independent geohash.
 /// Precision 7 represents cells roughly 150 metres wide at the equator.
 String encodeGeohash(double latitude, double longitude, {int precision = 7}) {
+  if (!latitude.isFinite || latitude < -90 || latitude > 90) {
+    throw RangeError.range(latitude, -90, 90, 'latitude');
+  }
+  if (!longitude.isFinite || longitude < -180 || longitude > 180) {
+    throw RangeError.range(longitude, -180, 180, 'longitude');
+  }
+  if (precision < 1 || precision > 12) {
+    throw RangeError.range(precision, 1, 12, 'precision');
+  }
   const alphabet = '0123456789bcdefghjkmnpqrstuvwxyz';
   var latitudeRange = (-90.0, 90.0);
   var longitudeRange = (-180.0, 180.0);
@@ -75,4 +84,12 @@ String encodeGeohash(double latitude, double longitude, {int precision = 7}) {
     }
   }
   return result.toString();
+}
+
+/// Reduces a precise device coordinate to the public grid used by Shouts.
+double publicLocationCoordinate(double coordinate) {
+  if (!coordinate.isFinite) {
+    throw ArgumentError.value(coordinate, 'coordinate', 'must be finite');
+  }
+  return (coordinate * 100).roundToDouble() / 100;
 }

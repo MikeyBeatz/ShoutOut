@@ -6,6 +6,7 @@ const _privateReplyPageSize = 50;
 const _profileHistoryPageSize = 50;
 const _moderationPageSize = 50;
 const _blockedUsersPageSize = 200;
+const _followedProfilesPageSize = 200;
 
 const _shoutRateWindow = Duration(days: 1);
 const _commentRateWindow = Duration(hours: 1);
@@ -13,6 +14,59 @@ const _privateReplyRateWindow = Duration(hours: 1);
 const _reportRateWindow = Duration(days: 1);
 const _interactionRateWindow = Duration(hours: 1);
 const _deleteRateWindow = Duration(hours: 1);
+const _shoutCooldown = Duration(minutes: 2);
+const _businessShoutCooldown = Duration(seconds: 1);
+const _shoutDailyMaximum = 50;
+const _businessShoutDailyMaximum = 500;
+
+Future<void> _recordClientError({
+  required String action,
+  required Object error,
+}) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+  final code = error is FirebaseException
+      ? error.code
+      : error is StateError
+      ? error.message.toString()
+      : error.runtimeType.toString();
+  try {
+    final expiresAt = Timestamp.fromDate(
+      DateTime.now().toUtc().add(const Duration(days: 60)),
+    );
+    await FirebaseFirestore.instance.collection('clientErrorLogs').add({
+      'userId': user.uid,
+      'action': action,
+      'code': code.substring(0, code.length.clamp(0, 120)),
+      'message': error.toString().substring(
+        0,
+        error.toString().length.clamp(0, 500),
+      ),
+      'createdAt': FieldValue.serverTimestamp(),
+      'expiresAt': expiresAt,
+    });
+  } catch (_) {
+    // Logging must never replace the original user-facing error.
+  }
+}
+
+Future<void> _recordTechnicalLogAccess(AccountRole role) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null || !role.isAtLeast(AccountRole.administrator)) return;
+  try {
+    await FirebaseFirestore.instance.collection('technicalLogAccessAudits').add({
+      'userId': user.uid,
+      'role': role.name,
+      'action': 'view_client_error_logs',
+      'createdAt': FieldValue.serverTimestamp(),
+      'expiresAt': Timestamp.fromDate(
+        DateTime.now().toUtc().add(const Duration(days: 60)),
+      ),
+    });
+  } catch (_) {
+    // The diagnostic screen remains usable if its secondary audit write fails.
+  }
+}
 
 DocumentReference<Map<String, dynamic>> _rateLimitReference(String action) {
   final uid = FirebaseAuth.instance.currentUser!.uid;

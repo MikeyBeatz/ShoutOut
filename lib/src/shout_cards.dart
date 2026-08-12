@@ -10,7 +10,7 @@ class RatedShoutCard extends StatefulWidget {
 
   final Shout shout;
   final VoidCallback onSave;
-  final ValueChanged<bool> onReaction;
+  final Future<void> Function(bool like) onReaction;
 
   @override
   State<RatedShoutCard> createState() => _RatedShoutCardState();
@@ -64,7 +64,7 @@ class ShoutCard extends StatelessWidget {
 
   final Shout shout;
   final VoidCallback onSave;
-  final ValueChanged<bool> onReaction;
+  final Future<void> Function(bool like) onReaction;
   final bool showSaveCount;
   final bool showDeleteButton;
   final Future<void> Function()? onDelete;
@@ -98,25 +98,52 @@ class ShoutCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  AvatarImage(
-                    avatarId: shout.authorAvatarStyle.avatarId,
-                    style: shout.authorAvatarStyle,
-                    radius: 20,
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          shout.author,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                    child: PublicIdentityBuilder(
+                      userId: shout.authorId,
+                      fallbackNickname: shout.author,
+                      fallbackAvatarStyle: shout.authorAvatarStyle,
+                      builder: (context, identity) => InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: shout.authorId.isEmpty
+                            ? null
+                            : () => showPublicProfileSheet(
+                                context,
+                                userId: shout.authorId,
+                                fallbackNickname: identity.nickname,
+                                fallbackAvatarStyle: identity.avatarStyle,
+                                onSave: (_) => onSave(),
+                                onReaction: (_, {required like}) async =>
+                                    onReaction(like),
+                              ),
+                        child: Row(
+                          children: [
+                            AvatarImage(
+                              avatarId: identity.avatarStyle.avatarId,
+                              style: identity.avatarStyle,
+                              radius: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    identity.nickname,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${shout.distanceLabel} · ${shout.createdDateLabel(context)} · ${shout.expiryLabel(context)}',
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${shout.distanceLabel} · ${shout.ageLabel} · ${shout.expiryLabel(context)}',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   IconButton(
@@ -195,14 +222,14 @@ class ShoutCard extends StatelessWidget {
                               icon: Icons.thumb_up_outlined,
                               value: shout.likes,
                               selected: shout.isLiked,
-                              onPressed: () => onReaction(true),
+                              onPressed: () => unawaited(onReaction(true)),
                             ),
                             const SizedBox(width: 4),
                             ReactionButton(
                               icon: Icons.thumb_down_outlined,
                               value: shout.dislikes,
                               selected: shout.isDisliked,
-                              onPressed: () => onReaction(false),
+                              onPressed: () => unawaited(onReaction(false)),
                             ),
                             const SizedBox(width: 8),
                             ReactionButton(

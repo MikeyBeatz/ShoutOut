@@ -22,6 +22,17 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Sledované': 'Following',
+  'Profily': 'Profiles',
+  'Sledovat': 'Follow',
+  'Sledováno': 'Following',
+  'Nahlásit účet': 'Report account',
+  'Aktivní Shouty': 'Active Shouts',
+  'Zatím nesleduješ žádné profily.': 'You are not following any profiles yet.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'This account has no active Shouts right now.',
+  'Shouty se nepodařilo načíst.': 'Shouts could not be loaded.',
+  'Důvod': 'Reason',
   'Oznámení': 'Notifications',
   'Přidat shout': 'Add shout',
   'Co se děje v okolí?': 'What is happening nearby?',
@@ -125,6 +136,9 @@ const _english = <String, String>{
   'Zobrazit heslo': 'Show password',
   'Skrýt heslo': 'Hide password',
   'Vytvořit účet': 'Create account',
+  'Vytvářím účet…': 'Creating account…',
+  'Přihlašuji…': 'Signing in…',
+  'Odesílám ověřovací e-mail…': 'Sending verification email…',
   'Přihlásit se': 'Sign in',
   'Přihlášení': 'Sign in',
   'Registrace': 'Create account',
@@ -181,6 +195,7 @@ const _english = <String, String>{
   'Odpovídáš': 'Replying to',
   'Odkazovaný komentář už není dostupný.':
       'The linked comment is no longer available.',
+  'Tento Shout už není dostupný.': 'This Shout is no longer available.',
   'Shout s nízkým hodnocením': 'Low-rated shout',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'This shout was collapsed because of strongly negative ratings.',
@@ -200,6 +215,32 @@ const _english = <String, String>{
   'Odpovědi na komentáře': 'Replies to comments',
   'Reakce na mé Shouty': 'Reactions to my shouts',
   'Nové Shouty v okolí': 'New shouts nearby',
+  'Soukromé odpovědi': 'Private replies',
+  'Nové Shouty sledovaných profilů': 'New Shouts from followed profiles',
+  'Oznámení se nepodařilo načíst.': 'Notifications could not be loaded.',
+  'Označit vše jako přečtené': 'Mark all as read',
+  'Někdo': 'Someone',
+  'reagoval na tvůj Shout.': 'reacted to your Shout.',
+  'okomentoval tvůj Shout.': 'commented on your Shout.',
+  'reagoval na tvůj komentář.': 'reacted to your comment.',
+  'dal like tvému Shoutu': 'liked your Shout',
+  'dal dislike tvému Shoutu': 'disliked your Shout',
+  'uživatelů dalo like tvému Shoutu': 'users liked your Shout',
+  'uživatelů dalo dislike tvému Shoutu': 'users disliked your Shout',
+  'okomentoval tvůj Shout': 'commented on your Shout',
+  'uživatelů komentovalo tvůj Shout': 'users commented on your Shout',
+  'dal like tvému komentáři': 'liked your comment on',
+  'dal dislike tvému komentáři': 'disliked your comment on',
+  'uživatelů dalo like tvému komentáři': 'users liked your comment on',
+  'uživatelů dalo dislike tvému komentáři': 'users disliked your comment on',
+  'odpověděl na tvůj komentář': 'replied to your comment on',
+  'uživatelů odpovědělo na tvůj komentář': 'users replied to your comment on',
+  'ti poslal soukromou odpověď': 'sent you a private reply on',
+  'uživatelů ti poslalo soukromou odpověď': 'users sent you private replies on',
+  'odpověděl na tvůj komentář.': 'replied to your comment.',
+  'ti poslal soukromou odpověď.': 'sent you a private reply.',
+  'zveřejnil nový Shout.': 'published a new Shout.',
+  'Nové oznámení': 'New notification',
   'Nápověda': 'Help',
   'Moderace': 'Moderation',
   'Soukromé': 'Private',
@@ -288,9 +329,47 @@ const _english = <String, String>{
   'Blokovat': 'Block',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Allow location access to publish a Shout.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Turn on location services and try publishing the Shout again.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Allow location access for the app in your device settings.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Your location could not be determined in time. Move to an open area and try again.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Your location could not be determined. Check your connection and location services.',
+  'Otevřít nastavení': 'Open settings',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'The Shout could not be published due to account permissions. Check email verification and your account status.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'The service is temporarily unavailable. Check your connection and try again.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Connecting to sign-in is taking too long. Check your internet connection and try again.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'The email is not verified yet. After opening the link, wait a moment and check again.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'The verification check is taking too long. Check your internet connection and try again.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Verification could not be loaded. Check your internet connection and try again.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Sending the verification email is taking too long. Check your internet connection and try again.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'The verification email could not be sent. Try again later.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'The profile could not be loaded. Check your connection and restart the app.',
 };
 
 const _german = <String, String>{
+  'Sledované': 'Gefolgt',
+  'Profily': 'Profile',
+  'Sledovat': 'Folgen',
+  'Sledováno': 'Gefolgt',
+  'Nahlásit účet': 'Konto melden',
+  'Aktivní Shouty': 'Aktive Shouts',
+  'Zatím nesleduješ žádné profily.': 'Du folgst noch keinen Profilen.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'Dieses Konto hat derzeit keine aktiven Shouts.',
+  'Shouty se nepodařilo načíst.': 'Shouts konnten nicht geladen werden.',
+  'Důvod': 'Grund',
   'Oznámení': 'Benachrichtigungen',
   'Přidat shout': 'Shout hinzufügen',
   'Co se děje v okolí?': 'Was passiert in deiner Nähe?',
@@ -397,6 +476,9 @@ const _german = <String, String>{
   'Zobrazit heslo': 'Passwort anzeigen',
   'Skrýt heslo': 'Passwort ausblenden',
   'Vytvořit účet': 'Konto erstellen',
+  'Vytvářím účet…': 'Konto wird erstellt…',
+  'Přihlašuji…': 'Anmeldung läuft…',
+  'Odesílám ověřovací e-mail…': 'Bestätigungs-E-Mail wird gesendet…',
   'Přihlásit se': 'Anmelden',
   'Už účet mám': 'Ich habe bereits ein Konto',
   'Vytvořit nový účet': 'Neues Konto erstellen',
@@ -457,6 +539,7 @@ const _german = <String, String>{
   'Odpovídáš': 'Antwort an',
   'Odkazovaný komentář už není dostupný.':
       'Der verlinkte Kommentar ist nicht mehr verfügbar.',
+  'Tento Shout už není dostupný.': 'Dieser Shout ist nicht mehr verfügbar.',
   'Shout s nízkým hodnocením': 'Shout mit niedriger Bewertung',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Dieser Shout wurde wegen stark negativer Bewertungen eingeklappt.',
@@ -476,6 +559,36 @@ const _german = <String, String>{
   'Odpovědi na komentáře': 'Antworten auf Kommentare',
   'Reakce na mé Shouty': 'Reaktionen auf meine Shouts',
   'Nové Shouty v okolí': 'Neue Shouts in der Nähe',
+  'Soukromé odpovědi': 'Private Antworten',
+  'Nové Shouty sledovaných profilů': 'Neue Shouts von gefolgten Profilen',
+  'Oznámení se nepodařilo načíst.':
+      'Benachrichtigungen konnten nicht geladen werden.',
+  'Označit vše jako přečtené': 'Alle als gelesen markieren',
+  'Někdo': 'Jemand',
+  'reagoval na tvůj Shout.': 'hat auf deinen Shout reagiert.',
+  'reagoval na tvůj komentář.': 'hat auf deinen Kommentar reagiert.',
+  'dal like tvému Shoutu': 'gefällt dein Shout',
+  'dal dislike tvému Shoutu': 'gefällt dein Shout nicht',
+  'uživatelů dalo like tvému Shoutu': 'Nutzern gefällt dein Shout',
+  'uživatelů dalo dislike tvému Shoutu': 'Nutzern gefällt dein Shout nicht',
+  'okomentoval tvůj Shout': 'hat deinen Shout kommentiert',
+  'uživatelů komentovalo tvůj Shout': 'Nutzer haben deinen Shout kommentiert',
+  'dal like tvému komentáři': 'gefällt dein Kommentar zu',
+  'dal dislike tvému komentáři': 'gefällt dein Kommentar nicht zu',
+  'uživatelů dalo like tvému komentáři': 'Nutzern gefällt dein Kommentar zu',
+  'uživatelů dalo dislike tvému komentáři':
+      'Nutzern gefällt dein Kommentar nicht zu',
+  'odpověděl na tvůj komentář': 'hat auf deinen Kommentar geantwortet zu',
+  'uživatelů odpovědělo na tvůj komentář':
+      'Nutzer antworteten auf deinen Kommentar zu',
+  'ti poslal soukromou odpověď': 'hat dir privat geantwortet zu',
+  'uživatelů ti poslalo soukromou odpověď':
+      'Nutzer haben dir privat geantwortet zu',
+  'okomentoval tvůj Shout.': 'hat deinen Shout kommentiert.',
+  'odpověděl na tvůj komentář.': 'hat auf deinen Kommentar geantwortet.',
+  'ti poslal soukromou odpověď.': 'hat dir privat geantwortet.',
+  'zveřejnil nový Shout.': 'hat einen neuen Shout veröffentlicht.',
+  'Nové oznámení': 'Neue Benachrichtigung',
   'Nápověda': 'Hilfe',
   'Moderace': 'Moderation',
   'Soukromé': 'Privat',
@@ -564,9 +677,47 @@ const _german = <String, String>{
   'Blokovat': 'Blockieren',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Erlaube den Standortzugriff, um einen Shout zu veröffentlichen.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Aktiviere die Standortdienste und versuche erneut, den Shout zu veröffentlichen.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Erlaube der App den Standortzugriff in den Geräteeinstellungen.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Der Standort konnte nicht rechtzeitig ermittelt werden. Gehe ins Freie und versuche es erneut.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Der Standort konnte nicht ermittelt werden. Prüfe Verbindung und Standortdienste.',
+  'Otevřít nastavení': 'Einstellungen öffnen',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'Der Shout konnte wegen der Kontoberechtigungen nicht veröffentlicht werden. Prüfe E-Mail-Bestätigung und Kontostatus.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'Der Dienst ist vorübergehend nicht verfügbar. Prüfe die Verbindung und versuche es erneut.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Die Verbindung zur Anmeldung dauert zu lange. Prüfe deine Internetverbindung und versuche es erneut.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'Die E-Mail ist noch nicht bestätigt. Warte nach dem Öffnen des Links kurz und prüfe erneut.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Die Überprüfung dauert zu lange. Prüfe deine Internetverbindung und versuche es erneut.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Die Bestätigung konnte nicht geladen werden. Prüfe deine Internetverbindung und versuche es erneut.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Das Senden der Bestätigungs-E-Mail dauert zu lange. Prüfe deine Internetverbindung und versuche es erneut.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'Die Bestätigungs-E-Mail konnte nicht gesendet werden. Versuche es später erneut.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'Das Profil konnte nicht geladen werden. Prüfe die Verbindung und starte die App neu.',
 };
 
 const _polish = <String, String>{
+  'Sledované': 'Obserwowane',
+  'Profily': 'Profile',
+  'Sledovat': 'Obserwuj',
+  'Sledováno': 'Obserwujesz',
+  'Nahlásit účet': 'Zgłoś konto',
+  'Aktivní Shouty': 'Aktywne Shouty',
+  'Zatím nesleduješ žádné profily.': 'Nie obserwujesz jeszcze żadnych profili.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'To konto nie ma teraz aktywnych Shoutów.',
+  'Shouty se nepodařilo načíst.': 'Nie udało się wczytać Shoutów.',
+  'Důvod': 'Powód',
   'Oznámení': 'Powiadomienia',
   'Přidat shout': 'Dodaj shout',
   'Okolí': 'W pobliżu',
@@ -670,6 +821,9 @@ const _polish = <String, String>{
   'Zobrazit heslo': 'Pokaż hasło',
   'Skrýt heslo': 'Ukryj hasło',
   'Vytvořit účet': 'Utwórz konto',
+  'Vytvářím účet…': 'Tworzenie konta…',
+  'Přihlašuji…': 'Logowanie…',
+  'Odesílám ověřovací e-mail…': 'Wysyłanie e-maila weryfikacyjnego…',
   'Přihlásit se': 'Zaloguj się',
   'Už účet mám': 'Mam już konto',
   'Vytvořit nový účet': 'Utwórz nowe konto',
@@ -728,6 +882,7 @@ const _polish = <String, String>{
   'Odpovídáš': 'Odpowiadasz do',
   'Odkazovaný komentář už není dostupný.':
       'Komentarz, do którego prowadzi link, nie jest już dostępny.',
+  'Tento Shout už není dostupný.': 'Ten Shout nie jest już dostępny.',
   'Shout s nízkým hodnocením': 'Shout z niską oceną',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Ten shout został zwinięty z powodu bardzo negatywnych ocen.',
@@ -747,6 +902,37 @@ const _polish = <String, String>{
   'Odpovědi na komentáře': 'Odpowiedzi na komentarze',
   'Reakce na mé Shouty': 'Reakcje na moje shouty',
   'Nové Shouty v okolí': 'Nowe shouty w pobliżu',
+  'Soukromé odpovědi': 'Prywatne odpowiedzi',
+  'Nové Shouty sledovaných profilů': 'Nowe Shouty obserwowanych profili',
+  'Oznámení se nepodařilo načíst.': 'Nie udało się wczytać powiadomień.',
+  'Označit vše jako přečtené': 'Oznacz wszystkie jako przeczytane',
+  'Někdo': 'Ktoś',
+  'reagoval na tvůj Shout.': 'zareagował na Twój Shout.',
+  'reagoval na tvůj komentář.': 'zareagował na Twój komentarz.',
+  'dal like tvému Shoutu': 'polubił Twój Shout',
+  'dal dislike tvému Shoutu': 'nie polubił Twojego Shoutu',
+  'uživatelů dalo like tvému Shoutu': 'użytkowników polubiło Twój Shout',
+  'uživatelů dalo dislike tvému Shoutu':
+      'użytkowników nie polubiło Twojego Shoutu',
+  'okomentoval tvůj Shout': 'skomentował Twój Shout',
+  'uživatelů komentovalo tvůj Shout': 'użytkowników skomentowało Twój Shout',
+  'dal like tvému komentáři': 'polubił Twój komentarz pod',
+  'dal dislike tvému komentáři': 'nie polubił Twojego komentarza pod',
+  'uživatelů dalo like tvému komentáři':
+      'użytkowników polubiło Twój komentarz pod',
+  'uživatelů dalo dislike tvému komentáři':
+      'użytkowników nie polubiło Twojego komentarza pod',
+  'odpověděl na tvůj komentář': 'odpowiedział na Twój komentarz pod',
+  'uživatelů odpovědělo na tvůj komentář':
+      'użytkowników odpowiedziało na Twój komentarz pod',
+  'ti poslal soukromou odpověď': 'wysłał Ci prywatną odpowiedź pod',
+  'uživatelů ti poslalo soukromou odpověď':
+      'użytkowników wysłało Ci prywatne odpowiedzi pod',
+  'okomentoval tvůj Shout.': 'skomentował Twój Shout.',
+  'odpověděl na tvůj komentář.': 'odpowiedział na Twój komentarz.',
+  'ti poslal soukromou odpověď.': 'wysłał Ci prywatną odpowiedź.',
+  'zveřejnil nový Shout.': 'opublikował nowy Shout.',
+  'Nové oznámení': 'Nowe powiadomienie',
   'Nápověda': 'Pomoc',
   'Moderace': 'Moderacja',
   'Soukromé': 'Prywatne',
@@ -835,4 +1021,31 @@ const _polish = <String, String>{
   'Blokovat': 'Zablokuj',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Zezwól na dostęp do lokalizacji, aby opublikować shout.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Włącz usługi lokalizacyjne i spróbuj ponownie opublikować Shout.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Zezwól aplikacji na dostęp do lokalizacji w ustawieniach urządzenia.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Nie udało się ustalić lokalizacji na czas. Przejdź na otwartą przestrzeń i spróbuj ponownie.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Nie udało się ustalić lokalizacji. Sprawdź połączenie i usługi lokalizacyjne.',
+  'Otevřít nastavení': 'Otwórz ustawienia',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'Nie udało się opublikować Shoutu z powodu uprawnień konta. Sprawdź weryfikację e-maila i stan konta.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'Usługa jest tymczasowo niedostępna. Sprawdź połączenie i spróbuj ponownie.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Łączenie z logowaniem trwa zbyt długo. Sprawdź internet i spróbuj ponownie.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'E-mail nie jest jeszcze potwierdzony. Po otwarciu linku odczekaj chwilę i sprawdź ponownie.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Sprawdzanie weryfikacji trwa zbyt długo. Sprawdź internet i spróbuj ponownie.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Nie udało się wczytać weryfikacji. Sprawdź internet i spróbuj ponownie.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Wysyłanie e-maila weryfikacyjnego trwa zbyt długo. Sprawdź internet i spróbuj ponownie.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'Nie udało się wysłać e-maila weryfikacyjnego. Spróbuj później.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'Nie udało się wczytać profilu. Sprawdź połączenie i uruchom aplikację ponownie.',
 };

@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function supportStaff() {
+      return signedIn() &&
+        firestore.exists(/databases/(default)/documents/accountRoles/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/accountRoles/$(request.auth.uid)).data.level >= 5;
+    }
+
+    match /bugReports/{userId}/{reportId}/screenshot {
+      allow create: if signedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size > 0 &&
+        request.resource.size <= 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow read: if signedIn() &&
+        (request.auth.uid == userId || supportStaff());
+      allow delete: if signedIn() && request.auth.uid == userId;
+      allow update: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

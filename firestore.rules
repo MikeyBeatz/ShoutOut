@@ -35,6 +35,15 @@ service cloud.firestore {
       return hasRoleLevel(3);
     }
 
+    function isBusinessAccount() {
+      let rolePath =
+        /databases/$(database)/documents/accountRoles/$(request.auth.uid);
+      return signedIn() &&
+        exists(rolePath) &&
+        get(rolePath).data.role == 'business' &&
+        get(rolePath).data.level == 2;
+    }
+
     function hasProfile() {
       return signedIn() &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid));
@@ -79,6 +88,10 @@ service cloud.firestore {
 
     function eligibleSeniorModerator() {
       return eligibleUser() && hasRoleLevel(4);
+    }
+
+    function eligibleAdministrator() {
+      return eligibleUser() && hasRoleLevel(5);
     }
 
     function hasActiveContentRestriction() {
@@ -197,6 +210,28 @@ service cloud.firestore {
         data.avatarGradientDirection in ['horizontal', 'diagonal', 'vertical'];
     }
 
+    function validPublicProfile(userId, data) {
+      let userPath = /databases/$(database)/documents/users/$(userId);
+      return data.keys().hasOnly([
+          'nickname', 'avatarId', 'avatarBackgroundStart',
+          'avatarBackgroundEnd', 'avatarGradientDirection'
+        ]) &&
+        data.keys().hasAll([
+          'nickname', 'avatarId', 'avatarBackgroundStart',
+          'avatarBackgroundEnd', 'avatarGradientDirection'
+        ]) &&
+        validAvatarStyle(data) &&
+        existsAfter(userPath) &&
+        data.nickname == getAfter(userPath).data.nickname &&
+        data.avatarId == getAfter(userPath).data.avatarId &&
+        data.avatarBackgroundStart ==
+          getAfter(userPath).data.avatarBackgroundStart &&
+        data.avatarBackgroundEnd ==
+          getAfter(userPath).data.avatarBackgroundEnd &&
+        data.avatarGradientDirection ==
+          getAfter(userPath).data.avatarGradientDirection;
+    }
+
     function validNickname(nickname, nicknameLower) {
       return nickname is string &&
         nickname.size() >= 3 &&
@@ -217,6 +252,8 @@ service cloud.firestore {
           'nicknameChangeCount',
           'emailVerified',
           'language',
+          'themeMode',
+          'showOnboardingHelp',
           'avatarId',
           'avatarBackgroundStart',
           'avatarBackgroundEnd',
@@ -230,6 +267,8 @@ service cloud.firestore {
           'nicknameChangeCount',
           'emailVerified',
           'language',
+          'themeMode',
+          'showOnboardingHelp',
           'avatarId',
           'avatarBackgroundStart',
           'avatarBackgroundEnd',
@@ -245,6 +284,8 @@ service cloud.firestore {
         request.resource.data.emailVerified ==
           request.auth.token.email_verified &&
         request.resource.data.language in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi'] &&
+        request.resource.data.themeMode in ['system', 'light', 'dark'] &&
+        request.resource.data.showOnboardingHelp == true &&
         validAvatarStyle(request.resource.data);
     }
 
@@ -284,7 +325,9 @@ service cloud.firestore {
 
     function rateCooldown(action) {
       return action == 'shout'
-        ? duration.value(2, 'm')
+        ? (isBusinessAccount()
+          ? duration.value(1, 's')
+          : duration.value(2, 'm'))
         : action == 'report'
           ? duration.value(1, 'm')
           : action in ['comment', 'privateReply']
@@ -300,7 +343,7 @@ service cloud.firestore {
 
     function rateMaximum(action) {
       return action == 'shout'
-        ? 10
+        ? (isBusinessAccount() ? 500 : 50)
         : action == 'report'
           ? 20
           : action in ['comment', 'privateReply']
@@ -370,6 +413,27 @@ service cloud.firestore {
         get(
           /databases/$(database)/documents/users/$(request.auth.uid)
         ).data.nickname;
+    }
+
+    function validBusinessShout(data) {
+      let businessPath =
+        /databases/$(database)/documents/businessProfiles/$(request.auth.uid);
+      let locationPath =
+        /databases/$(database)/documents/businessProfiles/$(request.auth.uid)/locations/$(data.businessLocationId);
+      let business = get(businessPath).data;
+      let location = get(locationPath).data;
+      return isBusinessAccount() &&
+        data.businessLocationId is string &&
+        exists(businessPath) &&
+        exists(locationPath) &&
+        business.status == 'active' &&
+        location.active == true &&
+        location.deleted == false &&
+        location.geocodingStatus == 'verified' &&
+        data.authorNickname == business.displayName + ' – ' +
+          location.displayName &&
+        data.location == location.location &&
+        data.geohash == location.geohash;
     }
 
     function activeShout(shoutId) {
@@ -629,6 +693,213 @@ service cloud.firestore {
       allow list, update, delete: if false;
     }
 
+    match /businessApplications/{userId} {
+      allow get: if signedIn() &&
+        (request.auth.uid == userId || isModerator());
+      allow create: if signedIn() &&
+        request.auth.uid == userId &&
+        request.auth.token.email is string &&
+        request.resource.data.keys().hasOnly([
+          'userId',
+          'countryCode',
+          'registrationNumber',
+          'submittedCompanyName',
+          'submittedAddress',
+          'submittedCity',
+          'submittedPostalCode',
+          'initialLocationName',
+          'initialLocationAddress',
+          'initialLocationCity',
+          'initialLocationPostalCode',
+          'initialLocationCountryCode',
+          'initialLocation',
+          'initialLocationGeohash',
+          'initialLocationProviderPlaceId',
+          'contactEmail',
+          'status',
+          'submittedAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId',
+          'countryCode',
+          'registrationNumber',
+          'submittedCompanyName',
+          'submittedAddress',
+          'submittedCity',
+          'submittedPostalCode',
+          'initialLocationName',
+          'initialLocationAddress',
+          'initialLocationCity',
+          'initialLocationPostalCode',
+          'initialLocationCountryCode',
+          'initialLocation',
+          'initialLocationGeohash',
+          'initialLocationProviderPlaceId',
+          'contactEmail',
+          'status',
+          'submittedAt'
+        ]) &&
+        request.resource.data.userId == userId &&
+        request.resource.data.countryCode is string &&
+        request.resource.data.countryCode.size() >= 2 &&
+        request.resource.data.countryCode.size() <= 5 &&
+        request.resource.data.countryCode.matches('^[A-Z]+$') &&
+        request.resource.data.registrationNumber is string &&
+        request.resource.data.registrationNumber.size() >= 3 &&
+        request.resource.data.registrationNumber.size() <= 40 &&
+        request.resource.data.submittedCompanyName is string &&
+        request.resource.data.submittedCompanyName.size() >= 2 &&
+        request.resource.data.submittedCompanyName.size() <= 160 &&
+        request.resource.data.submittedAddress is string &&
+        request.resource.data.submittedAddress.size() >= 3 &&
+        request.resource.data.submittedAddress.size() <= 200 &&
+        request.resource.data.submittedCity is string &&
+        request.resource.data.submittedCity.size() >= 1 &&
+        request.resource.data.submittedCity.size() <= 100 &&
+        request.resource.data.submittedPostalCode is string &&
+        request.resource.data.submittedPostalCode.size() >= 2 &&
+        request.resource.data.submittedPostalCode.size() <= 20 &&
+        request.resource.data.initialLocationName is string &&
+        request.resource.data.initialLocationName.size() >= 1 &&
+        request.resource.data.initialLocationName.size() <= 100 &&
+        request.resource.data.initialLocationAddress is string &&
+        request.resource.data.initialLocationAddress.size() >= 3 &&
+        request.resource.data.initialLocationAddress.size() <= 200 &&
+        request.resource.data.initialLocationCity is string &&
+        request.resource.data.initialLocationCity.size() <= 100 &&
+        request.resource.data.initialLocationPostalCode is string &&
+        request.resource.data.initialLocationPostalCode.size() <= 20 &&
+        request.resource.data.initialLocationCountryCode is string &&
+        request.resource.data.initialLocationCountryCode.matches('^[A-Z]{2}$') &&
+        request.resource.data.initialLocation is latlng &&
+        request.resource.data.initialLocationGeohash is string &&
+        request.resource.data.initialLocationGeohash.matches('^[0-9b-hj-km-np-z]{7}$') &&
+        request.resource.data.initialLocationProviderPlaceId is string &&
+        request.resource.data.initialLocationProviderPlaceId.size() >= 1 &&
+        request.resource.data.initialLocationProviderPlaceId.size() <= 200 &&
+        request.resource.data.contactEmail == request.auth.token.email &&
+        request.resource.data.status == 'pending_email' &&
+        request.resource.data.submittedAt == request.time;
+      allow list, update, delete: if false;
+    }
+
+    match /businessProfiles/{userId} {
+      allow get: if verifiedIdentity() &&
+        (request.auth.uid == userId || isModerator());
+      allow update: if eligibleUser() &&
+        request.auth.uid == userId &&
+        isBusinessAccount() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'registryAddress', 'billingCity',
+          'billingPostalCode', 'billingEmail', 'updatedAt'
+        ]) &&
+        request.resource.data.displayName is string &&
+        request.resource.data.displayName.size() >= 2 &&
+        request.resource.data.displayName.size() <= 100 &&
+        request.resource.data.registryAddress is string &&
+        request.resource.data.registryAddress.size() >= 3 &&
+        request.resource.data.registryAddress.size() <= 200 &&
+        request.resource.data.billingCity is string &&
+        request.resource.data.billingCity.size() <= 100 &&
+        request.resource.data.billingPostalCode is string &&
+        request.resource.data.billingPostalCode.size() <= 20 &&
+        request.resource.data.billingEmail is string &&
+        request.resource.data.billingEmail.size() <= 254 &&
+        request.resource.data.updatedAt == request.time;
+      allow list, create, delete: if false;
+
+      match /locations/{locationId} {
+        function validLocation() {
+          return request.resource.data.keys().hasOnly([
+              'displayName', 'address', 'active', 'deleted',
+              'geocodingStatus', 'location', 'geohash', 'providerPlaceId',
+              'countryCode',
+              'createdAt', 'updatedAt'
+            ]) &&
+            request.resource.data.keys().hasAll([
+              'displayName', 'address', 'active', 'deleted',
+              'geocodingStatus', 'createdAt', 'updatedAt'
+            ]) &&
+            request.resource.data.displayName is string &&
+            request.resource.data.displayName.size() >= 1 &&
+            request.resource.data.displayName.size() <= 80 &&
+            request.resource.data.address is string &&
+            request.resource.data.address.size() >= 3 &&
+            request.resource.data.address.size() <= 200 &&
+            request.resource.data.active is bool &&
+            request.resource.data.deleted is bool &&
+            request.resource.data.geocodingStatus in ['pending', 'verified'] &&
+            (
+              !request.resource.data.keys().hasAny(['providerPlaceId']) ||
+              request.resource.data.providerPlaceId is string
+            ) &&
+            (
+              !request.resource.data.keys().hasAny(['countryCode']) ||
+              (
+                request.resource.data.countryCode is string &&
+                request.resource.data.countryCode.size() == 2
+              )
+            ) &&
+            request.resource.data.updatedAt == request.time;
+        }
+
+        allow get, list: if eligibleUser() &&
+          request.auth.uid == userId &&
+          isBusinessAccount();
+        allow create: if eligibleUser() &&
+          request.auth.uid == userId &&
+          isBusinessAccount() &&
+          exists(/databases/$(database)/documents/businessProfiles/$(userId)) &&
+          validLocation() &&
+          (
+            (
+              !request.resource.data.keys().hasAny([
+                'location', 'geohash', 'providerPlaceId'
+              ]) &&
+              request.resource.data.geocodingStatus == 'pending'
+            ) ||
+            (
+              request.resource.data.geocodingStatus == 'verified' &&
+              request.resource.data.location is latlng &&
+              request.resource.data.geohash is string &&
+              request.resource.data.providerPlaceId is string
+            )
+          ) &&
+          request.resource.data.active == true &&
+          request.resource.data.deleted == false &&
+          request.resource.data.createdAt == request.time;
+        allow update: if eligibleUser() &&
+          request.auth.uid == userId &&
+          isBusinessAccount() &&
+          validLocation() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName', 'address', 'active', 'deleted',
+            'geocodingStatus', 'location', 'geohash', 'providerPlaceId',
+            'countryCode', 'updatedAt'
+          ]) &&
+          (
+            request.resource.data.address == resource.data.address ||
+            request.resource.data.geocodingStatus == 'pending' ||
+            (
+              request.resource.data.geocodingStatus == 'verified' &&
+              request.resource.data.location is latlng &&
+              request.resource.data.geohash is string &&
+              request.resource.data.providerPlaceId is string
+            )
+          ) &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          (
+            request.resource.data.deleted == resource.data.deleted ||
+            (
+              resource.data.deleted == false &&
+              request.resource.data.deleted == true &&
+              request.resource.data.active == false
+            )
+          );
+        allow delete: if false;
+      }
+    }
+
     match /nicknames/{nicknameLower} {
       allow get: if verifiedIdentity() && hasAcceptedLegal();
       allow create: if verifiedIdentity() &&
@@ -666,6 +937,20 @@ service cloud.firestore {
       allow update, list: if false;
     }
 
+    match /publicProfiles/{userId} {
+      allow get: if eligibleUser();
+      allow create: if verifiedIdentity() &&
+        hasAcceptedLegal() &&
+        !hasActiveBan() &&
+        !deletionPending() &&
+        request.auth.uid == userId &&
+        validPublicProfile(userId, request.resource.data);
+      allow update: if eligibleUser() &&
+        request.auth.uid == userId &&
+        validPublicProfile(userId, request.resource.data);
+      allow list, delete: if false;
+    }
+
     match /users/{userId} {
       allow get: if verifiedIdentity() &&
         (request.auth.uid == userId || eligibleModerator());
@@ -674,7 +959,16 @@ service cloud.firestore {
         !hasActiveBan() &&
         !deletionPending() &&
         request.auth.uid == userId &&
-        validProfile() &&
+         validProfile() &&
+         existsAfter(
+           /databases/$(database)/documents/publicProfiles/$(userId)
+         ) &&
+         validPublicProfile(
+           userId,
+           getAfter(
+             /databases/$(database)/documents/publicProfiles/$(userId)
+           ).data
+         ) &&
         existsAfter(
           /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
         ) &&
@@ -696,10 +990,35 @@ service cloud.firestore {
                 'avatarBackgroundStart',
                 'avatarBackgroundEnd',
                 'avatarGradientDirection'
-              ]) &&
-            validAvatarStyle(request.resource.data)
-          ) ||
-          validNicknameChange()
+             ]) &&
+             validAvatarStyle(request.resource.data) &&
+             validPublicProfile(
+               userId,
+               getAfter(
+                 /databases/$(database)/documents/publicProfiles/$(userId)
+               ).data
+             )
+           ) ||
+           (
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['themeMode']) &&
+             request.resource.data.themeMode in ['system', 'light', 'dark']
+           ) ||
+           (
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['showOnboardingHelp']) &&
+             resource.data.showOnboardingHelp == true &&
+             request.resource.data.showOnboardingHelp == false
+           ) ||
+           (
+             validNicknameChange() &&
+             validPublicProfile(
+               userId,
+               getAfter(
+                 /databases/$(database)/documents/publicProfiles/$(userId)
+               ).data
+             )
+           )
         );
       allow delete, list: if false;
 
@@ -718,20 +1037,229 @@ service cloud.firestore {
         allow update: if false;
       }
 
+      match /following/{targetUserId} {
+        allow get: if eligibleUser() && request.auth.uid == userId;
+        allow list: if eligibleUser() &&
+          request.auth.uid == userId && limited(200);
+        allow create: if eligibleUser() &&
+          request.auth.uid == userId &&
+          targetUserId != userId &&
+          exists(
+            /databases/$(database)/documents/publicProfiles/$(targetUserId)
+          ) &&
+          !exists(
+            /databases/$(database)/documents/users/$(userId)/blocked/$(targetUserId)
+          ) &&
+          request.resource.data.keys().hasOnly([
+            'targetUserId', 'createdAt'
+          ]) &&
+          request.resource.data.keys().hasAll([
+            'targetUserId', 'createdAt'
+          ]) &&
+          request.resource.data.targetUserId == targetUserId &&
+          request.resource.data.createdAt == request.time;
+        allow delete: if eligibleUser() && request.auth.uid == userId;
+        allow update: if false;
+      }
+
       match /settings/{settingId} {
-        allow read: if eligibleUser() && request.auth.uid == userId;
+        // Individual notification preferences are readable by another signed-in
+        // client only so it can omit an atomic notification write without
+        // blocking the underlying interaction. Settings cannot be enumerated.
+        allow get: if eligibleUser() &&
+          (request.auth.uid == userId || settingId == 'notifications');
+        allow list: if eligibleUser() && request.auth.uid == userId;
         allow create, update: if eligibleUser() &&
           request.auth.uid == userId &&
           settingId == 'notifications' &&
           request.resource.data.keys().hasOnly([
-            'replies', 'reactions', 'nearbyShouts'
+            'replies', 'reactions', 'privateReplies',
+            'followedProfiles', 'nearbyShouts'
           ]) &&
           request.resource.data.keys().hasAll([
-            'replies', 'reactions', 'nearbyShouts'
+            'replies', 'reactions', 'privateReplies',
+            'followedProfiles', 'nearbyShouts'
           ]) &&
           request.resource.data.replies is bool &&
           request.resource.data.reactions is bool &&
+          request.resource.data.privateReplies is bool &&
+          request.resource.data.followedProfiles is bool &&
           request.resource.data.nearbyShouts is bool;
+        allow delete: if false;
+      }
+
+      match /notifications/{notificationId} {
+        function notificationEnabled(setting) {
+          let settingsPath = /databases/$(database)/documents/users/$(userId)/settings/notifications;
+          return !exists(settingsPath) || get(settingsPath).data.get(setting, true);
+        }
+
+        function validReactionNotification() {
+          let shoutId = request.resource.data.targetShoutId;
+          let shoutPath = /databases/$(database)/documents/shouts/$(shoutId);
+          let reactionPath = /databases/$(database)/documents/shouts/$(shoutId)/reactions/$(request.auth.uid);
+          return notificationId ==
+              'reaction_' + request.resource.data.reactionType + '_' + shoutId &&
+            exists(shoutPath) &&
+            get(shoutPath).data.authorId == userId &&
+            userId != request.auth.uid &&
+            existsAfter(reactionPath) &&
+            getAfter(reactionPath).data.type ==
+              request.resource.data.reactionType &&
+            consumedRate('interaction', 'shoutReaction_' + shoutId) &&
+            request.resource.data.keys().hasOnly([
+              'kind', 'actorId', 'actorNickname', 'targetShoutId',
+              'targetTitle', 'reactionType', 'eventCount', 'createdAt', 'readAt'
+            ]) &&
+            request.resource.data.keys().hasAll([
+              'kind', 'actorId', 'actorNickname', 'targetShoutId',
+              'targetTitle', 'reactionType', 'eventCount', 'createdAt', 'readAt'
+            ]) &&
+            request.resource.data.kind == 'reaction' &&
+            request.resource.data.actorId == request.auth.uid &&
+            request.resource.data.actorNickname == get(
+              /databases/$(database)/documents/publicProfiles/$(request.auth.uid)
+            ).data.nickname &&
+            request.resource.data.reactionType in ['like', 'dislike'] &&
+            notificationEnabled('reactions') &&
+            commonNotificationFields('reaction', shoutId);
+        }
+
+        function validCommentNotification() {
+          let shoutId = request.resource.data.targetShoutId;
+          let commentId = request.resource.data.targetCommentId;
+          let shoutPath = /databases/$(database)/documents/shouts/$(shoutId);
+          let commentPath = /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId);
+          return notificationId == 'comment_' + shoutId &&
+            exists(shoutPath) && get(shoutPath).data.authorId == userId &&
+            userId != request.auth.uid && existsAfter(commentPath) &&
+            getAfter(commentPath).data.authorId == request.auth.uid &&
+            consumedRate('comment', commentId) &&
+            notificationEnabled('replies') &&
+            validSocialNotificationFields('comment', shoutId, commentId, false);
+        }
+
+        function validReplyNotification() {
+          let shoutId = request.resource.data.targetShoutId;
+          let commentId = request.resource.data.targetCommentId;
+          let commentPath = /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId);
+          let parentId = request.resource.data.parentCommentId;
+          let parentPath = /databases/$(database)/documents/shouts/$(shoutId)/comments/$(parentId);
+          return notificationId == 'reply_' + shoutId &&
+            userId != request.auth.uid && existsAfter(commentPath) &&
+            getAfter(commentPath).data.authorId == request.auth.uid &&
+            getAfter(commentPath).data.replyToCommentId == parentId &&
+            exists(parentPath) && get(parentPath).data.authorId == userId &&
+            consumedRate('comment', commentId) &&
+            notificationEnabled('replies') &&
+            validSocialNotificationFields('reply', shoutId, commentId, true);
+        }
+
+        function validPrivateReplyNotification() {
+          let shoutId = request.resource.data.targetShoutId;
+          let replyId = request.resource.data.targetPrivateReplyId;
+          let replyPath = /databases/$(database)/documents/shouts/$(shoutId)/privateReplies/$(replyId);
+          return notificationId == 'privateReply_' + shoutId &&
+            userId != request.auth.uid && existsAfter(replyPath) &&
+            getAfter(replyPath).data.authorId == request.auth.uid &&
+            getAfter(replyPath).data.recipientId == userId &&
+            consumedRate('privateReply', replyId) &&
+            notificationEnabled('privateReplies') &&
+            request.resource.data.keys().hasOnly([
+              'kind', 'actorId', 'actorNickname', 'targetShoutId',
+              'targetTitle', 'targetPrivateReplyId', 'eventCount',
+              'createdAt', 'readAt'
+            ]) && commonNotificationFields('privateReply', shoutId);
+        }
+
+        function validCommentReactionNotification() {
+          let shoutId = request.resource.data.targetShoutId;
+          let commentId = request.resource.data.targetCommentId;
+          let commentPath = /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId);
+          let reactionPath = /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId)/reactions/$(request.auth.uid);
+          return notificationId ==
+              'commentReaction_' + request.resource.data.reactionType + '_' +
+              shoutId + '_' + commentId &&
+            exists(commentPath) && get(commentPath).data.authorId == userId &&
+            userId != request.auth.uid && existsAfter(reactionPath) &&
+            getAfter(reactionPath).data.type == request.resource.data.reactionType &&
+            consumedRate('interaction', 'commentReaction_' + shoutId + '_' + commentId) &&
+            notificationEnabled('reactions') &&
+            request.resource.data.keys().hasOnly([
+              'kind', 'actorId', 'actorNickname', 'targetShoutId',
+              'targetTitle', 'targetCommentId', 'reactionType', 'eventCount',
+              'createdAt', 'readAt'
+            ]) &&
+            request.resource.data.targetCommentId == commentId &&
+            request.resource.data.reactionType in ['like', 'dislike'] &&
+            commonNotificationFields('commentReaction', shoutId);
+        }
+
+        function commonNotificationFields(kind, shoutId) {
+          return request.resource.data.kind == kind &&
+            request.resource.data.actorId == request.auth.uid &&
+            request.resource.data.actorNickname == get(
+              /databases/$(database)/documents/publicProfiles/$(request.auth.uid)
+            ).data.nickname &&
+            request.resource.data.targetShoutId == shoutId &&
+            request.resource.data.targetTitle == get(
+              /databases/$(database)/documents/shouts/$(shoutId)
+            ).data.title &&
+            request.resource.data.targetTitle is string &&
+            request.resource.data.targetTitle.size() <= 60 &&
+            request.resource.data.eventCount is int &&
+            request.resource.data.eventCount >= 1 &&
+            request.resource.data.createdAt == request.time &&
+            request.resource.data.readAt == null;
+        }
+
+        function validSocialNotificationFields(kind, shoutId, commentId, reply) {
+          return request.resource.data.keys().hasOnly(
+              reply
+                ? ['kind', 'actorId', 'actorNickname', 'targetShoutId',
+                   'targetTitle', 'targetCommentId', 'parentCommentId',
+                   'eventCount', 'createdAt', 'readAt']
+                : ['kind', 'actorId', 'actorNickname', 'targetShoutId',
+                   'targetTitle', 'targetCommentId', 'eventCount',
+                   'createdAt', 'readAt']
+            ) &&
+            request.resource.data.targetCommentId == commentId &&
+            commonNotificationFields(kind, shoutId);
+        }
+
+        function validClientNotification() {
+          return request.resource.data.kind == 'reaction'
+            ? validReactionNotification()
+            : request.resource.data.kind == 'comment'
+              ? validCommentNotification()
+              : request.resource.data.kind == 'reply'
+                ? validReplyNotification()
+                : request.resource.data.kind == 'privateReply'
+                  ? validPrivateReplyNotification()
+                  : request.resource.data.kind == 'commentReaction'
+                    ? validCommentReactionNotification()
+                    : false;
+        }
+
+        allow get: if eligibleUser() && request.auth.uid == userId;
+        allow list: if eligibleUser() &&
+          request.auth.uid == userId && limited(50);
+        allow create: if eligibleUser() && validClientNotification() &&
+          request.resource.data.eventCount == 1;
+        allow update: if eligibleUser() &&
+          (
+            (
+              request.auth.uid == userId &&
+              request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['readAt']) &&
+              request.resource.data.readAt == request.time
+            ) ||
+            (
+              validClientNotification() &&
+              request.resource.data.eventCount ==
+                resource.data.get('eventCount', 0) + 1
+            )
+          );
         allow delete: if false;
       }
 
@@ -844,8 +1372,8 @@ service cloud.firestore {
     }
 
     match /moderationClearances/{clearanceId} {
-      allow get: if eligibleModerator();
-      allow list: if eligibleModerator() && limited(50);
+      allow get: if eligibleAdministrator();
+      allow list: if eligibleAdministrator() && limited(50);
       allow create: if eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'targetType', 'shoutId', 'contentId', 'createdAt', 'moderatorId',
@@ -995,13 +1523,127 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /bugReports/{reportId} {
+      allow create: if eligibleUser() &&
+        consumedRate('report', 'bug_' + reportId) &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'description', 'createdAt', 'expiresAt', 'status',
+          'screenshotPath', 'screenshotContentType', 'screenshotSize'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'description', 'createdAt', 'expiresAt', 'status',
+          'screenshotPath', 'screenshotContentType', 'screenshotSize'
+        ]) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.description is string &&
+        request.resource.data.description.size() >= 10 &&
+        request.resource.data.description.size() <= 1000 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.expiresAt >= request.time + duration.value(59, 'd') &&
+        request.resource.data.expiresAt <= request.time + duration.value(61, 'd') &&
+        request.resource.data.status == 'open' &&
+        (
+          (
+            request.resource.data.screenshotPath == null &&
+            request.resource.data.screenshotContentType == null &&
+            request.resource.data.screenshotSize == null
+          ) ||
+          (
+            request.resource.data.screenshotPath ==
+              'bugReports/' + request.auth.uid + '/' + reportId + '/screenshot' &&
+            request.resource.data.screenshotContentType in [
+              'image/jpeg', 'image/png', 'image/webp'
+            ] &&
+            request.resource.data.screenshotSize is int &&
+            request.resource.data.screenshotSize > 0 &&
+            request.resource.data.screenshotSize <= 5 * 1024 * 1024
+          )
+        );
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow update, delete: if false;
+    }
+
+    match /accountReports/{reportId} {
+      allow create: if eligibleUser() &&
+        reportId == request.auth.uid + '_' +
+          request.resource.data.targetUserId &&
+        request.resource.data.keys().hasOnly([
+          'reporterId', 'targetUserId', 'reason', 'status', 'createdAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'reporterId', 'targetUserId', 'reason', 'status', 'createdAt'
+        ]) &&
+        request.resource.data.reporterId == request.auth.uid &&
+        request.resource.data.targetUserId is string &&
+        request.resource.data.targetUserId != request.auth.uid &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 3 &&
+        request.resource.data.reason.size() <= 300 &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.createdAt == request.time;
+      allow get: if eligibleModerator();
+      allow list: if eligibleModerator() && limited(50);
+      allow update, delete: if false;
+    }
+
+    match /clientErrorLogs/{logId} {
+      allow create: if eligibleUser() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'action', 'code', 'message', 'createdAt', 'expiresAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'action', 'code', 'message', 'createdAt', 'expiresAt'
+        ]) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.action is string &&
+        request.resource.data.action.size() >= 1 &&
+        request.resource.data.action.size() <= 80 &&
+        request.resource.data.code is string &&
+        request.resource.data.code.size() <= 120 &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() <= 500 &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.expiresAt is timestamp &&
+        request.resource.data.expiresAt >= request.time + duration.value(59, 'd') &&
+        request.resource.data.expiresAt <= request.time + duration.value(61, 'd');
+      allow get: if eligibleAdministrator() &&
+        resource.data.createdAt >= request.time - duration.value(60, 'd');
+      allow list: if eligibleAdministrator() && limited(100) &&
+        resource.data.createdAt >= request.time - duration.value(60, 'd');
+      allow update, delete: if false;
+    }
+
+    match /technicalLogAccessAudits/{auditId} {
+      allow create: if eligibleAdministrator() &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'role', 'action', 'createdAt', 'expiresAt'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'userId', 'role', 'action', 'createdAt', 'expiresAt'
+        ]) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.role in ['administrator', 'owner'] &&
+        request.resource.data.role == get(
+          /databases/$(database)/documents/accountRoles/$(request.auth.uid)
+        ).data.role &&
+        request.resource.data.action == 'view_client_error_logs' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.expiresAt is timestamp &&
+        request.resource.data.expiresAt >= request.time + duration.value(59, 'd') &&
+        request.resource.data.expiresAt <= request.time + duration.value(61, 'd');
+      allow get: if eligibleAdministrator();
+      allow list: if eligibleAdministrator() && limited(100);
+      allow update, delete: if false;
+    }
+
     function validShoutCreate() {
       return request.resource.data.keys().hasOnly([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
           'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
           'dislikesCount', 'commentsCount', 'savesCount', 'avatarId',
           'avatarBackgroundStart', 'avatarBackgroundEnd',
-          'avatarGradientDirection'
+          'avatarGradientDirection', 'businessLocationId'
         ]) &&
         request.resource.data.keys().hasAll([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
@@ -1010,7 +1652,14 @@ service cloud.firestore {
         ]) &&
         request.resource.data.authorId == request.auth.uid &&
         request.resource.data.authorNickname is string &&
-        canonicalNickname(request.resource.data) &&
+        (
+          (
+            !isBusinessAccount() &&
+            !request.resource.data.keys().hasAll(['businessLocationId']) &&
+            canonicalNickname(request.resource.data)
+          ) ||
+          validBusinessShout(request.resource.data)
+        ) &&
         request.resource.data.keys().hasAll([
           'avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd',
           'avatarGradientDirection'
@@ -1043,8 +1692,8 @@ service cloud.firestore {
         request.resource.data.createdAt == request.time &&
         request.resource.data.expiresAt >=
           request.time + duration.value(14, 'm') &&
-        request.resource.data.expiresAt <=
-          request.time + duration.value(1441, 'm') &&
+        request.resource.data.expiresAt <= request.time +
+          duration.value(isBusinessAccount() ? 2881 : 1441, 'm') &&
         request.resource.data.status == 'active' &&
         request.resource.data.likesCount == 0 &&
         request.resource.data.dislikesCount == 0 &&

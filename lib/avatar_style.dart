@@ -94,6 +94,11 @@ class AvatarStyle {
     'avatarGradientDirection': direction.name,
   };
 
+  Map<String, String> publicProfileData(String nickname) => {
+    'nickname': nickname,
+    ...toFirestore(),
+  };
+
   static AvatarStyle fromProfile(Map<String, dynamic>? profile) {
     final avatarId = profile?['avatarId'] as String?;
     final start = profile?['avatarBackgroundStart'] as String?;

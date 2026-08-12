@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_locale.dart';
+import 'app_theme.dart';
 import 'avatar_style.dart';
+import 'business_registration.dart';
 import 'legal.dart';
 import 'l10n/text.dart';
 
@@ -54,6 +56,9 @@ class ProfileGate extends StatelessWidget {
             .doc(user.uid)
             .snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const _GateLoadError();
+          }
           if (!snapshot.hasData) {
             return const _LoadingPage();
           }
@@ -69,19 +74,295 @@ class ProfileGate extends StatelessWidget {
               appLocale.value = Locale(language);
             });
           }
+          final themeMode = themeModeFromProfile(
+            snapshot.data!.data()?['themeMode'] as String?,
+          );
+          if (appThemeMode.value != themeMode) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              appThemeMode.value = themeMode;
+            });
+          }
           return DeletionRequestGate(
             user: user,
             child: BanGate(
               user: user,
               child: ContentRestrictionGate(
                 user: user,
-                child: LegalAcceptanceGate(user: user, child: child),
+                child: LegalAcceptanceGate(
+                  user: user,
+                  child: OnboardingHelpGate(userId: user.uid, child: child),
+                ),
               ),
             ),
           );
         },
       );
 }
+
+class OnboardingHelpGate extends StatefulWidget {
+  const OnboardingHelpGate({
+    super.key,
+    required this.userId,
+    required this.child,
+  });
+
+  final String userId;
+  final Widget child;
+
+  @override
+  State<OnboardingHelpGate> createState() => _OnboardingHelpGateState();
+}
+
+class _OnboardingHelpGateState extends State<OnboardingHelpGate> {
+  bool _finishedForSession = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_finishedForSession) return widget.child;
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const _LoadingPage();
+        final showHelp = snapshot.data!.data()?['showOnboardingHelp'] as bool?;
+        if (showHelp != true) return widget.child;
+        return OnboardingHelpPage(
+          onFinished: (neverShowAgain) async {
+            if (neverShowAgain) {
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(widget.userId)
+                  .update({'showOnboardingHelp': false});
+            }
+            if (mounted) setState(() => _finishedForSession = true);
+          },
+        );
+      },
+    );
+  }
+}
+
+class OnboardingHelpPage extends StatefulWidget {
+  const OnboardingHelpPage({super.key, this.onFinished});
+
+  final Future<void> Function(bool neverShowAgain)? onFinished;
+
+  @override
+  State<OnboardingHelpPage> createState() => _OnboardingHelpPageState();
+}
+
+class _OnboardingHelpPageState extends State<OnboardingHelpPage> {
+  final _controller = PageController();
+  int _page = 0;
+  bool _neverShowAgain = false;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = _onboardingPages(
+      Localizations.localeOf(context).languageCode,
+    );
+    final lastPage = _page == pages.length - 1;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr(context, 'Nápověda')),
+        automaticallyImplyLeading: widget.onFinished == null,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: pages.length,
+                onPageChanged: (value) => setState(() => _page = value),
+                itemBuilder: (context, index) {
+                  final page = pages[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(page.$1, size: 72, color: const Color(0xFF0A6371)),
+                        const SizedBox(height: 28),
+                        Text(
+                          page.$2,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          page.$3,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                pages.length,
+                (index) => Container(
+                  width: index == _page ? 22 : 8,
+                  height: 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: index == _page
+                        ? const Color(0xFF0A6371)
+                        : Colors.black26,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            if (lastPage && widget.onFinished != null)
+              CheckboxListTile(
+                value: _neverShowAgain,
+                onChanged: _saving
+                    ? null
+                    : (value) =>
+                          setState(() => _neverShowAgain = value ?? false),
+                title: Text(_onboardingNeverAgain(context)),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              child: Row(
+                children: [
+                  if (_page > 0)
+                    TextButton(
+                      onPressed: _saving
+                          ? null
+                          : () => _controller.previousPage(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOut,
+                            ),
+                      child: Text(_onboardingBack(context)),
+                    ),
+                  const Spacer(),
+                  FilledButton(
+                    onPressed: _saving
+                        ? null
+                        : () async {
+                            if (!lastPage) {
+                              await _controller.nextPage(
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              );
+                              return;
+                            }
+                            if (widget.onFinished == null) {
+                              if (mounted) Navigator.pop(context);
+                              return;
+                            }
+                            setState(() => _saving = true);
+                            try {
+                              await widget.onFinished!(_neverShowAgain);
+                            } finally {
+                              if (mounted) setState(() => _saving = false);
+                            }
+                          },
+                    child: Text(
+                      lastPage
+                          ? _onboardingFinish(context)
+                          : _onboardingNext(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+List<(IconData, String, String)> _onboardingPages(String language) {
+  final english = [
+    (
+      Icons.location_on_outlined,
+      'Your surroundings',
+      'ShoutOut uses your location to show nearby posts. Your exact position is not displayed publicly.',
+    ),
+    (
+      Icons.tune_rounded,
+      'Filters',
+      'Adjust distance and categories to see what matters to you. Your filters remain selected while you use the app.',
+    ),
+    (
+      Icons.campaign_outlined,
+      'Create a Shout',
+      'Write a short local post, choose its category and publish it from your actual location.',
+    ),
+    (
+      Icons.lock_outline,
+      'Privacy',
+      'Use comments or private replies. Your nickname and current avatar represent you throughout the app.',
+    ),
+    (
+      Icons.flag_outlined,
+      'Keep the community safe',
+      'Report harmful content from its menu. Moderators review reports without revealing who submitted them.',
+    ),
+  ];
+  if (language != 'cs') return english;
+  return [
+    (
+      Icons.location_on_outlined,
+      'Tvoje okolí',
+      'ShoutOut používá polohu k zobrazení příspěvků v okolí. Přesná poloha se veřejně nezobrazuje.',
+    ),
+    (
+      Icons.tune_rounded,
+      'Filtry',
+      'Nastav si vzdálenost a kategorie podle toho, co tě zajímá. Během používání aplikace zůstávají filtry zachované.',
+    ),
+    (
+      Icons.campaign_outlined,
+      'Vytvoření Shoutu',
+      'Napiš krátký místní příspěvek, vyber kategorii a publikuj ho ze své skutečné polohy.',
+    ),
+    (
+      Icons.lock_outline,
+      'Soukromí',
+      'Používej komentáře nebo soukromé odpovědi. V celé aplikaci tě zastupuje přezdívka a aktuální avatar.',
+    ),
+    (
+      Icons.flag_outlined,
+      'Bezpečná komunita',
+      'Škodlivý obsah nahlásíš z jeho nabídky. Moderátoři hlášení prověří, aniž by zveřejnili autora hlášení.',
+    ),
+  ];
+}
+
+String _onboardingNeverAgain(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'cs'
+    ? 'Znovu nezobrazovat'
+    : 'Do not show again';
+
+String _onboardingBack(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'cs' ? 'Zpět' : 'Back';
+
+String _onboardingNext(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'cs' ? 'Další' : 'Next';
+
+String _onboardingFinish(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'cs'
+    ? 'Dokončit'
+    : 'Finish';
 
 class DeletionRequestGate extends StatelessWidget {
   const DeletionRequestGate({
@@ -280,6 +561,7 @@ class _SignInPageState extends State<SignInPage> {
   bool _confirmPasswordValidationActive = false;
   bool _register = false;
   bool _busy = false;
+  String? _authProgress;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -586,6 +868,17 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                               ),
                             ),
+                            if (_busy && _authProgress != null) ...[
+                              const SizedBox(height: 8),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  tr(context, _authProgress!),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
                             TextButton(
                               onPressed: _busy ? null : _toggleRegistration,
                               child: Text(
@@ -597,6 +890,21 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                               ),
                             ),
+                            if (_register)
+                              OutlinedButton.icon(
+                                onPressed: _busy
+                                    ? null
+                                    : () => Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              const BusinessRegistrationPage(),
+                                        ),
+                                      ),
+                                icon: const Icon(Icons.storefront_outlined),
+                                label: Text(
+                                  tr(context, 'Vytvořit business účet'),
+                                ),
+                              ),
                             Row(
                               children: [
                                 Expanded(child: Divider()),
@@ -696,27 +1004,57 @@ class _SignInPageState extends State<SignInPage> {
       return;
     }
     if (_focusFirstMissingField()) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _authProgress = _register ? 'Vytvářím účet…' : 'Přihlašuji…';
+    });
+    final stopwatch = Stopwatch()..start();
     try {
       if (_register) {
         final credential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
               email: _email.text.trim(),
               password: _password.text,
-            );
+            )
+            .timeout(const Duration(seconds: 20));
+        _logAuthTiming('create-account', stopwatch);
         TextInput.finishAutofillContext(shouldSave: true);
-        await credential.user?.sendEmailVerification();
-      } else {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _email.text.trim(),
-          password: _password.text,
+        stopwatch.reset();
+        if (mounted) {
+          setState(() => _authProgress = 'Odesílám ověřovací e-mail…');
+        }
+        await credential.user?.sendEmailVerification().timeout(
+          const Duration(seconds: 20),
         );
+        _logAuthTiming('send-verification-email', stopwatch);
+      } else {
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+              email: _email.text.trim(),
+              password: _password.text,
+            )
+            .timeout(const Duration(seconds: 20));
+        _logAuthTiming('sign-in', stopwatch);
         TextInput.finishAutofillContext(shouldSave: true);
+      }
+    } on TimeoutException {
+      if (mounted) {
+        _message(
+          tr(
+            context,
+            'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.',
+          ),
+        );
       }
     } on FirebaseAuthException catch (error) {
       if (mounted) _message(_authMessage(error.code));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _authProgress = null;
+        });
+      }
     }
   }
 
@@ -731,10 +1069,17 @@ class _SignInPageState extends State<SignInPage> {
       return;
     }
     setState(() => _busy = true);
+    final stopwatch = Stopwatch()..start();
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _email.text.trim(),
-      );
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _email.text.trim())
+          .timeout(const Duration(seconds: 20));
+      _logAuthTiming('send-password-reset', stopwatch);
+      if (mounted) _passwordResetConfirmation();
+    } on TimeoutException {
+      // Keep the response neutral even on a timeout: the backend may have
+      // accepted the request before the client stopped waiting.
+      _logAuthTiming('send-password-reset-timeout', stopwatch);
       if (mounted) _passwordResetConfirmation();
     } on FirebaseAuthException catch (error) {
       if (mounted) {
@@ -863,19 +1208,76 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   );
   Future<void> _check() async {
     setState(() => _busy = true);
-    await widget.user.reload();
-    if (mounted) setState(() => _busy = false);
+    final stopwatch = Stopwatch()..start();
+    try {
+      await widget.user.reload().timeout(const Duration(seconds: 20));
+      _logAuthTiming('reload-verified-user', stopwatch);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user?.emailVerified != true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                tr(
+                  context,
+                  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.',
+                ),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+      stopwatch.reset();
+      // Firestore Rules read email_verified from the ID token. Reloading the
+      // user alone can leave the old token cached and make the next gate wait
+      // or fail with permission-denied.
+      await user!.getIdToken(true).timeout(const Duration(seconds: 20));
+      _logAuthTiming('refresh-verified-token', stopwatch);
+    } on TimeoutException {
+      _showVerificationError(
+        'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.',
+      );
+    } on FirebaseAuthException {
+      _showVerificationError(
+        'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.',
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _resend() async {
     setState(() => _busy = true);
-    await widget.user.sendEmailVerification();
-    if (mounted) {
-      setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr(context, 'Ověřovací e-mail byl odeslán.'))),
+    final stopwatch = Stopwatch()..start();
+    try {
+      await widget.user.sendEmailVerification().timeout(
+        const Duration(seconds: 20),
       );
+      _logAuthTiming('resend-verification-email', stopwatch);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr(context, 'Ověřovací e-mail byl odeslán.'))),
+        );
+      }
+    } on TimeoutException {
+      _showVerificationError(
+        'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.',
+      );
+    } on FirebaseAuthException {
+      _showVerificationError(
+        'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.',
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _showVerificationError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(tr(context, message))));
   }
 
   Future<void> _startOver() async {
@@ -1211,8 +1613,16 @@ class _NicknamePageState extends State<NicknamePage> {
             'nicknameChangeCount': 0,
             'emailVerified': true,
             'language': initialLanguage,
+            'themeMode': 'system',
+            'showOnboardingHelp': true,
             ..._avatarStyle.toFirestore(),
           },
+        );
+        transaction.set(
+          FirebaseFirestore.instance
+              .collection('publicProfiles')
+              .doc(widget.user.uid),
+          _avatarStyle.publicProfileData(name),
         );
       });
     } on StateError catch (error) {
@@ -1279,4 +1689,38 @@ class _LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Scaffold(body: Center(child: CircularProgressIndicator()));
+}
+
+class _GateLoadError extends StatelessWidget {
+  const _GateLoadError();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_outlined, size: 56),
+            const SizedBox(height: 12),
+            Text(
+              tr(
+                context,
+                'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+void _logAuthTiming(String step, Stopwatch stopwatch) {
+  assert(() {
+    debugPrint('Auth timing: $step ${stopwatch.elapsedMilliseconds} ms');
+    return true;
+  }());
 }

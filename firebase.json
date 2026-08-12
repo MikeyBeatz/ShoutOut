@@ -23,6 +23,9 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "functions": {
     "source": "functions"
   },
@@ -32,6 +35,44 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/flutter_bootstrap.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/main.dart.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/version.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
     ],
     "rewrites": [
       {

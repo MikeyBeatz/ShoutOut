@@ -29,6 +29,18 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "clientErrorLogs",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "technicalLogAccessAudits",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "comments",
       "fieldPath": "authorId",
       "indexes": [

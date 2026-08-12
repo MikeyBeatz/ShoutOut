@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
+  'Sledované': 'Đang theo dõi',
+  'Profily': 'Hồ sơ',
+  'Sledovat': 'Theo dõi',
+  'Sledováno': 'Đang theo dõi',
+  'Nahlásit účet': 'Báo cáo tài khoản',
+  'Aktivní Shouty': 'Shout đang hoạt động',
+  'Zatím nesleduješ žádné profily.': 'Bạn chưa theo dõi hồ sơ nào.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'Tài khoản này hiện không có Shout nào đang hoạt động.',
+  'Shouty se nepodařilo načíst.': 'Không thể tải các Shout.',
+  'Důvod': 'Lý do',
   'Oznámení': 'Thông báo',
   'Přidat shout': 'Thêm vào shout',
   'Co se děje v okolí?': 'Điều gì đang xảy ra gần đó?',
@@ -102,6 +113,9 @@ const vietnameseTranslations = <String, String>{
   'Zobrazit heslo': 'Hiển thị mật khẩu',
   'Skrýt heslo': 'Ẩn mật khẩu',
   'Vytvořit účet': 'Tạo tài khoản',
+  'Vytvářím účet…': 'Đang tạo tài khoản…',
+  'Přihlašuji…': 'Đang đăng nhập…',
+  'Odesílám ověřovací e-mail…': 'Đang gửi email xác minh…',
   'Přihlásit se': 'Đăng nhập',
   'Přihlášení': 'Đăng nhập',
   'Registrace': 'Tạo tài khoản',
@@ -159,6 +173,7 @@ const vietnameseTranslations = <String, String>{
   'Odpovídáš': 'Trả lời',
   'Odkazovaný komentář už není dostupný.':
       'Nhận xét được liên kết không còn tồn tại.',
+  'Tento Shout už není dostupný.': 'Shout này không còn khả dụng.',
   'Shout s nízkým hodnocením': 'Đánh giá thấp shout',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Cái này shout đã bị sụp đổ vì xếp hạng tiêu cực mạnh mẽ.',
@@ -178,6 +193,36 @@ const vietnameseTranslations = <String, String>{
   'Odpovědi na komentáře': 'Trả lời bình luận',
   'Reakce na mé Shouty': 'Phản ứng với của tôi shouts',
   'Nové Shouty v okolí': 'Mới shouts gần đó',
+  'Soukromé odpovědi': 'Phản hồi riêng tư',
+  'Nové Shouty sledovaných profilů': 'Shout mới từ hồ sơ đang theo dõi',
+  'Oznámení se nepodařilo načíst.': 'Không thể tải thông báo.',
+  'Označit vše jako přečtené': 'Đánh dấu tất cả là đã đọc',
+  'Někdo': 'Ai đó',
+  'reagoval na tvůj Shout.': 'đã phản ứng với Shout của bạn.',
+  'reagoval na tvůj komentář.': 'đã phản ứng với bình luận của bạn.',
+  'dal like tvému Shoutu': 'đã thích Shout của bạn',
+  'dal dislike tvému Shoutu': 'đã không thích Shout của bạn',
+  'uživatelů dalo like tvému Shoutu': 'người đã thích Shout của bạn',
+  'uživatelů dalo dislike tvému Shoutu': 'người đã không thích Shout của bạn',
+  'okomentoval tvůj Shout': 'đã bình luận Shout của bạn',
+  'uživatelů komentovalo tvůj Shout': 'người đã bình luận Shout của bạn',
+  'dal like tvému komentáři': 'đã thích bình luận của bạn trong',
+  'dal dislike tvému komentáři': 'đã không thích bình luận của bạn trong',
+  'uživatelů dalo like tvému komentáři':
+      'người đã thích bình luận của bạn trong',
+  'uživatelů dalo dislike tvému komentáři':
+      'người đã không thích bình luận của bạn trong',
+  'odpověděl na tvůj komentář': 'đã trả lời bình luận của bạn trong',
+  'uživatelů odpovědělo na tvůj komentář':
+      'người đã trả lời bình luận của bạn trong',
+  'ti poslal soukromou odpověď': 'đã gửi phản hồi riêng cho bạn trong',
+  'uživatelů ti poslalo soukromou odpověď':
+      'người đã gửi phản hồi riêng cho bạn trong',
+  'okomentoval tvůj Shout.': 'đã bình luận về Shout của bạn.',
+  'odpověděl na tvůj komentář.': 'đã trả lời bình luận của bạn.',
+  'ti poslal soukromou odpověď.': 'đã gửi cho bạn một phản hồi riêng tư.',
+  'zveřejnil nový Shout.': 'đã đăng một Shout mới.',
+  'Nové oznámení': 'Thông báo mới',
   'Nápověda': 'Giúp đỡ',
   'Moderace': 'Kiểm duyệt',
   'Soukromé': 'Riêng tư',
@@ -266,4 +311,31 @@ const vietnameseTranslations = <String, String>{
   'Blokovat': 'Khối',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Cho phép truy cập vị trí để xuất bản một Shout.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Bật dịch vụ vị trí và thử đăng lại Shout.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Cho phép ứng dụng truy cập vị trí trong cài đặt thiết bị.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Không thể xác định vị trí kịp thời. Hãy di chuyển đến nơi thoáng và thử lại.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Không thể xác định vị trí. Hãy kiểm tra kết nối và dịch vụ vị trí.',
+  'Otevřít nastavení': 'Mở cài đặt',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'Không thể đăng Shout do quyền của tài khoản. Hãy kiểm tra xác minh email và trạng thái tài khoản.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'Dịch vụ tạm thời không khả dụng. Hãy kiểm tra kết nối và thử lại.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Kết nối đăng nhập mất quá nhiều thời gian. Hãy kiểm tra Internet và thử lại.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'Email chưa được xác minh. Sau khi mở liên kết, hãy đợi một chút rồi kiểm tra lại.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Kiểm tra xác minh mất quá nhiều thời gian. Hãy kiểm tra Internet và thử lại.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Không thể tải trạng thái xác minh. Hãy kiểm tra Internet và thử lại.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Gửi email xác minh mất quá nhiều thời gian. Hãy kiểm tra Internet và thử lại.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'Không thể gửi email xác minh. Hãy thử lại sau.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'Không thể tải hồ sơ. Hãy kiểm tra kết nối và khởi động lại ứng dụng.',
 };

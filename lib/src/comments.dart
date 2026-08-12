@@ -78,26 +78,40 @@ class _CommentTileState extends State<CommentTile> {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 16,
-                      child: Icon(Icons.person_outline),
-                    ),
-                    const SizedBox(width: 8),
                     Expanded(
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 6,
-                        children: [
-                          Text(
-                            data['authorNickname'] as String,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          if (data['authorId'] == widget.shoutAuthorId)
-                            Chip(
-                              label: Text(tr(context, 'Autor')),
-                              visualDensity: VisualDensity.compact,
+                      child: PublicIdentityBuilder(
+                        userId: data['authorId'] as String,
+                        fallbackNickname: data['authorNickname'] as String,
+                        fallbackAvatarStyle: AvatarStyle.fallback,
+                        builder: (context, identity) => Row(
+                          children: [
+                            AvatarImage(
+                              avatarId: identity.avatarStyle.avatarId,
+                              style: identity.avatarStyle,
+                              radius: 16,
                             ),
-                        ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 6,
+                                children: [
+                                  Text(
+                                    identity.nickname,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  if (data['authorId'] == widget.shoutAuthorId)
+                                    Chip(
+                                      label: Text(tr(context, 'Autor')),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     if (ownComment)
@@ -223,6 +237,22 @@ class _CommentTileState extends State<CommentTile> {
     final firestore = FirebaseFirestore.instance;
     final reference = widget.comment.reference.collection('reactions').doc(uid);
     final shoutReference = widget.comment.reference.parent.parent!;
+    final commentAuthorId = widget.comment.data()['authorId'] as String;
+    final actorProfileReference = firestore
+        .collection('publicProfiles')
+        .doc(uid);
+    final notificationSettingsReference = firestore
+        .collection('users')
+        .doc(commentAuthorId)
+        .collection('settings')
+        .doc('notifications');
+    final notificationReference = firestore
+        .collection('users')
+        .doc(commentAuthorId)
+        .collection('notifications')
+        .doc(
+          'commentReaction_${type}_${shoutReference.id}_${widget.comment.id}',
+        );
     final rateReference = _rateLimitReference('interaction');
     final eventId = _commentReactionEventId(
       shoutReference.id,
@@ -232,7 +262,14 @@ class _CommentTileState extends State<CommentTile> {
       await firestore.runTransaction((transaction) async {
         final rateSnapshot = await transaction.get(rateReference);
         final commentSnapshot = await transaction.get(widget.comment.reference);
+        final shoutSnapshot = await transaction.get(shoutReference);
         final reactionSnapshot = await transaction.get(reference);
+        final actorProfileSnapshot = commentAuthorId == uid
+            ? null
+            : await transaction.get(actorProfileReference);
+        final notificationSettingsSnapshot = commentAuthorId == uid
+            ? null
+            : await transaction.get(notificationSettingsReference);
         final currentType = reactionSnapshot.data()?['type'] as String?;
         var likes = commentSnapshot.data()?['likesCount'] as int? ?? 0;
         var dislikes = commentSnapshot.data()?['dislikesCount'] as int? ?? 0;
@@ -263,6 +300,24 @@ class _CommentTileState extends State<CommentTile> {
               window: _interactionRateWindow,
             ),
           );
+        if (currentType != type &&
+            commentAuthorId != uid &&
+            actorProfileSnapshot?.exists == true &&
+            (notificationSettingsSnapshot?.data()?['reactions'] as bool? ??
+                true)) {
+          transaction.set(notificationReference, {
+            'kind': 'commentReaction',
+            'actorId': uid,
+            'actorNickname': actorProfileSnapshot!.data()!['nickname'],
+            'targetShoutId': shoutReference.id,
+            'targetTitle': shoutSnapshot.data()!['title'],
+            'targetCommentId': widget.comment.id,
+            'reactionType': type,
+            'eventCount': FieldValue.increment(1),
+            'createdAt': FieldValue.serverTimestamp(),
+            'readAt': null,
+          }, SetOptions(merge: true));
+        }
       });
     } on FirebaseException {
       _showWriteFailure();

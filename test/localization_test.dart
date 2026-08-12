@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/l10n/app_localizations.dart';
 import 'package:shoutout/l10n/legal_translations.dart';
 import 'package:shoutout/l10n/text.dart';
+import 'package:shoutout/l10n/business_text.dart';
 
 void main() {
   test('supports all configured languages', () {
@@ -11,6 +12,35 @@ void main() {
       containsAll(<String>['cs', 'de', 'en', 'pl', 'sk', 'uk', 'vi']),
     );
   });
+
+  for (final expectation in <(String, String)>[
+    ('cs', 'Pobočky'),
+    ('en', 'Branches'),
+    ('de', 'Filialen'),
+    ('pl', 'Oddziały'),
+    ('sk', 'Pobočky'),
+    ('uk', 'Філії'),
+    ('vi', 'Chi nhánh'),
+  ]) {
+    testWidgets('translates Business UI to ${expectation.$1}', (tester) async {
+      late BuildContext localizedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(expectation.$1),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) {
+              localizedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(businessTr(localizedContext, 'Pobočky'), expectation.$2);
+      expect(businessTr(localizedContext, 'Až 48 hodin'), isNotEmpty);
+    });
+  }
 
   test('new languages have complete legal documents', () {
     for (final document in <List<(String, String)>>[

@@ -6,6 +6,7 @@
     "reconcile:data": "node reconcile_counters.mjs",
     "set:role": "node set_role.mjs",
     "backfill:geography": "node backfill_shout_geography.mjs",
+    "backfill:public-profiles": "node backfill_public_profiles.mjs",
     "reset:integration": "node reset_integration_scenario.mjs",
     "inspect:integration": "node inspect_integration_scenario.mjs",
     "verify:moderator-client": "node verify_moderator_client_access.mjs",

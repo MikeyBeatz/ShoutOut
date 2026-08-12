@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
+  'Sledované': 'Відстежувані',
+  'Profily': 'Профілі',
+  'Sledovat': 'Стежити',
+  'Sledováno': 'Відстежується',
+  'Nahlásit účet': 'Поскаржитися на акаунт',
+  'Aktivní Shouty': 'Активні Shout-и',
+  'Zatím nesleduješ žádné profily.': 'Ви ще не стежите за профілями.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'Цей акаунт зараз не має активних Shout-ів.',
+  'Shouty se nepodařilo načíst.': 'Не вдалося завантажити Shout-и.',
+  'Důvod': 'Причина',
   'Oznámení': 'Сповіщення',
   'Přidat shout': 'Додати shout',
   'Co se děje v okolí?': 'Що відбувається поруч?',
@@ -102,6 +113,9 @@ const ukrainianTranslations = <String, String>{
   'Zobrazit heslo': 'Показати пароль',
   'Skrýt heslo': 'Приховати пароль',
   'Vytvořit účet': 'Створити акаунт',
+  'Vytvářím účet…': 'Створення акаунта…',
+  'Přihlašuji…': 'Вхід…',
+  'Odesílám ověřovací e-mail…': 'Надсилання листа для підтвердження…',
   'Přihlásit se': 'Увійдіть',
   'Přihlášení': 'Увійдіть',
   'Registrace': 'Створити акаунт',
@@ -161,6 +175,7 @@ const ukrainianTranslations = <String, String>{
   'Odpovídáš': 'Відповідаючи на',
   'Odkazovaný komentář už není dostupný.':
       'Пов’язаний коментар більше не доступний.',
+  'Tento Shout už není dostupný.': 'Цей Shout більше недоступний.',
   'Shout s nízkým hodnocením': 'Низький рейтинг shout',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Це shout було згорнуто через сильно негативні рейтинги.',
@@ -180,6 +195,36 @@ const ukrainianTranslations = <String, String>{
   'Odpovědi na komentáře': 'Відповіді на коментарі',
   'Reakce na mé Shouty': 'Реакції на мої shouts',
   'Nové Shouty v okolí': 'Новий shouts неподалік',
+  'Soukromé odpovědi': 'Приватні відповіді',
+  'Nové Shouty sledovaných profilů': 'Нові Shout від відстежуваних профілів',
+  'Oznámení se nepodařilo načíst.': 'Не вдалося завантажити сповіщення.',
+  'Označit vše jako přečtené': 'Позначити все як прочитане',
+  'Někdo': 'Хтось',
+  'reagoval na tvůj Shout.': 'відреагував на ваш Shout.',
+  'reagoval na tvůj komentář.': 'відреагував на ваш коментар.',
+  'dal like tvému Shoutu': 'вподобав ваш Shout',
+  'dal dislike tvému Shoutu': 'не вподобав ваш Shout',
+  'uživatelů dalo like tvému Shoutu': 'користувачів вподобали ваш Shout',
+  'uživatelů dalo dislike tvému Shoutu': 'користувачів не вподобали ваш Shout',
+  'okomentoval tvůj Shout': 'прокоментував ваш Shout',
+  'uživatelů komentovalo tvůj Shout': 'користувачів прокоментували ваш Shout',
+  'dal like tvému komentáři': 'вподобав ваш коментар до',
+  'dal dislike tvému komentáři': 'не вподобав ваш коментар до',
+  'uživatelů dalo like tvému komentáři':
+      'користувачів вподобали ваш коментар до',
+  'uživatelů dalo dislike tvému komentáři':
+      'користувачів не вподобали ваш коментар до',
+  'odpověděl na tvůj komentář': 'відповів на ваш коментар до',
+  'uživatelů odpovědělo na tvůj komentář':
+      'користувачів відповіли на ваш коментар до',
+  'ti poslal soukromou odpověď': 'надіслав вам приватну відповідь до',
+  'uživatelů ti poslalo soukromou odpověď':
+      'користувачів надіслали вам приватні відповіді до',
+  'okomentoval tvůj Shout.': 'прокоментував ваш Shout.',
+  'odpověděl na tvůj komentář.': 'відповів на ваш коментар.',
+  'ti poslal soukromou odpověď.': 'надіслав вам приватну відповідь.',
+  'zveřejnil nový Shout.': 'опублікував новий Shout.',
+  'Nové oznámení': 'Нове сповіщення',
   'Nápověda': 'Довідка',
   'Moderace': 'Модерація',
   'Soukromé': 'Приватний',
@@ -269,4 +314,31 @@ const ukrainianTranslations = <String, String>{
   'Blokovat': 'Блокувати',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Дозволити доступ до місцезнаходження для публікації a Shout.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Увімкніть служби геолокації та спробуйте опублікувати Shout знову.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Дозвольте програмі доступ до геолокації в налаштуваннях пристрою.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Не вдалося вчасно визначити місцезнаходження. Перейдіть на відкриту місцевість і повторіть спробу.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Не вдалося визначити місцезнаходження. Перевірте з’єднання та служби геолокації.',
+  'Otevřít nastavení': 'Відкрити налаштування',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'Не вдалося опублікувати Shout через дозволи облікового запису. Перевірте підтвердження електронної пошти та стан облікового запису.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'Служба тимчасово недоступна. Перевірте з’єднання та повторіть спробу.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Підключення для входу триває надто довго. Перевірте інтернет і повторіть спробу.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'Електронну пошту ще не підтверджено. Після відкриття посилання трохи зачекайте й перевірте знову.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Перевірка підтвердження триває надто довго. Перевірте інтернет і повторіть спробу.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Не вдалося завантажити підтвердження. Перевірте інтернет і повторіть спробу.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Надсилання листа підтвердження триває надто довго. Перевірте інтернет і повторіть спробу.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'Не вдалося надіслати лист підтвердження. Спробуйте пізніше.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'Не вдалося завантажити профіль. Перевірте з’єднання та перезапустіть програму.',
 };

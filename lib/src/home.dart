@@ -7,13 +7,26 @@ class ShoutOutHome extends StatefulWidget {
   State<ShoutOutHome> createState() => _ShoutOutHomeState();
 }
 
+enum _LocationRefreshResult {
+  available,
+  servicesDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+  timedOut,
+  unavailable,
+}
+
 class _ShoutOutHomeState extends State<ShoutOutHome> {
   final List<Shout> _shouts = [];
+  final FeedFilters _feedFilters = FeedFilters();
   Set<String> _blockedUserIds = {};
+  Set<String> _followedUserIds = {};
   Position? _currentPosition;
   bool _isLoadingShouts = true;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _shoutSubscription;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _blockedSubscription;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+  _followingSubscription;
 
   int _tab = 0;
   late final Timer _expiryTimer;
@@ -63,26 +76,48 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             });
           }
         });
+    _followingSubscription = firestore
+        .collection('users')
+        .doc(uid)
+        .collection('following')
+        .limit(_followedProfilesPageSize)
+        .snapshots()
+        .listen((snapshot) {
+          if (mounted) {
+            setState(() {
+              _followedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
+            });
+          }
+        });
   }
 
-  Future<void> _refreshLocation() async {
+  Future<_LocationRefreshResult> _refreshLocation({
+    Duration timeout = const Duration(seconds: 8),
+    LocationAccuracy accuracy = LocationAccuracy.medium,
+  }) async {
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) return;
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        return _LocationRefreshResult.servicesDisabled;
+      }
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return;
+      if (permission == LocationPermission.deniedForever) {
+        return _LocationRefreshResult.permissionDeniedForever;
+      }
+      if (permission == LocationPermission.denied) {
+        return _LocationRefreshResult.permissionDenied;
       }
       _currentPosition = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-        ),
-      ).timeout(const Duration(seconds: 4));
+        locationSettings: LocationSettings(accuracy: accuracy),
+      ).timeout(timeout);
+      return _LocationRefreshResult.available;
+    } on TimeoutException {
+      return _LocationRefreshResult.timedOut;
     } catch (_) {
       // The feed can still be used without location permission.
+      return _LocationRefreshResult.unavailable;
     }
   }
 
@@ -91,6 +126,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     _expiryTimer.cancel();
     _shoutSubscription?.cancel();
     _blockedSubscription?.cancel();
+    _followingSubscription?.cancel();
     super.dispose();
   }
 
@@ -169,13 +205,29 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   }
 
   Future<void> _addShout(Shout shout) async {
-    if (_currentPosition == null) await _refreshLocation();
-    final position = _currentPosition;
-    if (position == null) {
-      throw StateError('location-unavailable');
-    }
     final user = FirebaseAuth.instance.currentUser!;
     final firestore = FirebaseFirestore.instance;
+    final roleSnapshot = await firestore
+        .collection('accountRoles')
+        .doc(user.uid)
+        .get();
+    final role = AccountRole.fromData(roleSnapshot.data());
+    final isBusiness = role == AccountRole.business;
+    Position? position;
+    if (!isBusiness) {
+      // Personal Shouts always use a fresh device position.
+      final locationResult = await _refreshLocation(
+        timeout: const Duration(seconds: 15),
+        accuracy: LocationAccuracy.high,
+      );
+      position = _currentPosition;
+      if (locationResult != _LocationRefreshResult.available ||
+          position == null) {
+        throw StateError('location-${locationResult.name}');
+      }
+    } else if (shout.businessLocationId == null) {
+      throw StateError('business-location-required');
+    }
     final shoutReference = firestore.collection('shouts').doc(shout.id);
     final profileReference = firestore.collection('users').doc(user.uid);
     final rateReference = _rateLimitReference('shout');
@@ -183,9 +235,71 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     await firestore.runTransaction((transaction) async {
       final profile = await transaction.get(profileReference);
       final rateSnapshot = await transaction.get(rateReference);
-      final nickname = profile.data()!['nickname'] as String;
+      final rateData = rateSnapshot.data();
+      final lastShoutAt = rateData?['lastAt'] as Timestamp?;
+      final windowStartedAt = rateData?['windowStartedAt'] as Timestamp?;
+      final rateCount = rateData?['count'] as int? ?? 0;
+      final now = DateTime.now().toUtc();
+      final shoutCooldown = isBusiness
+          ? _businessShoutCooldown
+          : _shoutCooldown;
+      final shoutDailyMaximum = isBusiness
+          ? _businessShoutDailyMaximum
+          : _shoutDailyMaximum;
+      if (lastShoutAt != null &&
+          now.isBefore(lastShoutAt.toDate().toUtc().add(shoutCooldown))) {
+        throw StateError('rate-shout-cooldown');
+      }
+      if (windowStartedAt != null &&
+          now.isBefore(
+            windowStartedAt.toDate().toUtc().add(_shoutRateWindow),
+          ) &&
+          rateCount >= shoutDailyMaximum) {
+        throw StateError('rate-shout-daily-limit');
+      }
+      var nickname = profile.data()!['nickname'] as String;
+      GeoPoint publicationLocation;
+      String publicationGeohash;
+      final data = <String, dynamic>{};
+      if (isBusiness) {
+        final businessReference = firestore
+            .collection('businessProfiles')
+            .doc(user.uid);
+        final locationReference = businessReference
+            .collection('locations')
+            .doc(shout.businessLocationId);
+        final business = await transaction.get(businessReference);
+        final location = await transaction.get(locationReference);
+        final businessData = business.data();
+        final locationData = location.data();
+        if (businessData == null ||
+            locationData == null ||
+            locationData['active'] != true ||
+            locationData['deleted'] == true ||
+            locationData['geocodingStatus'] != 'verified' ||
+            locationData['location'] is! GeoPoint ||
+            locationData['geohash'] is! String) {
+          throw StateError('business-location-unavailable');
+        }
+        nickname =
+            '${businessData['displayName']} – '
+            '${locationData['displayName']}';
+        publicationLocation = locationData['location'] as GeoPoint;
+        publicationGeohash = locationData['geohash'] as String;
+        data['businessLocationId'] = shout.businessLocationId;
+      } else {
+        publicationLocation = GeoPoint(
+          publicLocationCoordinate(position!.latitude),
+          publicLocationCoordinate(position.longitude),
+        );
+        publicationGeohash = encodeGeohash(
+          publicationLocation.latitude,
+          publicationLocation.longitude,
+        );
+      }
       transaction
         ..set(shoutReference, {
+          ...data,
           'authorId': user.uid,
           'authorNickname': nickname,
           'avatarId': profile.data()!['avatarId'],
@@ -195,14 +309,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
           'title': shout.title,
           'text': shout.text,
           'categories': shout.categories,
-          'location': GeoPoint(
-            _publicLocationCoordinate(position.latitude),
-            _publicLocationCoordinate(position.longitude),
-          ),
-          'geohash': encodeGeohash(
-            _publicLocationCoordinate(position.latitude),
-            _publicLocationCoordinate(position.longitude),
-          ),
+          'location': publicationLocation,
+          'geohash': publicationGeohash,
           'createdAt': FieldValue.serverTimestamp(),
           'expiresAt': Timestamp.fromDate(DateTime.now().add(duration)),
           'status': 'active',
@@ -221,11 +329,6 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         );
     });
   }
-
-  // A public Shout is associated with an approximately one-kilometre grid,
-  // never with the author's precise device position.
-  double _publicLocationCoordinate(double coordinate) =>
-      (coordinate * 100).roundToDouble() / 100;
 
   Future<void> _deleteShout(Shout shout) async {
     await FirebaseFirestore.instance.collection('shouts').doc(shout.id).update({
@@ -286,6 +389,18 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     final firestore = FirebaseFirestore.instance;
     final shoutRef = firestore.collection('shouts').doc(shout.id);
     final reactionRef = shoutRef.collection('reactions').doc(uid);
+    final actorProfileRef = firestore.collection('publicProfiles').doc(uid);
+    final notificationSettingsRef = firestore
+        .collection('users')
+        .doc(shout.authorId)
+        .collection('settings')
+        .doc('notifications');
+    final nextType = like ? 'like' : 'dislike';
+    final notificationRef = firestore
+        .collection('users')
+        .doc(shout.authorId)
+        .collection('notifications')
+        .doc('reaction_${nextType}_${shout.id}');
     final rateRef = _rateLimitReference('interaction');
     final eventId = _shoutReactionEventId(shout.id);
     final currentType = shout.isLiked
@@ -293,12 +408,17 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         : shout.isDisliked
         ? 'dislike'
         : null;
-    final nextType = like ? 'like' : 'dislike';
     try {
       await firestore.runTransaction((transaction) async {
         final rateSnapshot = await transaction.get(rateRef);
         final shoutSnapshot = await transaction.get(shoutRef);
         final reactionSnapshot = await transaction.get(reactionRef);
+        final actorProfileSnapshot = shout.authorId == uid
+            ? null
+            : await transaction.get(actorProfileRef);
+        final notificationSettingsSnapshot = shout.authorId == uid
+            ? null
+            : await transaction.get(notificationSettingsRef);
         final storedType = reactionSnapshot.data()?['type'] as String?;
         var likes = shoutSnapshot.data()?['likesCount'] as int? ?? 0;
         var dislikes = shoutSnapshot.data()?['dislikesCount'] as int? ?? 0;
@@ -315,6 +435,22 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             'type': nextType,
             'updatedAt': FieldValue.serverTimestamp(),
           });
+          if (shout.authorId != uid &&
+              actorProfileSnapshot?.exists == true &&
+              (notificationSettingsSnapshot?.data()?['reactions'] as bool? ??
+                  true)) {
+            transaction.set(notificationRef, {
+              'kind': 'reaction',
+              'actorId': uid,
+              'actorNickname': actorProfileSnapshot!.data()!['nickname'],
+              'targetShoutId': shout.id,
+              'targetTitle': shoutSnapshot.data()!['title'],
+              'reactionType': nextType,
+              'eventCount': FieldValue.increment(1),
+              'createdAt': FieldValue.serverTimestamp(),
+              'readAt': null,
+            }, SetOptions(merge: true));
+          }
         }
         transaction
           ..update(shoutRef, {'likesCount': likes, 'dislikesCount': dislikes})
@@ -389,13 +525,21 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             onReaction: _toggleReaction,
             onNotifications: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const NotificationsPage()),
+              MaterialPageRoute(
+                builder: (_) => NotificationsPage(
+                  onSave: _toggleSaved,
+                  onReaction: _toggleReaction,
+                ),
+              ),
             ),
+            filters: _feedFilters,
+            followedUserIds: _followedUserIds,
           ),
-          1 => SavedPage(
+          1 => FollowedPage(
             shouts: activeShouts.where((shout) => shout.isSaved).toList(),
             onSave: _toggleSaved,
             onReaction: _toggleReaction,
+            followedUserIds: _followedUserIds,
           ),
           2 => MyShoutsPage(
             shouts: _shouts
@@ -419,7 +563,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                   builder: (_) => Dialog(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 520),
-                      child: const CreateShoutSheet(),
+                      child: CreateShoutSheet(onPublish: _addShout),
                     ),
                   ),
                 );
@@ -427,30 +571,89 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                   try {
                     await _addShout(shout);
                   } on StateError catch (error) {
+                    await _recordClientError(
+                      action: 'publish_shout',
+                      error: error,
+                    );
                     if (context.mounted &&
-                        error.message == 'location-unavailable') {
+                        error.message.toString().startsWith('location-')) {
+                      final message = switch (error.message) {
+                        'location-servicesDisabled' =>
+                          'Zapni polohové služby a zkus Shout publikovat znovu.',
+                        'location-permissionDeniedForever' =>
+                          'Povol aplikaci přístup k poloze v nastavení zařízení.',
+                        'location-permissionDenied' =>
+                          'Pro publikování Shoutu povol přístup k poloze.',
+                        'location-timedOut' =>
+                          'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.',
+                        _ =>
+                          'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.',
+                      };
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(tr(context, message)),
+                          action:
+                              error.message ==
+                                  'location-permissionDeniedForever'
+                              ? SnackBarAction(
+                                  label: tr(context, 'Otevřít nastavení'),
+                                  onPressed: Geolocator.openAppSettings,
+                                )
+                              : null,
+                        ),
+                      );
+                    } else if (context.mounted &&
+                        error.message == 'business-location-unavailable') {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             tr(
                               context,
-                              'Pro publikování Shoutu povol přístup k poloze.',
+                              'Vybraná pobočka není dostupná. Zkontrolujte její adresu a aktivní stav.',
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (context.mounted &&
+                        error.message == 'rate-shout-cooldown') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            tr(
+                              context,
+                              'Mezi dvěma Shouty je potřeba počkat alespoň 2 minuty.',
+                            ),
+                          ),
+                        ),
+                      );
+                    } else if (context.mounted &&
+                        error.message == 'rate-shout-daily-limit') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            tr(
+                              context,
+                              'Byl dosažen denní limit 50 Shoutů pro tento účet.',
                             ),
                           ),
                         ),
                       );
                     }
-                  } on FirebaseException {
+                  } on FirebaseException catch (error) {
+                    await _recordClientError(
+                      action: 'publish_shout',
+                      error: error,
+                    );
                     if (context.mounted) {
+                      final message = switch (error.code) {
+                        'permission-denied' =>
+                          'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.',
+                        'unavailable' || 'deadline-exceeded' =>
+                          'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.',
+                        _ => 'Akci se nepodařilo dokončit. Zkus to znovu.',
+                      };
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            tr(
-                              context,
-                              'Akci se nepodařilo dokončit. Zkus to znovu.',
-                            ),
-                          ),
-                        ),
+                        SnackBar(content: Text(tr(context, message))),
                       );
                     }
                   }
@@ -487,7 +690,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             ),
           ),
           Material(
-            color: _shoutSurface,
+            color: Theme.of(context).colorScheme.surface,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -515,7 +718,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                     NavigationDestination(
                       icon: Icon(Icons.bookmark_outline),
                       selectedIcon: Icon(Icons.bookmark),
-                      label: tr(context, 'Uložené'),
+                      label: tr(context, 'Sledované'),
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.campaign_outlined),
@@ -547,7 +750,7 @@ class _BrandedTabBackground extends StatelessWidget {
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
     children: [
-      const ColoredBox(color: _shoutBackground),
+      ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
       IgnorePointer(
         child: ExcludeSemantics(
           child: Align(

@@ -1,7 +1,9 @@
 part of '../main.dart';
 
 class CreateShoutSheet extends StatefulWidget {
-  const CreateShoutSheet({super.key});
+  const CreateShoutSheet({super.key, this.onPublish});
+
+  final Future<void> Function(Shout shout)? onPublish;
 
   @override
   State<CreateShoutSheet> createState() => _CreateShoutSheetState();
@@ -25,16 +27,22 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
   final Set<String> _selected = {};
   int _hours = 2;
   int _minutes = 0;
+  String? _businessLocationId;
+  AccountRole? _accountRole;
+  bool _publishing = false;
+  bool _extendedBusinessDuration = false;
   late final FixedExtentScrollController _hoursController;
   late final FixedExtentScrollController _minutesController;
 
   Duration get _duration => Duration(hours: _hours, minutes: _minutes);
+  int get _maximumHours => _extendedBusinessDuration ? 48 : 24;
 
   @override
   void initState() {
     super.initState();
     _hoursController = FixedExtentScrollController(initialItem: _hours);
     _minutesController = FixedExtentScrollController(initialItem: 0);
+    _loadAccountRole();
   }
 
   @override
@@ -71,7 +79,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
               ),
               IconButton(
                 tooltip: tr(context, 'Zavřít'),
-                onPressed: () => Navigator.pop(context),
+                onPressed: _publishing ? null : () => Navigator.pop(context),
                 icon: const Icon(Icons.close),
               ),
             ],
@@ -79,6 +87,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _title,
+            textCapitalization: TextCapitalization.sentences,
             maxLength: 60,
             decoration: InputDecoration(
               labelText: tr(context, 'Nadpis'),
@@ -89,6 +98,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           const SizedBox(height: 8),
           TextField(
             controller: _text,
+            textCapitalization: TextCapitalization.sentences,
             maxLength: 220,
             maxLines: 4,
             decoration: InputDecoration(
@@ -124,6 +134,23 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                 .toList(),
           ),
           const SizedBox(height: 16),
+          if (_accountRole == AccountRole.business) ...[
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(businessTr(context, 'Až 48 hodin')),
+              subtitle: Text(
+                businessTr(
+                  context,
+                  'Prodlouží výběr platnosti Shoutu až na 48 hodin.',
+                ),
+              ),
+              value: _extendedBusinessDuration,
+              onChanged: _publishing
+                  ? null
+                  : (value) => _setExtendedBusinessDuration(value ?? false),
+            ),
+            const SizedBox(height: 4),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -152,7 +179,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                 Expanded(
                   child: _DurationWheel(
                     controller: _hoursController,
-                    values: List.generate(25, (index) => index),
+                    values: List.generate(_maximumHours + 1, (index) => index),
                     suffix: 'h',
                     onChanged: (hours) => _setDuration(hours, _minutes),
                   ),
@@ -170,17 +197,100 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
             ),
           ),
           const SizedBox(height: 16),
+          StreamBuilder<AccountRole>(
+            stream: _watchAccountRole(FirebaseAuth.instance.currentUser!.uid),
+            builder: (context, roleSnapshot) {
+              if (roleSnapshot.data != AccountRole.business) {
+                return const SizedBox.shrink();
+              }
+              final uid = FirebaseAuth.instance.currentUser!.uid;
+              return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('businessProfiles')
+                    .doc(uid)
+                    .collection('locations')
+                    .where('active', isEqualTo: true)
+                    .snapshots(),
+                builder: (context, locationSnapshot) {
+                  final locations =
+                      locationSnapshot.data?.docs
+                          .where(
+                            (document) =>
+                                document.data()['deleted'] != true &&
+                                document.data()['geocodingStatus'] ==
+                                    'verified',
+                          )
+                          .toList() ??
+                      const [];
+                  if (locations.length == 1 && _businessLocationId == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && _businessLocationId == null) {
+                        setState(
+                          () => _businessLocationId = locations.first.id,
+                        );
+                      }
+                    });
+                  }
+                  return DropdownButtonFormField<String>(
+                    initialValue:
+                        locations.any(
+                          (document) => document.id == _businessLocationId,
+                        )
+                        ? _businessLocationId
+                        : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Vybrat pobočku',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: locations
+                        .map(
+                          (document) => DropdownMenuItem(
+                            value: document.id,
+                            child: Text(
+                              document.data()['displayName'] as String,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: locations.isEmpty
+                        ? null
+                        : (value) =>
+                              setState(() => _businessLocationId = value),
+                    hint: Text(
+                      locations.isEmpty
+                          ? 'Nejdříve přidejte aktivní pobočku'
+                          : 'Zvolte pobočku',
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: _publish,
-            icon: const Icon(Icons.send_outlined),
-            label: Text(tr(context, 'Publikovat')),
+            onPressed: _publishing ? null : _publish,
+            icon: _publishing
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.send_outlined),
+            label: Text(tr(context, _publishing ? 'Publikuji…' : 'Publikovat')),
           ),
         ],
       ),
     ),
   );
 
-  void _publish() {
+  Future<void> _publish() async {
+    if (_accountRole == null) {
+      _showMessage(tr(context, 'Počkejte prosím na načtení účtu.'));
+      return;
+    }
+    if (_accountRole == AccountRole.business && _businessLocationId == null) {
+      _showMessage(tr(context, 'Pro publikování vyberte aktivní pobočku.'));
+      return;
+    }
     if (_title.text.trim().isEmpty ||
         _text.text.trim().isEmpty ||
         _selected.isEmpty) {
@@ -190,24 +300,72 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
       return;
     }
     final now = DateTime.now();
-    Navigator.pop(
-      context,
-      Shout(
-        id: now.microsecondsSinceEpoch.toString(),
-        author: 'Nový_soused',
-        title: _title.text.trim(),
-        text: _text.text.trim(),
-        categories: _selected.toList(),
-        distanceKm: 0,
-        createdAt: now,
-        expiresAt: now.add(_duration),
-      ),
+    final shout = Shout(
+      id: now.microsecondsSinceEpoch.toString(),
+      author: 'Nový_soused',
+      title: titleWithInitialCapital(_title.text),
+      text: _text.text.trim(),
+      categories: _selected.toList(),
+      distanceKm: 0,
+      createdAt: now,
+      expiresAt: now.add(_duration),
+      businessLocationId: _businessLocationId,
     );
+    if (widget.onPublish == null) {
+      Navigator.pop(context, shout);
+      return;
+    }
+    setState(() => _publishing = true);
+    try {
+      await widget.onPublish!(shout);
+      if (mounted) Navigator.pop(context);
+    } on StateError catch (error) {
+      await _recordClientError(action: 'publish_shout', error: error);
+      if (!mounted) return;
+      final message = switch (error.message) {
+        'rate-shout-cooldown' =>
+          _accountRole == AccountRole.business
+              ? 'Před dalším Shoutem počkejte jednu sekundu.'
+              : 'Mezi dvěma Shouty je potřeba počkat alespoň 2 minuty.',
+        'rate-shout-daily-limit' =>
+          _accountRole == AccountRole.business
+              ? 'Byl dosažen denní limit Business účtu.'
+              : 'Byl dosažen denní limit 50 Shoutů.',
+        'business-location-unavailable' =>
+          'Vybraná pobočka není dostupná. Zkontrolujte její adresu a aktivní stav.',
+        'location-servicesDisabled' =>
+          'Zapněte polohové služby a zkuste to znovu.',
+        'location-permissionDenied' || 'location-permissionDeniedForever' =>
+          'Pro publikování Shoutu povolte přístup k poloze.',
+        _ => 'Shout se nepodařilo publikovat. Zkuste to znovu.',
+      };
+      _showMessage(tr(context, message));
+    } on FirebaseException catch (error) {
+      await _recordClientError(action: 'publish_shout', error: error);
+      if (!mounted) return;
+      _showMessage(
+        tr(
+          context,
+          error.code == 'permission-denied'
+              ? 'Shout se nepodařilo publikovat kvůli oprávnění účtu.'
+              : 'Shout se nepodařilo publikovat. Zkuste to znovu.',
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _publishing = false);
+    }
+  }
+
+  Future<void> _loadAccountRole() async {
+    final role = await _watchAccountRole(
+      FirebaseAuth.instance.currentUser!.uid,
+    ).first;
+    if (mounted) setState(() => _accountRole = role);
   }
 
   void _setDuration(int hours, int minutes) {
     var validMinutes = minutes;
-    if (hours == 24) validMinutes = 0;
+    if (hours == _maximumHours) validMinutes = 0;
     if (hours == 0 && validMinutes == 0) {
       validMinutes = 15;
       _showMessage(tr(context, 'Shout může mít platnost minimálně 15 minut.'));
@@ -219,6 +377,19 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
     final minuteIndex = [0, 15, 30, 45].indexOf(validMinutes);
     if (_minutesController.selectedItem != minuteIndex) {
       _minutesController.jumpToItem(minuteIndex);
+    }
+  }
+
+  void _setExtendedBusinessDuration(bool enabled) {
+    setState(() {
+      _extendedBusinessDuration = enabled;
+      if (!enabled && _hours > 24) {
+        _hours = 24;
+        _minutes = 0;
+      }
+    });
+    if (!enabled && _hoursController.selectedItem > 24) {
+      _hoursController.jumpToItem(24);
     }
   }
 

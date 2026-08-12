@@ -11,8 +11,11 @@ class _StaffShouts extends StatefulWidget {
 class _StaffShoutsState extends State<_StaffShouts> {
   final _countryController = TextEditingController();
   final _subdivisionController = TextEditingController();
+  final _previewAddressController = TextEditingController();
   String? _countryCode;
   String? _subdivisionCode;
+  AddressSelection? _previewLocation;
+  double _previewRadiusKm = 10;
 
   bool get _hasGlobalAccess => widget.role.isAtLeast(AccountRole.administrator);
 
@@ -20,6 +23,7 @@ class _StaffShoutsState extends State<_StaffShouts> {
   void dispose() {
     _countryController.dispose();
     _subdivisionController.dispose();
+    _previewAddressController.dispose();
     super.dispose();
   }
 
@@ -60,6 +64,19 @@ class _StaffShoutsState extends State<_StaffShouts> {
               onApply: (country, subdivision) => setState(() {
                 _countryCode = country;
                 _subdivisionCode = subdivision;
+                _previewLocation = null;
+                _previewAddressController.clear();
+              }),
+              previewAddressController: _previewAddressController,
+              previewLocation: _previewLocation,
+              previewRadiusKm: _previewRadiusKm,
+              onPreviewSelected: (selection) =>
+                  setState(() => _previewLocation = selection),
+              onPreviewRadiusChanged: (radius) =>
+                  setState(() => _previewRadiusKm = radius),
+              onPreviewCleared: () => setState(() {
+                _previewLocation = null;
+                _previewAddressController.clear();
               }),
             ),
             Expanded(
@@ -71,6 +88,8 @@ class _StaffShoutsState extends State<_StaffShouts> {
                       global: global,
                       allowedCountries: countries,
                       allowedSubdivisions: subdivisions,
+                      previewLocation: _previewLocation,
+                      previewRadiusKm: _previewRadiusKm,
                     ),
             ),
           ],
@@ -94,6 +113,12 @@ class _RegionFilter extends StatelessWidget {
     required this.selectedCountry,
     required this.selectedSubdivision,
     required this.onApply,
+    required this.previewAddressController,
+    required this.previewLocation,
+    required this.previewRadiusKm,
+    required this.onPreviewSelected,
+    required this.onPreviewRadiusChanged,
+    required this.onPreviewCleared,
   });
 
   final bool global;
@@ -104,6 +129,12 @@ class _RegionFilter extends StatelessWidget {
   final String? selectedCountry;
   final String? selectedSubdivision;
   final void Function(String? country, String? subdivision) onApply;
+  final TextEditingController previewAddressController;
+  final AddressSelection? previewLocation;
+  final double previewRadiusKm;
+  final ValueChanged<AddressSelection> onPreviewSelected;
+  final ValueChanged<double> onPreviewRadiusChanged;
+  final VoidCallback onPreviewCleared;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -169,6 +200,38 @@ class _RegionFilter extends StatelessWidget {
                 onSelected: (_) => onApply(null, code),
               ),
           ],
+          SizedBox(
+            width: 340,
+            child: AddressAutocompleteField(
+              controller: previewAddressController,
+              countryCode:
+                  selectedCountry ??
+                  (selectedSubdivision?.split('-').first) ??
+                  (countries.isNotEmpty ? countries.first : ''),
+              label: 'Ruční poloha pro náhled',
+              onSelected: onPreviewSelected,
+            ),
+          ),
+          DropdownButton<double>(
+            value: previewRadiusKm,
+            items: const [5.0, 10.0, 25.0, 50.0]
+                .map(
+                  (radius) => DropdownMenuItem(
+                    value: radius,
+                    child: Text('${radius.toInt()} km'),
+                  ),
+                )
+                .toList(),
+            onChanged: (radius) {
+              if (radius != null) onPreviewRadiusChanged(radius);
+            },
+          ),
+          if (previewLocation != null)
+            TextButton.icon(
+              onPressed: onPreviewCleared,
+              icon: const Icon(Icons.my_location_outlined),
+              label: const Text('Zrušit ruční polohu'),
+            ),
         ],
       ),
     ),
@@ -201,6 +264,8 @@ class _RegionalShoutList extends StatelessWidget {
     required this.global,
     required this.allowedCountries,
     required this.allowedSubdivisions,
+    required this.previewLocation,
+    required this.previewRadiusKm,
   });
 
   final String? countryCode;
@@ -208,6 +273,8 @@ class _RegionalShoutList extends StatelessWidget {
   final bool global;
   final List<String> allowedCountries;
   final List<String> allowedSubdivisions;
+  final AddressSelection? previewLocation;
+  final double previewRadiusKm;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +309,7 @@ class _RegionalShoutList extends StatelessWidget {
     } else if (effectiveCountry != null) {
       query = query.where('geography.countryCode', isEqualTo: effectiveCountry);
     }
-    query = query.orderBy('createdAt', descending: true).limit(100);
+    query = query.orderBy('createdAt', descending: true).limit(50);
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: query.snapshots(),
       builder: (context, snapshot) {
@@ -254,7 +321,19 @@ class _RegionalShoutList extends StatelessWidget {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final documents = snapshot.data!.docs;
+        final documents = snapshot.data!.docs.where((document) {
+          final preview = previewLocation;
+          if (preview == null) return true;
+          final point = document.data()['location'];
+          if (point is! GeoPoint) return false;
+          final distanceMeters = Geolocator.distanceBetween(
+            preview.latitude,
+            preview.longitude,
+            point.latitude,
+            point.longitude,
+          );
+          return distanceMeters <= previewRadiusKm * 1000;
+        }).toList();
         if (documents.isEmpty) {
           return const Center(
             child: Text('V tomto regionu nejsou aktivní shouty.'),
@@ -283,7 +362,7 @@ class _RegionalShoutList extends StatelessWidget {
                     builder: (_) => ShoutDetailPage(
                       shout: shout,
                       onSave: () {},
-                      onReaction: (_) {},
+                      onReaction: (_) async {},
                     ),
                   ),
                 ),

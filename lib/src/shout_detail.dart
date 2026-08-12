@@ -12,7 +12,7 @@ class ShoutDetailPage extends StatefulWidget {
 
   final Shout shout;
   final VoidCallback onSave;
-  final ValueChanged<bool> onReaction;
+  final Future<void> Function(bool like) onReaction;
   final String? focusCommentId;
   final Timestamp? focusCommentCreatedAt;
 
@@ -124,9 +124,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 widget.onSave();
                 setState(() {});
               },
-              onReaction: (like) {
-                widget.onReaction(like);
-                setState(() {});
+              onReaction: (like) async {
+                await widget.onReaction(like);
+                if (mounted) setState(() {});
               },
               openOnTap: false,
               onPrivateReply:
@@ -360,10 +360,23 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         final targetType = _privateTargetType!;
         final replyRef = shoutRef.collection('privateReplies').doc();
         final rateRef = _rateLimitReference('privateReply');
+        final notificationRef = firestore
+            .collection('users')
+            .doc(recipientId)
+            .collection('notifications')
+            .doc('privateReply_${widget.shout.id}');
+        final notificationSettingsRef = firestore
+            .collection('users')
+            .doc(recipientId)
+            .collection('settings')
+            .doc('notifications');
         await firestore.runTransaction((transaction) async {
           final profile = await transaction.get(profileRef);
           final rateSnapshot = await transaction.get(rateRef);
-          await transaction.get(shoutRef);
+          final shoutSnapshot = await transaction.get(shoutRef);
+          final notificationSettings = await transaction.get(
+            notificationSettingsRef,
+          );
           final authorNickname = profile.data()!['nickname'] as String;
           transaction
             ..set(replyRef, {
@@ -386,6 +399,19 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 window: _privateReplyRateWindow,
               ),
             );
+          if (notificationSettings.data()?['privateReplies'] as bool? ?? true) {
+            transaction.set(notificationRef, {
+              'kind': 'privateReply',
+              'actorId': user.uid,
+              'actorNickname': authorNickname,
+              'targetShoutId': widget.shout.id,
+              'targetTitle': shoutSnapshot.data()!['title'],
+              'targetPrivateReplyId': replyRef.id,
+              'eventCount': FieldValue.increment(1),
+              'createdAt': FieldValue.serverTimestamp(),
+              'readAt': null,
+            }, SetOptions(merge: true));
+          }
         });
       } else {
         final commentRef = shoutRef.collection('comments').doc();
@@ -395,6 +421,36 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           final rateSnapshot = await transaction.get(rateRef);
           final shoutSnapshot = await transaction.get(shoutRef);
           final authorNickname = profile.data()!['nickname'] as String;
+          final shoutAuthorId = shoutSnapshot.data()!['authorId'] as String;
+          final shoutAuthorSettings = shoutAuthorId == user.uid
+              ? null
+              : await transaction.get(
+                  firestore
+                      .collection('users')
+                      .doc(shoutAuthorId)
+                      .collection('settings')
+                      .doc('notifications'),
+                );
+          DocumentSnapshot<Map<String, dynamic>>? parentComment;
+          DocumentSnapshot<Map<String, dynamic>>? replyRecipientSettings;
+          if (_replyToCommentId != null) {
+            parentComment = await transaction.get(
+              shoutRef.collection('comments').doc(_replyToCommentId),
+            );
+            final replyRecipientId =
+                parentComment.data()?['authorId'] as String?;
+            if (replyRecipientId != null &&
+                replyRecipientId != user.uid &&
+                replyRecipientId != shoutAuthorId) {
+              replyRecipientSettings = await transaction.get(
+                firestore
+                    .collection('users')
+                    .doc(replyRecipientId)
+                    .collection('settings')
+                    .doc('notifications'),
+              );
+            }
+          }
           final commentsCount =
               shoutSnapshot.data()?['commentsCount'] as int? ?? 0;
           transaction
@@ -418,6 +474,55 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 window: _commentRateWindow,
               ),
             );
+          if (shoutAuthorId != user.uid &&
+              (shoutAuthorSettings?.data()?['replies'] as bool? ?? true)) {
+            transaction.set(
+              firestore
+                  .collection('users')
+                  .doc(shoutAuthorId)
+                  .collection('notifications')
+                  .doc('comment_${widget.shout.id}'),
+              {
+                'kind': 'comment',
+                'actorId': user.uid,
+                'actorNickname': authorNickname,
+                'targetShoutId': widget.shout.id,
+                'targetTitle': shoutSnapshot.data()!['title'],
+                'targetCommentId': commentRef.id,
+                'eventCount': FieldValue.increment(1),
+                'createdAt': FieldValue.serverTimestamp(),
+                'readAt': null,
+              },
+              SetOptions(merge: true),
+            );
+          }
+          final replyRecipientId =
+              parentComment?.data()?['authorId'] as String?;
+          if (replyRecipientId != null &&
+              replyRecipientId != user.uid &&
+              replyRecipientId != shoutAuthorId &&
+              (replyRecipientSettings?.data()?['replies'] as bool? ?? true)) {
+            transaction.set(
+              firestore
+                  .collection('users')
+                  .doc(replyRecipientId)
+                  .collection('notifications')
+                  .doc('reply_${widget.shout.id}'),
+              {
+                'kind': 'reply',
+                'actorId': user.uid,
+                'actorNickname': authorNickname,
+                'targetShoutId': widget.shout.id,
+                'targetTitle': shoutSnapshot.data()!['title'],
+                'targetCommentId': commentRef.id,
+                'parentCommentId': _replyToCommentId,
+                'eventCount': FieldValue.increment(1),
+                'createdAt': FieldValue.serverTimestamp(),
+                'readAt': null,
+              },
+              SetOptions(merge: true),
+            );
+          }
         });
         widget.shout.comments++;
       }
@@ -474,12 +579,18 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ),
     );
     if (confirmed != true) return;
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('blocked')
-        .doc(widget.shout.authorId)
-        .set({'createdAt': FieldValue.serverTimestamp()});
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final batch = FirebaseFirestore.instance.batch();
+    batch.set(
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('blocked')
+          .doc(widget.shout.authorId),
+      {'createdAt': FieldValue.serverTimestamp()},
+    );
+    batch.delete(_followingReference(widget.shout.authorId));
+    await batch.commit();
     if (mounted) Navigator.pop(context, true);
   }
 

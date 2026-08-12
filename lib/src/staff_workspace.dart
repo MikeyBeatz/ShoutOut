@@ -307,10 +307,89 @@ class _StaffInfoCard extends StatelessWidget {
   );
 }
 
-class _SystemOversight extends StatelessWidget {
+class _SystemOversight extends StatefulWidget {
   const _SystemOversight({required this.role});
 
   final AccountRole role;
+
+  @override
+  State<_SystemOversight> createState() => _SystemOversightState();
+}
+
+class _SystemOversightState extends State<_SystemOversight> {
+  static const _pageSize = 25;
+  final _searchController = TextEditingController();
+  final List<QueryDocumentSnapshot<Map<String, dynamic>>> _logs = [];
+  bool _loading = false;
+  bool _hasMore = true;
+  Object? _loadError;
+
+  @override
+  void initState() {
+    super.initState();
+    _recordTechnicalLogAccess(widget.role);
+    _loadNextPage();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadNextPage({bool refresh = false}) async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _loadError = null;
+      if (refresh) {
+        _logs.clear();
+        _hasMore = true;
+      }
+    });
+    try {
+      Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+          .collection('clientErrorLogs')
+          .where(
+            'createdAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(
+              DateTime.now().toUtc().subtract(const Duration(days: 60)),
+            ),
+          )
+          .orderBy('createdAt', descending: true)
+          .limit(_pageSize);
+      if (_logs.isNotEmpty) query = query.startAfterDocument(_logs.last);
+      final page = await query.get();
+      if (!mounted) return;
+      setState(() {
+        _logs.addAll(page.docs);
+        _hasMore = page.docs.length == _pageSize;
+      });
+    } catch (error) {
+      if (mounted) setState(() => _loadError = error);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> get _visibleLogs {
+    final search = _searchController.text.trim().toLowerCase();
+    if (search.isEmpty) return _logs;
+    return _logs.where((document) {
+      final data = document.data();
+      return ['action', 'code', 'message', 'userId'].any(
+        (field) => (data[field] ?? '').toString().toLowerCase().contains(search),
+      );
+    }).toList();
+  }
+
+  String _formatTimestamp(BuildContext context, Timestamp? timestamp) {
+    if (timestamp == null) return '—';
+    final local = timestamp.toDate().toLocal();
+    final material = MaterialLocalizations.of(context);
+    return '${material.formatMediumDate(local)} '
+        '${material.formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
+  }
 
   @override
   Widget build(BuildContext context) => ListView(
@@ -335,10 +414,95 @@ class _SystemOversight extends StatelessWidget {
         leading: Icon(Icons.policy_outlined),
         title: Text('Audit a monitoring'),
         subtitle: Text(
-          'Přehled bude rozšířen o filtrování a systémové události.',
+          'Přístupy se auditují a záznamy mají 60denní retenci.',
         ),
       ),
-      if (role == AccountRole.owner)
+      const Divider(height: 32),
+      Text(
+        'Poslední technické chyby',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      const SizedBox(height: 8),
+      TextField(
+        controller: _searchController,
+        onChanged: (_) => setState(() {}),
+        decoration: InputDecoration(
+          labelText: 'Filtrovat načtené záznamy',
+          hintText: 'Akce, kód, zpráva nebo UID',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Vymazat filtr',
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.clear),
+                ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      if (_loadError != null)
+        ListTile(
+          leading: const Icon(Icons.error_outline),
+          title: const Text('Technické chyby se nepodařilo načíst.'),
+          trailing: TextButton(
+            onPressed: _loading ? null : _loadNextPage,
+            child: const Text('Zkusit znovu'),
+          ),
+        )
+      else if (!_loading && _logs.isEmpty)
+        const ListTile(title: Text('Žádné zaznamenané technické chyby.'))
+      else if (_visibleLogs.isEmpty)
+        const ListTile(title: Text('Filtru neodpovídá žádný načtený záznam.'))
+      else
+        ..._visibleLogs.map((document) {
+          final data = document.data();
+          return ExpansionTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: Text(
+              '${data['action'] ?? 'unknown'} · ${data['code'] ?? 'unknown'}',
+            ),
+            subtitle: Text(
+              _formatTimestamp(context, data['createdAt'] as Timestamp?),
+            ),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SelectableText(data['message'] as String? ?? '—'),
+              ),
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SelectableText('UID: ${data['userId'] ?? '—'}'),
+              ),
+            ],
+          );
+        }),
+      if (_loading)
+        const Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        )
+      else if (_hasMore)
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: _loadNextPage,
+            icon: const Icon(Icons.expand_more),
+            label: const Text('Načíst dalších 25'),
+          ),
+        ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton.icon(
+          onPressed: _loading ? null : () => _loadNextPage(refresh: true),
+          icon: const Icon(Icons.refresh),
+          label: const Text('Obnovit'),
+        ),
+      ),
+      if (widget.role == AccountRole.owner)
         const ListTile(
           leading: Icon(Icons.security_outlined),
           title: Text('Bezpečnost vlastníka'),

@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Sledované': 'Sledované',
+  'Profily': 'Profily',
+  'Sledovat': 'Sledovať',
+  'Sledováno': 'Sledované',
+  'Nahlásit účet': 'Nahlásiť účet',
+  'Aktivní Shouty': 'Aktívne Shouty',
+  'Zatím nesleduješ žádné profily.': 'Zatiaľ nesleduješ žiadne profily.',
+  'Tento účet nyní nemá žádné aktivní Shouty.':
+      'Tento účet teraz nemá žiadne aktívne Shouty.',
+  'Shouty se nepodařilo načíst.': 'Shouty sa nepodarilo načítať.',
+  'Důvod': 'Dôvod',
   'Oznámení': 'Upozornenia',
   'Přidat shout': 'Pridať shout',
   'Co se děje v okolí?': 'Čo sa deje v blízkosti?',
@@ -103,6 +114,9 @@ const slovakTranslations = <String, String>{
   'Zobrazit heslo': 'Zobraziť heslo',
   'Skrýt heslo': 'Skryť heslo',
   'Vytvořit účet': 'Vytvoriť účet',
+  'Vytvářím účet…': 'Vytváram účet…',
+  'Přihlašuji…': 'Prihlasujem…',
+  'Odesílám ověřovací e-mail…': 'Odosielam overovací e-mail…',
   'Přihlásit se': 'Prihláste sa',
   'Přihlášení': 'Prihláste sa',
   'Registrace': 'Vytvoriť účet',
@@ -160,6 +174,7 @@ const slovakTranslations = <String, String>{
   'Odpovídáš': 'Odpovedanie komu',
   'Odkazovaný komentář už není dostupný.':
       'Prepojený komentár už nie je dostupný.',
+  'Tento Shout už není dostupný.': 'Tento Shout už nie je dostupný.',
   'Shout s nízkým hodnocením': 'Nízke hodnotenie shout',
   'Tento Shout byl sbalen kvůli výrazně negativnímu hodnocení.':
       'Toto shout bola zrútená z dôvodu výrazne negatívnych hodnotení.',
@@ -179,6 +194,37 @@ const slovakTranslations = <String, String>{
   'Odpovědi na komentáře': 'Odpovede na komentáre',
   'Reakce na mé Shouty': 'Reakcie na moje shouts',
   'Nové Shouty v okolí': 'Nové shouts v blízkosti',
+  'Soukromé odpovědi': 'Súkromné odpovede',
+  'Nové Shouty sledovaných profilů': 'Nové Shouty sledovaných profilov',
+  'Oznámení se nepodařilo načíst.': 'Upozornenia sa nepodarilo načítať.',
+  'Označit vše jako přečtené': 'Označiť všetko ako prečítané',
+  'Někdo': 'Niekto',
+  'reagoval na tvůj Shout.': 'reagoval na tvoj Shout.',
+  'reagoval na tvůj komentář.': 'reagoval na tvoj komentár.',
+  'dal like tvému Shoutu': 'dal like tvojmu Shoutu',
+  'dal dislike tvému Shoutu': 'dal dislike tvojmu Shoutu',
+  'uživatelů dalo like tvému Shoutu': 'používateľov dalo like tvojmu Shoutu',
+  'uživatelů dalo dislike tvému Shoutu':
+      'používateľov dalo dislike tvojmu Shoutu',
+  'okomentoval tvůj Shout': 'okomentoval tvoj Shout',
+  'uživatelů komentovalo tvůj Shout': 'používateľov komentovalo tvoj Shout',
+  'dal like tvému komentáři': 'dal like tvojmu komentáru pri',
+  'dal dislike tvému komentáři': 'dal dislike tvojmu komentáru pri',
+  'uživatelů dalo like tvému komentáři':
+      'používateľov dalo like tvojmu komentáru pri',
+  'uživatelů dalo dislike tvému komentáři':
+      'používateľov dalo dislike tvojmu komentáru pri',
+  'odpověděl na tvůj komentář': 'odpovedal na tvoj komentár pri',
+  'uživatelů odpovědělo na tvůj komentář':
+      'používateľov odpovedalo na tvoj komentár pri',
+  'ti poslal soukromou odpověď': 'ti poslal súkromnú odpoveď pri',
+  'uživatelů ti poslalo soukromou odpověď':
+      'používateľov ti poslalo súkromnú odpoveď pri',
+  'okomentoval tvůj Shout.': 'komentoval tvoj Shout.',
+  'odpověděl na tvůj komentář.': 'odpovedal na tvoj komentár.',
+  'ti poslal soukromou odpověď.': 'ti poslal súkromnú odpoveď.',
+  'zveřejnil nový Shout.': 'zverejnil nový Shout.',
+  'Nové oznámení': 'Nové upozornenie',
   'Nápověda': 'Pomoc',
   'Moderace': 'Moderovanie',
   'Soukromé': 'Súkromné',
@@ -268,4 +314,31 @@ const slovakTranslations = <String, String>{
   'Blokovat': 'Blokovať',
   'Pro publikování Shoutu povol přístup k poloze.':
       'Povoliť prístup k polohe na zverejnenie a Shout.',
+  'Zapni polohové služby a zkus Shout publikovat znovu.':
+      'Zapnite lokalizačné služby a skúste Shout zverejniť znova.',
+  'Povol aplikaci přístup k poloze v nastavení zařízení.':
+      'Povoľte aplikácii prístup k polohe v nastaveniach zariadenia.',
+  'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.':
+      'Polohu sa nepodarilo zistiť včas. Prejdite na otvorené miesto a skúste to znova.',
+  'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.':
+      'Polohu sa nepodarilo zistiť. Skontrolujte pripojenie a lokalizačné služby.',
+  'Otevřít nastavení': 'Otvoriť nastavenia',
+  'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.':
+      'Shout sa nepodarilo zverejniť pre oprávnenia účtu. Skontrolujte overenie e-mailu a stav účtu.',
+  'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.':
+      'Služba je dočasne nedostupná. Skontrolujte pripojenie a skúste to znova.',
+  'Připojení k přihlášení trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Pripojenie k prihláseniu trvá príliš dlho. Skontrolujte internet a skúste to znova.',
+  'E-mail zatím není potvrzený. Po otevření odkazu chvíli počkej a zkus kontrolu znovu.':
+      'E-mail ešte nie je potvrdený. Po otvorení odkazu chvíľu počkajte a skúste kontrolu znova.',
+  'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Kontrola overenia trvá príliš dlho. Skontrolujte internet a skúste to znova.',
+  'Ověření se nepodařilo načíst. Zkontroluj internet a zkus to znovu.':
+      'Overenie sa nepodarilo načítať. Skontrolujte internet a skúste to znova.',
+  'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.':
+      'Odoslanie overovacieho e-mailu trvá príliš dlho. Skontrolujte internet a skúste to znova.',
+  'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.':
+      'Overovací e-mail sa nepodarilo odoslať. Skúste to neskôr.',
+  'Profil se nepodařilo načíst. Zkontroluj připojení a spusť aplikaci znovu.':
+      'Profil sa nepodarilo načítať. Skontrolujte pripojenie a spustite aplikáciu znova.',
 };
