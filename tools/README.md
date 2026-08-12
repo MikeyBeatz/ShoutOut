@@ -60,6 +60,17 @@ $env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-accou
 npm run reconcile:data
 ```
 
+## Backfill veřejných profilů
+
+Po nasazení dynamických avatarů vytvořte jednorázově bezpečné veřejné profily
+pro existující uživatele. Skript kopíruje pouze přezdívku a avatarový styl a má
+pojistku proti spuštění mimo vývojový projekt:
+
+```powershell
+$env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
+npm run backfill:public-profiles
+```
+
 ## Firestore Rules tests
 
 Testy používají pouze lokální Firestore Emulator a projekt

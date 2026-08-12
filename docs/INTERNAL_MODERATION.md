@@ -94,6 +94,7 @@ role může případ eskalovat, ale ne dokončit.
 | Zrušit zásah jiného moderátora | Ne | Ne | Ne | Navrženo | Nouzově | Nouzově |
 | Řešit odvolání | Ne | Ne | Ne | Navrženo | Dohled | Dohled |
 | Kontrolovat práci moderátorů | Ne | Ne | Ne | Navrženo | Ano | Ano |
+| Prohlížet technické chyby aplikace | Ne | Ne | Ne | Ne | Ano | Ano |
 | Pozastavit moderátorskou roli | Ne | Ne | Ne | Ne | Navrženo | Ano |
 | Přidělit moderátora | Ne | Ne | Ne | Ne | Navrženo | Ano |
 | Přidělit administrátora | Ne | Ne | Ne | Ne | Ne | Navrženo |
@@ -113,6 +114,9 @@ Běžný uživatel ani business účet do pracovní části přístup nemají.
 - Moderátor vidí přehled, hlášení a historii postihů.
 - Senior moderátor používá stejné prostředí s vyššími pravomocemi postihů.
 - Administrátor a owner navíc vidí systémový dohled.
+- Evidence technických chyb je součást systémového dohledu pouze pro
+  administrátora a ownera. Moderátor ani senior moderátor k ní přístup nemají;
+  řeší chování uživatelů a nahlášený obsah.
 - Správa rolí a business schvalování jsou v rozhraní označené jako čekající na
   chráněnou serverovou operaci; klient zatím žádný zápis nepředstírá.
 - Sekce Uživatelé umožňuje vyhledat přesné UID nebo přezdívku a zobrazit roli,
@@ -268,5 +272,5 @@ Každá změna rolí, pravomocí, délky postihu nebo retence musí současně u
 1. tento dokument,
 2. Firestore Rules a jejich negativní i pozitivní testy,
 3. klientské nebo webové rozhraní,
-4. `BACKEND_TODO.md`, pokud část procesu ještě vyžaduje server,
+4. `TODO.md`, pokud část procesu ještě vyžaduje server,
 5. veřejné právní nebo komunitní dokumenty, pokud se jich změna týká.

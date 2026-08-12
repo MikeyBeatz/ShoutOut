@@ -156,7 +156,7 @@ Android debug build používá App Check debug provider, release build použív�
 Play Integrity. Vynucení App Check se nesmí zapnout naslepo: nejdřív
 zaregistrujte pouze vlastní debug tokeny, ověřte metriky a až potom zapínejte
 enforcement po jednotlivých Firebase službách. Webový provider a produkční
-enforcement jsou zapsané v `BACKEND_TODO.md`.
+enforcement jsou zapsané v `docs/TODO.md`.
 
 ### Android release podpis
 
@@ -185,7 +185,7 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
-- `BACKEND_TODO.md` – jediný společný projektový backlog
+- `docs/TODO.md` – jediný společný projektový backlog
 - `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace
@@ -199,7 +199,7 @@ být prováděny samostatně a ověřeny také s geolokačním feedem.
 Některé operace jsou v klientovi a Firestore připravené, ale vyžadují budoucí
 serverovou automatizaci – například úplné zpracování smazání účtu, retenční
 lhůty, čištění expirovaného obsahu a push notifikace. Přesný seznam a podmínky
-dokončení jsou v `BACKEND_TODO.md`.
+dokončení jsou v `docs/TODO.md`.
 
 ## Licence
 

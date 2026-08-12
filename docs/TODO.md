@@ -22,6 +22,233 @@ implementovaný.
 
 ## Aktuální produktové úpravy
 
+Otevřené produktové úkoly řešit v pořadí následujících etap. Pořadí drží
+diagnostiku a společný datový základ před obrazovkami, které na nich závisejí;
+odložené nápady až za hlavními uživatelskými cestami.
+
+### Etapa 1 – stabilita, poloha a základní chování
+
+- [ ] **Zjistit, proč mimo Litoměřice nešlo vytvořit Shout.**
+  - Reprodukovat na fyzickém zařízení i emulátoru s polohou uvnitř a mimo
+    Litoměřice a rozlišit oprávnění, nedostupnou/nepřesnou polohu, validaci
+    geohashe, rate limit a zamítnutí Firestore Rules.
+  - Zobrazit uživateli konkrétní a lokalizovanou příčinu místo obecné chyby.
+  - Ověřit, že pevná poloha Litoměřice zůstává pouze v označeném demo buildu.
+  - [x] Automaticky ověřit geohash a veřejné zaokrouhlení pro Litoměřice,
+    Lovosice, Ústí nad Labem, Prahu, Bratislavu, Varšavu, Berlín a Řím včetně
+    světových hranic a odmítnutí neplatných souřadnic.
+  - [x] Doplnit testy pravidel pro běžný účet mimo Litoměřice, výběr pobočky
+    odlišné od sídla a odmítnutí pozastavené, smazané nebo neověřené pobočky.
+  - [ ] Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
+    Litoměřice; dosavadní opakované pokusy uživateli procházejí.
+- [x] **Dokončit interní evidenci technických chyb.**
+  - Ukládat bezpečný diagnostický záznam neúspěšné akce, důvod zamítnutí,
+    čas, verzi aplikace a nezbytný technický kontext bez hesel, tokenů a
+    nadbytečných osobních údajů.
+  - Přístup k technickým chybám mají pouze administrátor a owner (role 5–6).
+    Moderátor ani senior moderátor je nevidí; jejich úkolem je řešit chování
+    uživatelů a nahlášený obsah, nikoli provoz aplikace.
+  - Doplnit retenci, stránkování, filtrování, audit přístupu a upravit Firestore
+    Rules tak, aby kolekci nebylo možné číst rolím 1–4.
+  - [x] Omezit čtení ve Firestore Rules na role 5–6 a zobrazit posledních
+    50 záznamů v systémovém dohledu administrátora a ownera.
+  - [x] Doplnit stránkování po 25, filtrování načtených záznamů, přesný čas,
+    neměnný audit otevření a 60denní hranici čtení.
+  - [ ] Po zapnutí fakturace nasadit připravenou Firestore TTL konfiguraci pro
+    fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits`; Spark plán
+    aktivaci TTL odmítá, do té doby jsou starší záznamy bezpečně nečitelné.
+- [x] **Umožnit moderátorským a vyšším rolím nastavit polohu pro náhled území.**
+  - Role 3–6 mohou ručně vybrat bod, obec nebo region a prohlížet feed tak, jako
+    by se nacházely na zvoleném místě; nabídnout návrat ke skutečné poloze.
+  - Náhradní polohu držet odděleně od polohy zařízení, výrazně označit aktivní
+    režim náhledu a rozhodnout, zda má přetrvat pouze relaci, nebo i další
+    přihlášení na stejném účtu.
+  - Ručně nastavená poloha nesmí být použita jako poloha nového Shoutu, měnit
+    uložený profil ani rozšířit právo moderovat mimo `moderationScope` dané role.
+  - Administrátor a owner mohou procházet libovolné území; moderátor a senior
+    mohou území prohlížet, ale zásahy se nadále řídí přiděleným rozsahem.
+  - Doplnit auditované testy oddělení náhledu, publikování a moderátorských
+    oprávnění a ověřit chování na mobilu i ve webovém pracovním prostoru.
+  - Ruční adresa je pouze stav pracovního prostoru, filtruje náhled podle
+    poloměru 5–50 km a nepřepisuje polohu zařízení, profil ani uložené Shouty.
+- [ ] **Změřit a zkrátit dlouhé načítání při registraci.**
+  - Změřit jednotlivé kroky: vytvoření účtu, odeslání/ověření e-mailu, zápis
+    profilu, právní souhlas, načtení polohy a první otevření feedu.
+  - Odstranit z kritické cesty vše, co může doběhnout bezpečně na pozadí, a po
+    dobu nutného čekání zobrazit srozumitelný stav a možnost opakování.
+  - [x] Měřit samostatně vytvoření účtu, odeslání a kontrolu ověřovacího e-mailu,
+    obnovení ID tokenu a u business účtu také zápis žádosti.
+  - [x] Zobrazovat aktuální krok registrace a u business účtu po vytvoření účtu
+    souběžně uložit žádost a odeslat ověřovací e-mail.
+  - [ ] Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
+- [x] **Ověřit reset hesla přes registrační e-mail.**
+  - Pokrýt existující i neexistující adresu, neplatný a expirovaný odkaz,
+    opakované použití odkazu a přihlášení novým heslem.
+  - Zachovat neutrální odpověď, která neprozradí, zda je e-mail registrovaný.
+  - [x] Na doručitelném vývojovém účtu ověřeno doručení e-mailu, změna hesla,
+    přihlášení novým heslem a odmítnutí opakovaně použitého odkazu; konkrétní
+    adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
+  - [ ] Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho platnosti;
+    tento časový test neblokuje hlavní tok obnovy hesla.
+- [x] **Zachovat filtr při přepínání karet.**
+  - Výběr filtru držet po celou relaci aplikace a při návratu na kartu obnovit
+    stejný filtr i výsledky.
+  - Resetovat jej pouze při novém spuštění aplikace nebo explicitním resetu,
+    nikoli při běžné navigaci mezi kartami.
+- [x] **Upravit časové údaje na Shoutu.**
+  - Zrušit průběžné počítání minut od vytvoření a zobrazovat pouze lokalizované
+    datum vytvoření; určit jednotné chování pro dnešní datum a časová pásma.
+- [x] **Normalizovat nadpis Shoutu na počáteční velké písmeno.**
+  - Rozhodnout, zda jde pouze o vizuální zobrazení, nebo úpravu při zápisu;
+    nepoškodit zkratky, emoji ani jazyky bez rozlišení velikosti písmen.
+
+### Etapa 2 – společný profil a identita autora
+
+- [x] **Sjednotit avatarová data ve všech typech obsahu.**
+  - Shouty, komentáře a soukromé odpovědi odkazují přes `authorId` na aktuální
+    `publicProfiles/{uid}`; starý snímek slouží pouze jako fallback.
+  - Veřejný profil obsahuje jen přezdívku a avatarový styl a Firestore Rules
+    atomicky kontrolují shodu se soukromým profilem a brání podvržení identity.
+- [x] Nasadit nová Firestore Rules a jednorázově spustit
+  `npm run backfill:public-profiles` pro existující účty ve vývojovém projektu.
+- [x] **Přidat na kartu profilu datum vzniku účtu pod přezdívku.**
+  - Použít důvěryhodné serverové datum, lokalizovaný formát a definovat fallback
+    pro starší profily bez údaje.
+
+### Etapa 3 – první použití, nastavení a zpětná vazba
+
+- [x] **Přidat úvodní nápovědu po založení účtu.**
+  - Navázat ji až na dokončenou registraci a vysvětlit polohu, filtry, vytvoření
+    Shoutu, soukromí a hlášení obsahu.
+  - Přidat volbu „Znovu nezobrazovat“, uložit ji k účtu a nabídnout opětovné
+    spuštění nápovědy v nastavení.
+- [x] **Přidat noční režim.**
+  - Podporovat systémové nastavení, světlý a tmavý režim; volbu uložit k účtu
+    nebo lokálně před přihlášením.
+  - Prověřit kontrast, mapy, dialogy, formuláře, avatary, web a všechny stavy chyb.
+- [ ] **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
+  - Umožnit náhled, odebrání a bezpečný upload screenshotu se stavem průběhu.
+  - Stanovit limit typu/velikosti, retenci, přístup podpory a upozornění na možné
+    osobní údaje; obrázek nepřikládat bez výslovného potvrzení uživatele.
+  - Kód je připravený: JPG/PNG/WebP do 5 MB, náhled, odebrání, potvrzení obsahu,
+    průběh uploadu, retence 60 dní a čtení pouze administrátorem nebo ownerem.
+  - Firebase Storage na projektu Spark nelze inicializovat. Do přechodu na
+    placený plán je tlačítko skryté a zůstává funkční textové hlášení.
+  - Aktivační a ověřovací postup je v `docs/FIREBASE_STORAGE_SETUP.md`.
+
+### Etapa 4 – životnost obsahu a business účty
+
+- [x] **Rozhodnout pravidla životnosti Shoutu před změnou expirace.**
+  - Schválené chování, budoucí zpoplatnění a serverové požadavky jsou vedené
+    pouze v `docs/BUSINESS_MONETIZATION.md`.
+  - Vyhodnotit dopad na feed, zvýrazněné Shouty, cenu/zneužití business účtů,
+    moderaci, notifikace, indexy, pravidla a serverové mazání.
+- [ ] **Rozšířit návrh business účtu o provozovnu a ověření.**
+  - Globální cílový návrh, úrovně důvěry, regionální adaptéry, rizikový model,
+    datový model a postup zavádění jsou v `docs/BUSINESS_VERIFICATION.md`.
+  - Přidat do profilu konkrétní adresu/polohu provozovny, veřejný náhled a postup
+    při změně adresy; souřadnice odvozovat důvěryhodně a chránit proti podvržení.
+  - Jeden účet může mít více poboček pod stejným registračním číslem. V první
+    verzi neimplementovat správce ani pozvánky; účet má jedno přihlášení.
+  - [x] Přidat pouze business účtům dlaždici Business se schválenými profilovými
+    a monetizačními sekcemi podle `docs/BUSINESS_MONETIZATION.md`.
+  - [x] Přidat klientskou správu poboček: seznam, název, adresa, pozastavení,
+    bezpečné skrytí a opětovné předání změněné adresy k serverovému geocodingu.
+  - Oddělit oficiální název firmy od veřejného názvu. Při vytvoření Shoutu vybrat
+    pobočku a autora zobrazit jako `Veřejný název – Pobočka`.
+  - IČO nejprve ověřit serverově přes ARES a uložit oficiální název, právní formu,
+    stav a sídlo jako neměnný snímek žádosti. ARES ověřuje subjekt, nikoli právo
+    konkrétního uživatele za něj jednat.
+  - Oprávnění konkrétní osoby jednat za firmu neověřovat jako u finanční služby.
+    Automaticky potvrdit jednorázový odkaz na firemní e-mail a stav označit jako
+    „Registrovaný business účet“; telefon, DNS ani dokumenty nepoužívat.
+  - Přijmout jakýkoli funkční kontaktní e-mail včetně veřejných služeb jako Gmail
+    nebo Seznam. Potvrzení prokazuje jen dosažitelnost kontaktu, nikoli oprávnění
+    uživatele právně jednat za firmu.
+  - Stavový tok: `checking` → `contact_pending` → `active` / `suspended` /
+    `rejected`; běžný proces je bez ručního schvalování.
+  - Ruční zásah použít jen při sporu o profil, hlášení vydávání se za firmu,
+    známé značce nebo zjevné neshodě údajů.
+  - Ověření obnovit při změně IČO nebo právního subjektu, pravidelně kontrolovat
+    stav v ARES a umožnit administrátorovi okamžité pozastavení s auditním záznamem.
+  - Implementovat automatickou žádost, stav ověření, audit a odebrání business
+    role; ruční zásah ponechat jen pro spory, duplicity a zneužití známých značek.
+  - [x] Přidat samostatnou business registraci s údaji firmy, fakturační adresou,
+    kontaktním e-mailem a žádostí ve stavu `pending_email`; klient si business
+    roli nepřiděluje.
+  - [x] Přidat do registrace samostatnou povinnou část **Pobočka/provozovna** s
+    veřejným názvem a adresou první provozovny. Provozovnu nikdy automaticky
+    nevytvářet ze sídla ani fakturační adresy; shodné adresy jsou však povolené.
+    Adresu vybrat přes našeptávač a uložit ověřené souřadnice a geohash, protože
+    tato poloha určuje oblast Shoutů.
+  - [ ] Při budoucí serverové aktivaci business žádosti atomicky převést údaje
+    první provozovny do `businessProfiles/{uid}/locations/{locationId}`; bez
+    úspěšného vytvoření provozovny účet neoznačit jako aktivní.
+  - [x] Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
+    Česko, Německo, Polsko, Slovensko a další prioritní evropské země řadit nahoru.
+  - [x] Doplnit překlady všech business obrazovek a validačních/chybových textů
+    do všech sedmi jazyků aplikace (čeština, angličtina, němčina, polština,
+    slovenština, ukrajinština a vietnamština); názvy zemí přebírat lokalizovaně
+    z udržovaného ISO seznamu.
+  - [ ] Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes
+    VIES a následné automatické přidělení role až po úspěšné kontrole. Pokud pro
+    zemi není dostupné bezplatné rozhraní, přijmout ručně vyplněný identifikátor
+    a žádost ponechat k ruční kontrole.
+  - [ ] Implementovat odložené platební kroky až po splnění předpokladů a podle
+    jednotného návrhu v `docs/BUSINESS_MONETIZATION.md`.
+  - [x] Přidat Business checkbox **Až 48 hodin**, po jehož zapnutí se časový
+    výběr rozšíří na 48 hodin; server dovolí delší expiraci pouze Business účtu.
+
+### Etapa 5 – sociální vazby a oznámení
+
+- [x] **Navrhnout a přidat Follow.**
+  - Určit, zda se sledují uživatelé, business profily, oblasti nebo kombinace,
+    a vyřešit soukromí, blokace, limity, odstranění účtu a zneužití.
+  - Přidat follow/unfollow, seznamy a feed až po uzavření datového modelu; veřejné
+    počty odvozovat důvěryhodně, ne klientským přepisem.
+  - [x] Přejmenovat kartu Uložené na Sledované a rozdělit ji na uložené Shouty
+    a sledované profily, aniž by se měnila karta Mé Shouty.
+  - [x] Otevřít profil kliknutím na autora, zobrazit aktivní Shouty a nabídnout
+    sledování, zrušení sledování, blokaci a nahlášení účtu.
+  - [x] Řadit lokální Shouty sledovaných účtů před ostatními a uvnitř obou skupin
+    zachovat zvolené řazení; blokace současně ukončí sledování.
+- [ ] **Napojit Follow a uživatelské preference na oznámení.**
+  - Zahrnout reakce na vlastní Shout, komentáře a odpovědi, soukromé odpovědi,
+    relevantní nebo zajímavé Shouty a nový obsah sledovaných profilů/oblastí.
+  - Definovat, co znamená „zajímavý“, omezit četnost a umožnit každou kategorii
+    samostatně vypnout; serverovou realizaci vést v části 8 níže.
+  - [x] Připravit centrum oznámení uvnitř aplikace, živý seznam posledních 50,
+    stav přečtení a samostatné preference pro reakce, komentáře/odpovědi,
+    soukromé odpovědi, sledované profily a okolní Shouty.
+  - [x] Vytvářet oznámení o like/dislike ve stejné atomické transakci jako
+    reakci; pravidla ověřují příjemce, autora, Shout, typ reakce i rate limit.
+  - [x] Atomicky vytvářet oznámení pro komentář na vlastním Shoutu, odpověď na
+    komentář, soukromou odpověď a like/dislike komentáře. Zápis je povolen jen
+    společně s ověřenou zdrojovou událostí a respektuje preference příjemce.
+  - [x] Slučovat opakované události stejného typu u stejného Shoutu nebo
+    komentáře, zvyšovat počet, zobrazit zkrácený nadpis a každou další událostí
+    vrátit oznámení mezi nejnovější a nepřečtená.
+  - [x] Kliknutím na oznámení otevřít živý detail cílového Shoutu, u komentářů
+    posunout a zvýraznit konkrétní komentář; nedostupný, smazaný nebo expirovaný
+    obsah nahradit srozumitelnou hláškou.
+  - [ ] Přes Cloud Functions rozesílat nový Shout sledovaného profilu a později
+    relevantní Shouty v okolí; tyto události mají více příjemců a klient je
+    nesmí rozesílat sám.
+  - [ ] Přidat FCM push mimo otevřenou aplikaci, systémová/moderátorská
+    oznámení a omezení četnosti.
+
+### Etapa 6 – gamifikace a odložené nápady
+
+- [ ] **Navrhnout karmu, achievementy a kosmetické odměny.**
+  - Nejprve určit důvěryhodné události, pravidla proti farmení a význam karmy;
+    neodměňovat samotný objem obsahu ani konfliktní chování.
+  - Potom navrhnout malé odznaky a rámečky, přičemž uživatel může zvolit nejvýše
+    jeden odznak zobrazovaný u avatara; zajistit přístupnost a moderaci názvů.
+- [ ] **Odloženě přidat skrytou minihru s letadlem.**
+  - Až po dokončení hlavních uživatelských cest připravit jednoduchou offline
+    minihru s překážkami a nenápadný vstup například v právních informacích.
+  - Nesmí měnit právní obsah, vyžadovat další oprávnění ani ovlivňovat karmu.
+
 ### Vzhled a grafika
 
 - [x] **Odstranit světlý proužek kolem ikony na ploše Androidu.**
@@ -47,8 +274,8 @@ implementovaný.
   - Nové Shouty ukládají ověřený veřejný snímek avataru a barevného stylu.
   - Firestore Rules porovnají snímek s profilem autora a nedovolí podvržení.
   - Starší Shouty bez snímku používají bezpečný výchozí avatar.
-- [ ] Doplnit stejný veřejný avatarový snímek také ke komentářům a soukromým
-  odpovědím a připravit řízený backfill starších Shoutů.
+- [x] Doplnit avatary komentářů, soukromých odpovědí a migraci historického
+  obsahu podle úkolu **Sjednotit avatarová data ve všech typech obsahu** v etapě 2.
 
 - [x] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
   - Po otevření Profilu se nejdřív ukáže liška a až potom správně uložená sova.
@@ -91,6 +318,8 @@ implementovaný.
 ### Business účty a webová správa
 
 - [ ] **Vytvořit business účet.**
+  - Navázat na rozhodnutí o životnosti Shoutů, model provozovny a schválený
+    proces ověření z etapy 4.
 - [ ] **Přidat zvýrazněné Shouty.**
 - [ ] **Přidat propagační okénko.**
 - [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
@@ -140,7 +369,8 @@ hranice a upravená aplikace jej může obejít.
   značky, autora a přezdívku načtenou z profilu.
 - Vytvoření Shoutu, komentáře, soukromé odpovědi, hlášení a interakce spotřebuje
   atomický limit svázaný s ID konkrétního zápisu.
-- Aktuální limity: Shout nejvýše 1 za 2 minuty a 10 za 24 hodin; komentář a
+- Aktuální limity: běžný účet nejvýše 1 Shout za 2 minuty a 50 za 24 hodin,
+  business účet nejvýše 1 Shout za sekundu a 500 za 24 hodin; komentář a
   soukromá odpověď nejvýše 1 za 10 sekund a 60 za hodinu; hlášení nejvýše
   1 za minutu a 20 za 24 hodin; interakce a mazání nejvýše 120 za hodinu.
 - Hlášení má deterministické ID, takže stejný účet nemůže opakovaně hlásit
@@ -294,12 +524,16 @@ Firestore podkolekce automaticky nemaže.
 
 ## 8. Push notifikace a centrum oznámení
 
+- [x] schválený model Follow, centrum oznámení a kategorie uživatelských
+  preferencí,
+- [x] oznámení uvnitř aplikace pro reakci na Shout, komentář na Shout,
+  odpověď na komentář, soukromou odpověď a reakci na komentář,
+- [x] respektovat preference v `users/{uid}/settings/notifications`,
 - přidat Firebase Cloud Messaging a správu tokenů zařízení,
 - ukládat tokeny pouze pro vlastní účet a po odhlášení je odstranit/deaktivovat,
 - odstraňovat neplatné tokeny,
-- vytvářet oznámení pro relevantní komentáře, odpovědi, soukromé odpovědi,
+- serverově vytvářet oznámení pro zajímavé Shouty, sledované profily/oblasti,
   varování a moderátorské události,
-- respektovat preference v `users/{uid}/settings/notifications`,
 - nezobrazit obsah blokovaného uživatele v notifikaci,
 - ukládat stav přečtení, slučovat opakované události a omezit četnost,
 - striktně oddělit vývojové a produkční tokeny.
