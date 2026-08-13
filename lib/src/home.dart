@@ -281,12 +281,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             locationData['geohash'] is! String) {
           throw StateError('business-location-unavailable');
         }
-        nickname =
-            '${businessData['displayName']} – '
-            '${locationData['displayName']}';
+        nickname = locationData['displayName'] as String;
         publicationLocation = locationData['location'] as GeoPoint;
         publicationGeohash = locationData['geohash'] as String;
         data['businessLocationId'] = shout.businessLocationId;
+        data['businessAuthorFormat'] = 'branch';
       } else {
         publicationLocation = GeoPoint(
           publicLocationCoordinate(position!.latitude),

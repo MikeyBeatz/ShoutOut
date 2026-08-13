@@ -24,6 +24,78 @@ Shout _shout({
 );
 
 void main() {
+  test('Business Shout keeps its branch name after profile refresh', () {
+    final shout = Shout(
+      id: 'business-shout',
+      authorId: 'business-user',
+      author: 'Centrum Brno',
+      title: 'Novinka',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 1,
+      createdAt: DateTime(2026),
+      expiresAt: DateTime(2027),
+      businessLocationId: 'brno-centre',
+      businessAuthorFormat: 'branch',
+    );
+
+    expect(shout.displayedAuthor('Kavárny Novák'), 'Centrum Brno');
+  });
+
+  test('legacy Business Shout hides the historical company prefix', () {
+    final shout = Shout(
+      id: 'legacy-business-shout',
+      authorId: 'business-user',
+      author: 'Kavárny Novák – Centrum Brno',
+      title: 'Novinka',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 1,
+      createdAt: DateTime(2026),
+      expiresAt: DateTime(2027),
+      businessLocationId: 'brno-centre',
+    );
+
+    expect(shout.displayedAuthor('Kavárny Novák'), 'Centrum Brno');
+  });
+
+  test('new Business branch name may contain its own company prefix', () {
+    final shout = Shout(
+      id: 'explicit-business-shout',
+      authorId: 'business-user',
+      author: 'Kavárny Novák – Centrum Brno',
+      title: 'Novinka',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 1,
+      createdAt: DateTime(2026),
+      expiresAt: DateTime(2027),
+      businessLocationId: 'brno-centre',
+      businessAuthorFormat: 'branch',
+    );
+
+    expect(
+      shout.displayedAuthor('Kavárny Novák'),
+      'Kavárny Novák – Centrum Brno',
+    );
+  });
+
+  test('regular Shout follows the current public nickname', () {
+    final shout = Shout(
+      id: 'regular-shout',
+      authorId: 'regular-user',
+      author: 'Staré jméno',
+      title: 'Novinka',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 1,
+      createdAt: DateTime(2026),
+      expiresAt: DateTime(2027),
+    );
+
+    expect(shout.displayedAuthor('Nové jméno'), 'Nové jméno');
+  });
+
   test('normalizes only a lowercase initial title character', () {
     expect(
       titleWithInitialCapital('  sousedská slavnost  '),

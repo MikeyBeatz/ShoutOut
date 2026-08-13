@@ -16,6 +16,11 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
   přezdívky v obsahu je pouze historický fallback.
 - Běžný Shout používá polohu zařízení zaokrouhlenou funkcí
   `publicLocationCoordinate`; Business Shout používá ověřenou polohu pobočky.
+- Business Shout ukládá jako `authorNickname` pouze název vybrané pobočky, její
+  ID a značku `businessAuthorFormat: branch`. U starších dokumentů bez značky
+  klient při zobrazení odstraní historickou předponu „firma –“, takže není nutná
+  migrace databáze. Avatar se dál načítá realtime z veřejného profilu firmy.
+  Běžnému Shoutu se realtime mění avatar i přezdívka.
 - Firestore Rules jsou součást aplikační logiky. Změna klientského zápisu bez
   odpovídající změny pravidel a jejich testů je neúplná změna.
 

@@ -430,8 +430,8 @@ service cloud.firestore {
         location.active == true &&
         location.deleted == false &&
         location.geocodingStatus == 'verified' &&
-        data.authorNickname == business.displayName + ' – ' +
-          location.displayName &&
+        data.businessAuthorFormat == 'branch' &&
+        data.authorNickname == location.displayName &&
         data.location == location.location &&
         data.geohash == location.geohash;
     }
@@ -1643,7 +1643,8 @@ service cloud.firestore {
           'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
           'dislikesCount', 'commentsCount', 'savesCount', 'avatarId',
           'avatarBackgroundStart', 'avatarBackgroundEnd',
-          'avatarGradientDirection', 'businessLocationId'
+          'avatarGradientDirection', 'businessLocationId',
+          'businessAuthorFormat'
         ]) &&
         request.resource.data.keys().hasAll([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
@@ -1655,7 +1656,9 @@ service cloud.firestore {
         (
           (
             !isBusinessAccount() &&
-            !request.resource.data.keys().hasAll(['businessLocationId']) &&
+            !request.resource.data.keys().hasAny([
+              'businessLocationId', 'businessAuthorFormat'
+            ]) &&
             canonicalNickname(request.resource.data)
           ) ||
           validBusinessShout(request.resource.data)

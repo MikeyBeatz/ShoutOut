@@ -160,13 +160,27 @@ describe('business locations', () => {
       });
     });
     const db = authenticatedDb('business-publisher');
-    await assertSucceeds(createShoutBatch(
+    await assertFails(createShoutBatch(
       db,
       'business-publisher',
       'Test Business – Ústí nad Labem',
+      'business-prefixed-name-shout',
+      {
+        businessLocationId: 'usti',
+        businessAuthorFormat: 'branch',
+        location: new GeoPoint(50.6605659, 14.0402374),
+        geohash: 'u31bpqr',
+        expiresAt: future(48 * 60 * 60 * 1000),
+      },
+    ));
+    await assertSucceeds(createShoutBatch(
+      db,
+      'business-publisher',
+      'Ústí nad Labem',
       'business-usti-shout',
       {
         businessLocationId: 'usti',
+        businessAuthorFormat: 'branch',
         location: new GeoPoint(50.6605659, 14.0402374),
         geohash: 'u31bpqr',
         expiresAt: future(48 * 60 * 60 * 1000),
@@ -232,10 +246,11 @@ describe('business locations', () => {
     await assertSucceeds(createShoutBatch(
       authenticatedDb('lovosice-publisher'),
       'lovosice-publisher',
-      'Pražská firma – Lovosice',
+      'Lovosice',
       'business-lovosice-shout',
       {
         businessLocationId: 'lovosice',
+        businessAuthorFormat: 'branch',
         location: new GeoPoint(50.515, 14.051),
         geohash: 'u31b4bc',
       },
@@ -275,6 +290,7 @@ describe('business locations', () => {
         `blocked-${id}-shout`,
         {
           businessLocationId: id,
+          businessAuthorFormat: 'branch',
           location: new GeoPoint(50.66, 14.04),
           geohash: 'u31bpqr',
         },

@@ -129,7 +129,7 @@ class ShoutCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    identity.nickname,
+                                    shout.displayedAuthor(identity.nickname),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
                                     ),

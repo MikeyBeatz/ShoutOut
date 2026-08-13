@@ -70,8 +70,12 @@ levněji a přesněji pokrýt unit testem.
 - Business dlaždice zůstává po přechodu Profil → Shouty → Profil;
 - pouze Business účet vidí v editoru avatara tlačítko vlastního loga; před
   zapnutím Storage kliknutí zobrazí lokalizovanou informaci o připravované funkci;
-- formulář Shoutu nabízí jen aktivní ověřené pobočky, jméno je
-  `Firma – Pobočka` a poloha odpovídá vybrané pobočce, ne zařízení ani sídlu;
+- formulář Shoutu nabízí jen aktivní ověřené pobočky; viditelné jméno autora je
+  název vybrané pobočky a poloha odpovídá této pobočce, ne zařízení ani sídlu;
+- načtení veřejného Business profilu nesmí přepsat název pobočky názvem firmy;
+  realtime se na Business Shoutu aktualizuje avatar, u běžného Shoutu i přezdívka;
+- starší Business Shout uložený jako „firma – pobočka“ se zobrazí jen jako
+  „pobočka“, zatímco nový název pobočky obsahující pomlčku zůstane beze změny;
 - publikování rychle po sobě respektuje 1s cooldown a 500/24 h; 48hodinový
   checkbox se běžnému účtu nezobrazí.
 

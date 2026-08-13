@@ -34,6 +34,7 @@ class Shout {
     this.geography = const ShoutGeography(geohash: ''),
     this.authorAvatarStyle = AvatarStyle.fallback,
     this.businessLocationId,
+    this.businessAuthorFormat,
   });
 
   factory Shout.fromDocument(
@@ -65,6 +66,8 @@ class Shout {
         'geohash': data['geohash'],
       }),
       authorAvatarStyle: AvatarStyle.fromProfile(data),
+      businessLocationId: data['businessLocationId'] as String?,
+      businessAuthorFormat: data['businessAuthorFormat'] as String?,
     );
   }
   final String id;
@@ -87,6 +90,14 @@ class Shout {
   final ShoutGeography geography;
   final AvatarStyle authorAvatarStyle;
   final String? businessLocationId;
+  final String? businessAuthorFormat;
+  String displayedAuthor(String currentProfileNickname) {
+    if (businessLocationId == null) return currentProfileNickname;
+    if (businessAuthorFormat == 'branch') return author;
+    final legacySeparator = author.indexOf(' – ');
+    return legacySeparator < 0 ? author : author.substring(legacySeparator + 3);
+  }
+
   ShoutStatus get effectiveStatus {
     if (status == ShoutStatus.deleted) return ShoutStatus.deleted;
     return expiresAt.isAfter(DateTime.now())
