@@ -152,9 +152,8 @@ class _FeedPageState extends State<FeedPage> {
             }(),
           };
         });
-    final spotlightShouts =
-        widget.shouts
-            .where((shout) => shout.isActiveSpotlightWithinRange)
+    final spotlightShouts = widget.shouts
+        .where((shout) => shout.isActiveSpotlightWithinRange)
         .toList();
     final visibleFeedShouts = filteredShouts
         .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
