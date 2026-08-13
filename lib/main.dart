@@ -59,6 +59,8 @@ const _shoutPrimaryDark = Color(0xFF074B57);
 const _shoutAccent = Color(0xFF0E8EA0);
 const _shoutAccentLight = Color(0xFFDDF5F6);
 const _shoutBackground = Color(0xFFFAFDFD);
+const _shoutBrowserBackground = Color(0xFFEEF8F8);
+const _shoutBrowserBackgroundDark = Color(0xFF091519);
 const _shoutSurface = Color(0xFFFFFFFF);
 const _shoutBorder = Color(0xFFE3EEEE);
 const _shoutText = Color(0xFF1F2933);
@@ -94,8 +96,12 @@ class ShoutOutApp extends StatelessWidget {
               final appWidth = constraints.maxWidth > 840
                   ? 840.0
                   : constraints.maxWidth;
+              final browserBackground =
+                  Theme.of(context).brightness == Brightness.dark
+                  ? _shoutBrowserBackgroundDark
+                  : _shoutBrowserBackground;
               return ColoredBox(
-                color: Theme.of(context).scaffoldBackgroundColor,
+                color: browserBackground,
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: SizedBox(

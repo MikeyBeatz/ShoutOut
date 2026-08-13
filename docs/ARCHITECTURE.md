@@ -7,6 +7,8 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
 ## Základní principy
 
 - Flutter klient je společný pro Android a web.
+- Web na široké obrazovce drží aplikaci uprostřed v šířce nejvýše 840 px;
+  okolní plocha má jemný tyrkysový odstín odlišný od pozadí aplikace.
 - Firebase Authentication zajišťuje e-mailové účty a ověření adresy.
 - Cloud Firestore je hlavní databáze, realtime zdroj obrazovek a současně
   serverová validační vrstva prostřednictvím `firestore.rules`.
