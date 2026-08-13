@@ -43,11 +43,176 @@ class AuthGate extends StatelessWidget {
       if (!user.emailVerified) {
         return VerifyEmailPage(user: user);
       }
-      return BusinessApplicationGate(
+      return AccountBanGate(
         user: user,
-        child: ProfileGate(user: user, child: signedInChild),
+        child: BusinessApplicationGate(
+          user: user,
+          child: ProfileGate(user: user, child: signedInChild),
+        ),
       );
     },
+  );
+}
+
+class AccountBanGate extends StatelessWidget {
+  const AccountBanGate({super.key, required this.user, required this.child});
+
+  final User user;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('bans')
+            .doc(user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData && !snapshot.hasError) {
+            return const _LoadingPage();
+          }
+          if (snapshot.hasError) {
+            return _BanStatusLoadFailedPage(user: user);
+          }
+          final ban = snapshot.data!.data();
+          if (ban == null || !isAccountBanActive(ban, DateTime.now())) {
+            return child;
+          }
+          return _BannedAccountPage(user: user, ban: ban);
+        },
+      );
+}
+
+@visibleForTesting
+bool isAccountBanActive(Map<String, dynamic> ban, DateTime now) {
+  final expiresAt = ban['expiresAt'];
+  if (ban['permanent'] == true || expiresAt == null) return true;
+  return expiresAt is Timestamp && expiresAt.toDate().isAfter(now);
+}
+
+class _BannedAccountPage extends StatelessWidget {
+  const _BannedAccountPage({required this.user, required this.ban});
+
+  final User user;
+  final Map<String, dynamic> ban;
+
+  @override
+  Widget build(BuildContext context) {
+    final expiresAt = ban['expiresAt'];
+    final permanent = ban['permanent'] == true || expiresAt == null;
+    final end = expiresAt is Timestamp ? expiresAt.toDate().toLocal() : null;
+    final decisionId = ban['sanctionId'] as String? ?? '';
+    final reason = ban['reason'] as String? ?? 'Porušení pravidel komunity.';
+    final localizations = MaterialLocalizations.of(context);
+    final endLabel = end == null
+        ? null
+        : '${localizations.formatMediumDate(end)} '
+              '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(end))}';
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.block_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Účet je zablokován',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(reason, textAlign: TextAlign.center),
+                      const SizedBox(height: 20),
+                      ListTile(
+                        leading: const Icon(Icons.schedule_outlined),
+                        title: Text(
+                          permanent
+                              ? 'Trvalý ban'
+                              : endLabel == null
+                              ? 'Dočasný ban'
+                              : 'Ban platí do $endLabel',
+                        ),
+                      ),
+                      if (decisionId.isNotEmpty)
+                        ListTile(
+                          leading: const Icon(Icons.gavel_outlined),
+                          title: const Text('Číslo rozhodnutí'),
+                          subtitle: SelectableText(decisionId),
+                        ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => FirebaseAuth.instance.signOut(),
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Odhlásit se'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BanStatusLoadFailedPage extends StatelessWidget {
+  const _BanStatusLoadFailedPage({required this.user});
+
+  final User user;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_off_outlined, size: 56),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Stav účtu se nepodařilo ověřit.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Odhlásit se'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 

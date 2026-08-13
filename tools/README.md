@@ -150,6 +150,18 @@ soukromé odpovědi se záměrně připisují pouze běžným nebo Business test
 účtům. Moderátor, senior, administrátor a owner mohou obsah hlásit či přijmout
 soukromou odpověď, ale nikdy nejsou autory demonstračního závadného obsahu.
 
+### Úplný reset integračního scénáře
+
+`reset_integration_scenario.mjs` je destruktivní nástroj pro vývojový projekt.
+Kontrolní spuštění bez potvrzení pouze vypíše rozsah. Varianta s
+`--confirm-project=shoutout-dev-46c81` smaže všechny dokumenty ve vyjmenovaných
+vývojových kolekcích a odpovídající Firebase Authentication účty, tedy také
+ručně vytvořené demo Shouty a účty, nejen předchozí integrační scénář. Použijte
+ji pouze tehdy, když je úplné vyčištění vývojových dat výslovně zamýšlené.
+
+Pro doplnění samotné moderátorské fronty bez plošného resetu použijte přednostně
+`seed_moderation_queue.mjs`.
+
 ## Doplnění geografických údajů
 
 Po nasazení geografického modelu doplní starší shouty:

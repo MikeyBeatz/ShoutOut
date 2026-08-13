@@ -176,6 +176,12 @@ Ban úplně uzamkne účet. Po otevření aplikace se místo obsahu zobrazí:
 - číslo moderátorského rozhodnutí,
 - možnost odhlášení.
 
+Kontrola aktivního dokumentu `bans/{uid}` je součástí společného autentizačního
+vstupu aplikace, takže platí pro běžné rozhraní i trasu `/admin` a reaguje na
+zrušení postihu bez nového přihlášení. Dočasný ban se po uplynutí `expiresAt`
+už neuplatní; dokument bez konce platnosti se považuje za trvalý. Pokud klient
+stav banu nedokáže bezpečně načíst, nepustí účet dál a nabídne pouze odhlášení.
+
 Moderátor může udělit ban na 1, 7 nebo 30 dní. Senior moderátor navíc na 90 dní
 nebo trvale. Možnost podat odvolání ještě není implementována.
 
