@@ -27,14 +27,6 @@ class ProfilePage extends StatelessWidget {
               avatarId: avatarId,
               avatarStyle: avatarStyle,
               createdAt: createdAt,
-              onEdit: profile == null
-                  ? null
-                  : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EditProfilePage(userId: uid),
-                      ),
-                    ),
             ),
             Expanded(
               child: ListView(
@@ -71,14 +63,12 @@ class ProfileHeader extends StatelessWidget {
     required this.avatarId,
     required this.avatarStyle,
     required this.createdAt,
-    this.onEdit,
   });
 
   final String nickname;
   final String? avatarId;
   final AvatarStyle? avatarStyle;
   final DateTime? createdAt;
-  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -142,17 +132,6 @@ class ProfileHeader extends StatelessWidget {
                             color: Colors.white70,
                             fontSize: 13,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        TextButton.icon(
-                          onPressed: onEdit,
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.edit_outlined, size: 17),
-                          label: Text(tr(context, 'Upravit profil')),
                         ),
                       ],
                     ),
@@ -237,11 +216,27 @@ class ProfileTileGrid extends StatelessWidget {
     builder: (context, snapshot) {
       final tiles = <Widget>[
         ProfileActionTile(
+          icon: Icons.manage_accounts_outlined,
+          title: tr(context, 'Upravit profil'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => EditProfilePage(userId: userId)),
+          ),
+        ),
+        ProfileActionTile(
           icon: Icons.help_outline,
           title: tr(context, 'Nápověda'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const HelpPage()),
+          ),
+        ),
+        ProfileActionTile(
+          icon: Icons.bug_report_outlined,
+          title: tr(context, 'Nahlásit chybu'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BugReportPage()),
           ),
         ),
         ProfileActionTile(
@@ -300,14 +295,9 @@ class ProfileTileGrid extends StatelessWidget {
           ),
         );
       }
-      if (tiles.length % 3 == 1) {
-        final last = tiles.removeLast();
-        tiles.addAll([const SizedBox.shrink(), last, const SizedBox.shrink()]);
-      } else if (tiles.length % 3 == 2) {
-        final last = tiles.removeLast();
-        final previous = tiles.removeLast();
-        tiles.addAll([previous, const SizedBox.shrink(), last]);
-      }
+      final arrangedTiles = arrangeProfileTiles(
+        tiles,
+      ).map((tile) => tile ?? const SizedBox.shrink()).toList();
       return LayoutBuilder(
         builder: (context, constraints) => Center(
           child: SizedBox(
@@ -319,7 +309,7 @@ class ProfileTileGrid extends StatelessWidget {
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               mainAxisExtent: 92,
-              children: tiles,
+              children: arrangedTiles,
             ),
           ),
         ),

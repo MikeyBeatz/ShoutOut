@@ -310,13 +310,13 @@ odložené nápady až za hlavními uživatelskými cestami.
 ### Profil a avatary
 
 - [ ] **Přestavět akce na kartě Profil.**
-  - **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
+  - [x] **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
   - **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
     **Upravit profil**; zachovat stávající validaci a lokalizace.
-  - Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
+  - [x] Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
     po přidání druhého se první posune doleva a nový je uprostřed; třetí obsadí
     pravou pozici. Další řádek začne znovu uprostřed stejným pravidlem.
-  - Rozložení odvozovat z pořadí skutečně viditelných dlaždic včetně Business a
+  - [x] Rozložení odvozovat z pořadí skutečně viditelných dlaždic včetně Business a
     staff rolí, bez prázdných klikacích míst a se stabilní šířkou na mobilu i webu.
 
 - [x] **Zobrazovat avatar autora na kartách Shoutů.**

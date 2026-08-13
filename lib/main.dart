@@ -25,6 +25,7 @@ import 'avatar_style.dart';
 import 'firebase_options.dart';
 import 'legal.dart';
 import 'public_profile.dart';
+import 'profile_tile_layout.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 import 'l10n/business_text.dart';
