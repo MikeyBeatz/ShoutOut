@@ -99,6 +99,13 @@ The feed, Saved, My Shouts, and Profile share one fixed background layer:
 Runtime avatars in `assets/avatars/` have transparent backgrounds. Their
 original opaque artwork is preserved in `avatars/original/`.
 
+The application uses 512 × 512 px transparent runtime derivatives. The largest
+current UI avatar is 116 logical pixels in diameter, so 512 px remains sharp up
+to a device pixel ratio of 4 with additional margin. High-resolution sources in
+`design/avatars/` and the copies intended for marketing work in
+`promo/avatars/` must stay at their original dimensions; regenerate only the
+runtime files when the application size needs to be optimized.
+
 Each profile combines one of 24 avatar images with:
 
 - two colors from the curated 16-color palette (the same color creates a
@@ -119,6 +126,7 @@ When a master asset changes, update its runtime copy as well:
 | `logos/app-icon-master.png` | `assets/branding/app_icon.png` |
 | `logos/shoutout-mark-transparent.png` | `assets/branding/feed_mark.png` |
 | `logos/shoutout-mark-transparent.png` | `android/app/src/main/res/drawable-nodpi/ic_launcher_mark.png` |
+| `avatars/original/` and `avatars/generated-source/` | 512 × 512 px transparent derivatives in `assets/avatars/` |
 | `fonts/Urbanist-Medium.ttf` | `assets/fonts/Urbanist-Medium.ttf` |
 | `fonts/OFL-Urbanist.txt` | `assets/fonts/OFL-Urbanist.txt` |
 
