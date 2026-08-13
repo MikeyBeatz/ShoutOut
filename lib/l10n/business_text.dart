@@ -8,6 +8,104 @@ String businessTr(BuildContext context, String cs) {
 }
 
 const _translations = <String, Map<String, String>>{
+  'Upravit business logo': {
+    'en': 'Edit business logo',
+    'de': 'Unternehmenslogo bearbeiten',
+    'pl': 'Edytuj logo firmy',
+    'sk': 'Upraviť firemné logo',
+    'uk': 'Редагувати логотип компанії',
+    'vi': 'Chỉnh sửa logo doanh nghiệp',
+  },
+  'Posuň a přibliž obrázek tak, aby důležitá část zůstala uvnitř kruhu.': {
+    'en':
+        'Move and zoom the image so the important part stays inside the circle.',
+    'de':
+        'Verschiebe und vergrößere das Bild, sodass der wichtige Teil im Kreis bleibt.',
+    'pl':
+        'Przesuń i powiększ obraz, aby ważna część pozostała wewnątrz okręgu.',
+    'sk': 'Posuň a priblíž obrázok tak, aby dôležitá časť zostala v kruhu.',
+    'uk':
+        'Перемістіть і масштабуйте зображення, щоб важлива частина залишилася в колі.',
+    'vi': 'Di chuyển và thu phóng ảnh để phần quan trọng nằm trong vòng tròn.',
+  },
+  'Obnovit výřez': {
+    'en': 'Reset crop',
+    'de': 'Ausschnitt zurücksetzen',
+    'pl': 'Zresetuj kadr',
+    'sk': 'Obnoviť výrez',
+    'uk': 'Скинути кадрування',
+    'vi': 'Đặt lại vùng cắt',
+  },
+  'Připravuji…': {
+    'en': 'Preparing…',
+    'de': 'Wird vorbereitet…',
+    'pl': 'Przygotowywanie…',
+    'sk': 'Pripravujem…',
+    'uk': 'Підготовка…',
+    'vi': 'Đang chuẩn bị…',
+  },
+  'Použít výřez': {
+    'en': 'Use crop',
+    'de': 'Ausschnitt verwenden',
+    'pl': 'Użyj kadru',
+    'sk': 'Použiť výrez',
+    'uk': 'Використати кадрування',
+    'vi': 'Dùng vùng cắt',
+  },
+  'Výsledkem je nový obrázek 512 × 512 px. Původní metadata ani části mimo výřez se neukládají.': {
+    'en':
+        'The result is a new 512 × 512 px image. Original metadata and areas outside the crop are not saved.',
+    'de':
+        'Das Ergebnis ist ein neues Bild mit 512 × 512 px. Ursprüngliche Metadaten und Bereiche außerhalb des Ausschnitts werden nicht gespeichert.',
+    'pl':
+        'Wynikiem jest nowy obraz 512 × 512 px. Oryginalne metadane i obszary poza kadrem nie są zapisywane.',
+    'sk':
+        'Výsledkom je nový obrázok 512 × 512 px. Pôvodné metadáta ani časti mimo výrezu sa neukladajú.',
+    'uk':
+        'Результатом є нове зображення 512 × 512 пікселів. Початкові метадані та ділянки поза кадром не зберігаються.',
+    'vi':
+        'Kết quả là ảnh mới 512 × 512 px. Siêu dữ liệu gốc và phần ngoài vùng cắt không được lưu.',
+  },
+  'Použij obrázek JPG, PNG nebo WebP.': {
+    'en': 'Use a JPG, PNG or WebP image.',
+    'de': 'Verwende ein JPG-, PNG- oder WebP-Bild.',
+    'pl': 'Użyj obrazu JPG, PNG lub WebP.',
+    'sk': 'Použi obrázok JPG, PNG alebo WebP.',
+    'uk': 'Використайте зображення JPG, PNG або WebP.',
+    'vi': 'Hãy dùng ảnh JPG, PNG hoặc WebP.',
+  },
+  'Obrázek musí mít alespoň 512 × 512 pixelů.': {
+    'en': 'The image must be at least 512 × 512 pixels.',
+    'de': 'Das Bild muss mindestens 512 × 512 Pixel groß sein.',
+    'pl': 'Obraz musi mieć co najmniej 512 × 512 pikseli.',
+    'sk': 'Obrázok musí mať aspoň 512 × 512 pixelov.',
+    'uk': 'Зображення має бути щонайменше 512 × 512 пікселів.',
+    'vi': 'Ảnh phải có kích thước ít nhất 512 × 512 pixel.',
+  },
+  'Obrázek může mít nejvýše 10 MB.': {
+    'en': 'The image can be at most 10 MB.',
+    'de': 'Das Bild darf höchstens 10 MB groß sein.',
+    'pl': 'Obraz może mieć maksymalnie 10 MB.',
+    'sk': 'Obrázok môže mať najviac 10 MB.',
+    'uk': 'Розмір зображення не може перевищувати 10 МБ.',
+    'vi': 'Ảnh có dung lượng tối đa 10 MB.',
+  },
+  'Obrázek se nepodařilo načíst.': {
+    'en': 'The image could not be loaded.',
+    'de': 'Das Bild konnte nicht geladen werden.',
+    'pl': 'Nie udało się wczytać obrazu.',
+    'sk': 'Obrázok sa nepodarilo načítať.',
+    'uk': 'Не вдалося завантажити зображення.',
+    'vi': 'Không thể tải ảnh.',
+  },
+  'Výřez se nepodařilo připravit.': {
+    'en': 'The crop could not be prepared.',
+    'de': 'Der Ausschnitt konnte nicht erstellt werden.',
+    'pl': 'Nie udało się przygotować kadru.',
+    'sk': 'Výrez sa nepodarilo pripraviť.',
+    'uk': 'Не вдалося підготувати кадрування.',
+    'vi': 'Không thể chuẩn bị vùng cắt.',
+  },
   'Business žádost čeká na ověření': {
     'en': 'Business application pending verification',
     'de': 'Unternehmensantrag wartet auf Prüfung',

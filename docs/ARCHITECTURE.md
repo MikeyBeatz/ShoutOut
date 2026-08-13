@@ -65,6 +65,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/main.dart` | Inicializace, téma, routing a seznam Flutter `part` modulů. |
 | `lib/auth_gate.dart` | Přihlášení, běžná registrace, ověření e-mailu, právní a stavové brány, onboarding a vytvoření profilu. |
 | `lib/business_registration.dart` | Samostatný registrační formulář Business účtu a zápis žádosti. |
+| `lib/business_logo_editor.dart` | Lokální výběr a bezpečný 512px výřez vlastního Business loga; bez vzdáleného uložení do zapnutí Storage. |
 | `lib/address_autocomplete.dart` | Geoapify autocomplete a převod výsledku na adresu, souřadnice a provider place ID. |
 | `lib/public_profile.dart` | Realtime načtení aktuální přezdívky a avataru. |
 | `lib/geography.dart` | Geohash, veřejné zaokrouhlení souřadnic a geografický model. |

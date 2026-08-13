@@ -9,7 +9,7 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 | Vrstva | Umístění | Co ověřuje |
 |---|---|---|
 | Dart unit testy | `test/account_role_test.dart`, `app_theme_test.dart`, `geography_test.dart`, `shout_test.dart` | Role, téma, geohash, veřejné zaokrouhlení, životní cyklus a řazení Shoutu, avatary a normalizaci nadpisu. |
-| Flutter widget testy | `test/widget_test.dart`, `localization_test.dart` | Hlavní UI, zachování filtrů, avatar, datum profilu, onboarding, systém, heslo, Storage feature flag a všech sedm jazyků. |
+| Flutter widget testy | `test/widget_test.dart`, `localization_test.dart`, `business_logo_editor_test.dart` | Hlavní UI, zachování filtrů, avatar, datum profilu, onboarding, systém, heslo, Storage feature flag, všech sedm jazyků a geometrii i 512px výstup Business loga. |
 | Firestore Rules integrační testy | `tools/rules/firestore.rules.test.mjs` | Pozitivní i útočné scénáře registrace, rolí, Business poboček, obsahu, čítačů, limitů, soukromí, oznámení a moderace. |
 | Vývojové nástroje | `tools/business_activation.test.mjs` | Odmítnutí neověřeného nebo odlišného e-mailu, neplatného stavu a pobočky a sestavení atomické Business aktivace. |
 | Functions unit testy | `functions/index.test.js` | Normalizaci ISO regionu a bezpečné zachování provider-specific hodnot. |

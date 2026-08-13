@@ -198,6 +198,12 @@ Role 2 otevře čtyři funkční/rezervované oblasti:
 - **Tokeny** – placeholder budoucí monetizace;
 - **Nákupy a faktury** – placeholder budoucích firemních dokladů.
 
+Vlastní Business logo má připravený lokální editor: přijímá JPG, PNG nebo WebP
+do 10 MB a nejméně 512 × 512 px, umožňuje posun a přiblížení ve čtvercovém
+výřezu s kruhovou bezpečnou zónou a vytvoří nový PNG 512 × 512 px bez původních
+metadat. Vstup do editoru se v aktuálním UI nezobrazuje, dokud nebude bezpečně
+zapnuté trvalé uložení ve Firebase Storage.
+
 ## Centrum oznámení
 
 Seznam je řazený nejnovější aktualizací, maximum 50. Nepřečtená karta má

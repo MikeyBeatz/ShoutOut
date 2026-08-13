@@ -50,6 +50,39 @@ void main() {
     });
   }
 
+  for (final expectation in <(String, String)>[
+    ('cs', 'Upravit business logo'),
+    ('en', 'Edit business logo'),
+    ('de', 'Unternehmenslogo bearbeiten'),
+    ('pl', 'Edytuj logo firmy'),
+    ('sk', 'Upraviť firemné logo'),
+    ('uk', 'Редагувати логотип компанії'),
+    ('vi', 'Chỉnh sửa logo doanh nghiệp'),
+  ]) {
+    testWidgets('translates Business logo editor to ${expectation.$1}', (
+      tester,
+    ) async {
+      late BuildContext localizedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(expectation.$1),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) {
+              localizedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(
+        businessTr(localizedContext, 'Upravit business logo'),
+        expectation.$2,
+      );
+    });
+  }
+
   test('new languages have complete legal documents', () {
     for (final document in <List<(String, String)>>[
       legalSkTerms,

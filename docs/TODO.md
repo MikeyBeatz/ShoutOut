@@ -196,6 +196,14 @@ odložené nápady až za hlavními uživatelskými cestami.
     do všech sedmi jazyků aplikace (čeština, angličtina, němčina, polština,
     slovenština, ukrajinština a vietnamština); názvy zemí přebírat lokalizovaně
     z udržovaného ISO seznamu.
+  - [ ] Přidat aktivním Business účtům vlastní logo místo systémového avatara.
+    - [x] Připravit lokální editor s posunem a zoomem, kruhovým náhledem,
+      kontrolou formátu, 10MB limitem a minimálním rozlišením 512 × 512 px.
+      Ukládaný výsledek je nový 512 × 512 PNG bez původních metadat a částí
+      mimo výřez; všechny texty jsou dostupné v sedmi jazycích.
+    - [ ] Tlačítko a trvalé nahrání zpřístupnit až po zapnutí Firebase Storage,
+      doplnění pravidel, cesty souboru, cache invalidace a bezpečného odstranění
+      předchozí verze. Do té doby editor není z uživatelského UI dostupný.
   - [ ] Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes
     VIES a následné automatické přidělení role až po úspěšné kontrole. Pokud pro
     zemi není dostupné bezplatné rozhraní, přijmout ručně vyplněný identifikátor

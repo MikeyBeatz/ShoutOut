@@ -117,6 +117,12 @@ New profiles start with a random valid combination and can customize it during
 onboarding. Existing profiles without gradient fields use the teal-to-navy
 diagonal fallback until the user saves a new combination.
 
+Business accounts may later replace the generated avatar with their own logo.
+The local editor always rerenders the selected crop as a 512 × 512 px PNG; the
+original upload, its metadata, and pixels outside the crop are not retained.
+Persistent upload remains disabled until Firebase Storage is enabled and
+secured, so no master artwork belongs in the runtime asset directory.
+
 ## Runtime asset map
 
 When a master asset changes, update its runtime copy as well:
