@@ -44,6 +44,12 @@ uvolní až po důvěryhodném přidělení role `business` a vytvoření aktivn
 verze nemá automatický serverový převod žádosti na aktivní profil; tento krok je
 popsán v `BUSINESS_VERIFICATION.md`.
 
+Ve vývojovém projektu lze po ruční kontrole údajů použít chráněný Admin SDK
+nástroj `npm run activate:business`. Ve výchozím režimu pouze vypíše plán a až
+po explicitním potvrzení projektu, UID a pobočky atomicky vytvoří roli 2,
+Business profil a první pobočku. Tento vývojový postup nenahrazuje cílové
+automatické ověření registru.
+
 ## Vytvoření Shoutu
 
 Společná pole:

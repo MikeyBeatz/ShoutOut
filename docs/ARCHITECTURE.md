@@ -160,7 +160,9 @@ vysvětluje záměr, nenahrazuje pravidla.
 
 ## Co dnes není automatizované
 
-- aktivace Business žádosti a vytvoření první pobočky,
+- automatická aktivace Business žádosti přes registry; vývojový projekt má
+  bezpečný ruční Admin SDK nástroj, který atomicky vytvoří roli, profil a první
+  pobočku až po potvrzení e-mailu a kontrole údajů,
 - ověření ARES/VIES a platby,
 - push notifikace a oznámení sledujícím,
 - fyzické TTL mazání na placeném plánu,

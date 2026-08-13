@@ -39,6 +39,10 @@ jobs:
         working-directory: tools
         run: npm ci
 
+      - name: Test development tools
+        working-directory: tools
+        run: npm run test:tools
+
       - name: Install Firebase CLI
         run: npm install --global firebase-tools@15.24.0
 

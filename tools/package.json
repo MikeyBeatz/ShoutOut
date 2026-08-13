@@ -5,6 +5,8 @@
   "scripts": {
     "reconcile:data": "node reconcile_counters.mjs",
     "set:role": "node set_role.mjs",
+    "activate:business": "node activate_business_application.mjs",
+    "test:tools": "node --test business_activation.test.mjs",
     "backfill:geography": "node backfill_shout_geography.mjs",
     "backfill:public-profiles": "node backfill_public_profiles.mjs",
     "reset:integration": "node reset_integration_scenario.mjs",

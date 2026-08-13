@@ -120,6 +120,11 @@ Role, Business profil a případná demo data se zakládají důvěryhodnými Ad
 nástroji podle `tools/README.md`, nikoli ručně z klienta. Přesný katalog kolekcí
 je v `DATA_MODEL.md`.
 
+Čekající Business žádost lze ve vývojovém projektu po potvrzení e-mailu a ruční
+kontrole firmy i první pobočky aktivovat příkazem `npm run activate:business`
+podle `tools/README.md`. Výchozí spuštění je pouze náhled; skutečný atomický
+zápis vyžaduje `--apply` a potvrzení project ID, UID a adresy pobočky.
+
 ### 3. Authentication a e-maily
 
 - Přidejte všechny Hosting a vlastní domény mezi autorizované domény Auth.
@@ -200,6 +205,7 @@ flutter test
 
 Push-Location tools
 npm ci
+npm run test:tools
 npm run test:rules
 Pop-Location
 
@@ -223,7 +229,8 @@ Pop-Location
 ```
 
 GitHub Actions v `.github/workflows/flutter.yml` kontroluje formát, analyzátor,
-Flutter testy, Firestore Rules a debug web build při pushi i pull requestu.
+Flutter testy, čisté testy vývojových nástrojů, Firestore Rules a debug web
+build při pushi i pull requestu.
 Functions test je proto nutné lokálně spustit vždy, když se `functions/` změní.
 Povinné ruční scénáře pro dva účty, Business pobočky, realtime oznámení,
 moderaci a různá zařízení jsou v `TESTING.md`.

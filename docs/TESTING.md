@@ -11,12 +11,14 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 | Dart unit testy | `test/account_role_test.dart`, `app_theme_test.dart`, `geography_test.dart`, `shout_test.dart` | Role, téma, geohash, veřejné zaokrouhlení, životní cyklus a řazení Shoutu, avatary a normalizaci nadpisu. |
 | Flutter widget testy | `test/widget_test.dart`, `localization_test.dart` | Hlavní UI, zachování filtrů, avatar, datum profilu, onboarding, systém, heslo, Storage feature flag a všech sedm jazyků. |
 | Firestore Rules integrační testy | `tools/rules/firestore.rules.test.mjs` | Pozitivní i útočné scénáře registrace, rolí, Business poboček, obsahu, čítačů, limitů, soukromí, oznámení a moderace. |
+| Vývojové nástroje | `tools/business_activation.test.mjs` | Odmítnutí neověřeného nebo odlišného e-mailu, neplatného stavu a pobočky a sestavení atomické Business aktivace. |
 | Functions unit testy | `functions/index.test.js` | Normalizaci ISO regionu a bezpečné zachování provider-specific hodnot. |
 | Statická kontrola a build | `dart format`, `flutter analyze`, `flutter build web` | Konzistenci zdroje, typové/lint chyby a sestavitelnost webu. |
 
-CI workflow `.github/workflows/flutter.yml` spouští Flutter vrstvu, Rules a web
-build při každém pushi a pull requestu. Functions test je zatím lokální povinná
-kontrola. Přesné příkazy a závislosti jsou v `SETUP_AND_OPERATIONS.md`.
+CI workflow `.github/workflows/flutter.yml` spouští Flutter vrstvu, čisté testy
+vývojových nástrojů, Rules a web build při každém pushi a pull requestu.
+Functions test je zatím lokální povinná kontrola. Přesné příkazy a závislosti
+jsou v `SETUP_AND_OPERATIONS.md`.
 
 Počet testů není cílová metrika. Test přidejte vždy, když opravujete regresi,
 měníte Firestore zápis/pravidlo nebo přidáváte větev s uživatelsky důležitým
@@ -32,6 +34,9 @@ levněji a přesněji pokrýt unit testem.
 - Business registrace zůstane před potvrzením na ověření e-mailu a po potvrzení
   na stavu žádosti; do profilového onboardingu pokračuje až s rolí 2 a aktivním
   Business profilem;
+- kontrolní spuštění Business aktivace nic nezapíše; potvrzené spuštění vytvoří
+  roli 2, profil a první pobočku společně a druhé spuštění pouze oznámí, že je
+  žádost již aktivní;
 - chybné/krátké heslo, rozdílné potvrzení, obsazená přezdívka a opětovné použití
   existujícího e-mailu;
 - reset hesla na existujícím i neexistujícím e-mailu bez úniku existence účtu;

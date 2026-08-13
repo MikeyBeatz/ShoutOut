@@ -187,6 +187,9 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [ ] Při budoucí serverové aktivaci business žádosti atomicky převést údaje
     první provozovny do `businessProfiles/{uid}/locations/{locationId}`; bez
     úspěšného vytvoření provozovny účet neoznačit jako aktivní.
+  - [x] Pro dobu před serverovou automatizací přidat vývojový Admin SDK nástroj
+    s dry-runem a explicitním potvrzením, který po ověření e-mailu a ruční
+    kontrole atomicky vytvoří roli 2, Business profil a první pobočku.
   - [x] Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
     Česko, Německo, Polsko, Slovensko a další prioritní evropské země řadit nahoru.
   - [x] Doplnit překlady všech business obrazovek a validačních/chybových textů

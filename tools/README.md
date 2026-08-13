@@ -108,6 +108,40 @@ npm run set:role -- moderator@example.com moderator --countries=CZ,DE --subdivis
 Administrátor a owner dostanou globální rozsah automaticky. Moderátor a senior
 moderátor bez regionu neuvidí regionální pracovní frontu.
 
+## Aktivace čekající Business žádosti ve vývoji
+
+Dokud není nasazené automatické ověření ARES/VIES, lze dokončit skutečnou
+Business registraci jedním vývojovým Admin SDK nástrojem. Nástroj odmítne jiný
+projekt než `shoutout-dev-46c81`, neověřený nebo odlišný kontaktní e-mail,
+neúplnou žádost a přepsání existujícího profilu či první pobočky.
+
+Nejdřív spusťte pouze kontrolní náhled bez zápisu:
+
+```powershell
+$env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
+npm run activate:business -- business@example.com
+```
+
+Porovnejte vypsané UID, oficiální název, registrační číslo, pobočku a adresu s
+důvěryhodným zdrojem. Teprve potom spusťte zápis s přesným UID z náhledu:
+
+```powershell
+npm run activate:business -- business@example.com --apply --confirm-project=shoutout-dev-46c81 --confirm-uid=FIREBASE_UID --confirm-location
+```
+
+Jedna Firestore transakce vytvoří roli 2, aktivní Business profil a první
+pobočku `initial` a označí žádost jako aktivní. Již existující správná Business
+role je zachována. Skript nikdy nepovažuje klientský Geoapify výsledek za
+automaticky důvěryhodný; příznak `--confirm-location` vyjadřuje ruční kontrolu
+operátorem. Jde pouze o vývojový mezikrok, ne náhradu cílového serverového
+ověření registru.
+
+Čistou transformační logiku bez přístupu k Firebase ověří:
+
+```powershell
+npm run test:tools
+```
+
 ## Doplnění geografických údajů
 
 Po nasazení geografického modelu doplní starší shouty:
