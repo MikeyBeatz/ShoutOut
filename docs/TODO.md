@@ -20,6 +20,14 @@ Toto je jediné místo pro otevřené produktové, grafické, lokalizační, ser
 a produkční úkoly projektu. Samotné zapsání bodu neznamená, že je
 implementovaný.
 
+## Brána před veřejným spuštěním
+
+- [ ] Splnit předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument
+  sdružuje produkční, bezpečnostní, právní, distribuční, testovací a provozní
+  předpoklady. Jednotlivé implementační úkoly zůstávají v tomto backlogu.
+- [ ] Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
+  samostatným plánem `docs/local/ShoutOut_marketingovy_plan_spusteni.docx`.
+
 ## Aktuální produktové úpravy
 
 Otevřené produktové úkoly řešit v pořadí následujících etap. Pořadí drží
