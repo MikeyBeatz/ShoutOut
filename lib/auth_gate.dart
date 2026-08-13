@@ -8,12 +8,15 @@ import 'package:flutter/services.dart';
 
 import 'app_locale.dart';
 import 'app_theme.dart';
+import 'account_deletion.dart';
 import 'avatar_style.dart';
 import 'business_application_state.dart';
 import 'business_registration.dart';
+import 'email_verification.dart';
 import 'legal.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
+import 'nickname_validation.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key, required this.signedInChild});
@@ -79,6 +82,33 @@ class BusinessApplicationGate extends StatelessWidget {
         return child;
       }
       final application = applicationSnapshot.data!.data() ?? const {};
+
+      // A newly registered Business account cannot have an active role yet.
+      // Show its known application state immediately instead of adding another
+      // network round trip to the registration critical path. Once the trusted
+      // activation tool changes the application to active, the role and
+      // Business profile checks below still remain mandatory.
+      final applicationStatus = application['status'] as String?;
+      if (applicationStatus == 'pending_email' && user.emailVerified) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          try {
+            await applicationSnapshot.data!.reference.update({
+              'status': 'checking',
+              'emailVerifiedAt': FieldValue.serverTimestamp(),
+            });
+          } on FirebaseException {
+            // The status page remains usable and its refresh action retries the
+            // authenticated reads if this best-effort transition fails.
+          }
+        });
+      }
+      if (!requiresBusinessActivationChecks(applicationStatus)) {
+        return _BusinessApplicationStatusPage(
+          user: user,
+          application: application,
+          profileStatus: applicationStatus,
+        );
+      }
 
       return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -257,6 +287,16 @@ class _BusinessApplicationStatusPageState
                             : () => FirebaseAuth.instance.signOut(),
                         child: Text(tr(context, 'Odhlásit se')),
                       ),
+                      if (!rejected && !suspended)
+                        TextButton(
+                          onPressed: _busy ? null : _cancelRegistration,
+                          child: Text(
+                            businessTr(
+                              context,
+                              'Zrušit registraci a začít znovu',
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 12),
                       SelectableText(
                         '${businessTr(context, 'V případě potíží kontaktujte podporu:')} $businessSupportEmail',
@@ -281,6 +321,18 @@ class _BusinessApplicationStatusPageState
       await FirebaseAuth.instance.currentUser
           ?.getIdToken(true)
           .timeout(const Duration(seconds: 20));
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser?.emailVerified == true &&
+          widget.application['status'] == 'pending_email') {
+        await FirebaseFirestore.instance
+            .collection('businessApplications')
+            .doc(widget.user.uid)
+            .update({
+              'status': 'checking',
+              'emailVerifiedAt': FieldValue.serverTimestamp(),
+            })
+            .timeout(const Duration(seconds: 20));
+      }
       await Future.wait([
         FirebaseFirestore.instance
             .collection('businessApplications')
@@ -297,6 +349,30 @@ class _BusinessApplicationStatusPageState
       ]).timeout(const Duration(seconds: 20));
     } on TimeoutException {
       _showRefreshError();
+    } on FirebaseException {
+      _showRefreshError();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _cancelRegistration() async {
+    final password = await _requestRegistrationPassword(context);
+    if (password == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await _cancelIncompleteRegistration(widget.user, password);
+      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+    } on FirebaseAuthException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(context, 'Registraci se nepodařilo zrušit. Zkontroluj heslo.'),
+            ),
+          ),
+        );
+      }
     } on FirebaseException {
       _showRefreshError();
     } finally {
@@ -366,7 +442,12 @@ class ProfileGate extends StatelessWidget {
                 user: user,
                 child: LegalAcceptanceGate(
                   user: user,
-                  child: OnboardingHelpGate(userId: user.uid, child: child),
+                  child: OnboardingHelpGate(
+                    userId: user.uid,
+                    showInitially:
+                        snapshot.data!.data()?['showOnboardingHelp'] == true,
+                    child: child,
+                  ),
                 ),
               ),
             ),
@@ -379,10 +460,12 @@ class OnboardingHelpGate extends StatefulWidget {
   const OnboardingHelpGate({
     super.key,
     required this.userId,
+    required this.showInitially,
     required this.child,
   });
 
   final String userId;
+  final bool showInitially;
   final Widget child;
 
   @override
@@ -394,27 +477,16 @@ class _OnboardingHelpGateState extends State<OnboardingHelpGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_finishedForSession) return widget.child;
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const _LoadingPage();
-        final showHelp = snapshot.data!.data()?['showOnboardingHelp'] as bool?;
-        if (showHelp != true) return widget.child;
-        return OnboardingHelpPage(
-          onFinished: (neverShowAgain) async {
-            if (neverShowAgain) {
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(widget.userId)
-                  .update({'showOnboardingHelp': false});
-            }
-            if (mounted) setState(() => _finishedForSession = true);
-          },
-        );
+    if (_finishedForSession || !widget.showInitially) return widget.child;
+    return OnboardingHelpPage(
+      onFinished: (neverShowAgain) async {
+        if (neverShowAgain) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.userId)
+              .update({'showOnboardingHelp': false});
+        }
+        if (mounted) setState(() => _finishedForSession = true);
       },
     );
   }
@@ -1299,9 +1371,9 @@ class _SignInPageState extends State<SignInPage> {
         if (mounted) {
           setState(() => _authProgress = 'Odesílám ověřovací e-mail…');
         }
-        await credential.user?.sendEmailVerification().timeout(
-          const Duration(seconds: 20),
-        );
+        await credential.user
+            ?.sendEmailVerification(emailVerificationActionSettings)
+            .timeout(const Duration(seconds: 20));
         _logAuthTiming('send-verification-email', stopwatch);
       } else {
         await FirebaseAuth.instance
@@ -1442,42 +1514,57 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   bool _busy = false;
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.mark_email_unread_outlined, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              tr(context, 'Ověř svůj e-mail'),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+    body: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.mark_email_unread_outlined,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      tr(context, 'Ověř svůj e-mail'),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${tr(context, 'Ověřovací odkaz byl zaslán na adresu')} ${widget.user.email}. ${tr(context, 'Po kliknutí se vrať sem.')}',
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      onPressed: _busy ? null : _check,
+                      child: Text(tr(context, 'Už jsem e-mail ověřil/a')),
+                    ),
+                    TextButton(
+                      onPressed: _busy ? null : _resend,
+                      child: Text(tr(context, 'Poslat ověřovací e-mail znovu')),
+                    ),
+                    TextButton(
+                      onPressed: _busy ? null : _startOver,
+                      child: Text(
+                        tr(context, 'Zrušit registraci a začít znovu'),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => FirebaseAuth.instance.signOut(),
+                      child: Text(tr(context, 'Odhlásit se')),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              '${tr(context, 'Ověřovací odkaz byl zaslán na adresu')} ${widget.user.email}. ${tr(context, 'Po kliknutí se vrať sem.')}',
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _busy ? null : _check,
-              child: Text(tr(context, 'Už jsem e-mail ověřil/a')),
-            ),
-            TextButton(
-              onPressed: _busy ? null : _resend,
-              child: Text(tr(context, 'Poslat ověřovací e-mail znovu')),
-            ),
-            TextButton(
-              onPressed: _busy ? null : _startOver,
-              child: Text(tr(context, 'Zpět a opravit e-mail')),
-            ),
-            TextButton(
-              onPressed: () => FirebaseAuth.instance.signOut(),
-              child: Text(tr(context, 'Odhlásit se')),
-            ),
-          ],
+          ),
         ),
       ),
     ),
@@ -1527,9 +1614,9 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     setState(() => _busy = true);
     final stopwatch = Stopwatch()..start();
     try {
-      await widget.user.sendEmailVerification().timeout(
-        const Duration(seconds: 20),
-      );
+      await widget.user
+          .sendEmailVerification(emailVerificationActionSettings)
+          .timeout(const Duration(seconds: 20));
       _logAuthTiming('resend-verification-email', stopwatch);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1557,10 +1644,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   }
 
   Future<void> _startOver() async {
+    final password = await _requestRegistrationPassword(context);
+    if (password == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      await widget.user.delete();
-      await FirebaseAuth.instance.signOut();
+      await _cancelIncompleteRegistration(widget.user, password);
+      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1577,6 +1666,65 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   }
 }
 
+Future<String?> _requestRegistrationPassword(BuildContext context) async {
+  final controller = TextEditingController();
+  final password = await showDialog<String>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(tr(dialogContext, 'Zrušit registraci?')),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tr(
+              dialogContext,
+              'Účet bude odstraněn a se stejným e-mailem můžeš registraci spustit znovu.',
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: controller,
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: tr(dialogContext, 'Potvrď heslo'),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: Text(tr(dialogContext, 'Zpět')),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialogContext, controller.text),
+          child: Text(tr(dialogContext, 'Zrušit registraci')),
+        ),
+      ],
+    ),
+  );
+  controller.dispose();
+  return password?.isEmpty == true ? null : password;
+}
+
+Future<void> _cancelIncompleteRegistration(User user, String password) async {
+  await user.reauthenticateWithCredential(
+    EmailAuthProvider.credential(email: user.email!, password: password),
+  );
+  await hideActiveShoutsBeforeAccountDeletion(user.uid);
+  final application = FirebaseFirestore.instance
+      .collection('businessApplications')
+      .doc(user.uid);
+  final snapshot = await application.get();
+  if (snapshot.exists) {
+    await application.update({
+      'status': 'cancelled',
+      'cancelledAt': FieldValue.serverTimestamp(),
+    });
+  }
+  await user.delete();
+}
+
 class NicknamePage extends StatefulWidget {
   const NicknamePage({super.key, required this.user});
   final User user;
@@ -1588,6 +1736,8 @@ class _NicknamePageState extends State<NicknamePage> {
   final _nickname = TextEditingController();
   bool _busy = false;
   bool? _isAvailable;
+  bool _hasNicknameInput = false;
+  bool _hasValidNicknameFormat = false;
   Timer? _availabilityTimer;
   AvatarStyle _avatarStyle = AvatarStyle.random();
   static const _adjectives = [
@@ -1762,21 +1912,48 @@ class _NicknamePageState extends State<NicknamePage> {
                   decoration: InputDecoration(
                     labelText: tr(context, 'Přezdívka'),
                     border: OutlineInputBorder(),
+                    helperText: tr(
+                      context,
+                      '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -',
+                    ),
+                    helperMaxLines: 2,
+                    helperStyle: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(fontSize: 11),
                   ),
                 ),
-                if (_isAvailable != null)
+                if (_hasNicknameInput &&
+                    (!_hasValidNicknameFormat || _isAvailable != null))
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        _isAvailable! ? Icons.check_circle : Icons.cancel,
-                        color: _isAvailable! ? Colors.green : Colors.red,
+                        _hasValidNicknameFormat && _isAvailable == true
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _hasValidNicknameFormat && _isAvailable == true
+                            ? Colors.green
+                            : Colors.red,
                         size: 18,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        _isAvailable!
-                            ? tr(context, 'Přezdívka je volná')
-                            : tr(context, 'Tato přezdívka je obsazená'),
+                      Expanded(
+                        child: Text(
+                          !_hasValidNicknameFormat
+                              ? tr(
+                                  context,
+                                  'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.',
+                                )
+                              : _isAvailable!
+                              ? tr(context, 'Přezdívka je volná')
+                              : tr(context, 'Tato přezdívka je obsazená'),
+                          style: TextStyle(
+                            color:
+                                _hasValidNicknameFormat && _isAvailable == true
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -1847,9 +2024,7 @@ class _NicknamePageState extends State<NicknamePage> {
 
   Future<void> _save() async {
     final name = _nickname.text.trim();
-    if (!RegExp(
-      r'^(?=.{3,24}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$',
-    ).hasMatch(name)) {
+    if (!isValidNickname(name)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -1924,11 +2099,15 @@ class _NicknamePageState extends State<NicknamePage> {
 
   void _scheduleAvailabilityCheck(String value) {
     _availabilityTimer?.cancel();
-    final normalized = value.trim().toLowerCase();
-    if (!RegExp(
-      r'^(?=.{3,24}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$',
-    ).hasMatch(value.trim())) {
-      setState(() => _isAvailable = null);
+    final trimmed = value.trim();
+    final normalized = trimmed.toLowerCase();
+    final isValid = isValidNickname(trimmed);
+    setState(() {
+      _hasNicknameInput = trimmed.isNotEmpty;
+      _hasValidNicknameFormat = isValid;
+      _isAvailable = null;
+    });
+    if (!isValid) {
       return;
     }
     _availabilityTimer = Timer(const Duration(milliseconds: 350), () async {

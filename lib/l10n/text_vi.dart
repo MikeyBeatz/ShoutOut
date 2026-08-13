@@ -147,6 +147,8 @@ const vietnameseTranslations = <String, String>{
   'Tato přezdívka je obsazená': 'Biệt danh này được sử dụng',
   'Vygenerovat přezdívku': 'Tạo biệt hiệu',
   'Pokračovat': 'Tiếp tục',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 ký tự · chữ cái và số · thay khoảng trắng bằng _ hoặc -',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Sử dụng 3–24 ký tự. Dấu gạch nối và dấu gạch dưới chỉ có thể nằm giữa các phần biệt hiệu.',
   'Tato přezdívka už je obsazená.': 'Biệt hiệu này đã được sử dụng.',

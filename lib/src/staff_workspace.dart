@@ -116,6 +116,9 @@ class _StaffShellState extends State<_StaffShell> {
       page: _StaffOverview(
         role: widget.role,
         onOpenReports: () => _openDestination('Hlášení'),
+        onOpenSanctions: () => _openDestination('Postihy'),
+        onOpenBusiness: () => _openDestination('Business ověření'),
+        onOpenBugReports: () => _openDestination('Hlášení chyb'),
       ),
     ),
     _StaffDestination(
@@ -134,15 +137,20 @@ class _StaffShellState extends State<_StaffShell> {
       page: _SanctionHistoryList(),
     ),
     _StaffDestination(
+      label: 'Hlášení chyb',
+      icon: Icons.bug_report_outlined,
+      page: const _StaffBugReports(),
+    ),
+    _StaffDestination(
       label: 'Uživatelé',
       icon: Icons.people_outline,
       page: _StaffUserSearch(role: widget.role),
     ),
     if (widget.role.isAtLeast(AccountRole.administrator))
       _StaffDestination(
-        label: 'Systém',
-        icon: Icons.settings_suggest_outlined,
-        page: _SystemOversight(role: widget.role),
+        label: 'Business ověření',
+        icon: Icons.storefront_outlined,
+        page: const _BusinessApplicationList(),
       ),
   ];
 
@@ -212,10 +220,19 @@ class _StaffShellState extends State<_StaffShell> {
 }
 
 class _StaffOverview extends StatelessWidget {
-  const _StaffOverview({required this.role, required this.onOpenReports});
+  const _StaffOverview({
+    required this.role,
+    required this.onOpenReports,
+    required this.onOpenSanctions,
+    required this.onOpenBusiness,
+    required this.onOpenBugReports,
+  });
 
   final AccountRole role;
   final VoidCallback onOpenReports;
+  final VoidCallback onOpenSanctions;
+  final VoidCallback onOpenBusiness;
+  final VoidCallback onOpenBugReports;
 
   @override
   Widget build(BuildContext context) => ListView(
@@ -246,20 +263,99 @@ class _StaffOverview extends StatelessWidget {
                 : 'Otevřená hlášení Shoutů, komentářů a soukromých odpovědí.',
             onTap: onOpenReports,
           ),
-          const _StaffInfoCard(
+          _StaffInfoCard(
             icon: Icons.gavel_outlined,
             title: 'Postihy',
             description: 'Historie rozhodnutí, důvody a uložené snímky obsahu.',
+            onTap: onOpenSanctions,
           ),
           if (role.isAtLeast(AccountRole.administrator))
-            const _StaffInfoCard(
-              icon: Icons.admin_panel_settings_outlined,
-              title: 'Systém',
-              description: 'Role, business účty a bezpečnostní dohled.',
+            _StaffInfoCard(
+              icon: Icons.storefront_outlined,
+              title: 'Business ověření',
+              description:
+                  'Kontrola firem a poboček podle veřejně dostupných informací.',
+              onTap: onOpenBusiness,
             ),
+          _StaffInfoCard(
+            icon: Icons.bug_report_outlined,
+            title: 'Hlášení chyb',
+            description: 'Zprávy uživatelů o nalezených chybách aplikace.',
+            onTap: onOpenBugReports,
+          ),
         ],
       ),
     ],
+  );
+}
+
+class _StaffBugReports extends StatelessWidget {
+  const _StaffBugReports();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('bugReports')
+        .where('status', isEqualTo: 'open')
+        .limit(50)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return const Center(child: Text('Hlášení chyb se nepodařilo načíst.'));
+      }
+      if (!snapshot.hasData) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      final reports = snapshot.data!.docs.toList()
+        ..sort((a, b) {
+          final aTime = a.data()['createdAt'] as Timestamp?;
+          final bTime = b.data()['createdAt'] as Timestamp?;
+          return (bTime?.millisecondsSinceEpoch ?? 0).compareTo(
+            aTime?.millisecondsSinceEpoch ?? 0,
+          );
+        });
+      if (reports.isEmpty) {
+        return const Center(child: Text('Žádná otevřená hlášení chyb.'));
+      }
+      return ListView.builder(
+        padding: const EdgeInsets.all(24),
+        itemCount: reports.length,
+        itemBuilder: (context, index) {
+          final data = reports[index].data();
+          final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+          final date = createdAt == null
+              ? '—'
+              : MaterialLocalizations.of(
+                  context,
+                ).formatMediumDate(createdAt.toLocal());
+          return Card(
+            child: ExpansionTile(
+              leading: const Icon(Icons.bug_report_outlined),
+              title: Text(data['description'] as String? ?? ''),
+              subtitle: Text('$date • UID: ${data['userId'] ?? '—'}'),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SelectableText(data['description'] as String? ?? ''),
+                ),
+                if (data['screenshotPath'] != null) ...[
+                  const SizedBox(height: 8),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Hlášení obsahuje snímek obrazovky; zobrazování bude dostupné po zapojení Storage.',
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      );
+    },
   );
 }
 

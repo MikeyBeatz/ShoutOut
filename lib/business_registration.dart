@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'address_autocomplete.dart';
+import 'email_verification.dart';
 import 'geography.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
@@ -572,7 +573,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
           );
       final emailStopwatch = Stopwatch()..start();
       final emailFuture = user
-          .sendEmailVerification()
+          .sendEmailVerification(emailVerificationActionSettings)
           .timeout(const Duration(seconds: 20))
           .then(
             (_) => _logBusinessRegistrationTiming(

@@ -28,7 +28,7 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 | `accountRoles/{uid}` | `role`, `level` a podle role moderátorský rozsah | Důvěryhodně přidělená role. Úrovně: user 1, business 2, moderator 3, seniorModerator 4, administrator 5, owner 6. |
 | `moderators/{uid}` | historická/kompatibilní moderátorská metadata | Klient smí načíst jen vlastní dokument. Nové rozhodování je založené na `accountRoles`. |
 | `users/{uid}/legal/acceptance_2026_07_25` | `termsVersion`, `privacyVersion`, `communityRulesVersion`, `ageConfirmed`, `acceptedAt`, `acceptedLanguage` | Neměnný důkaz souhlasu. Aktuální verze všech textů je `2026-07-25`. |
-| `accountDeletionRequests/{uid}` | `userId`, `email`, `requestedAt`, `retainUntil`, `status: pending` | Blokuje vstup do aplikace. Retence je přibližně 60 dní; finální serverové smazání zatím není implementované. |
+| `accountDeletionRequests/{uid}` | `userId`, `email`, `requestedAt`, `retainUntil`, `status: pending` | Archivní záznam pod původním UID na přibližně 60 dní. Authentication účet se odstraní ihned, takže e-mail lze znovu registrovat; finální serverové pročištění archivních dat zatím není implementované. |
 
 Změna přezdívky musí atomicky odstranit starou rezervaci, vytvořit novou a
 aktualizovat soukromý i veřejný profil. Avatar se obdobně zapisuje do obou
@@ -39,6 +39,7 @@ profilů, aby se bez přepisování historie změnil všude, kde se autor zobraz
 | Cesta | Důležitá pole | Význam |
 |---|---|---|
 | `businessApplications/{uid}` | `countryCode`, `registrationNumber`, `submittedCompanyName`, fakturační adresa, `initialLocationName`, adresa a země provozovny, `initialLocation`, `initialLocationGeohash`, `initialLocationProviderPlaceId`, `contactEmail`, `status`, `submittedAt`; po ruční aktivaci `activatedAt`, `activatedBy`, `activationMethod` | Žádost vytvořená při Business registraci ve stavu `pending_email`. Vývojový Admin SDK nástroj ji po kontrole atomicky přepne na `active`; klient ji měnit nesmí. |
+| `businessActivationAudits/{id}` | `applicationId`, `administratorId`, `action: activate`, `createdAt` | Neměnný audit ruční aktivace Business účtu z administrátorského rozhraní. |
 | `businessProfiles/{uid}` | `displayName`, `officialName`, `registrationNumber`, `vatId`, `countryCode`, `registryAddress`, `billingCity`, `billingPostalCode`, `billingEmail`, `status`, časová pole | Aktivní firemní profil a společné fakturační údaje. Vytvoření/aktivace je serverová operace; klient smí měnit jen vybrané kontaktní a zobrazované údaje. |
 | `businessProfiles/{uid}/locations/{locationId}` | `displayName`, `address`, `active`, `deleted`, `geocodingStatus`, `location`, `geohash`, `providerPlaceId`, `countryCode`, `createdAt`, `updatedAt` | Pobočka/provozovna. Ověřená adresa má `geocodingStatus: verified`; pozastavení mění `active`, odstranění je soft-delete přes `deleted`. |
 

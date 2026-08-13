@@ -20,31 +20,309 @@ class _ModerationContent extends StatelessWidget {
   final AccountRole role;
 
   @override
-  Widget build(BuildContext context) => DefaultTabController(
-    length: 4,
-    child: Scaffold(
-      appBar: AppBar(
-        title: Text(tr(context, 'Moderace')),
-        bottom: TabBar(
-          isScrollable: true,
-          tabs: [
-            Tab(text: tr(context, 'Shouty')),
-            Tab(text: tr(context, 'Komentáře')),
-            Tab(text: tr(context, 'Soukromé')),
-            const Tab(text: 'Postihy'),
+  Widget build(BuildContext context) {
+    final canVerifyBusiness = role.isAtLeast(AccountRole.administrator);
+    return DefaultTabController(
+      length: canVerifyBusiness ? 5 : 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(tr(context, 'Moderace')),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(text: tr(context, 'Shouty')),
+              Tab(text: tr(context, 'Komentáře')),
+              Tab(text: tr(context, 'Soukromé')),
+              const Tab(text: 'Postihy'),
+              if (canVerifyBusiness) const Tab(text: 'Business žádosti'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _ReportList(collection: 'reports', role: role),
+            _ReportList(collection: 'commentReports', role: role),
+            const _PrivateReplyReportList(),
+            const _SanctionHistoryList(),
+            if (canVerifyBusiness) const _BusinessApplicationList(),
           ],
         ),
       ),
-      body: TabBarView(
-        children: [
-          _ReportList(collection: 'reports', role: role),
-          _ReportList(collection: 'commentReports', role: role),
-          const _PrivateReplyReportList(),
-          const _SanctionHistoryList(),
+    );
+  }
+}
+
+class _BusinessApplicationList extends StatelessWidget {
+  const _BusinessApplicationList();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('businessApplications')
+        .where('status', whereIn: const ['pending_email', 'checking'])
+        .limit(50)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return const Center(child: Text('Žádosti se nepodařilo načíst.'));
+      }
+      if (!snapshot.hasData) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      final applications = snapshot.data!.docs;
+      if (applications.isEmpty) {
+        return const Center(child: Text('Žádné Business žádosti nečekají.'));
+      }
+      return ListView.builder(
+        padding: const EdgeInsets.all(12),
+        itemCount: applications.length,
+        itemBuilder: (context, index) {
+          final application = applications[index];
+          final data = application.data();
+          final awaitingEmailState = data['status'] == 'pending_email';
+          return Card(
+            child: ListTile(
+              leading: const Icon(Icons.storefront_outlined),
+              title: Text(data['submittedCompanyName'] as String? ?? ''),
+              subtitle: Text(
+                '${awaitingEmailState ? 'E-mail ještě není potvrzený nebo se jeho stav dosud nesynchronizoval.\n' : ''}'
+                '${data['registrationNumber'] ?? ''}\n'
+                '${data['initialLocationName'] ?? ''} • ${data['initialLocationAddress'] ?? ''}',
+              ),
+              isThreeLine: true,
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => showDialog<void>(
+                context: context,
+                builder: (_) =>
+                    _BusinessApplicationDialog(application: application),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+class _BusinessApplicationDialog extends StatefulWidget {
+  const _BusinessApplicationDialog({required this.application});
+
+  final QueryDocumentSnapshot<Map<String, dynamic>> application;
+
+  @override
+  State<_BusinessApplicationDialog> createState() =>
+      _BusinessApplicationDialogState();
+}
+
+class _BusinessApplicationDialogState
+    extends State<_BusinessApplicationDialog> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.application.data();
+    final readyForReview = data['status'] == 'checking';
+    Widget row(String label, Object? value) => Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text('$label: ${value ?? ''}'),
+      ),
+    );
+    return AlertDialog(
+      title: const Text('Ověřit Business účet'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            row('Firma', data['submittedCompanyName']),
+            row('Země', data['countryCode']),
+            row('Registrační číslo', data['registrationNumber']),
+            row('Sídlo', data['submittedAddress']),
+            row(
+              'Město a PSČ',
+              '${data['submittedCity'] ?? ''} ${data['submittedPostalCode'] ?? ''}',
+            ),
+            row('Kontaktní e-mail', data['contactEmail']),
+            row(
+              'Stav e-mailu',
+              readyForReview
+                  ? 'potvrzený'
+                  : 'nepotvrzený nebo dosud nesynchronizovaný',
+            ),
+            const Divider(),
+            row('Pobočka', data['initialLocationName']),
+            row('Adresa pobočky', data['initialLocationAddress']),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.pop(context),
+          child: const Text('Zavřít'),
+        ),
+        if (!readyForReview)
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _confirmEmailManually,
+            icon: const Icon(Icons.mark_email_read_outlined),
+            label: const Text('Potvrdit stav e-mailu ručně'),
+          ),
+        FilledButton.icon(
+          onPressed: _busy || !readyForReview ? null : _activate,
+          icon: _busy
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.verified_outlined),
+          label: Text(
+            readyForReview
+                ? 'Schválit a aktivovat'
+                : 'Čeká na potvrzení e-mailu',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmEmailManually() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Nouzové ruční potvrzení'),
+        content: const Text(
+          'Použij pouze tehdy, když jsi samostatně ověřil/a, že kontaktní e-mail patří žadateli. Operace se zapíše do žádosti. Pokud Firebase e-mail skutečně potvrzený není, uživatel se bez nového odkazu do aplikace nedostane.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Zrušit'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Potvrdit ručně'),
+          ),
         ],
       ),
-    ),
-  );
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await widget.application.reference.update({
+        'status': 'checking',
+        'emailVerificationMethod': 'manual_admin',
+        'emailVerifiedBy': FirebaseAuth.instance.currentUser!.uid,
+        'emailVerifiedAt': FieldValue.serverTimestamp(),
+      });
+      if (mounted) Navigator.pop(context);
+    } on FirebaseException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ruční potvrzení se nepodařilo.')),
+        );
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  Future<void> _activate() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Potvrdit aktivaci?'),
+        content: const Text(
+          'Potvrzuješ, že jsi zkontroloval/a firmu i adresu první pobočky.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Zrušit'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Aktivovat'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busy = true);
+    final data = widget.application.data();
+    final uid = widget.application.id;
+    final adminUid = FirebaseAuth.instance.currentUser!.uid;
+    final firestore = FirebaseFirestore.instance;
+    final batch = firestore.batch();
+    final role = firestore.collection('accountRoles').doc(uid);
+    final profile = firestore.collection('businessProfiles').doc(uid);
+    final location = profile.collection('locations').doc('initial');
+    final audit = firestore.collection('businessActivationAudits').doc();
+    final timestamp = FieldValue.serverTimestamp();
+    batch.set(role, {
+      'role': 'business',
+      'level': 2,
+      'assignedBy': adminUid,
+      'moderationScope': const {
+        'global': false,
+        'countries': <String>[],
+        'subdivisions': <String>[],
+      },
+      'createdAt': timestamp,
+    });
+    batch.set(profile, {
+      'displayName': data['submittedCompanyName'],
+      'officialName': data['submittedCompanyName'],
+      'registrationNumber': data['registrationNumber'],
+      'vatId': '',
+      'countryCode': data['countryCode'],
+      'registryAddress': data['submittedAddress'],
+      'billingCity': data['submittedCity'],
+      'billingPostalCode': data['submittedPostalCode'],
+      'billingEmail': data['contactEmail'],
+      'status': 'active',
+      'activationMethod': 'manual_admin',
+      'emailVerifiedAt': data['emailVerifiedAt'],
+      'createdAt': timestamp,
+      'updatedAt': timestamp,
+    });
+    batch.set(location, {
+      'displayName': data['initialLocationName'],
+      'address': data['initialLocationAddress'],
+      'active': true,
+      'deleted': false,
+      'geocodingStatus': 'verified',
+      'location': data['initialLocation'],
+      'geohash': data['initialLocationGeohash'],
+      'providerPlaceId': data['initialLocationProviderPlaceId'],
+      'countryCode': data['initialLocationCountryCode'],
+      'createdAt': timestamp,
+      'updatedAt': timestamp,
+    });
+    batch.update(widget.application.reference, {
+      'status': 'active',
+      'activationMethod': 'manual_admin',
+      'activatedBy': adminUid,
+      'activatedAt': timestamp,
+    });
+    batch.set(audit, {
+      'applicationId': uid,
+      'administratorId': adminUid,
+      'action': 'activate',
+      'createdAt': timestamp,
+    });
+    try {
+      await batch.commit();
+      if (mounted) Navigator.pop(context);
+    } on FirebaseException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aktivace se nepodařila.')),
+        );
+        setState(() => _busy = false);
+      }
+    }
+  }
 }
 
 class _PrivateReplyReportList extends StatelessWidget {

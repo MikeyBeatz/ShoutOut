@@ -4,6 +4,9 @@ enum BusinessApplicationGateState {
   activeBusiness,
 }
 
+bool requiresBusinessActivationChecks(String? applicationStatus) =>
+    applicationStatus == 'active';
+
 BusinessApplicationGateState resolveBusinessApplicationGateState({
   required bool applicationExists,
   Map<String, dynamic>? role,

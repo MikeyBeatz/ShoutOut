@@ -2,6 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/business_application_state.dart';
 
 void main() {
+  test('only an active application needs role and profile checks', () {
+    expect(requiresBusinessActivationChecks('pending_email'), isFalse);
+    expect(requiresBusinessActivationChecks('rejected'), isFalse);
+    expect(requiresBusinessActivationChecks(null), isFalse);
+    expect(requiresBusinessActivationChecks('active'), isTrue);
+  });
+
   test('ordinary account without a Business application continues', () {
     expect(
       resolveBusinessApplicationGateState(

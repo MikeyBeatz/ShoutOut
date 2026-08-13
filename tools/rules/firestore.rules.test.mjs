@@ -19,6 +19,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
 } from 'firebase/firestore';
 
@@ -111,6 +112,133 @@ describe('business registration', () => {
         initialLocationGeohash: 'invalid',
       }),
     );
+  });
+
+  test('verified owner moves the application into administrator review', async () => {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), 'businessApplications', 'business-owner'),
+        { ...application, submittedAt: now() },
+      );
+    });
+    await assertFails(
+      updateDoc(
+        doc(
+          authenticatedDb('business-owner', {
+            emailVerified: false,
+            email: 'business@example.com',
+          }),
+          'businessApplications',
+          'business-owner',
+        ),
+        { status: 'checking', emailVerifiedAt: serverTimestamp() },
+      ),
+    );
+    await assertSucceeds(
+      updateDoc(
+        doc(
+          authenticatedDb('business-owner', {
+            email: 'business@example.com',
+          }),
+          'businessApplications',
+          'business-owner',
+        ),
+        { status: 'checking', emailVerifiedAt: serverTimestamp() },
+      ),
+    );
+  });
+
+  test('administrator can atomically activate a reviewed Business application', async () => {
+    await seedEligibleUser('admin', 'Admin');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'admin'), {
+        role: 'administrator', level: 5, createdAt: now(), assignedBy: 'owner',
+      });
+      await setDoc(doc(db, 'businessApplications', 'business-owner'), {
+        ...application,
+        status: 'checking',
+        emailVerifiedAt: now(),
+        submittedAt: now(),
+      });
+    });
+    const db = authenticatedDb('admin');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'accountRoles', 'business-owner'), {
+      role: 'business', level: 2, assignedBy: 'admin', createdAt: serverTimestamp(),
+      moderationScope: { global: false, countries: [], subdivisions: [] },
+    });
+    batch.set(doc(db, 'businessProfiles', 'business-owner'), {
+      displayName: 'Test Business s.r.o.', officialName: 'Test Business s.r.o.',
+      registrationNumber: '12345678', vatId: '', countryCode: 'CZ',
+      registryAddress: 'Testovací 1', billingCity: 'Praha',
+      billingPostalCode: '11000', billingEmail: 'business@example.com',
+      status: 'active', activationMethod: 'manual_admin',
+      emailVerifiedAt: now(), createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    batch.set(doc(db, 'businessProfiles', 'business-owner', 'locations', 'initial'), {
+      displayName: 'Centrum', address: 'Václavské náměstí 1, Praha',
+      active: true, deleted: false, geocodingStatus: 'verified',
+      location: new GeoPoint(50.081, 14.426), geohash: 'u2fkbn0',
+      providerPlaceId: 'geoapify-test-place', countryCode: 'CZ',
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    batch.update(doc(db, 'businessApplications', 'business-owner'), {
+      status: 'active', activationMethod: 'manual_admin', activatedBy: 'admin',
+      activatedAt: serverTimestamp(),
+    });
+    batch.set(doc(db, 'businessActivationAudits', 'audit-1'), {
+      applicationId: 'business-owner', administratorId: 'admin',
+      action: 'activate', createdAt: serverTimestamp(),
+    });
+    await assertSucceeds(batch.commit());
+  });
+
+  test('administrator can manually move an old application into review', async () => {
+    await seedEligibleUser('admin', 'Admin');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'admin'), {
+        role: 'administrator', level: 5, createdAt: now(), assignedBy: 'owner',
+      });
+      await setDoc(doc(db, 'businessApplications', 'business-owner'), {
+        ...application, submittedAt: now(),
+      });
+    });
+    await assertSucceeds(updateDoc(
+      doc(authenticatedDb('admin'), 'businessApplications', 'business-owner'),
+      {
+        status: 'checking', emailVerificationMethod: 'manual_admin',
+        emailVerifiedBy: 'admin', emailVerifiedAt: serverTimestamp(),
+      },
+    ));
+    await assertFails(updateDoc(
+      doc(authenticatedDb('ordinary'), 'businessApplications', 'business-owner'),
+      {
+        status: 'checking', emailVerificationMethod: 'manual_admin',
+        emailVerifiedBy: 'ordinary', emailVerifiedAt: serverTimestamp(),
+      },
+    ));
+  });
+
+  test('applicant can cancel an incomplete Business registration', async () => {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), 'businessApplications', 'business-owner'),
+        { ...application, submittedAt: now() },
+      );
+    });
+    await assertSucceeds(updateDoc(
+      doc(
+        authenticatedDb('business-owner', {
+          emailVerified: false,
+          email: 'business@example.com',
+        }),
+        'businessApplications',
+        'business-owner',
+      ),
+      { status: 'cancelled', cancelledAt: serverTimestamp() },
+    ));
   });
 });
 
@@ -536,6 +664,50 @@ describe('identity and account gates', () => {
     await assertSucceeds(batch.commit());
   });
 
+  test('verified onboarding accepts supported Unicode nickname letters', async () => {
+    const db = authenticatedDb('unicode-user');
+    const nickname = 'Українська_зірка';
+    const nicknameLower = 'українська_зірка';
+    await assertSucceeds(
+      setDoc(doc(db, 'users', 'unicode-user', 'legal', legalDocument), {
+        termsVersion: '2026-07-25',
+        privacyVersion: '2026-07-25',
+        communityRulesVersion: '2026-07-25',
+        ageConfirmed: true,
+        acceptedAt: serverTimestamp(),
+        acceptedLanguage: 'uk',
+      }),
+    );
+
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'nicknames', nicknameLower), {
+      uid: 'unicode-user', nickname, nicknameLower,
+      createdAt: serverTimestamp(),
+    });
+    batch.set(doc(db, 'users', 'unicode-user'), {
+      nickname, nicknameLower,
+      createdAt: serverTimestamp(),
+      nicknameChangedAt: serverTimestamp(),
+      nicknameChangeCount: 0,
+      emailVerified: true,
+      language: 'uk',
+      themeMode: 'system',
+      showOnboardingHelp: true,
+      avatarId: 'fox',
+      avatarBackgroundStart: 'teal',
+      avatarBackgroundEnd: 'navy',
+      avatarGradientDirection: 'diagonal',
+    });
+    batch.set(doc(db, 'publicProfiles', 'unicode-user'), {
+      nickname,
+      avatarId: 'fox',
+      avatarBackgroundStart: 'teal',
+      avatarBackgroundEnd: 'navy',
+      avatarGradientDirection: 'diagonal',
+    });
+    await assertSucceeds(batch.commit());
+  });
+
   test('user can update a complete valid avatar style', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     const db = authenticatedDb('reader');
@@ -730,6 +902,29 @@ describe('identity and account gates', () => {
         'deleted-user',
       ),
     );
+  });
+
+  test('owner can hide active shouts before requesting account deletion', async () => {
+    await seedEligibleUser('writer', 'SafeWriter');
+    await seedShout({
+      id: 'deletion-shout',
+      authorId: 'writer',
+      authorNickname: 'SafeWriter',
+    });
+    const db = authenticatedDb('writer');
+    const active = await assertSucceeds(getDocs(query(
+      collection(db, 'shouts'),
+      where('authorId', '==', 'writer'),
+      where('status', '==', 'active'),
+      limit(50),
+    )));
+    const batch = writeBatch(db);
+    for (const shout of active.docs) {
+      batch.update(shout.ref, { status: 'deleted' });
+    }
+    await assertSucceeds(batch.commit());
+    const hidden = await getDoc(doc(db, 'shouts', 'deletion-shout'));
+    assert.equal(hidden.data().status, 'deleted');
   });
 
   test('content restriction blocks creating content until it expires', async () => {

@@ -169,6 +169,8 @@ const _english = <String, String>{
   'Tato přezdívka je obsazená': 'This nickname is taken',
   'Vygenerovat přezdívku': 'Generate nickname',
   'Pokračovat': 'Continue',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 characters · letters and numbers · replace spaces with _ or -',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Use 3–24 characters. Hyphens and underscores may only be between nickname parts.',
   'Tato přezdívka už je obsazená.': 'This nickname is already taken.',
@@ -510,6 +512,8 @@ const _german = <String, String>{
   'Tato přezdívka je obsazená': 'Dieser Spitzname ist vergeben',
   'Vygenerovat přezdívku': 'Spitznamen generieren',
   'Pokračovat': 'Weiter',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 Zeichen · Buchstaben und Zahlen · Leerzeichen durch _ oder - ersetzen',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Verwende 3–24 Zeichen. Bindestriche und Unterstriche dürfen nur zwischen Teilen des Spitznamens stehen.',
   'Tato přezdívka už je obsazená.': 'Dieser Spitzname ist bereits vergeben.',
@@ -856,6 +860,8 @@ const _polish = <String, String>{
   'Tato přezdívka je obsazená': 'Ten pseudonim jest zajęty',
   'Vygenerovat přezdívku': 'Wygeneruj pseudonim',
   'Pokračovat': 'Kontynuuj',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 znaki · litery i cyfry · spacje zastąp _ lub -',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Użyj 3–24 znaków. Myślniki i podkreślenia mogą znajdować się tylko między częściami pseudonimu.',
   'Tato přezdívka už je obsazená.': 'Ten pseudonim jest już zajęty.',

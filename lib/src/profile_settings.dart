@@ -456,6 +456,8 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
   final _controller = TextEditingController();
   Timer? _availabilityTimer;
   bool? _isAvailable;
+  bool _hasNicknameInput = false;
+  bool _hasValidNicknameFormat = false;
   bool _saving = false;
 
   @override
@@ -468,23 +470,62 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Text(AppLocalizations.of(context)!.changeNickname),
-    content: TextField(
-      controller: _controller,
-      autofocus: true,
-      maxLength: 24,
-      onChanged: _checkAvailabilityLater,
-      decoration: InputDecoration(
-        labelText: tr(context, 'Přezdívka'),
-        border: const OutlineInputBorder(),
-        helperText: _isAvailable == null
-            ? null
-            : _isAvailable!
-            ? tr(context, 'Přezdívka je volná')
-            : tr(context, 'Tato přezdívka je obsazená'),
-        helperStyle: TextStyle(
-          color: _isAvailable == false ? Colors.red : Colors.green,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _controller,
+          autofocus: true,
+          maxLength: 24,
+          onChanged: _checkAvailabilityLater,
+          decoration: InputDecoration(
+            labelText: tr(context, 'Přezdívka'),
+            border: const OutlineInputBorder(),
+            helperText: tr(
+              context,
+              '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -',
+            ),
+            helperMaxLines: 2,
+            helperStyle: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontSize: 11),
+          ),
         ),
-      ),
+        if (_hasNicknameInput &&
+            (!_hasValidNicknameFormat || _isAvailable != null))
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                _hasValidNicknameFormat && _isAvailable == true
+                    ? Icons.check_circle
+                    : Icons.cancel,
+                color: _hasValidNicknameFormat && _isAvailable == true
+                    ? Colors.green
+                    : Colors.red,
+                size: 18,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  !_hasValidNicknameFormat
+                      ? tr(
+                          context,
+                          'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.',
+                        )
+                      : _isAvailable!
+                      ? tr(context, 'Přezdívka je volná')
+                      : tr(context, 'Tato přezdívka je obsazená'),
+                  style: TextStyle(
+                    color: _hasValidNicknameFormat && _isAvailable == true
+                        ? Colors.green
+                        : Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
     ),
     actions: [
       TextButton(
@@ -500,10 +541,15 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
 
   void _checkAvailabilityLater(String value) {
     _availabilityTimer?.cancel();
-    final normalized = value.trim().toLowerCase();
-    if (!_isValidNickname(value.trim()) ||
-        normalized == widget.currentNickname.toLowerCase()) {
-      setState(() => _isAvailable = null);
+    final trimmed = value.trim();
+    final normalized = trimmed.toLowerCase();
+    final isValid = isValidNickname(trimmed);
+    setState(() {
+      _hasNicknameInput = trimmed.isNotEmpty;
+      _hasValidNicknameFormat = isValid;
+      _isAvailable = null;
+    });
+    if (!isValid || normalized == widget.currentNickname.toLowerCase()) {
       return;
     }
     _availabilityTimer = Timer(const Duration(milliseconds: 350), () async {
@@ -519,7 +565,7 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
 
   Future<void> _save() async {
     final nickname = _controller.text.trim();
-    if (!_isValidNickname(nickname)) {
+    if (!isValidNickname(nickname)) {
       _showError(
         tr(
           context,
@@ -598,7 +644,3 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
-
-bool _isValidNickname(String nickname) => RegExp(
-  r'^(?=.{3,24}$)[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)*$',
-).hasMatch(nickname);

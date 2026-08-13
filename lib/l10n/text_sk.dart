@@ -148,6 +148,8 @@ const slovakTranslations = <String, String>{
   'Tato přezdívka je obsazená': 'Táto prezývka je prevzatá',
   'Vygenerovat přezdívku': 'Vygenerovať prezývku',
   'Pokračovat': 'Pokračovať',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 znakov · písmená a čísla · medzery nahraď _ alebo -',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Použite 3–24 znakov. Spojovníky a podčiarkovníky môžu byť iba medzi časťami prezývok.',
   'Tato přezdívka už je obsazená.': 'Táto prezývka je už obsadená.',

@@ -23,6 +23,24 @@ Ověření e-mailu lze znovu odeslat. Volba opravit e-mail odstraní ještě
 nedokončený Authentication účet a vrátí uživatele na začátek. Reset hesla vrací
 neutrální zprávu bez prozrazení existence účtu.
 
+Při smazání uživatel znovu zadá heslo. Po úspěšném ověření se uloží
+60denní retenční záznam a okamžitě se odstraní Firebase Authentication účet;
+stejný e-mail je proto možné použít pro novou registraci. Archivní data
+zůstávají svázaná s původním UID, nikoli s novým účtem.
+Před vytvořením retenční žádosti klient v omezených dávkách označí všechny
+aktivní Shouty původního UID jako `deleted`. Tím okamžitě zmizí z feedu i
+propagačního okénka, zatímco jejich archivní data a informace o použité
+propagaci zůstanou zachovány po dobu retence. Pokud skrytí selže, Authentication
+účet se neodstraní.
+Starší osiřelé Shouty po již odstraněném Authentication účtu lze skrýt pouze
+důvěryhodným Admin SDK nástrojem `tools/hide_deleted_account_shouts.mjs`.
+Nástroj před změnou vyžaduje retenční žádost ve stavu `pending`, ověří, že
+Authentication účet už neexistuje, a po dávkovém skrytí zkontroluje nulový počet
+aktivních Shoutů.
+Po úspěšném odstranění Authentication účtu se vyčistí celý navigační
+zásobník. Přihlašovací formulář se proto zobrazí okamžitě bez ručního návratu
+z obrazovky Upravit profil nebo z Business registrace.
+
 ## Business registrace
 
 Business registrace je samostatný formulář ve stejném vizuálním stylu. Obsahuje:
@@ -43,6 +61,39 @@ uvolní až po důvěryhodném přidělení role `business` a vytvoření aktivn
 `businessProfiles/{uid}`. Klient si roli nikdy nepřidělí. Současná vývojová
 verze nemá automatický serverový převod žádosti na aktivní profil; tento krok je
 popsán v `BUSINESS_VERIFICATION.md`.
+
+Stav nové neaktivní Business žádosti se po potvrzení e-mailu zobrazí přímo z
+`businessApplications/{uid}`. Kontroly role a Business profilu se načítají až
+poté, co důvěryhodný aktivační proces nastaví žádost na `active`; registrace tak
+na pomalejším připojení nečeká na zbytečný druhý Firestore dotaz.
+
+Po potvrzení e-mailu přejde žádost z `pending_email` do `checking`. Administrátor
+ji vidí v moderátorském rozhraní, zkontroluje firmu i první pobočku a jedním
+atomickým zápisem vytvoří Business roli, profil, pobočku a neměnný audit
+aktivace. Běžný uživatel ani moderátor aktivaci provést nemohou.
+
+Expirovaný ověřovací odkaz není slepá ulička: obrazovka ověření umožňuje
+odeslat nový odkaz nebo po opětovném zadání hesla registraci zrušit. Stejné
+zrušení je dostupné i na obrazovce čekající Business žádosti. Žádost se
+označí `cancelled`, Authentication účet se odstraní a e-mail lze znovu použít.
+Administrátor může starou žádost v `pending_email` nouzově posunout do ruční
+kontroly; zápis obsahuje metodu, administrátora a čas. Tento krok nemění
+`emailVerified` ve Firebase Authentication a neobchází vlastnictví e-mailu.
+
+Ověřovací e-maily používají výslovnou návratovou adresu hlavního Hostingu.
+Vlastní webový action handler ShoutOutu na `/auth/action` přečte jednorázový
+`oobCode` a obsluhuje všechny režimy sdílené globální Action URL: ověření
+e-mailu, reset hesla a obnovení nechtěně změněné e-mailové adresy. Pravdivě
+rozliší úspěch, neplatný, použitý nebo expirovaný odkaz. Firebase šablony musí
+mít nastavenou tuto vlastní action URL; `ActionCodeSettings.url` je pouze
+návratová adresa po zpracování, nikoli adresa handleru. Action kód proto
+zpracová Firebase právě jednou a po úspěchu nabídne návrat do aplikace; klient
+jej znovu neaplikuje.
+Handler je na Hostingu nasazený, ale vývojový projekt odmítá uložit výchozí
+domény `web.app` i `firebaseapp.com` jako vlastní globální Action URL. Do
+připojení vlastní domény proto nové e-maily nadále používají výchozí Firebase
+handler; přepnutí se nesmí provést jen pro ověřovací šablonu, protože globální
+URL obsluhuje také reset hesla a obnovení změněného e-mailu.
 
 Ve vývojovém projektu lze po ruční kontrole údajů použít chráněný Admin SDK
 nástroj `npm run activate:business`. Ve výchozím režimu pouze vypíše plán a až

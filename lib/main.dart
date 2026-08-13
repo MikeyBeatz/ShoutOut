@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'auth_gate.dart';
+import 'account_deletion.dart';
 import 'account_role.dart';
 import 'address_autocomplete.dart';
 import 'geography.dart';
@@ -31,6 +32,7 @@ import 'profile_tile_layout.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 import 'l10n/business_text.dart';
+import 'nickname_validation.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';

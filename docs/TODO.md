@@ -81,6 +81,8 @@ odložené nápady až za hlavními uživatelskými cestami.
     obnovení ID tokenu a u business účtu také zápis žádosti.
   - [x] Zobrazovat aktuální krok registrace a u business účtu po vytvoření účtu
     souběžně uložit žádost a odeslat ověřovací e-mail.
+  - [x] U neaktivní Business žádosti zobrazit známý stav bez čekání na roli a
+    Business profil a pro onboarding znovu použít již načtená data profilu.
   - [ ] Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
 - [x] **Ověřit reset hesla přes registrační e-mail.**
   - Pokrýt existující i neexistující adresu, neplatný a expirovaný odkaz,
@@ -91,6 +93,10 @@ odložené nápady až za hlavními uživatelskými cestami.
     adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
   - [ ] Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho platnosti;
     tento časový test neblokuje hlavní tok obnovy hesla.
+  - [ ] Po připojení vlastní domény přepnout globální Firebase Authentication
+    Action URL na připravený `/auth/action`. Handler už bezpečně obsluhuje
+    ověření e-mailu, reset hesla i obnovení změněné adresy; výchozí domény
+    projektu Firebase při ukládání vlastní Action URL odmítá.
 - [x] **Zachovat filtr při přepínání karet.**
   - Výběr filtru držet po celou relaci aplikace a při návratu na kartu obnovit
     stejný filtr i výsledky.
@@ -204,6 +210,8 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [x] Pro dobu před serverovou automatizací přidat vývojový Admin SDK nástroj
     s dry-runem a explicitním potvrzením, který po ověření e-mailu a ruční
     kontrole atomicky vytvoří roli 2, Business profil a první pobočku.
+  - [x] Přidat administrátorům a ownerovi frontu ověřených Business žádostí;
+    ruční schválení atomicky vytvoří roli, profil, pobočku a audit.
   - [x] Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
     Česko, Německo, Polsko, Slovensko a další prioritní evropské země řadit nahoru.
   - [x] Doplnit překlady všech business obrazovek a validačních/chybových textů
@@ -558,13 +566,14 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
 ## 6. Zpracování žádosti o smazání účtu
 
-Klient zapisuje `accountDeletionRequests/{uid}` a další používání účtu blokují
-UI i Firestore Rules. Serverová automatizace musí:
+Klient po opětovném zadání hesla zapisuje `accountDeletionRequests/{uid}` a
+ihned odstraňuje Firebase Authentication účet, aby bylo možné e-mail znovu
+registrovat. Serverová automatizace musí:
 
 - atomicky převzít žádost a zaznamenat stav zpracování,
 - okamžitě skrýt veřejný obsah uživatele,
-- zneplatnit relace a zakázat další přihlášení,
-- odstranit nebo deaktivovat Firebase Authentication účet,
+- ověřit, že Authentication účet již neexistuje, a bezpečně dořešit
+  případné částečné selhání klientského toku,
 - uvolnit nebo bezpečně rezervovat přezdívku podle produktové politiky,
 - odstranit nepotřebná soukromá data,
 - uchovat pouze nezbytné bezpečnostní záznamy po deklarovaných 60 dnů,

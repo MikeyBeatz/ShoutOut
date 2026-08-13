@@ -50,6 +50,11 @@ dostupná z Profilu bez duplikování právních textů.
 
 ### Business registrace
 
+První obrazovka ověření e-mailu používá stejnou vystředěnou kartu,
+maximální šířku 480 px, vnitřní odsazení a značkovou barvu ikony jako
+navazující obrazovka čekající Business žádosti. Na malé výšce je karta
+scrollovatelná a nesmí se rozpadnout ani přetéct.
+
 Samostatná scrollovatelná stránka zachovává značkový styl registrace. Pořadí:
 
 1. země z celosvětového country pickeru;

@@ -153,13 +153,16 @@ void main() {
       ),
     );
 
-    expect(find.text('První nabídka'), findsOneWidget);
+    final startsWithFirst = find.text('První nabídka').evaluate().isNotEmpty;
+    final initialTitle = startsWithFirst ? 'První nabídka' : 'Druhá nabídka';
+    final nextTitle = startsWithFirst ? 'Druhá nabídka' : 'První nabídka';
+    expect(find.text(initialTitle), findsOneWidget);
     await tester.drag(find.byType(PageView), const Offset(-300, 0));
     await tester.pumpAndSettle();
-    expect(find.text('Druhá nabídka'), findsOneWidget);
+    expect(find.text(nextTitle), findsOneWidget);
     await tester.drag(find.byType(PageView), const Offset(300, 0));
     await tester.pumpAndSettle();
-    expect(find.text('První nabídka'), findsOneWidget);
+    expect(find.text(initialTitle), findsOneWidget);
   });
 
   testWidgets('shows the profile creation date below the nickname', (

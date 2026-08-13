@@ -129,6 +129,12 @@ nesmí. Podrobné pravomoci rolí 3–6 jsou v `INTERNAL_MODERATION.md`.
 Soukromý profil `users/{uid}` obsahuje nastavení účtu. Veřejný profil obsahuje
 jen přezdívku a avatar. Rezervace v `nicknames/{lowercase}` zajišťuje globální
 unikátnost a změna přezdívky atomicky aktualizuje všechny tři dokumenty.
+Přezdívka má 3–24 písmen nebo číslic. Podporuje Unicode písmena, takže lze
+použít znaky všech jazyků aplikace včetně ukrajinské cyrilice a české,
+slovenské, německé, polské a vietnamské diakritiky. Pomlčka a podtržítko jsou
+povolené pouze mezi částmi; mezery povolené nejsou. Formulář průběžně odlišuje
+červenou chybu formátu nebo obsazenou přezdívku od zeleného potvrzení
+dostupnosti.
 
 ## Poloha
 

@@ -58,6 +58,11 @@ nebo nejstarších případů. Více otevřených hlášení stejného obsahu se
 po úspěšném rozhodnutí se uzavřou všechna hlášení daného obsahu. Zrušené nebo
 neúspěšné rozhodnutí je nesmí uzavřít.
 
+Přehled pracovního prostoru odkazuje na stejné sekce jako boční navigace:
+**Hlášení**, **Postihy**, **Hlášení chyb** a pro administrátora nebo ownera
+také **Business ověření**. Hlášení chyb jsou uživatelské zprávy z
+`bugReports`; nejsou smíchána s interními technickými logy klienta.
+
 Detail případu obsahuje jednu roletku rozhodnutí. Vedle odstranění obsahu a
 postihů dostupných dané roli nabízí také tyto výsledky:
 
@@ -103,6 +108,17 @@ role může případ eskalovat, ale ne dokončit.
 Administrátor není běžný supermoderátor. Jeho hlavní odpovědností je provozní
 dohled, nastavení systému, role, business účty, monitoring a řešení zneužití
 moderátorských pravomocí. Přímá moderace administrátorem je nouzová operace.
+
+Administrátor a owner mají v moderátorském rozhraní samostatnou frontu
+Business žádostí ve stavu `checking`. Schválení vyžaduje druhé potvrzení,
+atomicky vytvoří roli úrovně 2, aktivní Business profil a ověřenou první
+pobočku a zapíše neměnný audit. Nižší role frontu nevidí ani do ní nemohou
+zapisovat. Do zavedení automatického registru administrátor ověřuje firmu a
+pobočku ručně podle mapy a veřejně dostupných informací.
+U staré žádosti ve stavu `pending_email` může administrátor nouzově potvrdit
+přechod do ruční kontroly. Zápis uchová `emailVerificationMethod`, administrátora
+a čas; nemění ale Firebase Authentication `emailVerified`, takže skutečně
+nepotvrzený uživatel musí použít nový odkaz nebo registraci zrušit.
 
 ## Webové pracovní prostředí
 

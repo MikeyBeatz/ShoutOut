@@ -150,6 +150,8 @@ const ukrainianTranslations = <String, String>{
   'Tato přezdívka je obsazená': 'Цей псевдонім прийнято',
   'Vygenerovat přezdívku': 'Згенерувати нікнейм',
   'Pokračovat': 'Продовжити',
+  '3–24 znaků · písmena a čísla · mezery nahraď _ nebo -':
+      '3–24 символи · літери й цифри · замініть пробіли на _ або -',
   'Použij 3–24 znaků. Pomlčka a podtržítko mohou být jen mezi částmi přezdívky.':
       'Використовуйте 3–24 символи. Дефіс і підкреслення можуть бути лише між частинами псевдоніма.',
   'Tato přezdívka už je obsazená.': 'Цей псевдонім уже зайнятий.',

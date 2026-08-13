@@ -236,11 +236,11 @@ service cloud.firestore {
       return nickname is string &&
         nickname.size() >= 3 &&
         nickname.size() <= 24 &&
-        nickname.matches('^[a-zA-Z0-9]+([-_][a-zA-Z0-9]+)*$') &&
+        nickname.matches('^[\\p{L}0-9]+([-_][\\p{L}0-9]+)*$') &&
         nicknameLower is string &&
         nicknameLower.size() >= 3 &&
         nicknameLower.size() <= 24 &&
-        nicknameLower.matches('^[a-z0-9]+([-_][a-z0-9]+)*$');
+        nicknameLower.matches('^[\\p{L}0-9]+([-_][\\p{L}0-9]+)*$');
     }
 
     function validProfile() {
@@ -466,7 +466,16 @@ service cloud.firestore {
     match /accountRoles/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || eligibleModerator());
-      allow list, create, update, delete: if false;
+      allow create: if eligibleAdministrator() &&
+        request.auth.uid != userId &&
+        !exists(/databases/$(database)/documents/accountRoles/$(userId)) &&
+        exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
+        get(/databases/$(database)/documents/businessApplications/$(userId)).data.status == 'checking' &&
+        request.resource.data.role == 'business' &&
+        request.resource.data.level == 2 &&
+        request.resource.data.assignedBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow list, update, delete: if false;
     }
 
     match /contentRestrictions/{userId} {
@@ -704,7 +713,13 @@ service cloud.firestore {
         request.resource.data.retainUntil <=
           request.time + duration.value(61, 'd') &&
         request.resource.data.status == 'pending';
-      allow list, update, delete: if false;
+      // Roll back a just-created request if deleting the Authentication user
+      // unexpectedly fails after successful reauthentication.
+      allow delete: if signedIn() &&
+        request.auth.uid == userId &&
+        resource.data.status == 'pending' &&
+        resource.data.requestedAt + duration.value(10, 'm') >= request.time;
+      allow list, update: if false;
     }
 
     match /businessApplications/{userId} {
@@ -794,7 +809,54 @@ service cloud.firestore {
         request.resource.data.contactEmail == request.auth.token.email &&
         request.resource.data.status == 'pending_email' &&
         request.resource.data.submittedAt == request.time;
-      allow list, update, delete: if false;
+      allow list: if eligibleAdministrator() && limited(50);
+      allow update: if
+        (
+          verifiedIdentity() &&
+          request.auth.uid == userId &&
+          resource.data.status == 'pending_email' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'emailVerifiedAt'
+          ]) &&
+          request.resource.data.status == 'checking' &&
+          request.resource.data.emailVerifiedAt == request.time
+        ) ||
+        (
+          eligibleAdministrator() &&
+          request.auth.uid != userId &&
+          resource.data.status == 'pending_email' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'emailVerificationMethod', 'emailVerifiedBy',
+            'emailVerifiedAt'
+          ]) &&
+          request.resource.data.status == 'checking' &&
+          request.resource.data.emailVerificationMethod == 'manual_admin' &&
+          request.resource.data.emailVerifiedBy == request.auth.uid &&
+          request.resource.data.emailVerifiedAt == request.time
+        ) ||
+        (
+          signedIn() &&
+          request.auth.uid == userId &&
+          resource.data.status in ['pending_email', 'checking', 'cancelled'] &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'cancelledAt'
+          ]) &&
+          request.resource.data.status == 'cancelled' &&
+          request.resource.data.cancelledAt == request.time
+        ) ||
+        (
+          eligibleAdministrator() &&
+          request.auth.uid != userId &&
+          resource.data.status == 'checking' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'activationMethod', 'activatedBy', 'activatedAt'
+          ]) &&
+          request.resource.data.status == 'active' &&
+          request.resource.data.activationMethod == 'manual_admin' &&
+          request.resource.data.activatedBy == request.auth.uid &&
+          request.resource.data.activatedAt == request.time
+        );
+      allow delete: if false;
     }
 
     match /businessProfiles/{userId} {
@@ -820,7 +882,15 @@ service cloud.firestore {
         request.resource.data.billingEmail is string &&
         request.resource.data.billingEmail.size() <= 254 &&
         request.resource.data.updatedAt == request.time;
-      allow list, create, delete: if false;
+      allow create: if eligibleAdministrator() &&
+        request.auth.uid != userId &&
+        exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
+        get(/databases/$(database)/documents/businessApplications/$(userId)).data.status == 'checking' &&
+        request.resource.data.status == 'active' &&
+        request.resource.data.activationMethod == 'manual_admin' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+      allow list, delete: if false;
 
       match /locations/{locationId} {
         function validLocation() {
@@ -860,7 +930,20 @@ service cloud.firestore {
         allow get, list: if eligibleUser() &&
           request.auth.uid == userId &&
           isBusinessAccount();
-        allow create: if eligibleUser() &&
+        allow create: if
+          (
+            eligibleAdministrator() &&
+            request.auth.uid != userId &&
+            exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
+            get(/databases/$(database)/documents/businessApplications/$(userId)).data.status == 'checking' &&
+            validLocation() &&
+            request.resource.data.geocodingStatus == 'verified' &&
+            request.resource.data.active == true &&
+            request.resource.data.deleted == false &&
+            request.resource.data.createdAt == request.time
+          ) ||
+          (
+          eligibleUser() &&
           request.auth.uid == userId &&
           isBusinessAccount() &&
           exists(/databases/$(database)/documents/businessProfiles/$(userId)) &&
@@ -881,7 +964,8 @@ service cloud.firestore {
           ) &&
           request.resource.data.active == true &&
           request.resource.data.deleted == false &&
-          request.resource.data.createdAt == request.time;
+          request.resource.data.createdAt == request.time
+          );
         allow update: if eligibleUser() &&
           request.auth.uid == userId &&
           isBusinessAccount() &&
@@ -912,6 +996,19 @@ service cloud.firestore {
           );
         allow delete: if false;
       }
+    }
+
+    match /businessActivationAudits/{auditId} {
+      allow get, list: if eligibleAdministrator();
+      allow create: if eligibleAdministrator() &&
+        request.resource.data.keys().hasOnly([
+          'applicationId', 'administratorId', 'action', 'createdAt'
+        ]) &&
+        request.resource.data.applicationId is string &&
+        request.resource.data.administratorId == request.auth.uid &&
+        request.resource.data.action == 'activate' &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
     }
 
     match /nicknames/{nicknameLower} {

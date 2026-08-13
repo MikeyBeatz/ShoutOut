@@ -834,15 +834,30 @@ Future<void> _showNicknameChange(
 }
 
 Future<void> _requestAccountDeletion(BuildContext context) async {
+  final password = TextEditingController();
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: Text(tr(dialogContext, 'Smazat účet?')),
-      content: Text(
-        tr(
-          dialogContext,
-          'Veřejný obsah bude při serverovém zpracování skryt. Potřebné bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
-        ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tr(
+              dialogContext,
+              'Přihlášení bude odstraněno ihned a tento e-mail půjde znovu použít. Archivní a bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: password,
+            obscureText: true,
+            autofillHints: const [AutofillHints.password],
+            decoration: InputDecoration(
+              labelText: tr(dialogContext, 'Potvrď heslo'),
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -856,19 +871,47 @@ Future<void> _requestAccountDeletion(BuildContext context) async {
       ],
     ),
   );
-  if (confirmed != true || !context.mounted) return;
+  if (confirmed != true || !context.mounted) {
+    password.dispose();
+    return;
+  }
   final user = FirebaseAuth.instance.currentUser!;
-  await FirebaseFirestore.instance
+  final request = FirebaseFirestore.instance
       .collection('accountDeletionRequests')
-      .doc(user.uid)
-      .set({
-        'userId': user.uid,
-        'email': user.email,
-        'requestedAt': FieldValue.serverTimestamp(),
-        'retainUntil': Timestamp.fromDate(
-          DateTime.now().add(const Duration(days: 60)),
-        ),
-        'status': 'pending',
-      });
-  await FirebaseAuth.instance.signOut();
+      .doc(user.uid);
+  try {
+    await user.reauthenticateWithCredential(
+      EmailAuthProvider.credential(email: user.email!, password: password.text),
+    );
+    await hideActiveShoutsBeforeAccountDeletion(user.uid);
+    await request.set({
+      'userId': user.uid,
+      'email': user.email,
+      'requestedAt': FieldValue.serverTimestamp(),
+      'retainUntil': Timestamp.fromDate(
+        DateTime.now().add(const Duration(days: 60)),
+      ),
+      'status': 'pending',
+    });
+    try {
+      await user.delete();
+      if (context.mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (_) {
+      await request.delete();
+      rethrow;
+    }
+  } on FirebaseAuthException catch (error) {
+    if (!context.mounted) return;
+    final message =
+        error.code == 'wrong-password' || error.code == 'invalid-credential'
+        ? 'Heslo není správné.'
+        : 'Účet se nepodařilo odstranit. Zkus to znovu.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(tr(context, message))));
+  } finally {
+    password.dispose();
+  }
 }
