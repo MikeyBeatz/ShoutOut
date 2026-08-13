@@ -142,6 +142,14 @@ ověření registru.
 npm run test:tools
 ```
 
+## Testovací moderátorská fronta
+
+Příkaz `npm run seed:moderation-queue -- --confirm-project=shoutout-dev-46c81`
+vytvoří vývojový obsah a hlášení pro ruční test moderace. Shouty, komentáře a
+soukromé odpovědi se záměrně připisují pouze běžným nebo Business testovacím
+účtům. Moderátor, senior, administrátor a owner mohou obsah hlásit či přijmout
+soukromou odpověď, ale nikdy nejsou autory demonstračního závadného obsahu.
+
 ## Doplnění geografických údajů
 
 Po nasazení geografického modelu doplní starší shouty:

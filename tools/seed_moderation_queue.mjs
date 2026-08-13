@@ -3,6 +3,11 @@ import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { GeoPoint, Timestamp, getFirestore } from 'firebase-admin/firestore';
 
+import {
+  eligibleModerationContentAuthors,
+  moderationSeedUserAt,
+} from './moderation_seed.mjs';
+
 const expectedProjectId = 'shoutout-dev-46c81';
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!serviceAccountPath) throw new Error('Set FIREBASE_SERVICE_ACCOUNT_PATH.');
@@ -25,6 +30,13 @@ const users = [
   ['it_admin', 'TestAdmin'],
   ['it_owner', 'TestOwner'],
 ];
+const staffUserIds = new Set([
+  'it_moderator',
+  'it_senior',
+  'it_admin',
+  'it_owner',
+]);
+const contentAuthors = eligibleModerationContentAuthors(users, staffUserIds);
 const titles = [
   'Noční hluk v centru',
   'Nabídka vstupenek na koncert',
@@ -79,7 +91,7 @@ let privateReplyReports = 0;
 
 for (let index = 0; index < 12; index += 1) {
   const shoutId = `queue_demo_shout_${String(index + 1).padStart(2, '0')}`;
-  const [authorId, authorNickname] = users[index % 3];
+  const [authorId, authorNickname] = moderationSeedUserAt(contentAuthors, index);
   const createdAt = Timestamp.fromMillis(now - (index + 1) * 47 * 60 * 1000);
   const shoutRef = db.collection('shouts').doc(shoutId);
   const commentCount = 2 + (index % 3);
@@ -121,8 +133,10 @@ for (let index = 0; index < 12; index += 1) {
 
   for (let commentIndex = 0; commentIndex < commentCount; commentIndex += 1) {
     const commentId = `queue_comment_${commentIndex + 1}`;
-    const [commentAuthorId, commentAuthorNickname] =
-      users[(index + commentIndex + 1) % users.length];
+    const [commentAuthorId, commentAuthorNickname] = moderationSeedUserAt(
+      contentAuthors,
+      index + commentIndex + 1,
+    );
     const commentCreatedAt = Timestamp.fromMillis(
       createdAt.toMillis() + (commentIndex + 1) * 5 * 60000,
     );
@@ -160,8 +174,15 @@ for (let index = 0; index < 12; index += 1) {
 
   if (index < 8) {
     const replyId = 'queue_private_reply';
-    const [replyAuthorId, replyAuthorNickname] = users[(index + 2) % users.length];
-    const [recipientId, recipientNickname] = users[(index + 3) % users.length];
+    const [replyAuthorId, replyAuthorNickname] = moderationSeedUserAt(
+      contentAuthors,
+      index + 2,
+    );
+    const recipients = users.filter(([uid]) => uid !== replyAuthorId);
+    const [recipientId, recipientNickname] = moderationSeedUserAt(
+      recipients,
+      index + 3,
+    );
     const text = `Soukromá testovací odpověď ${index + 1} s obsahem určeným ke kontrole.`;
     const replyCreatedAt = Timestamp.fromMillis(createdAt.toMillis() + 11 * 60000);
     await shoutRef.collection('privateReplies').doc(replyId).set({

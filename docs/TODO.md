@@ -366,7 +366,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 - [ ] Senior rolí ověřit 90denní a trvalý ban.
 - [ ] Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
 - [ ] Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
-- [ ] Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
+- [x] Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
   standardně nevytvářely účty moderátora, seniora, administrátora ani ownera.
 
 ## Odložená serverová a produkční část
