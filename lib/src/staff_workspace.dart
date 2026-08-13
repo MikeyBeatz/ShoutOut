@@ -378,7 +378,8 @@ class _SystemOversightState extends State<_SystemOversight> {
     return _logs.where((document) {
       final data = document.data();
       return ['action', 'code', 'message', 'userId'].any(
-        (field) => (data[field] ?? '').toString().toLowerCase().contains(search),
+        (field) =>
+            (data[field] ?? '').toString().toLowerCase().contains(search),
       );
     }).toList();
   }
@@ -413,9 +414,7 @@ class _SystemOversightState extends State<_SystemOversight> {
       const ListTile(
         leading: Icon(Icons.policy_outlined),
         title: Text('Audit a monitoring'),
-        subtitle: Text(
-          'Přístupy se auditují a záznamy mají 60denní retenci.',
-        ),
+        subtitle: Text('Přístupy se auditují a záznamy mají 60denní retenci.'),
       ),
       const Divider(height: 32),
       Text(

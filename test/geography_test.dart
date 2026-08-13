@@ -40,7 +40,10 @@ void main() {
     expect(publicLocationCoordinate(50.6605659), 50.66);
     expect(publicLocationCoordinate(14.0402374), 14.04);
     expect(publicLocationCoordinate(-33.8688), -33.87);
-    expect(() => publicLocationCoordinate(double.infinity), throwsArgumentError);
+    expect(
+      () => publicLocationCoordinate(double.infinity),
+      throwsArgumentError,
+    );
   });
 
   test('geography builds a useful region label', () {

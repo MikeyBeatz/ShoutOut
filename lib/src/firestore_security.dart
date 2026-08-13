@@ -54,15 +54,17 @@ Future<void> _recordTechnicalLogAccess(AccountRole role) async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null || !role.isAtLeast(AccountRole.administrator)) return;
   try {
-    await FirebaseFirestore.instance.collection('technicalLogAccessAudits').add({
-      'userId': user.uid,
-      'role': role.name,
-      'action': 'view_client_error_logs',
-      'createdAt': FieldValue.serverTimestamp(),
-      'expiresAt': Timestamp.fromDate(
-        DateTime.now().toUtc().add(const Duration(days: 60)),
-      ),
-    });
+    await FirebaseFirestore.instance
+        .collection('technicalLogAccessAudits')
+        .add({
+          'userId': user.uid,
+          'role': role.name,
+          'action': 'view_client_error_logs',
+          'createdAt': FieldValue.serverTimestamp(),
+          'expiresAt': Timestamp.fromDate(
+            DateTime.now().toUtc().add(const Duration(days: 60)),
+          ),
+        });
   } catch (_) {
     // The diagnostic screen remains usable if its secondary audit write fails.
   }
