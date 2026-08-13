@@ -76,8 +76,16 @@ levněji a přesněji pokrýt unit testem.
   realtime se na Business Shoutu aktualizuje avatar, u běžného Shoutu i přezdívka;
 - starší Business Shout uložený jako „firma – pobočka“ se zobrazí jen jako
   „pobočka“, zatímco nový název pobočky obsahující pomlčku zůstane beze změny;
-- publikování rychle po sobě respektuje 1s cooldown a 500/24 h; 48hodinový
-  checkbox se běžnému účtu nezobrazí.
+- publikování rychle po sobě respektuje 1s cooldown a 500/24 h; Business
+  checkboxy se běžnému účtu nezobrazí.
+- Business formulář dovolí kombinovat zvýraznění a okénko; bez checkboxů je
+  Shout standardní. Okénka do 20 km jsou připnutá, po 6 sekundách rotují,
+  reagují na tah do stran a cyklicky se opakují. Bez okénka prostor zmizí.
+- delší platnost nabízí po 24 hodinách pouze celé dny 2–7; běžný účet nesmí
+  propagaci ani prodloužení zapsat a nepravdivé příznaky pravidla odmítnou.
+- Business → Propagace uvádí použité funkce bez ceny a připravené metriky
+  unikátní dosah, zobrazení, rozkliknutí a míra prokliku; do zapojení
+  důvěryhodného serverového měření místo čísel zobrazí pomlčku.
 
 ### Follow, komunikace a oznámení
 

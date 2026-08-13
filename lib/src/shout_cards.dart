@@ -87,7 +87,17 @@ class ShoutCard extends StatelessWidget {
       );
     }
 
+    final highlighted = shout.businessHighlighted;
     return Card(
+      color: highlighted
+          ? theme.colorScheme.secondaryContainer.withValues(alpha: .55)
+          : null,
+      shape: highlighted
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+              side: BorderSide(color: theme.colorScheme.secondary, width: 1.5),
+            )
+          : null,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: openOnTap ? openComments : null,
@@ -96,6 +106,27 @@ class ShoutCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (highlighted) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      businessTr(context, 'Zvýrazněný Shout'),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -262,4 +293,207 @@ class ShoutCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class BusinessSpotlightCard extends StatelessWidget {
+  const BusinessSpotlightCard({
+    super.key,
+    required this.shout,
+    required this.onSave,
+    required this.onReaction,
+  });
+
+  final Shout shout;
+  final VoidCallback onSave;
+  final Future<void> Function(bool like) onReaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    void openDetail() => Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShoutDetailPage(
+          shout: shout,
+          onSave: onSave,
+          onReaction: onReaction,
+        ),
+      ),
+    );
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: theme.colorScheme.secondaryContainer.withValues(alpha: .7),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: theme.colorScheme.secondary, width: 1.5),
+      ),
+      child: InkWell(
+        onTap: openDetail,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: PublicIdentityBuilder(
+            userId: shout.authorId,
+            fallbackNickname: shout.author,
+            fallbackAvatarStyle: shout.authorAvatarStyle,
+            builder: (context, identity) => Row(
+              children: [
+                AvatarImage(
+                  avatarId: identity.avatarStyle.avatarId,
+                  style: identity.avatarStyle,
+                  radius: 25,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        businessTr(context, 'Propagováno'),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        shout.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        businessTr(
+                          context,
+                          'Vzdálenost od podniku: {distance}',
+                        ).replaceFirst('{distance}', shout.distanceLabel),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.chevron_right, color: theme.colorScheme.primary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BusinessSpotlightCarousel extends StatefulWidget {
+  const BusinessSpotlightCarousel({
+    super.key,
+    required this.shouts,
+    required this.onSave,
+    required this.onReaction,
+  });
+
+  final List<Shout> shouts;
+  final ValueChanged<Shout> onSave;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
+
+  @override
+  State<BusinessSpotlightCarousel> createState() =>
+      _BusinessSpotlightCarouselState();
+}
+
+class _BusinessSpotlightCarouselState extends State<BusinessSpotlightCarousel> {
+  static const _rotationInterval = Duration(seconds: 6);
+  late final PageController _controller;
+  late final int _shuffleSeed;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _shuffleSeed = DateTime.now().microsecondsSinceEpoch;
+    _controller = PageController(
+      initialPage: widget.shouts.length > 1 ? 1000 : 0,
+    );
+    _restartTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant BusinessSpotlightCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shouts.length != widget.shouts.length) _restartTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _restartTimer() {
+    _timer?.cancel();
+    if (widget.shouts.length < 2) return;
+    _timer = Timer.periodic(_rotationInterval, (_) {
+      if (!mounted || !_controller.hasClients) return;
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => PageView.builder(
+    controller: _controller,
+    onPageChanged: (_) => _restartTimer(),
+    itemBuilder: (context, index) {
+      final length = widget.shouts.length;
+      final cycle = index ~/ length;
+      final position = index % length;
+      final shout = shuffledPromotionCycle(
+        widget.shouts,
+        cycle,
+        _shuffleSeed,
+      )[position];
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+        child: BusinessSpotlightCard(
+          shout: shout,
+          onSave: () => widget.onSave(shout),
+          onReaction: (like) => widget.onReaction(shout, like: like),
+        ),
+      );
+    },
+  );
+}
+
+class SpotlightHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const SpotlightHeaderDelegate({required this.child});
+
+  final Widget child;
+
+  @override
+  double get minExtent => 140;
+
+  @override
+  double get maxExtent => 140;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      elevation: overlapsContent ? 3 : 0,
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant SpotlightHeaderDelegate oldDelegate) =>
+      oldDelegate.child != child;
 }

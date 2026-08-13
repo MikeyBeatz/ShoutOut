@@ -63,8 +63,9 @@ Společná pole:
 Běžný účet smí zvolit maximálně 24 hodin. Při publikování se získá aktuální
 poloha zařízení, zaokrouhlí se veřejná souřadnice a vypočte geohash. Business
 účet musí zvolit aktivní ověřenou pobočku; jméno autora se zobrazí jako
-`Veřejný název – Pobočka` a poloha pochází výhradně z pobočky. Checkbox **Až 48
-hodin** dovolí Business účtu maximum 48 hodin.
+název pobočky a poloha pochází výhradně z pobočky. Checkbox **Na více než 24
+hodin** dovolí Business účtu výběr po celých dnech až na 7 dní. Zvýraznění a
+propagační okénko jsou dva kombinovatelné checkboxy.
 
 Formulář zůstává otevřený při rate limitu nebo chybě zápisu. Limity:
 

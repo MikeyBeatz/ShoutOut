@@ -61,6 +61,9 @@ Povinná pole:
 - `location: latlng`, `geohash`, `createdAt`, `expiresAt`, `status`;
 - `likesCount`, `dislikesCount`, `commentsCount`, `savesCount`;
 - avatarová fallback pole.
+- volitelné pravdivé příznaky `businessHighlighted`, `businessSpotlight` a
+  `businessExtendedDuration` pouze pro aktivní Business účet; chybějící příznak
+  znamená neaktivní funkci a zvýraznění s okénkem lze kombinovat.
 
 Business Shout navíc nese `businessLocationId`. Serverová Function může po
 vytvoření doplnit mapu `geography` se `schemaVersion`, `countryCode`,
@@ -69,7 +72,8 @@ vytvoření doplnit mapu `geography` se `schemaVersion`, `countryCode`,
 Stavy jsou v klientovi především `active` a `deleted`; expirace vychází z
 `expiresAt`. Nadpis má 1–60 znaků, text 1–220, kategorie jsou jedna až dvě z:
 Obecné, Akce, Sport, Zábava, Pomoc, Upozornění, Dotaz, Doprava, Jídlo a pití,
-Kultura. Běžná platnost je 15 minut až 24 hodin, Business až 48 hodin.
+Kultura. Běžná platnost je 15 minut až 24 hodin, Business až 7 dní při použití
+`businessExtendedDuration`.
 
 | Cesta pod Shoutem | Pole | Oprávnění a invarianta |
 |---|---|---|

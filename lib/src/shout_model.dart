@@ -15,6 +15,25 @@ enum ShoutStatus { active, expired, deleted }
 
 const _expiredShoutRetention = Duration(days: 7);
 
+List<int> businessDurationHourOptions(bool extended) => [
+  ...List.generate(25, (index) => index),
+  if (extended) ...[48, 72, 96, 120, 144, 168],
+];
+
+List<T> shuffledPromotionCycle<T>(List<T> values, int cycle, int seed) {
+  final result = List<T>.of(values);
+  if (result.length < 2) return result;
+  var state = (seed ^ (cycle * 0x45d9f3b)) & 0x7fffffff;
+  for (var index = result.length - 1; index > 0; index--) {
+    state = (1103515245 * state + 12345) & 0x7fffffff;
+    final swapIndex = state % (index + 1);
+    final value = result[index];
+    result[index] = result[swapIndex];
+    result[swapIndex] = value;
+  }
+  return result;
+}
+
 class Shout {
   Shout({
     required this.id,
@@ -35,6 +54,9 @@ class Shout {
     this.authorAvatarStyle = AvatarStyle.fallback,
     this.businessLocationId,
     this.businessAuthorFormat,
+    this.businessHighlighted = false,
+    this.businessSpotlight = false,
+    this.businessExtendedDuration = false,
   });
 
   factory Shout.fromDocument(
@@ -68,6 +90,13 @@ class Shout {
       authorAvatarStyle: AvatarStyle.fromProfile(data),
       businessLocationId: data['businessLocationId'] as String?,
       businessAuthorFormat: data['businessAuthorFormat'] as String?,
+      businessHighlighted:
+          data['businessHighlighted'] == true ||
+          data['businessPromotion'] == 'highlighted',
+      businessSpotlight:
+          data['businessSpotlight'] == true ||
+          data['businessPromotion'] == 'spotlight',
+      businessExtendedDuration: data['businessExtendedDuration'] == true,
     );
   }
   final String id;
@@ -91,6 +120,9 @@ class Shout {
   final AvatarStyle authorAvatarStyle;
   final String? businessLocationId;
   final String? businessAuthorFormat;
+  final bool businessHighlighted;
+  final bool businessSpotlight;
+  final bool businessExtendedDuration;
   String displayedAuthor(String currentProfileNickname) {
     if (businessLocationId == null) return currentProfileNickname;
     if (businessAuthorFormat == 'branch') return author;
@@ -106,6 +138,9 @@ class Shout {
   }
 
   bool get isActive => effectiveStatus == ShoutStatus.active;
+
+  bool get isActiveSpotlightWithinRange =>
+      businessSpotlight && isActive && distanceKm <= 20;
 
   bool get isExpiredBeyondRetention =>
       effectiveStatus == ShoutStatus.expired &&

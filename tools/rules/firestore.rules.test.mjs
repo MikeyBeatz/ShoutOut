@@ -127,6 +127,17 @@ describe('business locations', () => {
         geohash: 'sr2yk3v',
       },
     ));
+    await assertFails(createShoutBatch(
+      authenticatedDb('rome-publisher'),
+      'rome-publisher',
+      'RomePublisher',
+      'ordinary-promoted-shout',
+      {
+        location: new GeoPoint(41.90, 12.50),
+        geohash: 'sr2yk3v',
+        businessSpotlight: true,
+      },
+    ));
   });
 
   test('business owner can publish from a verified branch', async () => {
@@ -168,9 +179,38 @@ describe('business locations', () => {
       {
         businessLocationId: 'usti',
         businessAuthorFormat: 'branch',
+        businessSpotlight: true,
+        businessExtendedDuration: true,
         location: new GeoPoint(50.6605659, 14.0402374),
         geohash: 'u31bpqr',
         expiresAt: future(48 * 60 * 60 * 1000),
+      },
+    ));
+    await assertFails(createShoutBatch(
+      db,
+      'business-publisher',
+      'Ústí nad Labem',
+      'business-eight-day-shout',
+      {
+        businessLocationId: 'usti',
+        businessAuthorFormat: 'branch',
+        businessExtendedDuration: true,
+        location: new GeoPoint(50.6605659, 14.0402374),
+        geohash: 'u31bpqr',
+        expiresAt: future(8 * 24 * 60 * 60 * 1000),
+      },
+    ));
+    await assertFails(createShoutBatch(
+      db,
+      'business-publisher',
+      'Ústí nad Labem',
+      'business-invalid-promotion-shout',
+      {
+        businessLocationId: 'usti',
+        businessAuthorFormat: 'branch',
+        businessSpotlight: false,
+        location: new GeoPoint(50.6605659, 14.0402374),
+        geohash: 'u31bpqr',
       },
     ));
     await assertSucceeds(createShoutBatch(
@@ -181,9 +221,12 @@ describe('business locations', () => {
       {
         businessLocationId: 'usti',
         businessAuthorFormat: 'branch',
+        businessHighlighted: true,
+        businessSpotlight: true,
+        businessExtendedDuration: true,
         location: new GeoPoint(50.6605659, 14.0402374),
         geohash: 'u31bpqr',
-        expiresAt: future(48 * 60 * 60 * 1000),
+        expiresAt: future(7 * 24 * 60 * 60 * 1000),
       },
     ));
   });

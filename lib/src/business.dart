@@ -37,6 +37,17 @@ class BusinessPage extends StatelessWidget {
           ),
         ),
         _BusinessSectionTile(
+          icon: Icons.campaign_outlined,
+          title: businessTr(context, 'Propagace'),
+          subtitle: businessTr(context, 'Historie prémiových funkcí Shoutů'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BusinessPromotionsPage(userId: userId),
+            ),
+          ),
+        ),
+        _BusinessSectionTile(
           icon: Icons.account_balance_wallet_outlined,
           title: businessTr(context, 'Tokeny'),
           subtitle: businessTr(
@@ -73,6 +84,131 @@ class BusinessPage extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    ),
+  );
+}
+
+class BusinessPromotionsPage extends StatelessWidget {
+  const BusinessPromotionsPage({super.key, required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(businessTr(context, 'Propagace'))),
+    body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('shouts')
+          .where('authorId', isEqualTo: userId)
+          .limit(50)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final shouts =
+            (snapshot.data?.docs ?? const [])
+                .map(Shout.fromDocument)
+                .where(
+                  (shout) =>
+                      shout.businessHighlighted ||
+                      shout.businessSpotlight ||
+                      shout.businessExtendedDuration,
+                )
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        if (shouts.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                businessTr(
+                  context,
+                  'Zatím zde nejsou žádné propagované Shouty.',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: shouts.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          itemBuilder: (context, index) =>
+              _BusinessPromotionHistoryCard(shout: shouts[index]),
+        );
+      },
+    ),
+  );
+}
+
+class _BusinessPromotionHistoryCard extends StatelessWidget {
+  const _BusinessPromotionHistoryCard({required this.shout});
+
+  final Shout shout;
+
+  @override
+  Widget build(BuildContext context) {
+    final features = <String>[
+      if (shout.businessHighlighted) businessTr(context, 'Zvýraznění'),
+      if (shout.businessSpotlight) businessTr(context, 'Propagační okénko'),
+      if (shout.businessExtendedDuration)
+        businessTr(context, 'Více než 24 hodin'),
+    ];
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              shout.title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: features
+                  .map((feature) => Chip(label: Text(feature)))
+                  .toList(),
+            ),
+            const SizedBox(height: 8),
+            _PromotionMetric(label: businessTr(context, 'Unikátní dosah')),
+            _PromotionMetric(label: businessTr(context, 'Zobrazení')),
+            _PromotionMetric(label: businessTr(context, 'Rozkliknutí')),
+            _PromotionMetric(label: businessTr(context, 'Míra prokliku')),
+            const SizedBox(height: 8),
+            Text(
+              businessTr(
+                context,
+                'Statistiky budou dostupné po zapojení serverového měření.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PromotionMetric extends StatelessWidget {
+  const _PromotionMetric({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        Expanded(child: Text(label)),
+        Text('—', style: Theme.of(context).textTheme.titleMedium),
       ],
     ),
   );

@@ -39,7 +39,14 @@ void main() {
         ),
       );
       expect(businessTr(localizedContext, 'Pobočky'), expectation.$2);
-      expect(businessTr(localizedContext, 'Až 48 hodin'), isNotEmpty);
+      expect(businessTr(localizedContext, 'Na více než 24 hodin'), isNotEmpty);
+      expect(businessTr(localizedContext, 'Propagační okénko'), isNotEmpty);
+      expect(
+        businessTr(localizedContext, 'Historie prémiových funkcí Shoutů'),
+        isNotEmpty,
+      );
+      expect(businessTr(localizedContext, 'Unikátní dosah'), isNotEmpty);
+      expect(businessTr(localizedContext, 'Míra prokliku'), isNotEmpty);
       expect(
         businessTr(localizedContext, 'Business žádost čeká na ověření'),
         isNotEmpty,
@@ -49,6 +56,12 @@ void main() {
         isNotEmpty,
       );
       expect(businessTr(localizedContext, 'Nahrát vlastní logo'), isNotEmpty);
+      expect(businessTr(localizedContext, 'Propagace'), isNotEmpty);
+      expect(businessTr(localizedContext, 'Zvýrazněný Shout'), isNotEmpty);
+      expect(
+        businessTr(localizedContext, 'Vzdálenost od podniku: {distance}'),
+        contains('{distance}'),
+      );
       expect(
         businessTr(
           localizedContext,

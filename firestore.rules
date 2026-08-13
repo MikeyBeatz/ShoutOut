@@ -431,6 +431,20 @@ service cloud.firestore {
         location.deleted == false &&
         location.geocodingStatus == 'verified' &&
         data.businessAuthorFormat == 'branch' &&
+        (!data.keys().hasAll(['businessHighlighted']) ||
+          data.businessHighlighted == true) &&
+        (!data.keys().hasAll(['businessSpotlight']) ||
+          data.businessSpotlight == true) &&
+        (
+          (
+            !data.keys().hasAll(['businessExtendedDuration']) &&
+            data.expiresAt <= request.time + duration.value(1441, 'm')
+          ) ||
+          (
+            data.businessExtendedDuration == true &&
+            data.expiresAt > request.time + duration.value(1439, 'm')
+          )
+        ) &&
         data.authorNickname == location.displayName &&
         data.location == location.location &&
         data.geohash == location.geohash;
@@ -1644,7 +1658,8 @@ service cloud.firestore {
           'dislikesCount', 'commentsCount', 'savesCount', 'avatarId',
           'avatarBackgroundStart', 'avatarBackgroundEnd',
           'avatarGradientDirection', 'businessLocationId',
-          'businessAuthorFormat'
+          'businessAuthorFormat', 'businessHighlighted',
+          'businessSpotlight', 'businessExtendedDuration'
         ]) &&
         request.resource.data.keys().hasAll([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
@@ -1657,7 +1672,9 @@ service cloud.firestore {
           (
             !isBusinessAccount() &&
             !request.resource.data.keys().hasAny([
-              'businessLocationId', 'businessAuthorFormat'
+              'businessLocationId', 'businessAuthorFormat',
+              'businessHighlighted', 'businessSpotlight',
+              'businessExtendedDuration'
             ]) &&
             canonicalNickname(request.resource.data)
           ) ||
@@ -1696,7 +1713,7 @@ service cloud.firestore {
         request.resource.data.expiresAt >=
           request.time + duration.value(14, 'm') &&
         request.resource.data.expiresAt <= request.time +
-          duration.value(isBusinessAccount() ? 2881 : 1441, 'm') &&
+          duration.value(isBusinessAccount() ? 10081 : 1441, 'm') &&
         request.resource.data.status == 'active' &&
         request.resource.data.likesCount == 0 &&
         request.resource.data.dislikesCount == 0 &&

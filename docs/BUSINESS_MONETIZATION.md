@@ -17,7 +17,7 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
 ## Bezplatná zaváděcí fáze premium funkcí
 
 - Schválené Business premium funkce se implementují a zpřístupní ještě před
-  tokeny bez poplatku: platnost až 48 hodin, zvýrazněný Shout a propagační okénko.
+  tokeny bez poplatku: platnost až 7 dní, zvýrazněný Shout a propagační okénko.
 - Uživatelský tok, datový typ propagace a kontrola oprávnění musí být od začátku
   oddělené od ceny. V bezplatné fázi autorizační vrstva vrátí nulovou cenu;
   později ji nahradí serverové odečtení tokenů bez předělání formuláře a feedu.
@@ -47,15 +47,31 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
   na placený plán. Do té doby karta není podmínkou registrace ani aktivace
   Business účtu.
 
-## Platnost Shoutu až 48 hodin
+## Platnost Shoutu nad 24 hodin
 
-- Pouze Business účet uvidí nad běžným výběrem délky checkbox **Až 48 hodin**.
-- Po zaškrtnutí se časové ciferníky rozšíří až na maximálně 48 hodin.
+- Pouze Business účet uvidí checkbox **Na více než 24 hodin**.
+- Po zaškrtnutí pokračuje výběr po 24 hodinách v celých dnech: 2–7 dní.
 - Funkce bude zpočátku zdarma.
 - Později může být placenou funkcí nebo se hradit tokeny. Konkrétní cena ani
   způsob účtování zatím nejsou rozhodnuté.
 - Nárok na delší platnost a maximální expiraci musí vždy ověřovat server, aby šlo
   funkci později zpoplatnit bez změny uživatelského toku.
+
+## Zvýraznění a propagační okénko
+
+- Zvýraznění a okénko jsou samostatné checkboxy a lze je kombinovat. Bez výběru
+  vznikne standardní Business Shout.
+- Okénko je připnuté nahoře ve feedu, po 6 sekundách cyklicky rotuje a uživatel
+  se mezi dostupnými položkami může pohybovat tahem do stran.
+- Obsahuje avatar účtu, titulek a vzdálenost od pobočky; kliknutí otevře celý
+  Shout. Bez aktivního okénka do 20 km se tento prostor vůbec nezobrazí.
+- Všechna aktivní okénka do 20 km tvoří společnou směs. Každý cyklus je
+  promíchaný, aby vzdálenost ani stáří trvale nezvýhodňovaly jednu firmu.
+- Statistiky obsahují pouze unikátní dosah, celková zobrazení, rozkliknutí a
+  míru prokliku. Vzdálenostní pásma ani automatické rozšiřování se nepoužívají.
+  Důvěryhodné počítání se zapojí až se serverovým měřením; klient ho nesmí určovat.
+- Budoucí cena se počítá za každý započatý den každé zvolené funkce. Doba nad
+  prvních 24 hodin je samostatná denní položka. V zaváděcí fázi je cena nulová.
 
 ## Fakturace a doklady
 

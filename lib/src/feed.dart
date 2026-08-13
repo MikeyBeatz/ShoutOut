@@ -152,9 +152,16 @@ class _FeedPageState extends State<FeedPage> {
             }(),
           };
         });
+    final spotlightShouts =
+        widget.shouts
+            .where((shout) => shout.isActiveSpotlightWithinRange)
+        .toList();
+    final visibleFeedShouts = filteredShouts
+        .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
+        .toList();
     final shouts = [
-      ...filteredShouts.where((shout) => !shout.isLowRated),
-      ...filteredShouts.where((shout) => shout.isLowRated),
+      ...visibleFeedShouts.where((shout) => !shout.isLowRated),
+      ...visibleFeedShouts.where((shout) => shout.isLowRated),
     ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -401,6 +408,18 @@ class _FeedPageState extends State<FeedPage> {
               ],
             ),
           ),
+
+          if (spotlightShouts.isNotEmpty)
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: SpotlightHeaderDelegate(
+                child: BusinessSpotlightCarousel(
+                  shouts: spotlightShouts,
+                  onSave: widget.onSave,
+                  onReaction: widget.onReaction,
+                ),
+              ),
+            ),
 
           if (widget.isLoading)
             const SliverFillRemaining(

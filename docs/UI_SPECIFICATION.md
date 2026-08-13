@@ -113,7 +113,8 @@ Modální dialog v pořadí obsahuje:
 
 1. Nadpis 60 znaků a Text 220 znaků, oba s kapitalizací věty;
 2. volbu nejvýše dvou kategorií přes chips;
-3. pouze Business checkbox **Až 48 hodin**;
+3. pouze Business checkboxy **Zvýraznit Shout**, **Propagační okénko** a
+   **Na více než 24 hodin**;
 4. dvousloupcový výběr hodin/minut a souhrnnou Platnost;
 5. pouze Business dropdown **Vybrat pobočku**;
 6. tlačítko **Publikovat** se stavem **Publikuji…**.
@@ -218,12 +219,14 @@ gratulaci; výsledek neovlivňuje účet ani karmu.
 
 ### Business
 
-Role 2 otevře čtyři funkční/rezervované oblasti:
+Role 2 otevře pět funkčních/rezervovaných oblastí:
 
 - **Business profil** – veřejný název, oficiální a registrační/fakturační údaje,
   ikona tužky v AppBar i tlačítko Upravit údaje;
 - **Pobočky** – plus v AppBar a seznam rozbalovacích provozoven; editor má
   název, Geoapify adresu, aktivní stav, uložit a smazat. Po uložení se sbalí;
+- **Propagace** – historie Shoutů s prodloužením, zvýrazněním nebo okénkem,
+  bez ceny do zavedení tokenů a s připraveným místem pro serverové statistiky;
 - **Tokeny** – placeholder budoucí monetizace;
 - **Nákupy a faktury** – placeholder budoucích firemních dokladů.
 
@@ -234,6 +237,14 @@ metadat. V úpravě avatara ho vidí pouze Business účet jako vizuálně neakt
 tlačítko **Nahrát vlastní logo**. Kliknutí zatím zobrazí informaci, že funkci
 připravujeme. Po předání Storage ukládací callback funkce stejné tlačítko bez
 změny rozhraní spustí připravený výběr a editor.
+
+Při tvorbě Business Shoutu jsou zvýraznění a okénko samostatné checkboxy, které
+lze kombinovat; bez nich vznikne standardní karta. Delší platnost odemkne po
+24 hodinách celé dny až do 7 dní.
+Okénko obsahuje avatar účtu, titulek a vzdálenost od vybrané pobočky; až kliknutí
+otevře plný detail Shoutu. Je připnuté v horní části feedu, rotuje po 6 sekundách,
+lze ho posouvat do stran a cyklicky opakuje aktivní položky do 20 km. Pokud není
+žádná, prostor zmizí. V zaváděcí fázi jsou všechny funkce zdarma.
 
 ## Centrum oznámení
 

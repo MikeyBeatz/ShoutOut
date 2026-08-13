@@ -96,6 +96,88 @@ void main() {
     expect(shout.displayedAuthor('Nové jméno'), 'Nové jméno');
   });
 
+  test('Business promotion defaults to the standard feed card', () {
+    final shout = _shout();
+
+    expect(shout.businessHighlighted, isFalse);
+    expect(shout.businessSpotlight, isFalse);
+  });
+
+  test('Business highlight and spotlight can be combined', () {
+    final now = DateTime.now();
+    final shout = Shout(
+      id: 'combined-promotion',
+      author: 'Pobočka',
+      title: 'Akce',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 2,
+      createdAt: now,
+      expiresAt: now.add(const Duration(days: 4)),
+      businessHighlighted: true,
+      businessSpotlight: true,
+      businessExtendedDuration: true,
+    );
+
+    expect(shout.businessHighlighted, isTrue);
+    expect(shout.businessSpotlight, isTrue);
+    expect(shout.businessExtendedDuration, isTrue);
+  });
+
+  test('Business spotlight is active only within twenty kilometres', () {
+    final now = DateTime.now();
+    final far = Shout(
+      id: 'far-promo',
+      author: 'Pobočka',
+      title: 'Akce',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 20.01,
+      createdAt: now,
+      expiresAt: now.add(const Duration(hours: 1)),
+      businessSpotlight: true,
+    );
+    final atLimit = Shout(
+      id: 'near-promo',
+      author: 'Pobočka',
+      title: 'Akce',
+      text: 'Text',
+      categories: const ['Obecné'],
+      distanceKm: 20,
+      createdAt: now,
+      expiresAt: now.add(const Duration(hours: 1)),
+      businessSpotlight: true,
+    );
+
+    expect(atLimit.isActiveSpotlightWithinRange, isTrue);
+    expect(far.isActiveSpotlightWithinRange, isFalse);
+  });
+
+  test('extended Business duration jumps from one day to whole days', () {
+    expect(businessDurationHourOptions(false).last, 24);
+    expect(businessDurationHourOptions(true).skip(22), [
+      22,
+      23,
+      24,
+      48,
+      72,
+      96,
+      120,
+      144,
+      168,
+    ]);
+  });
+
+  test('promotion cycles contain every active promo exactly once', () {
+    const promos = ['a', 'b', 'c', 'd'];
+    final first = shuffledPromotionCycle(promos, 0, 42);
+    final second = shuffledPromotionCycle(promos, 1, 42);
+
+    expect(first.toSet(), promos.toSet());
+    expect(second.toSet(), promos.toSet());
+    expect(first, isNot(second));
+  });
+
   test('normalizes only a lowercase initial title character', () {
     expect(
       titleWithInitialCapital('  sousedská slavnost  '),

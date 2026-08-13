@@ -74,6 +74,94 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
+  testWidgets('Business promo window hides the full Shout body', (
+    WidgetTester tester,
+  ) async {
+    final now = DateTime.now();
+    final shout = Shout(
+      id: 'promo',
+      author: 'Centrum',
+      title: 'Dnešní nabídka',
+      text: 'Tento celý text patří až do detailu.',
+      categories: const ['Obecné'],
+      distanceKm: 1.3,
+      createdAt: now,
+      expiresAt: now.add(const Duration(hours: 2)),
+      businessLocationId: 'centrum',
+      businessSpotlight: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('cs'),
+        supportedLocales: const [Locale('cs')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Scaffold(
+          body: BusinessSpotlightCard(
+            shout: shout,
+            onSave: () {},
+            onReaction: (_) async {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Dnešní nabídka'), findsOneWidget);
+    expect(find.text('Vzdálenost od podniku: 1.3 km'), findsOneWidget);
+    expect(find.text('Tento celý text patří až do detailu.'), findsNothing);
+  });
+
+  testWidgets('Business promo carousel can move back and forward', (
+    WidgetTester tester,
+  ) async {
+    final now = DateTime.now();
+    Shout promo(String id, String title) => Shout(
+      id: id,
+      author: 'Centrum',
+      title: title,
+      text: 'Detail',
+      categories: const ['Obecné'],
+      distanceKm: 2,
+      createdAt: now,
+      expiresAt: now.add(const Duration(hours: 2)),
+      businessSpotlight: true,
+    );
+    final shouts = [
+      promo('one', 'První nabídka'),
+      promo('two', 'Druhá nabídka'),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 400,
+              height: 140,
+              child: BusinessSpotlightCarousel(
+                shouts: shouts,
+                onSave: (_) {},
+                onReaction: (_, {required like}) async {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('První nabídka'), findsOneWidget);
+    await tester.drag(find.byType(PageView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Druhá nabídka'), findsOneWidget);
+    await tester.drag(find.byType(PageView), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('První nabídka'), findsOneWidget);
+  });
+
   testWidgets('shows the profile creation date below the nickname', (
     WidgetTester tester,
   ) async {

@@ -31,11 +31,14 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
   AccountRole? _accountRole;
   bool _publishing = false;
   bool _extendedBusinessDuration = false;
+  bool _businessHighlighted = false;
+  bool _businessSpotlight = false;
   late final FixedExtentScrollController _hoursController;
   late final FixedExtentScrollController _minutesController;
 
   Duration get _duration => Duration(hours: _hours, minutes: _minutes);
-  int get _maximumHours => _extendedBusinessDuration ? 48 : 24;
+  List<int> get _hourOptions =>
+      businessDurationHourOptions(_extendedBusinessDuration);
 
   @override
   void initState() {
@@ -135,13 +138,48 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           ),
           const SizedBox(height: 16),
           if (_accountRole == AccountRole.business) ...[
+            Text(
+              businessTr(context, 'Propagace'),
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 6),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(businessTr(context, 'Až 48 hodin')),
+              title: Text(businessTr(context, 'Zvýraznit Shout')),
               subtitle: Text(
                 businessTr(
                   context,
-                  'Prodlouží výběr platnosti Shoutu až na 48 hodin.',
+                  'Celá karta bude ve feedu vizuálně zvýrazněná.',
+                ),
+              ),
+              value: _businessHighlighted,
+              onChanged: _publishing
+                  ? null
+                  : (value) =>
+                        setState(() => _businessHighlighted = value ?? false),
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(businessTr(context, 'Propagační okénko')),
+              subtitle: Text(
+                businessTr(
+                  context,
+                  'Ve feedu se zobrazí kompaktní okénko; celý Shout se otevře po kliknutí.',
+                ),
+              ),
+              value: _businessSpotlight,
+              onChanged: _publishing
+                  ? null
+                  : (value) =>
+                        setState(() => _businessSpotlight = value ?? false),
+            ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(businessTr(context, 'Na více než 24 hodin')),
+              subtitle: Text(
+                businessTr(
+                  context,
+                  'Po 24 hodinách pokračuje výběr po celých dnech až na 7 dní.',
                 ),
               ),
               value: _extendedBusinessDuration,
@@ -179,7 +217,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                 Expanded(
                   child: _DurationWheel(
                     controller: _hoursController,
-                    values: List.generate(_maximumHours + 1, (index) => index),
+                    values: _hourOptions,
                     suffix: 'h',
                     onChanged: (hours) => _setDuration(hours, _minutes),
                   ),
@@ -310,6 +348,10 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
       createdAt: now,
       expiresAt: now.add(_duration),
       businessLocationId: _businessLocationId,
+      businessHighlighted: _businessHighlighted,
+      businessSpotlight: _businessSpotlight,
+      businessExtendedDuration:
+          _extendedBusinessDuration && _duration > const Duration(hours: 24),
     );
     if (widget.onPublish == null) {
       Navigator.pop(context, shout);
@@ -365,7 +407,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
 
   void _setDuration(int hours, int minutes) {
     var validMinutes = minutes;
-    if (hours == _maximumHours) validMinutes = 0;
+    if (hours >= 24) validMinutes = 0;
     if (hours == 0 && validMinutes == 0) {
       validMinutes = 15;
       _showMessage(tr(context, 'Shout může mít platnost minimálně 15 minut.'));
@@ -388,7 +430,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
         _minutes = 0;
       }
     });
-    if (!enabled && _hoursController.selectedItem > 24) {
+    if (!enabled && _hours > 24) {
       _hoursController.jumpToItem(24);
     }
   }
@@ -458,8 +500,10 @@ class _DurationWheel extends StatelessWidget {
         ),
         onSelectedItemChanged: (index) => onChanged(values[index]),
         children: values.map((value) {
-          final label = twoDigits ? value.toString().padLeft(2, '0') : '$value';
-          return Center(child: Text('$label $suffix'));
+          final label = value > 24
+              ? localizedDurationLabel(context, Duration(hours: value))
+              : '${twoDigits ? value.toString().padLeft(2, '0') : value} $suffix';
+          return Center(child: Text(label));
         }).toList(),
       ),
     ),

@@ -286,6 +286,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         publicationGeohash = locationData['geohash'] as String;
         data['businessLocationId'] = shout.businessLocationId;
         data['businessAuthorFormat'] = 'branch';
+        if (shout.businessHighlighted) data['businessHighlighted'] = true;
+        if (shout.businessSpotlight) data['businessSpotlight'] = true;
+        if (shout.businessExtendedDuration) {
+          data['businessExtendedDuration'] = true;
+        }
       } else {
         publicationLocation = GeoPoint(
           publicLocationCoordinate(position!.latitude),

@@ -227,12 +227,16 @@ odložené nápady až za hlavními uživatelskými cestami.
     a žádost ponechat k ruční kontrole.
   - [ ] Implementovat odložené platební kroky až po splnění předpokladů a podle
     jednotného návrhu v `docs/BUSINESS_MONETIZATION.md`.
-  - [x] Přidat Business checkbox **Až 48 hodin**, po jehož zapnutí se časový
-    výběr rozšíří na 48 hodin; server dovolí delší expiraci pouze Business účtu.
-  - [ ] Implementovat schválené Business premium funkce bez tokenové platby:
-    48hodinovou platnost zachovat zdarma, doplnit zvýrazněný Shout a propagační
+  - [x] Přidat Business checkbox **Na více než 24 hodin**, po jehož zapnutí
+    pokračuje výběr po celých dnech až na 7 dní; server dovolí delší expiraci
+    pouze Business účtu.
+  - [x] Implementovat schválené Business premium funkce bez tokenové platby:
+    platnost až 7 dní zachovat zdarma, doplnit zvýrazněný Shout a propagační
     okénko. Nárok a použití ukládat odděleně od budoucí platby, aby pozdější
     tokeny změnily pouze autorizační/účetní krok, nikoli uživatelský tok.
+  - [ ] Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
+    zobrazení a rozkliknutí propagačních okének; v Business → Propagace zobrazit
+    také vypočtenou míru prokliku. Vzdálenostní pásma se nesledují.
 
 ### Etapa 5 – sociální vazby a oznámení
 

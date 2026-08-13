@@ -23,6 +23,10 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
   klient při zobrazení odstraní historickou předponu „firma –“, takže není nutná
   migrace databáze. Avatar se dál načítá realtime z veřejného profilu firmy.
   Běžnému Shoutu se realtime mění avatar i přezdívka.
+- Bezplatné zaváděcí Business funkce jsou nezávislé příznaky Shoutu:
+  zvýraznění, připnuté propagační okénko a délka nad 24 hodin. Aktivní okénka do
+  20 km klient v každém cyklu promíchá a rotuje; důvěryhodný unikátní dosah,
+  zobrazení a rozkliknutí zůstávají v budoucí serverové vrstvě.
 - Firestore Rules jsou součást aplikační logiky. Změna klientského zápisu bez
   odpovídající změny pravidel a jejich testů je neúplná změna.
 
