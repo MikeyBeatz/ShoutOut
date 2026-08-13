@@ -1,7 +1,10 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'business_logo_editor.dart';
+import 'l10n/business_text.dart';
 import 'l10n/text.dart';
 
 enum AvatarGradientDirection { horizontal, diagonal, vertical }
@@ -196,9 +199,16 @@ class AvatarImage extends StatelessWidget {
 }
 
 class AvatarPickerSheet extends StatefulWidget {
-  const AvatarPickerSheet({super.key, required this.initialStyle});
+  const AvatarPickerSheet({
+    super.key,
+    required this.initialStyle,
+    this.showBusinessLogoAction = false,
+    this.onBusinessLogoSelected,
+  });
 
   final AvatarStyle initialStyle;
+  final bool showBusinessLogoAction;
+  final Future<void> Function(Uint8List bytes)? onBusinessLogoSelected;
 
   @override
   State<AvatarPickerSheet> createState() => _AvatarPickerSheetState();
@@ -269,6 +279,30 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
               ),
             ),
             const SizedBox(height: 14),
+            if (widget.showBusinessLogoAction) ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('business-logo-action'),
+                  onPressed: _selectBusinessLogo,
+                  icon: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    color: widget.onBusinessLogoSelected == null
+                        ? Theme.of(context).colorScheme.outline
+                        : null,
+                  ),
+                  label: Text(
+                    businessTr(context, 'Nahrát vlastní logo'),
+                    style: widget.onBusinessLogoSelected == null
+                        ? TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 170),
@@ -423,6 +457,25 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
       ),
     ),
   );
+
+  Future<void> _selectBusinessLogo() async {
+    final onSelected = widget.onBusinessLogoSelected;
+    if (onSelected == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            businessTr(
+              context,
+              'Vlastní logo připravujeme. Zatím můžeš použít některý z našich avatarů.',
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    final bytes = await pickAndEditBusinessLogo(context);
+    if (bytes != null) await onSelected(bytes);
+  }
 }
 
 class _ColorSelector extends StatelessWidget {

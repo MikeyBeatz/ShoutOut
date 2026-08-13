@@ -68,6 +68,8 @@ levněji a přesněji pokrýt unit testem.
 - přidání, úprava, pozastavení a soft-delete pobočky; po uložení se rozbalený
   editor zavře a změna se objeví bez reloadu;
 - Business dlaždice zůstává po přechodu Profil → Shouty → Profil;
+- pouze Business účet vidí v editoru avatara tlačítko vlastního loga; před
+  zapnutím Storage kliknutí zobrazí lokalizovanou informaci o připravované funkci;
 - formulář Shoutu nabízí jen aktivní ověřené pobočky, jméno je
   `Firma – Pobočka` a poloha odpovídá vybrané pobočce, ne zařízení ani sídlu;
 - publikování rychle po sobě respektuje 1s cooldown a 500/24 h; 48hodinový

@@ -201,9 +201,12 @@ odložené nápady až za hlavními uživatelskými cestami.
       kontrolou formátu, 10MB limitem a minimálním rozlišením 512 × 512 px.
       Ukládaný výsledek je nový 512 × 512 PNG bez původních metadat a částí
       mimo výřez; všechny texty jsou dostupné v sedmi jazycích.
-    - [ ] Tlačítko a trvalé nahrání zpřístupnit až po zapnutí Firebase Storage,
-      doplnění pravidel, cesty souboru, cache invalidace a bezpečného odstranění
-      předchozí verze. Do té doby editor není z uživatelského UI dostupný.
+    - [x] V úpravě avatara zobrazit pouze Business účtům vizuálně neaktivní
+      tlačítko **Nahrát vlastní logo** s lokalizovanou informací, že funkci
+      připravujeme. Běžné účty tuto volbu nevidí.
+    - [ ] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
+      invalidaci a bezpečné odstranění předchozí verze a tlačítku předat hotovou
+      ukládací callback funkci. Výběr, editor a 512px převod už jsou zapojené.
   - [ ] Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes
     VIES a následné automatické přidělení role až po úspěšné kontrole. Pokud pro
     zemi není dostupné bezplatné rozhraní, přijmout ručně vyplněný identifikátor

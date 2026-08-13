@@ -201,8 +201,10 @@ Role 2 otevře čtyři funkční/rezervované oblasti:
 Vlastní Business logo má připravený lokální editor: přijímá JPG, PNG nebo WebP
 do 10 MB a nejméně 512 × 512 px, umožňuje posun a přiblížení ve čtvercovém
 výřezu s kruhovou bezpečnou zónou a vytvoří nový PNG 512 × 512 px bez původních
-metadat. Vstup do editoru se v aktuálním UI nezobrazuje, dokud nebude bezpečně
-zapnuté trvalé uložení ve Firebase Storage.
+metadat. V úpravě avatara ho vidí pouze Business účet jako vizuálně neaktivní
+tlačítko **Nahrát vlastní logo**. Kliknutí zatím zobrazí informaci, že funkci
+připravujeme. Po předání Storage ukládací callback funkce stejné tlačítko bez
+změny rozhraní spustí připravený výběr a editor.
 
 ## Centrum oznámení
 

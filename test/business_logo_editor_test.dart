@@ -2,7 +2,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shoutout/avatar_style.dart';
 import 'package:shoutout/business_logo_editor.dart';
+import 'package:shoutout/l10n/app_localizations.dart';
 
 void main() {
   test('cover layout fills the square crop viewport', () {
@@ -73,5 +75,48 @@ void main() {
       expect(frame.image.width, businessLogoOutputSize);
       expect(frame.image.height, businessLogoOutputSize);
     });
+  });
+
+  testWidgets('Business avatar editor exposes a coming-soon logo action', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('cs'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: Scaffold(
+          body: AvatarPickerSheet(
+            initialStyle: AvatarStyle.fallback,
+            showBusinessLogoAction: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('business-logo-action')), findsOneWidget);
+    expect(find.text('Nahrát vlastní logo'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('business-logo-action')));
+    await tester.pump();
+    expect(
+      find.text(
+        'Vlastní logo připravujeme. Zatím můžeš použít některý z našich avatarů.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('regular avatar editor does not expose custom logo action', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: AvatarPickerSheet(initialStyle: AvatarStyle.fallback),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('business-logo-action')), findsNothing);
   });
 }

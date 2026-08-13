@@ -47,6 +47,14 @@ void main() {
         businessTr(localizedContext, 'Zkontrolovat stav znovu'),
         isNotEmpty,
       );
+      expect(businessTr(localizedContext, 'Nahrát vlastní logo'), isNotEmpty);
+      expect(
+        businessTr(
+          localizedContext,
+          'Vlastní logo připravujeme. Zatím můžeš použít některý z našich avatarů.',
+        ),
+        isNotEmpty,
+      );
     });
   }
 

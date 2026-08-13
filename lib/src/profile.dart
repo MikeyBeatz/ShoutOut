@@ -626,56 +626,66 @@ class EditProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Card(
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.face_retouching_natural_outlined,
-                      ),
-                      title: Text(tr(context, 'Změnit avatar')),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: profile == null
-                          ? null
-                          : () async {
-                              final selected =
-                                  await showModalBottomSheet<AvatarStyle>(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (_) => AvatarPickerSheet(
-                                      initialStyle: avatarStyle!,
-                                    ),
-                                  );
-                              if (selected == null) return;
-                              try {
-                                final db = FirebaseFirestore.instance;
-                                final batch = db.batch()
-                                  ..update(
-                                    db.collection('users').doc(userId),
-                                    selected.toFirestore(),
-                                  )
-                                  ..set(
-                                    db.collection('publicProfiles').doc(userId),
-                                    selected.publicProfileData(nickname),
-                                  );
-                                await batch.commit();
-                                if (context.mounted) {
+                    child: StreamBuilder<AccountRole>(
+                      stream: _watchAccountRole(userId),
+                      builder: (context, roleSnapshot) => ListTile(
+                        leading: const Icon(
+                          Icons.face_retouching_natural_outlined,
+                        ),
+                        title: Text(tr(context, 'Změnit avatar')),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: profile == null || !roleSnapshot.hasData
+                            ? null
+                            : () async {
+                                final selected =
+                                    await showModalBottomSheet<AvatarStyle>(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (_) => AvatarPickerSheet(
+                                        initialStyle: avatarStyle!,
+                                        showBusinessLogoAction:
+                                            roleSnapshot.data ==
+                                            AccountRole.business,
+                                      ),
+                                    );
+                                if (selected == null) return;
+                                try {
+                                  final db = FirebaseFirestore.instance;
+                                  final batch = db.batch()
+                                    ..update(
+                                      db.collection('users').doc(userId),
+                                      selected.toFirestore(),
+                                    )
+                                    ..set(
+                                      db
+                                          .collection('publicProfiles')
+                                          .doc(userId),
+                                      selected.publicProfileData(nickname),
+                                    );
+                                  await batch.commit();
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          tr(context, 'Avatar byl uložen.'),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } on FirebaseException catch (error) {
+                                  if (!context.mounted) return;
+                                  final message =
+                                      error.code == 'permission-denied'
+                                      ? 'Avatar se nepodařilo uložit kvůli oprávnění. Aktualizuj aplikaci a zkus to znovu.'
+                                      : 'Avatar se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.';
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
-                                        tr(context, 'Avatar byl uložen.'),
-                                      ),
+                                      content: Text(tr(context, message)),
                                     ),
                                   );
                                 }
-                              } on FirebaseException catch (error) {
-                                if (!context.mounted) return;
-                                final message =
-                                    error.code == 'permission-denied'
-                                    ? 'Avatar se nepodařilo uložit kvůli oprávnění. Aktualizuj aplikaci a zkus to znovu.'
-                                    : 'Avatar se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.';
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(tr(context, message))),
-                                );
-                              }
-                            },
+                              },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),

@@ -8,6 +8,28 @@ String businessTr(BuildContext context, String cs) {
 }
 
 const _translations = <String, Map<String, String>>{
+  'Nahrát vlastní logo': {
+    'en': 'Upload custom logo',
+    'de': 'Eigenes Logo hochladen',
+    'pl': 'Prześlij własne logo',
+    'sk': 'Nahrať vlastné logo',
+    'uk': 'Завантажити власний логотип',
+    'vi': 'Tải logo riêng lên',
+  },
+  'Vlastní logo připravujeme. Zatím můžeš použít některý z našich avatarů.': {
+    'en':
+        'Custom logos are coming soon. For now, you can use one of our avatars.',
+    'de':
+        'Eigene Logos sind in Vorbereitung. Bis dahin kannst du einen unserer Avatare verwenden.',
+    'pl':
+        'Własne logo będzie dostępne wkrótce. Na razie możesz użyć jednego z naszych awatarów.',
+    'sk':
+        'Vlastné logo pripravujeme. Zatiaľ môžeš použiť niektorého z našich avatarov.',
+    'uk':
+        'Ми готуємо власні логотипи. Поки що ви можете скористатися одним із наших аватарів.',
+    'vi':
+        'Logo riêng sẽ sớm ra mắt. Hiện tại bạn có thể dùng một trong các hình đại diện của chúng tôi.',
+  },
   'Upravit business logo': {
     'en': 'Edit business logo',
     'de': 'Unternehmenslogo bearbeiten',
