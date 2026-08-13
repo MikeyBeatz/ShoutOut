@@ -62,6 +62,12 @@ Samostatná scrollovatelná stránka zachovává značkový styl registrace. Po�
 Návrh adresy je povinné vybrat; zobrazený řádek může obsahovat diakritiku a
 formát země poskytovatele. Dialog nemění šířku podle délky návrhů.
 
+Po odeslání používá Business účet stejnou povinnou obrazovku ověření e-mailu
+jako běžný účet. Po potvrzení odkazu následuje stavová karta čekající žádosti s
+názvem firmy, registračním číslem, kontrolou stavu, podporou a odhlášením. Do
+běžného profilového onboardingu pokračuje až po vytvoření aktivního Business
+profilu a důvěryhodném přidělení role 2.
+
 ## Hlavní aplikace
 
 Spodní `NavigationBar` je vždy ve stejném pořadí:

@@ -8,6 +8,105 @@ String businessTr(BuildContext context, String cs) {
 }
 
 const _translations = <String, Map<String, String>>{
+  'Business žádost čeká na ověření': {
+    'en': 'Business application pending verification',
+    'de': 'Unternehmensantrag wartet auf Prüfung',
+    'pl': 'Wniosek firmowy oczekuje na weryfikację',
+    'sk': 'Firemná žiadosť čaká na overenie',
+    'uk': 'Заявка бізнесу очікує на перевірку',
+    'vi': 'Hồ sơ doanh nghiệp đang chờ xác minh',
+  },
+  'Kontaktní e-mail je potvrzený. Údaje firmy a první pobočku nyní ověřujeme.': {
+    'en':
+        'The contact email is confirmed. We are now verifying the company details and first branch.',
+    'de':
+        'Die Kontakt-E-Mail ist bestätigt. Wir prüfen nun die Unternehmensdaten und die erste Filiale.',
+    'pl':
+        'E-mail kontaktowy został potwierdzony. Weryfikujemy teraz dane firmy i pierwszy oddział.',
+    'sk':
+        'Kontaktný e-mail je potvrdený. Teraz overujeme údaje firmy a prvú pobočku.',
+    'uk':
+        'Контактну електронну адресу підтверджено. Тепер ми перевіряємо дані компанії та першу філію.',
+    'vi':
+        'Email liên hệ đã được xác nhận. Chúng tôi đang xác minh thông tin doanh nghiệp và chi nhánh đầu tiên.',
+  },
+  'Business žádost byla zamítnuta': {
+    'en': 'Business application rejected',
+    'de': 'Unternehmensantrag abgelehnt',
+    'pl': 'Wniosek firmowy został odrzucony',
+    'sk': 'Firemná žiadosť bola zamietnutá',
+    'uk': 'Заявку бізнесу відхилено',
+    'vi': 'Hồ sơ doanh nghiệp bị từ chối',
+  },
+  'Žádost nyní nelze aktivovat. Pokud potřebuješ vysvětlení, kontaktuj podporu.': {
+    'en':
+        'The application cannot be activated now. Contact support if you need an explanation.',
+    'de':
+        'Der Antrag kann derzeit nicht aktiviert werden. Kontaktiere den Support, wenn du eine Erklärung benötigst.',
+    'pl':
+        'Wniosku nie można teraz aktywować. Jeśli potrzebujesz wyjaśnienia, skontaktuj się z pomocą.',
+    'sk':
+        'Žiadosť teraz nemožno aktivovať. Ak potrebuješ vysvetlenie, kontaktuj podporu.',
+    'uk':
+        'Заявку зараз неможливо активувати. Якщо потрібне пояснення, зверніться до підтримки.',
+    'vi':
+        'Hiện chưa thể kích hoạt hồ sơ. Hãy liên hệ hỗ trợ nếu bạn cần giải thích.',
+  },
+  'Business účet je pozastavený': {
+    'en': 'Business account suspended',
+    'de': 'Unternehmenskonto gesperrt',
+    'pl': 'Konto firmowe zostało zawieszone',
+    'sk': 'Firemný účet je pozastavený',
+    'uk': 'Бізнес-акаунт призупинено',
+    'vi': 'Tài khoản doanh nghiệp bị tạm ngưng',
+  },
+  'Business funkce jsou dočasně nedostupné. Pro další informace kontaktuj podporu.': {
+    'en':
+        'Business features are temporarily unavailable. Contact support for more information.',
+    'de':
+        'Business-Funktionen sind vorübergehend nicht verfügbar. Kontaktiere den Support für weitere Informationen.',
+    'pl':
+        'Funkcje firmowe są tymczasowo niedostępne. Skontaktuj się z pomocą, aby uzyskać więcej informacji.',
+    'sk':
+        'Firemné funkcie sú dočasne nedostupné. Ďalšie informácie získaš od podpory.',
+    'uk':
+        'Бізнес-функції тимчасово недоступні. Для отримання додаткової інформації зверніться до підтримки.',
+    'vi':
+        'Các tính năng doanh nghiệp tạm thời không khả dụng. Hãy liên hệ hỗ trợ để biết thêm thông tin.',
+  },
+  'Stav žádosti se nepodařilo načíst': {
+    'en': 'Could not load application status',
+    'de': 'Antragsstatus konnte nicht geladen werden',
+    'pl': 'Nie udało się wczytać stanu wniosku',
+    'sk': 'Stav žiadosti sa nepodarilo načítať',
+    'uk': 'Не вдалося завантажити статус заявки',
+    'vi': 'Không thể tải trạng thái hồ sơ',
+  },
+  'Zkontroluj připojení a zkus stav načíst znovu.': {
+    'en': 'Check your connection and try loading the status again.',
+    'de': 'Prüfe deine Verbindung und lade den Status erneut.',
+    'pl': 'Sprawdź połączenie i spróbuj ponownie wczytać stan.',
+    'sk': 'Skontroluj pripojenie a skús stav načítať znova.',
+    'uk': 'Перевірте з’єднання та спробуйте завантажити статус ще раз.',
+    'vi': 'Hãy kiểm tra kết nối và thử tải lại trạng thái.',
+  },
+  'Zkontrolovat stav znovu': {
+    'en': 'Check status again',
+    'de': 'Status erneut prüfen',
+    'pl': 'Sprawdź stan ponownie',
+    'sk': 'Skontrolovať stav znova',
+    'uk': 'Перевірити статус ще раз',
+    'vi': 'Kiểm tra lại trạng thái',
+  },
+  'Stav žádosti se nepodařilo načíst. Zkus to prosím znovu.': {
+    'en': 'Could not load the application status. Please try again.',
+    'de':
+        'Der Antragsstatus konnte nicht geladen werden. Bitte versuche es erneut.',
+    'pl': 'Nie udało się wczytać stanu wniosku. Spróbuj ponownie.',
+    'sk': 'Stav žiadosti sa nepodarilo načítať. Skús to znova.',
+    'uk': 'Не вдалося завантажити статус заявки. Спробуйте ще раз.',
+    'vi': 'Không thể tải trạng thái hồ sơ. Vui lòng thử lại.',
+  },
   'Vytvářím účet…': {
     'en': 'Creating account…',
     'de': 'Konto wird erstellt…',

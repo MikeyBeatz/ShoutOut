@@ -29,12 +29,14 @@ main()
            └─ AuthGate
               ├─ nepřihlášený → SignInPage
               ├─ neověřený e-mail → VerifyEmailPage
-              └─ ověřený e-mail → ProfileGate
-                 ├─ právní souhlas
-                 ├─ vytvoření přezdívky, avataru a profilů
-                 ├─ žádost o smazání / ban / omezení obsahu
-                 ├─ úvodní nápověda
-                 └─ ShoutOutHome
+              └─ ověřený e-mail → BusinessApplicationGate
+                 ├─ čekající Business žádost → stav ověření
+                 └─ běžný nebo aktivovaný Business účet → ProfileGate
+                    ├─ právní souhlas
+                    ├─ vytvoření přezdívky, avataru a profilů
+                    ├─ žádost o smazání / ban / omezení obsahu
+                    ├─ úvodní nápověda
+                    └─ ShoutOutHome
 ```
 
 `ProfileGate` současně synchronizuje jazyk a režim vzhledu z dokumentu uživatele.

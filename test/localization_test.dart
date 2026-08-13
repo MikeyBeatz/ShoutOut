@@ -39,6 +39,14 @@ void main() {
       );
       expect(businessTr(localizedContext, 'Pobočky'), expectation.$2);
       expect(businessTr(localizedContext, 'Až 48 hodin'), isNotEmpty);
+      expect(
+        businessTr(localizedContext, 'Business žádost čeká na ověření'),
+        isNotEmpty,
+      );
+      expect(
+        businessTr(localizedContext, 'Zkontrolovat stav znovu'),
+        isNotEmpty,
+      );
     });
   }
 

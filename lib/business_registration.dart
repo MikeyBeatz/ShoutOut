@@ -11,6 +11,8 @@ import 'geography.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
 
+const businessSupportEmail = 'support@shoutout.app';
+
 class BusinessRegistrationPage extends StatefulWidget {
   const BusinessRegistrationPage({super.key});
 
@@ -20,7 +22,6 @@ class BusinessRegistrationPage extends StatefulWidget {
 }
 
 class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
-  static const supportEmail = 'support@shoutout.app';
   final _formKey = GlobalKey<FormState>();
   final _companyName = TextEditingController();
   final _registrationNumber = TextEditingController();
@@ -324,7 +325,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                             ],
                             const SizedBox(height: 16),
                             SelectableText(
-                              '${businessTr(context, 'V případě potíží kontaktujte podporu:')} $supportEmail',
+                              '${businessTr(context, 'V případě potíží kontaktujte podporu:')} $businessSupportEmail',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
@@ -605,7 +606,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
     } catch (_) {
       if (mounted) {
         _message(
-          '${businessTr(context, 'Žádost se nepodařilo uložit. Kontaktujte podporu:')} $supportEmail',
+          '${businessTr(context, 'Žádost se nepodařilo uložit. Kontaktujte podporu:')} $businessSupportEmail',
         );
       }
     } finally {

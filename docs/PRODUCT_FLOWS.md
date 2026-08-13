@@ -36,9 +36,13 @@ Business registrace je samostatný formulář ve stejném vizuálním stylu. Obs
 
 Po odeslání vznikne Authentication účet, paralelně se uloží
 `businessApplications/{uid}` ve stavu `pending_email` a odešle ověřovací e-mail.
-Klient si nikdy nepřidělí Business roli. Současná vývojová verze nemá automatický
-serverový převod žádosti na aktivní profil; tento krok je popsán v
-`BUSINESS_VERIFICATION.md`.
+Dokud uživatel odkaz nepotvrdí, nepokračuje stejně jako u běžné registrace. Po
+potvrzení se obnoví Firebase uživatel i ID token a zobrazí se samostatný stav
+čekající Business žádosti; běžný profilový onboarding se neotevře. Brána se
+uvolní až po důvěryhodném přidělení role `business` a vytvoření aktivního
+`businessProfiles/{uid}`. Klient si roli nikdy nepřidělí. Současná vývojová
+verze nemá automatický serverový převod žádosti na aktivní profil; tento krok je
+popsán v `BUSINESS_VERIFICATION.md`.
 
 ## Vytvoření Shoutu
 

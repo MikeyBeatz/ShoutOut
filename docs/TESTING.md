@@ -29,6 +29,9 @@ levněji a přesněji pokrýt unit testem.
 
 - běžná registrace, doručení ověřovacího e-mailu, návrat do aplikace a vytvoření
   právního souhlasu, přezdívky a avataru;
+- Business registrace zůstane před potvrzením na ověření e-mailu a po potvrzení
+  na stavu žádosti; do profilového onboardingu pokračuje až s rolí 2 a aktivním
+  Business profilem;
 - chybné/krátké heslo, rozdílné potvrzení, obsazená přezdívka a opětovné použití
   existujícího e-mailu;
 - reset hesla na existujícím i neexistujícím e-mailu bez úniku existence účtu;

@@ -9,8 +9,10 @@ import 'package:flutter/services.dart';
 import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';
+import 'business_application_state.dart';
 import 'business_registration.dart';
 import 'legal.dart';
+import 'l10n/business_text.dart';
 import 'l10n/text.dart';
 
 class AuthGate extends StatelessWidget {
@@ -38,9 +40,283 @@ class AuthGate extends StatelessWidget {
       if (!user.emailVerified) {
         return VerifyEmailPage(user: user);
       }
-      return ProfileGate(user: user, child: signedInChild);
+      return BusinessApplicationGate(
+        user: user,
+        child: ProfileGate(user: user, child: signedInChild),
+      );
     },
   );
+}
+
+class BusinessApplicationGate extends StatelessWidget {
+  const BusinessApplicationGate({
+    super.key,
+    required this.user,
+    required this.child,
+  });
+
+  final User user;
+  final Widget child;
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('businessApplications')
+        .doc(user.uid)
+        .snapshots(),
+    builder: (context, applicationSnapshot) {
+      if (applicationSnapshot.hasError) {
+        return _BusinessApplicationStatusPage(
+          user: user,
+          application: const {},
+          loadFailed: true,
+        );
+      }
+      if (!applicationSnapshot.hasData) return const _LoadingPage();
+      if (!applicationSnapshot.data!.exists) {
+        return child;
+      }
+      final application = applicationSnapshot.data!.data() ?? const {};
+
+      return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('accountRoles')
+            .doc(user.uid)
+            .snapshots(),
+        builder: (context, roleSnapshot) {
+          if (roleSnapshot.hasError) {
+            return _BusinessApplicationStatusPage(
+              user: user,
+              application: application,
+              loadFailed: true,
+            );
+          }
+          if (!roleSnapshot.hasData) return const _LoadingPage();
+          final role = roleSnapshot.data!.data();
+          final isBusiness = role?['role'] == 'business' || role?['level'] == 2;
+          if (!isBusiness) {
+            return _BusinessApplicationStatusPage(
+              user: user,
+              application: application,
+              profileStatus: application['status'] as String?,
+            );
+          }
+
+          return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
+                .collection('businessProfiles')
+                .doc(user.uid)
+                .snapshots(),
+            builder: (context, profileSnapshot) {
+              if (profileSnapshot.hasError) {
+                return _BusinessApplicationStatusPage(
+                  user: user,
+                  application: application,
+                  loadFailed: true,
+                );
+              }
+              if (!profileSnapshot.hasData) return const _LoadingPage();
+              final profile = profileSnapshot.data!.data();
+              final gateState = resolveBusinessApplicationGateState(
+                applicationExists: true,
+                role: role,
+                businessProfileExists: profileSnapshot.data!.exists,
+                businessProfile: profile,
+              );
+              if (gateState == BusinessApplicationGateState.activeBusiness) {
+                return child;
+              }
+              return _BusinessApplicationStatusPage(
+                user: user,
+                application: application,
+                profileStatus: profile?['status'] as String?,
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+}
+
+class _BusinessApplicationStatusPage extends StatefulWidget {
+  const _BusinessApplicationStatusPage({
+    required this.user,
+    required this.application,
+    this.profileStatus,
+    this.loadFailed = false,
+  });
+
+  final User user;
+  final Map<String, dynamic> application;
+  final String? profileStatus;
+  final bool loadFailed;
+
+  @override
+  State<_BusinessApplicationStatusPage> createState() =>
+      _BusinessApplicationStatusPageState();
+}
+
+class _BusinessApplicationStatusPageState
+    extends State<_BusinessApplicationStatusPage> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final companyName =
+        widget.application['submittedCompanyName'] as String? ?? '';
+    final registrationNumber =
+        widget.application['registrationNumber'] as String? ?? '';
+    final rejected = widget.profileStatus == 'rejected';
+    final suspended = widget.profileStatus == 'suspended';
+    final title = widget.loadFailed
+        ? 'Stav žádosti se nepodařilo načíst'
+        : rejected
+        ? 'Business žádost byla zamítnuta'
+        : suspended
+        ? 'Business účet je pozastavený'
+        : 'Business žádost čeká na ověření';
+    final description = widget.loadFailed
+        ? 'Zkontroluj připojení a zkus stav načíst znovu.'
+        : rejected
+        ? 'Žádost nyní nelze aktivovat. Pokud potřebuješ vysvětlení, kontaktuj podporu.'
+        : suspended
+        ? 'Business funkce jsou dočasně nedostupné. Pro další informace kontaktuj podporu.'
+        : 'Kontaktní e-mail je potvrzený. Údaje firmy a první pobočku nyní ověřujeme.';
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        widget.loadFailed
+                            ? Icons.cloud_off_outlined
+                            : rejected || suspended
+                            ? Icons.pause_circle_outline
+                            : Icons.verified_user_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        businessTr(context, title),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        businessTr(context, description),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (companyName.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        ListTile(
+                          leading: const Icon(Icons.business_outlined),
+                          title: Text(companyName),
+                          subtitle: registrationNumber.isEmpty
+                              ? null
+                              : Text(
+                                  '${businessTr(context, 'Registrační číslo / IČO')}: $registrationNumber',
+                                ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _busy ? null : _refresh,
+                          icon: _busy
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh),
+                          label: Text(
+                            businessTr(context, 'Zkontrolovat stav znovu'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _busy
+                            ? null
+                            : () => FirebaseAuth.instance.signOut(),
+                        child: Text(tr(context, 'Odhlásit se')),
+                      ),
+                      const SizedBox(height: 12),
+                      SelectableText(
+                        '${businessTr(context, 'V případě potíží kontaktujte podporu:')} $businessSupportEmail',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _busy = true);
+    try {
+      await widget.user.reload().timeout(const Duration(seconds: 20));
+      await FirebaseAuth.instance.currentUser
+          ?.getIdToken(true)
+          .timeout(const Duration(seconds: 20));
+      await Future.wait([
+        FirebaseFirestore.instance
+            .collection('businessApplications')
+            .doc(widget.user.uid)
+            .get(const GetOptions(source: Source.server)),
+        FirebaseFirestore.instance
+            .collection('accountRoles')
+            .doc(widget.user.uid)
+            .get(const GetOptions(source: Source.server)),
+        FirebaseFirestore.instance
+            .collection('businessProfiles')
+            .doc(widget.user.uid)
+            .get(const GetOptions(source: Source.server)),
+      ]).timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      _showRefreshError();
+    } on FirebaseException {
+      _showRefreshError();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _showRefreshError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          businessTr(
+            context,
+            'Stav žádosti se nepodařilo načíst. Zkus to prosím znovu.',
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ProfileGate extends StatelessWidget {

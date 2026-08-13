@@ -176,6 +176,9 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [x] Přidat samostatnou business registraci s údaji firmy, fakturační adresou,
     kontaktním e-mailem a žádostí ve stavu `pending_email`; klient si business
     roli nepřiděluje.
+  - [x] Po povinném potvrzení e-mailu držet žadatele na samostatné stavové
+    obrazovce a nepustit ho do běžného profilu, dokud důvěryhodný proces
+    nevytvoří aktivní Business profil a nepřidělí roli 2.
   - [x] Přidat do registrace samostatnou povinnou část **Pobočka/provozovna** s
     veřejným názvem a adresou první provozovny. Provozovnu nikdy automaticky
     nevytvářet ze sídla ani fakturační adresy; shodné adresy jsou však povolené.
@@ -339,8 +342,9 @@ odložené nápady až za hlavními uživatelskými cestami.
   okolí bez závislosti na poloze zařízení.
 - [ ] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
   App Check enforcement, rozpočtových alertech a odstranění testovacích účtů.
-- [ ] Optimalizovat webové assety, zejména avatary; současný release balíček má
-  přibližně 63 MB (odhad přenosu po gzip kompresi přibližně 35 MB).
+- [x] Optimalizovat webové assety, zejména avatary; 24 transparentních runtime
+  avatarů je odvozených v rozměru 512 × 512 px, zatímco vysoké zdroje v
+  `design/` a `promo/` zůstávají beze změny pro budoucí grafickou a promo práci.
 
 ### Navazující ruční test moderace
 
