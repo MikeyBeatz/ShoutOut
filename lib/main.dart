@@ -24,6 +24,7 @@ import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';
 import 'firebase_options.dart';
+import 'easter_egg_game.dart';
 import 'legal.dart';
 import 'public_profile.dart';
 import 'profile_tile_layout.dart';

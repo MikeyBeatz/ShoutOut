@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:shoutout/avatar_style.dart';
 import 'package:shoutout/auth_gate.dart';
+import 'package:shoutout/easter_egg_game.dart';
 import 'package:shoutout/l10n/app_localizations.dart';
 import 'package:shoutout/main.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('shows the ShoutOut feed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(locale: Locale('cs'), home: ShoutOutHome()),
@@ -132,12 +138,22 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: HelpPage()));
 
     expect(find.text('Location and privacy'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Business account'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Business account'), findsOneWidget);
     expect(find.text('Report a bug'), findsNothing);
     expect(find.byIcon(Icons.article_outlined), findsNothing);
     expect(find.byIcon(Icons.privacy_tip_outlined), findsNothing);
     expect(find.byIcon(Icons.gavel_outlined), findsNothing);
 
+    await tester.scrollUntilVisible(
+      find.text('Location and privacy'),
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Location and privacy'));
     await tester.pumpAndSettle();
     expect(
@@ -170,6 +186,141 @@ void main() {
     expect(find.text('Notifikace'), findsOneWidget);
     expect(find.text('Vzhled aplikace'), findsOneWidget);
     expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+  });
+
+  testWidgets('help offers Shout Flight as a regular card', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('cs'),
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [Locale('cs')],
+        home: HelpPage(),
+      ),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Shout Flight'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Shout Flight'), findsOneWidget);
+    await tester.tap(find.text('Shout Flight'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Shout Flight'), findsOneWidget);
+    expect(find.text('Klepni pro vzlet'), findsOneWidget);
+  });
+
+  testWidgets('Shout Flight starts after a tap', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({'shout_flight_best_score': 123});
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('cs'),
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [Locale('cs')],
+        home: ShoutFlightPage(),
+      ),
+    );
+
+    expect(find.text('Klepni pro vzlet'), findsOneWidget);
+    await tester.pump();
+    expect(find.text('Nejlepší: 123'), findsOneWidget);
+    await tester.tap(find.text('Klepni pro vzlet'));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      0,
+    );
+    expect(find.byKey(const Key('flight-score')), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Shout Flight keeps a new record after reopening', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    const game = MaterialApp(
+      locale: Locale('cs'),
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [Locale('cs')],
+      home: ShoutFlightPage(),
+    );
+
+    await tester.pumpWidget(game);
+    await tester.pump();
+    await tester.tap(find.text('Klepni pro vzlet'));
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+
+    final preferences = await SharedPreferences.getInstance();
+    final stored = preferences.getInt('shout_flight_best_score');
+    expect(stored, isNotNull);
+    expect(stored, greaterThan(0));
+
+    await tester.pumpWidget(game);
+    await tester.pump();
+    expect(find.text('Nejlepší: $stored'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Shout Flight requires a separate restart confirmation', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('cs'),
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [Locale('cs')],
+        home: ShoutFlightPage(),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Klepni pro vzlet'));
+    await tester.pump(const Duration(seconds: 3));
+
+    expect(find.textContaining('Konec letu'), findsOneWidget);
+    await tester.tap(find.textContaining('Konec letu'));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Klepni pro vzlet'), findsOneWidget);
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      1,
+    );
+
+    await tester.tap(find.text('Klepni pro vzlet'));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(
+      tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
+      0,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('bug report keeps image attachment disabled without Storage', (

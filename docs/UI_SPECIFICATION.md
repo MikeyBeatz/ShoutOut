@@ -171,7 +171,7 @@ dlaždice v tomto významu:
 - **Nahlásit chybu** – samostatný vstup do textového hlášení a pozdější přílohy;
 - **Varování** – vlastní historii upozornění/postihů;
 - **Právní info** – právní dokumenty a informace, ne nápovědu;
-- **Systém** – jazyk, Notifikace, Vzhled aplikace a skrytý vstup do Easter eggu;
+- **Systém** – jazyk, Notifikace a Vzhled aplikace;
 - **Business** – pouze role 2;
 - **Moderace** – pouze role 3–6, na webu vede také do `/admin`;
 - odhlášení.
@@ -183,6 +183,32 @@ heslo** a **Smazat účet**. Změna přezdívky ukáže 30denní omezení před
 potvrzením. Smazání vysvětlí skrytí obsahu a přibližně 60denní retenci.
 
 ### Systém
+
+Poslední karta **Shout Flight** uvnitř dlaždice **Nápověda** otevře offline
+minihru. Nemá vysvětlující popisek, aby uživatel její význam objevil sám.
+Hráč klepnutím, mezerníkem nebo šipkou nahoru nadzvedává a
+roztáčí megafon aplikace; každý vstup obnoví stejný předvídatelný vzestup a bez
+klepání rotace zpomaluje. Tematické mrakodrapy
+mohou stát zdola, viset shora nebo vytvořit různě obtížný průlet a používají
+několik variant střech, fasád, oken a antén. Velké skóre
+roste podle času letu a za překážku přičte bonus podle velikosti mezery.
+
+Pocit letu podporují dvě různě rychlé vrstvy nepravidelné, plynule navazující
+městské siluety a pomalejší mraky. Pozadí je procedurální, nepoužívá externí
+obrázky a není součástí kolizí.
+
+Pohyb a skóre používají skutečný počet uplynulých intervalů herní smyčky, takže
+rychlost zůstává srovnatelná i při nižší snímkové frekvenci telefonu. Delší skok
+po návratu aplikace z pozadí je omezený, aby nezpůsobil okamžitý náraz.
+
+Po nárazu první kliknutí nebo stisk klávesy pouze opustí výsledek a vrátí
+úvodní kartu **Klepni pro vzlet**. Nový pokus začne až dalším samostatným vstupem,
+aby doznívající klikání nemohlo nechtěně spustit hru.
+
+Grafika používá pouze odstíny aktuálního motivu. Hra nevyžaduje síť, další
+oprávnění ani serverové služby. Osobní maximum se trvale ukládá jen lokálně v
+zařízení, načte se i po zavření a opětovném otevření hry a nový rekord zobrazí
+gratulaci; výsledek neovlivňuje účet ani karmu.
 
 - Jazyk otevře bottom sheet se jmény jazyků a kódy CS, EN, DE, PL, SK, UK, VI.
   `UK` je ISO 639 kód ukrajinštiny; nejde o zkratku země.

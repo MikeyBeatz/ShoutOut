@@ -69,6 +69,8 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/address_autocomplete.dart` | Geoapify autocomplete a převod výsledku na adresu, souřadnice a provider place ID. |
 | `lib/public_profile.dart` | Realtime načtení aktuální přezdívky a avataru. |
 | `lib/help_content.dart` | Osm rozšířených témat Nápovědy ve všech sedmi jazycích. |
+| `lib/easter_egg_game.dart` | Offline minihra Shout Flight, fyzika megafonu nezávislá na snímkové frekvenci, obtížnost překážek, skóre, překlady a tematické vykreslení bez externích assetů. |
+| `lib/flight_score_store*.dart` | Platformní úložiště osobního rekordu: webový `LocalStorage` a nativní `SharedPreferences`, vždy pouze vyšší výsledek. |
 | `lib/profile_tile_layout.dart` | Deterministické skládání viditelných profilových dlaždic do řádků po třech. |
 | `lib/geography.dart` | Geohash, veřejné zaokrouhlení souřadnic a geografický model. |
 | `lib/src/home.dart` | Realtime feed, poloha, publikování, ukládání a reakce na Shout. |

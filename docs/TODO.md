@@ -279,14 +279,24 @@ odložené nápady až za hlavními uživatelskými cestami.
     neodměňovat samotný objem obsahu ani konfliktní chování.
   - Potom navrhnout malé odznaky a rámečky, přičemž uživatel může zvolit nejvýše
     jeden odznak zobrazovaný u avatara; zajistit přístupnost a moderaci názvů.
-- [ ] **Odloženě přidat skrytou minihru s letadlem.**
-  - Připravit jednoduchou offline klikací hru ve stylu Flappy Bird, bez použití
-    cizích assetů nebo názvu; monochromatickou grafiku tvoří pouze odstíny
-    aktuálního tématu ShoutOut.
-  - Vstup skrýt jako Easter egg v Nastavení (například opakovaným klepnutím na
-    nenápadný prvek), nezobrazovat ji jako běžnou funkci ani dlaždici.
+- [x] **Přidat minihru Shout Flight.**
+  - Offline klikací hra používá megafon aplikace, který se klepnutím nadzvedne a
+    roztočí; bez dalšího klepnutí rotace postupně zpomaluje.
+  - Překážky tvoří tematické mrakodrapy zdola, shora nebo v páru. Skóre roste s
+    časem letu a přidává bonus podle obtížnosti průletu.
+  - Hra je dostupná jako poslední karta uvnitř dlaždice **Nápověda**, bez
+    vysvětlujícího popisku, aby ji mohl každý objevit sám.
   - Nesmí měnit právní obsah, vyžadovat další oprávnění ani ovlivňovat karmu.
-  - Hra funguje zcela offline; skóre je pouze lokální a bez globálního žebříčku.
+  - Hra funguje zcela offline; nejlepší skóre je uložené pouze v zařízení a bez
+    globálního žebříčku. Maximum přetrvá zavření hry a překonání zobrazí
+    gratulaci k novému rekordu.
+  - Pohybové pozadí tvoří procedurální mraky a dvě vrstvy městské siluety s
+    rozdílnou rychlostí paralaxy; nepravidelný vzor plynule navazuje a pozadí
+    nevstupuje do kolizí.
+  - Po výsledku vyžadovat samostatný vstup pro návrat na úvodní kartu a teprve
+    další vstup pro spuštění nového pokusu.
+  - [ ] Volitelně později zvážit žebříček pouze mezi sledovanými profily; před
+    implementací vyřešit soukromí, ochranu výsledků a náklady Firestore.
 
 ### Vzhled a grafika
 

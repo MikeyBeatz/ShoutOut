@@ -342,6 +342,17 @@ class HelpPage extends StatelessWidget {
               ),
             ),
           ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.campaign_rounded),
+              title: const Text('Shout Flight'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ShoutFlightPage()),
+              ),
+            ),
+          ),
         ],
       ),
     );
