@@ -339,17 +339,6 @@ class SystemSettingsPage extends StatelessWidget {
         ),
         Card(
           child: ListTile(
-            leading: const Icon(Icons.lock_outline),
-            title: Text(tr(context, 'Změnit heslo')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => showDialog<void>(
-              context: context,
-              builder: (_) => const ChangePasswordDialog(),
-            ),
-          ),
-        ),
-        Card(
-          child: ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: Text(tr(context, 'Notifikace')),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -692,6 +681,18 @@ class EditProfilePage extends StatelessWidget {
                               nickname,
                               userId,
                             ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.lock_outline),
+                      title: Text(tr(context, 'Změnit heslo')),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => showDialog<void>(
+                        context: context,
+                        builder: (_) => const ChangePasswordDialog(),
+                      ),
                     ),
                   ),
                 ],

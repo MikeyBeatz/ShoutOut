@@ -156,7 +156,7 @@ void main() {
 
     expect(find.text('Systém'), findsOneWidget);
     expect(find.text('Jazyk'), findsOneWidget);
-    expect(find.text('Změnit heslo'), findsOneWidget);
+    expect(find.text('Změnit heslo'), findsNothing);
     expect(find.text('Notifikace'), findsOneWidget);
     expect(find.text('Vzhled aplikace'), findsOneWidget);
     expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);

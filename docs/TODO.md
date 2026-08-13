@@ -311,7 +311,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 - [ ] **Přestavět akce na kartě Profil.**
   - [x] **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
-  - **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
+  - [x] **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
     **Upravit profil**; zachovat stávající validaci a lokalizace.
   - [x] Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
     po přidání druhého se první posune doleva a nový je uprostřed; třetí obsadí
