@@ -20,11 +20,11 @@ ale mají vlastní text a schvalovací proces.
 |---:|---|---|---|
 | 0 | návštěvník | Pouze přihlášení nebo registrace, bez veřejného náhledu | Implementováno |
 | 1 | `user` | Běžný komunitní účet | Implementováno |
-| 2 | `business` | Firemní profil, propagace a vlastní statistiky | Role implementována, funkce navrženy |
+| 2 | `business` | Firemní profil, provozovny a publikování za pobočku | Základ implementován; aktivace, platby, propagace a statistiky navrženy |
 | 3 | `moderator` | Každodenní moderace a dočasné postihy | Implementováno částečně |
 | 4 | `seniorModerator` | Vedení moderace, dlouhé a trvalé bany, odvolání | Implementováno částečně |
-| 5 | `administrator` | Správa systému, rolí, business účtů a dohled | Role implementována, rozhraní navrženo |
-| 6 | `owner` | Nejvyšší bezpečnostní a organizační pravomoc | Role implementována, rozhraní navrženo |
+| 5 | `administrator` | Správa systému, rolí, business účtů a dohled | Role a technický dohled implementovány; část správy navržena |
+| 6 | `owner` | Nejvyšší bezpečnostní a organizační pravomoc | Role a technický dohled implementovány; část správy navržena |
 
 Role jsou ukládány v `accountRoles/{uid}`. Klient smí přečíst pouze vlastní
 roli a nesmí role vytvářet, měnit ani mazat. Vývojové přiřazení probíhá pouze

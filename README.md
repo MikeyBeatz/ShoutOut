@@ -18,8 +18,11 @@ součástí aktuálně podporovaného vývojového prostředí.
 
 - Flutter a Dart
 - Firebase Authentication
-- Cloud Firestore
-- Geolocator
+- Cloud Firestore, Security Rules a indexy
+- Firebase Hosting, App Check a připravený Firebase Storage
+- Cloud Functions for Firebase pro serverové geografické obohacení
+- Geoapify Autocomplete API pro adresy a Google Geocoding API pro regiony
+- Geolocator a `country_picker`
 - Material 3
 
 Vývojová Firebase konfigurace používá projekt `shoutout-dev-46c81`. Produkční
@@ -30,7 +33,8 @@ prostředí musí před vydáním používat samostatný Firebase projekt.
 - Flutter SDK odpovídající `pubspec.yaml`
 - Android Studio nebo Android SDK pro Android
 - Chrome pro webový vývoj
-- Node.js pouze pro pomocné skripty ve složce `tools`
+- Node.js 22 pro pomocné skripty a Cloud Functions
+- Firebase CLI a Java 21 pro testy Firestore Rules
 - přístup k vývojovému Firebase projektu
 
 Stav prostředí lze zkontrolovat příkazem:
@@ -40,6 +44,10 @@ flutter doctor
 ```
 
 ## První spuštění
+
+Kompletní nastavení Firebase, Geoapify, lokálních klíčů a nasazení je v
+[provozním runbooku](docs/SETUP_AND_OPERATIONS.md). Následující příkazy stačí pro
+části aplikace, které nepoužívají adresní našeptávání.
 
 Nainstalujte závislosti:
 
@@ -59,7 +67,8 @@ Spusťte Android aplikaci na připojeném zařízení nebo emulátoru:
 flutter run
 ```
 
-Spusťte webovou variantu:
+Spusťte webovou variantu bez Geoapify nebo použijte příkaz s `--dart-define` z
+runbooku:
 
 ```powershell
 flutter run -d chrome
@@ -73,6 +82,10 @@ Aplikace žádá o přístup k poloze. Pokud uživatel oprávnění nepovolí ne
 není dostupná, feed se stále načte, pouze nemá přesný výpočet vzdálenosti.
 
 ### Geografické regiony
+
+Geoapify v klientovi našeptává adresy a vrací přesnou polohu Business
+provozovny. Klíč se předává přes `GEOAPIFY_API_KEY` při sestavení; jeho vytvoření,
+omezení a příkazy jsou v [provozním runbooku](docs/SETUP_AND_OPERATIONS.md).
 
 Nové shouty ukládají sedmimístný `geohash`. Firebase Function
 `enrichShoutGeography` následně pomocí Google Geocoding API doplní pole
@@ -107,6 +120,10 @@ flutter build web --debug
 Stejné základní kontroly spouští také GitHub Actions.
 
 ## Firebase a data
+
+Význam a vazby všech kolekcí jsou popsané v
+[datovém modelu](docs/DATA_MODEL.md). Přesná validace zůstává ve
+`firestore.rules`.
 
 Hlavní kolekce ve Firestore:
 
@@ -180,26 +197,36 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `lib/auth_gate.dart` – přihlášení, registrace a vstupní uživatelské brány
 - `lib/legal.dart` – právní souhlasy a dokumenty
 - `lib/l10n/` – stávající lokalizační vrstva
+- `functions/` – serverové geografické obohacení Shoutů
+- `.geoapify.json.example` – bezpečná šablona lokálního klientského API klíče
 - `assets/avatars/` – vestavěné uživatelské avatary
 - `promo/` – samostatný balíček značky, screenshotů a zadání pro promo video
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
+- `docs/ARCHITECTURE.md` – hranice systému a odpovědnosti modulů
+- `docs/PRODUCT_FLOWS.md` – skutečné uživatelské toky současné verze
+- `docs/UI_SPECIFICATION.md` – obrazovky, navigace a globální UI pravidla
+- `docs/DATA_MODEL.md` – kolekce, vazby a atomické invarianty
+- `docs/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
+- `docs/TESTING.md` – automatická a ruční regresní matice
 - `docs/TODO.md` – jediný společný projektový backlog
 - `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace
 
-Aplikace podporuje češtinu, angličtinu, němčinu a polštinu. Lokalizační systém
-je propojený se stávajícím profilem a vývojovým tokem aplikace; jeho změny musí
-být prováděny samostatně a ověřeny také s geolokačním feedem.
+Aplikace podporuje češtinu (`cs`), angličtinu (`en`), němčinu (`de`), polštinu
+(`pl`), slovenštinu (`sk`), ukrajinštinu (`uk`) a vietnamštinu (`vi`). Používá
+generované ARB lokalizace a přechodové slovníky `tr`/`businessTr`; při změně
+textu je nutné doplnit obě vrstvy, dokud nebude migrace dokončená.
 
 ## Odložená serverová část
 
 Některé operace jsou v klientovi a Firestore připravené, ale vyžadují budoucí
-serverovou automatizaci – například úplné zpracování smazání účtu, retenční
-lhůty, čištění expirovaného obsahu a push notifikace. Přesný seznam a podmínky
-dokončení jsou v `docs/TODO.md`.
+serverovou automatizaci – například aktivace Business žádosti, úplné zpracování
+smazání účtu, retenční lhůty, čištění expirovaného obsahu a push notifikace.
+Přesný seznam a podmínky dokončení jsou v [TODO](docs/TODO.md); dokumentace
+současné architektury zřetelně odděluje hotový stav od návrhu.
 
 ## Licence
 

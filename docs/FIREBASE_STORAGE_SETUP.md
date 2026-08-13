@@ -25,7 +25,8 @@ hlášení chyb zůstávají funkční; tlačítko pro obrázek je do aktivace s
    v evropské oblasti odpovídající projektu, přednostně `europe-west3`.
 3. Ověřit, že název bucketu odpovídá `storageBucket` ve
    `lib/firebase_options.dart`; případnou odlišnost opravit přes FlutterFire CLI.
-4. Nasadit pravidla: `firebase deploy --only storage`.
+4. Nasadit pravidla s explicitním prostředím:
+   `firebase deploy --only storage --project your-project-id`.
 5. Změnit `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` na `true`.
 6. Sestavit a nasadit web se stejnými produkčními parametry jako běžné demo.
 

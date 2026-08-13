@@ -1,6 +1,6 @@
 # ShoutOut development seed users
 
-This tool creates five **development-only** Firebase Authentication users with
+This tool creates ten **development-only** Firebase Authentication users with
 non-deliverable `@shoutout.test` e-mails. Each user is marked as verified and
 has an `isTest: true` profile field.
 
@@ -12,7 +12,7 @@ commit it or send it through chat.
 1. Firebase Console → Project settings → Service accounts.
 2. Choose **Generate new private key** and save it outside this repository,
    for example `C:\Users\micha\.shoutout-dev-service-account.json`.
-3. In a terminal, run `npm install` from this `tools` folder.
+3. In a terminal, run `npm ci` from this `tools` folder.
 
 ## Seed accounts
 

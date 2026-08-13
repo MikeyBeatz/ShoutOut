@@ -33,7 +33,8 @@ obcích. Komunikace má být přístupná i lidem mimo tuto věkovou skupinu.
 3. Uživatel filtruje vzdálenost, pořadí a kategorii.
 4. Otevře Shout, reaguje, komentuje, uloží jej nebo odpoví soukromě.
 5. Případně vytvoří vlastní Shout, zvolí kategorii a dobu platnosti.
-6. Aktivitu a uložené položky najde v hlavních kartách aplikace.
+6. Aktivitu, uložené Shouty a sledované profily najde v hlavních kartách
+   aplikace.
 
 ## Aktuálně implementované funkce
 
@@ -44,21 +45,29 @@ obcích. Komunikace má být přístupná i lidem mimo tuto věkovou skupinu.
 - komentáře a reakce;
 - soukromé odpovědi;
 - ukládání Shoutů;
+- Follow/unfollow a řazení feedu se sledovanými autory prvními;
+- veřejný detail profilu s aktivními Shouty;
+- centrum in-app oznámení se slučováním událostí a otevřením cílového Shoutu;
 - vlastní aktivní, expirované a komentované Shouty;
 - uživatelské avatary a profil;
+- světlý, tmavý a systémový vzhled;
+- Business registrace, profil, fakturační údaje, provozovny a publikování z
+  vybrané pobočky;
 - blokování uživatelů a hlášení obsahu;
 - moderátorské nástroje;
-- čeština, angličtina, němčina a polština;
+- čeština, angličtina, němčina, polština, slovenština, ukrajinština a
+  vietnamština;
 - Android a vývojová webová verze.
 
-Slovenština, ukrajinština a vietnamština jsou plánované, nikoliv dokončené.
-Push notifikace a část serverových automatizací jsou také plánované.
+Push notifikace mimo otevřenou aplikaci, automatická aktivace Business účtu,
+platby a část retenčních serverových automatizací jsou plánované.
 
 ## Produktová terminologie
 
 - **Shout** – veřejný, místní a časově omezený příspěvek.
 - **Feed / Shouty** – přehled aktuálních Shoutů v okolí.
-- **Uložené** – Shouty uložené uživatelem pro pozdější návrat.
+- **Sledované** – hlavní karta se Shouty uloženými vlaječkou a sledovanými
+  profily.
 - **Mé Shouty** – vlastní aktivní a expirované Shouty a historie komentářů.
 - **Soukromá odpověď** – neveřejná reakce adresovaná autorovi Shoutu.
 
@@ -132,5 +141,5 @@ Vodoznak není uvnitř jednotlivých karet.
 - že má aktivní uživatele v konkrétním počtu nebo po celém světě;
 - že je uživatel zcela anonymní;
 - že poloha nebo obsah jsou neomylně ověřené;
-- že push notifikace nebo všechny plánované jazyky už fungují;
+- že push notifikace, automatické Business ověření nebo platby už fungují;
 - že jde o náhradu tísňových linek nebo oficiálního varovného systému.

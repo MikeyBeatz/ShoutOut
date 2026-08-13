@@ -1,5 +1,13 @@
 # Jednoduché automatické ověření business účtů
 
+## Stav dokumentu
+
+Toto je schválený cílový proces, nikoli popis hotové serverové automatizace.
+Současný klient umí vytvořit `businessApplications/{uid}` s povinnou první
+provozovnou vybranou přes Geoapify. Automatická kontrola registru, aktivace role
+a vytvoření `businessProfiles/{uid}` zatím nejsou implementované. Skutečný
+současný tok je v `PRODUCT_FLOWS.md` a technický model v `DATA_MODEL.md`.
+
 ## Zásada
 
 ShoutOut není banka ani tržiště a business účet nedostává oprávnění nakládat s
@@ -39,7 +47,8 @@ adresa sídla a provozovny je povolená, ale uživatel ji musí zadat nebo potvr
 samostatně. Jeden business účet může mít více poboček pod stejným registračním
 číslem. Každá pobočka má vlastní veřejný název, adresu a polohu:
 
-- adresa se převede na souřadnice serverovým geocodingem;
+- současný klient převezme souřadnice z vybraného návrhu Geoapify; budoucí
+  aktivační backend musí adresu a polohu znovu ověřit, nemá slepě věřit klientu;
 - při tvorbě Shoutu se pobočka vybere z nabídky; pokud existuje jen jedna, vybere
   se automaticky;
 - autor Shoutu se zobrazí například jako `Název firmy – Litoměřice`;
@@ -81,7 +90,7 @@ Ověření firmy je oddělené od plateb. Jednotná pravidla pro Stripe, ověře
 tokeny, Apple Pay, Google Pay, fakturaci a 48hodinové Shouty jsou v
 `docs/BUSINESS_MONETIZATION.md`.
 
-## Minimální datový model
+## Cílový minimální datový model
 
 `businessProfiles/{uid}`:
 

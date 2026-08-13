@@ -85,6 +85,8 @@ anglicky přibližně „šaut aut“.
 ## Střih a grafika
 
 - používat skutečné screenshoty jako přesnou referenci rozhraní;
+- před finálním výstupem nahradit starou obrazovku Uložené aktuálním screenshotem
+  karty Sledované; starý soubor slouží jen jako kompoziční reference;
 - telefon může být v čistém 3D nebo plochém rámu, ale UI nesmí být deformované;
 - přechody stavět na kruzích polohy, zvukových vlnách a oblém tvarosloví UI;
 - držet text v bezpečné oblasti pro Reels, Shorts a TikTok;

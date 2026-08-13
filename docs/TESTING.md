@@ -1,0 +1,119 @@
+# Testovací strategie a regresní matice
+
+Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná technická
+specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
+automatickými vrstvami i hlavními ručními scénáři níže.
+
+## Automatické vrstvy
+
+| Vrstva | Umístění | Co ověřuje |
+|---|---|---|
+| Dart unit testy | `test/account_role_test.dart`, `app_theme_test.dart`, `geography_test.dart`, `shout_test.dart` | Role, téma, geohash, veřejné zaokrouhlení, životní cyklus a řazení Shoutu, avatary a normalizaci nadpisu. |
+| Flutter widget testy | `test/widget_test.dart`, `localization_test.dart` | Hlavní UI, zachování filtrů, avatar, datum profilu, onboarding, systém, heslo, Storage feature flag a všech sedm jazyků. |
+| Firestore Rules integrační testy | `tools/rules/firestore.rules.test.mjs` | Pozitivní i útočné scénáře registrace, rolí, Business poboček, obsahu, čítačů, limitů, soukromí, oznámení a moderace. |
+| Functions unit testy | `functions/index.test.js` | Normalizaci ISO regionu a bezpečné zachování provider-specific hodnot. |
+| Statická kontrola a build | `dart format`, `flutter analyze`, `flutter build web` | Konzistenci zdroje, typové/lint chyby a sestavitelnost webu. |
+
+CI workflow `.github/workflows/flutter.yml` spouští Flutter vrstvu, Rules a web
+build při každém pushi a pull requestu. Functions test je zatím lokální povinná
+kontrola. Přesné příkazy a závislosti jsou v `SETUP_AND_OPERATIONS.md`.
+
+Počet testů není cílová metrika. Test přidejte vždy, když opravujete regresi,
+měníte Firestore zápis/pravidlo nebo přidáváte větev s uživatelsky důležitým
+výsledkem. Neduplicujte stejnou podmínku v několika widget testech, pokud ji lze
+levněji a přesněji pokrýt unit testem.
+
+## Povinné ruční scénáře
+
+### Účet a registrace
+
+- běžná registrace, doručení ověřovacího e-mailu, návrat do aplikace a vytvoření
+  právního souhlasu, přezdívky a avataru;
+- chybné/krátké heslo, rozdílné potvrzení, obsazená přezdívka a opětovné použití
+  existujícího e-mailu;
+- reset hesla na existujícím i neexistujícím e-mailu bez úniku existence účtu;
+- změna avataru a přezdívky na jednom zařízení a realtime změna ve starších
+  Shoutech/komentářích na druhém zařízení;
+- odhlášení, nové přihlášení a čekající smazání účtu.
+
+### Feed a Shout
+
+- povolená, zamítnutá a nedostupná poloha; feed musí fungovat i bez přesné
+  vzdálenosti, publikování běžného Shoutu ji vyžaduje;
+- poloměr, kategorie a všechna řazení; filtry zůstávají při přepnutí všech čtyř
+  karet a resetují se až novou relací aplikace;
+- nadpis i text na mobilní klávesnici začnou velkým písmenem; uložený nadpis je
+  normalizovaný i při vložení textu;
+- limity délky, jedna/dvě kategorie, minimum 15 minut, maximum 24 hodin a hláška
+  rate limitu bez zavření či vymazání formuláře;
+- like, dislike, odebrání reakce, vlaječka a čítače se shodují ve feedu, detailu,
+  Mé Shouty i detailu sledovaného profilu bez znovuotevření obrazovky;
+- expirovaný nebo smazaný Shout zmizí z aktivních seznamů a deep link zobrazí
+  nedostupný stav.
+
+### Business
+
+- registrace ze zařízení v každém podporovaném jazyce, povinné odlišení sídla a
+  první pobočky/provozovny;
+- Geoapify návrhy pro českou i zahraniční adresu, diakritika, stabilní šířka
+  dialogu a zákaz uložení pouhého ručně napsaného textu;
+- přidání, úprava, pozastavení a soft-delete pobočky; po uložení se rozbalený
+  editor zavře a změna se objeví bez reloadu;
+- Business dlaždice zůstává po přechodu Profil → Shouty → Profil;
+- formulář Shoutu nabízí jen aktivní ověřené pobočky, jméno je
+  `Firma – Pobočka` a poloha odpovídá vybrané pobočce, ne zařízení ani sídlu;
+- publikování rychle po sobě respektuje 1s cooldown a 500/24 h; 48hodinový
+  checkbox se běžnému účtu nezobrazí.
+
+### Follow, komunikace a oznámení
+
+- veřejný profil z přezdívky, Follow/unfollow, blokace a hlášení účtu;
+- karta Sledované přepíná uložené Shouty a profily; Shout v profilu otevře plný
+  detail s komentáři a reakcemi;
+- veřejný komentář, odpověď na komentář a soukromá odpověď jsou viditelné jen
+  zamýšlenému publiku;
+- dva účty/zařízení ověří realtime změny reakcí a avataru;
+- každý druh události vytvoří oznámení jen cizímu příjemci a respektuje jeho
+  preference;
+- více like nebo komentářů stejného typu a cíle zvýší jednu sérii, aktualizuje
+  posledního aktéra, vrátí ji nahoru a označí nepřečteně;
+- jiné Shouty a jiné komentáře mají vlastní série;
+- kliknutí na oznámení otevře správný Shout a relevantní komentář, po expiraci
+  zobrazí srozumitelný nedostupný stav.
+
+### Moderace a administrace
+
+- `/admin` odmítne role 1–2 a zobrazí jen sekce povolené rolím 3–6;
+- regionální moderátor vidí/potrestá jen obsah v přiděleném ISO rozsahu a nikdy
+  uživatele stejné nebo vyšší role;
+- warning, omezení tvorby, dočasný/trvalý ban, zrušení postihu, eskalace a
+  označení obsahu jako v pořádku zachovají neměnný audit;
+- technické logy nevidí moderátor ani senior; administrator/owner při otevření
+  vytvoří `technicalLogAccessAudits`;
+- ruční náhled polohy role 3–6 mění pouze prohlížené území, ne jejich scope ani
+  místo publikovaného Shoutu.
+
+## Zařízení a zobrazení
+
+Před demo/release ověřte minimálně:
+
+- úzký Android telefon v portrait, otevřenou klávesnici a změnu orientace
+  zakázanou manifestem;
+- Chrome v mobilní šířce a desktopový Chrome alespoň 1920 px široký;
+- maximální šířku celé aplikace 840 px, centrování a užší, rozměrově stabilní
+  dialogy;
+- světlý, tmavý i systémový režim;
+- češtinu, angličtinu, němčinu, polštinu, slovenštinu, ukrajinštinu a
+  vietnamštinu včetně diakritiky a delších popisků;
+- launcher, splash, feed watermark a všech 24 avatarů podle `design/README.md`.
+
+## Testovací data
+
+Automatické Rules testy používají pouze lokální projekt
+`shoutout-rules-test`. Seedovací skripty smějí pracovat jen s vývojovým
+projektem `shoutout-dev-46c81` a mají pojistku proti produkci. Jejich návod je v
+`tools/README.md`.
+
+Konkrétní ruční účty a hesla patří výhradně do ignorované složky `docs/local/`.
+Nejsou součástí přenositelné dokumentace ani historie Gitu a před produkcí se
+odstraní.
