@@ -131,10 +131,20 @@ void main() {
   ) async {
     await tester.pumpWidget(const MaterialApp(home: HelpPage()));
 
-    expect(find.text('How do shouts work?'), findsOneWidget);
+    expect(find.text('Location and privacy'), findsOneWidget);
+    expect(find.text('Business account'), findsOneWidget);
+    expect(find.text('Report a bug'), findsNothing);
     expect(find.byIcon(Icons.article_outlined), findsNothing);
     expect(find.byIcon(Icons.privacy_tip_outlined), findsNothing);
     expect(find.byIcon(Icons.gavel_outlined), findsNothing);
+
+    await tester.tap(find.text('Location and privacy'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('ShoutOut uses your device location'),
+      findsOneWidget,
+    );
+    expect(find.byType(AlertDialog), findsOneWidget);
   });
 
   testWidgets('system settings contains the appearance setting', (

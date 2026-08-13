@@ -4,6 +4,7 @@ import 'package:shoutout/l10n/app_localizations.dart';
 import 'package:shoutout/l10n/legal_translations.dart';
 import 'package:shoutout/l10n/text.dart';
 import 'package:shoutout/l10n/business_text.dart';
+import 'package:shoutout/help_content.dart';
 
 void main() {
   test('supports all configured languages', () {
@@ -111,6 +112,30 @@ void main() {
       expect(document.first.$1, isNot('1. Who processes the data'));
     }
   });
+
+  for (final language in <String>['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi']) {
+    testWidgets('provides complete help topics in $language', (tester) async {
+      late BuildContext localizedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(language),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) {
+              localizedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final topics = helpTopics(localizedContext);
+      expect(topics, hasLength(8));
+      expect(topics.every((topic) => topic.title.isNotEmpty), isTrue);
+      expect(topics.every((topic) => topic.body.length > 100), isTrue);
+    });
+  }
 
   for (final expectation in <(String, String)>[
     ('sk', 'Upozornenia'),

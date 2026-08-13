@@ -127,7 +127,7 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Podporovat systémové nastavení, světlý a tmavý režim; volbu uložit k účtu
     nebo lokálně před přihlášením.
   - Prověřit kontrast, mapy, dialogy, formuláře, avatary, web a všechny stavy chyb.
-- [ ] **Přepracovat dlaždici Nápověda.**
+- [x] **Přepracovat dlaždici Nápověda.**
   - Rozšířit stručné texty na samostatná témata pro polohu a soukromí, feed a
     filtry, vytvoření Shoutu, reakce a komentáře, sledování, bezpečnost účtu,
     hlášení obsahu a Business funkce.
@@ -135,7 +135,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     vyskakovacím okně stejným vzorem jako dokumenty v **Právní info**.
   - Zachovat úvodní onboarding po registraci, ale opakovaná Nápověda z profilu
     má sloužit jako přehled snadno dostupných témat.
-- [ ] **Přesunout Nahlásit chybu přímo na kartu Profil.**
+- [x] **Přesunout Nahlásit chybu přímo na kartu Profil.**
   - Přidat samostatnou dlaždici vedle ostatních profilových akcí a odstranit
     duplicitní vstup z Nápovědy.
   - Textové hlášení zůstává funkční zdarma; příloha obrázku zůstane skrytá do
@@ -309,7 +309,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Profil a avatary
 
-- [ ] **Přestavět akce na kartě Profil.**
+- [x] **Přestavět akce na kartě Profil.**
   - [x] **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
   - [x] **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
     **Upravit profil**; zachovat stávající validaci a lokalizace.

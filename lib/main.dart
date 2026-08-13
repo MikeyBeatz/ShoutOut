@@ -19,6 +19,7 @@ import 'auth_gate.dart';
 import 'account_role.dart';
 import 'address_autocomplete.dart';
 import 'geography.dart';
+import 'help_content.dart';
 import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';

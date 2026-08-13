@@ -68,6 +68,8 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/business_logo_editor.dart` | Lokální výběr a bezpečný 512px výřez vlastního Business loga; bez vzdáleného uložení do zapnutí Storage. |
 | `lib/address_autocomplete.dart` | Geoapify autocomplete a převod výsledku na adresu, souřadnice a provider place ID. |
 | `lib/public_profile.dart` | Realtime načtení aktuální přezdívky a avataru. |
+| `lib/help_content.dart` | Osm rozšířených témat Nápovědy ve všech sedmi jazycích. |
+| `lib/profile_tile_layout.dart` | Deterministické skládání viditelných profilových dlaždic do řádků po třech. |
 | `lib/geography.dart` | Geohash, veřejné zaokrouhlení souřadnic a geografický model. |
 | `lib/src/home.dart` | Realtime feed, poloha, publikování, ukládání a reakce na Shout. |
 | `lib/src/feed.dart` | Vykreslení feedu, filtrů, řazení a společných záhlaví. |

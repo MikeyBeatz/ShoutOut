@@ -302,24 +302,7 @@ class HelpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topics = [
-      (
-        'Jak fungují Shouty?',
-        'Shout se zobrazuje lidem v okolí po dobu, kterou nastavíš při publikování.',
-      ),
-      (
-        'Jak fungují komentáře?',
-        'Na komentář můžeš odpovědět přes @přezdívku, hodnotit ho nebo nahlásit.',
-      ),
-      (
-        'Bezpečnost a pravidla',
-        'Nesdílej veřejně citlivé kontakty. Nevhodný obsah nahlas nebo autora zablokuj.',
-      ),
-      (
-        'Účet a soukromí',
-        'Používáme přezdívku místo skutečného jména. Nastavení účtu najdeš v profilu.',
-      ),
-    ];
+    final topics = helpTopics(context);
     return Scaffold(
       appBar: AppBar(title: Text(tr(context, 'Nápověda'))),
       body: ListView(
@@ -338,26 +321,24 @@ class HelpPage extends StatelessWidget {
           ),
           ...topics.map(
             (topic) => Card(
-              child: ExpansionTile(
-                title: Text(tr(context, topic.$1)),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(tr(context, topic.$2)),
+              child: ListTile(
+                title: Text(topic.title),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => showDialog<void>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(topic.title),
+                    content: SingleChildScrollView(child: Text(topic.body)),
+                    actions: [
+                      FilledButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: Text(
+                          MaterialLocalizations.of(context).closeButtonLabel,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.bug_report_outlined),
-              title: Text(tr(context, 'Nahlásit chybu')),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BugReportPage()),
+                ),
               ),
             ),
           ),
