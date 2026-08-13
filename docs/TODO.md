@@ -33,7 +33,8 @@ odložené nápady až za hlavními uživatelskými cestami.
     Litoměřice a rozlišit oprávnění, nedostupnou/nepřesnou polohu, validaci
     geohashe, rate limit a zamítnutí Firestore Rules.
   - Zobrazit uživateli konkrétní a lokalizovanou příčinu místo obecné chyby.
-  - Ověřit, že pevná poloha Litoměřice zůstává pouze v označeném demo buildu.
+  - Zachovat skutečnou polohu zařízení také na Hosting preview kanálu; pevnou
+    demo polohu nezavádět.
   - [x] Automaticky ověřit geohash a veřejné zaokrouhlení pro Litoměřice,
     Lovosice, Ústí nad Labem, Prahu, Bratislavu, Varšavu, Berlín a Řím včetně
     světových hranic a odmítnutí neplatných souřadnic.
@@ -351,9 +352,9 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 - [x] Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
 - [x] Ověřit přihlášení na preview doméně a nasadit aktuální Firestore Rules.
-- [ ] Přidat viditelné označení **DEMO** a pevnou demo polohu Litoměřice pouze
-  pro preview sestavení, aby všichni testeři viděli a vytvářeli obsah ve stejném
-  okolí bez závislosti na poloze zařízení.
+- [x] Hosting preview kanál `demo` používá běžný release web a skutečnou polohu
+  zařízení po udělení oprávnění. Samostatný DEMO build ani pevnou polohu
+  Litoměřice nezavádět; test mimo Litoměřice musí odpovídat reálnému chování.
 - [ ] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
   App Check enforcement, rozpočtových alertech a odstranění testovacích účtů.
 - [x] Optimalizovat webové assety, zejména avatary; 24 transparentních runtime

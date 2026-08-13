@@ -237,6 +237,11 @@ moderaci a různá zařízení jsou v `TESTING.md`.
 
 ## Nasazení webového dema
 
+Hosting označený jako demo není samostatná Flutter build varianta. Jde o běžný
+release web připojený k vývojovému Firebase projektu; po povolení používá
+skutečnou polohu prohlížeče. Pevná poloha Litoměřice se do buildu nevkládá.
+Samostatné produkční Firebase prostředí a build konfigurace zatím neexistují.
+
 1. Ověřte čistý pracovní strom a cílový projekt.
 2. Sestavte release s Geoapify hodnotou.
 3. Nasaďte Hosting s explicitním project ID:
