@@ -160,29 +160,32 @@ feed.
 
 ## Profil a nastavení
 
-Záhlaví profilu ukazuje velký avatar, přezdívku, řádek **Členem od …** a tlačítko
-**Upravit profil**. Pod ním jsou dlaždice v tomto významu:
+Záhlaví profilu ukazuje velký avatar, přezdívku a řádek **Členem od …**. Akce
+**Upravit profil** je samostatná dlaždice pod záhlavím. Dlaždice se skládají po
+řádcích maximálně po třech: jedna je uprostřed, dvě obsadí levou a prostřední
+pozici a tři celý řádek. Každý další řádek začíná znovu uprostřed. Pod nimi jsou
+dlaždice v tomto významu:
 
-- **Nápověda** – opakované otevření průvodce;
+- **Upravit profil** – avatar, přezdívka, heslo a smazání účtu;
+- **Nápověda** – seznam rozšířených témat otevíraných ve vyskakovacích oknech;
+- **Nahlásit chybu** – samostatný vstup do textového hlášení a pozdější přílohy;
 - **Varování** – vlastní historii upozornění/postihů;
 - **Právní info** – právní dokumenty a informace, ne nápovědu;
-- **Systém** – jazyk, Změnit heslo, Notifikace a Vzhled aplikace;
+- **Systém** – jazyk, Notifikace, Vzhled aplikace a skrytý vstup do Easter eggu;
 - **Business** – pouze role 2;
 - **Moderace** – pouze role 3–6, na webu vede také do `/admin`;
 - odhlášení.
 
 ### Upravit profil
 
-Obsahuje samostatné řádky **Změnit avatar**, **Změnit přezdívku** a **Smazat
-účet**. Změna přezdívky ukáže 30denní omezení před potvrzením. Smazání vysvětlí
-skrytí obsahu a přibližně 60denní retenci.
+Obsahuje samostatné řádky **Změnit avatar**, **Změnit přezdívku**, **Změnit
+heslo** a **Smazat účet**. Změna přezdívky ukáže 30denní omezení před
+potvrzením. Smazání vysvětlí skrytí obsahu a přibližně 60denní retenci.
 
 ### Systém
 
 - Jazyk otevře bottom sheet se jmény jazyků a kódy CS, EN, DE, PL, SK, UK, VI.
   `UK` je ISO 639 kód ukrajinštiny; nejde o zkratku země.
-- Změnit heslo vyžaduje nové heslo a shodné potvrzení, zobrazení znaků a podle
-  Firebase stavu případnou opětovnou autentizaci.
 - Notifikace nabízí switche Odpovědi, Reakce, Soukromé odpovědi, Shouty
   sledovaných a Shouty v okolí; poslední dvě čekají na backend.
 - Vzhled vybírá Podle systému, Světlý nebo Tmavý a ukládá profil.

@@ -127,6 +127,19 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Podporovat systémové nastavení, světlý a tmavý režim; volbu uložit k účtu
     nebo lokálně před přihlášením.
   - Prověřit kontrast, mapy, dialogy, formuláře, avatary, web a všechny stavy chyb.
+- [ ] **Přepracovat dlaždici Nápověda.**
+  - Rozšířit stručné texty na samostatná témata pro polohu a soukromí, feed a
+    filtry, vytvoření Shoutu, reakce a komentáře, sledování, bezpečnost účtu,
+    hlášení obsahu a Business funkce.
+  - Místo stránkovaného průvodce zobrazit seznam témat; každé téma otevřít ve
+    vyskakovacím okně stejným vzorem jako dokumenty v **Právní info**.
+  - Zachovat úvodní onboarding po registraci, ale opakovaná Nápověda z profilu
+    má sloužit jako přehled snadno dostupných témat.
+- [ ] **Přesunout Nahlásit chybu přímo na kartu Profil.**
+  - Přidat samostatnou dlaždici vedle ostatních profilových akcí a odstranit
+    duplicitní vstup z Nápovědy.
+  - Textové hlášení zůstává funkční zdarma; příloha obrázku zůstane skrytá do
+    aktivace Firebase Storage podle následujícího úkolu.
 - [ ] **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
   - Umožnit náhled, odebrání a bezpečný upload screenshotu se stavem průběhu.
   - Stanovit limit typu/velikosti, retenci, přístup podpory a upozornění na možné
@@ -216,6 +229,10 @@ odložené nápady až za hlavními uživatelskými cestami.
     jednotného návrhu v `docs/BUSINESS_MONETIZATION.md`.
   - [x] Přidat Business checkbox **Až 48 hodin**, po jehož zapnutí se časový
     výběr rozšíří na 48 hodin; server dovolí delší expiraci pouze Business účtu.
+  - [ ] Implementovat schválené Business premium funkce bez tokenové platby:
+    48hodinovou platnost zachovat zdarma, doplnit zvýrazněný Shout a propagační
+    okénko. Nárok a použití ukládat odděleně od budoucí platby, aby pozdější
+    tokeny změnily pouze autorizační/účetní krok, nikoli uživatelský tok.
 
 ### Etapa 5 – sociální vazby a oznámení
 
@@ -263,9 +280,13 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Potom navrhnout malé odznaky a rámečky, přičemž uživatel může zvolit nejvýše
     jeden odznak zobrazovaný u avatara; zajistit přístupnost a moderaci názvů.
 - [ ] **Odloženě přidat skrytou minihru s letadlem.**
-  - Až po dokončení hlavních uživatelských cest připravit jednoduchou offline
-    minihru s překážkami a nenápadný vstup například v právních informacích.
+  - Připravit jednoduchou offline klikací hru ve stylu Flappy Bird, bez použití
+    cizích assetů nebo názvu; monochromatickou grafiku tvoří pouze odstíny
+    aktuálního tématu ShoutOut.
+  - Vstup skrýt jako Easter egg v Nastavení (například opakovaným klepnutím na
+    nenápadný prvek), nezobrazovat ji jako běžnou funkci ani dlaždici.
   - Nesmí měnit právní obsah, vyžadovat další oprávnění ani ovlivňovat karmu.
+  - Hra funguje zcela offline; skóre je pouze lokální a bez globálního žebříčku.
 
 ### Vzhled a grafika
 
@@ -287,6 +308,16 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Zachovat čitelnost delších překladů a jednotnou velikost záhlaví.
 
 ### Profil a avatary
+
+- [ ] **Přestavět akce na kartě Profil.**
+  - **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
+  - **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
+    **Upravit profil**; zachovat stávající validaci a lokalizace.
+  - Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
+    po přidání druhého se první posune doleva a nový je uprostřed; třetí obsadí
+    pravou pozici. Další řádek začne znovu uprostřed stejným pravidlem.
+  - Rozložení odvozovat z pořadí skutečně viditelných dlaždic včetně Business a
+    staff rolí, bez prázdných klikacích míst a se stabilní šířkou na mobilu i webu.
 
 - [x] **Zobrazovat avatar autora na kartách Shoutů.**
   - Nové Shouty ukládají ověřený veřejný snímek avataru a barevného stylu.

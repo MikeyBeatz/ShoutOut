@@ -14,6 +14,19 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
 - Zůstatek nesmí být obyčejné číslo přepisovatelné klientem. Každý nákup,
   čerpání, vrácení nebo administrativní oprava musí mít serverový účetní záznam.
 
+## Bezplatná zaváděcí fáze premium funkcí
+
+- Schválené Business premium funkce se implementují a zpřístupní ještě před
+  tokeny bez poplatku: platnost až 48 hodin, zvýrazněný Shout a propagační okénko.
+- Uživatelský tok, datový typ propagace a kontrola oprávnění musí být od začátku
+  oddělené od ceny. V bezplatné fázi autorizační vrstva vrátí nulovou cenu;
+  později ji nahradí serverové odečtení tokenů bez předělání formuláře a feedu.
+- Klient si nesmí sám přiznat Business roli ani obcházet limity. „Zdarma“
+  znamená nulovou cenu pro důvěryhodně aktivovaný Business účet, nikoli veřejnou
+  funkci pro běžné účty.
+- Zapnutí tokenů, ceny a plateb je samostatná budoucí změna a nesmí zpětně
+  účtovat použití z bezplatné fáze.
+
 ## Platební metody
 
 - Primární poskytovatel je Stripe.
@@ -76,6 +89,8 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
 1. Dokončit Business registraci, ověření a fakturační údaje bez povinné karty.
 2. Po možnosti přejít na placený Firebase plán zapojit serverový Stripe základ a
    případné ověření karty přes SetupIntent.
-3. Implementovat účetní knihu tokenů, nákup kartou, Apple Pay a Google Pay.
-4. Zpřístupnit propagaci hrazenou tokeny a nákupy s fakturami.
-5. Až podle reálného používání rozhodnout o zpoplatnění 48hodinových Shoutů.
+3. Ještě bez plateb zpřístupnit Business premium funkce zdarma a měřit jejich
+   technické používání bez reklamní analytiky nebo profilování uživatelů.
+4. Implementovat účetní knihu tokenů, nákup kartou, Apple Pay a Google Pay.
+5. Přepnout vybrané typy propagace z nulové ceny na schválenou tokenovou cenu.
+6. Až podle reálného používání rozhodnout o zpoplatnění 48hodinových Shoutů.
