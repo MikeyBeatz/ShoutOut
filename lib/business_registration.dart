@@ -11,6 +11,7 @@ import 'email_verification.dart';
 import 'geography.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
+import 'registration_timing.dart';
 
 const businessSupportEmail = 'support@shoutout.app';
 
@@ -525,6 +526,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
     UserCredential? credential;
     final accountStopwatch = Stopwatch()..start();
     try {
+      RegistrationTiming.start('business');
       credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: _email.text.trim(),
@@ -532,6 +534,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
           )
           .timeout(const Duration(seconds: 20));
       _logBusinessRegistrationTiming('create-account', accountStopwatch);
+      RegistrationTiming.checkpoint('create-account');
       final user = credential.user;
       if (user == null) throw StateError('missing-user');
       if (mounted) setState(() => _progress = 'Dokončuji registraci…');
@@ -571,20 +574,16 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
               applicationStopwatch,
             ),
           );
-      final emailStopwatch = Stopwatch()..start();
-      final emailFuture = user
-          .sendEmailVerification(emailVerificationActionSettings)
-          .timeout(const Duration(seconds: 20))
-          .then(
-            (_) => _logBusinessRegistrationTiming(
-              'send-verification-email',
-              emailStopwatch,
-            ),
-          );
-      await Future.wait([applicationFuture, emailFuture]);
+      // Persisting the application is required before leaving this form. The
+      // verification message can finish in parallel without extending the
+      // critical path; the following screen always offers an explicit resend.
+      unawaited(_sendInitialBusinessVerificationEmail(user));
+      await applicationFuture;
+      RegistrationTiming.checkpoint('save-business-application');
       TextInput.finishAutofillContext(shouldSave: true);
       if (mounted) Navigator.of(context).pop();
     } on FirebaseAuthException catch (error) {
+      RegistrationTiming.cancel(error.code);
       if (mounted) {
         _message(
           error.code == 'email-already-in-use'
@@ -596,6 +595,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
         );
       }
     } on TimeoutException {
+      RegistrationTiming.cancel('timeout');
       if (mounted) {
         _message(
           businessTr(
@@ -605,6 +605,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
         );
       }
     } catch (_) {
+      RegistrationTiming.cancel('unexpected-error');
       if (mounted) {
         _message(
           '${businessTr(context, 'Žádost se nepodařilo uložit. Kontaktujte podporu:')} $businessSupportEmail',
@@ -632,4 +633,25 @@ void _logBusinessRegistrationTiming(String step, Stopwatch stopwatch) {
     );
     return true;
   }());
+}
+
+Future<void> _sendInitialBusinessVerificationEmail(User user) async {
+  final stopwatch = Stopwatch()..start();
+  try {
+    await user
+        .sendEmailVerification(emailVerificationActionSettings)
+        .timeout(const Duration(seconds: 20));
+    _logBusinessRegistrationTiming(
+      'send-verification-email-background',
+      stopwatch,
+    );
+    RegistrationTiming.checkpoint('send-verification-email-background');
+  } on FirebaseAuthException catch (error) {
+    debugPrint('Initial Business verification e-mail failed: ${error.code}');
+  } on TimeoutException {
+    _logBusinessRegistrationTiming(
+      'send-verification-email-background-timeout',
+      stopwatch,
+    );
+  }
 }

@@ -17,6 +17,7 @@ import 'legal.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
 import 'nickname_validation.dart';
+import 'registration_timing.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key, required this.signedInChild});
@@ -357,6 +358,12 @@ class _BusinessApplicationStatusPage extends StatefulWidget {
 class _BusinessApplicationStatusPageState
     extends State<_BusinessApplicationStatusPage> {
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    RegistrationTiming.finish('business-status-screen');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1524,6 +1531,7 @@ class _SignInPageState extends State<SignInPage> {
     final stopwatch = Stopwatch()..start();
     try {
       if (_register) {
+        RegistrationTiming.start('personal');
         final credential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
               email: _email.text.trim(),
@@ -1531,15 +1539,14 @@ class _SignInPageState extends State<SignInPage> {
             )
             .timeout(const Duration(seconds: 20));
         _logAuthTiming('create-account', stopwatch);
+        RegistrationTiming.checkpoint('create-account');
         TextInput.finishAutofillContext(shouldSave: true);
-        stopwatch.reset();
-        if (mounted) {
-          setState(() => _authProgress = 'Odesílám ověřovací e-mail…');
-        }
-        await credential.user
-            ?.sendEmailVerification(emailVerificationActionSettings)
-            .timeout(const Duration(seconds: 20));
-        _logAuthTiming('send-verification-email', stopwatch);
+        final user = credential.user;
+        if (user == null) throw StateError('missing-user');
+        // AuthGate can show the verification page as soon as the account
+        // exists. Sending the message does not need to block that transition;
+        // the verification page also offers an explicit retry.
+        unawaited(_sendInitialVerificationEmail(user));
       } else {
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(
@@ -1551,6 +1558,7 @@ class _SignInPageState extends State<SignInPage> {
         TextInput.finishAutofillContext(shouldSave: true);
       }
     } on TimeoutException {
+      if (_register) RegistrationTiming.cancel('timeout');
       if (mounted) {
         _message(
           tr(
@@ -1560,6 +1568,7 @@ class _SignInPageState extends State<SignInPage> {
         );
       }
     } on FirebaseAuthException catch (error) {
+      if (_register) RegistrationTiming.cancel(error.code);
       if (mounted) _message(_authMessage(error.code));
     } finally {
       if (mounted) {
@@ -1740,6 +1749,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     try {
       await widget.user.reload().timeout(const Duration(seconds: 20));
       _logAuthTiming('reload-verified-user', stopwatch);
+      RegistrationTiming.checkpoint('reload-verified-user');
       final user = FirebaseAuth.instance.currentUser;
       if (user?.emailVerified != true) {
         if (mounted) {
@@ -1762,6 +1772,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       // or fail with permission-denied.
       await user!.getIdToken(true).timeout(const Duration(seconds: 20));
       _logAuthTiming('refresh-verified-token', stopwatch);
+      RegistrationTiming.checkpoint('refresh-verified-token');
     } on TimeoutException {
       _showVerificationError(
         'Kontrola ověření trvá příliš dlouho. Zkontroluj internet a zkus to znovu.',
@@ -2241,6 +2252,7 @@ class _NicknamePageState extends State<NicknamePage> {
           _avatarStyle.publicProfileData(name),
         );
       });
+      RegistrationTiming.checkpoint('save-profile');
     } on StateError catch (error) {
       if (mounted && error.message == 'taken') {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2343,4 +2355,19 @@ void _logAuthTiming(String step, Stopwatch stopwatch) {
     debugPrint('Auth timing: $step ${stopwatch.elapsedMilliseconds} ms');
     return true;
   }());
+}
+
+Future<void> _sendInitialVerificationEmail(User user) async {
+  final stopwatch = Stopwatch()..start();
+  try {
+    await user
+        .sendEmailVerification(emailVerificationActionSettings)
+        .timeout(const Duration(seconds: 20));
+    _logAuthTiming('send-verification-email-background', stopwatch);
+    RegistrationTiming.checkpoint('send-verification-email-background');
+  } on FirebaseAuthException catch (error) {
+    debugPrint('Initial verification e-mail failed: ${error.code}');
+  } on TimeoutException {
+    _logAuthTiming('send-verification-email-background-timeout', stopwatch);
+  }
 }

@@ -13,8 +13,10 @@ projekt `shoutout-dev-46c81`. Produkci vždy nahraďte samostatným project ID.
 - Node.js 22 pro Cloud Functions; aktuální LTS je vhodný i pro `tools/`.
 - Firebase CLI 15.24.0 odpovídá CI.
 
-iOS, Windows, macOS a Linux mají Flutter kostru, ale nejsou připojené k Firebase
-a nejsou podporované cíle této verze.
+iOS má připravenou vývojovou Firebase konfiguraci a identitu
+`cz.shoutout.app.dev`, ale build zatím nebyl sestaven ani podepsán na macOS.
+Windows, macOS a Linux mají pouze Flutter kostru a nejsou podporované cíle této
+verze.
 
 ## Lokální instalace existujícího projektu
 
@@ -33,9 +35,28 @@ Pop-Location
 
 Repozitář neobsahuje service-account JSON, podpisový klíč, hesla testovacích
 účtů ani Geoapify hodnotu. Firebase klientská konfigurace v
-`lib/firebase_options.dart` a `android/app/google-services.json` není serverové
-tajemství; je v Gitu záměrně. Její zneužití omezují Authentication, App Check,
-Firestore Rules a kvóty.
+`lib/firebase_options.dart`, `android/app/google-services.json` a
+`ios/Runner/GoogleService-Info.plist` není serverové tajemství; je v Gitu
+záměrně. Její zneužití omezují Authentication, App Check, Firestore Rules a
+kvóty.
+
+## iOS příprava bez Macu
+
+Vývojová iOS aplikace je ve Firebase zaregistrovaná s bundle ID
+`cz.shoutout.app.dev`. Projekt obsahuje Firebase konfiguraci, URL schéma pro
+Google přihlášení, oprávnění k poloze a výběru fotografií, App Check providery,
+značkovou ikonu a startovní obrazovku. Tyto části jsou připravené zdarma ve
+Windows.
+
+Sestavení, podpis a instalaci na fyzický iPhone nelze ve Windows věrohodně
+ověřit. Až bude dostupný Mac, stačí nainstalovat Flutter a Xcode, otevřít
+`ios/Runner.xcworkspace`, v cíli Runner vybrat vlastní Apple Personal Team a
+spustit aplikaci na připojeném telefonu. Bez placeného členství je takový vývojový
+podpis určený jen pro vlastní zařízení a musí se pravidelně obnovovat. Před
+zapnutím App Check enforcementu je nutné zaregistrovat debug token z telefonu;
+produkční App Attest se dokončí až s produkční Apple identitou.
+Podrobná cesta přes cloudový Mac, TestFlight a App Store je v plánu
+[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md).
 
 ## Geoapify: našeptávání a přesná poloha adresy
 
@@ -88,8 +109,8 @@ uložit neověřenou Business pobočku.
    vytvořením Firestore, protože ho později nelze jednoduše změnit.
 2. Zapněte Authentication provider **Email/Password**. Klient vyžaduje heslo
    nejméně 10 znaků a před vytvořením profilu ověření e-mailu.
-3. Zaregistrujte Android aplikaci s package name `cz.shoutout.app` a webovou
-   aplikaci.
+3. Zaregistrujte Android aplikaci s package name `cz.shoutout.app`, iOS aplikaci
+   se správným bundle ID a webovou aplikaci.
 4. Nainstalujte Firebase CLI a FlutterFire CLI, přihlaste se a vygenerujte
    klientské konfigurace:
 
@@ -97,12 +118,13 @@ uložit neověřenou Business pobočku.
    npm install --global firebase-tools@15.24.0
    dart pub global activate flutterfire_cli
    firebase login
-   flutterfire configure --project your-project-id --platforms android,web
+   flutterfire configure --project your-project-id --platforms android,ios,web
    ```
 
 5. Zkontrolujte, že vznikl `lib/firebase_options.dart`, Android
-   `google-services.json` a vazby ve `firebase.json`. Pro jiné prostředí je
-   vygenerujte znovu; nekopírujte vývojové project ID do produkce.
+   `google-services.json`, iOS `GoogleService-Info.plist` a vazby ve
+   `firebase.json`. Pro jiné prostředí je vygenerujte znovu; nekopírujte
+   vývojové project ID do produkce.
 
 Repozitář nemá `.firebaserc`, aby se omylem nepřepínal implicitní projekt. Každý
 nasazovací příkaz proto musí obsahovat `--project`.
@@ -137,7 +159,8 @@ zápis vyžaduje `--apply` a potvrzení project ID, UID a adresy pobočky.
 
 ### 4. App Check
 
-Android debug používá debug provider a release Play Integrity. Postup:
+Android debug používá debug provider a release Play Integrity. iOS debug používá
+debug provider a release App Attest s fallbackem na DeviceCheck. Postup:
 
 1. Zaregistrujte Android aplikaci pro Play Integrity ve Firebase App Check.
 2. Pro lokální debug přidejte pouze token vypsaný vlastním zařízením/emulátorem.
@@ -145,6 +168,8 @@ Android debug používá debug provider a release Play Integrity. Postup:
    po ověření legitimního provozu.
 4. Web provider dnes není v aplikaci nakonfigurovaný. Dokud nebude doplněný podle
    `TODO.md`, nevynucujte App Check pro webový provoz.
+5. Na iPhonu zaregistrujte debug token vypsaný aplikací; produkční App Attest
+   nakonfigurujte až pro konečný bundle ID a Apple tým.
 
 ### 5. Cloud Function pro geografii
 
@@ -264,6 +289,10 @@ Každá část se nasazuje explicitním `--only` až po příslušných testech.
 
 ## Android release
 
+Účty, testovací kanály, fyzické ověření zařízení a cesta do produkce jsou
+podrobně popsané v plánu
+[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md).
+
 1. Vytvořte vlastní upload keystore a bezpečně ho zálohujte mimo repozitář.
 2. Zkopírujte `android/key.properties.example` na ignorovaný
    `android/key.properties` a vyplňte `storeFile`, `storePassword`, `keyAlias` a
@@ -284,7 +313,7 @@ produkční bezpečnostní a právní body v `TODO.md`.
 
 | Hodnota | Kde patří | V Gitu |
 |---|---|---|
-| Firebase web/Android client config | `firebase_options.dart`, `google-services.json` | ano; veřejná identifikace projektu |
+| Firebase web/Android/iOS client config | `firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist` | ano; veřejná identifikace projektu |
 | Geoapify API key | `.geoapify.json` → `--dart-define` | ne; ve výsledném klientu je viditelný, proto restrikce a kvóty |
 | Google Maps API key | Firebase Functions secret | nikdy |
 | service-account JSON | lokální bezpečné úložiště / CI secret | nikdy |
@@ -299,7 +328,7 @@ není důvod k odstranění z klienta, ale musí mít správné aplikační rest
 
 - [ ] Flutter projekt používá stejný package name, závislosti, assety, font a
   Material 3 téma.
-- [ ] Android a web jsou registrované ve správném Firebase prostředí.
+- [ ] Android, iOS a web jsou registrované ve správném Firebase prostředí.
 - [ ] Email/Password Auth, ověření e-mailu a autorizované domény fungují.
 - [ ] Firestore Rules a indexy jsou nasazené a celé rules testy procházejí.
 - [ ] Datové kolekce a atomické invarianty odpovídají `DATA_MODEL.md`.

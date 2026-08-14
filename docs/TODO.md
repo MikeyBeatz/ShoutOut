@@ -4,6 +4,29 @@ Interní pravidla rolí, pravomocí a postihů jsou vedena v
 `docs/INTERNAL_MODERATION.md`. Změny moderace musí aktualizovat také tento
 dokument, pravidla, testy a případně veřejné právní texty.
 
+## Stav dokončení backlogu
+
+Aktualizováno 14. srpna 2026.
+
+`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
+
+Hotovo je 77 ze 114 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+`[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
+Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
+
+| Rozsah | Orientační stav |
+|---:|---|
+| 0–19 % | začátek |
+| 20–39 % | základ rozpracovaný |
+| 40–59 % | hlavní části ve vývoji |
+| 60–79 % | pokročilá fáze |
+| 80–99 % | dokončování a ověřování |
+| 100 % | backlog uzavřený |
+
+Toto číslo měří postup celým backlogem, nikoli připravenost k veřejnému vydání.
+O spuštění rozhoduje samostatná povinná brána v `docs/LAUNCH_READINESS.md`; její
+blokující body nelze vyvážit dokončením většího počtu méně kritických úkolů.
+
 ## Geografie a globální moderace
 
 - [x] Geohash nových shoutů a model `geography`.
@@ -80,7 +103,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     oprávnění a ověřit chování na mobilu i ve webovém pracovním prostoru.
   - Ruční adresa je pouze stav pracovního prostoru, filtruje náhled podle
     poloměru 5–50 km a nepřepisuje polohu zařízení, profil ani uložené Shouty.
-- [ ] **Změřit a zkrátit dlouhé načítání při registraci.**
+- [x] **Změřit a zkrátit dlouhé načítání při registraci.**
   - Změřit jednotlivé kroky: vytvoření účtu, odeslání/ověření e-mailu, zápis
     profilu, právní souhlas, načtení polohy a první otevření feedu.
   - Odstranit z kritické cesty vše, co může doběhnout bezpečně na pozadí, a po
@@ -91,7 +114,18 @@ odložené nápady až za hlavními uživatelskými cestami.
     souběžně uložit žádost a odeslat ověřovací e-mail.
   - [x] U neaktivní Business žádosti zobrazit známý stav bez čekání na roli a
     Business profil a pro onboarding znovu použít již načtená data profilu.
-  - [ ] Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
+  - [x] Odeslání prvního ověřovacího e-mailu spouštět po vytvoření účtu na pozadí,
+    aby neblokovalo přechod na ověřovací obrazovku; opakované odeslání zůstává
+    dostupné. Debug měření propojuje vytvoření účtu, ověření, profil a první
+    obrazovku bez ukládání UID, e-mailu nebo jiných osobních údajů.
+  - [x] Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
+    Android Emulator API 35: profil `full` bez latence vytvořil účet za 2 424 ms
+    a odeslal ověřovací e-mail na pozadí za 496 ms; profil `edge` (473,6 kbit/s,
+    latence 80–400 ms) vytvořil účet za 2 140 ms a e-mail odeslal za 601 ms.
+    U malých Firebase požadavků nebyl rozdíl větší než běžné kolísání backendu;
+    v obou případech se ověřovací obrazovka zobrazila bez čekání na e-mail.
+    Omezení nebylo ověřeno jen stavem emulátoru: průměrná odezva na 8.8.8.8 se
+    reálně zvýšila z 246 ms na profilu `full` na 446 ms na profilu `edge`.
 - [x] **Ověřit reset hesla přes registrační e-mail.**
   - Pokrýt existující i neexistující adresu, neplatný a expirovaný odkaz,
     opakované použití odkazu a přihlášení novým heslem.
@@ -411,6 +445,11 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Demo a distribuce
 
+Budoucí postup od Windows přes Google Play a cloudový Mac až k TestFlightu a
+veřejným obchodům je zapsaný v plánu
+[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md) včetně nákladů,
+podmínek testovacích účtů a požadavků na fyzická zařízení.
+
 - [x] Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
 - [x] Ověřit přihlášení na preview doméně a nasadit aktuální Firestore Rules.
 - [x] Hosting preview kanál `demo` používá běžný release web a skutečnou polohu
@@ -421,6 +460,18 @@ odložené nápady až za hlavními uživatelskými cestami.
 - [x] Optimalizovat webové assety, zejména avatary; 24 transparentních runtime
   avatarů je odvozených v rozměru 512 × 512 px, zatímco vysoké zdroje v
   `design/` a `promo/` zůstávají beze změny pro budoucí grafickou a promo práci.
+- [x] Připravit vývojovou iOS variantu bez Macu a placeného Apple účtu.
+  - Ve Firebase projektu je registrované bundle ID `cz.shoutout.app.dev`; projekt
+    obsahuje iOS Firebase konfiguraci, Google OAuth URL schéma, oprávnění k poloze
+    a fotografiím a debug/release App Check providery.
+  - Výchozí Flutter ikonu a startovní obrazovku nahradily existující značkové
+    podklady ShoutOut ve všech požadovaných iOS rozměrech.
+  - [ ] Na Macu sestavit nepodepsaný iOS build a odstranit případné chyby nativních
+    závislostí; ve Windows tento krok nelze spolehlivě provést.
+  - [ ] Přes Xcode s Apple Personal Team nainstalovat debug build na vlastní
+    iPhone, zaregistrovat App Check debug token a projít hlavní uživatelské cesty.
+  - [ ] Pro distribuci vytvořit samostatnou produkční Firebase/Apple identitu,
+    podpisy a App Store konfiguraci; vývojovou konfiguraci nepoužít veřejně.
 
 ### Navazující ruční test moderace
 

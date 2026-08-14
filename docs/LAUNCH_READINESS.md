@@ -32,6 +32,10 @@ kontrola → ruční testy → měření → provozní připravenost → startov
 
 ## 2. Platformy a veřejná distribuce
 
+Podrobný postup a časově citlivé požadavky obchodů jsou v plánu
+[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md); před placením
+nebo uploadem je ověřte znovu u Googlu a Applu.
+
 - [ ] Dokončit podepsaný Android release a bezpečně zálohovat produkční klíč.
 - [ ] Připravit Google Play záznam, ochranu dat, věkové hodnocení a materiály.
 - [ ] Projít požadovaným interním nebo uzavřeným testováním Google Play.

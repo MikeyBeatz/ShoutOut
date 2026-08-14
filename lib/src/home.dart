@@ -34,6 +34,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   @override
   void initState() {
     super.initState();
+    RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
       _initializeFeed();
     }

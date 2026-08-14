@@ -29,6 +29,9 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
   budoucí stav, nikoli automaticky současnou funkčnost.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
   pro produkci, distribuci, bezpečnost, právo, testování a provoz.
+- [Mobilní testování, distribuce a technický rozpočet](MOBILE_DISTRIBUTION_PLAN.md)
+  – ověřený postup pro Google Play, cloudový Mac, TestFlight a veřejné vydání
+  včetně Firebase, domény, nákladů a požadavků na skutečná zařízení.
 - [Business monetizace](BUSINESS_MONETIZATION.md) – jednotný návrh nákupů,
   tokenů a placených funkcí.
 - [Ověření business účtů](BUSINESS_VERIFICATION.md) – registrační a ověřovací

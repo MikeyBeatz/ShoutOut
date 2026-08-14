@@ -33,6 +33,7 @@ import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 import 'l10n/business_text.dart';
 import 'nickname_validation.dart';
+import 'registration_timing.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';
@@ -72,12 +73,23 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await FirebaseAppCheck.instance.activate(
-      providerAndroid: kDebugMode
-          ? const AndroidDebugProvider()
-          : const AndroidPlayIntegrityProvider(),
-    );
+  if (!kIsWeb) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        await FirebaseAppCheck.instance.activate(
+          providerAndroid: kDebugMode
+              ? const AndroidDebugProvider()
+              : const AndroidPlayIntegrityProvider(),
+        );
+      case TargetPlatform.iOS:
+        await FirebaseAppCheck.instance.activate(
+          providerApple: kDebugMode
+              ? const AppleDebugProvider()
+              : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+        );
+      default:
+        break;
+    }
   }
   runApp(const ShoutOutApp());
 }
