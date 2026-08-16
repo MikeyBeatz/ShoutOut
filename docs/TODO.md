@@ -68,11 +68,11 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Aktualizováno 14. srpna 2026.
+Aktualizováno 17. srpna 2026.
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
+`█████████████████████████░░░░░░░░░░░░░░░` **63 %** — pokročilá fáze
 
-Hotovo je 77 ze 114 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 79 ze 126 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
