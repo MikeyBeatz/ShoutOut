@@ -1,5 +1,21 @@
 # Specifikace obrazovek a navigace
 
+## Schválené směry příští revize UI
+
+- Autor komentáře je klikací přes avatar i přezdívku a otevře veřejný profil.
+- Veřejné flairy `Business`, `Moderátor`, `Admin` a `Owner` jsou malé
+  obdélníkové štítky za jménem. Business autor Shoutu má současně `Business` a
+  `Autor`; dlouhé jméno se před štítky zkrátí výpustkou.
+- Úvodní stránkovaný výklad nahradí interaktivní tutorial nad skutečným
+  rozhraním s konkrétními akcemi, možností přeskočit a později jej zopakovat.
+- Revize Shout karty zachová avatar, zvětší jméno, pod něj kompaktně umístí
+  vzdálenost, vložení a expiraci a zachová snadno dostupné uložení.
+- Nadpis se ověří proti skutečné šířce. Text ve feedu má nejvýše tři řádky a
+  výpustku, celý obsah je v detailu. Kategorie mohou být menší při zachování
+  čitelnosti a dotykové plochy.
+- Like/dislike zůstávají; je nutné ověřit práh skrytí a možnost vědomě rozbalit
+  Shout skrytý kvůli negativním reakcím.
+
 Tento dokument popisuje informační architekturu současného klienta. Neurčuje
 každý pixel; přesné barvy, fonty, logo, splash, watermark a assety jsou v
 `design/README.md` a `design/brand-tokens.json`. Produktové podmínky jednotlivých

@@ -1,5 +1,67 @@
 # ShoutOut – společný projektový backlog
 
+## Nové podněty z uživatelského testování
+
+- [ ] **Umožnit otevřít veřejný profil autora z komentáře.**
+  - Přezdívka a avatar v komentáři musí mít stejné chování jako autor na kartě
+    Shoutu; vlastní profil nesmí nabízet Follow, blokaci ani nahlášení sebe sama.
+- [ ] **Přidat veřejné flairy rolí.**
+  - Za jménem zobrazit malý obdélníkový štítek pro `Business`, `Moderátor`,
+    `Admin` a `Owner`; interní role `seniorModerator` se navenek zobrazí jako
+    `Moderátor`.
+  - Pokud je Business účet současně autorem Shoutu, zobrazit vedle sebe flair
+    `Business` i existující štítek `Autor`.
+  - Dlouhé jméno zkrátit třemi tečkami ještě před flairy; flairy se nesmí
+    zmenšit, zalomit ani vytlačit mimo kartu.
+- [ ] **Přepracovat onboarding na interaktivní tutorial.**
+  - Nahradit dlouhé úvodní rady krátkými kontextovými kroky typu „klikni sem“,
+    „udělej toto“ a „pokračuj tady“ přímo nad skutečným rozhraním.
+  - Umožnit přeskočení, pozdější opakování a pokračování po přerušení; měřit
+    dokončení kroků bez ukládání přesné polohy.
+- [ ] **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.**
+  - Navrhnout důvěryhodné počítání zobrazení Shoutu a zobrazit autorovi počet
+    zobrazení, uložení a dalších relevantních interakcí.
+  - Vyřešit unikátní versus celková zobrazení, ochranu proti farmení, soukromí,
+    retenci a serverové počítání před použitím metrik pro karmu.
+- [ ] **Provést cílenou kontrolu překladů hlášení chyb a průvodce aplikací.**
+  - Opravit stav, kdy tyto části v některých podporovaných jazycích zůstávají
+    česky; tím se znovu otevírá dříve odškrtnutý obecný audit překladů.
+- [ ] **Opravit ciferník platnosti v dialogu Nový Shout.**
+  - Příčina potvrzena v `_DurationWheel`: podmínka `value > 24` nerozlišuje
+    hodinový a minutový sloupec. Minutové volby 30 a 45 proto formátuje jako
+    `Duration(hours: 30/45)`, tedy například „1 den 6 h“ a „1 den 21 h“.
+  - Formát celých dnů používat pouze pro hodinový ciferník; minutový ciferník
+    musí vždy zobrazit `00`, `15`, `30` a `45 min`. Referenční fotku lze doplnit
+    při implementaci pro vizuální kontrolu výsledku.
+- [ ] **Přepracovat rozložení společné Shout karty.**
+  - Zachovat avatar; zvětšit jméno autora a pod něj úsporně umístit vzdálenost,
+    čas vložení a expiraci.
+  - Flair zobrazit u jména a akci Uložit Shout zachovat snadno dosažitelnou.
+  - Ověřit limit nadpisu podle skutečné šířky a podporovaných jazyků.
+  - Text ve feedu zobrazit nejvýše na tři řádky, přetečení zakončit třemi
+    tečkami a celý text ukázat v detailu.
+  - Zmenšit category chips bez ztráty čitelnosti a přístupnosti.
+  - Zachovat like/dislike a ověřit práh automatického skrytí: skrytý Shout musí
+    být možné vědomě rozbalit kliknutím.
+- [ ] **Navrhnout ekonomiku karmy, coinů a kosmetického obchodu.**
+  - Rozhodnout vztah karmy, zobrazení, liků a coinů a obsah obchodu, například
+    premium avatary. Snadno farmitelné počty nesmí dávat odměny bez serverové
+    validace a ochrany proti zneužití.
+- [ ] **Omezit Business promo na nejvýše dva současně aktivní Shouty na firmu.**
+  - Limit vynucovat serverově napříč všemi pobočkami a typy propagace; určit,
+    zda kombinované zvýraznění s okénkem spotřebuje jeden aktivní promo slot.
+- [ ] **Navrhnout Founder balíček pro nové podniky.**
+  - Founder entitlement vést odděleně od veřejné role a flairu; oprávněný účet
+    nikdy nespotřebovává tokeny za premium Business funkce.
+  - Určit podmínky přidělení, počáteční množství coinů/tokenů, převoditelnost,
+    expiraci, audit a ochranu proti zneužití.
+- [x] **Zvýrazněné Business Shouty a propagační okénko jsou implementované.**
+  - Tato položka opravuje starší duplicitní nezaškrtnuté položky níže v backlogu;
+    zbývá ruční ověření a budoucí důvěryhodné serverové měření.
+- [ ] **Naplánovat pořízení evropské ochranné známky ShoutOut.**
+  - Zahrnout rešerši kolizí, vlastníka, relevantní třídy, rozpočet, termín podání
+    u EUIPO a odbornou právní kontrolu před podáním.
+
 Interní pravidla rolí, pravomocí a postihů jsou vedena v
 `docs/INTERNAL_MODERATION.md`. Změny moderace musí aktualizovat také tento
 dokument, pravidla, testy a případně veřejné právní texty.
@@ -417,7 +479,7 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Zachovat automatickou volbu podle jazyka zařízení a funkční ruční přepnutí.
   - Ověřit fallback pro zařízení s nepodporovaným jazykem.
 
-- [x] **Provést kompletní audit překladů.**
+- [ ] **Provést kompletní audit překladů.**
   - Najít texty zapsané přímo ve widgetech a přesunout je do lokalizace.
   - Porovnat úplnost všech klíčů pro češtinu, angličtinu, němčinu, polštinu,
     slovenštinu, ukrajinštinu a vietnamštinu.
@@ -433,8 +495,8 @@ odložené nápady až za hlavními uživatelskými cestami.
 - [ ] **Vytvořit business účet.**
   - Navázat na rozhodnutí o životnosti Shoutů, model provozovny a schválený
     proces ověření z etapy 4.
-- [ ] **Přidat zvýrazněné Shouty.**
-- [ ] **Přidat propagační okénko.**
+- [x] **Přidat zvýrazněné Shouty.**
+- [x] **Přidat propagační okénko.**
 - [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
   - Jednotné přihlášení a navigace podle role 3–6.
   - Regionální přehled Shoutů, společná fronta hlášení, seskupování a řazení.

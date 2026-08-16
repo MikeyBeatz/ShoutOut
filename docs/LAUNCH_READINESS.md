@@ -1,5 +1,11 @@
 # ShoutOut – připravenost před veřejným spuštěním
 
+## Nový právní milník
+
+- [ ] Prověřit a naplánovat registraci evropské ochranné známky ShoutOut:
+  rešerši kolizí, vlastníka, relevantní třídy výrobků a služeb, rozpočet a termín
+  podání u EUIPO; před podáním využít odbornou právní kontrolu.
+
 Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze aplikaci
 zpřístupnit prvním skutečným uživatelům a zahájit marketingový pilot. Nejde o
 marketingový plán. Jednotlivé implementační úkoly a jejich technické podrobnosti

@@ -1,5 +1,18 @@
 # ShoutOut – Business monetizace
 
+## Nová produktová rozhodnutí k dopracování
+
+- Firma může mít nejvýše dva současně aktivní promo Shouty napříč všemi
+  pobočkami. Limit vynucuje server; zbývá určit, zda kombinace zvýraznění a
+  propagačního okénka spotřebuje jeden promo slot.
+- Founder je samostatný auditovaný entitlement pro vybrané nové podniky, nikoli
+  další veřejná role nebo flair. Founder účet nikdy nespotřebovává tokeny za
+  premium Business funkce; společný autorizační tok přesto zaznamená nulovou cenu.
+- Před spuštěním Founder balíčku určit podmínky přidělení a odebrání, počáteční
+  coiny/tokeny, expiraci, převoditelnost a ochranu proti duplicitním firmám.
+- Otevřeným návrhem obchodu jsou kosmetické položky, například premium avatary;
+  nesmí poskytovat moderátorská oprávnění ani bezpečnostní výhodu.
+
 Tento dokument je jediným zdrojem produktových rozhodnutí o platbách,
 Business tokenech, placených funkcích a fakturaci. Ověření firmy je samostatně v
 `docs/BUSINESS_VERIFICATION.md`; technické implementační kroky zůstávají v

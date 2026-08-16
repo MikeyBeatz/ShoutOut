@@ -1,5 +1,12 @@
 # ShoutOut – interní role, oprávnění a moderace
 
+## Veřejné flairy a Founder entitlement
+
+Veřejné flairy jsou pouze odvozené prezentační štítky a samy neudělují žádné
+oprávnění. Zobrazují se jako `Business`, `Moderátor`, `Admin` a `Owner`;
+`seniorModerator` používá veřejný štítek `Moderátor`. Founder je obchodní
+entitlement oddělený od interních rolí a veřejných flairů.
+
 Tento dokument je hlavním interním zdrojem pravidel pro role, postihy a
 moderátorské postupy. Není určen jako veřejný právní dokument. Veřejná pravidla
 komunity a zásady ochrany soukromí musí odpovídat skutečně nasazenému chování,
