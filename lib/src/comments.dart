@@ -385,11 +385,7 @@ class CommentAuthorIdentity extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          AvatarImage(
-            avatarId: identity.avatarStyle.avatarId,
-            style: identity.avatarStyle,
-            radius: 16,
-          ),
+          PublicIdentityAvatar(identity: identity, radius: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Wrap(

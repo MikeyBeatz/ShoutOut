@@ -254,10 +254,10 @@ Role 2 otevře pět funkčních/rezervovaných oblastí:
 Vlastní Business logo má připravený lokální editor: přijímá JPG, PNG nebo WebP
 do 10 MB a nejméně 512 × 512 px, umožňuje posun a přiblížení ve čtvercovém
 výřezu s kruhovou bezpečnou zónou a vytvoří nový PNG 512 × 512 px bez původních
-metadat. V úpravě avatara ho vidí pouze Business účet jako vizuálně neaktivní
-tlačítko **Nahrát vlastní logo**. Kliknutí zatím zobrazí informaci, že funkci
-připravujeme. Po předání Storage ukládací callback funkce stejné tlačítko bez
-změny rozhraní spustí připravený výběr a editor.
+metadat. V úpravě avatara ho vidí pouze aktivní Business účet. Tlačítko
+**Nahrát vlastní logo** spustí výběr a editor, výsledek uloží do Storage a po
+atomické aktualizaci soukromého a veřejného profilu odstraní předchozí verzi.
+Logo nahrazuje systémový avatar na profilech, Shoutech, komentářích a odpovědích.
 
 Při tvorbě Business Shoutu jsou zvýraznění a okénko samostatné checkboxy, které
 lze kombinovat; bez nich vznikne standardní karta. Delší platnost odemkne po

@@ -725,6 +725,44 @@ describe('identity and account gates', () => {
     await assertSucceeds(batch.commit());
   });
 
+  test('only a business account can publish matching logo metadata', async () => {
+    await seedEligibleUser('business-owner', 'SafeBusiness');
+    await seedEligibleUser('reader', 'SafeReader');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'accountRoles', 'business-owner'), {
+        role: 'business', level: 2, assignedBy: 'test', createdAt: now(),
+      });
+    });
+
+    const version = 1787654321000;
+    const logo = {
+      businessLogoPath:
+        `businessLogos/business-owner/logo-${version}.png`,
+      businessLogoVersion: version,
+    };
+    const businessDb = authenticatedDb('business-owner');
+    const allowed = writeBatch(businessDb);
+    allowed.update(doc(businessDb, 'users', 'business-owner'), logo);
+    allowed.set(
+      doc(businessDb, 'publicProfiles', 'business-owner'),
+      logo,
+      { merge: true },
+    );
+    await assertSucceeds(allowed.commit());
+
+    await assertFails(updateDoc(
+      doc(authenticatedDb('reader'), 'users', 'reader'),
+      {
+        businessLogoPath: `businessLogos/reader/logo-${version}.png`,
+        businessLogoVersion: version,
+      },
+    ));
+    await assertFails(updateDoc(
+      doc(businessDb, 'publicProfiles', 'business-owner'),
+      { businessLogoVersion: version + 1 },
+    ));
+  });
+
   test('avatar style accepts identical colors but rejects unknown directions', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     const db = authenticatedDb('reader');

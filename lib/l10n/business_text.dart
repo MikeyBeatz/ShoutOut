@@ -29,6 +29,33 @@ const _translations = <String, Map<String, String>>{
     'uk': 'Завантажити власний логотип',
     'vi': 'Tải logo riêng lên',
   },
+  'Business logo bylo uložené.': {
+    'en': 'The business logo was saved.',
+    'de': 'Das Unternehmenslogo wurde gespeichert.',
+    'pl': 'Logo firmy zostało zapisane.',
+    'sk': 'Firemné logo bolo uložené.',
+    'uk': 'Логотип компанії збережено.',
+    'vi': 'Logo doanh nghiệp đã được lưu.',
+  },
+  'Logo se nepodařilo uložit kvůli oprávnění účtu.': {
+    'en': 'The logo could not be saved because of account permissions.',
+    'de':
+        'Das Logo konnte wegen der Kontoberechtigungen nicht gespeichert werden.',
+    'pl': 'Nie udało się zapisać logo z powodu uprawnień konta.',
+    'sk': 'Logo sa nepodarilo uložiť pre oprávnenia účtu.',
+    'uk': 'Не вдалося зберегти логотип через дозволи облікового запису.',
+    'vi': 'Không thể lưu logo do quyền của tài khoản.',
+  },
+  'Logo se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.': {
+    'en': 'The logo could not be saved. Check your connection and try again.',
+    'de':
+        'Das Logo konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.',
+    'pl': 'Nie udało się zapisać logo. Sprawdź połączenie i spróbuj ponownie.',
+    'sk': 'Logo sa nepodarilo uložiť. Skontroluj pripojenie a skús to znova.',
+    'uk':
+        'Не вдалося зберегти логотип. Перевірте підключення та повторіть спробу.',
+    'vi': 'Không thể lưu logo. Hãy kiểm tra kết nối và thử lại.',
+  },
   'Vlastní logo připravujeme. Zatím můžeš použít některý z našich avatarů.': {
     'en':
         'Custom logos are coming soon. For now, you can use one of our avatars.',

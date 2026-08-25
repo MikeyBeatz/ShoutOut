@@ -68,8 +68,8 @@ levněji a přesněji pokrýt unit testem.
 - přidání, úprava, pozastavení a soft-delete pobočky; po uložení se rozbalený
   editor zavře a změna se objeví bez reloadu;
 - Business dlaždice zůstává po přechodu Profil → Shouty → Profil;
-- pouze Business účet vidí v editoru avatara tlačítko vlastního loga; před
-  zapnutím Storage kliknutí zobrazí lokalizovanou informaci o připravované funkci;
+- pouze aktivní Business účet vidí v editoru avatara tlačítko vlastního loga;
+  nahrání 512px PNG se projeví ve veřejné identitě a nahrazení odstraní starý soubor;
 - formulář Shoutu nabízí jen aktivní ověřené pobočky; viditelné jméno autora je
   název vybrané pobočky a poloha odpovídá této pobočce, ne zařízení ani sídlu;
 - načtení veřejného Business profilu nesmí přepsat název pobočky názvem firmy;

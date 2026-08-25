@@ -122,9 +122,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 Aktualizováno 25. srpna 2026.
 
-`███████████████████████████░░░░░░░░░░░░░` **67 %** — pokročilá fáze
+`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
 
-Hotovo je 92 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 94 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -376,7 +376,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     do všech sedmi jazyků aplikace (čeština, angličtina, němčina, polština,
     slovenština, ukrajinština a vietnamština); názvy zemí přebírat lokalizovaně
     z udržovaného ISO seznamu.
-  - [ ] Přidat aktivním Business účtům vlastní logo místo systémového avatara.
+  - [x] Přidat aktivním Business účtům vlastní logo místo systémového avatara.
     - [x] Připravit lokální editor s posunem a zoomem, kruhovým náhledem,
       kontrolou formátu, 10MB limitem a minimálním rozlišením 512 × 512 px.
       Ukládaný výsledek je nový 512 × 512 PNG bez původních metadat a částí
@@ -384,7 +384,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     - [x] V úpravě avatara zobrazit pouze Business účtům vizuálně neaktivní
       tlačítko **Nahrát vlastní logo** s lokalizovanou informací, že funkci
       připravujeme. Běžné účty tuto volbu nevidí.
-    - [ ] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
+    - [x] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
       invalidaci a bezpečné odstranění předchozí verze a tlačítku předat hotovou
       ukládací callback funkci. Výběr, editor a 512px převod už jsou zapojené.
   - [ ] Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes

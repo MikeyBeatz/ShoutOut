@@ -151,9 +151,8 @@ class ShoutCard extends StatelessWidget {
                               ),
                         child: Row(
                           children: [
-                            AvatarImage(
-                              avatarId: identity.avatarStyle.avatarId,
-                              style: identity.avatarStyle,
+                            PublicIdentityAvatar(
+                              identity: identity,
                               radius: 20,
                             ),
                             const SizedBox(width: 10),
@@ -375,11 +374,7 @@ class BusinessSpotlightCard extends StatelessWidget {
             fallbackAvatarStyle: shout.authorAvatarStyle,
             builder: (context, identity) => Row(
               children: [
-                AvatarImage(
-                  avatarId: identity.avatarStyle.avatarId,
-                  style: identity.avatarStyle,
-                  radius: 25,
-                ),
+                PublicIdentityAvatar(identity: identity, radius: 25),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

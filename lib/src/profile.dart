@@ -26,6 +26,8 @@ class ProfilePage extends StatelessWidget {
               nickname: nickname,
               avatarId: avatarId,
               avatarStyle: avatarStyle,
+              businessLogoPath: profile?['businessLogoPath'] as String?,
+              businessLogoVersion: profile?['businessLogoVersion'] as int?,
               createdAt: createdAt,
             ),
             Expanded(
@@ -62,12 +64,16 @@ class ProfileHeader extends StatelessWidget {
     required this.nickname,
     required this.avatarId,
     required this.avatarStyle,
+    this.businessLogoPath,
+    this.businessLogoVersion,
     required this.createdAt,
   });
 
   final String nickname;
   final String? avatarId;
   final AvatarStyle? avatarStyle;
+  final String? businessLogoPath;
+  final int? businessLogoVersion;
   final DateTime? createdAt;
 
   @override
@@ -98,11 +104,21 @@ class ProfileHeader extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(5),
-                      child: AvatarImage(
-                        avatarId: avatarId,
-                        style: avatarStyle,
-                        radius: 34,
-                      ),
+                      child: avatarStyle == null
+                          ? AvatarImage(
+                              avatarId: avatarId,
+                              style: avatarStyle,
+                              radius: 34,
+                            )
+                          : PublicIdentityAvatar(
+                              identity: PublicIdentity(
+                                nickname: nickname,
+                                avatarStyle: avatarStyle!,
+                                businessLogoPath: businessLogoPath,
+                                businessLogoVersion: businessLogoVersion,
+                              ),
+                              radius: 34,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -589,11 +605,23 @@ class EditProfilePage extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 children: [
                   Center(
-                    child: AvatarImage(
-                      avatarId: avatarId,
-                      style: avatarStyle,
-                      radius: 58,
-                    ),
+                    child: avatarStyle == null
+                        ? AvatarImage(
+                            avatarId: avatarId,
+                            style: avatarStyle,
+                            radius: 58,
+                          )
+                        : PublicIdentityAvatar(
+                            identity: PublicIdentity(
+                              nickname: nickname,
+                              avatarStyle: avatarStyle,
+                              businessLogoPath:
+                                  profile?['businessLogoPath'] as String?,
+                              businessLogoVersion:
+                                  profile?['businessLogoVersion'] as int?,
+                            ),
+                            radius: 58,
+                          ),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -625,6 +653,16 @@ class EditProfilePage extends StatelessWidget {
                                         showBusinessLogoAction:
                                             roleSnapshot.data ==
                                             AccountRole.business,
+                                        onBusinessLogoSelected:
+                                            roleSnapshot.data ==
+                                                AccountRole.business
+                                            ? (bytes) => _uploadBusinessLogo(
+                                                context,
+                                                bytes,
+                                                profile,
+                                                nickname,
+                                              )
+                                            : null,
                                       ),
                                     );
                                 if (selected == null) return;
@@ -716,6 +754,66 @@ class EditProfilePage extends StatelessWidget {
       },
     ),
   );
+
+  Future<void> _uploadBusinessLogo(
+    BuildContext context,
+    Uint8List bytes,
+    Map<String, dynamic> profile,
+    String nickname,
+  ) async {
+    final version = DateTime.now().millisecondsSinceEpoch;
+    final path = 'businessLogos/$userId/logo-$version.png';
+    final reference = FirebaseStorage.instance.ref(path);
+    final oldPath = profile['businessLogoPath'] as String?;
+    try {
+      await reference.putData(
+        bytes,
+        SettableMetadata(
+          contentType: 'image/png',
+          cacheControl: 'public,max-age=31536000,immutable',
+        ),
+      );
+      final logoData = <String, dynamic>{
+        'businessLogoPath': path,
+        'businessLogoVersion': version,
+      };
+      final db = FirebaseFirestore.instance;
+      final batch = db.batch()
+        ..update(db.collection('users').doc(userId), logoData)
+        ..set(db.collection('publicProfiles').doc(userId), {
+          ...logoData,
+          'nickname': nickname,
+        }, SetOptions(merge: true));
+      await batch.commit();
+      if (oldPath != null && oldPath != path) {
+        try {
+          await FirebaseStorage.instance.ref(oldPath).delete();
+        } on FirebaseException {
+          // Nové logo už je bezpečně aktivní; starý soubor lze uklidit později.
+        }
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(businessTr(context, 'Business logo bylo uložené.')),
+          ),
+        );
+      }
+    } on FirebaseException catch (error) {
+      try {
+        await reference.delete();
+      } on FirebaseException {
+        // Soubor nemusel vzniknout nebo jej už Storage odstranilo.
+      }
+      if (!context.mounted) return;
+      final message = error.code == 'permission-denied'
+          ? 'Logo se nepodařilo uložit kvůli oprávnění účtu.'
+          : 'Logo se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(businessTr(context, message))));
+    }
+  }
 }
 
 Future<void> _selectProfileLanguage(BuildContext context, String userId) async {

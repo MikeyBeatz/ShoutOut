@@ -22,8 +22,9 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 
 | Cesta | ID a důležitá pole | Význam a životní cyklus |
 |---|---|---|
-| `users/{uid}` | `nickname`, `nicknameLower`, `createdAt`, `emailVerified`, `language`, `themeMode`, `showOnboardingHelp`, `avatarId`, `avatarBackgroundStart`, `avatarBackgroundEnd`, `avatarGradientDirection` | Soukromý profil a preference vlastníka. Vzniká až po ověření e-mailu a přijetí právních dokumentů. |
-| `publicProfiles/{uid}` | `nickname`, avatarová pole, volitelné `publicRole` | Minimální veřejná identita. Karty Shoutů a komentářů ji sledují realtime; důvěryhodné nástroje synchronizují veřejnou roli, zatímco klient ji nesmí měnit. |
+| `users/{uid}` | `nickname`, `nicknameLower`, `createdAt`, `emailVerified`, `language`, `themeMode`, `showOnboardingHelp`, `avatarId`, `avatarBackgroundStart`, `avatarBackgroundEnd`, `avatarGradientDirection`, volitelně `businessLogoPath`, `businessLogoVersion` | Soukromý profil a preference vlastníka. Vzniká až po ověření e-mailu a přijetí právních dokumentů. Logo smí přidat pouze aktivní Business účet. |
+| `publicProfiles/{uid}` | `nickname`, avatarová pole, volitelné `publicRole`, `businessLogoPath`, `businessLogoVersion` | Minimální veřejná identita. Karty Shoutů a komentářů ji sledují realtime; důvěryhodné nástroje synchronizují veřejnou roli, zatímco klient ji nesmí měnit. |
+| Storage `businessLogos/{uid}/logo-{version}.png` | PNG do 2 MiB | Veřejné logo Business účtu dostupné přihlášeným uživatelům; zapisovat a mazat ho smí pouze vlastník s aktivní Business rolí. |
 | `nicknames/{nicknameLower}` | `uid`, `nickname`, `nicknameLower`, `createdAt` | Globální rezervace přezdívky. ID je normalizovaná přezdívka; změna probíhá transakcí společně s oběma profily. |
 | `accountRoles/{uid}` | `role`, `level` a podle role moderátorský rozsah | Důvěryhodně přidělená role. Úrovně: user 1, business 2, moderator 3, seniorModerator 4, administrator 5, owner 6. |
 | `moderators/{uid}` | historická/kompatibilní moderátorská metadata | Klient smí načíst jen vlastní dokument. Nové rozhodování je založené na `accountRoles`. |

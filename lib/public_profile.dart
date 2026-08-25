@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'avatar_style.dart';
@@ -8,11 +11,15 @@ class PublicIdentity {
     required this.nickname,
     required this.avatarStyle,
     this.publicRole,
+    this.businessLogoPath,
+    this.businessLogoVersion,
   });
 
   final String nickname;
   final AvatarStyle avatarStyle;
   final String? publicRole;
+  final String? businessLogoPath;
+  final int? businessLogoVersion;
 }
 
 class PublicIdentityBuilder extends StatelessWidget {
@@ -50,6 +57,54 @@ class PublicIdentityBuilder extends StatelessWidget {
             nickname: data['nickname'] as String? ?? fallbackNickname,
             avatarStyle: AvatarStyle.fromProfile(data),
             publicRole: data['publicRole'] as String?,
+            businessLogoPath: data['businessLogoPath'] as String?,
+            businessLogoVersion: data['businessLogoVersion'] as int?,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class PublicIdentityAvatar extends StatelessWidget {
+  const PublicIdentityAvatar({
+    super.key,
+    required this.identity,
+    required this.radius,
+  });
+
+  final PublicIdentity identity;
+  final double radius;
+
+  static final Map<String, Future<Uint8List?>> _logoBytes = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final path = identity.businessLogoPath;
+    final version = identity.businessLogoVersion;
+    final fallback = AvatarImage(
+      avatarId: identity.avatarStyle.avatarId,
+      style: identity.avatarStyle,
+      radius: radius,
+    );
+    if (path == null || version == null) return fallback;
+    final cacheKey = '$path@$version';
+    return FutureBuilder<Uint8List?>(
+      future: _logoBytes.putIfAbsent(
+        cacheKey,
+        () => FirebaseStorage.instance.ref(path).getData(2 * 1024 * 1024),
+      ),
+      builder: (context, snapshot) {
+        final bytes = snapshot.data;
+        if (bytes == null) return fallback;
+        return ClipOval(
+          child: Image.memory(
+            bytes,
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => fallback,
           ),
         );
       },
@@ -133,11 +188,7 @@ class PublicProfileCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            AvatarImage(
-              avatarId: identity.avatarStyle.avatarId,
-              style: identity.avatarStyle,
-              radius: avatarRadius,
-            ),
+            PublicIdentityAvatar(identity: identity, radius: avatarRadius),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

@@ -12,6 +12,24 @@ service firebase.storage {
         firestore.get(/databases/(default)/documents/accountRoles/$(request.auth.uid)).data.level >= 5;
     }
 
+    function businessOwner(userId) {
+      return signedIn() &&
+        request.auth.uid == userId &&
+        firestore.exists(/databases/(default)/documents/accountRoles/$(userId)) &&
+        firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.role == 'business' &&
+        firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.level == 2;
+    }
+
+    match /businessLogos/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow create, update: if businessOwner(userId) &&
+        fileName.matches('logo-[0-9]+\\.png') &&
+        request.resource.size > 0 &&
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType == 'image/png';
+      allow delete: if businessOwner(userId);
+    }
+
     match /bugReports/{userId}/{reportId}/screenshot {
       allow create: if signedIn() &&
         request.auth.uid == userId &&

@@ -141,11 +141,7 @@ class PrivateReplyTile extends StatelessWidget {
             fallbackAvatarStyle: AvatarStyle.fallback,
             builder: (context, identity) => Row(
               children: [
-                AvatarImage(
-                  avatarId: identity.avatarStyle.avatarId,
-                  style: identity.avatarStyle,
-                  radius: 15,
-                ),
+                PublicIdentityAvatar(identity: identity, radius: 15),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(

@@ -214,13 +214,28 @@ service cloud.firestore {
       let userPath = /databases/$(database)/documents/users/$(userId);
       return data.keys().hasOnly([
           'nickname', 'avatarId', 'avatarBackgroundStart',
-          'avatarBackgroundEnd', 'avatarGradientDirection', 'publicRole'
+          'avatarBackgroundEnd', 'avatarGradientDirection', 'publicRole',
+          'businessLogoPath', 'businessLogoVersion'
         ]) &&
         data.keys().hasAll([
           'nickname', 'avatarId', 'avatarBackgroundStart',
           'avatarBackgroundEnd', 'avatarGradientDirection'
         ]) &&
         validAvatarStyle(data) &&
+        (
+          !data.keys().hasAny(['businessLogoPath', 'businessLogoVersion']) ||
+          (
+            data.keys().hasAll(['businessLogoPath', 'businessLogoVersion']) &&
+            data.businessLogoPath is string &&
+            data.businessLogoPath.matches(
+              '^businessLogos/' + userId + '/logo-[0-9]+\\.png$'
+            ) &&
+            data.businessLogoVersion is int &&
+            data.businessLogoVersion > 0 &&
+            data.businessLogoPath == getAfter(userPath).data.businessLogoPath &&
+            data.businessLogoVersion == getAfter(userPath).data.businessLogoVersion
+          )
+        ) &&
         (
           !('publicRole' in data) ||
           data.publicRole in [
@@ -1123,6 +1138,23 @@ service cloud.firestore {
                 'avatarGradientDirection'
              ]) &&
              validAvatarStyle(request.resource.data) &&
+             validPublicProfile(
+               userId,
+               getAfter(
+                 /databases/$(database)/documents/publicProfiles/$(userId)
+               ).data
+             )
+           ) ||
+           (
+             isBusinessAccount() &&
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['businessLogoPath', 'businessLogoVersion']) &&
+             request.resource.data.businessLogoPath is string &&
+             request.resource.data.businessLogoPath.matches(
+               '^businessLogos/' + userId + '/logo-[0-9]+\\.png$'
+             ) &&
+             request.resource.data.businessLogoVersion is int &&
+             request.resource.data.businessLogoVersion > 0 &&
              validPublicProfile(
                userId,
                getAfter(
