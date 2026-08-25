@@ -640,6 +640,7 @@ class EditProfilePage extends StatelessWidget {
                                           .collection('publicProfiles')
                                           .doc(userId),
                                       selected.publicProfileData(nickname),
+                                      SetOptions(merge: true),
                                     );
                                   await batch.commit();
                                   if (context.mounted) {

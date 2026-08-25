@@ -320,10 +320,8 @@ class BugReportPage extends StatefulWidget {
 }
 
 class _BugReportPageState extends State<BugReportPage> {
-  // Enable only after Firebase Storage is initialized and storage.rules are
-  // deployed in the target project. See docs/FIREBASE_STORAGE_SETUP.md.
-  static const _imageAttachmentsEnabled = false;
-  static const _maximumImageBytes = 5 * 1024 * 1024;
+  static const _imageAttachmentsEnabled = true;
+  static const _maximumImageBytes = 2 * 1024 * 1024;
   final _description = TextEditingController();
   XFile? _image;
   Uint8List? _imageBytes;
@@ -353,7 +351,7 @@ class _BugReportPageState extends State<BugReportPage> {
       return;
     }
     if (bytes.length > _maximumImageBytes) {
-      setState(() => _error = 'Obrázek může mít nejvýše 5 MB.');
+      setState(() => _error = 'Obrázek může mít nejvýše 2 MB.');
       return;
     }
     setState(() {
@@ -384,25 +382,9 @@ class _BugReportPageState extends State<BugReportPage> {
     final report = firestore.collection('bugReports').doc();
     Reference? imageReference;
     try {
-      String? screenshotPath;
-      if (_imageBytes != null) {
-        imageReference = FirebaseStorage.instance.ref(
-          'bugReports/${user.uid}/${report.id}/screenshot',
-        );
-        final task = imageReference.putData(
-          _imageBytes!,
-          SettableMetadata(contentType: _imageType),
-        );
-        task.snapshotEvents.listen((snapshot) {
-          if (mounted && snapshot.totalBytes > 0) {
-            setState(
-              () => _progress = snapshot.bytesTransferred / snapshot.totalBytes,
-            );
-          }
-        });
-        await task;
-        screenshotPath = imageReference.fullPath;
-      }
+      final screenshotPath = _imageBytes == null
+          ? null
+          : 'bugReports/${user.uid}/${report.id}/screenshot';
       final rateReference = _rateLimitReference('report');
       await firestore.runTransaction((transaction) async {
         final rate = await transaction.get(rateReference);
@@ -428,9 +410,26 @@ class _BugReportPageState extends State<BugReportPage> {
             'screenshotSize': _imageBytes?.length,
           });
       });
+      if (_imageBytes != null) {
+        imageReference = FirebaseStorage.instance.ref(screenshotPath!);
+        final task = imageReference.putData(
+          _imageBytes!,
+          SettableMetadata(contentType: _imageType),
+        );
+        task.snapshotEvents.listen((snapshot) {
+          if (mounted && snapshot.totalBytes > 0) {
+            setState(
+              () => _progress = snapshot.bytesTransferred / snapshot.totalBytes,
+            );
+          }
+        });
+        await task;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Hlášení chyby bylo odesláno.')),
+          SnackBar(
+            content: Text(bugReportTr(context, 'Hlášení chyby bylo odesláno.')),
+          ),
         );
         Navigator.pop(context);
       }
@@ -438,6 +437,13 @@ class _BugReportPageState extends State<BugReportPage> {
       if (imageReference != null) {
         try {
           await imageReference.delete();
+        } catch (_) {}
+        try {
+          await report.update({
+            'screenshotPath': null,
+            'screenshotContentType': null,
+            'screenshotSize': null,
+          });
         } catch (_) {}
       }
       if (mounted) setState(() => _error = 'Hlášení se nepodařilo odeslat.');
@@ -453,7 +459,7 @@ class _BugReportPageState extends State<BugReportPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Nahlásit chybu')),
+    appBar: AppBar(title: Text(bugReportTr(context, 'Nahlásit chybu'))),
     body: ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -463,10 +469,12 @@ class _BugReportPageState extends State<BugReportPage> {
           maxLines: 10,
           maxLength: 1000,
           enabled: !_sending,
-          decoration: const InputDecoration(
-            labelText: 'Co se stalo?',
-            hintText:
-                'Popiš postup, očekávaný výsledek a co se zobrazilo místo něj.',
+          decoration: InputDecoration(
+            labelText: bugReportTr(context, 'Co se stalo?'),
+            hintText: bugReportTr(
+              context,
+              'Popiš postup, očekávaný výsledek a co se zobrazilo místo něj.',
+            ),
             alignLabelWithHint: true,
           ),
         ),
@@ -475,7 +483,7 @@ class _BugReportPageState extends State<BugReportPage> {
           OutlinedButton.icon(
             onPressed: _sending ? null : _pickImage,
             icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: const Text('Přidat obrázek'),
+            label: Text(bugReportTr(context, 'Přidat obrázek')),
           )
         else if (_imageAttachmentsEnabled) ...[
           ClipRRect(
@@ -492,7 +500,7 @@ class _BugReportPageState extends State<BugReportPage> {
                     _confirmed = false;
                   }),
             icon: const Icon(Icons.delete_outline),
-            label: const Text('Odebrat obrázek'),
+            label: Text(bugReportTr(context, 'Odebrat obrázek')),
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
@@ -500,19 +508,28 @@ class _BugReportPageState extends State<BugReportPage> {
             onChanged: _sending
                 ? null
                 : (value) => setState(() => _confirmed = value ?? false),
-            title: const Text(
-              'Zkontroloval/a jsem, že obrázek neobsahuje hesla ani zbytečné osobní údaje.',
+            title: Text(
+              bugReportTr(
+                context,
+                'Zkontroloval/a jsem, že obrázek neobsahuje hesla ani zbytečné osobní údaje.',
+              ),
             ),
             controlAffinity: ListTileControlAffinity.leading,
           ),
         ],
         if (_imageAttachmentsEnabled)
-          const Text(
-            'Povolené formáty: JPG, PNG a WebP. Maximum 5 MB. Hlášení a obrázek se uchovávají nejvýše 60 dní.',
+          Text(
+            bugReportTr(
+              context,
+              'Povolené formáty: JPG, PNG a WebP. Maximum 2 MB. Hlášení a obrázek se uchovávají nejvýše 60 dní.',
+            ),
           )
         else
-          const Text(
-            'Přiložení obrázku připravujeme. Textové hlášení můžeš odeslat už nyní.',
+          Text(
+            bugReportTr(
+              context,
+              'Přiložení obrázku připravujeme. Textové hlášení můžeš odeslat už nyní.',
+            ),
           ),
         if (_progress != null) ...[
           const SizedBox(height: 12),
@@ -521,7 +538,7 @@ class _BugReportPageState extends State<BugReportPage> {
         if (_error != null) ...[
           const SizedBox(height: 12),
           Text(
-            _error!,
+            bugReportTr(context, _error!),
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],
@@ -529,7 +546,9 @@ class _BugReportPageState extends State<BugReportPage> {
         FilledButton.icon(
           onPressed: _sending ? null : _submit,
           icon: const Icon(Icons.send_outlined),
-          label: Text(_sending ? 'Odesílám…' : 'Odeslat hlášení'),
+          label: Text(
+            bugReportTr(context, _sending ? 'Odesílám…' : 'Odeslat hlášení'),
+          ),
         ),
       ],
     ),

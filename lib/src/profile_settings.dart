@@ -618,7 +618,7 @@ class _ChangeNicknameDialogState extends State<ChangeNicknameDialog> {
           'avatarBackgroundEnd': currentProfile.data()!['avatarBackgroundEnd'],
           'avatarGradientDirection': currentProfile
               .data()!['avatarGradientDirection'],
-        });
+        }, SetOptions(merge: true));
       });
       if (!mounted) return;
       Navigator.pop(context);

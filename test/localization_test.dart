@@ -5,6 +5,7 @@ import 'package:shoutout/l10n/legal_translations.dart';
 import 'package:shoutout/l10n/text.dart';
 import 'package:shoutout/l10n/business_text.dart';
 import 'package:shoutout/help_content.dart';
+import 'package:shoutout/l10n/bug_report_text.dart';
 
 void main() {
   test('supports all configured languages', () {
@@ -147,6 +148,31 @@ void main() {
       expect(topics, hasLength(8));
       expect(topics.every((topic) => topic.title.isNotEmpty), isTrue);
       expect(topics.every((topic) => topic.body.length > 100), isTrue);
+    });
+  }
+
+  for (final language in <String>['en', 'de', 'pl', 'sk', 'uk', 'vi']) {
+    testWidgets('translates the complete bug report UI to $language', (
+      tester,
+    ) async {
+      late BuildContext localizedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(language),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (context) {
+              localizedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      for (final key in bugReportTextKeys) {
+        expect(bugReportTr(localizedContext, key), isNot(key));
+      }
     });
   }
 

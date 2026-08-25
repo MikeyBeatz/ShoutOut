@@ -100,7 +100,7 @@ for (let index = 0; index < 12; index += 1) {
     authorNickname,
     title: `[FRONTA] ${titles[index]}`,
     text: shoutTexts[index % shoutTexts.length],
-    categories: [index % 2 === 0 ? 'Obecné' : 'Upozornění'],
+    categories: [index % 2 === 0 ? 'Ostatní' : 'Varování!'],
     location,
     geohash: geography.geohash,
     geography,

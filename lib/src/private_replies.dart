@@ -147,10 +147,18 @@ class PrivateReplyTile extends StatelessWidget {
                   radius: 15,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  identity.nickname,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                Flexible(
+                  child: Text(
+                    identity.nickname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
+                if (identity.publicRole != null) ...[
+                  const SizedBox(width: 6),
+                  PublicRoleFlair(role: identity.publicRole),
+                ],
               ],
             ),
           ),

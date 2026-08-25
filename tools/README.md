@@ -20,7 +20,7 @@ In PowerShell from this folder:
 
 ```powershell
 $env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
-$env:SHOUTOUT_TEST_PASSWORD = 'choose-a-development-only-password'
+$env:SHOUTOUT_TEST_PASSWORD = 'ShoutOut2026+'
 node .\seed_test_users.mjs
 ```
 
@@ -158,6 +158,8 @@ Kontrolní spuštění bez potvrzení pouze vypíše rozsah. Varianta s
 vývojových kolekcích a odpovídající Firebase Authentication účty, tedy také
 ručně vytvořené demo Shouty a účty, nejen předchozí integrační scénář. Použijte
 ji pouze tehdy, když je úplné vyčištění vývojových dat výslovně zamýšlené.
+Reset vytvoří účty úrovní 1–6; Business účet obsahuje aktivní Business
+profil a ověřenou počáteční pobočku.
 
 Pro doplnění samotné moderátorské fronty bez plošného resetu použijte přednostně
 `seed_moderation_queue.mjs`.

@@ -9,6 +9,8 @@ class CommentTile extends StatefulWidget {
     required this.onPrivateReply,
     required this.onReport,
     required this.onJumpToReply,
+    required this.onSave,
+    required this.onReaction,
   });
 
   final QueryDocumentSnapshot<Map<String, dynamic>> comment;
@@ -18,6 +20,8 @@ class CommentTile extends StatefulWidget {
   onPrivateReply;
   final VoidCallback onReport;
   final ValueChanged<String> onJumpToReply;
+  final ValueChanged<Shout> onSave;
+  final Future<void> Function(Shout shout, {required bool like}) onReaction;
 
   @override
   State<CommentTile> createState() => _CommentTileState();
@@ -83,34 +87,18 @@ class _CommentTileState extends State<CommentTile> {
                         userId: data['authorId'] as String,
                         fallbackNickname: data['authorNickname'] as String,
                         fallbackAvatarStyle: AvatarStyle.fallback,
-                        builder: (context, identity) => Row(
-                          children: [
-                            AvatarImage(
-                              avatarId: identity.avatarStyle.avatarId,
-                              style: identity.avatarStyle,
-                              radius: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 6,
-                                children: [
-                                  Text(
-                                    identity.nickname,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  if (data['authorId'] == widget.shoutAuthorId)
-                                    Chip(
-                                      label: Text(tr(context, 'Autor')),
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        builder: (context, identity) => CommentAuthorIdentity(
+                          identity: identity,
+                          isShoutAuthor:
+                              data['authorId'] == widget.shoutAuthorId,
+                          onTap: () => showPublicProfileSheet(
+                            context,
+                            userId: data['authorId'] as String,
+                            fallbackNickname: identity.nickname,
+                            fallbackAvatarStyle: identity.avatarStyle,
+                            onSave: widget.onSave,
+                            onReaction: widget.onReaction,
+                          ),
                         ),
                       ),
                     ),
@@ -375,4 +363,55 @@ class _CommentTileState extends State<CommentTile> {
       ],
     );
   }
+}
+
+class CommentAuthorIdentity extends StatelessWidget {
+  const CommentAuthorIdentity({
+    super.key,
+    required this.identity,
+    required this.isShoutAuthor,
+    required this.onTap,
+  });
+
+  final PublicIdentity identity;
+  final bool isShoutAuthor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          AvatarImage(
+            avatarId: identity.avatarStyle.avatarId,
+            style: identity.avatarStyle,
+            radius: 16,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 6,
+              children: [
+                Text(
+                  identity.nickname,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                if (identity.publicRole != null)
+                  PublicRoleFlair(role: identity.publicRole),
+                if (isShoutAuthor)
+                  Chip(
+                    label: Text(tr(context, 'Autor')),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

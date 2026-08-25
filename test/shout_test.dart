@@ -24,6 +24,22 @@ Shout _shout({
 );
 
 void main() {
+  test('nabízí schválené kategorie Shoutů ve správném pořadí', () {
+    expect(shoutCategories, const [
+      'Událost',
+      'Dotaz',
+      'Nabídka',
+      'Pomoc',
+      'Ztráty a nálezy',
+      'Tip',
+      'Doprava',
+      'Diskuze',
+      'Varování!',
+      'Ostatní',
+    ]);
+    expect(shoutCategoryEmoji.keys, shoutCategories);
+  });
+
   test('Business Shout keeps its branch name after profile refresh', () {
     final shout = Shout(
       id: 'business-shout',
@@ -31,7 +47,7 @@ void main() {
       author: 'Centrum Brno',
       title: 'Novinka',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 1,
       createdAt: DateTime(2026),
       expiresAt: DateTime(2027),
@@ -49,7 +65,7 @@ void main() {
       author: 'Kavárny Novák – Centrum Brno',
       title: 'Novinka',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 1,
       createdAt: DateTime(2026),
       expiresAt: DateTime(2027),
@@ -66,7 +82,7 @@ void main() {
       author: 'Kavárny Novák – Centrum Brno',
       title: 'Novinka',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 1,
       createdAt: DateTime(2026),
       expiresAt: DateTime(2027),
@@ -87,7 +103,7 @@ void main() {
       author: 'Staré jméno',
       title: 'Novinka',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 1,
       createdAt: DateTime(2026),
       expiresAt: DateTime(2027),
@@ -110,7 +126,7 @@ void main() {
       author: 'Pobočka',
       title: 'Akce',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 2,
       createdAt: now,
       expiresAt: now.add(const Duration(days: 4)),
@@ -131,7 +147,7 @@ void main() {
       author: 'Pobočka',
       title: 'Akce',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 20.01,
       createdAt: now,
       expiresAt: now.add(const Duration(hours: 1)),
@@ -142,7 +158,7 @@ void main() {
       author: 'Pobočka',
       title: 'Akce',
       text: 'Text',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 20,
       createdAt: now,
       expiresAt: now.add(const Duration(hours: 1)),

@@ -10,18 +10,6 @@ class CreateShoutSheet extends StatefulWidget {
 }
 
 class _CreateShoutSheetState extends State<CreateShoutSheet> {
-  static const _categories = [
-    'Obecné',
-    'Akce',
-    'Sport',
-    'Zábava',
-    'Pomoc',
-    'Upozornění',
-    'Dotaz',
-    'Doprava',
-    'Jídlo a pití',
-    'Kultura',
-  ];
   final _title = TextEditingController();
   final _text = TextEditingController();
   final Set<String> _selected = {};
@@ -119,10 +107,10 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: _categories
+            children: shoutCategories
                 .map(
                   (category) => FilterChip(
-                    label: Text(tr(context, category)),
+                    label: Text(shoutCategoryLabel(context, category)),
                     selected: _selected.contains(category),
                     onSelected: (selected) => setState(() {
                       if (selected && _selected.length < 2) {
@@ -219,6 +207,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                     controller: _hoursController,
                     values: _hourOptions,
                     suffix: 'h',
+                    formatWholeDays: true,
                     onChanged: (hours) => _setDuration(hours, _minutes),
                   ),
                 ),
@@ -458,6 +447,7 @@ class _DurationWheel extends StatelessWidget {
     required this.suffix,
     required this.onChanged,
     this.twoDigits = false,
+    this.formatWholeDays = false,
   });
 
   final FixedExtentScrollController controller;
@@ -465,6 +455,7 @@ class _DurationWheel extends StatelessWidget {
   final String suffix;
   final ValueChanged<int> onChanged;
   final bool twoDigits;
+  final bool formatWholeDays;
 
   @override
   Widget build(BuildContext context) => CupertinoTheme(
@@ -500,14 +491,32 @@ class _DurationWheel extends StatelessWidget {
         ),
         onSelectedItemChanged: (index) => onChanged(values[index]),
         children: values.map((value) {
-          final label = value > 24
-              ? localizedDurationLabel(context, Duration(hours: value))
-              : '${twoDigits ? value.toString().padLeft(2, '0') : value} $suffix';
+          final label = durationWheelValueLabel(
+            context,
+            value: value,
+            suffix: suffix,
+            twoDigits: twoDigits,
+            formatWholeDays: formatWholeDays,
+          );
           return Center(child: Text(label));
         }).toList(),
       ),
     ),
   );
+}
+
+String durationWheelValueLabel(
+  BuildContext context, {
+  required int value,
+  required String suffix,
+  bool twoDigits = false,
+  bool formatWholeDays = false,
+}) {
+  if (formatWholeDays && value > 24) {
+    return localizedDurationLabel(context, Duration(hours: value));
+  }
+  final number = twoDigits ? value.toString().padLeft(2, '0') : '$value';
+  return '$number $suffix';
 }
 
 class ReactionButton extends StatelessWidget {

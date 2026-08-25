@@ -88,6 +88,9 @@ for (const testUser of users) {
       avatarBackgroundStart: 'teal',
       avatarBackgroundEnd: 'navy',
       avatarGradientDirection: 'diagonal',
+      themeMode: 'system',
+      showOnboardingHelp: true,
+      onboardingStep: 0,
       isTest: true,
     }, { merge: true }),
     db.collection('users').doc(uid).collection('legal')
@@ -128,7 +131,7 @@ async function seedDemoData() {
     ['culture', 32, 'Malá výstava o víkendu', 'Doporučuji návštěvu, vstup je zdarma.'],
   ];
   const categories = [
-    ['Akce'], ['Zábava'], ['Sport'], ['Upozornění'], ['Kultura'], ['Pomoc'], ['Kultura'],
+    ['Událost'], ['Diskuze'], ['Doprava'], ['Varování!'], ['Tip'], ['Pomoc'], ['Ostatní'],
   ];
   const now = Date.now();
 
@@ -210,7 +213,7 @@ async function addLiveActivity() {
     authorNickname: author.nickname,
     title: '[TEST] Káva po práci?',
     text: 'Je někdo poblíž centra Litoměřic a nechce se na chvíli zastavit na kávu?',
-    categories: ['Akce', 'Jídlo a pití'],
+    categories: ['Událost', 'Tip'],
     location: new GeoPoint(50.5408, 14.1301),
     createdAt: Timestamp.fromMillis(now),
     expiresAt: Timestamp.fromMillis(now + 3 * 60 * 60 * 1000),

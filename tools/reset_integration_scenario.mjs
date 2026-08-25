@@ -119,6 +119,9 @@ for (const account of accounts) {
       avatarBackgroundStart: 'teal',
       avatarBackgroundEnd: 'navy',
       avatarGradientDirection: 'diagonal',
+      themeMode: 'system',
+      showOnboardingHelp: true,
+      onboardingStep: 0,
       isTest: true,
     }),
     db.collection('nicknames').doc(account.nickname.toLowerCase()).set({
@@ -155,6 +158,65 @@ for (const account of accounts) {
   console.log(`Created level ${account.level}: ${account.email}`);
 }
 
+const businessUid = 'it_business';
+const businessCreatedAt = FieldValue.serverTimestamp();
+const businessLocation = new GeoPoint(50.5384, 14.1318);
+await Promise.all([
+  db.collection('businessApplications').doc(businessUid).set({
+    userId: businessUid,
+    countryCode: 'CZ',
+    registrationNumber: '12345678',
+    submittedCompanyName: 'Test Business s.r.o.',
+    submittedAddress: 'Dlouhá 1',
+    submittedCity: 'Litoměřice',
+    submittedPostalCode: '41201',
+    initialLocationName: 'Test Business Litoměřice',
+    initialLocationAddress: 'Dlouhá 1, Litoměřice',
+    initialLocation: businessLocation,
+    initialLocationCountryCode: 'CZ',
+    initialLocationGeohash: 'u2fkn8u',
+    initialLocationProviderPlaceId: 'integration-test-litomerice',
+    contactEmail: 'test.business@shoutout.test',
+    status: 'active',
+    activationMethod: 'reset_integration_scenario',
+    activatedBy: 'reset_integration_scenario.mjs',
+    submittedAt: businessCreatedAt,
+    emailVerifiedAt: businessCreatedAt,
+    activatedAt: businessCreatedAt,
+  }),
+  db.collection('businessProfiles').doc(businessUid).set({
+    displayName: 'Test Business s.r.o.',
+    officialName: 'Test Business s.r.o.',
+    registrationNumber: '12345678',
+    vatId: '',
+    countryCode: 'CZ',
+    registryAddress: 'Dlouhá 1',
+    billingCity: 'Litoměřice',
+    billingPostalCode: '41201',
+    billingEmail: 'test.business@shoutout.test',
+    status: 'active',
+    activationMethod: 'reset_integration_scenario',
+    emailVerifiedAt: businessCreatedAt,
+    createdAt: businessCreatedAt,
+    updatedAt: businessCreatedAt,
+  }),
+  db.collection('businessProfiles').doc(businessUid).collection('locations')
+    .doc('initial').set({
+      displayName: 'Test Business Litoměřice',
+      address: 'Dlouhá 1, Litoměřice',
+      active: true,
+      deleted: false,
+      geocodingStatus: 'verified',
+      location: businessLocation,
+      geohash: 'u2fkn8u',
+      providerPlaceId: 'integration-test-litomerice',
+      countryCode: 'CZ',
+      createdAt: businessCreatedAt,
+      updatedAt: businessCreatedAt,
+    }),
+]);
+console.log('Created active Business profile with an initial branch.');
+
 const shoutId = 'it_reported_comment_shout';
 const commentId = 'it_reported_comment';
 const createdAt = Timestamp.now();
@@ -177,7 +239,7 @@ await shoutRef.set({
   authorNickname: 'TestAuthor',
   title: '[TEST] Integrační moderace komentáře',
   text: 'Tento shout slouží k ověření kompletního moderátorského postupu.',
-  categories: ['Obecné'],
+  categories: ['Ostatní'],
   location,
   geohash: geography.geohash,
   geography,

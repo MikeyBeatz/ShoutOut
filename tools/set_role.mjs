@@ -29,9 +29,13 @@ if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
 initializeApp({ credential: cert(serviceAccount) });
 const user = await getAuth().getUserByEmail(email);
 const roleDocument = getFirestore().collection('accountRoles').doc(user.uid);
+const publicProfileDocument = getFirestore().collection('publicProfiles').doc(user.uid);
 
 if (role === 'user') {
-  await roleDocument.delete();
+  const batch = getFirestore().batch();
+  batch.delete(roleDocument);
+  batch.update(publicProfileDocument, { publicRole: FieldValue.delete() });
+  await batch.commit();
 } else {
   const option = (name) => options
     .find((item) => item.startsWith(`--${name}=`))
@@ -39,7 +43,8 @@ if (role === 'user') {
     .split(',')
     .map((item) => item.trim().toUpperCase())
     .filter(Boolean) ?? [];
-  await roleDocument.set({
+  const batch = getFirestore().batch();
+  batch.set(roleDocument, {
     role,
     level: roles.get(role),
     assignedBy: 'set_role.mjs',
@@ -50,6 +55,8 @@ if (role === 'user') {
       subdivisions: option('subdivisions'),
     },
   });
+  batch.update(publicProfileDocument, { publicRole: role });
+  await batch.commit();
 }
 
 console.log(`Role ${role} (level ${roles.get(role)}) set for ${user.uid}`);

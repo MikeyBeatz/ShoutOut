@@ -2,10 +2,54 @@
 
 ## Nové podněty z uživatelského testování
 
-- [ ] **Umožnit otevřít veřejný profil autora z komentáře.**
+- [x] **Navrhnout sdílenou profilovou vizitku.**
+  - Vytvořit kompaktní kartu veřejného profilu použitelnou při otevření autora
+    i pro budoucí sdílení; určit obsah, vzhled, akce a ochranu soukromých údajů.
+  - Sdílená komponenta zobrazuje pouze veřejnou přezdívku, avatar a flair;
+    používá se v detailu autora i v seznamu sledovaných. Kontextové akce zůstávají
+    mimo veřejnou identitu a vlastní profil nenabízí Follow, blokaci ani hlášení.
+- [ ] **Rozšířit Business monetizaci o dokoupení dosahu podle vzdálenosti.**
+  - Běžný Business Shout zachová standardní místní dosah; větší poloměr bude
+    možné aktivovat za tokeny v předem určených kilometrových pásmech.
+  - Před implementací určit pásma, ceny, maximální dosah, dobu platnosti,
+    serverové odečtení tokenů a ochranu proti překryvu či zneužití oblastí;
+    aktualizovat rozporné rozhodnutí v `docs/BUSINESS_MONETIZATION.md`.
+- [ ] **Prověřit API pro události v okolí.**
+  - Upřesnit zdroj událostí, podporované země, licenční podmínky, duplicity,
+    aktuálnost, lokalizaci a způsob odlišení externí události od Shoutu.
+- [x] **Opravit tlačítko „Zrušit registraci a začít znovu“.**
+  - Reprodukovat chybu v běžné i Business registraci, bezpečně zrušit rozpracovaný
+    účet a registrační data a vrátit uživatele na čistý začátek registrace.
+  - Příčinou byl dotaz na aktivní Shouty před smazáním neověřeného účtu;
+    Firestore jej správně odmítl, protože rozpracovaná registrace ještě není
+    oprávněný profil. Tento nepotřebný krok je pouze z registračního toku odstraněn.
+- [ ] **Prověřit nedoručený ověřovací e-mail na Email.cz.**
+  - Google/Gmail při testu fungoval, ale zpráva na Email.cz nedorazila; rozlišit
+    chybu odeslání, zpoždění, spam a odmítnutí či reputaci odesílací domény.
+  - Doplnit srozumitelný stav, opakované odeslání a diagnostiku bez ukládání
+    plné e-mailové adresy do technických logů.
+  - [x] Klient nabízí opakované odeslání, po úspěchu ponechá na obrazovce viditelný
+    stav a při chybě diagnostikuje pouze bezpečný Firebase kód bez adresy a odkazu.
+  - [ ] Doručitelnost na Email.cz ověřit mimo klienta podle Firebase/Auth provozu,
+    spamu a případného odmítnutí příjemcem; bez poštovních logů ji nelze potvrdit.
+- [ ] **Přidat postupné ověření telefonního čísla přes Firebase Phone Auth.**
+  - Telefon nevyžadovat při založení účtu. Vyžádat jej až při první chráněné
+    akci a po úspěšném ověření stav bezpečně svázat s účtem.
+  - Bez SMS ověření povolit prohlížení feedu, otevření Shoutu a komentářů,
+    vyhledávání nebo změnu lokality podle pravidel aplikace a sledování účtu.
+  - SMS ověření vyžadovat pro like/dislike či jinou reakci, komentář, vytvoření
+    Shoutu, hlasování v anketě a soukromou odpověď autorovi Shoutu.
+  - Před zapnutím vyřešit podporované země, kvóty a náklady, ochranu proti
+    zneužití SMS, změnu či ztrátu čísla, obnovu účtu a minimalizaci osobních dat.
+
+- [x] **Nahradit původní kategorie Shoutů novou sadou.**
+  - Událost, Dotaz, Nabídka, Pomoc, Ztráty a nálezy, Tip, Doprava, Diskuze,
+    Varování! a Ostatní; v klientovi se zobrazují s přiřazenými emoji.
+
+- [x] **Umožnit otevřít veřejný profil autora z komentáře.**
   - Přezdívka a avatar v komentáři musí mít stejné chování jako autor na kartě
     Shoutu; vlastní profil nesmí nabízet Follow, blokaci ani nahlášení sebe sama.
-- [ ] **Přidat veřejné flairy rolí.**
+- [x] **Přidat veřejné flairy rolí.**
   - Za jménem zobrazit malý obdélníkový štítek pro `Business`, `Moderátor`,
     `Admin` a `Owner`; interní role `seniorModerator` se navenek zobrazí jako
     `Moderátor`.
@@ -13,27 +57,35 @@
     `Business` i existující štítek `Autor`.
   - Dlouhé jméno zkrátit třemi tečkami ještě před flairy; flairy se nesmí
     zmenšit, zalomit ani vytlačit mimo kartu.
-- [ ] **Přepracovat onboarding na interaktivní tutorial.**
+  - [x] Doplnit klientské zobrazení flairů na Shoutech, komentářích, soukromých
+    odpovědích, veřejném profilu a seznamu sledovaných profilů včetně lokalizace
+    `Moderátor` a mapování `seniorModerator` na stejný veřejný štítek.
+  - [x] Nasadit upravená Firestore Rules a důvěryhodně doplnit `publicRole` do
+    existujících veřejných profilů skriptem `npm run backfill:public-profiles`.
+- [ ] **Přepracovat onboarding na interaktivní tutorial.** *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*
   - Nahradit dlouhé úvodní rady krátkými kontextovými kroky typu „klikni sem“,
     „udělej toto“ a „pokračuj tady“ přímo nad skutečným rozhraním.
   - Umožnit přeskočení, pozdější opakování a pokračování po přerušení; měřit
     dokončení kroků bez ukládání přesné polohy.
+  - První průchod vede uživatele přes skutečný výběr kategorie, otevření a zavření
+    detailu Shoutu, otevření formuláře a profilu. Postup je uložený u účtu;
+    dokončení nebo potvrzené přeskočení automatické spuštění trvale vypne.
 - [ ] **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.**
   - Navrhnout důvěryhodné počítání zobrazení Shoutu a zobrazit autorovi počet
     zobrazení, uložení a dalších relevantních interakcí.
   - Vyřešit unikátní versus celková zobrazení, ochranu proti farmení, soukromí,
     retenci a serverové počítání před použitím metrik pro karmu.
-- [ ] **Provést cílenou kontrolu překladů hlášení chyb a průvodce aplikací.**
+- [x] **Provést cílenou kontrolu překladů hlášení chyb a průvodce aplikací.**
   - Opravit stav, kdy tyto části v některých podporovaných jazycích zůstávají
     česky; tím se znovu otevírá dříve odškrtnutý obecný audit překladů.
-- [ ] **Opravit ciferník platnosti v dialogu Nový Shout.**
+- [x] **Opravit ciferník platnosti v dialogu Nový Shout.**
   - Příčina potvrzena v `_DurationWheel`: podmínka `value > 24` nerozlišuje
     hodinový a minutový sloupec. Minutové volby 30 a 45 proto formátuje jako
     `Duration(hours: 30/45)`, tedy například „1 den 6 h“ a „1 den 21 h“.
   - Formát celých dnů používat pouze pro hodinový ciferník; minutový ciferník
     musí vždy zobrazit `00`, `15`, `30` a `45 min`. Referenční fotku lze doplnit
     při implementaci pro vizuální kontrolu výsledku.
-- [ ] **Přepracovat rozložení společné Shout karty.**
+- [x] **Přepracovat rozložení společné Shout karty.**
   - Zachovat avatar; zvětšit jméno autora a pod něj úsporně umístit vzdálenost,
     čas vložení a expiraci.
   - Flair zobrazit u jména a akci Uložit Shout zachovat snadno dosažitelnou.
@@ -68,11 +120,11 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Aktualizováno 17. srpna 2026.
+Aktualizováno 25. srpna 2026.
 
-`█████████████████████████░░░░░░░░░░░░░░░` **63 %** — pokročilá fáze
+`███████████████████████████░░░░░░░░░░░░░` **67 %** — pokročilá fáze
 
-Hotovo je 79 ze 126 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 92 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -250,14 +302,14 @@ odložené nápady až za hlavními uživatelskými cestami.
     duplicitní vstup z Nápovědy.
   - Textové hlášení zůstává funkční zdarma; příloha obrázku zůstane skrytá do
     aktivace Firebase Storage podle následujícího úkolu.
-- [ ] **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
+- [x] **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
   - Umožnit náhled, odebrání a bezpečný upload screenshotu se stavem průběhu.
   - Stanovit limit typu/velikosti, retenci, přístup podpory a upozornění na možné
     osobní údaje; obrázek nepřikládat bez výslovného potvrzení uživatele.
-  - Kód je připravený: JPG/PNG/WebP do 5 MB, náhled, odebrání, potvrzení obsahu,
+  - JPG/PNG/WebP do 2 MB, náhled, odebrání, potvrzení obsahu,
     průběh uploadu, retence 60 dní a čtení pouze administrátorem nebo ownerem.
-  - Firebase Storage na projektu Spark nelze inicializovat. Do přechodu na
-    placený plán je tlačítko skryté a zůstává funkční textové hlášení.
+  - Obrázek se v administraci stáhne až po výslovném kliknutí administrátora nebo
+    ownera; moderátor a senior moderátor k souboru nemají přístup.
   - Aktivační a ověřovací postup je v `docs/FIREBASE_STORAGE_SETUP.md`.
 
 ### Etapa 4 – životnost obsahu a business účty
@@ -316,6 +368,8 @@ odložené nápady až za hlavními uživatelskými cestami.
     kontrole atomicky vytvoří roli 2, Business profil a první pobočku.
   - [x] Přidat administrátorům a ownerovi frontu ověřených Business žádostí;
     ruční schválení atomicky vytvoří roli, profil, pobočku a audit.
+  - [x] Při zamítnutém přidání, úpravě nebo smazání pobočky zachovat obrazovku,
+    zobrazit lokalizovanou chybu a diagnostikovat pouze bezpečný Firebase kód.
   - [x] Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
     Česko, Německo, Polsko, Slovensko a další prioritní evropské země řadit nahoru.
   - [x] Doplnit překlady všech business obrazovek a validačních/chybových textů

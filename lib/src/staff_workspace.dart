@@ -139,7 +139,7 @@ class _StaffShellState extends State<_StaffShell> {
     _StaffDestination(
       label: 'Hlášení chyb',
       icon: Icons.bug_report_outlined,
-      page: const _StaffBugReports(),
+      page: _StaffBugReports(role: widget.role),
     ),
     _StaffDestination(
       label: 'Uživatelé',
@@ -290,7 +290,9 @@ class _StaffOverview extends StatelessWidget {
 }
 
 class _StaffBugReports extends StatelessWidget {
-  const _StaffBugReports();
+  const _StaffBugReports({required this.role});
+
+  final AccountRole role;
 
   @override
   Widget build(
@@ -343,11 +345,9 @@ class _StaffBugReports extends StatelessWidget {
                 ),
                 if (data['screenshotPath'] != null) ...[
                   const SizedBox(height: 8),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Hlášení obsahuje snímek obrazovky; zobrazování bude dostupné po zapojení Storage.',
-                    ),
+                  _BugReportScreenshot(
+                    path: data['screenshotPath'] as String,
+                    canRead: role.level >= 5,
                   ),
                 ],
               ],
@@ -357,6 +357,81 @@ class _StaffBugReports extends StatelessWidget {
       );
     },
   );
+}
+
+class _BugReportScreenshot extends StatefulWidget {
+  const _BugReportScreenshot({required this.path, required this.canRead});
+
+  final String path;
+  final bool canRead;
+
+  @override
+  State<_BugReportScreenshot> createState() => _BugReportScreenshotState();
+}
+
+class _BugReportScreenshotState extends State<_BugReportScreenshot> {
+  Uint8List? _bytes;
+  bool _loading = false;
+  bool _failed = false;
+
+  Future<void> _load() async {
+    if (_loading || _bytes != null || !widget.canRead) return;
+    setState(() {
+      _loading = true;
+      _failed = false;
+    });
+    try {
+      final bytes = await FirebaseStorage.instance
+          .ref(widget.path)
+          .getData(2 * 1024 * 1024);
+      if (!mounted) return;
+      setState(() {
+        _bytes = bytes;
+        _failed = bytes == null;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.canRead) {
+      return const Align(
+        alignment: Alignment.centerLeft,
+        child: Text('Obrázek mohou zobrazit pouze administrátor a owner.'),
+      );
+    }
+    if (_bytes != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.memory(
+          _bytes!,
+          width: 640,
+          height: 360,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => const Text('Obrázek nelze zobrazit.'),
+        ),
+      );
+    }
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: _loading
+          ? const SizedBox.square(
+              dimension: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : OutlinedButton.icon(
+              onPressed: _load,
+              icon: const Icon(Icons.image_outlined),
+              label: Text(
+                _failed ? 'Zkusit načíst obrázek znovu' : 'Načíst obrázek',
+              ),
+            ),
+    );
+  }
 }
 
 class _StaffInfoCard extends StatelessWidget {

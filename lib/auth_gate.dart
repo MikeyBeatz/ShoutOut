@@ -8,11 +8,11 @@ import 'package:flutter/services.dart';
 
 import 'app_locale.dart';
 import 'app_theme.dart';
-import 'account_deletion.dart';
 import 'avatar_style.dart';
 import 'business_application_state.dart';
 import 'business_registration.dart';
 import 'email_verification.dart';
+import 'interactive_tutorial.dart';
 import 'legal.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
@@ -617,7 +617,10 @@ class ProfileGate extends StatelessWidget {
                   child: OnboardingHelpGate(
                     userId: user.uid,
                     showInitially:
+                        interactiveTutorialEnabled &&
                         snapshot.data!.data()?['showOnboardingHelp'] == true,
+                    initialStep:
+                        snapshot.data!.data()?['onboardingStep'] as int? ?? 0,
                     child: child,
                   ),
                 ),
@@ -633,11 +636,13 @@ class OnboardingHelpGate extends StatefulWidget {
     super.key,
     required this.userId,
     required this.showInitially,
+    required this.initialStep,
     required this.child,
   });
 
   final String userId;
   final bool showInitially;
+  final int initialStep;
   final Widget child;
 
   @override
@@ -648,18 +653,147 @@ class _OnboardingHelpGateState extends State<OnboardingHelpGate> {
   bool _finishedForSession = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.showInitially) {
+      interactiveTutorialStep.value = widget.initialStep.clamp(0, 4);
+      interactiveTutorialStep.addListener(_persistProgress);
+    }
+  }
+
+  @override
+  void dispose() {
+    interactiveTutorialStep.removeListener(_persistProgress);
+    if (interactiveTutorialStep.value != null) {
+      interactiveTutorialStep.value = null;
+    }
+    super.dispose();
+  }
+
+  Future<void> _persistProgress() async {
+    final step = interactiveTutorialStep.value;
+    if (step == null || _finishedForSession) return;
+    final finished = step >= 5;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .update({
+          'onboardingStep': step.clamp(0, 5),
+          if (finished) 'showOnboardingHelp': false,
+        });
+    if (finished && mounted) {
+      setState(() => _finishedForSession = true);
+      interactiveTutorialStep.value = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_finishedForSession || !widget.showInitially) return widget.child;
-    return OnboardingHelpPage(
-      onFinished: (neverShowAgain) async {
-        if (neverShowAgain) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.userId)
-              .update({'showOnboardingHelp': false});
-        }
-        if (mounted) setState(() => _finishedForSession = true);
-      },
+    return ValueListenableBuilder<int?>(
+      valueListenable: interactiveTutorialStep,
+      builder: (context, step, child) => Stack(
+        children: [
+          child!,
+          if (step != null && step < 5)
+            Positioned(
+              left: 12,
+              right: 12,
+              top: MediaQuery.paddingOf(context).top + 10,
+              child: _InteractiveTutorialBanner(
+                step: step,
+                onSkip: _confirmSkip,
+              ),
+            ),
+        ],
+      ),
+      child: widget.child,
+    );
+  }
+
+  Future<void> _confirmSkip() async {
+    final cs = Localizations.localeOf(context).languageCode == 'cs';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(cs ? 'Přeskočit tutorial?' : 'Skip tutorial?'),
+        content: Text(
+          cs
+              ? 'Tutorial se při dalším spuštění už automaticky nezobrazí.'
+              : 'The tutorial will not open automatically next time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(tr(context, 'Zrušit')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(cs ? 'Přeskočit' : 'Skip'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) interactiveTutorialStep.value = 5;
+  }
+}
+
+class _InteractiveTutorialBanner extends StatelessWidget {
+  const _InteractiveTutorialBanner({required this.step, required this.onSkip});
+
+  final int step;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Localizations.localeOf(context).languageCode == 'cs';
+    final instructions = cs
+        ? const [
+            'Vyber ve feedu jednu kategorii.',
+            'Otevři detail některého Shoutu.',
+            'Vrať se z detailu zpět do feedu.',
+            'Otevři formulář Přidat shout. Publikovat nemusíš.',
+            'Otevři záložku Profil.',
+          ]
+        : const [
+            'Choose a category in the feed.',
+            'Open the detail of any Shout.',
+            'Return from the detail to the feed.',
+            'Open the Add Shout form. You do not need to publish.',
+            'Open the Profile tab.',
+          ];
+    return Material(
+      elevation: 10,
+      borderRadius: BorderRadius.circular(16),
+      color: Theme.of(context).colorScheme.inverseSurface,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+        child: Row(
+          children: [
+            CircleAvatar(radius: 16, child: Text('${step + 1}/5')),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                instructions[step],
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onInverseSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            PopupMenuButton<String>(
+              iconColor: Theme.of(context).colorScheme.onInverseSurface,
+              onSelected: (_) => onSkip(),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'skip',
+                  child: Text(cs ? 'Přeskočit tutorial' : 'Skip tutorial'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1686,6 +1820,7 @@ class VerifyEmailPage extends StatefulWidget {
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
   bool _busy = false;
+  bool _resentSuccessfully = false;
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -1724,6 +1859,27 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       onPressed: _busy ? null : _resend,
                       child: Text(tr(context, 'Poslat ověřovací e-mail znovu')),
                     ),
+                    if (_resentSuccessfully)
+                      Semantics(
+                        liveRegion: true,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                tr(context, 'Ověřovací e-mail byl odeslán.'),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     TextButton(
                       onPressed: _busy ? null : _startOver,
                       child: Text(
@@ -1795,6 +1951,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           .timeout(const Duration(seconds: 20));
       _logAuthTiming('resend-verification-email', stopwatch);
       if (mounted) {
+        setState(() => _resentSuccessfully = true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(tr(context, 'Ověřovací e-mail byl odeslán.'))),
         );
@@ -1803,7 +1960,9 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       _showVerificationError(
         'Odeslání ověřovacího e-mailu trvá příliš dlouho. Zkontroluj internet a zkus to znovu.',
       );
-    } on FirebaseAuthException {
+    } on FirebaseAuthException catch (error) {
+      // Keep diagnostics free of the recipient address and verification link.
+      debugPrint('Verification e-mail resend failed: ${error.code}');
       _showVerificationError(
         'Ověřovací e-mail se nepodařilo odeslat. Zkus to později.',
       );
@@ -1887,7 +2046,9 @@ Future<void> _cancelIncompleteRegistration(User user, String password) async {
   await user.reauthenticateWithCredential(
     EmailAuthProvider.credential(email: user.email!, password: password),
   );
-  await hideActiveShoutsBeforeAccountDeletion(user.uid);
+  // An incomplete registration cannot create Shouts. Querying them here would
+  // fail for an unverified account because Shout reads require an eligible
+  // profile, preventing the Authentication account from being deleted.
   final application = FirebaseFirestore.instance
       .collection('businessApplications')
       .doc(user.uid);
@@ -2242,6 +2403,7 @@ class _NicknamePageState extends State<NicknamePage> {
             'language': initialLanguage,
             'themeMode': 'system',
             'showOnboardingHelp': true,
+            'onboardingStep': 0,
             ..._avatarStyle.toFirestore(),
           },
         );

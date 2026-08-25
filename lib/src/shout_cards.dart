@@ -74,8 +74,9 @@ class ShoutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    void openComments() {
-      Navigator.push(
+    Future<void> openComments() async {
+      completeInteractiveTutorialAction(1);
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => ShoutDetailPage(
@@ -85,6 +86,7 @@ class ShoutCard extends StatelessWidget {
           ),
         ),
       );
+      completeInteractiveTutorialAction(2);
     }
 
     final highlighted = shout.businessHighlighted;
@@ -100,7 +102,7 @@ class ShoutCard extends StatelessWidget {
           : null,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: openOnTap ? openComments : null,
+        onTap: openOnTap ? () => unawaited(openComments()) : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -159,15 +161,36 @@ class ShoutCard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    shout.displayedAuthor(identity.nickname),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          shout.displayedAuthor(
+                                            identity.nickname,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                        ),
+                                      ),
+                                      if (identity.publicRole != null) ...[
+                                        const SizedBox(width: 6),
+                                        PublicRoleFlair(
+                                          role: identity.publicRole,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                   Text(
                                     '${shout.distanceLabel} · ${shout.createdDateLabel(context)} · ${shout.expiryLabel(context)}',
-                                    style: theme.textTheme.bodySmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -218,12 +241,20 @@ class ShoutCard extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 shout.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 6),
-              Text(shout.text, style: theme.textTheme.bodyLarge),
+              Text(
+                shout.text,
+                key: const Key('shout-card-body'),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyLarge,
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 6,
@@ -231,8 +262,14 @@ class ShoutCard extends StatelessWidget {
                 children: shout.categories
                     .map(
                       (category) => Chip(
-                        label: Text(tr(context, category)),
-                        visualDensity: VisualDensity.compact,
+                        label: Text(shoutCategoryLabel(context, category)),
+                        labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        visualDensity: const VisualDensity(
+                          horizontal: -3,
+                          vertical: -3,
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     )
                     .toList(),
@@ -266,7 +303,7 @@ class ShoutCard extends StatelessWidget {
                             ReactionButton(
                               icon: Icons.chat_bubble_outline,
                               value: shout.comments,
-                              onPressed: openComments,
+                              onPressed: () => unawaited(openComments()),
                             ),
                           ],
                         ),

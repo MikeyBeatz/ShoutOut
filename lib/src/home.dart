@@ -563,6 +563,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       floatingActionButton: _tab == 0
           ? FloatingActionButton.extended(
               onPressed: () async {
+                completeInteractiveTutorialAction(3);
                 final shout = await showDialog<Shout>(
                   context: context,
                   builder: (_) => Dialog(
@@ -706,8 +707,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                 NavigationBar(
                   height: 64,
                   selectedIndex: _tab,
-                  onDestinationSelected: (index) =>
-                      setState(() => _tab = index),
+                  onDestinationSelected: (index) {
+                    setState(() => _tab = index);
+                    if (index == 3) completeInteractiveTutorialAction(4);
+                  },
                   destinations: [
                     NavigationDestination(
                       icon: Transform.rotate(

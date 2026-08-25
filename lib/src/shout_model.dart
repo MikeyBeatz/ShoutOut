@@ -219,3 +219,35 @@ String localizedDurationLabel(BuildContext context, Duration duration) {
   if (duration.inHours >= 1) return '${duration.inHours} $hours';
   return '${duration.inMinutes} $minutes';
 }
+
+const shoutCategories = <String>[
+  'Událost',
+  'Dotaz',
+  'Nabídka',
+  'Pomoc',
+  'Ztráty a nálezy',
+  'Tip',
+  'Doprava',
+  'Diskuze',
+  'Varování!',
+  'Ostatní',
+];
+
+const shoutCategoryEmoji = <String, String>{
+  'Událost': '🎉',
+  'Dotaz': '❓',
+  'Nabídka': '🏷️',
+  'Pomoc': '🤝',
+  'Ztráty a nálezy': '🔑',
+  'Tip': '💡',
+  'Doprava': '🚗',
+  'Diskuze': '💬',
+  'Varování!': '⚠️',
+  'Ostatní': '•••',
+};
+
+String shoutCategoryLabel(BuildContext context, String category) {
+  final emoji = shoutCategoryEmoji[category];
+  final label = tr(context, category);
+  return emoji == null ? label : '$emoji $label';
+}

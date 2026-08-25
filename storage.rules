@@ -16,8 +16,17 @@ service firebase.storage {
       allow create: if signedIn() &&
         request.auth.uid == userId &&
         request.resource.size > 0 &&
-        request.resource.size <= 5 * 1024 * 1024 &&
-        request.resource.contentType.matches('image/(jpeg|png|webp)');
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)') &&
+        firestore.exists(/databases/(default)/documents/bugReports/$(reportId)) &&
+        firestore.get(/databases/(default)/documents/bugReports/$(reportId)).data.userId == userId &&
+        firestore.get(/databases/(default)/documents/bugReports/$(reportId)).data.status == 'open' &&
+        firestore.get(/databases/(default)/documents/bugReports/$(reportId)).data.screenshotPath ==
+          'bugReports/' + userId + '/' + reportId + '/screenshot' &&
+        firestore.get(/databases/(default)/documents/bugReports/$(reportId)).data.screenshotContentType ==
+          request.resource.contentType &&
+        firestore.get(/databases/(default)/documents/bugReports/$(reportId)).data.screenshotSize ==
+          request.resource.size;
       allow read: if signedIn() &&
         (request.auth.uid == userId || supportStaff());
       allow delete: if signedIn() && request.auth.uid == userId;

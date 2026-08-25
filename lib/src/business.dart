@@ -561,6 +561,8 @@ class _BusinessLocationCardState extends State<_BusinessLocationCard> {
           ),
         );
       }
+    } on FirebaseException catch (error) {
+      if (mounted) _showBusinessLocationError(context, error);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -590,11 +592,18 @@ class _BusinessLocationCardState extends State<_BusinessLocationCard> {
       ),
     );
     if (confirmed != true) return;
-    await widget.reference.update({
-      'active': false,
-      'deleted': true,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    setState(() => _busy = true);
+    try {
+      await widget.reference.update({
+        'active': false,
+        'deleted': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (error) {
+      if (mounted) _showBusinessLocationError(context, error);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 }
 
@@ -759,19 +768,39 @@ Future<void> _showLocationDialog(
       selection == null) {
     return;
   }
-  await locations.add({
-    'displayName': displayName,
-    'address': locationAddress,
-    'active': true,
-    'deleted': false,
-    'geocodingStatus': 'verified',
-    'location': GeoPoint(selection.latitude, selection.longitude),
-    'geohash': encodeGeohash(selection.latitude, selection.longitude),
-    'providerPlaceId': selection.placeId,
-    'countryCode': selection.countryCode,
-    'createdAt': FieldValue.serverTimestamp(),
-    'updatedAt': FieldValue.serverTimestamp(),
-  });
+  try {
+    await locations.add({
+      'displayName': displayName,
+      'address': locationAddress,
+      'active': true,
+      'deleted': false,
+      'geocodingStatus': 'verified',
+      'location': GeoPoint(selection.latitude, selection.longitude),
+      'geohash': encodeGeohash(selection.latitude, selection.longitude),
+      'providerPlaceId': selection.placeId,
+      'countryCode': selection.countryCode,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  } on FirebaseException catch (error) {
+    if (context.mounted) _showBusinessLocationError(context, error);
+  }
+}
+
+void _showBusinessLocationError(BuildContext context, FirebaseException error) {
+  // The code is sufficient for diagnostics and contains no branch address.
+  debugPrint('Business location write failed: ${error.code}');
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        businessTr(
+          context,
+          'Pobočku se nepodařilo uložit. Zkontrolujte oprávnění účtu a připojení.',
+        ),
+      ),
+    ),
+  );
 }
 
 class _BusinessComingSoonPage extends StatelessWidget {

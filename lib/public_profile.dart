@@ -1,13 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'avatar_style.dart';
 
 class PublicIdentity {
-  const PublicIdentity({required this.nickname, required this.avatarStyle});
+  const PublicIdentity({
+    required this.nickname,
+    required this.avatarStyle,
+    this.publicRole,
+  });
 
   final String nickname;
   final AvatarStyle avatarStyle;
+  final String? publicRole;
 }
 
 class PublicIdentityBuilder extends StatelessWidget {
@@ -44,9 +49,136 @@ class PublicIdentityBuilder extends StatelessWidget {
           PublicIdentity(
             nickname: data['nickname'] as String? ?? fallbackNickname,
             avatarStyle: AvatarStyle.fromProfile(data),
+            publicRole: data['publicRole'] as String?,
           ),
         );
       },
     );
   }
+}
+
+String? publicRoleLabel(Locale locale, String? role) {
+  if (role == null) return null;
+  final language = locale.languageCode;
+  return switch (role) {
+    'business' => 'Business',
+    'moderator' || 'seniorModerator' => switch (language) {
+      'cs' => 'Moderátor',
+      'de' => 'Moderator',
+      'pl' => 'Moderator',
+      'sk' => 'Moderátor',
+      'uk' => 'Модератор',
+      'vi' => 'Kiểm duyệt viên',
+      _ => 'Moderator',
+    },
+    'administrator' => 'Admin',
+    'owner' => 'Owner',
+    _ => null,
+  };
+}
+
+class PublicRoleFlair extends StatelessWidget {
+  const PublicRoleFlair({super.key, required this.role});
+
+  final String? role;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = publicRoleLabel(Localizations.localeOf(context), role);
+    if (label == null) return const SizedBox.shrink();
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: colors.secondaryContainer,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colors.onSecondaryContainer,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class PublicProfileCard extends StatelessWidget {
+  const PublicProfileCard({
+    super.key,
+    required this.identity,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.avatarRadius = 28,
+  });
+
+  final PublicIdentity identity;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final double avatarRadius;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            AvatarImage(
+              avatarId: identity.avatarStyle.avatarId,
+              style: identity.avatarStyle,
+              radius: avatarRadius,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          identity.nickname,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      if (identity.publicRole != null) ...[
+                        const SizedBox(width: 7),
+                        PublicRoleFlair(role: identity.publicRole),
+                      ],
+                    ],
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+          ],
+        ),
+      ),
+    ),
+  );
 }

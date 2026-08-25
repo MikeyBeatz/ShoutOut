@@ -23,7 +23,7 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 | Cesta | ID a důležitá pole | Význam a životní cyklus |
 |---|---|---|
 | `users/{uid}` | `nickname`, `nicknameLower`, `createdAt`, `emailVerified`, `language`, `themeMode`, `showOnboardingHelp`, `avatarId`, `avatarBackgroundStart`, `avatarBackgroundEnd`, `avatarGradientDirection` | Soukromý profil a preference vlastníka. Vzniká až po ověření e-mailu a přijetí právních dokumentů. |
-| `publicProfiles/{uid}` | `nickname`, avatarová pole, `updatedAt` | Minimální veřejná identita. Karty Shoutů a komentářů ji sledují realtime. |
+| `publicProfiles/{uid}` | `nickname`, avatarová pole, volitelné `publicRole` | Minimální veřejná identita. Karty Shoutů a komentářů ji sledují realtime; důvěryhodné nástroje synchronizují veřejnou roli, zatímco klient ji nesmí měnit. |
 | `nicknames/{nicknameLower}` | `uid`, `nickname`, `nicknameLower`, `createdAt` | Globální rezervace přezdívky. ID je normalizovaná přezdívka; změna probíhá transakcí společně s oběma profily. |
 | `accountRoles/{uid}` | `role`, `level` a podle role moderátorský rozsah | Důvěryhodně přidělená role. Úrovně: user 1, business 2, moderator 3, seniorModerator 4, administrator 5, owner 6. |
 | `moderators/{uid}` | historická/kompatibilní moderátorská metadata | Klient smí načíst jen vlastní dokument. Nové rozhodování je založené na `accountRoles`. |
@@ -72,8 +72,9 @@ vytvoření doplnit mapu `geography` se `schemaVersion`, `countryCode`,
 
 Stavy jsou v klientovi především `active` a `deleted`; expirace vychází z
 `expiresAt`. Nadpis má 1–60 znaků, text 1–220, kategorie jsou jedna až dvě z:
-Obecné, Akce, Sport, Zábava, Pomoc, Upozornění, Dotaz, Doprava, Jídlo a pití,
-Kultura. Běžná platnost je 15 minut až 24 hodin, Business až 7 dní při použití
+Událost, Dotaz, Nabídka, Pomoc, Ztráty a nálezy, Tip, Doprava, Diskuze,
+Varování! a Ostatní. Emoji je pouze součástí prezentace v klientovi, ne uložené
+hodnoty. Běžná platnost je 15 minut až 24 hodin, Business až 7 dní při použití
 `businessExtendedDuration`.
 
 | Cesta pod Shoutem | Pole | Oprávnění a invarianta |
@@ -169,7 +170,7 @@ validována pravidly a nemají se reimplementovat jen podle této tabulky.
 
 Storage cesta připraveného screenshotu je
 `bugReports/{uid}/{reportId}/screenshot`. Povolené typy jsou JPEG, PNG a WebP,
-maximum 5 MiB. Aktivace je odložená a popsaná v `FIREBASE_STORAGE_SETUP.md`.
+maximum 2 MiB. Aktivace a provozní omezení jsou popsané v `FIREBASE_STORAGE_SETUP.md`.
 
 ## Co je zdroj pravdy
 

@@ -21,6 +21,7 @@ import 'account_role.dart';
 import 'address_autocomplete.dart';
 import 'geography.dart';
 import 'help_content.dart';
+import 'interactive_tutorial.dart';
 import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';
@@ -32,6 +33,7 @@ import 'profile_tile_layout.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 import 'l10n/business_text.dart';
+import 'l10n/bug_report_text.dart';
 import 'nickname_validation.dart';
 import 'registration_timing.dart';
 
@@ -67,6 +69,7 @@ const _shoutBrowserBackgroundDark = Color(0xFF091519);
 const _shoutSurface = Color(0xFFFFFFFF);
 const _shoutBorder = Color(0xFFE3EEEE);
 const _shoutText = Color(0xFF1F2933);
+
 const _shoutSecondaryText = Color(0xFF697A84);
 
 Future<void> main() async {

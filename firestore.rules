@@ -214,13 +214,19 @@ service cloud.firestore {
       let userPath = /databases/$(database)/documents/users/$(userId);
       return data.keys().hasOnly([
           'nickname', 'avatarId', 'avatarBackgroundStart',
-          'avatarBackgroundEnd', 'avatarGradientDirection'
+          'avatarBackgroundEnd', 'avatarGradientDirection', 'publicRole'
         ]) &&
         data.keys().hasAll([
           'nickname', 'avatarId', 'avatarBackgroundStart',
           'avatarBackgroundEnd', 'avatarGradientDirection'
         ]) &&
         validAvatarStyle(data) &&
+        (
+          !('publicRole' in data) ||
+          data.publicRole in [
+            'business', 'moderator', 'seniorModerator', 'administrator', 'owner'
+          ]
+        ) &&
         existsAfter(userPath) &&
         data.nickname == getAfter(userPath).data.nickname &&
         data.avatarId == getAfter(userPath).data.avatarId &&
@@ -254,6 +260,7 @@ service cloud.firestore {
           'language',
           'themeMode',
           'showOnboardingHelp',
+          'onboardingStep',
           'avatarId',
           'avatarBackgroundStart',
           'avatarBackgroundEnd',
@@ -269,6 +276,7 @@ service cloud.firestore {
           'language',
           'themeMode',
           'showOnboardingHelp',
+          'onboardingStep',
           'avatarId',
           'avatarBackgroundStart',
           'avatarBackgroundEnd',
@@ -286,6 +294,7 @@ service cloud.firestore {
         request.resource.data.language in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi'] &&
         request.resource.data.themeMode in ['system', 'light', 'dark'] &&
         request.resource.data.showOnboardingHelp == true &&
+        request.resource.data.onboardingStep == 0 &&
         validAvatarStyle(request.resource.data);
     }
 
@@ -1055,10 +1064,21 @@ service cloud.firestore {
         !hasActiveBan() &&
         !deletionPending() &&
         request.auth.uid == userId &&
-        validPublicProfile(userId, request.resource.data);
+        validPublicProfile(userId, request.resource.data) &&
+        (
+          !('publicRole' in request.resource.data) ||
+          (
+            exists(/databases/$(database)/documents/accountRoles/$(userId)) &&
+            request.resource.data.publicRole == get(
+              /databases/$(database)/documents/accountRoles/$(userId)
+            ).data.role
+          )
+        );
       allow update: if eligibleUser() &&
         request.auth.uid == userId &&
-        validPublicProfile(userId, request.resource.data);
+        validPublicProfile(userId, request.resource.data) &&
+        request.resource.data.get('publicRole', '') ==
+          resource.data.get('publicRole', '');
       allow list, delete: if false;
     }
 
@@ -1120,6 +1140,25 @@ service cloud.firestore {
                .hasOnly(['showOnboardingHelp']) &&
              resource.data.showOnboardingHelp == true &&
              request.resource.data.showOnboardingHelp == false
+           ) ||
+           (
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['onboardingStep', 'showOnboardingHelp']) &&
+             request.resource.data.onboardingStep is int &&
+             request.resource.data.onboardingStep >= 1 &&
+             request.resource.data.onboardingStep <= 5 &&
+             request.resource.data.onboardingStep >
+               resource.data.get('onboardingStep', -1) &&
+             (
+               (
+                 request.resource.data.onboardingStep < 5 &&
+                 request.resource.data.showOnboardingHelp == true
+               ) ||
+               (
+                 request.resource.data.onboardingStep == 5 &&
+                 request.resource.data.showOnboardingHelp == false
+               )
+             )
            ) ||
            (
              validNicknameChange() &&
@@ -1667,12 +1706,21 @@ service cloud.firestore {
             ] &&
             request.resource.data.screenshotSize is int &&
             request.resource.data.screenshotSize > 0 &&
-            request.resource.data.screenshotSize <= 5 * 1024 * 1024
+            request.resource.data.screenshotSize <= 2 * 1024 * 1024
           )
         );
       allow get: if eligibleModerator();
       allow list: if eligibleModerator() && limited(50);
-      allow update, delete: if false;
+      allow update: if eligibleUser() &&
+        resource.data.userId == request.auth.uid &&
+        resource.data.screenshotPath != null &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'screenshotPath', 'screenshotContentType', 'screenshotSize'
+        ]) &&
+        request.resource.data.screenshotPath == null &&
+        request.resource.data.screenshotContentType == null &&
+        request.resource.data.screenshotSize == null;
+      allow delete: if false;
     }
 
     match /accountReports/{reportId} {
@@ -1800,8 +1848,8 @@ service cloud.firestore {
         request.resource.data.categories.size() >= 1 &&
         request.resource.data.categories.size() <= 2 &&
         request.resource.data.categories.hasOnly([
-          'Obecné', 'Akce', 'Sport', 'Zábava', 'Pomoc', 'Upozornění',
-          'Dotaz', 'Doprava', 'Jídlo a pití', 'Kultura'
+          'Událost', 'Dotaz', 'Nabídka', 'Pomoc', 'Ztráty a nálezy',
+          'Tip', 'Doprava', 'Diskuze', 'Varování!', 'Ostatní'
         ]) &&
         request.resource.data.location is latlng &&
         request.resource.data.geohash is string &&

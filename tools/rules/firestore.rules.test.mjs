@@ -557,7 +557,7 @@ async function seedShout({
       authorNickname,
       title: 'Bezpečný test',
       text: 'Obsah testovacího Shoutu.',
-      categories: ['Obecné'],
+      categories: ['Ostatní'],
       location: new GeoPoint(50.54, 14.13),
       geohash: 'u2fkbnh',
       ...(countryCode ? {
@@ -597,7 +597,7 @@ function shoutData(uid, nickname, overrides = {}) {
     avatarGradientDirection: 'diagonal',
     title: 'Nový Shout',
     text: 'Text bezpečného testovacího Shoutu.',
-    categories: ['Obecné'],
+    categories: ['Ostatní'],
     location: new GeoPoint(50.54, 14.13),
     geohash: 'u2fkbnh',
     createdAt: serverTimestamp(),
@@ -649,6 +649,7 @@ describe('identity and account gates', () => {
       language: 'cs',
       themeMode: 'system',
       showOnboardingHelp: true,
+      onboardingStep: 0,
       avatarId: 'fox',
       avatarBackgroundStart: 'teal',
       avatarBackgroundEnd: 'navy',
@@ -693,6 +694,7 @@ describe('identity and account gates', () => {
       language: 'uk',
       themeMode: 'system',
       showOnboardingHelp: true,
+      onboardingStep: 0,
       avatarId: 'fox',
       avatarBackgroundStart: 'teal',
       avatarBackgroundEnd: 'navy',
@@ -759,6 +761,33 @@ describe('identity and account gates', () => {
     }));
   });
 
+  test('public role flair cannot be assigned or changed by its owner', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    const profile = doc(authenticatedDb('reader'), 'publicProfiles', 'reader');
+    await assertFails(updateDoc(profile, { publicRole: 'owner' }));
+
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const trustedDb = context.firestore();
+      await setDoc(doc(trustedDb, 'accountRoles', 'reader'), {
+        role: 'moderator', level: 3, assignedBy: 'test', createdAt: now(),
+      });
+      await updateDoc(doc(trustedDb, 'publicProfiles', 'reader'), {
+        publicRole: 'moderator',
+      });
+    });
+
+    await assertFails(updateDoc(profile, { publicRole: 'owner' }));
+    const db = authenticatedDb('reader');
+    const avatarUpdate = writeBatch(db);
+    const avatar = {
+      avatarId: 'owl', avatarBackgroundStart: 'purple',
+      avatarBackgroundEnd: 'gold', avatarGradientDirection: 'vertical',
+    };
+    avatarUpdate.update(doc(db, 'users', 'reader'), avatar);
+    avatarUpdate.set(doc(db, 'publicProfiles', 'reader'), avatar, { merge: true });
+    await assertSucceeds(avatarUpdate.commit());
+  });
+
   test('profile accepts the new languages and rejects unknown language codes', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     const profile = doc(authenticatedDb('reader'), 'users', 'reader');
@@ -769,6 +798,24 @@ describe('identity and account gates', () => {
   });
 
   test('user can permanently dismiss onboarding but cannot enable it again', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await updateDoc(doc(context.firestore(), 'users', 'reader'), {
+        showOnboardingHelp: true,
+        onboardingStep: 0,
+      });
+    });
+    const profile = doc(authenticatedDb('reader'), 'users', 'reader');
+    await assertSucceeds(updateDoc(profile, { onboardingStep: 1 }));
+    await assertFails(updateDoc(profile, { onboardingStep: 0 }));
+    await assertSucceeds(updateDoc(profile, {
+      onboardingStep: 5,
+      showOnboardingHelp: false,
+    }));
+    await assertFails(updateDoc(profile, { showOnboardingHelp: true }));
+  });
+
+  test('legacy onboarding can still be dismissed without progress data', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       await updateDoc(doc(context.firestore(), 'users', 'reader'), {

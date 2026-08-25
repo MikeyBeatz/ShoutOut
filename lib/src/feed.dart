@@ -93,23 +93,16 @@ class _CompactFilterDropdown<T> extends StatelessWidget {
 }
 
 class _FeedPageState extends State<FeedPage> {
-  static const _categories = [
-    'Obecné',
-    'Akce',
-    'Sport',
-    'Zábava',
-    'Pomoc',
-    'Upozornění',
-    'Dotaz',
-    'Doprava',
-    'Jídlo a pití',
-    'Kultura',
-  ];
   double _categoryMenuWidth(BuildContext context, TextStyle style) {
     var widest = 0.0;
-    for (final category in ['Vše', ..._categories]) {
+    for (final category in ['Vše', ...shoutCategories]) {
       final painter = TextPainter(
-        text: TextSpan(text: tr(context, category), style: style),
+        text: TextSpan(
+          text: category == 'Vše'
+              ? tr(context, category)
+              : shoutCategoryLabel(context, category),
+          style: style,
+        ),
         textDirection: Directionality.of(context),
         maxLines: 1,
       )..layout();
@@ -343,12 +336,15 @@ class _FeedPageState extends State<FeedPage> {
                                           ),
                                         ),
                                       ),
-                                      ..._categories.map(
+                                      ...shoutCategories.map(
                                         (category) => DropdownMenuItem<String?>(
                                           value: category,
                                           child: Center(
                                             child: Text(
-                                              tr(context, category),
+                                              shoutCategoryLabel(
+                                                context,
+                                                category,
+                                              ),
                                               style: filterValueStyle,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -357,10 +353,15 @@ class _FeedPageState extends State<FeedPage> {
                                         ),
                                       ),
                                     ],
-                                    onChanged: (value) => setState(
-                                      () => widget.filters.selectedCategory =
-                                          value,
-                                    ),
+                                    onChanged: (value) {
+                                      setState(
+                                        () => widget.filters.selectedCategory =
+                                            value,
+                                      );
+                                      if (value != null) {
+                                        completeInteractiveTutorialAction(0);
+                                      }
+                                    },
                                   ),
                                 ),
                               ],

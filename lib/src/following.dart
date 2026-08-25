@@ -99,61 +99,59 @@ class _PublicProfileSheetState extends State<_PublicProfileSheet> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
-            child: Row(
-              children: [
-                AvatarImage(
-                  avatarId: identity.avatarStyle.avatarId,
-                  style: identity.avatarStyle,
-                  radius: 32,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    identity.nickname,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+            child: PublicProfileCard(
+              identity: identity,
+              avatarRadius: 32,
+              trailing: ownProfile
+                  ? null
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                          stream: _followingReference(
+                            widget.userId,
+                          ).snapshots(),
+                          builder: (context, snapshot) {
+                            final followed = snapshot.data?.exists == true;
+                            return FilledButton.tonalIcon(
+                              onPressed: () =>
+                                  _setFollowing(widget.userId, !followed),
+                              icon: Icon(
+                                followed
+                                    ? Icons.check
+                                    : Icons.person_add_outlined,
+                              ),
+                              label: Text(
+                                tr(
+                                  context,
+                                  followed ? 'Sledováno' : 'Sledovat',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        PopupMenuButton<String>(
+                          onSelected: (action) async {
+                            if (action == 'block') {
+                              await _blockProfile(context, widget.userId);
+                            } else {
+                              await _reportProfile(context, widget.userId);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'block',
+                              child: Text(tr(context, 'Blokovat')),
+                            ),
+                            PopupMenuItem(
+                              value: 'report',
+                              child: Text(tr(context, 'Nahlásit účet')),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                if (!ownProfile)
-                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: _followingReference(widget.userId).snapshots(),
-                    builder: (context, snapshot) {
-                      final followed = snapshot.data?.exists == true;
-                      return FilledButton.tonalIcon(
-                        onPressed: () =>
-                            _setFollowing(widget.userId, !followed),
-                        icon: Icon(
-                          followed ? Icons.check : Icons.person_add_outlined,
-                        ),
-                        label: Text(
-                          tr(context, followed ? 'Sledováno' : 'Sledovat'),
-                        ),
-                      );
-                    },
-                  ),
-                if (!ownProfile)
-                  PopupMenuButton<String>(
-                    onSelected: (action) async {
-                      if (action == 'block') {
-                        await _blockProfile(context, widget.userId);
-                      } else {
-                        await _reportProfile(context, widget.userId);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'block',
-                        child: Text(tr(context, 'Blokovat')),
-                      ),
-                      PopupMenuItem(
-                        value: 'report',
-                        child: Text(tr(context, 'Nahlásit účet')),
-                      ),
-                    ],
-                  ),
-              ],
             ),
           ),
           const Divider(height: 1),
@@ -281,24 +279,18 @@ class FollowedProfilesList extends StatelessWidget {
         userId: ids[index],
         fallbackNickname: tr(context, 'Profil'),
         fallbackAvatarStyle: AvatarStyle.fallback,
-        builder: (context, identity) => Card(
-          child: ListTile(
-            leading: AvatarImage(
-              avatarId: identity.avatarStyle.avatarId,
-              style: identity.avatarStyle,
-              radius: 22,
-            ),
-            title: Text(identity.nickname),
-            subtitle: Text(tr(context, 'Sledováno')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showPublicProfileSheet(
-              context,
-              userId: ids[index],
-              fallbackNickname: identity.nickname,
-              fallbackAvatarStyle: identity.avatarStyle,
-              onSave: onSave,
-              onReaction: onReaction,
-            ),
+        builder: (context, identity) => PublicProfileCard(
+          identity: identity,
+          subtitle: tr(context, 'Sledováno'),
+          avatarRadius: 22,
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showPublicProfileSheet(
+            context,
+            userId: ids[index],
+            fallbackNickname: identity.nickname,
+            fallbackAvatarStyle: identity.avatarStyle,
+            onSave: onSave,
+            onReaction: onReaction,
           ),
         ),
       ),

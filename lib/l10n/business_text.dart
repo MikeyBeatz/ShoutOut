@@ -8,6 +8,19 @@ String businessTr(BuildContext context, String cs) {
 }
 
 const _translations = <String, Map<String, String>>{
+  'Pobočku se nepodařilo uložit. Zkontrolujte oprávnění účtu a připojení.': {
+    'en':
+        'The branch could not be saved. Check account permissions and your connection.',
+    'de':
+        'Die Filiale konnte nicht gespeichert werden. Prüfe die Kontoberechtigungen und deine Verbindung.',
+    'pl':
+        'Nie udało się zapisać oddziału. Sprawdź uprawnienia konta i połączenie.',
+    'sk':
+        'Pobočku sa nepodarilo uložiť. Skontrolujte oprávnenia účtu a pripojenie.',
+    'uk':
+        'Не вдалося зберегти філію. Перевірте дозволи облікового запису та підключення.',
+    'vi': 'Không thể lưu chi nhánh. Hãy kiểm tra quyền tài khoản và kết nối.',
+  },
   'Nahrát vlastní logo': {
     'en': 'Upload custom logo',
     'de': 'Eigenes Logo hochladen',

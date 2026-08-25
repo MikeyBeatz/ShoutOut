@@ -8,6 +8,7 @@ import 'package:shoutout/auth_gate.dart';
 import 'package:shoutout/easter_egg_game.dart';
 import 'package:shoutout/l10n/app_localizations.dart';
 import 'package:shoutout/main.dart';
+import 'package:shoutout/public_profile.dart';
 
 void main() {
   setUp(() {
@@ -21,6 +22,98 @@ void main() {
 
     expect(find.text('ShoutOut'), findsOneWidget);
     expect(find.byType(DropdownButton<double>), findsOneWidget);
+  });
+
+  testWidgets('minute wheel never formats minute values as days', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext context;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('cs'),
+        home: Builder(
+          builder: (builderContext) {
+            context = builderContext;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    expect(
+      [0, 15, 30, 45].map(
+        (value) => durationWheelValueLabel(
+          context,
+          value: value,
+          suffix: 'min',
+          twoDigits: true,
+        ),
+      ),
+      ['00 min', '15 min', '30 min', '45 min'],
+    );
+  });
+
+  testWidgets('comment author identity opens the public profile action', (
+    WidgetTester tester,
+  ) async {
+    var opened = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('cs'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: Scaffold(
+          body: CommentAuthorIdentity(
+            identity: PublicIdentity(
+              nickname: 'Sousedka',
+              avatarStyle: AvatarStyle.fallback,
+              publicRole: 'seniorModerator',
+            ),
+            isShoutAuthor: true,
+            onTap: () => opened = true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Sousedka'));
+
+    expect(opened, isTrue);
+    expect(find.byType(Chip), findsOneWidget);
+    expect(find.text('Moderátor'), findsOneWidget);
+  });
+
+  testWidgets('public profile card keeps public identity and actions compact', (
+    WidgetTester tester,
+  ) async {
+    var opened = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('cs'),
+        home: Scaffold(
+          body: SizedBox(
+            width: 360,
+            child: PublicProfileCard(
+              identity: PublicIdentity(
+                nickname: 'VelmiDlouhýNázevBusinessProfilu',
+                avatarStyle: AvatarStyle.fallback,
+                publicRole: 'business',
+              ),
+              subtitle: 'Sledováno',
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => opened = true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PublicProfileCard));
+
+    expect(opened, isTrue);
+    expect(find.text('Business'), findsOneWidget);
+    expect(find.text('Sledováno'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('keeps feed filters while switching tabs', (
@@ -83,7 +176,7 @@ void main() {
       author: 'Centrum',
       title: 'Dnešní nabídka',
       text: 'Tento celý text patří až do detailu.',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 1.3,
       createdAt: now,
       expiresAt: now.add(const Duration(hours: 2)),
@@ -115,6 +208,62 @@ void main() {
     expect(find.text('Tento celý text patří až do detailu.'), findsNothing);
   });
 
+  testWidgets(
+    'feed Shout card limits preview text and keeps compact categories',
+    (WidgetTester tester) async {
+      final now = DateTime.now();
+      final shout = Shout(
+        id: 'compact-card',
+        author: 'Soused',
+        title: 'Dlouhý nadpis Shoutu pro kontrolu omezení řádků v kartě',
+        text: List.filled(
+          12,
+          'Dlouhý text náhledu, který se v detailu zobrazí celý.',
+        ).join(' '),
+        categories: const ['Událost', 'Ztráty a nálezy'],
+        distanceKm: 1.2,
+        createdAt: now,
+        expiresAt: now.add(const Duration(hours: 2)),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('cs'),
+          home: Scaffold(
+            body: SizedBox(
+              width: 360,
+              child: ShoutCard(
+                shout: shout,
+                onSave: () {},
+                onReaction: (_) async {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final body = tester.widget<Text>(
+        find.byKey(const Key('shout-card-body')),
+      );
+      final title = tester.widget<Text>(find.text(shout.title));
+      final chips = tester.widgetList<Chip>(find.byType(Chip)).toList();
+
+      expect(body.maxLines, 3);
+      expect(body.overflow, TextOverflow.ellipsis);
+      expect(title.maxLines, 2);
+      expect(title.overflow, TextOverflow.ellipsis);
+      expect(chips, hasLength(2));
+      expect(
+        chips.every(
+          (chip) =>
+              chip.materialTapTargetSize == MaterialTapTargetSize.shrinkWrap,
+        ),
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('Business promo carousel can move back and forward', (
     WidgetTester tester,
   ) async {
@@ -124,7 +273,7 @@ void main() {
       author: 'Centrum',
       title: title,
       text: 'Detail',
-      categories: const ['Obecné'],
+      categories: const ['Ostatní'],
       distanceKm: 2,
       createdAt: now,
       expiresAt: now.add(const Duration(hours: 2)),
@@ -414,16 +563,23 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('bug report keeps image attachment disabled without Storage', (
+  testWidgets('bug report offers a cost-limited image attachment', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: BugReportPage()));
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('cs'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const BugReportPage(),
+      ),
+    );
 
     expect(find.text('Co se stalo?'), findsOneWidget);
-    expect(find.text('Přidat obrázek'), findsNothing);
+    expect(find.text('Přidat obrázek'), findsOneWidget);
     expect(
       find.text(
-        'Přiložení obrázku připravujeme. Textové hlášení můžeš odeslat už nyní.',
+        'Povolené formáty: JPG, PNG a WebP. Maximum 2 MB. Hlášení a obrázek se uchovávají nejvýše 60 dní.',
       ),
       findsOneWidget,
     );
