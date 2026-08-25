@@ -103,6 +103,17 @@ uložit neověřenou Business pobočku.
 
 ## Firebase projekt od nuly
 
+### Režim před veřejným pilotem
+
+Současné prostředí zůstává uzavřeným vývojovým testem. Registrace se před
+veřejným sdílením neotevře anonymně: tester dostane odkaz individuálně a po
+ukončení testu se jeho účet odstraní nástrojem pro integrační scénář. App Check
+se nejprve sleduje v metrikách a vynutí se až po ověření webového, Android a iOS
+provideru, aby se legitimní klienti nezablokovali. Před pilotem musí být aktivní
+rozpočtové alerty Google Cloud; alert není tvrdý limit a nenahrazuje kvóty v
+kódu. Vývojové a seed účty se před produkčním spuštěním nesmějí migrovat do
+produkčního projektu.
+
 ### 1. Založení a registrace aplikací
 
 1. Založte oddělený Firebase projekt pro prostředí; region databáze zvolte před

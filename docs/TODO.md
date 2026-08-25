@@ -14,7 +14,7 @@
   - Před implementací určit pásma, ceny, maximální dosah, dobu platnosti,
     serverové odečtení tokenů a ochranu proti překryvu či zneužití oblastí;
     aktualizovat rozporné rozhodnutí v `docs/BUSINESS_MONETIZATION.md`.
-- [ ] **Prověřit API pro události v okolí.**
+- [x] **Prověřit API pro události v okolí.**
   - Upřesnit zdroj událostí, podporované země, licenční podmínky, duplicity,
     aktuálnost, lokalizaci a způsob odlišení externí události od Shoutu.
 - [x] **Opravit tlačítko „Zrušit registraci a začít znovu“.**
@@ -95,7 +95,7 @@
   - Zmenšit category chips bez ztráty čitelnosti a přístupnosti.
   - Zachovat like/dislike a ověřit práh automatického skrytí: skrytý Shout musí
     být možné vědomě rozbalit kliknutím.
-- [ ] **Navrhnout ekonomiku karmy, coinů a kosmetického obchodu.**
+- [x] **Navrhnout ekonomiku karmy, coinů a kosmetického obchodu.**
   - Rozhodnout vztah karmy, zobrazení, liků a coinů a obsah obchodu, například
     premium avatary. Snadno farmitelné počty nesmí dávat odměny bez serverové
     validace a ochrany proti zneužití.
@@ -110,7 +110,7 @@
 - [x] **Zvýrazněné Business Shouty a propagační okénko jsou implementované.**
   - Tato položka opravuje starší duplicitní nezaškrtnuté položky níže v backlogu;
     zbývá ruční ověření a budoucí důvěryhodné serverové měření.
-- [ ] **Naplánovat pořízení evropské ochranné známky ShoutOut.**
+- [x] **Naplánovat pořízení evropské ochranné známky ShoutOut.**
   - Zahrnout rešerši kolizí, vlastníka, relevantní třídy, rozpočet, termín podání
     u EUIPO a odbornou právní kontrolu před podáním.
 
@@ -122,9 +122,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 Aktualizováno 25. srpna 2026.
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
+`█████████████████████████████░░░░░░░░░░░` **73 %** — pokročilá fáze
 
-Hotovo je 94 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 101 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -151,7 +151,7 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
   a nasadit Functions, pravidla a indexy.
 - [ ] Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
   případné mapování udržovat v serverové vrstvě.
-- [ ] Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
+- [x] Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
 
 Toto je jediné místo pro otevřené produktové, grafické, lokalizační, serverové
 a produkční úkoly projektu. Samotné zapsání bodu neznamená, že je
@@ -444,7 +444,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Etapa 6 – gamifikace a odložené nápady
 
-- [ ] **Navrhnout karmu, achievementy a kosmetické odměny.**
+- [x] **Navrhnout karmu, achievementy a kosmetické odměny.**
   - Nejprve určit důvěryhodné události, pravidla proti farmení a význam karmy;
     neodměňovat samotný objem obsahu ani konfliktní chování.
   - Potom navrhnout malé odznaky a rámečky, přičemž uživatel může zvolit nejvýše
@@ -546,9 +546,11 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Business účty a webová správa
 
-- [ ] **Vytvořit business účet.**
+- [x] **Vytvořit business účet.**
   - Navázat na rozhodnutí o životnosti Shoutů, model provozovny a schválený
     proces ověření z etapy 4.
+  - Vývojový účet `test.business` je aktivní na úrovni 2; uživatel ověřil
+    publikování Business Shoutu, pobočky, propagační funkce a vlastní logo.
 - [x] **Přidat zvýrazněné Shouty.**
 - [x] **Přidat propagační okénko.**
 - [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
@@ -571,7 +573,7 @@ podmínek testovacích účtů a požadavků na fyzická zařízení.
 - [x] Hosting preview kanál `demo` používá běžný release web a skutečnou polohu
   zařízení po udělení oprávnění. Samostatný DEMO build ani pevnou polohu
   Litoměřice nezavádět; test mimo Litoměřice musí odpovídat reálnému chování.
-- [ ] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
+- [x] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
   App Check enforcement, rozpočtových alertech a odstranění testovacích účtů.
 - [x] Optimalizovat webové assety, zejména avatary; 24 transparentních runtime
   avatarů je odvozených v rozměru 512 × 512 px, zatímco vysoké zdroje v

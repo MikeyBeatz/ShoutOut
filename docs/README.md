@@ -39,6 +39,12 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 - [Interní moderace](INTERNAL_MODERATION.md) – role, pravomoci, postihy a audit.
 - [Napojení Firebase Storage](FIREBASE_STORAGE_SETUP.md) – postup aktivace po
   přechodu na placený plán.
+- [Vyhodnocení externích událostí](EXTERNAL_EVENTS_EVALUATION.md) – výběr zdroje,
+  limity, licence a podmínky případného pilotu.
+- [Model gamifikace](GAMIFICATION_MODEL.md) – oddělení karmy, tokenů,
+  achievementů a kosmetických odměn.
+- [Plán evropské ochranné známky](EU_TRADEMARK_PLAN.md) – rešerše, třídy,
+  rozpočet a rozhodovací brána před podáním.
 
 ## Zdroj pravdy
 

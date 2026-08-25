@@ -1785,9 +1785,11 @@ describe('moderation access', () => {
       const db = context.firestore();
       await setDoc(doc(db, 'accountRoles', 'moderator'), {
         role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+        moderationScope: { global: true, countries: [], subdivisions: [] },
       });
       await setDoc(doc(db, 'accountRoles', 'senior'), {
         role: 'seniorModerator', level: 4, createdAt: now(), assignedBy: 'test',
+        moderationScope: { global: true, countries: [], subdivisions: [] },
       });
     });
 
@@ -1852,6 +1854,7 @@ describe('moderation access', () => {
 
   test('moderator sanctions are limited to assigned countries', async () => {
     await seedEligibleUser('scoped-moderator', 'ScopedModerator');
+    await seedEligibleUser('legacy-moderator', 'LegacyModerator');
     await seedEligibleUser('target', 'ScopedTarget');
     await seedShout({ id: 'cz-shout', authorId: 'target', countryCode: 'CZ' });
     await seedShout({ id: 'de-shout', authorId: 'target', countryCode: 'DE' });
@@ -1861,6 +1864,9 @@ describe('moderation access', () => {
         moderationScope: {
           global: false, countries: ['CZ'], subdivisions: [],
         },
+      });
+      await setDoc(doc(context.firestore(), 'accountRoles', 'legacy-moderator'), {
+        role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
       });
     });
 
@@ -1886,6 +1892,24 @@ describe('moderation access', () => {
 
     await assertSucceeds(warningBatch('cz-warning', 'cz-shout').commit());
     await assertFails(warningBatch('de-warning', 'de-shout').commit());
+
+    const legacyDb = authenticatedDb('legacy-moderator');
+    const legacyWarning = writeBatch(legacyDb);
+    legacyWarning.set(doc(legacyDb, 'sanctions', 'legacy-warning'), {
+      userId: 'target', type: 'warning', reason: 'No implicit global scope',
+      createdAt: serverTimestamp(), expiresAt: null, permanent: false,
+      moderatorId: 'legacy-moderator', status: 'active', sourceReportId: '',
+      previousSanctionsCount: 0,
+      purgeAt: future(180 * 24 * 60 * 60 * 1000),
+      sourceType: 'moderatorObservation', sourceContentType: 'shout',
+      sourceContentId: 'cz-shout', contentSnapshot: { text: 'test' },
+    });
+    legacyWarning.set(doc(legacyDb, 'warnings', 'legacy-warning'), {
+      userId: 'target', reason: 'No implicit global scope',
+      createdAt: serverTimestamp(), moderatorId: 'legacy-moderator',
+      sanctionId: 'legacy-warning',
+    });
+    await assertFails(legacyWarning.commit());
   });
 
   test('approved content cannot be reported again and reports can escalate', async () => {
@@ -1967,9 +1991,11 @@ describe('moderation access', () => {
       });
       await setDoc(doc(db, 'accountRoles', 'moderator'), {
         role: 'moderator', level: 3, createdAt: now(), assignedBy: 'test',
+        moderationScope: { global: true, countries: [], subdivisions: [] },
       });
       await setDoc(doc(db, 'accountRoles', 'senior'), {
         role: 'seniorModerator', level: 4, createdAt: now(), assignedBy: 'test',
+        moderationScope: { global: true, countries: [], subdivisions: [] },
       });
       await setDoc(doc(db, 'reports', 'role-report'), {
         reporterId: 'target', shoutId: 'shout-1', reason: 'Spam',

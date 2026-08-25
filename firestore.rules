@@ -141,7 +141,6 @@ service cloud.firestore {
         ? get(shoutPath).data.get('geography', {})
         : {};
       return role.get('level', 0) >= 5 ||
-        !('moderationScope' in role) ||
         scope.get('global', false) == true ||
         geography.get('countryCode', '') in scope.get('countries', []) ||
         geography.get('subdivisionCode', '') in
