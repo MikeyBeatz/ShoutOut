@@ -6,6 +6,36 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 initializeApp();
 
 const googleMapsApiKey = defineSecret('GOOGLE_MAPS_API_KEY');
+const monthlyGeocodingLimit = 9500;
+
+function geocodingPeriod(date = new Date()) {
+  return date.toISOString().slice(0, 7);
+}
+
+async function reserveGeocodingRequest(db, eventId) {
+  const period = geocodingPeriod();
+  const counter = db.doc(`serviceUsage/googleGeocoding-${period}`);
+  const request = db.doc(`serviceUsage/googleGeocoding-${period}/events/${eventId}`);
+  return db.runTransaction(async (transaction) => {
+    const [counterSnapshot, requestSnapshot] = await Promise.all([
+      transaction.get(counter),
+      transaction.get(request),
+    ]);
+    if (requestSnapshot.exists) return false;
+    const count = counterSnapshot.data()?.count ?? 0;
+    if (count >= monthlyGeocodingLimit) return false;
+    transaction.set(counter, {
+      period,
+      count: count + 1,
+      limit: monthlyGeocodingLimit,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    transaction.create(request, {
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    return true;
+  });
+}
 
 function component(components, type) {
   return components.find((item) => item.types?.includes(type));
@@ -43,9 +73,14 @@ function normalizedGeography(result, geohash) {
 export const enrichShoutGeography = onDocumentCreated(
   {
     document: 'shouts/{shoutId}',
-    region: 'europe-west1',
+    region: 'europe-west3',
     secrets: [googleMapsApiKey],
-    retry: true,
+    retry: false,
+    minInstances: 0,
+    maxInstances: 1,
+    concurrency: 1,
+    memory: '256MiB',
+    timeoutSeconds: 15,
   },
   async (event) => {
     const snapshot = event.data;
@@ -55,6 +90,11 @@ export const enrichShoutGeography = onDocumentCreated(
     const location = data.location;
     const geohash = data.geohash;
     if (!location || typeof geohash !== 'string') return;
+    const reserved = await reserveGeocodingRequest(
+      getFirestore(),
+      event.id ?? snapshot.id,
+    );
+    if (!reserved) return;
 
     const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
     url.searchParams.set('latlng', `${location.latitude},${location.longitude}`);
@@ -84,4 +124,4 @@ export const enrichShoutGeography = onDocumentCreated(
   },
 );
 
-export { normalizedGeography };
+export { geocodingPeriod, monthlyGeocodingLimit, normalizedGeography };

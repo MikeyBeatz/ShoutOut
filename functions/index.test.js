@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizedGeography } from './index.js';
+import {
+  geocodingPeriod,
+  monthlyGeocodingLimit,
+  normalizedGeography,
+} from './index.js';
+
+test('keeps geocoding below the monthly no-cost usage cap', () => {
+  assert.equal(monthlyGeocodingLimit, 9500);
+  assert.equal(geocodingPeriod(new Date('2026-08-25T12:00:00Z')), '2026-08');
+});
 
 test('normalizes canonical ISO subdivision returned by Google', () => {
   const result = normalizedGeography({
