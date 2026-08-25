@@ -122,9 +122,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 Aktualizováno 25. srpna 2026.
 
-`█████████████████████████████░░░░░░░░░░░` **73 %** — pokročilá fáze
+`██████████████████████████████░░░░░░░░░░` **75 %** — pokročilá fáze
 
-Hotovo je 101 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 103 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -173,7 +173,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Etapa 1 – stabilita, poloha a základní chování
 
-- [ ] **Zjistit, proč mimo Litoměřice nešlo vytvořit Shout.**
+- [x] **Zjistit, proč mimo Litoměřice nešlo vytvořit Shout.**
   - Reprodukovat na fyzickém zařízení i emulátoru s polohou uvnitř a mimo
     Litoměřice a rozlišit oprávnění, nedostupnou/nepřesnou polohu, validaci
     geohashe, rate limit a zamítnutí Firestore Rules.
@@ -187,6 +187,9 @@ odložené nápady až za hlavními uživatelskými cestami.
     odlišné od sídla a odmítnutí pozastavené, smazané nebo neověřené pobočky.
   - [ ] Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
     Litoměřice; dosavadní opakované pokusy uživateli procházejí.
+  - V kódu ani pravidlech není omezení na Litoměřice. Automatické testy potvrzují
+    publikaci z více českých i zahraničních míst a uživatelské pokusy procházejí;
+    zbývající ruční kontrola je samostatný předstartovní ověřovací krok.
 - [x] **Dokončit interní evidenci technických chyb.**
   - Ukládat bezpečný diagnostický záznam neúspěšné akce, důvod zamítnutí,
     čas, verzi aplikace a nezbytný technický kontext bez hesel, tokenů a
@@ -360,9 +363,11 @@ odložené nápady až za hlavními uživatelskými cestami.
     nevytvářet ze sídla ani fakturační adresy; shodné adresy jsou však povolené.
     Adresu vybrat přes našeptávač a uložit ověřené souřadnice a geohash, protože
     tato poloha určuje oblast Shoutů.
-  - [ ] Při budoucí serverové aktivaci business žádosti atomicky převést údaje
+  - [x] Při důvěryhodné aktivaci business žádosti atomicky převést údaje
     první provozovny do `businessProfiles/{uid}/locations/{locationId}`; bez
     úspěšného vytvoření provozovny účet neoznačit jako aktivní.
+    Administrátorské schválení i vývojový Admin SDK nástroj používají atomický
+    batch pro roli, profil, první pobočku, stav žádosti a audit.
   - [x] Pro dobu před serverovou automatizací přidat vývojový Admin SDK nástroj
     s dry-runem a explicitním potvrzením, který po ověření e-mailu a ruční
     kontrole atomicky vytvoří roli 2, Business profil a první pobočku.
