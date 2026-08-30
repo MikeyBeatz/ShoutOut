@@ -204,11 +204,15 @@ class AvatarPickerSheet extends StatefulWidget {
     required this.initialStyle,
     this.showBusinessLogoAction = false,
     this.onBusinessLogoSelected,
+    this.pickBusinessLogo = pickAndEditBusinessLogo,
+    this.initialBusinessLogoPreview,
   });
 
   final AvatarStyle initialStyle;
   final bool showBusinessLogoAction;
-  final Future<void> Function(Uint8List bytes)? onBusinessLogoSelected;
+  final Future<bool> Function(Uint8List bytes)? onBusinessLogoSelected;
+  final Future<Uint8List?> Function(BuildContext context) pickBusinessLogo;
+  final Widget? initialBusinessLogoPreview;
 
   @override
   State<AvatarPickerSheet> createState() => _AvatarPickerSheetState();
@@ -216,6 +220,10 @@ class AvatarPickerSheet extends StatefulWidget {
 
 class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
   late AvatarStyle _style = widget.initialStyle;
+  Uint8List? _pendingBusinessLogo;
+  late bool _showInitialBusinessLogo =
+      widget.initialBusinessLogoPreview != null;
+  bool _saving = false;
   final ScrollController _avatarScrollController = ScrollController();
 
   @override
@@ -260,18 +268,35 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  AvatarImage(
-                    avatarId: _style.avatarId,
-                    style: _style,
-                    radius: 54,
+                  ClipOval(
+                    child: SizedBox.square(
+                      dimension: 108,
+                      child: _pendingBusinessLogo == null
+                          ? _showInitialBusinessLogo
+                                ? widget.initialBusinessLogoPreview!
+                                : AvatarImage(
+                                    avatarId: _style.avatarId,
+                                    style: _style,
+                                    radius: 54,
+                                  )
+                          : Image.memory(
+                              _pendingBusinessLogo!,
+                              key: const Key('pending-business-logo-preview'),
+                              fit: BoxFit.cover,
+                              gaplessPlayback: true,
+                            ),
+                    ),
                   ),
                   Positioned(
                     right: 0,
                     bottom: 2,
                     child: IconButton.filledTonal(
                       tooltip: tr(context, 'Náhodný avatar'),
-                      onPressed: () =>
-                          setState(() => _style = AvatarStyle.random()),
+                      onPressed: () => setState(() {
+                        _pendingBusinessLogo = null;
+                        _showInitialBusinessLogo = false;
+                        _style = AvatarStyle.random();
+                      }),
                       icon: const Icon(Icons.casino_outlined),
                     ),
                   ),
@@ -336,12 +361,13 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
                             child: SizedBox.square(
                               dimension: 66,
                               child: InkWell(
+                                key: Key('avatar-option-$avatarId'),
                                 customBorder: const CircleBorder(),
-                                onTap: () => setState(
-                                  () => _style = _style.copyWith(
-                                    avatarId: avatarId,
-                                  ),
-                                ),
+                                onTap: () => setState(() {
+                                  _pendingBusinessLogo = null;
+                                  _showInitialBusinessLogo = false;
+                                  _style = _style.copyWith(avatarId: avatarId);
+                                }),
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
@@ -382,29 +408,35 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
                   child: _ColorSelector(
                     title: tr(context, 'První barva'),
                     selectedId: _style.startColorId,
-                    onSelected: (id) => setState(
-                      () => _style = _style.copyWith(startColorId: id),
-                    ),
+                    onSelected: (id) => setState(() {
+                      _pendingBusinessLogo = null;
+                      _showInitialBusinessLogo = false;
+                      _style = _style.copyWith(startColorId: id);
+                    }),
                   ),
                 ),
                 IconButton(
                   tooltip: tr(context, 'Prohodit barvy'),
                   visualDensity: VisualDensity.compact,
-                  onPressed: () => setState(
-                    () => _style = _style.copyWith(
+                  onPressed: () => setState(() {
+                    _pendingBusinessLogo = null;
+                    _showInitialBusinessLogo = false;
+                    _style = _style.copyWith(
                       startColorId: _style.endColorId,
                       endColorId: _style.startColorId,
-                    ),
-                  ),
+                    );
+                  }),
                   icon: const Icon(Icons.swap_horiz),
                 ),
                 Expanded(
                   child: _ColorSelector(
                     title: tr(context, 'Druhá barva'),
                     selectedId: _style.endColorId,
-                    onSelected: (id) => setState(
-                      () => _style = _style.copyWith(endColorId: id),
-                    ),
+                    onSelected: (id) => setState(() {
+                      _pendingBusinessLogo = null;
+                      _showInitialBusinessLogo = false;
+                      _style = _style.copyWith(endColorId: id);
+                    }),
                   ),
                 ),
               ],
@@ -431,9 +463,11 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
                 ),
               ],
               selected: {_style.direction},
-              onSelectionChanged: (selection) => setState(
-                () => _style = _style.copyWith(direction: selection.single),
-              ),
+              onSelectionChanged: (selection) => setState(() {
+                _pendingBusinessLogo = null;
+                _showInitialBusinessLogo = false;
+                _style = _style.copyWith(direction: selection.single);
+              }),
             ),
             const SizedBox(height: 8),
             Text(
@@ -448,8 +482,9 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => Navigator.pop(context, _style),
-                child: Text(tr(context, 'Uložit')),
+                key: const Key('save-avatar'),
+                onPressed: _saving ? null : _save,
+                child: Text(tr(context, _saving ? 'Ukládání…' : 'Uložit')),
               ),
             ),
           ],
@@ -473,8 +508,28 @@ class _AvatarPickerSheetState extends State<AvatarPickerSheet> {
       );
       return;
     }
-    final bytes = await pickAndEditBusinessLogo(context);
-    if (bytes != null) await onSelected(bytes);
+    final bytes = await widget.pickBusinessLogo(context);
+    if (bytes != null && mounted) {
+      setState(() {
+        _pendingBusinessLogo = bytes;
+        _showInitialBusinessLogo = false;
+      });
+    }
+  }
+
+  Future<void> _save() async {
+    final logo = _pendingBusinessLogo;
+    if (logo == null) {
+      Navigator.pop(context, _showInitialBusinessLogo ? null : _style);
+      return;
+    }
+    final onSelected = widget.onBusinessLogoSelected;
+    if (onSelected == null) return;
+    setState(() => _saving = true);
+    final saved = await onSelected(logo);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (saved) Navigator.pop(context);
   }
 }
 

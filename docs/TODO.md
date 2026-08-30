@@ -385,10 +385,21 @@ odložené nápady až za hlavními uživatelskými cestami.
     - [x] Připravit lokální editor s posunem a zoomem, kruhovým náhledem,
       kontrolou formátu, 10MB limitem a minimálním rozlišením 512 × 512 px.
       Ukládaný výsledek je nový 512 × 512 PNG bez původních metadat a částí
-      mimo výřez; všechny texty jsou dostupné v sedmi jazycích.
-    - [x] V úpravě avatara zobrazit pouze Business účtům vizuálně neaktivní
-      tlačítko **Nahrát vlastní logo** s lokalizovanou informací, že funkci
-      připravujeme. Běžné účty tuto volbu nevidí.
+      mimo výřez; všechny texty jsou dostupné v sedmi jazycích. Běžné webové
+      obrázky se dekódují přímo a browserové odstranění problematických metadat
+      se používá pouze jako záložní cesta. Systémový dialog souborů otevírá
+      oficiální multiplatformní `file_selector` a jeho chyby nejsou skryté.
+      Náhled zachovává poměr stran a kruhová vodicí zóna se ztmaveným okolím je
+      vykreslená nad obrázkem. Výběr vestavěného avatara vlastní Business logo
+      deaktivuje v obou profilech a jeho soubor následně odstraní ze Storage.
+      Použitý výřez se nejdřív zobrazí jako rozpracovaný náhled v kartě změny
+      avatara; nahraje a aktivuje se až tlačítkem **Uložit**, zatímco návrat bez
+      uložení ponechá původní profil beze změny.
+      Při opětovném otevření editoru je úvodním náhledem aktivní Business logo,
+      nikoli dříve uložený záložní systémový avatar; ten se zobrazí až po nové
+      volbě uživatele.
+    - [x] V úpravě avatara zobrazit funkční tlačítko **Nahrát vlastní logo** pouze
+      aktivním Business účtům. Běžné účty tuto volbu nevidí.
     - [x] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
       invalidaci a bezpečné odstranění předchozí verze a tlačítku předat hotovou
       ukládací callback funkci. Výběr, editor a 512px převod už jsou zapojené.

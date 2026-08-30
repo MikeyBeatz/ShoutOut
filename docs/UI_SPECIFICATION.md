@@ -253,11 +253,27 @@ Role 2 otevře pět funkčních/rezervovaných oblastí:
 
 Vlastní Business logo má připravený lokální editor: přijímá JPG, PNG nebo WebP
 do 10 MB a nejméně 512 × 512 px, umožňuje posun a přiblížení ve čtvercovém
-výřezu s kruhovou bezpečnou zónou a vytvoří nový PNG 512 × 512 px bez původních
-metadat. V úpravě avatara ho vidí pouze aktivní Business účet. Tlačítko
-**Nahrát vlastní logo** spustí výběr a editor, výsledek uloží do Storage a po
-atomické aktualizaci soukromého a veřejného profilu odstraní předchozí verzi.
+výřezu bez deformace původního poměru stran. Kruhová bezpečná zóna je vždy
+vykreslená nad obrázkem a oblast určená k zahození je ztmavená. Editor vytvoří
+nový PNG 512 × 512 px bez původních
+metadat. Web nejprve dekóduje běžný vstup přímo ve Flutteru; pouze pokud přímé
+načtení selže, překreslí jej přes nativní obrazový dekodér prohlížeče do čistého
+PNG. Vložená nepovinná metadata tak nejsou překážkou a browserový převod není
+společným bodem selhání všech obrázků. V úpravě avatara ho vidí pouze aktivní
+Business účet. Tlačítko **Nahrát vlastní logo** spustí výběr a editor. Akce
+**Použít výřez** pouze vrátí nový kruhový náhled do karty změny avatara; profil,
+Storage ani Firestore ještě nemění. Teprve **Uložit** nahraje výsledek do Storage,
+atomicky aktualizuje soukromý a veřejný profil a odstraní předchozí verzi.
+Zavření karty bez uložení rozpracované logo zahodí a původní avatar zachová.
+Pokud profil už vlastní logo používá, karta změny avatara ho zobrazí jako úvodní
+náhled namísto dříve uloženého záložního systémového avatara. Náhled se přepne
+až po výběru jiného avatara nebo jeho barevného stylu; samotné otevření a uložení
+beze změny aktivní logo nedeaktivuje.
 Logo nahrazuje systémový avatar na profilech, Shoutech, komentářích a odpovědích.
+Systémový výběr souboru používá oficiální multiplatformní Flutter rozhraní
+`file_selector`; případné selhání otevření dialogu zobrazí lokalizovanou chybu.
+Výběr kteréhokoli vestavěného avatara vlastní Business logo deaktivuje v soukromém
+i veřejném profilu a následně odstraní jeho soubor ze Storage.
 
 Při tvorbě Business Shoutu jsou zvýraznění a okénko samostatné checkboxy, které
 lze kombinovat; bez nich vznikne standardní karta. Delší platnost odemkne po

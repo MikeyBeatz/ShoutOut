@@ -20,7 +20,7 @@ In PowerShell from this folder:
 
 ```powershell
 $env:FIREBASE_SERVICE_ACCOUNT_PATH = 'C:\Users\micha\.shoutout-dev-service-account.json'
-$env:SHOUTOUT_TEST_PASSWORD = 'ShoutOut2026+'
+$env:SHOUTOUT_TEST_PASSWORD = 'zvolene-testovaci-heslo-1'
 node .\seed_test_users.mjs
 ```
 
@@ -47,6 +47,18 @@ reactions under several existing demo Shouts:
 ```powershell
 node .\seed_test_users.mjs --live-activity
 ```
+
+## Ústí nad Labem demo activity
+
+The following idempotent seed creates one active test Shout per test account in
+Ústí nad Labem. Every account comments once on every other account's Shout:
+
+```powershell
+node .\seed_test_users.mjs --with-usti-data
+```
+
+The script refuses service accounts for projects other than
+`shoutout-dev-46c81`.
 
 ## Reconcile development counters
 

@@ -29,6 +29,14 @@ const _translations = <String, Map<String, String>>{
     'uk': 'Завантажити власний логотип',
     'vi': 'Tải logo riêng lên',
   },
+  'Výběr obrázku se nepodařilo otevřít.': {
+    'en': 'The image picker could not be opened.',
+    'de': 'Die Bildauswahl konnte nicht geöffnet werden.',
+    'pl': 'Nie udało się otworzyć wyboru obrazu.',
+    'sk': 'Výber obrázka sa nepodarilo otvoriť.',
+    'uk': 'Не вдалося відкрити вибір зображення.',
+    'vi': 'Không thể mở trình chọn hình ảnh.',
+  },
   'Business logo bylo uložené.': {
     'en': 'The business logo was saved.',
     'de': 'Das Unternehmenslogo wurde gespeichert.',

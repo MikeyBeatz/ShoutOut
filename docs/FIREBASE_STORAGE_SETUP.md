@@ -23,12 +23,16 @@ k hlášením chyb. Textová hlášení zůstávají funkční i bez přílohy.
 2. Ve Firebase Console otevřít Storage → **Get Started** a založit výchozí bucket.
    Vývojový bucket je v bezplatném umístění `US-EAST1`; evropské umístění by bylo
    účtované, proto nebylo zvoleno.
-3. Ověřit, že název bucketu odpovídá `storageBucket` ve
+3. Při prvním nasazení pravidel používajících `firestore.get()` nebo
+   `firestore.exists()` potvrdit výzvu Firebase CLI k přidělení role
+   `roles/firebaserules.firestoreServiceAgent` Storage service agentovi. Bez této
+   role se přihlášenému Business účtu upload zamítne jako `storage/unauthorized`.
+4. Ověřit, že název bucketu odpovídá `storageBucket` ve
    `lib/firebase_options.dart`; případnou odlišnost opravit přes FlutterFire CLI.
-4. Nasadit pravidla s explicitním prostředím:
+5. Nasadit pravidla s explicitním prostředím:
    `firebase deploy --only storage --project your-project-id`.
-5. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`.
-6. Sestavit a nasadit web se stejnými produkčními parametry jako běžné demo.
+6. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`.
+7. Sestavit a nasadit web se stejnými produkčními parametry jako běžné demo.
 
 ## Povinné ověření před zapnutím
 

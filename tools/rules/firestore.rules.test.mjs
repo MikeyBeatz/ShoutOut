@@ -10,6 +10,7 @@ import {
   GeoPoint,
   Timestamp,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -761,6 +762,44 @@ describe('identity and account gates', () => {
       doc(businessDb, 'publicProfiles', 'business-owner'),
       { businessLogoVersion: version + 1 },
     ));
+  });
+
+  test('business account can replace its logo with a built-in avatar', async () => {
+    await seedEligibleUser('business-avatar', 'BusinessAvatar');
+    const version = 1787654321000;
+    const path = `businessLogos/business-avatar/logo-${version}.png`;
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'accountRoles', 'business-avatar'), {
+        role: 'business', level: 2, assignedBy: 'test', createdAt: now(),
+      });
+      await updateDoc(doc(db, 'users', 'business-avatar'), {
+        businessLogoPath: path,
+        businessLogoVersion: version,
+      });
+      await updateDoc(doc(db, 'publicProfiles', 'business-avatar'), {
+        businessLogoPath: path,
+        businessLogoVersion: version,
+        publicRole: 'business',
+      });
+    });
+
+    const db = authenticatedDb('business-avatar');
+    const avatar = {
+      avatarId: 'octopus',
+      avatarBackgroundStart: 'purple',
+      avatarBackgroundEnd: 'teal',
+      avatarGradientDirection: 'diagonal',
+      businessLogoPath: deleteField(),
+      businessLogoVersion: deleteField(),
+    };
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'users', 'business-avatar'), avatar);
+    batch.set(doc(db, 'publicProfiles', 'business-avatar'), avatar, {
+      merge: true,
+    });
+
+    await assertSucceeds(batch.commit());
   });
 
   test('avatar style accepts identical colors but rejects unknown directions', async () => {

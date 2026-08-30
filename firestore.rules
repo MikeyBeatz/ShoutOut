@@ -1146,6 +1146,31 @@ service cloud.firestore {
            ) ||
            (
              isBusinessAccount() &&
+             resource.data.keys().hasAll([
+               'businessLogoPath', 'businessLogoVersion'
+             ]) &&
+             !request.resource.data.keys().hasAny([
+               'businessLogoPath', 'businessLogoVersion'
+             ]) &&
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly([
+                 'avatarId',
+                 'avatarBackgroundStart',
+                 'avatarBackgroundEnd',
+                 'avatarGradientDirection',
+                 'businessLogoPath',
+                 'businessLogoVersion'
+               ]) &&
+             validAvatarStyle(request.resource.data) &&
+             validPublicProfile(
+               userId,
+               getAfter(
+                 /databases/$(database)/documents/publicProfiles/$(userId)
+               ).data
+             )
+           ) ||
+           (
+             isBusinessAccount() &&
              request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly(['businessLogoPath', 'businessLogoVersion']) &&
              request.resource.data.businessLogoPath is string &&

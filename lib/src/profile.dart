@@ -653,6 +653,25 @@ class EditProfilePage extends StatelessWidget {
                                         showBusinessLogoAction:
                                             roleSnapshot.data ==
                                             AccountRole.business,
+                                        initialBusinessLogoPreview:
+                                            profile['businessLogoPath'] !=
+                                                    null &&
+                                                profile['businessLogoVersion'] !=
+                                                    null
+                                            ? PublicIdentityAvatar(
+                                                identity: PublicIdentity(
+                                                  nickname: nickname,
+                                                  avatarStyle: avatarStyle,
+                                                  businessLogoPath:
+                                                      profile['businessLogoPath']
+                                                          as String?,
+                                                  businessLogoVersion:
+                                                      profile['businessLogoVersion']
+                                                          as int?,
+                                                ),
+                                                radius: 54,
+                                              )
+                                            : null,
                                         onBusinessLogoSelected:
                                             roleSnapshot.data ==
                                                 AccountRole.business
@@ -668,19 +687,49 @@ class EditProfilePage extends StatelessWidget {
                                 if (selected == null) return;
                                 try {
                                   final db = FirebaseFirestore.instance;
+                                  final oldLogoPath =
+                                      profile['businessLogoPath'] as String?;
+                                  final privateAvatarData = <String, dynamic>{
+                                    ...selected.toFirestore(),
+                                  };
+                                  final publicAvatarData = <String, dynamic>{
+                                    ...selected.publicProfileData(nickname),
+                                  };
+                                  if (oldLogoPath != null) {
+                                    privateAvatarData.addAll({
+                                      'businessLogoPath': FieldValue.delete(),
+                                      'businessLogoVersion':
+                                          FieldValue.delete(),
+                                    });
+                                    publicAvatarData.addAll({
+                                      'businessLogoPath': FieldValue.delete(),
+                                      'businessLogoVersion':
+                                          FieldValue.delete(),
+                                    });
+                                  }
                                   final batch = db.batch()
                                     ..update(
                                       db.collection('users').doc(userId),
-                                      selected.toFirestore(),
+                                      privateAvatarData,
                                     )
                                     ..set(
                                       db
                                           .collection('publicProfiles')
                                           .doc(userId),
-                                      selected.publicProfileData(nickname),
+                                      publicAvatarData,
                                       SetOptions(merge: true),
                                     );
                                   await batch.commit();
+                                  if (oldLogoPath != null) {
+                                    try {
+                                      await FirebaseStorage.instance
+                                          .ref(oldLogoPath)
+                                          .delete();
+                                    } on FirebaseException {
+                                      // Profil už bezpečně používá vestavěný avatar;
+                                      // osiřelý soubor lze uklidit později.
+                                    }
+                                  }
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -755,7 +804,7 @@ class EditProfilePage extends StatelessWidget {
     ),
   );
 
-  Future<void> _uploadBusinessLogo(
+  Future<bool> _uploadBusinessLogo(
     BuildContext context,
     Uint8List bytes,
     Map<String, dynamic> profile,
@@ -799,19 +848,21 @@ class EditProfilePage extends StatelessWidget {
           ),
         );
       }
+      return true;
     } on FirebaseException catch (error) {
       try {
         await reference.delete();
       } on FirebaseException {
         // Soubor nemusel vzniknout nebo jej už Storage odstranilo.
       }
-      if (!context.mounted) return;
+      if (!context.mounted) return false;
       final message = error.code == 'permission-denied'
           ? 'Logo se nepodařilo uložit kvůli oprávnění účtu.'
           : 'Logo se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(businessTr(context, message))));
+      return false;
     }
   }
 }

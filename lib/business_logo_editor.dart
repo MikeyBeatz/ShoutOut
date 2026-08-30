@@ -2,14 +2,37 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
+import 'business_logo_input_normalizer.dart';
 import 'l10n/business_text.dart';
 
 const businessLogoOutputSize = 512;
 const businessLogoMaximumInputBytes = 10 * 1024 * 1024;
 const businessLogoMaximumDecodedDimension = 4096;
+
+typedef BusinessLogoInputNormalizer =
+    Future<Uint8List> Function(Uint8List bytes, {required String contentType});
+
+typedef BusinessLogoFileSelector =
+    Future<XFile?> Function({List<XTypeGroup> acceptedTypeGroups});
+
+const businessLogoFileTypes = XTypeGroup(
+  label: 'JPG, PNG, WebP',
+  extensions: <String>['jpg', 'jpeg', 'png', 'webp'],
+  mimeTypes: <String>['image/jpeg', 'image/png', 'image/webp'],
+  uniformTypeIdentifiers: <String>[
+    'public.jpeg',
+    'public.png',
+    'org.webmproject.webp',
+  ],
+  webWildCards: <String>['image/*'],
+);
+
+Future<XFile?> selectBusinessLogoFile({
+  BusinessLogoFileSelector selector = openFile,
+}) => selector(acceptedTypeGroups: const <XTypeGroup>[businessLogoFileTypes]);
 
 Size businessLogoBaseDisplaySize({
   required int sourceWidth,
@@ -90,6 +113,7 @@ Future<ui.Image> decodeBusinessLogoInput(Uint8List bytes) async {
       businessLogoMaximumDecodedDimension /
           math.max(descriptor.width, descriptor.height),
     );
+
     codec = await descriptor.instantiateCodec(
       targetWidth: math.max(1, (descriptor.width * scale).round()),
       targetHeight: math.max(1, (descriptor.height * scale).round()),
@@ -101,6 +125,21 @@ Future<ui.Image> decodeBusinessLogoInput(Uint8List bytes) async {
     descriptor?.dispose();
     buffer.dispose();
   }
+}
+
+Future<ui.Image> decodeBusinessLogoInputWithFallback(
+  Uint8List bytes, {
+  required String contentType,
+  BusinessLogoInputNormalizer normalizer = normalizeBusinessLogoInput,
+}) async {
+  try {
+    return await decodeBusinessLogoInput(bytes);
+  } catch (error) {
+    debugPrint('Business logo direct decode failed: $error');
+  }
+
+  final normalizedBytes = await normalizer(bytes, contentType: contentType);
+  return decodeBusinessLogoInput(normalizedBytes);
 }
 
 Future<Uint8List> renderBusinessLogoCrop({
@@ -138,7 +177,19 @@ Future<Uint8List> renderBusinessLogoCrop({
 }
 
 Future<Uint8List?> pickAndEditBusinessLogo(BuildContext context) async {
-  final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+  XFile? picked;
+  try {
+    picked = await selectBusinessLogoFile();
+  } catch (error) {
+    debugPrint('Business logo file selection failed: $error');
+    if (context.mounted) {
+      _showBusinessLogoError(
+        context,
+        businessTr(context, 'Výběr obrázku se nepodařilo otevřít.'),
+      );
+    }
+    return null;
+  }
   if (picked == null) return null;
   final contentType = picked.mimeType ?? _businessLogoTypeFromName(picked.name);
   if (!{'image/jpeg', 'image/png', 'image/webp'}.contains(contentType)) {
@@ -152,7 +203,10 @@ Future<Uint8List?> pickAndEditBusinessLogo(BuildContext context) async {
   }
   final bytes = await picked.readAsBytes();
   try {
-    final image = await decodeBusinessLogoInput(bytes);
+    final image = await decodeBusinessLogoInputWithFallback(
+      bytes,
+      contentType: contentType!,
+    );
     if (!context.mounted) {
       image.dispose();
       return null;
@@ -278,14 +332,23 @@ class _BusinessLogoEditorPageState extends State<BusinessLogoEditorPage> {
                             color: Theme.of(context).colorScheme.outlineVariant,
                           ),
                         ),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Center(
-                              child: Transform.translate(
-                                offset: _offset,
-                                child: Transform.scale(
-                                  scale: _zoom,
+                        child: CustomPaint(
+                          foregroundPainter: _BusinessLogoCropGuidePainter(
+                            color: Theme.of(context).colorScheme.primary,
+                            overlayColor: Theme.of(
+                              context,
+                            ).colorScheme.scrim.withValues(alpha: 0.42),
+                          ),
+                          child: Center(
+                            child: Transform.translate(
+                              offset: _offset,
+                              child: Transform.scale(
+                                scale: _zoom,
+                                child: OverflowBox(
+                                  minWidth: 0,
+                                  minHeight: 0,
+                                  maxWidth: double.infinity,
+                                  maxHeight: double.infinity,
                                   child: RawImage(
                                     image: widget.image,
                                     width: baseSize.width,
@@ -296,14 +359,7 @@ class _BusinessLogoEditorPageState extends State<BusinessLogoEditorPage> {
                                 ),
                               ),
                             ),
-                            IgnorePointer(
-                              child: CustomPaint(
-                                painter: _BusinessLogoCropGuidePainter(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -405,14 +461,23 @@ class _BusinessLogoEditorPageState extends State<BusinessLogoEditorPage> {
 }
 
 class _BusinessLogoCropGuidePainter extends CustomPainter {
-  const _BusinessLogoCropGuidePainter({required this.color});
+  const _BusinessLogoCropGuidePainter({
+    required this.color,
+    required this.overlayColor,
+  });
 
   final Color color;
+  final Color overlayColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
     final radius = math.min(size.width, size.height) / 2 - 5;
+    final overlay = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRect(Offset.zero & size)
+      ..addOval(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawPath(overlay, Paint()..color = overlayColor);
     canvas.drawCircle(
       center,
       radius,
@@ -425,7 +490,7 @@ class _BusinessLogoCropGuidePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BusinessLogoCropGuidePainter oldDelegate) =>
-      color != oldDelegate.color;
+      color != oldDelegate.color || overlayColor != oldDelegate.overlayColor;
 }
 
 String? _businessLogoTypeFromName(String name) {

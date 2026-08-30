@@ -20,6 +20,9 @@ if (password.length < 10 || !/\d/.test(password)) {
 }
 
 const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
+  throw new Error('This development tool only supports shoutout-dev-46c81.');
+}
 initializeApp({ credential: cert(serviceAccount) });
 
 const auth = getAuth();
@@ -115,6 +118,89 @@ if (process.argv.includes('--with-demo-data')) {
 
 if (process.argv.includes('--live-activity')) {
   await addLiveActivity();
+}
+
+if (process.argv.includes('--with-usti-data')) {
+  await seedUstiData();
+}
+
+async function seedUstiData() {
+  const centre = { latitude: 50.6607, longitude: 14.0323 };
+  const shoutTexts = [
+    ['Co se dnes děje v centru?', 'Máte tip na zajímavou dnešní akci v Ústí?'],
+    ['Procházka kolem Labe', 'Kdo se dnes přidá na pohodovou procházku podél řeky?'],
+    ['Tip na dobrou kávu', 'Kam v centru zajít na opravdu dobrou kávu?'],
+    ['Doprava v centru', 'Počítejte dnes odpoledne s hustším provozem v centru.'],
+    ['Sport po práci', 'Hledám parťáky na rekreační sport během týdne.'],
+    ['Kulturní tipy', 'Co zajímavého z kultury byste tento týden doporučili?'],
+    ['Pomoc se stěhováním', 'Nevíte o spolehlivé místní půjčovně dodávek?'],
+    ['Výlet na Větruši', 'Plánuje někdo o víkendu krátký výlet na Větruši?'],
+    ['Ztracené klíče', 'Našel někdo svazek klíčů poblíž Mírového náměstí?'],
+    ['Oblíbené místo v Ústí', 'Které klidné místo ve městě máte nejraději?'],
+  ];
+  const categories = [
+    'Událost', 'Diskuze', 'Tip', 'Doprava', 'Nabídka',
+    'Tip', 'Pomoc', 'Událost', 'Ztráty a nálezy', 'Diskuze',
+  ];
+  const commentTexts = [
+    'Díky za sdílení, tohle se může hodit.',
+    'To zní dobře, rád se dozvím víc.',
+    'Skvělý místní tip, díky!',
+    'Také mě to zajímá, budu sledovat odpovědi.',
+    'V Ústí je podobných možností víc, dobré téma.',
+  ];
+  const now = Date.now();
+  const batch = db.batch();
+
+  for (let index = 0; index < users.length; index += 1) {
+    const author = users[index];
+    const angle = (index * 137.5) * Math.PI / 180;
+    const distanceKm = 0.15 + index * 0.12;
+    const latitude = centre.latitude + (distanceKm * Math.cos(angle)) / 111;
+    const longitude = centre.longitude +
+      (distanceKm * Math.sin(angle)) / (111 * Math.cos(centre.latitude * Math.PI / 180));
+    const shoutRef = db.collection('shouts').doc(`demo_usti_${author.id}`);
+    batch.set(shoutRef, {
+      authorId: `test_${author.id}`,
+      authorNickname: author.nickname,
+      title: `[TEST] ${shoutTexts[index][0]}`,
+      text: shoutTexts[index][1],
+      categories: [categories[index]],
+      location: new GeoPoint(latitude, longitude),
+      createdAt: Timestamp.fromMillis(now - (index + 1) * 5 * 60 * 1000),
+      expiresAt: Timestamp.fromMillis(now + 24 * 60 * 60 * 1000),
+      status: 'active',
+      likesCount: 0,
+      dislikesCount: 0,
+      commentsCount: users.length - 1,
+      savesCount: 0,
+      isTest: true,
+    }, { merge: true });
+
+    for (let commenterIndex = 0; commenterIndex < users.length; commenterIndex += 1) {
+      if (commenterIndex === index) continue;
+      const commenter = users[commenterIndex];
+      const commentRef = shoutRef.collection('comments')
+        .doc(`demo_from_${commenter.id}`);
+      batch.set(commentRef, {
+        authorId: `test_${commenter.id}`,
+        authorNickname: commenter.nickname,
+        text: commentTexts[(index + commenterIndex) % commentTexts.length],
+        createdAt: Timestamp.fromMillis(
+          now - index * 60 * 1000 + commenterIndex * 1000,
+        ),
+        likesCount: 0,
+        dislikesCount: 0,
+        isTest: true,
+      }, { merge: true });
+    }
+  }
+
+  await batch.commit();
+  console.log(
+    `Seeded ${users.length} Ústí nad Labem Shouts and ` +
+    `${users.length * (users.length - 1)} cross-user comments.`,
+  );
 }
 
 async function seedDemoData() {
