@@ -2,7 +2,7 @@
 
 ## Nový právní milník
 
-- [ ] Prověřit a naplánovat registraci evropské ochranné známky ShoutOut:
+- [x] Prověřit a naplánovat registraci evropské ochranné známky ShoutOut:
   rešerši kolizí, vlastníka, relevantní třídy výrobků a služeb, rozpočet a termín
   podání u EUIPO; před podáním využít odbornou právní kontrolu.
 
@@ -10,6 +10,12 @@ Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze aplikaci
 zpřístupnit prvním skutečným uživatelům a zahájit marketingový pilot. Nejde o
 marketingový plán. Jednotlivé implementační úkoly a jejich technické podrobnosti
 zůstávají v `docs/TODO.md`; povinné ruční scénáře jsou v `docs/TESTING.md`.
+
+Aktuální MVP vyžaduje produkční Android, iOS a web, dokončenou Business
+monetizaci a kompletní moderaci. Mobilní aplikace podporují všechny zamýšlené
+role; web po přihlášení smí používat pouze Business a moderační účty. Běžný účet
+na webu nesmí načíst uživatelský feed. Změna rozsahu MVP musí být zapsaná
+současně zde i v `docs/TODO.md`.
 
 Pořadí práce: produkční základ → podporované platformy → bezpečnost a právní
 kontrola → ruční testy → měření → provozní připravenost → startovní brána.
@@ -49,8 +55,10 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
   polohu a ostatní používané služby.
 - [ ] Otestovat iOS build na skutečném iPhonu.
 - [ ] Připravit App Store Connect a projít schválením App Store.
-- [ ] Rozhodnout, zda pilot čeká na Android i iOS, nebo formálně začíná jako
-  omezený Android/web pilot.
+- [x] Původní rozhodnutí o omezeném Android/web pilotu bylo zaznamenáno a
+  následně nahrazeno širším rozsahem MVP.
+- [ ] Vydat Android i iOS pro běžné i privilegované účty a web omezit pouze na
+  Business a moderační role v klientovi, serverových oprávněních i testech.
 - [ ] Ověřit, že veřejné odkazy vedou výhradně do produkčního prostředí.
 
 ## 3. Stabilita hlavních uživatelských cest
@@ -76,7 +84,22 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 - [ ] Otestovat úzký Android, různé rozměry iPhonu, mobilní web a desktop.
 - [ ] Spustit kompletní CI a odstranit všechny chyby release kandidáta.
 
-## 4. Důvěryhodné serverové procesy
+## 4. Business a monetizace
+
+- [ ] Automatizovat důvěryhodné ověření Business subjektu a aktivaci účtu;
+  bezpečná ruční kontrola zůstává záložní cestou.
+- [ ] Dokončit serverová oprávnění a limity všech Business promo funkcí.
+- [ ] Schválit ceny, balíčky, expiraci a refundace tokenů.
+- [ ] Implementovat auditovanou tokenovou účetní knihu bez klientského přepisu.
+- [ ] Implementovat Stripe nákup kartou, Apple Pay a Google Pay s idempotentním
+  serverovým potvrzením.
+- [ ] Dokončit fakturaci, DPH/VAT, měny, doklady, refundace a chargebacky.
+- [ ] Důvěryhodně měřit a zobrazit Business dosah, zobrazení, rozkliknutí a
+  související monetizační metriky.
+- [ ] Uzavřít Founder entitlement, placený dosah a kosmetickou nabídku, pokud
+  zůstávají součástí nabídky první verze.
+
+## 5. Důvěryhodné serverové procesy
 
 - [ ] Zajistit okamžité skrytí obsahu zablokovaného nebo smazaného účtu.
 - [ ] Automatizovat dokončení žádosti o smazání účtu a 60denní retenci.
@@ -88,7 +111,7 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 - [ ] Monitorovat selhání automatizací a bezpečně opakovat nedokončené operace.
 - [ ] Před veřejným provozem výslovně schválit případná zbývající rizika.
 
-## 5. Právní a provozní připravenost
+## 6. Právní a provozní připravenost
 
 - [ ] Doplnit skutečného provozovatele, funkční kontaktní adresu a podporu.
 - [ ] Zkontrolovat podmínky, zásady ochrany osobních údajů a pravidla komunity.
@@ -101,7 +124,7 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
   závislostí, logů a záloh.
 - [ ] Odstranit z produkce testovací účty, demo data a vývojové přístupy.
 
-## 6. Měření potřebné pro rozhodování
+## 7. Měření potřebné pro rozhodování
 
 - [ ] Definovat aktivního uživatele, aktivního autora a užitečnou akci.
 - [ ] Měřit dokončenou registraci a první užitečnou akci během prvního dne.
@@ -112,10 +135,11 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 - [ ] Ověřit správnost měření a minimalizaci osobních údajů.
 - [ ] Určit vlastníka dashboardu a pravidelný termín kontroly.
 
-## 7. Co neblokuje uzavřený pilot
+## 8. Historický rozsah neblokující původní omezený pilot
 
-Následující funkce mohou zůstat odložené, pokud jejich absence neporušuje
-bezpečnost ani právní povinnosti:
+Následující seznam zachovává původní rozhodnutí pro dříve uvažovaný omezený
+Android/web pilot. Novější definice MVP jej nahrazuje: Business monetizace,
+vlastní logo a iOS už nyní mohou být blokující podle aktuální brány.
 
 - tokeny, ceny, platby a Stripe;
 - skutečné zpoplatnění Business funkcí;
@@ -125,7 +149,7 @@ bezpečnost ani právní povinnosti:
 - automatické ARES/VIES ověření, pokud funguje důvěryhodná ruční kontrola;
 - velké placené kampaně a rozšiřování do dalších měst.
 
-## 8. Rozhodovací brána
+## 9. Rozhodovací brána
 
 Uzavřený marketingový pilot lze zahájit, pouze pokud:
 

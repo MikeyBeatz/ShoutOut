@@ -16,10 +16,14 @@ k hlášením chyb. Textová hlášení zůstávají funkční i bez přílohy.
   administrátorem nebo ownerem a zákaz přepsání souboru;
 - Firestore pravidla pro shodu cesty, typu a velikosti a retence 60 dní.
 
-## Aktivace na plánu Blaze
+## Stav po aktivaci Blaze a postup pro nové prostředí
 
-1. Přepnout vývojový Firebase projekt na placený plán a nastavit rozpočtové
-   upozornění a nákladový limit, pokud ho platforma dovoluje.
+Blaze i vývojový Storage bucket jsou aktivní. Následující postup zůstává
+zachovaný pro obnovu nebo založení dalšího prostředí; nákladové pojistky se řídí
+samostatným dokumentem `docs/COST_SAFETY.md`.
+
+1. Ověřit Blaze, správný billing account a dokončený checklist nákladových
+   pojistek. Samotné rozpočtové upozornění účtování nezastaví.
 2. Ve Firebase Console otevřít Storage → **Get Started** a založit výchozí bucket.
    Vývojový bucket je v bezplatném umístění `US-EAST1`; evropské umístění by bylo
    účtované, proto nebylo zvoleno.

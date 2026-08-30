@@ -18,6 +18,12 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
 `docs/BUSINESS_VERIFICATION.md`; technické implementační kroky zůstávají v
 `TODO.md` a odkazují sem.
 
+Kompletní zde schválená Business monetizace je součástí hranice MVP. Tokenová
+účetní kniha, serverové platby, fakturace, promo oprávnění a důvěryhodné měření
+proto nejsou odložené vydání po MVP. Otevřená produktová rozhodnutí musí být
+uzavřena před implementací release kandidáta; historie bezplatné zaváděcí fáze
+níže zůstává zachovaná.
+
 ## Schválený model
 
 - Business účet nemá pravidelné tarify ani předplatné.
@@ -56,8 +62,10 @@ Business tokenech, placených funkcích a fakturaci. Ověření firmy je samosta
   signál proti zneužití, nikoli jako právní důkaz oprávnění jednat za firmu.
 - Banka může podle vlastních pravidel krátce zobrazit dočasnou ověřovací
   rezervaci, i když ShoutOut neúčtuje žádnou částku.
-- Zapojení SetupIntent je odložené, dokud projekt nemůže přejít z Firebase Spark
-  na placený plán. Do té doby karta není podmínkou registrace ani aktivace
+- Původní blokace přechodem z Firebase Spark skončila aktivací Blaze. Zapojení
+  SetupIntent ale zůstává neimplementované a před jeho nasazením je nutné
+  dokončit serverový Stripe tok, bezpečnostní kontrolu a nákladové pojistky podle
+  `docs/COST_SAFETY.md`. Karta zatím není podmínkou registrace ani aktivace
   Business účtu.
 
 ## Platnost Shoutu nad 24 hodin

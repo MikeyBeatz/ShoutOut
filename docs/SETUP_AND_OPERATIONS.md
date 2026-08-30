@@ -109,9 +109,12 @@ Současné prostředí zůstává uzavřeným vývojovým testem. Registrace se 
 veřejným sdílením neotevře anonymně: tester dostane odkaz individuálně a po
 ukončení testu se jeho účet odstraní nástrojem pro integrační scénář. App Check
 se nejprve sleduje v metrikách a vynutí se až po ověření webového, Android a iOS
-provideru, aby se legitimní klienti nezablokovali. Před pilotem musí být aktivní
-rozpočtové alerty Google Cloud; alert není tvrdý limit a nenahrazuje kvóty v
-kódu. Vývojové a seed účty se před produkčním spuštěním nesmějí migrovat do
+provideru, aby se legitimní klienti nezablokovali. Před pilotem musí být
+dokončený checklist v [nákladových pojistkách](COST_SAFETY.md). Samotný
+rozpočtový alert není tvrdý limit a nenahrazuje servisní kvóty, spend cap pro
+Functions, App Check ani nouzové selektivní vypnutí. Žádná Cloud Function se
+nesmí poprvé nasadit dřív, než jsou tyto pojistky nastavené a otestované.
+Vývojové a seed účty se před produkčním spuštěním nesmějí migrovat do
 produkčního projektu.
 
 ### 1. Založení a registrace aplikací
@@ -189,7 +192,11 @@ debug provider a release App Attest s fallbackem na DeviceCheck. Postup:
 serverový reverse geocoding přes Google Geocoding API a doplní moderátorský
 region. Jde o jinou službu než klientské Geoapify.
 
-1. V Google Cloud projektu povolte Geocoding API a billing.
+Před tímto krokem dokončete a prakticky ověřte povinnou bránu v
+`docs/COST_SAFETY.md`. Po nasazení následuje geografický backfill, kontrolovaná
+aktivace TTL a teprve potom serverová automatizace expirace a mazání účtů.
+
+1. V Google Cloud projektu povolte Geocoding API a ověřte billing.
 2. Vytvořte API key omezený pouze na Geocoding API.
 3. Uložte jej jako Functions secret a nasaďte funkci:
 
@@ -198,17 +205,17 @@ region. Jde o jinou službu než klientské Geoapify.
    firebase deploy --only functions --project your-project-id
    ```
 
-Cloud Functions deployment vyžaduje placený Firebase/Google Cloud plán. Bez něj
-zůstane Shout funkční, ale nové dokumenty nebudou mít doplněné `geography` a
-regionální moderace nebude kompletní. Starší Shouty lze po aktivaci obohatit
-Admin SDK skriptem `npm run backfill:geography` v `tools/`.
+Projekt již používá Blaze, ale funkce zatím není nasazená. Bez ní zůstane Shout
+funkční, nové dokumenty však nebudou mít doplněné `geography` a regionální
+moderace nebude kompletní. Starší Shouty lze po aktivaci obohatit Admin SDK
+skriptem `npm run backfill:geography` v `tools/`; spouštějte jej dávkově podle
+nákladového plánu, ne současně s prvním nasazením funkce.
 
 ### 6. Storage pro screenshoty
 
-Balíček, obrazovka, metadata a `storage.rules` jsou připravené, ale upload je
-záměrně skrytý do aktivace služby. Přesný postup, limit 5 MiB a retenční kontrola
-jsou v `FIREBASE_STORAGE_SETUP.md`. Storage a lifecycle automatizaci zapínejte
-až v odpovídajícím placeném prostředí.
+Storage, obrazovka, metadata a `storage.rules` jsou aktivní. Přesný postup,
+limit 2 MiB a retenční kontrola jsou v `FIREBASE_STORAGE_SETUP.md`. Lifecycle
+automatizaci zapínejte až po ověření nákladových pojistek.
 
 ## Spuštění
 

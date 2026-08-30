@@ -187,10 +187,12 @@ vysvětluje záměr, nenahrazuje pravidla.
   pobočku až po potvrzení e-mailu a kontrole údajů,
 - ověření ARES/VIES a platby,
 - push notifikace a oznámení sledujícím,
-- fyzické TTL mazání na placeném plánu,
+- fyzické TTL mazání; konfigurace je připravená, ale aktivace čeká na kontrolu
+  objemu a nákladů,
 - serverové čištění expirovaného obsahu a dokončení smazání účtu,
-- upload screenshotu bug reportu, dokud není inicializovaný Storage.
+- automatický úklid screenshotů bug reportů; samotný upload přes Storage je
+  aktivní.
 
 Tyto hranice musí při rekonstrukci zůstat zřetelně označené; jejich návrh je v
 `TODO.md`, `BUSINESS_VERIFICATION.md`, `BUSINESS_MONETIZATION.md` a
-`FIREBASE_STORAGE_SETUP.md`.
+`FIREBASE_STORAGE_SETUP.md` a `COST_SAFETY.md`.

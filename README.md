@@ -10,9 +10,15 @@ odpovědi, ukládání, blokování uživatelů, hlášení obsahu a moderaci.
 - Android
 - web
 
-Projekt obsahuje také výchozí Flutter projekty pro iOS, Windows, macOS a Linux,
-ale Firebase pro ně zatím není nakonfigurovaný. Tyto platformy proto nejsou
-součástí aktuálně podporovaného vývojového prostředí.
+Projekt obsahuje připravenou vývojovou Firebase konfiguraci pro iOS, ale build
+zatím nebyl sestaven ani ověřen na macOS a fyzickém iPhonu. Windows, macOS a
+Linux mají pouze Flutter kostru. Tyto platformy proto zatím nejsou součástí
+aktuálně podporovaného vývojového prostředí.
+
+Cílové MVP rozšiřuje veřejné mobilní klienty na Android i iOS. Web v MVP není
+určen běžným uživatelům: po přihlášení bude dostupný pouze Business a
+moderačním rolím. Jde o cílový stav backlogu, nikoli popis již nasazeného
+omezení.
 
 ## Technologie
 
@@ -209,8 +215,10 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `docs/UI_SPECIFICATION.md` – obrazovky, navigace a globální UI pravidla
 - `docs/DATA_MODEL.md` – kolekce, vazby a atomické invarianty
 - `docs/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
+- `docs/COST_SAFETY.md` – povinné nákladové limity, kvóty a nouzový postup
 - `docs/TESTING.md` – automatická a ruční regresní matice
-- `docs/TODO.md` – jediný společný projektový backlog
+- `docs/TODO.md` – jediný společný projektový backlog, hranice Android/iOS/web MVP
+  a oddělené počítadlo postupu k MVP i celému backlogu
 - `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace

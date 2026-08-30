@@ -1,5 +1,144 @@
 # ShoutOut – společný projektový backlog
 
+## Rychlý přehled postupu
+
+Aktualizováno 30. srpna 2026.
+
+### Postup do MVP
+
+`██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░` **24 %** — 8 z 34 milníků
+
+### Postup celého backlogu
+
+`█████████████████████████████░░░░░░░░░░░` **74 %** — 103 ze 140 úkolů
+
+Podrobnosti, pravidla počítání a úplné seznamy zůstávají v příslušných sekcích
+níže. Tento rychlý přehled je jejich záměrná kopie pro snadnou orientaci.
+
+---
+
+## Hranice MVP
+
+MVP je pro tento projekt **produkčně provozovatelný ShoutOut pro Android, iOS a
+web s dokončenou Business monetizací a moderací**. Mobilní aplikace je určená
+všem podporovaným rolím. Web před přihlášením nabídne společný vstup, ale po
+ověření role zpřístupní aplikaci pouze Business účtům a rolím `moderator`,
+`seniorModerator`, `administrator` a `owner`; běžný uživatel na webu do
+uživatelského feedu nevstoupí.
+
+MVP musí vedle základních komunitních toků obsahovat automatické důvěryhodné
+ověření Business účtů, kompletní schválený tokenový a platební model,
+fakturaci, placené Business funkce, důvěryhodné měření monetizace a kompletní
+moderátorské operace s auditem. Po MVP mohou zůstat SMS ověření, interaktivní
+tutorial, FCM push, obecná gamifikace a žebříčky, pokud nejsou nutné pro
+schválenou monetizaci.
+
+Tato hranice vychází z `README.md`, `docs/LAUNCH_READINESS.md`,
+`docs/PRODUCT_FLOWS.md`, `docs/TESTING.md`, `docs/BUSINESS_VERIFICATION.md` a
+`docs/MOBILE_DISTRIBUTION_PLAN.md`. Pokud se rozsah podporovaných platforem nebo
+pilotní strategie změní, musí se současně upravit tato definice i startovní
+brána.
+
+### Historie rozhodnutí o rozsahu
+
+- Původní pracovní varianta počítala s omezeným Android/web pilotem, ručním
+  Business ověřováním a přesunutím iOS i monetizace za MVP.
+- Dne 30. srpna 2026 byla tato varianta nahrazena současným širším MVP:
+  Android + iOS pro všechny podporované role, web pouze pro Business a moderaci
+  a kompletní Business monetizace i moderační část před vydáním.
+- Žádný úkol původní varianty nebyl odstraněn; změnilo se pouze jeho zařazení a
+  výsledný počet blokujících milníků.
+
+### Postup k MVP
+
+Aktualizováno 30. srpna 2026.
+
+`██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░` **24 %** — 8 z 34 milníků
+
+MVP počítadlo používá níže uvedené vydávací milníky, nikoli každý technický
+podkrok. Dokončení volitelné práce po MVP toto procento nezvyšuje a jediný
+nesplněný blokující milník může vydání zastavit bez ohledu na celkové procento.
+
+#### Hotové milníky MVP (8)
+
+1. ✅ Základní registrace, ověření e-mailu, právní souhlas a profil.
+2. ✅ Lokální feed, vytvoření a životní stav Shoutu.
+3. ✅ Komentáře, odpovědi, reakce, ukládání, blokace a hlášení.
+4. ✅ Veřejné profily, Follow a oznámení uvnitř aplikace.
+5. ✅ Business registrace, pobočky a důvěryhodná ruční aktivace s auditem.
+6. ✅ Moderátorské rozhraní, role, regionální rozsahy a základní Rules ochrana.
+7. ✅ Android a web jako funkční vývojové cíle se sedmi jazyky.
+8. ✅ Automatické Flutter a Firestore Rules testy zapojené do CI.
+
+#### Zbývající milníky před MVP (26)
+
+1. ⬜ Ověřit doručitelnost e-mailů, vlastní doménu, Action URL a produkční
+   šablony Auth.
+2. ⬜ Nasadit geografické obohacení, provést backfill a ověřit regionální data.
+3. ⬜ Dokončit hlavní polohové scénáře na fyzickém Android zařízení mimo
+   Litoměřice.
+4. ⬜ Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní
+   retence účtu.
+5. ⬜ Oddělit vývojové a produkční Firebase prostředí, konfigurace a nástroje.
+6. ⬜ Dokončit App Check pro Android, iOS a web, Play Integrity a App Attest;
+   enforcement zapnout až po ověření metrik.
+7. ⬜ Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu,
+   idempotenci a limity proti spamu.
+8. ⬜ Přesunout citlivé moderátorské operace do auditovaného serverového toku.
+9. ⬜ Serverově omezit aktivní Business promo Shouty podle schváleného pravidla.
+10. ⬜ Dokončit kompletní audit překladů a malých displejů pro sedm jazyků.
+11. ⬜ Projít všechny ruční regresní scénáře moderace a hlavních produktových
+    toků včetně pomalé nebo přerušované sítě.
+12. ⬜ Doplnit skutečného provozovatele, podporu, právní kontrolu a proces práv
+    subjektů údajů.
+13. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy a prakticky ověřenou obnovu
+    i rollback.
+14. ⬜ Připravit podepsaný Android release, Google Play záznam a požadované
+    uzavřené testování.
+15. ⬜ Sestavit a otestovat iOS na fyzickém iPhonu, připravit podpis, TestFlight,
+    App Store Connect a schválený veřejný release.
+16. ⬜ Omezit produkční web po přihlášení pouze na Business a moderační role a
+    otestovat zamítnutí běžného účtu bez úniku dat.
+17. ⬜ Automatizovat důvěryhodné ověření Business subjektu a aktivaci role přes
+    schválené registry a bezpečnou ruční záložní kontrolu.
+18. ⬜ Dokončit serverová oprávnění pro placený dosah, promo funkce, limity a
+    Founder entitlement bez možnosti obejití klientem.
+19. ⬜ Uzavřít ceny a pravidla tokenů a implementovat auditovanou účetní knihu
+    nákupů, čerpání, vrácení a administrativních oprav.
+20. ⬜ Implementovat Stripe nákupy tokenů, kartu, Apple Pay a Google Pay včetně
+    idempotentního serverového potvrzení plateb.
+21. ⬜ Dokončit fakturaci, DPH/VAT, měny, refundace, chargebacky, účetní retenci
+    a neměnné doklady firmy.
+22. ⬜ Důvěryhodně měřit dosah, zobrazení, rozkliknutí a konverze monetizovaných
+    funkcí a zobrazit oprávněné Business statistiky.
+23. ⬜ Uzavřít a implementovat zbývající schválené monetizační balíčky včetně
+    Founder pravidel a kosmetického obchodu, pokud zůstávají v nabídce MVP.
+24. ⬜ Definovat minimální metriky provozu, interní dashboard a odpovědnou osobu
+    bez nadbytečných osobních údajů.
+25. ⬜ Spustit kompletní CI a release buildy Androidu, iOS a webu a odstranit
+    všechny blokující vady release kandidáta.
+26. ⬜ Splnit rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně přijmout
+    nebo odstranit všechna zbývající rizika.
+
+### Práce po MVP
+
+Po MVP patří zejména interaktivní tutorial, telefonní ověření, FCM push a
+fan-out sledujícím a obecné žebříčky či gamifikace, které nejsou součástí
+monetizační nabídky. Tyto položky se neruší; zůstávají v detailním backlogu níže
+se štítkem **Po MVP**.
+
+### Význam štítků v detailním backlogu
+
+- **MVP** — otevřená položka nebo podúkol blokuje výše definovaný pilot.
+- **Po MVP** — položka zůstává plánovaná, ale pilot může začít bez ní.
+- Dokončené položky se zpětně neštítkují; jejich vztah k MVP shrnuje osm
+  hotových milníků. Neoznačený nový otevřený checkbox je chyba dokumentace a při
+  přidání musí být ihned zařazen.
+
+---
+
+## Detailní backlog a historie dokončené práce
+
 ## Nové podněty z uživatelského testování
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**
@@ -8,7 +147,7 @@
   - Sdílená komponenta zobrazuje pouze veřejnou přezdívku, avatar a flair;
     používá se v detailu autora i v seznamu sledovaných. Kontextové akce zůstávají
     mimo veřejnou identitu a vlastní profil nenabízí Follow, blokaci ani hlášení.
-- [ ] **Rozšířit Business monetizaci o dokoupení dosahu podle vzdálenosti.**
+- [ ] **Rozšířit Business monetizaci o dokoupení dosahu podle vzdálenosti.** **MVP**
   - Běžný Business Shout zachová standardní místní dosah; větší poloměr bude
     možné aktivovat za tokeny v předem určených kilometrových pásmech.
   - Před implementací určit pásma, ceny, maximální dosah, dobu platnosti,
@@ -23,16 +162,16 @@
   - Příčinou byl dotaz na aktivní Shouty před smazáním neověřeného účtu;
     Firestore jej správně odmítl, protože rozpracovaná registrace ještě není
     oprávněný profil. Tento nepotřebný krok je pouze z registračního toku odstraněn.
-- [ ] **Prověřit nedoručený ověřovací e-mail na Email.cz.**
+- [ ] **Prověřit nedoručený ověřovací e-mail na Email.cz.** **MVP**
   - Google/Gmail při testu fungoval, ale zpráva na Email.cz nedorazila; rozlišit
     chybu odeslání, zpoždění, spam a odmítnutí či reputaci odesílací domény.
   - Doplnit srozumitelný stav, opakované odeslání a diagnostiku bez ukládání
     plné e-mailové adresy do technických logů.
   - [x] Klient nabízí opakované odeslání, po úspěchu ponechá na obrazovce viditelný
     stav a při chybě diagnostikuje pouze bezpečný Firebase kód bez adresy a odkazu.
-  - [ ] Doručitelnost na Email.cz ověřit mimo klienta podle Firebase/Auth provozu,
+  - [ ] **MVP** — Doručitelnost na Email.cz ověřit mimo klienta podle Firebase/Auth provozu,
     spamu a případného odmítnutí příjemcem; bez poštovních logů ji nelze potvrdit.
-- [ ] **Přidat postupné ověření telefonního čísla přes Firebase Phone Auth.**
+- [ ] **Přidat postupné ověření telefonního čísla přes Firebase Phone Auth.** **Po MVP**
   - Telefon nevyžadovat při založení účtu. Vyžádat jej až při první chráněné
     akci a po úspěšném ověření stav bezpečně svázat s účtem.
   - Bez SMS ověření povolit prohlížení feedu, otevření Shoutu a komentářů,
@@ -62,7 +201,7 @@
     `Moderátor` a mapování `seniorModerator` na stejný veřejný štítek.
   - [x] Nasadit upravená Firestore Rules a důvěryhodně doplnit `publicRole` do
     existujících veřejných profilů skriptem `npm run backfill:public-profiles`.
-- [ ] **Přepracovat onboarding na interaktivní tutorial.** *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*
+- [ ] **Přepracovat onboarding na interaktivní tutorial.** **Po MVP** *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*
   - Nahradit dlouhé úvodní rady krátkými kontextovými kroky typu „klikni sem“,
     „udělej toto“ a „pokračuj tady“ přímo nad skutečným rozhraním.
   - Umožnit přeskočení, pozdější opakování a pokračování po přerušení; měřit
@@ -70,7 +209,7 @@
   - První průchod vede uživatele přes skutečný výběr kategorie, otevření a zavření
     detailu Shoutu, otevření formuláře a profilu. Postup je uložený u účtu;
     dokončení nebo potvrzené přeskočení automatické spuštění trvale vypne.
-- [ ] **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.**
+- [ ] **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.** **MVP**
   - Navrhnout důvěryhodné počítání zobrazení Shoutu a zobrazit autorovi počet
     zobrazení, uložení a dalších relevantních interakcí.
   - Vyřešit unikátní versus celková zobrazení, ochranu proti farmení, soukromí,
@@ -99,10 +238,10 @@
   - Rozhodnout vztah karmy, zobrazení, liků a coinů a obsah obchodu, například
     premium avatary. Snadno farmitelné počty nesmí dávat odměny bez serverové
     validace a ochrany proti zneužití.
-- [ ] **Omezit Business promo na nejvýše dva současně aktivní Shouty na firmu.**
+- [ ] **Omezit Business promo na nejvýše dva současně aktivní Shouty na firmu.** **MVP**
   - Limit vynucovat serverově napříč všemi pobočkami a typy propagace; určit,
     zda kombinované zvýraznění s okénkem spotřebuje jeden aktivní promo slot.
-- [ ] **Navrhnout Founder balíček pro nové podniky.**
+- [ ] **Navrhnout Founder balíček pro nové podniky.** **MVP**
   - Founder entitlement vést odděleně od veřejné role a flairu; oprávněný účet
     nikdy nespotřebovává tokeny za premium Business funkce.
   - Určit podmínky přidělení, počáteční množství coinů/tokenů, převoditelnost,
@@ -120,11 +259,11 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Aktualizováno 25. srpna 2026.
+Aktualizováno 30. srpna 2026.
 
-`██████████████████████████████░░░░░░░░░░` **75 %** — pokročilá fáze
+`██████████████████████████████░░░░░░░░░░` **74 %** — pokročilá fáze
 
-Hotovo je 103 ze 138 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 103 ze 140 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -147,9 +286,16 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
 - [x] Google reverse-geocoding trigger s tajným serverovým API klíčem.
 - [x] ISO země/oblasti, moderátorské rozsahy, webový filtr a kontrola postihu.
 - [x] Migrační nástroj pro existující shouty.
-- [ ] Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
+- [ ] **MVP** — Před prvním nasazením Functions nastavit a prakticky otestovat
+  nákladové pojistky podle `docs/COST_SAFETY.md`: servisní kvóty, Functions
+  spend cap, rozpočtová upozornění, Pub/Sub nouzovou reakci a odpovědnou osobu.
+  Po splnění pokračovat oddělenými kontrolovanými kroky: nasadit
+  `enrichShoutGeography`, provést dávkový geografický backfill, aktivovat po
+  cenové kontrole TTL a poté implementovat serverovou expiraci Shoutů a mazání
+  účtů. Přesná výstupní kritéria jsou v `docs/COST_SAFETY.md`.
+- [ ] **MVP** — Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
   a nasadit Functions, pravidla a indexy.
-- [ ] Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
+- [ ] **MVP** — Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
   případné mapování udržovat v serverové vrstvě.
 - [x] Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
 
@@ -159,10 +305,10 @@ implementovaný.
 
 ## Brána před veřejným spuštěním
 
-- [ ] Splnit předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument
+- [ ] **MVP** — Splnit předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument
   sdružuje produkční, bezpečnostní, právní, distribuční, testovací a provozní
   předpoklady. Jednotlivé implementační úkoly zůstávají v tomto backlogu.
-- [ ] Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
+- [ ] **Po MVP** — Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
   samostatným plánem `docs/local/ShoutOut_marketingovy_plan_spusteni.docx`.
 
 ## Aktuální produktové úpravy
@@ -185,7 +331,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     světových hranic a odmítnutí neplatných souřadnic.
   - [x] Doplnit testy pravidel pro běžný účet mimo Litoměřice, výběr pobočky
     odlišné od sídla a odmítnutí pozastavené, smazané nebo neověřené pobočky.
-  - [ ] Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
+  - [ ] **MVP** — Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
     Litoměřice; dosavadní opakované pokusy uživateli procházejí.
   - V kódu ani pravidlech není omezení na Litoměřice. Automatické testy potvrzují
     publikaci z více českých i zahraničních míst a uživatelské pokusy procházejí;
@@ -203,9 +349,10 @@ odložené nápady až za hlavními uživatelskými cestami.
     50 záznamů v systémovém dohledu administrátora a ownera.
   - [x] Doplnit stránkování po 25, filtrování načtených záznamů, přesný čas,
     neměnný audit otevření a 60denní hranici čtení.
-  - [ ] Po zapnutí fakturace nasadit připravenou Firestore TTL konfiguraci pro
-    fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits`; Spark plán
-    aktivaci TTL odmítá, do té doby jsou starší záznamy bezpečně nečitelné.
+  - [ ] **MVP** — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace
+    pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit
+    objem a schválit účtovaná TTL mazání podle `docs/COST_SAFETY.md`. Do té doby
+    jsou starší záznamy bezpečně nečitelné.
 - [x] **Umožnit moderátorským a vyšším rolím nastavit polohu pro náhled území.**
   - Role 3–6 mohou ručně vybrat bod, obec nebo region a prohlížet feed tak, jako
     by se nacházely na zvoleném místě; nabídnout návrat ke skutečné poloze.
@@ -250,9 +397,9 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [x] Na doručitelném vývojovém účtu ověřeno doručení e-mailu, změna hesla,
     přihlášení novým heslem a odmítnutí opakovaně použitého odkazu; konkrétní
     adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
-  - [ ] Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho platnosti;
+  - [ ] **MVP** — Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho platnosti;
     tento časový test neblokuje hlavní tok obnovy hesla.
-  - [ ] Po připojení vlastní domény přepnout globální Firebase Authentication
+  - [ ] **MVP** — Po připojení vlastní domény přepnout globální Firebase Authentication
     Action URL na připravený `/auth/action`. Handler už bezpečně obsluhuje
     ověření e-mailu, reset hesla i obnovení změněné adresy; výchozí domény
     projektu Firebase při ukládání vlastní Action URL odmítá.
@@ -322,7 +469,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     pouze v `docs/BUSINESS_MONETIZATION.md`.
   - Vyhodnotit dopad na feed, zvýrazněné Shouty, cenu/zneužití business účtů,
     moderaci, notifikace, indexy, pravidla a serverové mazání.
-- [ ] **Rozšířit návrh business účtu o provozovnu a ověření.**
+- [ ] **Rozšířit návrh business účtu o provozovnu a ověření.** **MVP**
   - Globální cílový návrh, úrovně důvěry, regionální adaptéry, rizikový model,
     datový model a postup zavádění jsou v `docs/BUSINESS_VERIFICATION.md`.
   - Přidat do profilu konkrétní adresu/polohu provozovny, veřejný náhled a postup
@@ -403,11 +550,11 @@ odložené nápady až za hlavními uživatelskými cestami.
     - [x] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
       invalidaci a bezpečné odstranění předchozí verze a tlačítku předat hotovou
       ukládací callback funkci. Výběr, editor a 512px převod už jsou zapojené.
-  - [ ] Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes
+  - [ ] **MVP** — Napojit serverové ověření českého IČO přes ARES, italské Partita IVA přes
     VIES a následné automatické přidělení role až po úspěšné kontrole. Pokud pro
     zemi není dostupné bezplatné rozhraní, přijmout ručně vyplněný identifikátor
     a žádost ponechat k ruční kontrole.
-  - [ ] Implementovat odložené platební kroky až po splnění předpokladů a podle
+  - [ ] **MVP** — Implementovat odložené platební kroky až po splnění předpokladů a podle
     jednotného návrhu v `docs/BUSINESS_MONETIZATION.md`.
   - [x] Přidat Business checkbox **Na více než 24 hodin**, po jehož zapnutí
     pokračuje výběr po celých dnech až na 7 dní; server dovolí delší expiraci
@@ -416,7 +563,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     platnost až 7 dní zachovat zdarma, doplnit zvýrazněný Shout a propagační
     okénko. Nárok a použití ukládat odděleně od budoucí platby, aby pozdější
     tokeny změnily pouze autorizační/účetní krok, nikoli uživatelský tok.
-  - [ ] Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
+  - [ ] **MVP** — Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
     zobrazení a rozkliknutí propagačních okének; v Business → Propagace zobrazit
     také vypočtenou míru prokliku. Vzdálenostní pásma se nesledují.
 
@@ -433,7 +580,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     sledování, zrušení sledování, blokaci a nahlášení účtu.
   - [x] Řadit lokální Shouty sledovaných účtů před ostatními a uvnitř obou skupin
     zachovat zvolené řazení; blokace současně ukončí sledování.
-- [ ] **Napojit Follow a uživatelské preference na oznámení.**
+- [ ] **Napojit Follow a uživatelské preference na oznámení.** **Po MVP**
   - Zahrnout reakce na vlastní Shout, komentáře a odpovědi, soukromé odpovědi,
     relevantní nebo zajímavé Shouty a nový obsah sledovaných profilů/oblastí.
   - Definovat, co znamená „zajímavý“, omezit četnost a umožnit každou kategorii
@@ -452,10 +599,10 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [x] Kliknutím na oznámení otevřít živý detail cílového Shoutu, u komentářů
     posunout a zvýraznit konkrétní komentář; nedostupný, smazaný nebo expirovaný
     obsah nahradit srozumitelnou hláškou.
-  - [ ] Přes Cloud Functions rozesílat nový Shout sledovaného profilu a později
+  - [ ] **Po MVP** — Přes Cloud Functions rozesílat nový Shout sledovaného profilu a později
     relevantní Shouty v okolí; tyto události mají více příjemců a klient je
     nesmí rozesílat sám.
-  - [ ] Přidat FCM push mimo otevřenou aplikaci, systémová/moderátorská
+  - [ ] **Po MVP** — Přidat FCM push mimo otevřenou aplikaci, systémová/moderátorská
     oznámení a omezení četnosti.
 
 ### Etapa 6 – gamifikace a odložené nápady
@@ -481,7 +628,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     nevstupuje do kolizí.
   - Po výsledku vyžadovat samostatný vstup pro návrat na úvodní kartu a teprve
     další vstup pro spuštění nového pokusu.
-  - [ ] Volitelně později zvážit žebříček pouze mezi sledovanými profily; před
+  - [ ] **Po MVP** — Volitelně později zvážit žebříček pouze mezi sledovanými profily; před
     implementací vyřešit soukromí, ochranu výsledků a náklady Firestore.
 
 ### Vzhled a grafika
@@ -549,7 +696,7 @@ odložené nápady až za hlavními uživatelskými cestami.
   - Zachovat automatickou volbu podle jazyka zařízení a funkční ruční přepnutí.
   - Ověřit fallback pro zařízení s nepodporovaným jazykem.
 
-- [ ] **Provést kompletní audit překladů.**
+- [ ] **Provést kompletní audit překladů.** **MVP**
   - Najít texty zapsané přímo ve widgetech a přesunout je do lokalizace.
   - Porovnat úplnost všech klíčů pro češtinu, angličtinu, němčinu, polštinu,
     slovenštinu, ukrajinštinu a vietnamštinu.
@@ -576,6 +723,13 @@ odložené nápady až za hlavními uživatelskými cestami.
     senior moderátorovi.
   - Přímé otevření nahlášeného komentáře v kontextu vlákna se zvýrazněním.
   - Historie postihů, uživatelský detail a zrušení oprávněného aktivního postihu.
+- [ ] **MVP** — Omezit produkční webovou aplikaci pouze na Business a moderační
+  účty. Nepřihlášený uživatel může otevřít společné přihlášení, ale po ověření
+  role smí web pokračovat jen pro `business`, `moderator`, `seniorModerator`,
+  `administrator` a `owner`. Běžnému účtu zobrazit srozumitelné odmítnutí,
+  nepovolit načtení uživatelského feedu a vynutit stejnou hranici také v
+  serverových oprávněních a integračních testech; mobilní Android a iOS zůstávají
+  dostupné běžným účtům.
 
 ### Demo a distribuce
 
@@ -600,31 +754,31 @@ podmínek testovacích účtů a požadavků na fyzická zařízení.
     a fotografiím a debug/release App Check providery.
   - Výchozí Flutter ikonu a startovní obrazovku nahradily existující značkové
     podklady ShoutOut ve všech požadovaných iOS rozměrech.
-  - [ ] Na Macu sestavit nepodepsaný iOS build a odstranit případné chyby nativních
+  - [ ] **MVP** — Na Macu sestavit nepodepsaný iOS build a odstranit případné chyby nativních
     závislostí; ve Windows tento krok nelze spolehlivě provést.
-  - [ ] Přes Xcode s Apple Personal Team nainstalovat debug build na vlastní
+  - [ ] **MVP** — Přes Xcode s Apple Personal Team nainstalovat debug build na vlastní
     iPhone, zaregistrovat App Check debug token a projít hlavní uživatelské cesty.
-  - [ ] Pro distribuci vytvořit samostatnou produkční Firebase/Apple identitu,
+  - [ ] **MVP** — Pro distribuci vytvořit samostatnou produkční Firebase/Apple identitu,
     podpisy a App Store konfiguraci; vývojovou konfiguraci nepoužít veřejně.
 
 ### Navazující ruční test moderace
 
-- [ ] Udělit varování běžnému uživateli a ověřit záznam v historii postihů.
-- [ ] Udělit dočasné omezení tvorby a ověřit blokaci Shoutů i komentářů.
-- [ ] Skrýt závadný komentář a ověřit jeho stav ve vlákně.
-- [ ] Eskalovat případ senior moderátorovi a ověřit oddělení obou front.
-- [ ] Senior rolí ověřit 90denní a trvalý ban.
-- [ ] Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
-- [ ] Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
+- [ ] **MVP** — Udělit varování běžnému uživateli a ověřit záznam v historii postihů.
+- [ ] **MVP** — Udělit dočasné omezení tvorby a ověřit blokaci Shoutů i komentářů.
+- [ ] **MVP** — Skrýt závadný komentář a ověřit jeho stav ve vlákně.
+- [ ] **MVP** — Eskalovat případ senior moderátorovi a ověřit oddělení obou front.
+- [ ] **MVP** — Senior rolí ověřit 90denní a trvalý ban.
+- [ ] **MVP** — Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
+- [ ] **MVP** — Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
 - [x] Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
   standardně nevytvářely účty moderátora, seniora, administrátora ani ownera.
 
-## Odložená serverová a produkční část
+## Serverová a produkční část nutná pro MVP
 
 Následující body nelze spolehlivě dokončit pouze ve Flutter klientovi nebo
-vyžadují produkční Firebase/Google Cloud konfiguraci. Serverová část je vědomě
-odložená až na závěr projektu. Klientský kód není důvěryhodná bezpečnostní
-hranice a upravená aplikace jej může obejít.
+vyžadují produkční Firebase/Google Cloud konfiguraci. S výjimkou výslovně
+označených push notifikací jsou součástí hranice MVP: klientský kód není
+důvěryhodná bezpečnostní hranice a upravená aplikace jej může obejít.
 
 ## Co je už hotové bez vlastního serveru
 
@@ -671,7 +825,7 @@ Skript tento krok záměrně odmítne pro jiný projekt než `shoutout-dev-46c81
 Dnes nebyl spuštěn, protože `FIREBASE_SERVICE_ACCOUNT_PATH` není nastavený a
 v projektu není žádný administrátorský klíč.
 
-## 1. Oddělit vývojové a produkční prostředí
+## 1. Oddělit vývojové a produkční prostředí — MVP
 
 - vytvořit samostatný produkční Firebase projekt,
 - vytvořit samostatné Android a webové Firebase aplikace,
@@ -688,7 +842,7 @@ v projektu není žádný administrátorský klíč.
 Hotovo, když vývojový build ani skript nemůže omylem číst nebo měnit produkční
 data a produkční release je podepsaný vlastním chráněným klíčem.
 
-## 2. App Check, registrace a ochrana proti farmám účtů
+## 2. App Check, registrace a ochrana proti farmám účtů — MVP
 
 - v Android vývojovém projektu zaregistrovat pouze potřebné App Check debug
   tokeny; nikdy je necommitovat,
@@ -711,7 +865,7 @@ data a produkční release je podepsaný vlastním chráněným klíčem.
 App Check omezuje neautorizované klienty, ale sám o sobě není CAPTCHA ani úplná
 ochrana proti replay útokům a farmám skutečných zařízení.
 
-## 3. Důvěryhodná serverová brána pro obsah
+## 3. Důvěryhodná serverová brána pro obsah — MVP
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,
@@ -729,7 +883,7 @@ ochrana proti replay útokům a farmám skutečných zařízení.
 Hotovo, když upravený klient nemůže podvrhnout autora, čas, polohu, čítač,
 limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
-## 4. Antispam a obsahová moderace
+## 4. Antispam a obsahová moderace — MVP
 
 - normalizovat text před kontrolou a detekovat opakovaný/velmi podobný obsah,
   zakázané odkazy, zahlcení, podvodné vzory a obcházení znaků,
@@ -747,7 +901,7 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
   dlouhodobé statistiky uchovávat jen anonymně bez vazby na konkrétní účet,
 - sladit retenční lhůty postihů s právními dokumenty před produkčním nasazením.
 
-## 5. Důvěryhodné moderátorské operace a audit
+## 5. Důvěryhodné moderátorské operace a audit — MVP
 
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
@@ -757,7 +911,7 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
 - omezit četnost moderátorských akcí a chránit citlivé exporty,
 - přidat druhé potvrzení pro nevratné nebo hromadné zásahy.
 
-## 6. Zpracování žádosti o smazání účtu
+## 6. Zpracování žádosti o smazání účtu — MVP
 
 Klient po opětovném zadání hesla zapisuje `accountDeletionRequests/{uid}` a
 ihned odstraňuje Firebase Authentication účet, aby bylo možné e-mail znovu
@@ -777,7 +931,7 @@ registrovat. Serverová automatizace musí:
 Hotovo, když integrační test pokryje běžnou žádost, opakované spuštění,
 částečné selhání a dokončení 60denní retence.
 
-## 7. Exspirace a mazání Shoutů
+## 7. Exspirace a mazání Shoutů — MVP
 
 - pravidelně vyhledat Shouty po skončení platnosti podle serverového času,
 - změnit stav na expirovaný bez spoléhání na čas zařízení,
@@ -788,7 +942,7 @@ Hotovo, když integrační test pokryje běžnou žádost, opakované spuštěn�
 
 Firestore podkolekce automaticky nemaže.
 
-## 8. Push notifikace a centrum oznámení
+## 8. Push notifikace a centrum oznámení — Po MVP
 
 - [x] schválený model Follow, centrum oznámení a kategorie uživatelských
   preferencí,
@@ -804,7 +958,7 @@ Firestore podkolekce automaticky nemaže.
 - ukládat stav přečtení, slučovat opakované události a omezit četnost,
 - striktně oddělit vývojové a produkční tokeny.
 
-## 9. Monitoring, zálohy a závislosti
+## 9. Monitoring, zálohy a závislosti — MVP
 
 - zapnout hlášení pádů a serverových chyb bez úniku citlivých dat,
 - alertovat na nárůst registrací, zamítnuté App Check požadavky, zápisy,
@@ -818,7 +972,7 @@ Firestore podkolekce automaticky nemaže.
   závislostech; nepoužívat automatický `npm audit fix --force`, pokud by
   provedl neověřený downgrade.
 
-## 10. Předprodukční bezpečnostní kontrola
+## 10. Předprodukční bezpečnostní kontrola — MVP
 
 - právní texty odpovídají skutečně nasazeným retenčním procesům,
 - provozovatel a kontaktní adresy jsou skutečné a funkční,
