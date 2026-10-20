@@ -49,6 +49,25 @@ brána.
 - Žádný úkol původní varianty nebyl odstraněn; změnilo se pouze jeho zařazení a
   výsledný počet blokujících milníků.
 
+### Prezentační web před MVP
+
+Doména `shoutout-app.eu` je pořízená a slouží jako veřejný statický prezentační
+web. Nejde o webovou verzi aplikace: neobsahuje
+přihlášení, registraci, Business ani moderátorské rozhraní a nebude odkazovat do
+obchodů s aplikacemi. Úplný záznam rozhodnutí, cílového Hostingu a pořadí
+zprovoznění je v `PRESENTATION_SITE.md`.
+
+- [x] **Před MVP, samostatná etapa** — vytvořit oddělený produkční Firebase
+  projekt pro prezentaci: `shoutout-production-a1b34`; doména není připojená k
+  `shoutout-dev-46c81`.
+- [x] **Před MVP, samostatná etapa** — připravit a nasadit statický prezentační
+  obsah na Firebase Hosting v projektu `shoutout-production-a1b34`.
+- [ ] **Před MVP, samostatná etapa** — připojit `shoutout-app.eu` a přesměrovat
+  `www.shoutout-app.eu` na hlavní doménu podle DNS záznamů vydaných Firebase.
+
+Tyto položky se nezapočítávají do procent MVP: neaktivují veřejnou aplikaci ani
+nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
+
 ### Postup k MVP
 
 Aktualizováno 30. srpna 2026.
@@ -72,8 +91,9 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 
 #### Zbývající milníky před MVP (26)
 
-1. ⬜ Ověřit doručitelnost e-mailů, vlastní doménu, Action URL a produkční
-   šablony Auth.
+1. ⬜ Ověřit doručitelnost e-mailů, vlastní doménu aplikace, Action URL a
+   produkční šablony Auth. Prezentační `shoutout-app.eu` tento milník sám o
+   sobě neplní.
 2. ⬜ Nasadit geografické obohacení, provést backfill a ověřit regionální data.
 3. ⬜ Dokončit hlavní polohové scénáře na fyzickém Android zařízení mimo
    Litoměřice.

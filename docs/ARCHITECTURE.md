@@ -6,10 +6,11 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
 
 ## Základní principy
 
-- Flutter klient je společný pro Android a web.
+- Flutter klient je společný pro Android, iOS a web.
 - Web na široké obrazovce drží aplikaci uprostřed v šířce nejvýše 840 px;
   okolní plocha má jemný tyrkysový odstín odlišný od pozadí aplikace.
-- Firebase Authentication zajišťuje e-mailové účty a ověření adresy.
+- Firebase Authentication zajišťuje e-mailové účty, přihlášení přes Google a
+  ověření e-mailových adres.
 - Cloud Firestore je hlavní databáze, realtime zdroj obrazovek a současně
   serverová validační vrstva prostřednictvím `firestore.rules`.
 - Důležité vícečetné zápisy jsou atomické transakce nebo batche. Klient například
@@ -35,7 +36,7 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
 ```text
 main()
   └─ Firebase.initializeApp
-     └─ Android App Check
+     └─ Android / iOS App Check
         └─ ShoutOutApp
            └─ AuthGate
               ├─ nepřihlášený → SignInPage
@@ -76,7 +77,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/main.dart` | Inicializace, téma, routing a seznam Flutter `part` modulů. |
 | `lib/auth_gate.dart` | Přihlášení, běžná registrace, ověření e-mailu, právní a stavové brány, onboarding a vytvoření profilu. |
 | `lib/business_registration.dart` | Samostatný registrační formulář Business účtu a zápis žádosti. |
-| `lib/business_logo_editor.dart` | Lokální výběr a bezpečný 512px výřez vlastního Business loga; bez vzdáleného uložení do zapnutí Storage. |
+| `lib/business_logo_editor.dart` | Lokální výběr a bezpečný 512px výřez vlastního Business loga; profil následně ukládá PNG do Firebase Storage a atomicky aktualizuje cestu loga ve veřejném i soukromém profilu. |
 | `lib/address_autocomplete.dart` | Geoapify autocomplete a převod výsledku na adresu, souřadnice a provider place ID. |
 | `lib/public_profile.dart` | Realtime načtení aktuální přezdívky a avataru. |
 | `lib/help_content.dart` | Osm rozšířených témat Nápovědy ve všech sedmi jazycích. |
@@ -104,7 +105,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/l10n/` | Generované ARB překlady a přechodové slovníky `tr` / `businessTr`. |
 | `functions/index.js` | Serverový reverse geocoding nových Shoutů přes Google. |
 | `firestore.rules` | Autorizace, schéma zápisů, rate limiting a integrita čítačů. |
-| `storage.rules` | Připravená pravidla screenshotů bug reportů. |
+| `storage.rules` | Pravidla Firebase Storage pro Business loga a screenshoty bug reportů. |
 
 ## Stav a realtime aktualizace
 

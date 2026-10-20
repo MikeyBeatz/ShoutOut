@@ -27,6 +27,8 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 
 - [TODO](TODO.md) – jediný projektový backlog a pořadí další práce. Popisuje
   budoucí stav, nikoli automaticky současnou funkčnost.
+- [Prezentační web](PRESENTATION_SITE.md) – rozhodnutý rozsah domény
+  `shoutout-app.eu`, oddělení od MVP aplikace a postup připojení k Hostingu.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
   pro produkci, distribuci, bezpečnost, právo, testování a provoz.
 - [Mobilní testování, distribuce a technický rozpočet](MOBILE_DISTRIBUTION_PLAN.md)
