@@ -31,7 +31,7 @@ ale mají vlastní text a schvalovací proces.
 |---:|---|---|---|
 | 0 | návštěvník | Pouze přihlášení nebo registrace, bez veřejného náhledu | Implementováno |
 | 1 | `user` | Běžný komunitní účet | Implementováno |
-| 2 | `business` | Firemní profil, provozovny a publikování za pobočku | Základ implementován; aktivace, platby, propagace a statistiky navrženy |
+| 2 | `business` | Firemní profil, provozovny a publikování za pobočku | Ruční schválení a bezplatná propagace fungují; zamítnutí a pozastavení chybí, předplatné a statistiky jsou pozdější plán |
 | 3 | `moderator` | Každodenní moderace a dočasné postihy | Implementováno částečně |
 | 4 | `seniorModerator` | Vedení moderace, dlouhé a trvalé bany, odvolání | Implementováno částečně |
 | 5 | `administrator` | Správa systému, rolí, business účtů a dohled | Role a technický dohled implementovány; část správy navržena |
@@ -124,8 +124,9 @@ Administrátor a owner mají v moderátorském rozhraní samostatnou frontu
 Business žádostí ve stavu `checking`. Schválení vyžaduje druhé potvrzení,
 atomicky vytvoří roli úrovně 2, aktivní Business profil a ověřenou první
 pobočku a zapíše neměnný audit. Nižší role frontu nevidí ani do ní nemohou
-zapisovat. Do zavedení automatického registru administrátor ověřuje firmu a
-pobočku ručně podle mapy a veřejně dostupných informací.
+zapisovat. Administrátor ověřuje firmu a pobočku ručně podle schválených
+kritérií; přesný postup pro veřejný web je otevřený v
+`BUSINESS_VERIFICATION.md`.
 U staré žádosti ve stavu `pending_email` může administrátor nouzově potvrdit
 přechod do ruční kontroly. Zápis uchová `emailVerificationMethod`, administrátora
 a čas; nemění ale Firebase Authentication `emailVerified`, takže skutečně

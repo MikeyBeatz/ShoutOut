@@ -6,28 +6,30 @@
   rešerši kolizí, vlastníka, relevantní třídy výrobků a služeb, rozpočet a termín
   podání u EUIPO; před podáním využít odbornou právní kontrolu.
 
-Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze aplikaci
-zpřístupnit prvním skutečným uživatelům a zahájit marketingový pilot. Nejde o
-marketingový plán. Jednotlivé implementační úkoly a jejich technické podrobnosti
-zůstávají v `docs/TODO.md`; povinné ruční scénáře jsou v `docs/TESTING.md`.
+Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze veřejně
+spustit webové MVP pro běžné uživatele a Business účty. Nejde o marketingový
+plán. Jednotlivé implementační úkoly a jejich technické podrobnosti zůstávají v
+`docs/TODO.md`; povinné ruční scénáře jsou v `docs/TESTING.md`.
 
-Aktuální MVP vyžaduje produkční Android, iOS a web, dokončenou Business
-monetizaci a kompletní moderaci. Mobilní aplikace podporují všechny zamýšlené
-role; web po přihlášení smí používat pouze Business a moderační účty. Běžný účet
-na webu nesmí načíst uživatelský feed. Změna rozsahu MVP musí být zapsaná
-současně zde i v `docs/TODO.md`.
+Webové MVP zahrnuje všechny současné webové funkce a dokončení rozpracovaných
+toků běžného a Business účtu. Moderátorské rozhraní musí umožnit bezpečný
+provoz. Mobilní vydání a placená Business monetizace následují po webovém MVP;
+jejich postupy a produktová rozhodnutí zůstávají zachované v navazujících
+plánech. Změna rozsahu MVP musí být zapsaná současně zde i v `docs/TODO.md`.
+Checkboxy pod nadpisy **Pozdější mobilní distribuce** a **Pozdější Business
+monetizace** ani produktové metriky v části 7 neblokují webové vydání.
 
-Pořadí práce: produkční základ → podporované platformy → bezpečnost a právní
-kontrola → ruční testy → měření → provozní připravenost → startovní brána.
+Pořadí práce: produkční webový základ → bezpečnost a právní kontrola → ruční
+testy běžných a Business toků → provozní připravenost → startovní brána.
 
 ## 1. Produkční prostředí a bezpečné nasazení
 
-- [ ] Vytvořit samostatný produkční Firebase projekt a oddělené aplikace pro
-  všechny podporované platformy.
+- [ ] Vytvořit samostatný produkční Firebase projekt aplikace, oddělený od
+  vývojového projektu i od projektu statické prezentace.
 - [ ] Přidat bezpečné přepínání vývojové a produkční konfigurace.
 - [ ] Zabránit seedovacím, testovacím a migračním nástrojům zasáhnout produkci.
-- [ ] Vytvořit minimálně oprávněné service accounts a uložit klíče, hesla a
-  podpisové certifikáty mimo Git.
+- [ ] Vytvořit minimálně oprávněné service accounts a uložit klíče a hesla mimo
+  Git.
 - [ ] Prověřit historii Gitu na privátní klíče, hesla a service-account soubory.
 - [ ] Připravit a vyzkoušet nasazení, rollback, obnovu a řešení částečného
   selhání.
@@ -35,18 +37,27 @@ kontrola → ruční testy → měření → provozní připravenost → startov
 - [ ] Připojit vlastní doménu, autorizované Auth domény a správnou Action URL.
 - [ ] Nastavit veřejný název, odesílatele a lokalizované e-mailové šablony.
 - [ ] Omezit produkční Geoapify klíč na správné domény a nastavit kvótu.
-- [ ] Nakonfigurovat App Check pro podporované platformy, nejprve sledovat
+- [ ] Nakonfigurovat App Check pro produkční web, nejprve sledovat
   metriky a až potom zapnout vynucení.
-- [ ] Dokončit Play Integrity pro produkční Android aplikaci a vhodnou ochranu
-  webového klienta.
+- [ ] Dokončit ochranu webového klienta a registrace proti zneužití.
 - [ ] Aktivovat placené serverové služby až po dokončení bezplatných příprav a
-  pouze v rozsahu nezbytném pro bezpečný pilot.
+  pouze v rozsahu nezbytném pro bezpečné webové MVP.
 
-## 2. Platformy a veřejná distribuce
+## 2. Webová aplikace a veřejná distribuce MVP
 
-Podrobný postup a časově citlivé požadavky obchodů jsou v plánu
+- [ ] Připravit `social.shoutout-app.eu` a Hosting v produkčním projektu
+  aplikace; prezentace na `shoutout-app.eu` zůstává v původním projektu.
+- [ ] Sestavit a nasadit produkční web s konfigurací správného Firebase
+  projektu, Auth Action URL a autorizovaných domén.
+- [ ] Ověřit, že běžný účet má na webu feed a tvorbu Shoutů, Business účet své
+  funkce a moderátorské cesty jsou přístupné pouze oprávněným rolím.
+- [ ] Ověřit, že veřejné odkazy vedou výhradně do produkčního prostředí.
+
+### Pozdější mobilní distribuce
+
+Podrobný postup a časově citlivé požadavky obchodů zůstávají v plánu
 [mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md); před placením
-nebo uploadem je ověřte znovu u Googlu a Applu.
+nebo uploadem je znovu ověřte u Googlu a Applu.
 
 - [ ] Dokončit podepsaný Android release a bezpečně zálohovat produkční klíč.
 - [ ] Připravit Google Play záznam, ochranu dat, věkové hodnocení a materiály.
@@ -55,23 +66,20 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
   polohu a ostatní používané služby.
 - [ ] Otestovat iOS build na skutečném iPhonu.
 - [ ] Připravit App Store Connect a projít schválením App Store.
-- [x] Původní rozhodnutí o omezeném Android/web pilotu bylo zaznamenáno a
-  následně nahrazeno širším rozsahem MVP.
-- [ ] Vydat Android i iOS pro běžné i privilegované účty a web omezit pouze na
-  Business a moderační role v klientovi, serverových oprávněních i testech.
-- [ ] Ověřit, že veřejné odkazy vedou výhradně do produkčního prostředí.
+- [ ] Vydat Android i iOS pro běžné i privilegované účty. Produkční web zůstává
+  dostupný běžným i Business účtům.
 
 ## 3. Stabilita hlavních uživatelských cest
 
-- [ ] Ověřit instalaci, první spuštění, přihlášení, odhlášení a návrat do
-  aplikace na skutečných telefonech.
+- [ ] Ověřit první otevření, přihlášení, odhlášení a návrat do webové aplikace.
 - [ ] Ověřit běžnou registraci, potvrzení e-mailu, přezdívku, avatar a onboarding.
 - [ ] Ověřit Business registraci, potvrzení e-mailu, čekací stav, zrušení žádosti
   a administrátorské schválení.
 - [ ] Ověřit reset hesla včetně neplatného, použitého a expirovaného odkazu.
 - [ ] Ověřit smazání účtu, okamžité odhlášení, opětovné použití stejného e-mailu
   a zmizení jeho obsahu z aplikace.
-- [ ] Dokončit test vytvoření Shoutu na fyzickém zařízení mimo Litoměřice.
+- [ ] Ověřit vytvoření Shoutu v mobilním i desktopovém prohlížeči mimo
+  Litoměřice.
 - [ ] Ověřit feed, poloměr, řazení, kategorie, filtry a navigaci.
 - [ ] Ověřit Shouty, komentáře, odpovědi, reakce, ukládání a expiraci.
 - [ ] Ověřit Follow, veřejné profily, blokování a hlášení.
@@ -81,23 +89,41 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 - [ ] Ověřit Business ověření, hlášení chyb, postihy, jejich zrušení a audit.
 - [ ] Otestovat pomalé a přerušované připojení.
 - [ ] Otestovat světlý, tmavý a systémový režim a všech sedm jazyků.
-- [ ] Otestovat úzký Android, různé rozměry iPhonu, mobilní web a desktop.
-- [ ] Spustit kompletní CI a odstranit všechny chyby release kandidáta.
+- [ ] Otestovat mobilní web i desktop v podporovaných šířkách.
+- [ ] Spustit webový build a relevantní CI a odstranit blokující chyby release
+  kandidáta.
 
-## 4. Business a monetizace
+Testy fyzického Androidu a iPhonu zůstávají podmínkou pozdějšího mobilního
+vydání podle `TESTING.md` a `MOBILE_DISTRIBUTION_PLAN.md`.
 
-- [ ] Automatizovat důvěryhodné ověření Business subjektu a aktivaci účtu;
-  bezpečná ruční kontrola zůstává záložní cestou.
-- [ ] Dokončit serverová oprávnění a limity všech Business promo funkcí.
-- [ ] Schválit ceny, balíčky, expiraci a refundace tokenů.
-- [ ] Implementovat auditovanou tokenovou účetní knihu bez klientského přepisu.
-- [ ] Implementovat Stripe nákup kartou, Apple Pay a Google Pay s idempotentním
-  serverovým potvrzením.
+## 4. Business základ pro webové MVP
+
+- [ ] Schválit kritéria ruční kontroly Business žádostí, řešení duplicit,
+  sporů a změn identifikačních údajů podle `BUSINESS_VERIFICATION.md`.
+- [ ] Doplnit a otestovat zamítnutí žádosti a pozastavení Business účtu včetně
+  odebrání oprávnění, odůvodnění a auditu; dnes funguje jen schválení.
+- [ ] Ověřit celý tok Business účtu od registrace a aktivace přes pobočky a
+  vlastní logo až po publikování a bezplatnou propagaci.
+- [ ] Dokončit serverová oprávnění a limity současných bezplatných Business
+  promo funkcí; nárok a použití oddělit od budoucí ceny.
+- [ ] Odstranit položku **Tokeny** a skrýt **Nákupy a faktury** i nefunkční
+  statistiky propagace; ověřit, že web nenabízí slepé platební cesty ani
+  tokenové texty.
+
+### Pozdější Business monetizace
+
+- [ ] Schválit podobu předplatného, ceny, období a rozsah placených Business
+  oprávnění bez tokenového modelu.
+- [ ] Zavést serverově řízený stav předplatného, audit a oprávnění, která si
+  klient nemůže sám přiznat.
+- [ ] Navrhnout a implementovat platební tok předplatného; dosavadní záměr
+  Stripe, karty, Apple Pay a Google Pay ověřit pro zvolený model a platformy,
+  serverové potvrzení zpracovávat idempotentně.
 - [ ] Dokončit fakturaci, DPH/VAT, měny, doklady, refundace a chargebacky.
 - [ ] Důvěryhodně měřit a zobrazit Business dosah, zobrazení, rozkliknutí a
   související monetizační metriky.
-- [ ] Uzavřít Founder entitlement, placený dosah a kosmetickou nabídku, pokud
-  zůstávají součástí nabídky první verze.
+- [ ] Navrhnout správu předplatného a dokladů v Business rozhraní a uzavřít
+  Founder zvýhodnění, případný větší dosah a kosmetickou nabídku.
 
 ## 5. Důvěryhodné serverové procesy
 
@@ -120,11 +146,15 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 - [ ] Určit odpovědnost za hlášení, moderaci, Business ověřování a incidenty.
 - [ ] Připravit eskalace, odvolání a reakci na právní požadavky.
 - [ ] Nastavit zálohování Firestore a prakticky ověřit obnovu.
-- [ ] Provést kontrolu Rules, IAM, service accounts, podpisů, tajemství,
+- [ ] Provést kontrolu Rules, IAM, service accounts, tajemství,
   závislostí, logů a záloh.
 - [ ] Odstranit z produkce testovací účty, demo data a vývojové přístupy.
 
-## 7. Měření potřebné pro rozhodování
+## 7. Měření pro navazující produktový rozvoj
+
+Provozní monitoring, náklady a bezpečnostní signály jsou podmínkou webového
+MVP v části 1. Následující produktové a akviziční metriky zůstávají plánované
+pro navazující vyhodnocování a marketing.
 
 - [ ] Definovat aktivního uživatele, aktivního autora a užitečnou akci.
 - [ ] Měřit dokončenou registraci a první užitečnou akci během prvního dne.
@@ -138,26 +168,27 @@ nebo uploadem je ověřte znovu u Googlu a Applu.
 ## 8. Historický rozsah neblokující původní omezený pilot
 
 Následující seznam zachovává původní rozhodnutí pro dříve uvažovaný omezený
-Android/web pilot. Novější definice MVP jej nahrazuje: Business monetizace,
-vlastní logo a iOS už nyní mohou být blokující podle aktuální brány.
+Android/web pilot. Rozšířená definice MVP z 30. srpna 2026 jej následně
+nahradila. Od 20. října 2026 je platným cílem veřejné webové MVP; mobilní
+distribuce a placená Business monetizace následují až po něm.
 
-- tokeny, ceny, platby a Stripe;
+- původně zvažované Business tokeny (20. října 2026 zrušené), ceny, platby a
+  Stripe; budoucí monetizace má mít podobu předplatného;
 - skutečné zpoplatnění Business funkcí;
 - vlastní Business logo ukládané ve Firebase Storage;
 - obrázkové přílohy hlášení chyby;
 - karma, achievementy a žebříčky;
-- automatické ARES/VIES ověření, pokud funguje důvěryhodná ruční kontrola;
 - velké placené kampaně a rozšiřování do dalších měst.
 
 ## 9. Rozhodovací brána
 
-Uzavřený marketingový pilot lze zahájit, pouze pokud:
+Veřejné webové MVP lze spustit, pouze pokud:
 
-- [ ] jsou veřejné a stabilní formálně dohodnuté platformy;
+- [ ] produkční web na dohodnuté subdoméně je veřejný a stabilní;
 - [ ] produkční prostředí je oddělené a chráněné;
 - [ ] hlavní uživatelské cesty prošly ručními i automatickými testy;
 - [ ] funguje právní, bezpečnostní a provozní minimum;
-- [ ] máme spolehlivé měření a osobu odpovědnou za jeho kontrolu;
+- [ ] funguje provozní a bezpečnostní monitoring s odpovědnou osobou;
 - [ ] byly výslovně přijaty nebo odstraněny všechny známé blokující závady.
 
 Po splnění této brány se příprava komunity, autorů, partnerů, propagačních

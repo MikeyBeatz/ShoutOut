@@ -3,9 +3,12 @@
 ## Schválené oddělení hodnot
 
 - **Karma** je nereálná reputační veličina. Nelze ji koupit, převést, utratit ani
-  směnit za Business tokeny a sama neuděluje moderátorská oprávnění.
-- **Business tokeny** patří pouze firemní propagaci a účetní knize popsané v
-  `BUSINESS_MONETIZATION.md`. S karmou ani achievementy se neslučují.
+  směnit za nárok k Business předplatnému a sama neuděluje moderátorská
+  oprávnění.
+- **Business monetizace** bude po webovém MVP řešená předplatným podle
+  `BUSINESS_MONETIZATION.md`. Business tokeny se nezavádějí. Případné kosmetické
+  coiny jsou samostatný nerozhodnutý návrh, nikoli platební prostředek pro
+  Business funkce.
 - **Kosmetika** mění pouze vzhled avatara/profilu. Nesmí zvýšit dosah, pořadí ve
   feedu, limity, viditelnost ani pravomoci.
 

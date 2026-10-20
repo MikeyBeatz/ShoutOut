@@ -98,8 +98,14 @@ URL obsluhuje také reset hesla a obnovení změněného e-mailu.
 Ve vývojovém projektu lze po ruční kontrole údajů použít chráněný Admin SDK
 nástroj `npm run activate:business`. Ve výchozím režimu pouze vypíše plán a až
 po explicitním potvrzení projektu, UID a pobočky atomicky vytvoří roli 2,
-Business profil a první pobočku. Tento vývojový postup nenahrazuje cílové
-automatické ověření registru.
+Business profil a první pobočku. Tento vývojový nástroj přijímá pouze žádost ve
+stavu `pending_email`, pokud je e-mail ve Firebase Authentication již ověřený.
+Běžný návrat žadatele do aplikace však spouští pokus o posun žádosti do
+`checking`; tu nástroj neaktivuje. Vývojový nástroj také nezapisuje audit
+`businessActivationAudits/{id}`. Běžné schválení stavu `checking` proto probíhá
+v administrátorském rozhraní, které audit zapisuje. Veřejné webové MVP vyžaduje
+dokončený provozní postup ruční kontroly a aktivace; napojení na firemní
+registry není plánované.
 
 ## Vytvoření Shoutu
 
@@ -195,7 +201,13 @@ Dlaždice Business je viditelná pouze roli 2. Obsahuje:
 
 - veřejný a oficiální název, registrační číslo, VAT ID a fakturační údaje,
 - seznam poboček,
-- připravené sekce Tokeny a Nákupy/faktury.
+- historii bezplatné propagace.
+
+Současný klient navíc ukazuje nefunkční položky **Tokeny**, **Nákupy a
+faktury** a prázdné statistiky propagace. Před webovým MVP se odstraní
+tokenová položka a ostatní odložené části skryjí. Budoucí správa předplatného
+a firemních dokladů se teprve navrhne; současné Business funkce zůstávají
+zdarma.
 
 Pobočka má název, Geoapify adresu, bod, geohash, stav geocodingu, aktivní stav a
 soft-delete. Pozastavená nebo smazaná pobočka není ve formuláři Shoutu. Změna

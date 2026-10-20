@@ -2,10 +2,10 @@
 
 ## Rozhodnutý rozsah
 
-Doména **`shoutout-app.eu`** byla pořízena u Hostingeru. V první etapě bude
-sloužit výhradně jako veřejný prezentační web ShoutOutu.
+Doména **`shoutout-app.eu`** byla pořízena u Hostingeru a slouží jako veřejný
+prezentační web ShoutOutu.
 
-Web nyní nebude obsahovat:
+Prezentační web neobsahuje:
 
 - přihlášení, registraci ani Firebase Authentication,
 - komunitní feed, tvorbu Shoutů nebo jiné části Flutter aplikace,
@@ -13,8 +13,8 @@ Web nyní nebude obsahovat:
 - odkazy do Google Play nebo App Storu; mobilní aplikace dosud není veřejně
   vydaná.
 
-Tato etapa není vydáním MVP ani veřejným spuštěním aplikace. Je samostatná od
-produkčního prostředí aplikace popsaného v `LAUNCH_READINESS.md`.
+Tato etapa není vydáním MVP ani veřejným spuštěním aplikace. Produkční webové
+MVP vznikne odděleně podle `LAUNCH_READINESS.md`.
 
 ## Hosting a doména
 
@@ -32,16 +32,19 @@ produkčního prostředí aplikace popsaného v `LAUNCH_READINESS.md`.
 - `www.shoutout-app.eu` zatím vrací 404; je potřeba jej připojit a nastavit
   přesměrování na `https://shoutout-app.eu`.
 
-## Co patří až k MVP
+## Webová aplikace pro MVP
 
-Po vydání MVP se odděleně rozhodne o webovém přístupu Business účtů a rolí
-moderace či veřejné správy. Doporučené je pro něj samostatné subdoménové
-rozhraní (například `app.shoutout-app.eu` nebo `admin.shoutout-app.eu`), ale
-název ani technické zapojení zatím nejsou rozhodnuté.
+Veřejná aplikace pro běžné a Business účty bude na
+`social.shoutout-app.eu`. Bude používat vlastní produkční Firebase projekt,
+jehož ID zatím není v repozitáři nakonfigurované; projekt
+`shoutout-production-a1b34` zůstává pro statickou prezentaci. Moderátorské
+rozhraní bude součástí aplikace s přístupem podle role. Produkční web vyžaduje
+vlastní konfiguraci Firebase Authentication, autorizovanou doménu a Action URL
+`/auth/action`.
 
-Až tato část vznikne, bude vyžadovat vlastní návrh přihlašovací brány, nastavení
-Firebase Authentication autorizovaných domén a případně globální Action URL
-`/auth/action`. Tyto kroky nejsou součástí prezentačního webu.
+Kořenový `firebase.json` v repozitáři patří Flutter aplikaci, zatímco
+`presentation/firebase.json` patří této statické stránce. Nasazení musí vždy
+explicitně určit správný adresář a Firebase projekt.
 
 ## Následující pořadí práce
 

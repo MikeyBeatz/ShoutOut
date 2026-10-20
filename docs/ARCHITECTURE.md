@@ -181,12 +181,12 @@ Klient je považován za nedůvěryhodný. Základní pravidla:
 Přesné a konečné znění oprávnění je vždy ve `firestore.rules`; tento dokument
 vysvětluje záměr, nenahrazuje pravidla.
 
-## Co dnes není automatizované
+## Co dnes není dokončené pro produkci
 
-- automatická aktivace Business žádosti přes registry; vývojový projekt má
-  bezpečný ruční Admin SDK nástroj, který atomicky vytvoří roli, profil a první
-  pobočku až po potvrzení e-mailu a kontrole údajů,
-- ověření ARES/VIES a platby,
+- produkční postup ruční kontroly Business žádosti včetně zamítnutí a
+  pozastavení; současné administrátorské rozhraní umí schválení a vývojový
+  projekt má omezený Admin SDK nástroj pro aktivaci vybraných žádostí,
+- platby,
 - push notifikace a oznámení sledujícím,
 - fyzické TTL mazání; konfigurace je připravená, ale aktivace čeká na kontrolu
   objemu a nákladů,

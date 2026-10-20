@@ -15,10 +15,12 @@ zatím nebyl sestaven ani ověřen na macOS a fyzickém iPhonu. Windows, macOS a
 Linux mají pouze Flutter kostru. Tyto platformy proto zatím nejsou součástí
 aktuálně podporovaného vývojového prostředí.
 
-Cílové MVP rozšiřuje veřejné mobilní klienty na Android i iOS. Web v MVP není
-určen běžným uživatelům: po přihlášení bude dostupný pouze Business a
-moderačním rolím. Jde o cílový stav backlogu, nikoli popis již nasazeného
-omezení.
+Cílem MVP je veřejně dostupná funkční webová aplikace pro běžné uživatele a
+Business účty na `social.shoutout-app.eu` ve vlastním produkčním Firebase
+projektu. Prezentace na `shoutout-app.eu` zůstává samostatná. Vývoj a vydání
+Androidu a iOS zůstávají v plánu po webovém MVP.
+Rozsah vydání a zbývající produkční předpoklady jsou v `docs/TODO.md` a
+`docs/LAUNCH_READINESS.md`.
 
 ## Technologie
 
@@ -102,9 +104,13 @@ oprávnění.
 Před nasazením povolte Geocoding API, nastavte Functions secret a nasaďte
 Functions, pravidla a indexy:
 
+Příkazy spouštějte z kořene repozitáře a zástupné `PROJECT_ID_APLIKACE`
+nahraďte ověřeným ID cílového Firebase projektu; postup a nákladová brána jsou
+v [provozním runbooku](docs/SETUP_AND_OPERATIONS.md).
+
 ```powershell
-firebase functions:secrets:set GOOGLE_MAPS_API_KEY
-firebase deploy --only functions,firestore:rules,firestore:indexes
+firebase functions:secrets:set GOOGLE_MAPS_API_KEY --project PROJECT_ID_APLIKACE
+firebase deploy --only functions,firestore:rules,firestore:indexes --project PROJECT_ID_APLIKACE
 ```
 
 Klíč omezte na Geocoding API a nevkládejte ho do Flutter aplikace. Starší shouty
@@ -144,10 +150,11 @@ Hlavní kolekce ve Firestore:
 Bezpečnostní pravidla jsou v `firestore.rules` a indexy v
 `firestore.indexes.json`.
 
-Nasazení pravidel a indexů:
+Nasazení pravidel a indexů z kořene repozitáře po ověření cíle; zástupné
+`PROJECT_ID_APLIKACE` nahraďte skutečným ID projektu aplikace:
 
 ```powershell
-firebase deploy --only firestore:rules,firestore:indexes
+firebase deploy --only firestore:rules,firestore:indexes --project PROJECT_ID_APLIKACE
 ```
 
 Před nasazením vždy ověřte, že Firebase CLI míří na správný projekt. Produkční
@@ -217,7 +224,7 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `docs/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
 - `docs/COST_SAFETY.md` – povinné nákladové limity, kvóty a nouzový postup
 - `docs/TESTING.md` – automatická a ruční regresní matice
-- `docs/TODO.md` – jediný společný projektový backlog, hranice Android/iOS/web MVP
+- `docs/TODO.md` – jediný společný projektový backlog, hranice webového MVP
   a oddělené počítadlo postupu k MVP i celému backlogu
 - `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
@@ -231,8 +238,10 @@ textu je nutné doplnit obě vrstvy, dokud nebude migrace dokončená.
 ## Odložená serverová část
 
 Některé operace jsou v klientovi a Firestore připravené, ale vyžadují budoucí
-serverovou automatizaci – například aktivace Business žádosti, úplné zpracování
-smazání účtu, retenční lhůty, čištění expirovaného obsahu a push notifikace.
+serverovou automatizaci – například úplné zpracování smazání účtu, retenční
+lhůty, čištění expirovaného obsahu a push notifikace. Business žádosti se dnes
+schvalují ručně v administrátorském rozhraní; zamítnutí a pozastavení se musí
+dopracovat před veřejným webovým MVP.
 Přesný seznam a podmínky dokončení jsou v [TODO](docs/TODO.md); dokumentace
 současné architektury zřetelně odděluje hotový stav od návrhu.
 

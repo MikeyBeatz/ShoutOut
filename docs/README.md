@@ -27,23 +27,23 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 
 - [TODO](TODO.md) – jediný projektový backlog a pořadí další práce. Popisuje
   budoucí stav, nikoli automaticky současnou funkčnost.
-- [Prezentační web](PRESENTATION_SITE.md) – rozhodnutý rozsah domény
-  `shoutout-app.eu`, oddělení od MVP aplikace a postup připojení k Hostingu.
+- [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
+  `shoutout-app.eu` a oddělení od webového MVP na `social.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
-  pro produkci, distribuci, bezpečnost, právo, testování a provoz.
+  veřejné webové aplikace pro produkci, bezpečnost, právo, testování a provoz.
 - [Mobilní testování, distribuce a technický rozpočet](MOBILE_DISTRIBUTION_PLAN.md)
-  – ověřený postup pro Google Play, cloudový Mac, TestFlight a veřejné vydání
+  – navazující postup pro Google Play, cloudový Mac, TestFlight a mobilní vydání
   včetně Firebase, domény, nákladů a požadavků na skutečná zařízení.
-- [Business monetizace](BUSINESS_MONETIZATION.md) – jednotný návrh nákupů,
-  tokenů a placených funkcí.
-- [Ověření business účtů](BUSINESS_VERIFICATION.md) – registrační a ověřovací
-  proces business účtů.
+- [Business monetizace](BUSINESS_MONETIZATION.md) – bezplatný základ webového
+  MVP a otevřený návrh budoucího předplatného bez Business tokenů.
+- [Ověření business účtů](BUSINESS_VERIFICATION.md) – současná ruční aktivace
+  a otevřená kritéria kontroly před veřejným webem.
 - [Interní moderace](INTERNAL_MODERATION.md) – role, pravomoci, postihy a audit.
-- [Napojení Firebase Storage](FIREBASE_STORAGE_SETUP.md) – postup aktivace po
-  přechodu na placený plán.
+- [Napojení Firebase Storage](FIREBASE_STORAGE_SETUP.md) – současná pravidla pro
+  Business loga a přílohy hlášení chyb a příprava produkčního bucketu.
 - [Vyhodnocení externích událostí](EXTERNAL_EVENTS_EVALUATION.md) – výběr zdroje,
   limity, licence a podmínky případného pilotu.
-- [Model gamifikace](GAMIFICATION_MODEL.md) – oddělení karmy, tokenů,
+- [Model gamifikace](GAMIFICATION_MODEL.md) – oddělení karmy, předplatného,
   achievementů a kosmetických odměn.
 - [Plán evropské ochranné známky](EU_TRADEMARK_PLAN.md) – rešerše, třídy,
   rozpočet a rozhodovací brána před podáním.

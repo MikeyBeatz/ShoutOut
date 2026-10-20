@@ -1,9 +1,20 @@
-# Firebase Storage – plán napojení obrázků k hlášení chyb
+# Firebase Storage – Business loga a obrázky k hlášením chyb
 
-Firebase Storage v projektu `shoutout-dev-46c81` slouží pouze pro obrázky přiložené
-k hlášením chyb. Textová hlášení zůstávají funkční i bez přílohy.
+Firebase Storage ve vývojovém projektu `shoutout-dev-46c81` slouží pro Business
+loga i obrázky přiložené k hlášením chyb. Textová hlášení zůstávají funkční i
+bez přílohy. Produkční webové MVP potřebuje vlastní bucket, pravidla a nákladové
+pojistky v samostatném Firebase projektu aplikace.
 
-## Co je připravené
+## Business loga
+
+- Aktivní Business účet může uložit vlastní logo na cestu
+  `businessLogos/{uid}/logo-{version}.png`. Klient vytváří čtvercové PNG o
+  rozměrech 512 × 512 px; Storage Rules přijímají soubor do 2 MiB.
+- Logo mohou číst přihlášení uživatelé. Zapsat a smazat ho může pouze vlastník
+  s aktivní Business rolí; cesta a verze se ukládají do soukromého i veřejného
+  profilu. Podrobnosti jsou v `DATA_MODEL.md`.
+
+## Obrázky k hlášením chyb
 
 - výběr obrázku z galerie a lokální náhled;
 - možnost obrázek před odesláním odebrat;
@@ -35,11 +46,15 @@ samostatným dokumentem `docs/COST_SAFETY.md`.
    `lib/firebase_options.dart`; případnou odlišnost opravit přes FlutterFire CLI.
 5. Nasadit pravidla s explicitním prostředím:
    `firebase deploy --only storage --project your-project-id`.
-6. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`.
-7. Sestavit a nasadit web se stejnými produkčními parametry jako běžné demo.
+6. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`
+   pro přílohy hlášení chyb, a samostatně ověřit upload Business loga.
+7. Web sestavit s konfigurací cílového projektu; produkční aplikace patří na
+   `social.shoutout-app.eu`, nikoli do projektu statické prezentace.
 
-## Povinné ověření před zapnutím
+## Povinné ověření před zapnutím příloh a log
 
+- aktivní Business účet nahraje a nahradí logo; běžný uživatel ani cizí Business
+  účet ho nezapíše a přihlášený uživatel ho může zobrazit;
 - textové hlášení bez obrázku projde;
 - JPG, PNG a WebP do 2 MB projdou a zobrazí průběh;
 - nepovolený typ, prázdný soubor a soubor nad 2 MB jsou odmítnuté;

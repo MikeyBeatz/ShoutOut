@@ -39,19 +39,26 @@ profilů, aby se bez přepisování historie změnil všude, kde se autor zobraz
 
 | Cesta | Důležitá pole | Význam |
 |---|---|---|
-| `businessApplications/{uid}` | `countryCode`, `registrationNumber`, `submittedCompanyName`, fakturační adresa, `initialLocationName`, adresa a země provozovny, `initialLocation`, `initialLocationGeohash`, `initialLocationProviderPlaceId`, `contactEmail`, `status`, `submittedAt`; po ruční aktivaci `activatedAt`, `activatedBy`, `activationMethod` | Žádost vytvořená při Business registraci ve stavu `pending_email`. Vývojový Admin SDK nástroj ji po kontrole atomicky přepne na `active`; klient ji měnit nesmí. |
+| `businessApplications/{uid}` | `countryCode`, `registrationNumber`, `submittedCompanyName`, fakturační adresa, `initialLocationName`, adresa a země provozovny, `initialLocation`, `initialLocationGeohash`, `initialLocationProviderPlaceId`, `contactEmail`, `status`, `submittedAt`; po ruční aktivaci `activatedAt`, `activatedBy`, `activationMethod` | Žádost vzniká ve stavu `pending_email`, po ověření přechází do `checking`. Administrátor nebo owner ji může ručně schválit; vývojový Admin SDK nástroj zvládá jen ověřený `pending_email`. Zamítnutí a pozastavení zatím chybí. |
 | `businessActivationAudits/{id}` | `applicationId`, `administratorId`, `action: activate`, `createdAt` | Neměnný audit ruční aktivace Business účtu z administrátorského rozhraní. |
-| `businessProfiles/{uid}` | `displayName`, `officialName`, `registrationNumber`, `vatId`, `countryCode`, `registryAddress`, `billingCity`, `billingPostalCode`, `billingEmail`, `status`, časová pole | Aktivní firemní profil a společné fakturační údaje. Vytvoření/aktivace je serverová operace; klient smí měnit jen vybrané kontaktní a zobrazované údaje. |
+| `businessProfiles/{uid}` | `displayName`, `officialName`, `registrationNumber`, `vatId`, `countryCode`, `registryAddress`, `billingCity`, `billingPostalCode`, `billingEmail`, `status`, časová pole | Aktivní firemní profil a společné fakturační údaje. Roli a profil vytváří důvěryhodný administrátorský zápis pod kontrolou Rules nebo vývojový Admin SDK nástroj; běžný klient smí měnit jen vybrané kontaktní a zobrazované údaje. Název pole `registryAddress` neznamená automatické ověření registru. |
 | `businessProfiles/{uid}/locations/{locationId}` | `displayName`, `address`, `active`, `deleted`, `geocodingStatus`, `location`, `geohash`, `providerPlaceId`, `countryCode`, `createdAt`, `updatedAt` | Pobočka/provozovna. Ověřená adresa má `geocodingStatus: verified`; pozastavení mění `active`, odstranění je soft-delete přes `deleted`. |
 
 Při Business Shoutu musí `businessLocationId`, zobrazované jméno, bod a geohash
 přesně odpovídat aktivní, nesmazané a ověřené provozovně. Sídlo firmy nikdy
 automaticky nenahrazuje první provozovnu.
 
-Vývojová ruční aktivace používá deterministické ID první pobočky `initial` a
-`activationMethod: manual_development`. Společně zapíše `accountRoles/{uid}` s
-rolí 2, aktivní Business profil, pobočku a stav žádosti. Automatická produkční
-aktivace později použije vlastní auditovaný serverový proces.
+Ruční schválení v administrátorském rozhraní používá deterministické ID první
+pobočky `initial` a `activationMethod: manual_admin`. Atomicky zapíše
+`accountRoles/{uid}` s rolí 2, aktivní Business profil, pobočku, stav žádosti a
+`businessActivationAudits/{id}`. Vývojový nástroj používá
+`activationMethod: manual_development` a audit nevytváří. Produkční ruční
+kontrola, zamítnutí a pozastavení se musí před webovým MVP dokončit; ověření
+firem přes registry není v plánu.
+
+Současný datový model nemá kolekci ani pravidla pro předplatné nebo placené
+Business nároky. Jejich důvěryhodný model se navrhne až pro monetizaci po MVP;
+Business tokeny se nezavádějí.
 
 ## Shout a konverzace
 

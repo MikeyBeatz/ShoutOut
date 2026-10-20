@@ -59,8 +59,9 @@ obcích. Komunikace má být přístupná i lidem mimo tuto věkovou skupinu.
   vietnamština;
 - Android a vývojová webová verze.
 
-Push notifikace mimo otevřenou aplikaci, automatická aktivace Business účtu,
-platby a část retenčních serverových automatizací jsou plánované.
+Push notifikace mimo otevřenou aplikaci, platby a část retenčních serverových
+automatizací jsou plánované. Business žádosti se posuzují ručně; provozní
+postup pro veřejný web je třeba dokončit.
 
 ## Produktová terminologie
 
@@ -141,5 +142,6 @@ Vodoznak není uvnitř jednotlivých karet.
 - že má aktivní uživatele v konkrétním počtu nebo po celém světě;
 - že je uživatel zcela anonymní;
 - že poloha nebo obsah jsou neomylně ověřené;
-- že push notifikace, automatické Business ověření nebo platby už fungují;
+- že push notifikace nebo platby už fungují;
+- že Business účet potvrzuje vlastnictví firmy nebo automatické ověření v registru;
 - že jde o náhradu tísňových linek nebo oficiálního varovného systému.

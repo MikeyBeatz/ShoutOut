@@ -122,8 +122,8 @@ moderátor bez regionu neuvidí regionální pracovní frontu.
 
 ## Aktivace čekající Business žádosti ve vývoji
 
-Dokud není nasazené automatické ověření ARES/VIES, lze dokončit skutečnou
-Business registraci jedním vývojovým Admin SDK nástrojem. Nástroj odmítne jiný
+Business žádosti se posuzují ručně. Ve vývojovém projektu lze registraci
+dokončit jedním chráněným Admin SDK nástrojem. Nástroj odmítne jiný
 projekt než `shoutout-dev-46c81`, neověřený nebo odlišný kontaktní e-mail,
 neúplnou žádost a přepsání existujícího profilu či první pobočky.
 
@@ -145,8 +145,9 @@ Jedna Firestore transakce vytvoří roli 2, aktivní Business profil a první
 pobočku `initial` a označí žádost jako aktivní. Již existující správná Business
 role je zachována. Skript nikdy nepovažuje klientský Geoapify výsledek za
 automaticky důvěryhodný; příznak `--confirm-location` vyjadřuje ruční kontrolu
-operátorem. Jde pouze o vývojový mezikrok, ne náhradu cílového serverového
-ověření registru.
+operátorem. Jde pouze o vývojový nástroj; postup ruční kontroly a aktivace pro
+veřejný web je potřeba dokončit podle
+[`BUSINESS_VERIFICATION.md`](../docs/BUSINESS_VERIFICATION.md).
 
 Čistou transformační logiku bez přístupu k Firebase ověří:
 

@@ -1,8 +1,10 @@
 # Nákladové pojistky Firebase a Google Cloud
 
-Tento dokument je povinný checklist před prvním nasazením Cloud Functions a
-před veřejným provozem projektu `shoutout-dev-46c81`. Cílem vývojového prostředí
-je zůstat v bezplatných kvótách a omezit škodu při chybě nebo zneužití.
+Tento dokument je povinný checklist před prvním nasazením Cloud Functions ve
+vývojovém projektu `shoutout-dev-46c81`. Samostatný produkční projekt webové
+aplikace musí před veřejným provozem projít stejnou nákladovou bránou s
+vlastními limity. Cílem vývojového prostředí je zůstat v bezplatných kvótách a
+omezit škodu při chybě nebo zneužití.
 
 ## Zásadní omezení
 
@@ -61,8 +63,9 @@ poplatkem.
   schválené časové okno a ihned vrátit.
 - [ ] Zakázat nepoužívaná API a každý API klíč omezit pouze na potřebné API a
   správný typ klienta.
-- [ ] Ověřit App Check metriky pro Android, iOS a web; enforcement zapínat po
-  jednotlivých službách až po potvrzení legitimních klientů.
+- [ ] Ověřit App Check metriky pro web před veřejným webovým MVP; enforcement
+  zapínat po jednotlivých službách až po potvrzení legitimních klientů. Pro
+  Android a iOS tento krok zopakovat před pozdějším mobilním vydáním.
 - [ ] Vytvořit dashboard spotřeby pro Functions, Firestore, Storage, Hosting a
   Maps a ověřit, že upozornění dorazí vlastníkovi projektu.
 - [ ] Provést řízený test překročení malé testovací kvóty a zaznamenat, zda se
@@ -89,8 +92,9 @@ kontrola metrik, chyb a spotřeby před otevřením dalšího kroku.
    limit dávky, `maxInstances`, ochranu proti opakování, audit a test částečného
    selhání.
 
-Pořadí je závazné pro vývojové prostředí. Produkce vznikne jako samostatný
-projekt a projde stejnou nákladovou bránou s vlastními limity.
+Pořadí je závazné pro vývojové prostředí. Produkční aplikace vznikne ve
+vlastním Firebase projektu odděleném od vývoje i statické prezentace a projde
+stejnou nákladovou bránou s vlastními limity.
 
 ## Limity jednotlivých služeb
 

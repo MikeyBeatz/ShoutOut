@@ -83,9 +83,12 @@ levněji a přesněji pokrýt unit testem.
   reagují na tah do stran a cyklicky se opakují. Bez okénka prostor zmizí.
 - delší platnost nabízí po 24 hodinách pouze celé dny 2–7; běžný účet nesmí
   propagaci ani prodloužení zapsat a nepravdivé příznaky pravidla odmítnou.
-- Business → Propagace uvádí použité funkce bez ceny a připravené metriky
-  unikátní dosah, zobrazení, rozkliknutí a míra prokliku; do zapojení
-  důvěryhodného serverového měření místo čísel zobrazí pomlčku.
+- Business → Propagace uvádí použité bezplatné funkce bez ceny. Před webovým
+  MVP se nesmí zobrazit položka **Tokeny**, nefunkční **Nákupy a faktury** ani
+  prázdné metriky dosahu, zobrazení, rozkliknutí a míry prokliku. Ověřit
+  mobilní i desktopový web a nápovědu ve všech sedmi jazycích bez slibů
+  tokenového nákupu; statistiky se vrátí až s důvěryhodným měřením po zavedení
+  monetizace.
 
 ### Follow, komunikace a oznámení
 
@@ -117,17 +120,19 @@ levněji a přesněji pokrýt unit testem.
 
 ## Zařízení a zobrazení
 
-Před demo/release ověřte minimálně:
+Před vydáním webového MVP ověřte minimálně:
 
-- úzký Android telefon v portrait, otevřenou klávesnici a změnu orientace
-  zakázanou manifestem;
 - Chrome v mobilní šířce a desktopový Chrome alespoň 1920 px široký;
 - maximální šířku celé aplikace 840 px, centrování a užší, rozměrově stabilní
   dialogy;
 - světlý, tmavý i systémový režim;
 - češtinu, angličtinu, němčinu, polštinu, slovenštinu, ukrajinštinu a
   vietnamštinu včetně diakritiky a delších popisků;
-- launcher, splash, feed watermark a všech 24 avatarů podle `design/README.md`.
+- feed watermark a všech 24 avatarů podle `design/README.md`.
+
+Před pozdějším mobilním vydáním navíc ověřte úzký Android telefon v portrait,
+otevřenou klávesnici, změnu orientace zakázanou manifestem, rozměry iPhonu,
+launcher a splash podle `design/README.md`.
 
 ## Testovací data
 

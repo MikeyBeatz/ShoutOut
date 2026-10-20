@@ -16,8 +16,9 @@
 - Like/dislike zůstávají; je nutné ověřit práh skrytí a možnost vědomě rozbalit
   Shout skrytý kvůli negativním reakcím.
 
-Tento dokument popisuje informační architekturu současného klienta. Neurčuje
-každý pixel; přesné barvy, fonty, logo, splash, watermark a assety jsou v
+Tento dokument popisuje informační architekturu současného klienta a výslovně
+označené změny před webovým MVP. Neurčuje každý pixel; přesné barvy, fonty,
+logo, splash, watermark a assety jsou v
 `design/README.md` a `design/brand-tokens.json`. Produktové podmínky jednotlivých
 akcí jsou v `PRODUCT_FLOWS.md`.
 
@@ -240,16 +241,21 @@ gratulaci; výsledek neovlivňuje účet ani karmu.
 
 ### Business
 
-Role 2 otevře pět funkčních/rezervovaných oblastí:
+Současný klient role 2 nabízí pět funkčních/rezervovaných oblastí:
 
 - **Business profil** – veřejný název, oficiální a registrační/fakturační údaje,
   ikona tužky v AppBar i tlačítko Upravit údaje;
 - **Pobočky** – plus v AppBar a seznam rozbalovacích provozoven; editor má
   název, Geoapify adresu, aktivní stav, uložit a smazat. Po uložení se sbalí;
 - **Propagace** – historie Shoutů s prodloužením, zvýrazněním nebo okénkem,
-  bez ceny do zavedení tokenů a s připraveným místem pro serverové statistiky;
-- **Tokeny** – placeholder budoucí monetizace;
-- **Nákupy a faktury** – placeholder budoucích firemních dokladů.
+  zatím bez ceny; prázdné statistiky čekají na serverové měření;
+- **Tokeny** – nefunkční placeholder dosavadního návrhu monetizace;
+- **Nákupy a faktury** – nefunkční placeholder budoucích firemních dokladů.
+
+Před veřejným webovým MVP se **Tokeny** odstraní a **Nákupy a faktury** i
+prázdné statistiky v **Propagaci** skryjí. Zůstanou funkční Business profil,
+pobočky a historie bezplatné propagace. Budoucí správu předplatného a dokladů
+určí samostatný návrh; tokenová sekce se nevrátí.
 
 Vlastní Business logo má připravený lokální editor: přijímá JPG, PNG nebo WebP
 do 10 MB a nejméně 512 × 512 px, umožňuje posun a přiblížení ve čtvercovém

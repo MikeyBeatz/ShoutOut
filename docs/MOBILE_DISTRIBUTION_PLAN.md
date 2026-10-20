@@ -4,6 +4,8 @@ Tento runbook popisuje cestu od současného vývoje ve Windows k testování p�
 Google Play a TestFlight a následně k veřejné distribuci. Podmínky obchodů byly
 ověřené 14. srpna 2026. Protože se mohou změnit, před placením účtů a před každým
 prvním odesláním znovu projděte odkazy v části **Aktuální oficiální požadavky**.
+Mobilní distribuce navazuje až po webovém MVP; popsaný postup zůstává plánem
+pozdějšího vydání Androidu a iOS.
 
 ## Co zůstává společné
 
@@ -15,9 +17,10 @@ vývojových účtů nebo tajemství v repozitáři.
 
 Před první distribucí obou platforem:
 
-1. Splnit [produkční bránu](LAUNCH_READINESS.md) a povinné scénáře v
-   [testovací strategii](TESTING.md).
-2. Vytvořit oddělený produkční Firebase projekt a produkční mobilní aplikace.
+1. Splnit webovou [produkční bránu](LAUNCH_READINESS.md) a navazující mobilní
+   body tohoto plánu a [testovací strategie](TESTING.md).
+2. V produkčním Firebase projektu aplikace připraveném pro webové MVP
+   zaregistrovat také produkční Android a iOS aplikaci a jejich konfigurace.
 3. Připravit zásady soukromí, kontakty podpory, popis zpracování dat, věkové
    hodnocení, screenshoty a přístup pro kontrolora k funkcím vyžadujícím účet.
 4. Zajistit verzování, podepisování, zálohu klíčů a možnost dohledat zdrojový
@@ -158,14 +161,17 @@ Zkrácená cesta:
 - [Apple – aktuální požadavky Xcode a SDK](https://developer.apple.com/news/upcoming-requirements/)
 - [Apple – TestFlight](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/)
 
-## Technické náklady na první veřejnou verzi
+## Technické náklady na pozdější mobilní vydání
 
-Odhad používá kurz **25 Kč/USD**. Počítá s vydáním na Google Play i App Storu,
-jednoduchým veřejným webem na vlastní `.cz` doméně a současnou architekturou
-Firebase. Marketing, placení testeři, mzdy a provize z případného prodeje nejsou
-zahrnuté.
+Následující čísla jsou původní odhad ze 14. srpna 2026 při kurzu **25 Kč/USD**.
+Počítal s vydáním na Google Play i App Storu, jednoduchým veřejným webem na
+vlastní `.cz` doméně a tehdejší architekturou Firebase. Nyní je cílem webové MVP
+na `.eu` doméně a pozdější mobilní aplikace použijí stejný produkční Firebase
+projekt aplikace. Před mobilním vydáním je nutné celý odhad znovu spočítat;
+uvedené částky nejsou rozpočtem webového MVP. Marketing, placení testeři, mzdy
+a provize z případného prodeje nebyly zahrnuté.
 
-### První oficiálně distribuovaná verze
+### První oficiálně distribuovaná mobilní verze
 
 | Položka | Odhad |
 |---|---:|
@@ -178,10 +184,10 @@ zahrnuté.
 | Firebase/Google Cloud – první skutečná spotřeba | 0–500 Kč |
 | **očekávaný přímý výdaj** | **4 100–4 700 Kč** |
 | **rezerva na daň, kurz, opakovaný iOS build a cloudové překročení** | **2 300–2 900 Kč** |
-| **doporučená hotovost pro první veřejnou verzi** | **7 000 Kč** |
+| **doporučená hotovost pro první mobilní vydání podle původního odhadu** | **7 000 Kč** |
 
-Sedm tisíc je konečný rozpočet prvního vydání včetně rezervy, nikoli částka, ke
-které se má ještě přičíst další „první měsíc“.
+V původním odhadu sedm tisíc zahrnovalo první mobilní vydání i rezervu; další
+„první měsíc“ se k němu nepřičítal.
 
 ### Měsíční provoz do 10 000 aktivních uživatelů
 
@@ -201,11 +207,12 @@ aktivních, dvě návštěvy aplikace denně, nejvýše 100 Firestore čtení na
 | **provozní rezerva** | **1 500 Kč** |
 | **doporučený měsíční rozpočet včetně rezervy** | **3 000 Kč** |
 
-Rozpočet 3 000 Kč platí jen při uvedeném využití. Největší rizika překročení jsou
-častější znovunačítání Firestore listenerů, více než 10 000 nových Shoutů a tedy
-geocodingů měsíčně, velké obrázky a neočekávaný přenos dat. Před spuštěním Blaze
-se proto nastaví billing alerty a API kvóty; samotný alert účet automaticky
-nezastaví.
+Původní měsíční odhad 3 000 Kč platil jen při uvedeném využití. Největší rizika
+překročení jsou častější znovunačítání Firestore listenerů, více než 10 000
+nových Shoutů a tedy
+geocodingů měsíčně, velké obrázky a neočekávaný přenos dat. Před produkčním
+mobilním provozem se proto nastaví billing alerty a API kvóty; samotný alert
+účet automaticky nezastaví.
 
 Aktuální podklady: [Google Play](https://support.google.com/android-developer-console/answer/16640817?hl=en),
 [Apple](https://developer.apple.com/programs/enroll/),

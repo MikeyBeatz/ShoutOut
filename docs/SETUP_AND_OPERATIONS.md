@@ -108,8 +108,9 @@ uložit neověřenou Business pobočku.
 Současné prostředí zůstává uzavřeným vývojovým testem. Registrace se před
 veřejným sdílením neotevře anonymně: tester dostane odkaz individuálně a po
 ukončení testu se jeho účet odstraní nástrojem pro integrační scénář. App Check
-se nejprve sleduje v metrikách a vynutí se až po ověření webového, Android a iOS
-provideru, aby se legitimní klienti nezablokovali. Před pilotem musí být
+se nejprve sleduje v metrikách a pro webové MVP vynutí až po ověření webového
+provideru, aby se legitimní klienti nezablokovali. Android a iOS provider se
+ověří před pozdější mobilní distribucí. Před pilotem musí být
 dokončený checklist v [nákladových pojistkách](COST_SAFETY.md). Samotný
 rozpočtový alert není tvrdý limit a nenahrazuje servisní kvóty, spend cap pro
 Functions, App Check ani nouzové selektivní vypnutí. Žádná Cloud Function se
@@ -123,25 +124,38 @@ produkčního projektu.
    vytvořením Firestore, protože ho později nelze jednoduše změnit.
 2. Zapněte Authentication provider **Email/Password**. Klient vyžaduje heslo
    nejméně 10 znaků a před vytvořením profilu ověření e-mailu.
-3. Zaregistrujte Android aplikaci s package name `cz.shoutout.app`, iOS aplikaci
-   se správným bundle ID a webovou aplikaci.
-4. Nainstalujte Firebase CLI a FlutterFire CLI, přihlaste se a vygenerujte
-   klientské konfigurace:
+3. Pro webové MVP zaregistrujte webovou aplikaci. Android aplikaci s package
+   name `cz.shoutout.app` a iOS aplikaci se správným bundle ID připravte pro
+   pozdější mobilní vydání.
+4. Nainstalujte Firebase CLI a FlutterFire CLI a přihlaste se. Produkční
+   klientskou konfiguraci vygenerujte až po zavedení bezpečného přepínání
+   prostředí; příkaz při spuštění v současné pracovní kopii přepisuje
+   `lib/firebase_options.dart` a může změnit vývojovou vazbu:
 
    ```powershell
    npm install --global firebase-tools@15.24.0
    dart pub global activate flutterfire_cli
    firebase login
-   flutterfire configure --project your-project-id --platforms android,ios,web
+   flutterfire configure --project your-project-id --platforms web
    ```
 
-5. Zkontrolujte, že vznikl `lib/firebase_options.dart`, Android
-   `google-services.json`, iOS `GoogleService-Info.plist` a vazby ve
-   `firebase.json`. Pro jiné prostředí je vygenerujte znovu; nekopírujte
-   vývojové project ID do produkce.
+5. Ověřte novou webovou konfiguraci ve `lib/firebase_options.dart` a vazby ve
+   `firebase.json`. Samostatně upravte konfiguraci v `web/auth-action.html` a
+   návratovou URL v `lib/email_verification.dart`; FlutterFire CLI tyto dvě
+   hodnoty nepřepíná. Pro mobilní vydání později znovu spusťte FlutterFire CLI
+   s platformami `android,ios,web` a ověřte také Android
+   `google-services.json` a iOS `GoogleService-Info.plist`. Konfiguraci pro
+   jiné prostředí vygenerujte znovu; nekopírujte vývojové project ID do
+   produkce.
 
-Repozitář nemá `.firebaserc`, aby se omylem nepřepínal implicitní projekt. Každý
-nasazovací příkaz proto musí obsahovat `--project`.
+Repozitář obsahuje `.firebaserc` s aliasem `web` pro produkční projekt
+prezentačního webu `shoutout-production-a1b34`. Výchozí projekt (`default`)
+nastavený není. Každý nasazovací příkaz proto musí obsahovat `--project` a musí
+být spuštěný ze správného adresáře podle příslušného `firebase.json`.
+
+Webové MVP bude na `social.shoutout-app.eu` ve vlastním produkčním Firebase
+projektu aplikace. Jeho ID zatím není v repozitáři nakonfigurované a nesmí se
+odvozovat z aliasu `web`, který patří statické prezentaci.
 
 ### 2. Firestore, pravidla a indexy
 
@@ -152,8 +166,10 @@ firebase deploy --only firestore:rules,firestore:indexes --project your-project-
 ```
 
 Schéma aplikace je bez migračního frameworku a první data vznikají registrací.
-Role, Business profil a případná demo data se zakládají důvěryhodnými Admin SDK
-nástroji podle `tools/README.md`, nikoli ručně z klienta. Přesný katalog kolekcí
+Business profil a roli dnes může vytvořit administrátorské rozhraní atomickým
+zápisem pod kontrolou Firestore Rules; vývojový Admin SDK nástroj podle
+`tools/README.md` je omezená alternativa pro vybrané vývojové scénáře.
+Případná demo data vytvářejte jen důvěryhodnými nástroji. Přesný katalog kolekcí
 je v `DATA_MODEL.md`.
 
 Čekající Business žádost lze ve vývojovém projektu po potvrzení e-mailu a ruční
@@ -305,6 +321,20 @@ ní samostatná.
 Pravidla, indexy, Functions a Storage nenasazujte automaticky spolu s demem.
 Každá část se nasazuje explicitním `--only` až po příslušných testech.
 
+## Produkční webové MVP
+
+Cílem je `social.shoutout-app.eu` v samostatném produkčním Firebase projektu
+aplikace. Před nasazením je potřeba vytvořit projekt a webovou Firebase
+aplikaci, zavést bezpečné přepínání konfigurace v `lib/firebase_options.dart`,
+`web/auth-action.html` a `lib/email_verification.dart`, připravit Hosting,
+Auth Action URL a autorizované domény, nasadit pravidla, indexy a potřebné
+služby a projít bránu v `LAUNCH_READINESS.md`.
+
+Kořenový `firebase.json` nasazuje Flutter build z `build/web`;
+`presentation/firebase.json` nasazuje statický web. Při budoucím nasazení je
+třeba explicitně určit nový project ID a pracovat v kořeni repozitáře. ID
+projektu prezentace `shoutout-production-a1b34` není cílem aplikace.
+
 ## Android release
 
 Účty, testovací kanály, fyzické ověření zařízení a cesta do produkce jsou
@@ -358,9 +388,11 @@ není důvod k odstranění z klienta, ale musí mít správné aplikační rest
   zřetelně označené jako bez regionálního obohacení.
 - [ ] App Check je nakonfigurovaný pro skutečné podporované klienty před
   zapnutím enforcementu.
-- [ ] Role a Business profily vytváří pouze důvěryhodný Admin SDK proces.
+- [ ] Business role a profily vznikají jen administrátorským zápisem pod
+  kontrolou Rules nebo schváleným Admin SDK procesem, nikoli běžným klientem.
 - [ ] Všechny kontroly z této stránky a ruční hlavní toky z
   `PRODUCT_FLOWS.md` prošly.
 - [ ] Web Hosting servíruje novou verzi bez staré cache a `/admin` funguje.
-- [ ] Produkční projekt, klíče, testovací účty, platby, monitoring, zálohy a
-  retenční joby jsou oddělené od dema a dokončené podle `TODO.md`.
+- [ ] Produkční projekt, klíče, testovací účty, monitoring, zálohy a retenční
+  joby jsou oddělené od dema a dokončené podle webové brány v `TODO.md`.
+  Platby patří do pozdější monetizační etapy.
