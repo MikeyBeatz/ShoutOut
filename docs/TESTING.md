@@ -11,9 +11,13 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 | Dart unit testy | `test/account_role_test.dart`, `account_ban_test.dart`, `app_theme_test.dart`, `geography_test.dart`, `profile_tile_layout_test.dart`, `shout_test.dart` | Role, aktivitu dočasných a trvalých banů, téma, geohash, veřejné zaokrouhlení, profilové řádky po třech, životní cyklus a řazení Shoutu, avatary a normalizaci nadpisu. |
 | Flutter widget testy | `test/widget_test.dart`, `localization_test.dart`, `business_logo_editor_test.dart` | Hlavní UI, zachování filtrů, avatar, datum profilu, onboarding, tematické dialogy Nápovědy, běžnou kartu, spuštění a trvalý lokální rekord Shout Flight, systém, heslo, Storage feature flag, všech sedm jazyků a geometrii i 512px výstup Business loga. |
 | Firestore Rules integrační testy | `tools/rules/firestore.rules.test.mjs` | Pozitivní i útočné scénáře registrace, rolí, Business poboček, obsahu, čítačů, limitů, soukromí, oznámení a moderace. |
-| Vývojové nástroje | `tools/business_activation.test.mjs`, `moderation_seed.test.mjs` | Odmítnutí neověřeného nebo odlišného e-mailu, neplatného stavu a pobočky, sestavení atomické Business aktivace a vyloučení staff rolí z autorů závadného seed obsahu. |
+| Vývojové nástroje | `tools/business_activation.test.mjs`, `moderation_seed.test.mjs`, `web_environment.test.mjs` | Odmítnutí neověřeného nebo odlišného e-mailu, neplatného stavu a pobočky, sestavení atomické Business aktivace a vyloučení staff rolí z autorů závadného seed obsahu; oddělení prostředí, integritu buildu, shodu cíle nasazení, konfiguraci Auth handleru a odmítnutí produkčních credentials třemi staršími vývojovými Admin SDK skripty. |
 | Functions unit testy | `functions/index.test.js` | Normalizaci ISO regionu a bezpečné zachování provider-specific hodnot. |
-| Statická kontrola a build | `dart format`, `flutter analyze`, `flutter build web` | Konzistenci zdroje, typové/lint chyby a sestavitelnost webu. |
+| Statická kontrola a build | `dart format`, `flutter analyze`, `node tools/web_environment.mjs build dev --debug` | Konzistenci zdroje, typové/lint chyby a sestavitelnost webu. |
+
+`test/web_environment_test.dart` navíc pokrývá společnou Firebase konfiguraci a
+návratovou URL e-mailů, odmítnutí neúplné konfigurace a záměny vývojové a
+produkční domény. Tyto testy neprokazují nastavení skutečného produkčního projektu.
 
 CI workflow `.github/workflows/flutter.yml` spouští Flutter vrstvu, čisté testy
 vývojových nástrojů, Rules a web build při každém pushi a pull requestu.

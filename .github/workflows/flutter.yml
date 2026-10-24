@@ -57,4 +57,4 @@ jobs:
         run: npm run test:rules
 
       - name: Build web
-        run: flutter build web --debug
+        run: node tools/web_environment.mjs build dev --debug

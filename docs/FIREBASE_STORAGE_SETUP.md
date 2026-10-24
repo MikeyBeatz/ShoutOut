@@ -49,7 +49,7 @@ samostatným dokumentem `docs/COST_SAFETY.md`.
 6. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`
    pro přílohy hlášení chyb, a samostatně ověřit upload Business loga.
 7. Web sestavit s konfigurací cílového projektu; produkční aplikace patří na
-   `social.shoutout-app.eu`, nikoli do projektu statické prezentace.
+   `go.shoutout-app.eu`, nikoli do projektu statické prezentace.
 
 ## Povinné ověření před zapnutím příloh a log
 

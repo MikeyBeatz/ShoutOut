@@ -189,3 +189,16 @@ npm run backfill:geography
 
 Nástroj zapisuje `geohash` a `geography`, klíč nevypisuje a odmítne jiný projekt
 než `shoutout-dev-46c81`.
+
+## Web environment workflow
+
+The build and Hosting preview workflow is documented in
+[`docs/WEB_ENVIRONMENTS.md`](../docs/WEB_ENVIRONMENTS.md). Run
+`node tools/web_environment.mjs build dev` from the repository root. The
+`deploy` command previews the verified target unless `--apply` is explicit.
+No deployment is authorized by a local configuration change.
+
+`enable_test_user_tutorial.mjs`, `round_shout_locations.mjs` and
+`set_moderator.mjs` now check the service account project before initializing
+Admin SDK and pin it to `shoutout-dev-46c81`. Their guards have negative tests
+with synthetic credentials; no real credentials are used.

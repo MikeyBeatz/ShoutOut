@@ -1,0 +1,13 @@
+{
+  "environment": "dev",
+  "appUrl": "https://shoutout-dev-46c81.web.app",
+  "hostingSite": "shoutout-dev-46c81",
+  "firebase": {
+    "apiKey": "AIzaSyAqcieaTn_wC-0tB2Y3gVCtD7dj9lINSJs",
+    "appId": "1:696035472864:web:744f27eac9135ba91ae785",
+    "messagingSenderId": "696035472864",
+    "projectId": "shoutout-dev-46c81",
+    "authDomain": "shoutout-dev-46c81.firebaseapp.com",
+    "storageBucket": "shoutout-dev-46c81.firebasestorage.app"
+  }
+}

@@ -26,6 +26,7 @@ import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';
 import 'firebase_options.dart';
+import 'web_environment.dart';
 import 'easter_egg_game.dart';
 import 'legal.dart';
 import 'public_profile.dart';
@@ -75,7 +76,11 @@ const _shoutSecondaryText = Color(0xFF697A84);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: kIsWeb
+        ? WebEnvironment.current.firebaseOptions
+        : DefaultFirebaseOptions.currentPlatform,
+  );
   if (!kIsWeb) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:

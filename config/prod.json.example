@@ -1,0 +1,13 @@
+{
+  "environment": "prod",
+  "appUrl": "https://go.shoutout-app.eu",
+  "hostingSite": "",
+  "firebase": {
+    "apiKey": "",
+    "appId": "",
+    "messagingSenderId": "",
+    "projectId": "",
+    "authDomain": "",
+    "storageBucket": ""
+  }
+}

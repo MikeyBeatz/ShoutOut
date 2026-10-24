@@ -14,6 +14,8 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
   atomické invarianty.
 - [Vývojové prostředí a nasazení](SETUP_AND_OPERATIONS.md) – Firebase,
   Geoapify, App Check, testy, Hosting, Android a rekonstrukce od nuly.
+- [Oddělení webových prostředí](WEB_ENVIRONMENTS.md) – konfigurace, buildy,
+  technické kontroly cíle nasazení a otevřené produkční kroky.
 - [Testovací strategie](TESTING.md) – automatické vrstvy a povinná ruční
   regresní matice pro účty, feed, Business, oznámení a moderaci.
 - [Design archiv](../design/README.md) – logo, barvy, písmo, splash, avatary a
@@ -28,7 +30,7 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 - [TODO](TODO.md) – jediný projektový backlog a pořadí další práce. Popisuje
   budoucí stav, nikoli automaticky současnou funkčnost.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
-  `shoutout-app.eu` a oddělení od webového MVP na `social.shoutout-app.eu`.
+  `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
   veřejné webové aplikace pro produkci, bezpečnost, právo, testování a provoz.
 - [Mobilní testování, distribuce a technický rozpočet](MOBILE_DISTRIBUTION_PLAN.md)

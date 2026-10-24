@@ -34,11 +34,17 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
 - Firestore Rules jsou součást aplikační logiky. Změna klientského zápisu bez
   odpovídající změny pravidel a jejich testů je neúplná změna.
 
+Webový build, návratová URL e-mailů a HTML Auth handler používají společnou
+konfiguraci z `config/`. `WebEnvironment` kontroluje projekt a hostitele před
+připojením Firebase. Vývojové a produkční artefakty a nasazovací kontroly jsou
+popsané v [oddělení prostředí](WEB_ENVIRONMENTS.md). Produkční projekt aplikace
+zatím není nakonfigurovaný.
+
 ## Spouštěcí a přístupový tok
 
 ```text
 main()
-  └─ Firebase.initializeApp
+  └─ Firebase.initializeApp (webové prostředí / vývojová mobilní konfigurace)
      └─ Android / iOS App Check
         └─ ShoutOutApp
            └─ AuthGate
@@ -77,6 +83,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 
 | Soubor nebo oblast | Odpovědnost |
 |---|---|
+| `lib/web_environment.dart` | Validace webového prostředí, Firebase konfigurace, hostitele a návratové URL e-mailů. |
 | `lib/main.dart` | Inicializace, téma, routing a seznam Flutter `part` modulů. |
 | `lib/auth_gate.dart` | Přihlášení, běžná registrace, ověření e-mailu, právní a stavové brány, onboarding a vytvoření profilu. |
 | `lib/business_registration.dart` | Samostatný registrační formulář Business účtu a zápis žádosti. |

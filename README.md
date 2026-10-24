@@ -16,7 +16,7 @@ Linux mají pouze Flutter kostru. Tyto platformy proto zatím nejsou součástí
 aktuálně podporovaného vývojového prostředí.
 
 Cílem MVP je veřejně dostupná funkční webová aplikace pro běžné uživatele a
-Business účty na `social.shoutout-app.eu` ve vlastním produkčním Firebase
+Business účty na `go.shoutout-app.eu` ve vlastním produkčním Firebase
 projektu. Prezentace na `shoutout-app.eu` zůstává samostatná. Vývoj a vydání
 Androidu a iOS zůstávají v plánu po webovém MVP.
 Rozsah vydání a zbývající produkční předpoklady jsou v `docs/TODO.md` a
@@ -76,10 +76,12 @@ flutter run
 ```
 
 Spusťte webovou variantu bez Geoapify nebo použijte příkaz s `--dart-define` z
-runbooku:
+runbooku. Oddělení prostředí a nasazení popisuje
+[WEB_ENVIRONMENTS.md](docs/WEB_ENVIRONMENTS.md):
 
 ```powershell
-flutter run -d chrome
+node tools/web_environment.mjs prepare dev
+flutter run -d chrome --dart-define-from-file=build/environments/dev.defines.json
 ```
 
 Pracovní prostředí moderátorů a administrátorů je po přihlášení dostupné na
@@ -126,7 +128,7 @@ Push-Location tools
 npm ci
 npm run test:rules
 Pop-Location
-flutter build web --debug
+node tools/web_environment.mjs build dev --debug
 ```
 
 Stejné základní kontroly spouští také GitHub Actions.

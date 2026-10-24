@@ -2,15 +2,16 @@ import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { GeoPoint, getFirestore } from 'firebase-admin/firestore';
+import { assertDevelopmentProject, devProject } from './web_environment.mjs';
 
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!serviceAccountPath) {
   throw new Error('Set FIREBASE_SERVICE_ACCOUNT_PATH before running this script.');
 }
 
-initializeApp({
-  credential: cert(JSON.parse(readFileSync(serviceAccountPath, 'utf8'))),
-});
+const credentials = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+assertDevelopmentProject(credentials.project_id);
+initializeApp({ credential: cert(credentials), projectId: devProject });
 
 const db = getFirestore();
 const snapshot = await db.collection('shouts').get();

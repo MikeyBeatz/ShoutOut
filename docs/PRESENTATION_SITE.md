@@ -35,7 +35,7 @@ MVP vznikne odděleně podle `LAUNCH_READINESS.md`.
 ## Webová aplikace pro MVP
 
 Veřejná aplikace pro běžné a Business účty bude na
-`social.shoutout-app.eu`. Bude používat vlastní produkční Firebase projekt,
+`go.shoutout-app.eu`. Bude používat vlastní produkční Firebase projekt,
 jehož ID zatím není v repozitáři nakonfigurované; projekt
 `shoutout-production-a1b34` zůstává pro statickou prezentaci. Moderátorské
 rozhraní bude součástí aplikace s přístupem podle role. Produkční web vyžaduje

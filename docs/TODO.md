@@ -27,7 +27,7 @@ loga a dosavadní bezplatné propagační funkce. Současné webové moderační
 rozhraní musí umožnit bezpečný provoz této veřejné aplikace. Všechny
 rozpracované toky, které tyto funkce potřebují, se dokončí před vydáním.
 
-Webová aplikace bude na `social.shoutout-app.eu` ve vlastním produkčním Firebase
+Webová aplikace bude na `go.shoutout-app.eu` ve vlastním produkčním Firebase
 projektu. Statická prezentace zůstává na `shoutout-app.eu` v projektu
 `shoutout-production-a1b34`. Vývojový web je již funkční cíl, ale jeho Firebase
 konfigurace stále míří na vývojový projekt; nový produkční projekt aplikace
@@ -102,7 +102,7 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 
 #### Zbývající milníky před MVP (16)
 
-1. ⬜ Připravit `social.shoutout-app.eu` a Hosting pro aplikaci odděleně od
+1. ⬜ Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
    stávající prezentace.
 2. ⬜ Vytvořit samostatný produkční Firebase projekt aplikace, nakonfigurovat
    webové služby a bezpečně oddělit vývojová a produkční data i nástroje.
@@ -431,7 +431,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
   - [ ] **MVP** — Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho
     platnosti ve webovém toku obnovy hesla.
-  - [ ] **MVP** — Po připojení `social.shoutout-app.eu` k novému produkčnímu
+  - [ ] **MVP** — Po připojení `go.shoutout-app.eu` k novému produkčnímu
     projektu aplikace přepnout jeho globální Firebase Authentication Action URL
     na připravený `/auth/action`. Handler už bezpečně obsluhuje ověření e-mailu,
     reset hesla i obnovení změněné adresy; výchozí domény projektu Firebase při
@@ -892,6 +892,19 @@ Dnes nebyl spuštěn, protože `FIREBASE_SERVICE_ACCOUNT_PATH` není nastavený 
 v projektu není žádný administrátorský klíč.
 
 ## 1. Oddělit vývojové a produkční prostředí — MVP pro web
+
+Lokální příprava dokončena 24. října 2026: společná webová konfigurace pro
+Flutter, e-mailové návraty a Auth handler, oddělené buildy, kontrola cílového
+projektu a integrity release artefaktů, ochrana tří starších Admin SDK
+skriptů (tutorial, zaokrouhlení polohy, přidělení moderátora) a testy.
+Cílová adresa byla změněna na `go.shoutout-app.eu`. Postup a omezení jsou v
+`WEB_ENVIRONMENTS.md`. Produkční projekt, DNS, služby, IAM a nákladové pojistky
+zůstávají otevřené; tento milník tím není dokončený.
+
+Ověření lokální přípravy: Flutter a Node testy, analyzátor, debug i release
+build a pozitivní/negativní nasazovací kontroly prošly. Celorepozitářový formát
+má starší nálezy ve dvou nezměněných překladových souborech; podrobnosti jsou
+v `WEB_ENVIRONMENTS.md`. Externí nasazení nebylo provedeno.
 
 - vytvořit samostatný produkční Firebase projekt aplikace oddělený od
   vývojového projektu i od projektu statické prezentace,

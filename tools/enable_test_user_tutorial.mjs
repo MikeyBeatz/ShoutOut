@@ -1,12 +1,14 @@
-import { cert, getApps, initializeApp } from 'firebase-admin/app';
+import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { readFile } from 'node:fs/promises';
+import { assertDevelopmentProject, devProject } from './web_environment.mjs';
 
 const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!keyPath) throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH is required.');
 
 const credentials = JSON.parse(await readFile(keyPath, 'utf8'));
-const app = getApps()[0] ?? initializeApp({ credential: cert(credentials) });
+assertDevelopmentProject(credentials.project_id);
+const app = initializeApp({ credential: cert(credentials), projectId: devProject });
 const db = getFirestore(app);
 const testUserIds = [
   'it_user_author',

@@ -45,7 +45,7 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 
 ## 2. Webová aplikace a veřejná distribuce MVP
 
-- [ ] Připravit `social.shoutout-app.eu` a Hosting v produkčním projektu
+- [ ] Připravit `go.shoutout-app.eu` a Hosting v produkčním projektu
   aplikace; prezentace na `shoutout-app.eu` zůstává v původním projektu.
 - [ ] Sestavit a nasadit produkční web s konfigurací správného Firebase
   projektu, Auth Action URL a autorizovaných domén.

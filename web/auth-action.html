@@ -107,38 +107,61 @@
     if (!code || !['verifyEmail', 'resetPassword', 'recoverEmail'].includes(mode)) {
       show('request');
     } else {
-      const app = initializeApp({
-        apiKey: 'AIzaSyAqcieaTn_wC-0tB2Y3gVCtD7dj9lINSJs',
-        authDomain: 'shoutout-dev-46c81.firebaseapp.com',
-        projectId: 'shoutout-dev-46c81',
-        appId: '1:696035472864:web:744f27eac9135ba91ae785',
-      });
-      const auth = getAuth(app);
-      if (mode === 'resetPassword') {
-        verifyPasswordResetCode(auth, code).then(() => {
-          [title.textContent, message.textContent] = copy.reset;
-          spinner.hidden = true;
-          form.hidden = false;
-          password.focus();
-        }).catch(() => show('invalid'));
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          if (password.value !== confirmation.value) {
-            [title.textContent, message.textContent] = copy.mismatch;
-            return;
-          }
-          form.querySelector('button').disabled = true;
-          try {
-            await confirmPasswordReset(auth, code, password.value);
-            show('resetSuccess');
-          } catch (_) {
-            show('invalid');
-          }
-        });
-      } else {
-        applyActionCode(auth, code)
-          .then(() => show(mode === 'verifyEmail' ? 'success' : 'recovered'))
-          .catch(() => show('invalid'));
+      let config;
+      try {
+        const response = await fetch('/app-config.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Missing environment configuration');
+        config = await response.json();
+        const project = config.firebase?.projectId;
+        const expectedUrl = config.environment === 'dev'
+          ? 'https://shoutout-dev-46c81.web.app' : 'https://go.shoutout-app.eu';
+        const allowedHosts = config.environment === 'dev'
+          ? ['shoutout-dev-46c81.web.app', 'shoutout-dev-46c81.firebaseapp.com', 'localhost', '127.0.0.1', '[::1]']
+          : ['go.shoutout-app.eu'];
+        if (!['dev', 'prod'].includes(config.environment) ||
+            !allowedHosts.includes(location.hostname) ||
+            config.appUrl !== expectedUrl ||
+            config.firebase.authDomain !== `${project}.firebaseapp.com` ||
+            (config.environment === 'prod' &&
+              (!project || config.firebase.messagingSenderId === '696035472864' ||
+               ['shoutout-dev-46c81', 'shoutout-production-a1b34'].includes(project))) ||
+            (config.environment === 'dev' &&
+              config.firebase.projectId !== 'shoutout-dev-46c81')) {
+          throw new Error('Unexpected environment');
+        }
+      } catch (_) {
+        config = null;
+        show('request');
+      }
+      if (config) {
+        const app = initializeApp(config.firebase);
+        const auth = getAuth(app);
+        if (mode === 'resetPassword') {
+          verifyPasswordResetCode(auth, code).then(() => {
+            [title.textContent, message.textContent] = copy.reset;
+            spinner.hidden = true;
+            form.hidden = false;
+            password.focus();
+          }).catch(() => show('invalid'));
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (password.value !== confirmation.value) {
+              [title.textContent, message.textContent] = copy.mismatch;
+              return;
+            }
+            form.querySelector('button').disabled = true;
+            try {
+              await confirmPasswordReset(auth, code, password.value);
+              show('resetSuccess');
+            } catch (_) {
+              show('invalid');
+            }
+          });
+        } else {
+          applyActionCode(auth, code)
+            .then(() => show(mode === 'verifyEmail' ? 'success' : 'recovered'))
+            .catch(() => show('invalid'));
+        }
       }
     }
   </script>

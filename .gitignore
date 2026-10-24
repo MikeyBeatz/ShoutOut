@@ -33,6 +33,8 @@ analysis_benchmark.json
 
 # Flutter/Dart/Pub related
 .geoapify.json
+.geoapify.prod.json
+.firebase-hosting-*.json
 docs/local/
 **/doc/api/
 .dart_tool/

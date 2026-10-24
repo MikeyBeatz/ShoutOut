@@ -18,6 +18,10 @@ iOS má připravenou vývojovou Firebase konfiguraci a identitu
 Windows, macOS a Linux mají pouze Flutter kostru a nejsou podporované cíle této
 verze.
 
+Webová prostředí a přesné buildovací a nasazovací příkazy jsou v
+[WEB_ENVIRONMENTS.md](WEB_ENVIRONMENTS.md). Výchozí holý webový build již není
+připravený pro nasazení; vyžaduje explicitní konfiguraci prostředí.
+
 ## Lokální instalace existujícího projektu
 
 ```powershell
@@ -85,14 +89,14 @@ ID. Ručně napsaný text bez výběru návrhu není ověřená poloha.
 
    ```powershell
    $geoConfig = Get-Content -Raw -Encoding UTF8 .geoapify.json | ConvertFrom-Json
-   flutter run -d chrome --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
+   node tools/web_environment.mjs prepare dev
+   flutter run -d chrome --dart-define-from-file=build/environments/dev.defines.json --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
    ```
 
 4. Release web sestavte stejně:
 
    ```powershell
-   $geoConfig = Get-Content -Raw -Encoding UTF8 .geoapify.json | ConvertFrom-Json
-   flutter build web --release --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
+   node tools/web_environment.mjs build dev
    ```
 
 `String.fromEnvironment` vloží hodnotu do výsledného klientského JavaScriptu;
@@ -128,9 +132,9 @@ produkčního projektu.
    name `cz.shoutout.app` a iOS aplikaci se správným bundle ID připravte pro
    pozdější mobilní vydání.
 4. Nainstalujte Firebase CLI a FlutterFire CLI a přihlaste se. Produkční
-   klientskou konfiguraci vygenerujte až po zavedení bezpečného přepínání
-   prostředí; příkaz při spuštění v současné pracovní kopii přepisuje
-   `lib/firebase_options.dart` a může změnit vývojovou vazbu:
+   klientskou konfiguraci získejte odděleně pro nový projekt. Následující
+   FlutterFire příkaz je pouze příklad pro samostatnou pracovní kopii;
+   v této kopii by přepsal vývojové `lib/firebase_options.dart`:
 
    ```powershell
    npm install --global firebase-tools@15.24.0
@@ -139,21 +143,17 @@ produkčního projektu.
    flutterfire configure --project your-project-id --platforms web
    ```
 
-5. Ověřte novou webovou konfiguraci ve `lib/firebase_options.dart` a vazby ve
-   `firebase.json`. Samostatně upravte konfiguraci v `web/auth-action.html` a
-   návratovou URL v `lib/email_verification.dart`; FlutterFire CLI tyto dvě
-   hodnoty nepřepíná. Pro mobilní vydání později znovu spusťte FlutterFire CLI
-   s platformami `android,ios,web` a ověřte také Android
-   `google-services.json` a iOS `GoogleService-Info.plist`. Konfiguraci pro
-   jiné prostředí vygenerujte znovu; nekopírujte vývojové project ID do
-   produkce.
+5. Produkční webové hodnoty doplňte do `config/prod.json` podle
+   `WEB_ENVIRONMENTS.md`. Flutter, HTML Auth handler a návratová URL používají
+   tento společný zdroj. Stávající `lib/firebase_options.dart` a mobilní
+   konfigurace zůstávají vývojové; produkčním generováním je nepřepisujte.
 
 Repozitář obsahuje `.firebaserc` s aliasem `web` pro produkční projekt
 prezentačního webu `shoutout-production-a1b34`. Výchozí projekt (`default`)
 nastavený není. Každý nasazovací příkaz proto musí obsahovat `--project` a musí
 být spuštěný ze správného adresáře podle příslušného `firebase.json`.
 
-Webové MVP bude na `social.shoutout-app.eu` ve vlastním produkčním Firebase
+Webové MVP bude na `go.shoutout-app.eu` ve vlastním produkčním Firebase
 projektu aplikace. Jeho ID zatím není v repozitáři nakonfigurované a nesmí se
 odvozovat z aliasu `web`, který patří statické prezentaci.
 
@@ -239,7 +239,8 @@ Web s adresním našeptáváním:
 
 ```powershell
 $geoConfig = Get-Content -Raw -Encoding UTF8 .geoapify.json | ConvertFrom-Json
-flutter run -d chrome --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
+node tools/web_environment.mjs prepare dev
+flutter run -d chrome --dart-define-from-file=build/environments/dev.defines.json --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
 ```
 
 Android na vybraném zařízení:
@@ -273,7 +274,7 @@ npm ci
 npm test
 Pop-Location
 
-flutter build web --debug
+node tools/web_environment.mjs build dev --debug
 ```
 
 Pokud Firestore Emulator v PowerShellu nenajde Java 21, použijte runtime Android
@@ -299,7 +300,8 @@ moderaci a různá zařízení jsou v `TESTING.md`.
 Hosting označený jako demo není samostatná Flutter build varianta. Jde o běžný
 release web připojený k vývojovému Firebase projektu; po povolení používá
 skutečnou polohu prohlížeče. Pevná poloha Litoměřice se do buildu nevkládá.
-Samostatné produkční Firebase prostředí a build konfigurace zatím neexistují.
+Produkční Firebase projekt zatím není nakonfigurovaný. Buildy už mají oddělené
+konfigurace a výstupy podle `WEB_ENVIRONMENTS.md`.
 
 1. Ověřte čistý pracovní strom a cílový projekt.
 2. Sestavte release s Geoapify hodnotou.
@@ -307,9 +309,8 @@ Samostatné produkční Firebase prostředí a build konfigurace zatím neexistu
 
 ```powershell
 git status --short
-$geoConfig = Get-Content -Raw -Encoding UTF8 .geoapify.json | ConvertFrom-Json
-flutter build web --release --dart-define="GEOAPIFY_API_KEY=$($geoConfig.GEOAPIFY_API_KEY)"
-firebase deploy --only hosting --project shoutout-dev-46c81
+node tools/web_environment.mjs build dev
+node tools/web_environment.mjs deploy dev --project=shoutout-dev-46c81 --apply
 ```
 
 `firebase.json` nastavuje SPA rewrite na `index.html` a zakazuje dlouhou cache pro
@@ -323,14 +324,14 @@ Každá část se nasazuje explicitním `--only` až po příslušných testech.
 
 ## Produkční webové MVP
 
-Cílem je `social.shoutout-app.eu` v samostatném produkčním Firebase projektu
+Cílem je `go.shoutout-app.eu` v samostatném produkčním Firebase projektu
 aplikace. Před nasazením je potřeba vytvořit projekt a webovou Firebase
-aplikaci, zavést bezpečné přepínání konfigurace v `lib/firebase_options.dart`,
-`web/auth-action.html` a `lib/email_verification.dart`, připravit Hosting,
+aplikaci, doplnit připravenou konfiguraci v `config/prod.json` podle
+`WEB_ENVIRONMENTS.md`, připravit Hosting,
 Auth Action URL a autorizované domény, nasadit pravidla, indexy a potřebné
 služby a projít bránu v `LAUNCH_READINESS.md`.
 
-Kořenový `firebase.json` nasazuje Flutter build z `build/web`;
+Kořenový `firebase.json` nasazuje ověřený vývojový Flutter build z `build/web-dev`;
 `presentation/firebase.json` nasazuje statický web. Při budoucím nasazení je
 třeba explicitně určit nový project ID a pracovat v kořeni repozitáře. ID
 projektu prezentace `shoutout-production-a1b34` není cílem aplikace.
@@ -361,7 +362,7 @@ produkční bezpečnostní a právní body v `TODO.md`.
 
 | Hodnota | Kde patří | V Gitu |
 |---|---|---|
-| Firebase web/Android/iOS client config | `firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist` | ano; veřejná identifikace projektu |
+| Firebase web/Android/iOS client config | `config/*.json` (web), `firebase_options.dart`, `google-services.json`, `GoogleService-Info.plist` | ano; veřejná identifikace projektu |
 | Geoapify API key | `.geoapify.json` → `--dart-define` | ne; ve výsledném klientu je viditelný, proto restrikce a kvóty |
 | Google Maps API key | Firebase Functions secret | nikdy |
 | service-account JSON | lokální bezpečné úložiště / CI secret | nikdy |

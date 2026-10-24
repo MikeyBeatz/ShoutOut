@@ -30,7 +30,7 @@
     "source": "functions"
   },
   "hosting": {
-    "public": "build/web",
+    "public": "build/web-dev",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -81,6 +81,15 @@
             "value": "no-cache, no-store, must-revalidate"
           }
         ]
+      },
+      {
+        "source": "/app-config.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
       }
     ],
     "rewrites": [
@@ -92,6 +101,10 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "site": "shoutout-dev-46c81",
+    "predeploy": [
+      "node tools/web_environment.mjs check dev"
     ]
   },
   "emulators": {
