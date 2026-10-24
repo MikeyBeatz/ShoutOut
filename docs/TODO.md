@@ -893,6 +893,12 @@ v projektu není žádný administrátorský klíč.
 
 ## 1. Oddělit vývojové a produkční prostředí — MVP pro web
 
+Pravidla výběru změn a publikování zapsána 25. října 2026 do `AGENTS.md` a
+`RELEASING.md`: samostatné větve, uživatelské schválení, produkční commit
+a verze, čistá pracovní kopie a oddělený souhlas s nasazením. Automatické
+vynucení Git původu buildu, release tagu a schválení zůstává otevřené;
+současné nasazovací kontroly je zatím neověřují.
+
 Lokální příprava dokončena 24. října 2026: společná webová konfigurace pro
 Flutter, e-mailové návraty a Auth handler, oddělené buildy, kontrola cílového
 projektu a integrity release artefaktů, ochrana tří starších Admin SDK

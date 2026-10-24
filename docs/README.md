@@ -14,6 +14,8 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
   atomické invarianty.
 - [Vývojové prostředí a nasazení](SETUP_AND_OPERATIONS.md) – Firebase,
   Geoapify, App Check, testy, Hosting, Android a rekonstrukce od nuly.
+- [Pravidla vydávání](RELEASING.md) – větve, schvalování změn, konkrétní Git
+  commit, verze a ruční kontroly před produkčním nasazením.
 - [Oddělení webových prostředí](WEB_ENVIRONMENTS.md) – konfigurace, buildy,
   technické kontroly cíle nasazení a otevřené produkční kroky.
 - [Testovací strategie](TESTING.md) – automatické vrstvy a povinná ruční

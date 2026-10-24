@@ -20,6 +20,10 @@
 
 ## Práce se změnami
 
+- Před úpravami nejdřív ověř stav a předlož konkrétní rozsah změny uživateli
+  ke schválení. Do té doby prováděj jen průzkum a kontroly bez změny zdrojů.
+  Pokud uživatel konkrétní rozsah už výslovně schválil, pokračuj v něm bez
+  opakovaného dotazu; při podstatném rozšíření si vyžádej nový souhlas.
 - Zachovej nesouvisející uživatelské změny a upravuj jen rozsah aktuálního úkolu.
 - Diagnózu bez výslovné žádosti automaticky neměň na implementaci.
 - Při změně chování aktualizuj příslušný dokument a stav v `docs/TODO.md`.
@@ -27,6 +31,26 @@
   nebylo ověřeno. Úspěch netvrď bez důkazu.
 - Firebase Hosting, pravidla, Functions, data ani jiné externí prostředí
   nenasazuj bez výslovného souhlasu uživatele. Vždy uveď přesný cíl nasazení.
+
+## Výběr změn a publikování
+
+- Před prací s větvemi, vydáním nebo nasazením si přečti
+  [docs/RELEASING.md](docs/RELEASING.md). Technické příkazy a prostředí ověř
+  také v [docs/WEB_ENVIRONMENTS.md](docs/WEB_ENVIRONMENTS.md).
+- Samostatné úkoly vyvíjej v samostatných větvích `feature/<nazev>` nebo
+  `fix/<nazev>`. Do `main` patří jen otestované změny schválené uživatelem.
+  Rozpracované a neschválené úkoly neslučuj do vydávané verze.
+- Před vytvořením nebo přepnutím větve zkontroluj pracovní strom. Existující
+  změny na `main` automaticky necommituj, nemaž ani nepřesouvej; jejich
+  rozdělení a převod do větví nejdřív navrhni uživateli.
+- Produkci sestavuj z konkrétního schváleného commitu v `main`, označeného
+  verzí `vX.Y.Z`, a z čisté pracovní kopie včetně kontroly nesledovaných souborů.
+  Před nasazením uveď verzi, úplný commit SHA, výsledky kontrol a přesný cíl.
+- Souhlas s lokální implementací nebo vývojovým nasazením neopravňuje
+  k produkčnímu nasazení. Commit, push, sloučení a vytvoření či publikování tagu
+  prováděj jen v uživatelem výslovně schváleném rozsahu.
+- Ověř, které pojistky jsou skutečně implementované. Dokumentované pravidlo
+  není důkaz automatického vynucení v CI nebo nasazovacím skriptu.
 
 ## Komunikace
 

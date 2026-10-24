@@ -71,6 +71,10 @@ a jiný cílový projekt. CI používá stejný nástroj pro debug build.
 
 ## Nasazení až po výslovném souhlasu
 
+Výběr schváleného kódu, větve, commitu a verze upravuje
+[RELEASING.md](RELEASING.md). Níže uvedená kontrola buildu zatím automaticky
+nevynucuje čistý Git strom, release tag ani vazbu artefaktu na commit.
+
 Pro vývojový Hosting je přesný cíl projekt i site `shoutout-dev-46c81`:
 
 ```powershell
