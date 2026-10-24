@@ -49,7 +49,7 @@ const _cs = <HelpTopic>[
   ),
   HelpTopic(
     'Business účet',
-    'Business účet publikuje za ověřenou pobočku, spravuje firemní údaje a může používat delší platnost Shoutu. Některé propagační funkce budou nejprve zdarma a později mohou používat tokeny. Aktivní Business účet si může v úpravě avatara nahrát vlastní logo.',
+    'Business účet publikuje za ověřenou pobočku, spravuje firemní údaje a může používat delší platnost Shoutu. Zvýraznění, propagační okénko a platnost až 7 dní jsou nyní zdarma. Aktivní Business účet si může v úpravě avatara nahrát vlastní logo.',
   ),
 ];
 
@@ -84,7 +84,7 @@ const _en = <HelpTopic>[
   ),
   HelpTopic(
     'Business account',
-    'A Business account publishes for a verified branch, manages company details and can use a longer Shout duration. Some promotion features will initially be free and may later use tokens. An active Business account can upload a custom logo in the avatar editor.',
+    'A Business account publishes for a verified branch, manages company details and can use a longer Shout duration. Highlighting, a promotional spotlight and a duration of up to 7 days are currently free. An active Business account can upload a custom logo in the avatar editor.',
   ),
 ];
 
@@ -119,7 +119,7 @@ const _de = <HelpTopic>[
   ),
   HelpTopic(
     'Business-Konto',
-    'Ein Business-Konto veröffentlicht für eine bestätigte Filiale, verwaltet Firmendaten und kann längere Shout-Laufzeiten nutzen. Einige Werbefunktionen starten kostenlos und können später Token verwenden. Ein aktives Business-Konto kann im Avatar-Editor ein eigenes Logo hochladen.',
+    'Ein Business-Konto veröffentlicht für eine bestätigte Filiale, verwaltet Firmendaten und kann längere Shout-Laufzeiten nutzen. Hervorhebung, Werbefenster und eine Laufzeit von bis zu 7 Tagen sind derzeit kostenlos. Ein aktives Business-Konto kann im Avatar-Editor ein eigenes Logo hochladen.',
   ),
 ];
 
@@ -154,7 +154,7 @@ const _pl = <HelpTopic>[
   ),
   HelpTopic(
     'Konto Business',
-    'Konto Business publikuje dla zweryfikowanego oddziału, zarządza danymi firmy i może używać dłuższego czasu Shoutu. Część promocji będzie początkowo bezpłatna, a później może używać tokenów. Aktywne konto Business może przesłać własne logo w edytorze awatara.',
+    'Konto Business publikuje dla zweryfikowanego oddziału, zarządza danymi firmy i może używać dłuższego czasu Shoutu. Wyróżnienie, okienko promocyjne i czas trwania do 7 dni są obecnie bezpłatne. Aktywne konto Business może przesłać własne logo w edytorze awatara.',
   ),
 ];
 
@@ -189,7 +189,7 @@ const _sk = <HelpTopic>[
   ),
   HelpTopic(
     'Business účet',
-    'Business účet publikuje za overenú pobočku, spravuje firemné údaje a môže používať dlhšiu platnosť Shoutu. Niektoré propagačné funkcie budú najprv zdarma a neskôr môžu používať tokeny. Aktívny Business účet si môže v editore avatara nahrať vlastné logo.',
+    'Business účet publikuje za overenú pobočku, spravuje firemné údaje a môže používať dlhšiu platnosť Shoutu. Zvýraznenie, propagačné okienko a platnosť až 7 dní sú teraz zdarma. Aktívny Business účet si môže v editore avatara nahrať vlastné logo.',
   ),
 ];
 
@@ -224,7 +224,7 @@ const _uk = <HelpTopic>[
   ),
   HelpTopic(
     'Бізнес-акаунт',
-    'Бізнес-акаунт публікує від перевіреної філії, керує даними компанії та може подовжувати Shout. Деякі функції просування спочатку будуть безкоштовними, а пізніше можуть використовувати токени. Активний бізнес-акаунт може завантажити власний логотип у редакторі аватара.',
+    'Бізнес-акаунт публікує від перевіреної філії, керує даними компанії та може подовжувати Shout. Виділення, рекламне віконце та термін дії до 7 днів зараз безкоштовні. Активний бізнес-акаунт може завантажити власний логотип у редакторі аватара.',
   ),
 ];
 
@@ -259,6 +259,6 @@ const _vi = <HelpTopic>[
   ),
   HelpTopic(
     'Tài khoản doanh nghiệp',
-    'Tài khoản doanh nghiệp đăng cho chi nhánh đã xác minh, quản lý thông tin công ty và có thể dùng thời hạn Shout dài hơn. Một số tính năng quảng bá ban đầu miễn phí và sau này có thể dùng token. Tài khoản doanh nghiệp đang hoạt động có thể tải logo riêng lên trong trình chỉnh sửa hình đại diện.',
+    'Tài khoản doanh nghiệp đăng cho chi nhánh đã xác minh, quản lý thông tin công ty và có thể dùng thời hạn Shout dài hơn. Tính năng làm nổi bật, ô quảng bá và thời hạn lên đến 7 ngày hiện được miễn phí. Tài khoản doanh nghiệp đang hoạt động có thể tải logo riêng lên trong trình chỉnh sửa hình đại diện.',
   ),
 ];

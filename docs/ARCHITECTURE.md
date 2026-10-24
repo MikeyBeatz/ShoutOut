@@ -28,6 +28,9 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
   zvýraznění, připnuté propagační okénko a délka nad 24 hodin. Aktivní okénka do
   20 km klient v každém cyklu promíchá a rotuje; důvěryhodný unikátní dosah,
   zobrazení a rozkliknutí zůstávají v budoucí serverové vrstvě.
+- Business nabídka obsahuje profil, pobočky a historii bezplatné propagace.
+  Tokenová sekce je odstraněná; nákupy a faktury ani prázdné metriky propagace
+  se před zavedením příslušných služeb nezobrazují.
 - Firestore Rules jsou součást aplikační logiky. Změna klientského zápisu bez
   odpovídající změny pravidel a jejich testů je neúplná změna.
 

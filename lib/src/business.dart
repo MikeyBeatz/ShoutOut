@@ -47,43 +47,6 @@ class BusinessPage extends StatelessWidget {
             ),
           ),
         ),
-        _BusinessSectionTile(
-          icon: Icons.account_balance_wallet_outlined,
-          title: businessTr(context, 'Tokeny'),
-          subtitle: businessTr(
-            context,
-            'Zůstatek a nákup tokenů pro propagaci',
-          ),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => _BusinessComingSoonPage(
-                title: businessTr(context, 'Tokeny'),
-                message: businessTr(
-                  context,
-                  'Nákup tokenů kartou, Apple Pay a Google Pay připravujeme.',
-                ),
-              ),
-            ),
-          ),
-        ),
-        _BusinessSectionTile(
-          icon: Icons.receipt_long_outlined,
-          title: businessTr(context, 'Nákupy a faktury'),
-          subtitle: businessTr(context, 'Doklady vystavené na firmu'),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => _BusinessComingSoonPage(
-                title: businessTr(context, 'Nákupy a faktury'),
-                message: businessTr(
-                  context,
-                  'Zatím zde nejsou žádné nákupy ani faktury.',
-                ),
-              ),
-            ),
-          ),
-        ),
       ],
     ),
   );
@@ -177,41 +140,11 @@ class _BusinessPromotionHistoryCard extends StatelessWidget {
                   .map((feature) => Chip(label: Text(feature)))
                   .toList(),
             ),
-            const SizedBox(height: 8),
-            _PromotionMetric(label: businessTr(context, 'Unikátní dosah')),
-            _PromotionMetric(label: businessTr(context, 'Zobrazení')),
-            _PromotionMetric(label: businessTr(context, 'Rozkliknutí')),
-            _PromotionMetric(label: businessTr(context, 'Míra prokliku')),
-            const SizedBox(height: 8),
-            Text(
-              businessTr(
-                context,
-                'Statistiky budou dostupné po zapojení serverového měření.',
-              ),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
           ],
         ),
       ),
     );
   }
-}
-
-class _PromotionMetric extends StatelessWidget {
-  const _PromotionMetric({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        Expanded(child: Text(label)),
-        Text('—', style: Theme.of(context).textTheme.titleMedium),
-      ],
-    ),
-  );
 }
 
 class _BusinessSectionTile extends StatelessWidget {
@@ -798,23 +731,6 @@ void _showBusinessLocationError(BuildContext context, FirebaseException error) {
           context,
           'Pobočku se nepodařilo uložit. Zkontrolujte oprávnění účtu a připojení.',
         ),
-      ),
-    ),
-  );
-}
-
-class _BusinessComingSoonPage extends StatelessWidget {
-  const _BusinessComingSoonPage({required this.title, required this.message});
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title)),
-    body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(message, textAlign: TextAlign.center),
       ),
     ),
   );

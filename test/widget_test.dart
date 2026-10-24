@@ -15,6 +15,26 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets('Business MVP menu in ${locale.languageCode}', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const BusinessPage(userId: 'business-test'),
+        ),
+      );
+      expect(find.byType(ListTile), findsNWidgets(3));
+      expect(find.byIcon(Icons.badge_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.location_on_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.campaign_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.account_balance_wallet_outlined), findsNothing);
+      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('shows the ShoutOut feed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(locale: Locale('cs'), home: ShoutOutHome()),

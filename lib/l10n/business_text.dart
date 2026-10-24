@@ -363,32 +363,6 @@ const _translations = <String, Map<String, String>>{
     'uk': 'Адреси для публікації Shout',
     'vi': 'Địa chỉ dùng khi đăng Shout',
   },
-  'Tokeny': {
-    'en': 'Tokens',
-    'de': 'Token',
-    'pl': 'Tokeny',
-    'sk': 'Tokeny',
-    'uk': 'Токени',
-    'vi': 'Token',
-  },
-  'Zůstatek a nákup tokenů pro propagaci': {
-    'en': 'Token balance and purchases for promotion',
-    'de': 'Token-Guthaben und Käufe für Werbung',
-    'pl': 'Saldo i zakup tokenów do promocji',
-    'sk': 'Zostatok a nákup tokenov na propagáciu',
-    'uk': 'Баланс і купівля токенів для просування',
-    'vi': 'Số dư và mua token để quảng bá',
-  },
-  'Nákup tokenů kartou, Apple Pay a Google Pay připravujeme.': {
-    'en': 'Token purchases by card, Apple Pay and Google Pay are coming soon.',
-    'de':
-        'Token-Käufe per Karte, Apple Pay und Google Pay sind in Vorbereitung.',
-    'pl': 'Przygotowujemy zakup tokenów kartą, Apple Pay i Google Pay.',
-    'sk': 'Pripravujeme nákup tokenov kartou, Apple Pay a Google Pay.',
-    'uk': 'Ми готуємо купівлю токенів карткою, Apple Pay і Google Pay.',
-    'vi':
-        'Tính năng mua token bằng thẻ, Apple Pay và Google Pay đang được chuẩn bị.',
-  },
   'Nákupy a faktury': {
     'en': 'Purchases and invoices',
     'de': 'Käufe und Rechnungen',

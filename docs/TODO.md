@@ -2,7 +2,7 @@
 
 ## Rychlý přehled postupu
 
-Aktualizováno 20. října 2026.
+Aktualizováno 24. října 2026.
 
 ### Postup do MVP
 
@@ -10,7 +10,7 @@ Aktualizováno 20. října 2026.
 
 ### Postup celého backlogu
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — 106 ze 155 úkolů
+`███████████████████████████░░░░░░░░░░░░░` **69 %** — 107 ze 155 úkolů
 
 Podrobnosti, pravidla počítání a úplné seznamy zůstávají v příslušných sekcích
 níže. Tento rychlý přehled je jejich záměrná kopie pro snadnou orientaci.
@@ -287,11 +287,11 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Aktualizováno 20. října 2026.
+Aktualizováno 24. října 2026.
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
+`███████████████████████████░░░░░░░░░░░░░` **69 %** — pokročilá fáze
 
-Hotovo je 106 ze 155 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 107 ze 155 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -583,10 +583,16 @@ odložené nápady až za hlavními uživatelskými cestami.
     platnost až 7 dní zachovat zdarma, doplnit zvýrazněný Shout a propagační
     okénko. Nárok a použití ukládat odděleně od budoucí platby, aby pozdější
     předplatné změnilo jen serverové oprávnění, nikoli základní uživatelský tok.
-  - [ ] **MVP** — Odstranit nefunkční položku **Tokeny** a skrýt **Nákupy a
+  - [x] Odstranit nefunkční položku **Tokeny** a skrýt **Nákupy a
     faktury** i prázdné metriky v **Propagaci**. Sekce bezplatné propagace
     zůstane funkční; odstranit také neplatné tokenové texty z nápovědy a
     lokalizace a ověřit webové rozhraní testy. Tokenová sekce se nevrátí.
+    - Implementováno 24. října 2026: nabídka má pouze profil, pobočky a
+      propagaci; historie zachovává příznaky bezplatných funkcí bez prázdných
+      statistik. Nápověda je upravená ve všech sedmi jazycích.
+    - Ověření: 66 widgetových a lokalizačních testů, `flutter analyze` a
+      `flutter build web --debug` prošly. Ruční kontrola v prohlížeči ani
+      nasazení nebyly součástí této změny.
   - [ ] **Po MVP** — Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
     zobrazení a rozkliknutí propagačních okének; v Business → Propagace zobrazit
     také vypočtenou míru prokliku. Vzdálenostní pásma se nesledují.
