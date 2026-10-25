@@ -104,7 +104,10 @@ Poslední příkaz je jen lokální kontrola a náhled cíle. Release vyžaduje
 jsou ignorované Gitem. Debug build bez Geoapify klíče je možný, ale neověřuje
 adresní formuláře. Klíče je nutné omezit na domény příslušného prostředí.
 
-Výstupy jsou oddělené v `build/web-dev` a `build/web-prod`. Manifest mimo
+Výstupy jsou oddělené v `build/web-dev` a `build/web-prod`.
+Před buildem se čistí pouze výstup právě zvoleného prostředí, aby ve vydání
+nezůstaly staré soubory nebo lokální diagnostika. Druhý výstup se nemaže.
+Manifest mimo
 veřejný web uchovává konfiguraci, typ buildu a SHA-256 otisky všech souborů.
 Neúspěšný pokus o build zneplatní předchozí manifest. Nasazovací kontrola
 odmítne debug build, chybějící manifest, změněné soubory, změněnou konfiguraci

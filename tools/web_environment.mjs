@@ -144,6 +144,12 @@ export function main(args) {
     if (!debug && (typeof geo.GEOAPIFY_API_KEY !== 'string' || !geo.GEOAPIFY_API_KEY.trim())) {
       throw new Error('Release requires the environment-specific Geoapify file.');
     }
+    // Flutter can preserve unrelated old files in --output. Rebuild this exact
+    // validated environment directory so diagnostics never enter a release.
+    if (![join(root, 'build', 'web-dev'), join(root, 'build', 'web-prod')].includes(directory)) {
+      throw new Error('Refusing to clean an unexpected build output.');
+    }
+    if (existsSync(directory)) rmSync(directory, { recursive: true, force: true });
     const buildArgs = ['build', 'web', debug ? '--debug' : '--release',
       '--output', directory, `--dart-define-from-file=${definesPath}`];
     if (existsSync(geoPath)) buildArgs.push(`--dart-define-from-file=${geoPath}`);
