@@ -57,10 +57,6 @@ jobs:
       - name: Install Firebase CLI
         run: npm install --global firebase-tools@15.24.0
 
-      - name: Test Firestore Rules
-        working-directory: tools
-        run: npm run test:rules
-
       - name: Install Cloud Functions dependencies
         working-directory: functions
         run: npm ci
@@ -72,6 +68,10 @@ jobs:
       - name: Test Cloud Functions
         working-directory: functions
         run: npm test
+
+      - name: Test Firestore Rules and server transactions
+        working-directory: tools
+        run: npm run test:rules
 
       - name: Build web
         run: node tools/web_environment.mjs build dev --debug

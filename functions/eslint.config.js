@@ -12,6 +12,7 @@ export default [
       globals: {
         URL: 'readonly',
         fetch: 'readonly',
+        process: 'readonly',
       },
     },
   },

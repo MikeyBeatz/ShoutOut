@@ -999,6 +999,18 @@ Attest zůstávají podmínkami pozdějších mobilních vydání.
 
 ## 3. Důvěryhodná serverová brána pro obsah — MVP
 
+Serverové vytváření Shoutu je lokálně implementované v `functions/create_shout.js`
+a exportované jako callable `createShout` v regionu `europe-west3` s povinným
+App Check. Autor, avatar, čas, nulové čítače, veřejné zaokrouhlení polohy a
+geohash vznikají na serveru. Business používá aktivní ověřenou pobočku a
+aktivní profil. Shout, rate limit a idempotentní záznam vznikají v jedné
+transakci. Limity odpovídají současným Rules (50/500 za den, 120/1 sekund).
+16 Functions unit testů a 68 emulatorových testů (64 Rules + 4 serverové)
+prošlo; emulator zahrnuje souběžné retry a souběžné odlišné požadavky.
+Klient ani přímé zápisy v Rules zatím přepnuté nejsou. Před aktivací zbývá
+webový App Check, řízené nasazení, end-to-end ověření a retence serverových
+idempotentních záznamů sladěná s mazáním účtů. Milník zůstává otevřený.
+
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a
 kontroluje profil, aktuální právní souhlas, ban, žádost o smazání a podle typu

@@ -129,6 +129,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/l10n/` | Generované ARB překlady a přechodové slovníky `tr` / `businessTr`. |
 | `functions/callable_security.js` | Společná serverová brána pro Auth, App Check, profil, právní souhlas, ban, žádost o smazání a omezení tvorby. Přijímá také Firestore transakci jako reader, aby budoucí kontrola a zápis mohly být atomické. |
 | `functions/index.js` | Serverový reverse geocoding nových Shoutů přes Google. |
+| `functions/create_shout.js` | Callable vytvoření Shoutu, autoritativní poloha a identita, transakční rate limit a idempotence; klient zatím nepřepnutý. |
 | `firestore.rules` | Autorizace, schéma zápisů, rate limiting a integrita čítačů. |
 | `storage.rules` | Pravidla Firebase Storage pro Business loga a screenshoty bug reportů. |
 
@@ -189,10 +190,13 @@ Kliknutí načte živý Shout, otevře detail a případně zvýrazní poslední
 Push mimo otevřenou aplikaci a fan-out sledujícím zatím nejsou implementované;
 jsou v `TODO.md` a vyžadují Cloud Functions/FCM.
 
-Společná callable brána je připravená a vyžaduje App Check, ale zatím ji
-nepoužívá žádný veřejný endpoint ani klientský tok. Přesun jednotlivých zápisů
-na server musí přidat vlastní validaci vstupu, rate limit a idempotenci ve stejné
-transakci; samotná existence brány neznamená dokončený serverový gateway.
+Společnou callable bránu používá připravený endpoint `createShout`, který zatím
+není nasazený ani zapojený do klienta. Ověřuje vstup a ve stejné transakci
+vytváří obsah, spotřebuje limit a uloží `serverOperations/{hash}` s otiskem
+požadavku a ID výsledku. Záznam neobsahuje text ani přesné souřadnice. Stejný
+klíč se stejným obsahem vrátí původní ID, s jiným obsahem se odmítne.
+Přímé klientské zápisy stále chrání současné Rules; jejich uzavření je součást
+pozdějšího řízeného přepnutí po App Check a end-to-end ověření.
 
 ## Bezpečnostní model
 

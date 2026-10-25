@@ -2,8 +2,20 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { defineSecret } from 'firebase-functions/params';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onCall } from 'firebase-functions/v2/https';
+import { secureCallableOptions } from './callable_security.js';
+import { createShoutOperation } from './create_shout.js';
 
 initializeApp();
+
+export const createShout = onCall({
+  ...secureCallableOptions,
+  minInstances: 0,
+  maxInstances: 1,
+  concurrency: 1,
+  memory: '256MiB',
+  timeoutSeconds: 15,
+}, (request) => createShoutOperation(request, getFirestore()));
 
 const googleMapsApiKey = defineSecret('GOOGLE_MAPS_API_KEY');
 const monthlyGeocodingLimit = 9500;

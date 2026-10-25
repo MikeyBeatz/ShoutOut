@@ -11,6 +11,14 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 
 ## Automatické vrstvy
 
+`functions/create_shout.integration.test.js` běží pouze s lokálním emulator
+hostem `127.0.0.1:8080` a pevným izolovaným projektem `shoutout-rules-test`.
+Ověřuje souběžnou idempotenci, transakční limity, serverovou identitu/polohu,
+Business pobočku a postihy. `npm run test:rules` spouští tuto sadu i Rules
+sekvenčně, protože Rules testy mezi scénáři čistí databázi. Před tímto příkazem
+je nutné provést `npm ci` také ve `functions/`. Samostatné `npm test` bez
+emulatoru tyto čtyři integrační testy přeskočí; přeskočení není důkaz ověření.
+
 | Vrstva | Umístění | Co ověřuje |
 |---|---|---|
 | Dart unit testy | `test/account_role_test.dart`, `account_ban_test.dart`, `app_theme_test.dart`, `geography_test.dart`, `profile_tile_layout_test.dart`, `shout_test.dart` | Role, aktivitu dočasných a trvalých banů, téma, geohash, veřejné zaokrouhlení, profilové řádky po třech, životní cyklus a řazení Shoutu, avatary a normalizaci nadpisu. |

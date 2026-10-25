@@ -1,5 +1,12 @@
 # Datový model Firestore
 
+Připravená serverová callable `createShout` používá `serverOperations/{hash}`
+pro idempotenci: `userId`, `action: createShout`, `fingerprint`, `shoutId`,
+`createdAt`. Hash ID je odvozen z UID a klíče požadavku. Záznam vzniká atomicky
+se Shoutem a existujícím `rateLimits/{uid}/actions/shout`; klient k němu nemá
+oprávnění. Neuchovává původní text ani přesné souřadnice. Nasazení a retenční
+úklid těchto nových záznamů zatím nejsou dokončené.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v
