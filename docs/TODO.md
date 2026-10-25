@@ -137,6 +137,8 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 14. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
     minimální provozní metriky bez nadbytečných osobních údajů.
 15. ⬜ Spustit CI a produkční webový build a odstranit blokující vady.
+    `pubspec.lock` je nyní verzovaný a CI používá `--enforce-lockfile`, aby
+    testovalo stejné Flutter závislosti jako lokální ověřený build.
     Lokální integrace 25. října prošla 147 Flutter testy, 12 testy nástrojů,
     64 testy Firestore Rules, 3 testy Functions, cíleným analyzátorem aplikace,
     kontrolou formátu, vývojovým release buildem i produkčním debug buildem.
