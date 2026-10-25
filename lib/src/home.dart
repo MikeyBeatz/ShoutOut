@@ -28,6 +28,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
   _followingSubscription;
 
+  List<QueryDocumentSnapshot<Map<String, dynamic>>>? _feedDocuments;
+  KeyedLiveState<Shout, _ShoutInteraction>? _interactions;
+
   int _tab = 0;
   late final Timer _expiryTimer;
 
@@ -36,6 +39,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     super.initState();
     RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
+      _interactions = _shoutInteractions(
+        onChanged: () {
+          if (mounted) setState(() {});
+        },
+        onError: (error, stack) {
+          // Transient disconnects are retried by the Firestore SDK.
+          debugPrint('Feed interaction subscription failed: $error');
+        },
+      );
       _initializeFeed();
     }
     _expiryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -46,7 +58,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   Future<void> _initializeFeed() async {
     _startFeedListeners();
     // Location improves distance sorting but must never hold up the feed.
-    unawaited(_refreshLocation().then((_) => _loadShouts()));
+    unawaited(
+      _refreshLocation().then((_) {
+        if (mounted && _feedDocuments != null) {
+          _applyShoutDocuments(_feedDocuments!);
+        }
+      }),
+    );
   }
 
   void _startFeedListeners() {
@@ -57,7 +75,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .where('status', isEqualTo: 'active')
         .orderBy('createdAt', descending: true)
         .limit(_feedPageSize)
-        .snapshots()
+        .liveSnapshots()
         .listen(
           (snapshot) => _applyShoutDocuments(snapshot.docs),
           onError: (_) {
@@ -69,7 +87,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .doc(uid)
         .collection('blocked')
         .limit(_blockedUsersPageSize)
-        .snapshots()
+        .liveSnapshots()
         .listen((snapshot) {
           if (mounted) {
             setState(() {
@@ -82,7 +100,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .doc(uid)
         .collection('following')
         .limit(_followedProfilesPageSize)
-        .snapshots()
+        .liveSnapshots()
         .listen((snapshot) {
           if (mounted) {
             setState(() {
@@ -128,30 +146,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     _shoutSubscription?.cancel();
     _blockedSubscription?.cancel();
     _followingSubscription?.cancel();
+    unawaited(_interactions?.dispose());
     super.dispose();
   }
 
-  Future<void> _loadShouts() async {
-    final blocked = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('blocked')
-        .limit(_blockedUsersPageSize)
-        .get();
-    final blockedUserIds = blocked.docs.map((doc) => doc.id).toSet();
-    final snapshot = await FirebaseFirestore.instance
-        .collection('shouts')
-        .where('status', isEqualTo: 'active')
-        .orderBy('createdAt', descending: true)
-        .limit(_feedPageSize)
-        .get();
-    await _applyShoutDocuments(snapshot.docs, blockedUserIds: blockedUserIds);
-  }
-
-  Future<void> _applyShoutDocuments(
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents, {
-    Set<String>? blockedUserIds,
-  }) async {
+  void _applyShoutDocuments(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> documents,
+  ) {
+    if (!mounted) return;
+    _feedDocuments = documents;
     final shouts = documents.map((doc) {
       final data = doc.data();
       final location = data['location'] as GeoPoint?;
@@ -166,43 +169,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                 1000;
       return Shout.fromDocument(doc, distanceKm: distanceKm);
     }).toList();
+    _interactions?.update(shouts);
     if (mounted) {
       setState(() {
         _shouts
           ..clear()
           ..addAll(shouts);
-        if (blockedUserIds != null) _blockedUserIds = blockedUserIds;
         _isLoadingShouts = false;
       });
     }
-    // Reaction and save details are secondary UI data. Fetch them after the
-    // feed is visible instead of delaying the first screen by many requests.
-    for (final shout in shouts) {
-      unawaited(
-        _loadInteractionState(shout).then((_) {
-          if (mounted) setState(() {});
-        }),
-      );
-    }
-  }
-
-  Future<void> _loadInteractionState(Shout shout) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-    final shoutRef = FirebaseFirestore.instance
-        .collection('shouts')
-        .doc(shout.id);
-    final results = await Future.wait([
-      shoutRef.collection('reactions').doc(uid).get(),
-      shoutRef.collection('saves').doc(uid).get(),
-    ]);
-    final reaction = results[0];
-    final save = results[1];
-    final type = reaction.data()?['type'] as String?;
-    shout
-      ..isLiked = type == 'like'
-      ..isDisliked = type == 'dislike'
-      ..isSaved = save.exists;
   }
 
   Future<void> _addShout(Shout shout) async {
@@ -339,7 +314,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     await FirebaseFirestore.instance.collection('shouts').doc(shout.id).update({
       'status': 'deleted',
     });
-    await _loadShouts();
+    // The active feed listener removes this document without another query.
   }
 
   Future<void> _toggleSaved(Shout shout) async {
@@ -349,8 +324,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     final actualSaveRef = shoutRef.collection('saves').doc(uid);
     final rateRef = _rateLimitReference('interaction');
     final eventId = _saveEventId(shout.id);
+    late ({bool saved, int count}) result;
     try {
-      await firestore.runTransaction((transaction) async {
+      result = await firestore.runTransaction((transaction) async {
         final rateSnapshot = await transaction.get(rateRef);
         final shoutSnapshot = await transaction.get(shoutRef);
         final saveSnapshot = await transaction.get(actualSaveRef);
@@ -374,17 +350,26 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             window: _interactionRateWindow,
           ),
         );
+        return (
+          saved: !saveSnapshot.exists,
+          count: saveSnapshot.exists
+              ? (currentSaves > 0 ? currentSaves - 1 : 0)
+              : currentSaves + 1,
+        );
       });
     } on FirebaseException {
       _showWriteFailure();
       return;
     }
+    if (!mounted) return;
     setState(() {
-      shout.isSaved = !shout.isSaved;
-      if (shout.isSaved) {
-        shout.saves++;
-      } else if (shout.saves > 0) {
-        shout.saves--;
+      for (final target in {
+        shout,
+        ..._shouts.where((item) => item.id == shout.id),
+      }) {
+        target
+          ..isSaved = result.saved
+          ..saves = result.count;
       }
     });
   }
@@ -408,22 +393,25 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .doc('reaction_${nextType}_${shout.id}');
     final rateRef = _rateLimitReference('interaction');
     final eventId = _shoutReactionEventId(shout.id);
-    final currentType = shout.isLiked
-        ? 'like'
-        : shout.isDisliked
-        ? 'dislike'
-        : null;
+    late ({String? type, int likes, int dislikes}) result;
     try {
-      await firestore.runTransaction((transaction) async {
+      result = await firestore.runTransaction((transaction) async {
         final rateSnapshot = await transaction.get(rateRef);
         final shoutSnapshot = await transaction.get(shoutRef);
         final reactionSnapshot = await transaction.get(reactionRef);
-        final actorProfileSnapshot = shout.authorId == uid
-            ? null
-            : await transaction.get(actorProfileRef);
-        final notificationSettingsSnapshot = shout.authorId == uid
+        final shouldNotify =
+            shout.authorId != uid &&
+            reactionSnapshot.data()?['type'] != nextType;
+        final notificationSettingsSnapshot = !shouldNotify
             ? null
             : await transaction.get(notificationSettingsRef);
+        final notificationsEnabled =
+            shouldNotify &&
+            (notificationSettingsSnapshot?.data()?['reactions'] as bool? ??
+                true);
+        final actorProfileSnapshot = !notificationsEnabled
+            ? null
+            : await transaction.get(actorProfileRef);
         final storedType = reactionSnapshot.data()?['type'] as String?;
         var likes = shoutSnapshot.data()?['likesCount'] as int? ?? 0;
         var dislikes = shoutSnapshot.data()?['dislikesCount'] as int? ?? 0;
@@ -467,34 +455,27 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
               window: _interactionRateWindow,
             ),
           );
+        return (
+          type: storedType == nextType ? null : nextType,
+          likes: likes,
+          dislikes: dislikes,
+        );
       });
     } on FirebaseException {
       _showWriteFailure();
       return;
     }
+    if (!mounted) return;
     setState(() {
-      if (currentType == nextType) {
-        if (like) {
-          shout.isLiked = false;
-          if (shout.likes > 0) shout.likes--;
-        } else {
-          shout.isDisliked = false;
-          if (shout.dislikes > 0) shout.dislikes--;
-        }
-      } else if (like) {
-        shout.isLiked = true;
-        shout.likes++;
-        if (shout.isDisliked) {
-          shout.isDisliked = false;
-          if (shout.dislikes > 0) shout.dislikes--;
-        }
-      } else {
-        shout.isDisliked = true;
-        shout.dislikes++;
-        if (shout.isLiked) {
-          shout.isLiked = false;
-          if (shout.likes > 0) shout.likes--;
-        }
+      for (final target in {
+        shout,
+        ..._shouts.where((item) => item.id == shout.id),
+      }) {
+        target
+          ..isLiked = result.type == 'like'
+          ..isDisliked = result.type == 'dislike'
+          ..likes = result.likes
+          ..dislikes = result.dislikes;
       }
     });
   }

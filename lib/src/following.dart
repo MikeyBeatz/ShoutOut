@@ -111,7 +111,7 @@ class _PublicProfileSheetState extends State<_PublicProfileSheet> {
                         StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                           stream: _followingReference(
                             widget.userId,
-                          ).snapshots(),
+                          ).liveSnapshots(),
                           builder: (context, snapshot) {
                             final followed = snapshot.data?.exists == true;
                             return FilledButton.tonalIcon(
@@ -212,42 +212,50 @@ class _PublicProfileSheetState extends State<_PublicProfileSheet> {
   }
 }
 
-Stream<List<Shout>> _watchActiveProfileShouts(String userId) =>
-    FirebaseFirestore.instance
-        .collection('shouts')
-        .where('authorId', isEqualTo: userId)
-        .limit(_feedPageSize)
-        .snapshots()
-        .asyncMap(_hydrateProfileShouts);
-
-Future<List<Shout>> _hydrateProfileShouts(
-  QuerySnapshot<Map<String, dynamic>> snapshot,
-) async {
-  final shouts = snapshot.docs
-      .map(Shout.fromDocument)
-      .where((shout) => shout.isActive)
-      .toList();
-  final viewerId = FirebaseAuth.instance.currentUser?.uid;
-  if (viewerId != null) {
-    await Future.wait(
-      shouts.map((shout) async {
-        final reference = FirebaseFirestore.instance
-            .collection('shouts')
-            .doc(shout.id);
-        final interactions = await Future.wait([
-          reference.collection('reactions').doc(viewerId).get(),
-          reference.collection('saves').doc(viewerId).get(),
-        ]);
-        final reaction = interactions[0].data()?['type'] as String?;
-        shout
-          ..isLiked = reaction == 'like'
-          ..isDisliked = reaction == 'dislike'
-          ..isSaved = interactions[1].exists;
-      }),
-    );
-  }
-  shouts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  return shouts;
+Stream<List<Shout>> _watchActiveProfileShouts(String userId) {
+  late final StreamController<List<Shout>> output;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? subscription;
+  KeyedLiveState<Shout, _ShoutInteraction>? interactions;
+  var shouts = <Shout>[];
+  output = StreamController<List<Shout>>(
+    onListen: () {
+      interactions = _shoutInteractions(
+        onChanged: () {
+          if (!output.isClosed) output.add(shouts);
+        },
+        onError: (error, stack) {
+          if (!output.isClosed) output.addError(error, stack);
+        },
+      );
+      subscription = FirebaseFirestore.instance
+          .collection('shouts')
+          .where('authorId', isEqualTo: userId)
+          .limit(_feedPageSize)
+          .liveSnapshots()
+          .listen(
+            (snapshot) {
+              shouts =
+                  snapshot.docs
+                      .map(Shout.fromDocument)
+                      .where((shout) => shout.isActive)
+                      .toList()
+                    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              interactions!.update(shouts);
+              output.add(shouts);
+            },
+            onError: output.addError,
+            onDone: () => output.close(),
+          );
+    },
+    onCancel: () async {
+      // Mark dependencies disposed before waiting for either cancellation.
+      await Future.wait([
+        if (subscription != null) subscription!.cancel(),
+        if (interactions != null) interactions!.dispose(),
+      ]);
+    },
+  );
+  return output.stream;
 }
 
 class FollowedProfilesList extends StatelessWidget {

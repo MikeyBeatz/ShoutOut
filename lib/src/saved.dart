@@ -184,7 +184,7 @@ class _MyShoutsPageState extends State<MyShoutsPage> {
 
 enum _MyShoutsSection { active, expired, comments }
 
-class MyCommentsPage extends StatelessWidget {
+class MyCommentsPage extends StatefulWidget {
   const MyCommentsPage({
     super.key,
     required this.onSave,
@@ -197,6 +197,24 @@ class MyCommentsPage extends StatelessWidget {
   final bool showTitle;
 
   @override
+  State<MyCommentsPage> createState() => _MyCommentsPageState();
+}
+
+class _MyCommentsPageState extends State<MyCommentsPage> {
+  QuerySnapshot<Map<String, dynamic>>? _loadedSnapshot;
+  Future<List<_CommentWithShout>>? _loadedComments;
+
+  Future<List<_CommentWithShout>> _commentsFor(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    if (!identical(snapshot, _loadedSnapshot)) {
+      _loadedSnapshot = snapshot;
+      _loadedComments = _loadComments(snapshot.docs);
+    }
+    return _loadedComments!;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -204,12 +222,12 @@ class MyCommentsPage extends StatelessWidget {
           .collectionGroup('comments')
           .where('authorId', isEqualTo: uid)
           .limit(_profileHistoryPageSize)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showTitle)
+            if (widget.showTitle)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
                 child: Text(
@@ -231,7 +249,7 @@ class MyCommentsPage extends StatelessWidget {
                   : !snapshot.hasData
                   ? const Center(child: CircularProgressIndicator())
                   : FutureBuilder<List<_CommentWithShout>>(
-                      future: _loadComments(snapshot.data!.docs),
+                      future: _commentsFor(snapshot.data!),
                       builder: (context, commentsSnapshot) {
                         if (commentsSnapshot.hasError) {
                           return EmptyState(
@@ -281,9 +299,11 @@ class MyCommentsPage extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (_) => ShoutDetailPage(
                                       shout: item.shout,
-                                      onSave: () => onSave(item.shout),
-                                      onReaction: (like) =>
-                                          onReaction(item.shout, like: like),
+                                      onSave: () => widget.onSave(item.shout),
+                                      onReaction: (like) => widget.onReaction(
+                                        item.shout,
+                                        like: like,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -303,9 +323,16 @@ class MyCommentsPage extends StatelessWidget {
   Future<List<_CommentWithShout>> _loadComments(
     List<QueryDocumentSnapshot<Map<String, dynamic>>> comments,
   ) async {
+    // Several comments may belong to the same Shout. Share that one read
+    // within this snapshot, but refresh it when the comment snapshot changes.
+    final parents = <String, Future<DocumentSnapshot<Map<String, dynamic>>>>{};
     final items = await Future.wait(
       comments.map((comment) async {
-        final shoutDocument = await comment.reference.parent.parent!.get();
+        final reference = comment.reference.parent.parent!;
+        final shoutDocument = await parents.putIfAbsent(
+          reference.path,
+          reference.get,
+        );
         if (!shoutDocument.exists) return null;
         final shout = Shout.fromDocument(shoutDocument);
         if (shout.effectiveStatus == ShoutStatus.deleted ||

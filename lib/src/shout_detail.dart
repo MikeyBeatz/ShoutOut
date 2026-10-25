@@ -102,7 +102,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       ],
     ),
     body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: _commentsQuery().snapshots(),
+      stream: _commentsQuery().liveSnapshots(),
       builder: (context, snapshot) {
         final comments = snapshot.data?.docs ?? [];
         _commentIds = comments.map((comment) => comment.id).toList();

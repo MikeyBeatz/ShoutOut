@@ -10,7 +10,7 @@ class ProfilePage extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';
@@ -590,7 +590,7 @@ class EditProfilePage extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         final profile = snapshot.data?.data();
         final nickname = profile?['nickname'] as String? ?? 'Načítání…';

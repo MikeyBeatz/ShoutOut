@@ -1,3 +1,4 @@
+import 'live_data.dart';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,7 +48,7 @@ class PublicIdentityBuilder extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('publicProfiles')
           .doc(userId)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         final data = snapshot.data?.data();
         if (data == null) return builder(context, fallback);

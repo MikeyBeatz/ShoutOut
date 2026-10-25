@@ -32,13 +32,13 @@ class PrivateReplyList extends StatelessWidget {
       stream: replies
           .where('authorId', isEqualTo: uid)
           .limit(_privateReplyPageSize)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, authoredSnapshot) =>
           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: replies
                 .where('recipientId', isEqualTo: uid)
                 .limit(_privateReplyPageSize)
-                .snapshots(),
+                .liveSnapshots(),
             builder: (context, receivedSnapshot) {
               final replyById =
                   <String, QueryDocumentSnapshot<Map<String, dynamic>>>{

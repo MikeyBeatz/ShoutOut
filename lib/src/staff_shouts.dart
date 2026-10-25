@@ -34,7 +34,7 @@ class _StaffShoutsState extends State<_StaffShouts> {
       stream: FirebaseFirestore.instance
           .collection('accountRoles')
           .doc(uid)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, roleSnapshot) {
         if (roleSnapshot.hasError) {
           return const Center(
@@ -311,7 +311,7 @@ class _RegionalShoutList extends StatelessWidget {
     }
     query = query.orderBy('createdAt', descending: true).limit(50);
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: query.snapshots(),
+      stream: query.liveSnapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(

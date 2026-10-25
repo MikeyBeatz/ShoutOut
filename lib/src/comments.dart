@@ -49,7 +49,7 @@ class _CommentTileState extends State<CommentTile> {
     final reactions = widget.comment.reference.collection('reactions');
     final ownReaction = reactions.doc(FirebaseAuth.instance.currentUser!.uid);
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: ownReaction.snapshots(),
+      stream: ownReaction.liveSnapshots(),
       builder: (context, snapshot) {
         final likes = data['likesCount'] as int? ?? 0;
         final dislikes = data['dislikesCount'] as int? ?? 0;
@@ -250,15 +250,22 @@ class _CommentTileState extends State<CommentTile> {
       await firestore.runTransaction((transaction) async {
         final rateSnapshot = await transaction.get(rateReference);
         final commentSnapshot = await transaction.get(widget.comment.reference);
-        final shoutSnapshot = await transaction.get(shoutReference);
         final reactionSnapshot = await transaction.get(reference);
-        final actorProfileSnapshot = commentAuthorId == uid
-            ? null
-            : await transaction.get(actorProfileReference);
-        final notificationSettingsSnapshot = commentAuthorId == uid
+        final currentType = reactionSnapshot.data()?['type'] as String?;
+        final shouldNotify = commentAuthorId != uid && currentType != type;
+        final notificationSettingsSnapshot = !shouldNotify
             ? null
             : await transaction.get(notificationSettingsReference);
-        final currentType = reactionSnapshot.data()?['type'] as String?;
+        final notificationsEnabled =
+            shouldNotify &&
+            (notificationSettingsSnapshot?.data()?['reactions'] as bool? ??
+                true);
+        final actorProfileSnapshot = !notificationsEnabled
+            ? null
+            : await transaction.get(actorProfileReference);
+        final shoutSnapshot = actorProfileSnapshot?.exists != true
+            ? null
+            : await transaction.get(shoutReference);
         var likes = commentSnapshot.data()?['likesCount'] as int? ?? 0;
         var dislikes = commentSnapshot.data()?['dislikesCount'] as int? ?? 0;
         if (currentType == type) {
@@ -298,7 +305,7 @@ class _CommentTileState extends State<CommentTile> {
             'actorId': uid,
             'actorNickname': actorProfileSnapshot!.data()!['nickname'],
             'targetShoutId': shoutReference.id,
-            'targetTitle': shoutSnapshot.data()!['title'],
+            'targetTitle': shoutSnapshot!.data()!['title'],
             'targetCommentId': widget.comment.id,
             'reactionType': type,
             'eventCount': FieldValue.increment(1),

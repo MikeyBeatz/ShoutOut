@@ -231,7 +231,7 @@ class NotificationSettingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(tr(context, 'Nastavení notifikací'))),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: reference.snapshots(),
+        stream: reference.liveSnapshots(),
         builder: (context, snapshot) {
           final settings = snapshot.data?.data();
           final replies = settings?['replies'] as bool? ?? true;

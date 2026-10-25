@@ -1,3 +1,4 @@
+import 'live_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class LegalAcceptanceGate extends StatelessWidget {
         .collection('legal')
         .doc(_acceptanceDocument);
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: acceptance.snapshots(),
+      stream: acceptance.liveSnapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(

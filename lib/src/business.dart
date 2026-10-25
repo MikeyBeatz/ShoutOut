@@ -65,7 +65,7 @@ class BusinessPromotionsPage extends StatelessWidget {
           .collection('shouts')
           .where('authorId', isEqualTo: userId)
           .limit(50)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -186,7 +186,7 @@ class BusinessProfilePage extends StatelessWidget {
           stream: FirebaseFirestore.instance
               .collection('businessProfiles')
               .doc(userId)
-              .snapshots(),
+              .liveSnapshots(),
           builder: (context, snapshot) => IconButton(
             tooltip: businessTr(context, 'Upravit údaje'),
             onPressed: snapshot.data?.data() == null
@@ -205,7 +205,7 @@ class BusinessProfilePage extends StatelessWidget {
       stream: FirebaseFirestore.instance
           .collection('businessProfiles')
           .doc(userId)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         final data = snapshot.data?.data();
         if (data == null) {
@@ -323,7 +323,7 @@ class BusinessLocationsPage extends StatelessWidget {
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: _locations.orderBy('createdAt').snapshots(),
+            stream: _locations.orderBy('createdAt').liveSnapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(

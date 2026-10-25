@@ -22,7 +22,7 @@ class NotificationBellButton extends StatelessWidget {
         .collection('notifications')
         .orderBy('createdAt', descending: true)
         .limit(50)
-        .snapshots();
+        .liveSnapshots();
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -87,7 +87,7 @@ class NotificationsPage extends StatelessWidget {
       stream: _reference
           .orderBy('createdAt', descending: true)
           .limit(50)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(

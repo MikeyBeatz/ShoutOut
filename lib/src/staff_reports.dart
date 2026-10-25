@@ -68,7 +68,7 @@ class _StaffReportsState extends State<_StaffReports> {
           ? query.where('status', whereIn: ['open', 'escalated'])
           : query.where('status', isEqualTo: 'open');
       query = query.limit(_moderationPageSize);
-      final subscription = query.snapshots().listen(
+      final subscription = query.liveSnapshots().listen(
         (snapshot) {
           if (!mounted) return;
           setState(() {

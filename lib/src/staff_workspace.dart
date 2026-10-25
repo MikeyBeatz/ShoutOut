@@ -302,7 +302,7 @@ class _StaffBugReports extends StatelessWidget {
         .collection('bugReports')
         .where('status', isEqualTo: 'open')
         .limit(50)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return const Center(child: Text('Hlášení chyb se nepodařilo načíst.'));

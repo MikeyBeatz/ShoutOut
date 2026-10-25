@@ -237,7 +237,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
                     .doc(uid)
                     .collection('locations')
                     .where('active', isEqualTo: true)
-                    .snapshots(),
+                    .liveSnapshots(),
                 builder: (context, locationSnapshot) {
                   final locations =
                       locationSnapshot.data?.docs

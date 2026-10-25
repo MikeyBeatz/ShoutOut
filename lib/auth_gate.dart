@@ -1,3 +1,4 @@
+import 'live_data.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -25,7 +26,10 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => StreamBuilder<User?>(
-    stream: FirebaseAuth.instance.userChanges(),
+    stream: liveStreams.watch((
+      'auth',
+      FirebaseAuth.instance,
+    ), FirebaseAuth.instance.userChanges),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const _LoadingPage();
@@ -45,6 +49,7 @@ class AuthGate extends StatelessWidget {
         return VerifyEmailPage(user: user);
       }
       return AccountBanGate(
+        key: ValueKey(user.uid),
         user: user,
         child: BusinessApplicationGate(
           user: user,
@@ -67,7 +72,7 @@ class AccountBanGate extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('bans')
             .doc(user.uid)
-            .snapshots(),
+            .liveSnapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData && !snapshot.hasError) {
             return const _LoadingPage();
@@ -234,7 +239,7 @@ class BusinessApplicationGate extends StatelessWidget {
     stream: FirebaseFirestore.instance
         .collection('businessApplications')
         .doc(user.uid)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, applicationSnapshot) {
       if (applicationSnapshot.hasError) {
         return _BusinessApplicationStatusPage(
@@ -280,7 +285,7 @@ class BusinessApplicationGate extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('accountRoles')
             .doc(user.uid)
-            .snapshots(),
+            .liveSnapshots(),
         builder: (context, roleSnapshot) {
           if (roleSnapshot.hasError) {
             return _BusinessApplicationStatusPage(
@@ -304,7 +309,7 @@ class BusinessApplicationGate extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('businessProfiles')
                 .doc(user.uid)
-                .snapshots(),
+                .liveSnapshots(),
             builder: (context, profileSnapshot) {
               if (profileSnapshot.hasError) {
                 return _BusinessApplicationStatusPage(
@@ -578,7 +583,7 @@ class ProfileGate extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .snapshots(),
+            .liveSnapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const _GateLoadError();
@@ -1033,7 +1038,7 @@ class DeletionRequestGate extends StatelessWidget {
     stream: FirebaseFirestore.instance
         .collection('accountDeletionRequests')
         .doc(user.uid)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       if (snapshot.data?.exists != true) return child;
       return Scaffold(
@@ -1081,7 +1086,7 @@ class BanGate extends StatelessWidget {
     stream: FirebaseFirestore.instance
         .collection('bans')
         .doc(user.uid)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       final ban = snapshot.data?.data();
       final expiry = (ban?['expiresAt'] as Timestamp?)?.toDate();
@@ -1152,7 +1157,7 @@ class ContentRestrictionGate extends StatelessWidget {
     stream: FirebaseFirestore.instance
         .collection('contentRestrictions')
         .doc(user.uid)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       final restriction = snapshot.data?.data();
       final expiry = (restriction?['expiresAt'] as Timestamp?)?.toDate();

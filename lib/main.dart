@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'live_data.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -59,6 +61,7 @@ part 'src/staff_reports.dart';
 part 'src/shout_cards.dart';
 part 'src/shout_detail.dart';
 part 'src/shout_model.dart';
+part 'src/shout_live_data.dart';
 
 const _shoutPrimary = Color(0xFF0A6371);
 const _shoutPrimaryDark = Color(0xFF074B57);

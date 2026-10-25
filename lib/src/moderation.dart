@@ -63,7 +63,7 @@ class _BusinessApplicationList extends StatelessWidget {
         .collection('businessApplications')
         .where('status', whereIn: const ['pending_email', 'checking'])
         .limit(50)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return const Center(child: Text('Žádosti se nepodařilo načíst.'));
@@ -335,7 +335,7 @@ class _PrivateReplyReportList extends StatelessWidget {
             .collection('privateReplyReports')
             .where('status', isEqualTo: 'open')
             .limit(_moderationPageSize)
-            .snapshots(),
+            .liveSnapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -404,7 +404,7 @@ class _ReportList extends StatelessWidget {
         .collection(collection)
         .where('status', isEqualTo: 'open')
         .limit(_moderationPageSize)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return Center(
@@ -706,7 +706,7 @@ class _ReportTargetDetails {
   final Timestamp? focusCommentCreatedAt;
 }
 
-class _ReportDetailDialog extends StatelessWidget {
+class _ReportDetailDialog extends StatefulWidget {
   const _ReportDetailDialog({
     required this.report,
     required this.collection,
@@ -717,8 +717,24 @@ class _ReportDetailDialog extends StatelessWidget {
   final String collection;
   final WidgetBuilder? decisionBuilder;
 
+  @override
+  State<_ReportDetailDialog> createState() => _ReportDetailDialogState();
+}
+
+class _ReportDetailDialogState extends State<_ReportDetailDialog> {
+  late Future<_ReportTargetDetails> _data = _load();
+
+  @override
+  void didUpdateWidget(covariant _ReportDetailDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.report != widget.report ||
+        oldWidget.collection != widget.collection) {
+      _data = _load();
+    }
+  }
+
   Future<_ReportTargetDetails> _load() async {
-    final data = report.data();
+    final data = widget.report.data();
     final shoutDocument = await FirebaseFirestore.instance
         .collection('shouts')
         .doc(data['shoutId'] as String)
@@ -729,7 +745,7 @@ class _ReportDetailDialog extends StatelessWidget {
     Map<String, dynamic>? targetData = shoutDocument.data();
     String? focusCommentId;
     Timestamp? focusCommentCreatedAt;
-    if (collection == 'commentReports') {
+    if (widget.collection == 'commentReports') {
       final commentDocument = await shoutDocument.reference
           .collection('comments')
           .doc(data['commentId'] as String)
@@ -737,7 +753,7 @@ class _ReportDetailDialog extends StatelessWidget {
       targetData = commentDocument.data();
       focusCommentId = commentDocument.id;
       focusCommentCreatedAt = targetData?['createdAt'] as Timestamp?;
-    } else if (collection == 'privateReplyReports') {
+    } else if (widget.collection == 'privateReplyReports') {
       // Private replies are not readable by unrelated moderators. The report
       // contains the immutable text and author snapshot needed for review.
       targetData = data;
@@ -762,7 +778,9 @@ class _ReportDetailDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Text(
-      collection == 'commentReports' ? 'Detail komentáře' : 'Detail Shoutu',
+      widget.collection == 'commentReports'
+          ? 'Detail komentáře'
+          : 'Detail Shoutu',
     ),
     content: SizedBox(
       width: 560,
@@ -771,7 +789,7 @@ class _ReportDetailDialog extends StatelessWidget {
         children: [
           Flexible(
             child: FutureBuilder<_ReportTargetDetails>(
-              future: _load(),
+              future: _data,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Text(
@@ -788,7 +806,7 @@ class _ReportDetailDialog extends StatelessWidget {
                 final target = details.targetData;
                 final createdAt = (target?['createdAt'] as Timestamp?)
                     ?.toDate();
-                final reportData = report.data();
+                final reportData = widget.report.data();
                 return SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -832,9 +850,9 @@ class _ReportDetailDialog extends StatelessWidget {
               },
             ),
           ),
-          if (decisionBuilder != null) ...[
+          if (widget.decisionBuilder != null) ...[
             const Divider(height: 28),
-            decisionBuilder!(context),
+            widget.decisionBuilder!(context),
           ],
         ],
       ),
@@ -845,7 +863,7 @@ class _ReportDetailDialog extends StatelessWidget {
         child: const Text('Zavřít'),
       ),
       FutureBuilder<_ReportTargetDetails>(
-        future: _load(),
+        future: _data,
         builder: (context, snapshot) => FilledButton.icon(
           onPressed: snapshot.hasData
               ? () {
@@ -868,9 +886,9 @@ class _ReportDetailDialog extends StatelessWidget {
               : null,
           icon: const Icon(Icons.open_in_new),
           label: Text(
-            collection == 'commentReports'
+            widget.collection == 'commentReports'
                 ? 'Otevřít u komentáře'
-                : collection == 'privateReplyReports'
+                : widget.collection == 'privateReplyReports'
                 ? 'Otevřít související místo'
                 : 'Otevřít celý Shout',
           ),
@@ -1116,7 +1134,7 @@ class _SanctionHistoryList extends StatelessWidget {
         .collection('sanctions')
         .orderBy('createdAt', descending: true)
         .limit(_moderationPageSize)
-        .snapshots(),
+        .liveSnapshots(),
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return const Center(child: Text('Postihy se nepodařilo načíst.'));
@@ -1182,7 +1200,7 @@ class WarningHistoryPage extends StatelessWidget {
           .collection('warnings')
           .where('userId', isEqualTo: userId)
           .limit(_moderationPageSize)
-          .snapshots(),
+          .liveSnapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
