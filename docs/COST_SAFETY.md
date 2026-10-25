@@ -6,6 +6,12 @@ vývojovém projektu `shoutout-dev-46c81`. Produkční projekt
 nákladovou bránou; limity zahrnují aplikaci i vstupní stránku. Cílem vývojového prostředí je zůstat v bezplatných kvótách a
 omezit škodu při chybě nebo zneužití.
 
+Vlastník 25. října 2026 uvedl nejvýše **5 000 Kč měsíčně** jako aktuálně
+přijatelný celkový náklad. Tato částka sama nenastavuje budget, servisní kvótu
+ani automatické vypnutí. Konkrétní provozní prahy a rezerva pod touto částkou
+ještě vyžadují nastavení a ověření. Lokální optimalizace a další postup jsou
+v [READ_COST_AUDIT.md](READ_COST_AUDIT.md).
+
 ## Zásadní omezení
 
 Rozpočet a jeho e-mailové upozornění **nezastaví účtování**. Firebase také nemá

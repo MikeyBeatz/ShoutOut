@@ -4,6 +4,13 @@ Tento dokument popisuje současnou implementaci aplikace. Je určen vývojáři,
 který projekt nezná a potřebuje pochopit jeho hranice, odpovědnosti a tok dat.
 Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.md`.
 
+Datové streamy klienta sdílí `lib/live_data.dart` podle uživatele, Firebase
+aplikace, databáze a dotazu. Aktivní odběratelé dostávají stejná realtime data
+a pozdní odběratel poslední událost. Poslední odpojení zruší zdroj a uvolní
+hodnotu. Feed a veřejný profil drží vlastní reakce a uložení podle ID Shoutu;
+změna čítače nerestartuje načítání všech interakcí. Podrobnosti a zbývající
+nákladová rizika shrnuje [READ_COST_AUDIT.md](READ_COST_AUDIT.md).
+
 ## Základní principy
 
 - Flutter klient je společný pro Android, iOS a web.
@@ -43,7 +50,8 @@ má vlastní Hosting site a konfiguraci. Webová aplikace nesmí použít site
 vstupní stránky. App site `shoutout-go-a1b34` je registrovaný a produkční
 SDK konfigurace je v `config/prod.json`. Nastavení a funkčnost runtime služeb zatím nebyly ověřené;
 vlastní doména je přidaná a má nastavený CNAME, DNS ověření ve Firebase proběhlo
-a HTTPS certifikát se nyní vystavuje.
+a Firebase potvrzuje stav `Connected` s platným HTTPS. Na app site zatím není
+první produkční release.
 
 ## Spouštěcí a přístupový tok
 
@@ -95,6 +103,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/business_logo_editor.dart` | Lokální výběr a bezpečný 512px výřez vlastního Business loga; profil následně ukládá PNG do Firebase Storage a atomicky aktualizuje cestu loga ve veřejném i soukromém profilu. |
 | `lib/address_autocomplete.dart` | Geoapify autocomplete a převod výsledku na adresu, souřadnice a provider place ID. |
 | `lib/public_profile.dart` | Realtime načtení aktuální přezdívky a avataru. |
+| `lib/live_data.dart` | Sdílení a replay aktivních Firestore streamů bez duplicitních listenerů. |
 | `lib/help_content.dart` | Osm rozšířených témat Nápovědy ve všech sedmi jazycích. |
 | `lib/easter_egg_game.dart` | Offline minihra Shout Flight, fyzika megafonu nezávislá na snímkové frekvenci, obtížnost překážek, skóre, překlady a tematické vykreslení bez externích assetů. |
 | `lib/flight_score_store*.dart` | Platformní úložiště osobního rekordu: webový `LocalStorage` a nativní `SharedPreferences`, vždy pouze vyšší výsledek. |

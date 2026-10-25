@@ -45,7 +45,8 @@ Veřejná aplikace pro běžné a Business účty bude na
 vytvořen app site `shoutout-go-a1b34`, propojený s webovou aplikací `ShoutOut
 Web Production`; SDK konfigurace je v `config/prod.json`. App build ani vlastní
 doména zatím nejsou připravené k veřejnému provozu: build čeká na první release,
-doména má ověřený CNAME a Firebase vystavuje HTTPS certifikát. Moderátorské
+doména má ověřený CNAME a Firebase potvrzuje stav `Connected` s platným HTTPS.
+Moderátorské
 rozhraní bude součástí aplikace s přístupem podle role. Produkční web vyžaduje
 vlastní konfiguraci Firebase Authentication, autorizovanou doménu a Action URL
 `/auth/action`.

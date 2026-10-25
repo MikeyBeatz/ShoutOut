@@ -1,5 +1,10 @@
 # Testovací strategie a regresní matice
 
+`test/live_data_test.dart` ověřuje stabilní sdílení realtime zdrojů, oddělení
+účtů/databází, chyby a opětovné načtení, rušení odběrů a zachování živých
+interakcí při opakovaných aktualizacích 50 položek. Modelové počty odběrů
+nejsou měřením účtovaných čtení; viz [READ_COST_AUDIT.md](READ_COST_AUDIT.md).
+
 Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná technická
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.

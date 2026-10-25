@@ -67,7 +67,7 @@ opakovat potvrzení pro již schválený konkrétní krok a cíl.
 | Prostředí | Cíl |
 |---|---|
 | Vývoj | projekt/site `shoutout-dev-46c81` |
-| Produkční aplikace | projekt `shoutout-production-a1b34`, site `shoutout-go-a1b34`, doména `go.shoutout-app.eu` (DNS ověřené, HTTPS certifikát se vystavuje) |
+| Produkční aplikace | projekt `shoutout-production-a1b34`, site `shoutout-go-a1b34`, doména `go.shoutout-app.eu` (`Connected`, platné HTTPS, první release zatím chybí) |
 | Prezentace | projekt `shoutout-production-a1b34`, vlastní `presentation/firebase.json` |
 
 Alias `web` označuje společný produkční projekt a nevybírá Hosting web.

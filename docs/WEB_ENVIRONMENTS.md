@@ -7,7 +7,8 @@ a konfiguraci. Dne 25. října 2026 byl vytvořen app site `shoutout-go-a1b34`,
 propojený s registrovanou aplikací `ShoutOut Web Production`. Veřejná SDK
 konfigurace je uložená v `config/prod.json`. Doména `go.shoutout-app.eu` je
 přidaná k app site a DNS CNAME na Hostingeru je nastavený; Firebase DNS uznal
-a nyní vystavuje HTTPS certifikát (`Minting certificate`). Nastavení provozních služeb aplikace není ověřené.
+a potvrzuje stav `Connected` s platným HTTPS. Na app site zatím není první
+release a nastavení provozních služeb aplikace není ověřené.
 
 | Účel | Firebase projekt | Veřejná adresa |
 |---|---|---|
@@ -147,8 +148,8 @@ Webová aplikace i druhý Hosting web už jsou vytvořené. Před případným
 vytvořením Firestore zvolit region databáze a nastavit potřebné
 Authentication, Firestore, Storage a Hosting služby. Testovací účty a demo
 data se nepřenášejí. CNAME pro `go.shoutout-app.eu` už odpovídá požadavku
-Firebase Hostingu; dokončit ověření HTTPS a autorizované Auth domény. Vlastní Auth
-Action URL má být `https://go.shoutout-app.eu/auth/action`.
+Firebase Hostingu a HTTPS je platné; zbývá autorizovaná Auth doména. Vlastní
+Auth Action URL má být `https://go.shoutout-app.eu/auth/action`.
 
 Před veřejným provozem dokončit nákladové pojistky, IAM, pravidla, App Check,
 testy e-mailů, rollback a ostatní brány v `LAUNCH_READINESS.md` a
@@ -227,8 +228,7 @@ Cloudflare `1.1.1.1` a Google `8.8.8.8`. Cílový Hosting web vrací DNS A
 `199.36.158.100`; tato IP nebyla ručně vkládaná do zóny pro `go`.
 
 Firebase po propagaci oznámil `Custom domain setup successfully`; průvodce
-byl dokončen tlačítkem Finish. Stav domény je nyní `Minting certificate`.
-HTTPS ověření ještě neprošlo; certifikát ani konektivita nebyly obcházené.
-Nastavení i ověření DNS je potvrzené, ale stav `Connected` a platné HTTPS zatím
-nejsou potvrzené. Po vydání certifikátu ověřit stav domény a HTTPS znovu. Aplikace stále čeká na první release;
-Flutter build, Auth, Firestore ani jiné služby v tomto kroku nasazené nebyly.
+byl dokončen tlačítkem Finish. Následná kontrola potvrdila stav `Connected`,
+platný TLS certifikát a HTTPS odpověď cílového webu. Odpověď je zatím očekávané
+404, protože app site stále čeká na první release. Flutter build, Auth,
+Firestore ani jiné služby v tomto kroku nasazené nebyly.

@@ -32,8 +32,8 @@ Webová aplikace bude na `go.shoutout-app.eu` ve stávajícím produkčním proj
 Každá část bude mít vlastní Hosting site, obsah a nasazování. Vývojový web a
 data zůstávají v projektu `shoutout-dev-46c81`. Produkční SDK konfigurace je
 v `config/prod.json`; app Hosting site `shoutout-go-a1b34` je vytvořený a
-propojený s registrovanou webovou aplikací. Vlastní doména, runtime služby
-a nasazení aplikace ještě zbývají.
+propojený s registrovanou webovou aplikací. Vlastní doména je `Connected` a má
+platné HTTPS; runtime služby a první nasazení aplikace ještě zbývají.
 
 Android a iOS, jejich distribuce a Business monetizace formou předplatného
 zůstávají v plánu po webovém MVP. Již při webovém MVP musí mít bezplatné
@@ -137,6 +137,13 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 14. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
     minimální provozní metriky bez nadbytečných osobních údajů.
 15. ⬜ Spustit CI a produkční webový build a odstranit blokující vady.
+    Lokální integrace 25. října prošla 147 Flutter testy, 12 testy nástrojů,
+    64 testy Firestore Rules, 3 testy Functions, cíleným analyzátorem aplikace,
+    kontrolou formátu, vývojovým release buildem i produkčním debug buildem.
+    Zbývá opravit deklaraci/configuraci ESLintu ve `functions/`; současný
+    `npm run lint` nenajde binárku. Celokořenový lokální analyzátor navíc zachytí
+    ignorovanou Dart šablonu ve Firebase CLI cache pod `build/`, zatímco
+    analyzátor všech projektových Dart zdrojů v `lib/` a `test/` prochází.
 16. ⬜ Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
     přijmout nebo odstranit zbývající rizika.
 
@@ -321,6 +328,12 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
 - [x] Google reverse-geocoding trigger s tajným serverovým API klíčem.
 - [x] ISO země/oblasti, moderátorské rozsahy, webový filtr a kontrola postihu.
 - [x] Migrační nástroj pro existující shouty.
+- Lokálně byly 25. října odstraněné opakované GETy interakcí, restartování
+  stejných streamů a duplicitní načítání historie/detailů; viz
+  `docs/READ_COST_AUDIT.md`. Tato optimalizace není dokončením cloudových
+  nákladových pojistek ani serverového prostorového feedu. Vývojový build byl
+  25. října nasazený na Hosting `shoutout-dev-46c81` a prošel základním
+  průchodem v přihlášené relaci.
 - [ ] **MVP** — Před prvním nasazením Functions nastavit a prakticky otestovat
   nákladové pojistky podle `docs/COST_SAFETY.md`: servisní kvóty, Functions
   spend cap, rozpočtová upozornění, Pub/Sub nouzovou reakci a odpovědnou osobu.
@@ -904,8 +917,9 @@ Dne 25. října 2026 byla doména `go.shoutout-app.eu` přidaná ve Firebase k
 app site `shoutout-go-a1b34`. Na Hostingeru je nový CNAME `go` →
 `shoutout-go-a1b34.web.app`, TTL 300 s, bez přepsání ostatních záznamů.
 Autoritativní DNS i Google a Cloudflare změnu potvrzují. Firebase DNS uznal
-a nyní hlásí `Minting certificate`; vydání HTTPS certifikátu ještě čeká, milník
-připojení domény proto zatím není uzavřený. Podrobnosti jsou v `WEB_ENVIRONMENTS.md`.
+a následná kontrola potvrdila stav `Connected`, platný TLS certifikát a HTTPS.
+App site vrací do prvního release očekávané 404. Podrobnosti jsou v
+`WEB_ENVIRONMENTS.md`.
 
 Rozhodnutí 25. října 2026: třetí Firebase projekt se nevytváří. Produkční
 aplikace sdílí `shoutout-production-a1b34` se vstupní stránkou, ale má vlastní
@@ -916,12 +930,13 @@ uživatele vytvořen app site `shoutout-go-a1b34` a registrována webová aplika
 `ShoutOut Web Production`; propojení ověřil výpis Firebase Hosting a veřejná
 SDK konfigurace byla uložena do `config/prod.json`.
 Následně prošel produkční debug build a 12 testů nástrojů. Release čeká na
-produkční Geoapify klíč; doména, provozní služby a nasazení aplikace zbývají.
+produkční Geoapify klíč; provozní služby a nasazení aplikace zbývají.
 
 Ověření této úpravy: 137 Flutter testů, 12 testů nástrojů, analyzátor a debug
 build prošly; tlačítko bylo vizuálně ověřené na desktopu a při mobilní šířce
 390 px. Produkční SDK konfigurace a vlastnictví app site byly následně ověřené;
-nastavení služeb Firebase zatím nebylo ověřené a vlastní doména nebyla připojená.
+nastavení služeb Firebase zatím nebylo ověřené. Vlastní doména byla následně
+připojená a její HTTPS ověřené.
 
 Pravidla výběru změn a publikování zapsána 25. října 2026 do `AGENTS.md` a
 `RELEASING.md`: samostatné větve, uživatelské schválení, produkční commit
