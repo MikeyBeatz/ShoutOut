@@ -979,6 +979,21 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Aktuální stav po úspěšném rollout testu 25. října 2026: vývojový Hosting
+`shoutout-dev-46c81` běží na commitu
+`36f42e241ce9d6d43175db076a3c726d0c306b0b`, verzi `d9c867abfdb9e20e`.
+App Check i `serverShoutCreation` jsou zapnuté. Přihlášený Business účet
+vytvořil přes aplikaci právě jeden testovací Shout. Čtení Firestore potvrdilo
+serverové ID, ověřenou pobočku a její kanonickou identitu/polohu, nulové čítače,
+geohash a odpovídající idempotentní záznam i limit se společným timestampem.
+Test byl následně v aplikaci odstraněn; stav `deleted` je ověřený čtením.
+CI `40227813927` prošlo a otisky nasazených souborů odpovídají release buildu.
+Globální enforcement Auth/Firestore, produkce a `main` se neměnily.
+Běžný účet s polohou zařízení zatím nebyl živě otestovaný.
+
+Následující odstavce zaznamenávají starší pokusy; jejich vypnuté přepínače
+a čekající ověření jsou historický stav překonaný výše uvedeným testem.
+
 Po zapnutí App Check API uživatelský test na vývojové doméně potvrdil
 `tokenObtained: true` a odpověď callable `401 Authentication is required.`.
 To prokazuje získání tokenu i jeho přijetí App Check vrstvou; následná Auth
@@ -1052,8 +1067,8 @@ obrazů starších než 24 hodin. Produkce ani geografická Function nebyly nasa
 
 - ověřit metriky platných/neplatných App Check požadavků a teprve potom
   postupně zapnout vynucení pro Firestore a podporované Authentication toky,
-- pro web vytvořit samostatný App Check provider a klíč reCAPTCHA
-  Enterprise; klíč nesmí být použit jako tajemství na serveru,
+- webový App Check provider a klíč reCAPTCHA Enterprise jsou ve vývoji
+  vytvořené a ověřené; připravit samostatné produkční nastavení,
 - po zapnutí fakturace/Identity Platform zapnout reCAPTCHA Enterprise pro
   registraci a přihlášení e-mailem a heslem nejdřív v auditním a pak ve
   vynucovacím režimu,
@@ -1079,9 +1094,10 @@ aktivní profil. Shout, rate limit a idempotentní záznam vznikají v jedné
 transakci. Limity odpovídají současným Rules (50/500 za den, 120/1 sekund).
 16 Functions unit testů a 68 emulatorových testů (64 Rules + 4 serverové)
 prošlo; emulator zahrnuje souběžné retry a souběžné odlišné požadavky.
-Klient ani přímé zápisy v Rules zatím přepnuté nejsou. Před aktivací zbývá
-funkční získávání webového App Check tokenu, end-to-end ověření a retence serverových
-idempotentních záznamů sladěná s mazáním účtů. Milník zůstává otevřený.
+Vývojový web již používá callable a Business průchod prošel živým testem
+popsaným výše. Přímé vytváření v Rules zatím není uzavřené. Zbývá živý test
+běžného účtu, retence serverových idempotentních záznamů sladěná s mazáním
+účtů a převod ostatních obsahových operací. Milník zůstává otevřený.
 
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a

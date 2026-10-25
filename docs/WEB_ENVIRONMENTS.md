@@ -38,8 +38,16 @@ připravenost Storage služby.
 Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
 diagnostika získala platný App Check token a callable jej přijala, pak správně
 odmítla chybějící Auth. `config/dev.json` znovu aktivuje registrovaný provider
-a serverové vytváření Shoutů pro schválený přihlášený test. Produkční
-konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže jsou historie.
+a serverové vytváření Shoutů. Přihlášený Business test úspěšně vytvořil
+Shout přes callable a následně jej odstranil. Firestore potvrdil serverové ID,
+kanonické údaje ověřené pobočky, čítače, geohash, idempotentní záznam a limit
+se společným časem zápisu; po úklidu potvrdil stav `deleted`.
+Nasazený commit je `36f42e241ce9d6d43175db076a3c726d0c306b0b`, Hosting verze
+`d9c867abfdb9e20e`, release `1792957831296000` z `2026-10-25T19:50:31.296Z`.
+Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
+CI `40227813927` prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
+Produkční konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže
+jsou historie, včetně tehdy vypnutého přepínače a čekajícího ověření.
 
 Volitelný `appCheckSiteKey` nastavuje veřejný reCAPTCHA Enterprise klíč a při
 startu webu aktivuje App Check. Volitelný boolean `serverShoutCreation`

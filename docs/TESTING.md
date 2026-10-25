@@ -9,6 +9,20 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Živý vývojový test serverového publikování 25. října 2026
+
+Hosting `shoutout-dev-46c81`, commit
+`36f42e241ce9d6d43175db076a3c726d0c306b0b`, verze `d9c867abfdb9e20e`:
+App Check diagnostika získala token a nepřihlášený callable požadavek správně
+odmítla Auth vrstva. Přihlášený Business účet následně v běžné aplikaci
+vytvořil jediný Shout s ověřenou pobočkou. Read-only kontrola Firestore
+potvrdila serverové ID, kanonickou identitu i polohu pobočky, nulové čítače,
+geohash a odpovídající receipt i rate limit se shodnými timestampy.
+Odstranění přes aplikaci bylo ověřené stavem `deleted`; žádný obsah nebyl
+vytvořen administrátorským zápisem. Živý test běžného účtu s polohou zařízení,
+souběžných retry a ostatních obsahových operací tento průchod nepokrývá.
+Souběh a idempotenci pokrývají lokální emulatorové testy uvedené níže.
+
 ## Automatické vrstvy
 
 `test/legal_acceptance_state_test.dart` ověřuje rozdíl mezi chybějící cache
