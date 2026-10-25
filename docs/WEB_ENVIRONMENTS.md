@@ -18,6 +18,17 @@ release a nastavení provozních služeb aplikace není ověřené.
 
 ## Registrované produkční prostředky
 
+Opakovaná read-only kontrola 25. října 2026: Hosting API potvrdilo oba sites
+a správné app ID; doména `go.shoutout-app.eu` má `HOST_ACTIVE`,
+`OWNERSHIP_ACTIVE`, `CERT_ACTIVE`. DNS resolvery Google a Cloudflare vracejí
+`shoutout-go-a1b34.web.app`. HTTPS spojení prošlo standardním ověřením
+certifikátu pro vlastní doménu (platnost do 22. ledna 2027).
+App site dosud nemá žádný release a vrací Firebase 404. Prezentace vrací 200,
+její aktuální verze je `a5262058f34f0154`; odkaz do aplikace zatím neobsahuje.
+Tím je dokončená příprava domény a samostatného Hostingu, nikoli konfigurace
+provozních služeb nebo první produkční nasazení. Devět testů
+`tools/web_environment.test.mjs` prošlo. Nebyla provedena externí změna.
+
 Ověřeno 25. října 2026 přes Firebase CLI:
 
 - projekt: `shoutout-production-a1b34`, číslo `391665039159`,

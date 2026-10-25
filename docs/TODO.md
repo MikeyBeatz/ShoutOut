@@ -6,7 +6,7 @@ Aktualizováno 25. října 2026.
 
 ### Postup do MVP
 
-`█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░` **33 %** — 8 z 24 milníků
+`███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
 
 ### Postup celého backlogu
 
@@ -89,13 +89,13 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 Aktualizováno 25. října 2026.
 
-`█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░` **33 %** — 8 z 24 milníků
+`███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
 
 MVP počítadlo používá níže uvedené vydávací milníky, nikoli každý technický
 podkrok. Dokončení volitelné práce po MVP toto procento nezvyšuje a jediný
 nesplněný blokující milník může vydání zastavit bez ohledu na celkové procento.
 
-#### Hotové milníky MVP (8)
+#### Hotové milníky MVP (9)
 
 1. ✅ Základní registrace, ověření e-mailu, právní souhlas a profil.
 2. ✅ Lokální feed, vytvoření a životní stav Shoutu.
@@ -105,38 +105,40 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 6. ✅ Moderátorské rozhraní, role, regionální rozsahy a základní Rules ochrana.
 7. ✅ Web jako funkční vývojový cíl se sedmi jazyky.
 8. ✅ Automatické Flutter a Firestore Rules testy zapojené do CI.
+9. ✅ Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
+   stávající prezentace. Ověřeno 25. října 2026: samostatný site, propojená
+   webová aplikace, DNS a aktivní HTTPS. Produkční release patří do navazujících
+   milníků a zatím není nasazený.
 
-#### Zbývající milníky před MVP (16)
+#### Zbývající milníky před MVP (15)
 
-1. ⬜ Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
-   stávající prezentace.
-2. ⬜ Nakonfigurovat aplikaci ve stávajícím projektu `shoutout-production-a1b34`,
+1. ⬜ Nakonfigurovat aplikaci ve stávajícím projektu `shoutout-production-a1b34`,
    oddělit její Hosting site od vstupní stránky a bezpečně oddělit vývojová
    a produkční data i nástroje.
-3. ⬜ Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.
-4. ⬜ Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči
+2. ⬜ Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.
+3. ⬜ Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči
    mimo Litoměřice.
-5. ⬜ Nasadit geografické obohacení, provést backfill a ověřit regionální data
+4. ⬜ Nasadit geografické obohacení, provést backfill a ověřit regionální data
    potřebná pro stávající moderaci.
-6. ⬜ Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní
+5. ⬜ Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní
    retence účtu.
-7. ⬜ Dokončit webový App Check a ochranu registrace; vynucení zapnout až po
+6. ⬜ Dokončit webový App Check a ochranu registrace; vynucení zapnout až po
    ověření metrik.
-8. ⬜ Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu,
+7. ⬜ Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu,
    idempotenci a limity proti spamu.
-9. ⬜ Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web,
+8. ⬜ Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web,
    včetně zamítnutí a pozastavení Business účtů.
-10. ⬜ Serverově vynutit pravidla současných bezplatných Business funkcí a
+9. ⬜ Serverově vynutit pravidla současných bezplatných Business funkcí a
     zachovat oddělení oprávnění od budoucí ceny.
-11. ⬜ Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i
+10. ⬜ Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i
     desktopové šířce pro všech sedm jazyků.
-12. ⬜ Projít všechny webové ruční regresní scénáře běžného, Business i
+11. ⬜ Projít všechny webové ruční regresní scénáře běžného, Business i
     moderačního účtu včetně pomalé nebo přerušované sítě.
-13. ⬜ Doplnit skutečného provozovatele, podporu, právní kontrolu a proces práv
+12. ⬜ Doplnit skutečného provozovatele, podporu, právní kontrolu a proces práv
     subjektů údajů.
-14. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
+13. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
     minimální provozní metriky bez nadbytečných osobních údajů.
-15. ⬜ Spustit CI a produkční webový build a odstranit blokující vady.
+14. ⬜ Spustit CI a produkční webový build a odstranit blokující vady.
     `pubspec.lock` je nyní verzovaný a CI používá `--enforce-lockfile`, aby
     testovalo stejné Flutter závislosti jako lokální ověřený build.
     Lokální integrace 25. října prošla 147 Flutter testy, 12 testy nástrojů,
@@ -145,7 +147,7 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
     ESLint ve `functions/` byl následně doplněný a prošel pod Node.js 22;
     CI zahrnuje Functions lint i testy. Generované artefakty `build/` jsou
     explicitně vyloučené z analyzátoru a celokořenová analýza prochází.
-16. ⬜ Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
+15. ⬜ Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
     přijmout nebo odstranit zbývající rizika.
 
 ### Práce po MVP
@@ -913,6 +915,16 @@ Dnes nebyl spuštěn, protože `FIREBASE_SERVICE_ACCOUNT_PATH` není nastavený 
 v projektu není žádný administrátorský klíč.
 
 ## 1. Oddělit vývojové a produkční prostředí — MVP pro web
+
+Samostatný milník přípravy domény a Hostingu je dokončený. Opakovaná kontrola
+25. října přes Firebase Hosting API potvrdila dva odlišné sites a vazbu
+`shoutout-go-a1b34` na produkční app ID. Vlastní doména má `HOST_ACTIVE`,
+`OWNERSHIP_ACTIVE` a `CERT_ACTIVE`. Google i Cloudflare vracejí očekávaný CNAME;
+HTTPS klient ověřil důvěryhodný certifikát pro `go.shoutout-app.eu`.
+App site nemá release a vrací očekávané 404. Prezentace vrací 200 ze svého
+site; odkaz do aplikace na živé prezentaci ještě chybí. Devět testů webových
+nástrojů prošlo včetně oddělení Hosting cílů a odmítnutí nesprávného nasazení.
+Širší milník konfigurace produkčních služeb níže zůstává otevřený.
 
 Dne 25. října 2026 byla doména `go.shoutout-app.eu` přidaná ve Firebase k
 app site `shoutout-go-a1b34`. Na Hostingeru je nový CNAME `go` →

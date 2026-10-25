@@ -49,6 +49,9 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 - [ ] Připravit `go.shoutout-app.eu` a app Hosting site ve společném
   projektu `shoutout-production-a1b34`; vstupní stránka
   na `shoutout-app.eu` má vlastní Hosting site a tlačítko do aplikace.
+  Doména, DNS, HTTPS a oddělený app site jsou ověřené a přípravný milník
+  v TODO je dokončený. Tento širší checkbox zůstává otevřený: tlačítko je
+  připravené lokálně a zveřejní se při zprovoznění produkční aplikace.
 - [ ] Sestavit a nasadit produkční web s konfigurací správného Firebase
   projektu, Auth Action URL a autorizovaných domén.
 - [ ] Ověřit, že běžný účet má na webu feed a tvorbu Shoutů, Business účet své
