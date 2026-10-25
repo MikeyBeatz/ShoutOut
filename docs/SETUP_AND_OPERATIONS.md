@@ -275,7 +275,9 @@ Pop-Location
 
 Push-Location functions
 npm ci
+npm run lint
 npm test
+npm audit --omit=dev
 Pop-Location
 
 node tools/web_environment.mjs build dev --debug
@@ -292,10 +294,11 @@ npm run test:rules
 Pop-Location
 ```
 
-GitHub Actions v `.github/workflows/flutter.yml` kontroluje formát, analyzátor,
-Flutter testy, čisté testy vývojových nástrojů, Firestore Rules a debug web
-build při pushi i pull requestu.
-Functions test je proto nutné lokálně spustit vždy, když se `functions/` změní.
+GitHub Actions v `.github/workflows/flutter.yml` používá Node.js 22 a kontroluje
+formát, analyzátor, Flutter testy, čisté testy vývojových nástrojů, Firestore
+Rules, Functions lint a unit testy i debug web build při pushi a pull requestu.
+`npm audit --omit=dev` zůstává povinná lokální kontrola při změně Functions
+závislostí; automatický `npm audit fix --force` se nepoužívá.
 Povinné ruční scénáře pro dva účty, Business pobočky, realtime oznámení,
 moderaci a různá zařízení jsou v `TESTING.md`.
 

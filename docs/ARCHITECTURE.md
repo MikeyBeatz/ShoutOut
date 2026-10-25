@@ -127,6 +127,7 @@ neztrácejí. Celá aplikace je na širokém webu centrovaná do maximální š�
 | `lib/src/firestore_security.dart` | Limity, bezpečné ID událostí, technické logování a sdílené atomické operace. |
 | `lib/legal.dart` | Právní souhlasy, podmínky a zásady ochrany soukromí. |
 | `lib/l10n/` | Generované ARB překlady a přechodové slovníky `tr` / `businessTr`. |
+| `functions/callable_security.js` | Společná serverová brána pro Auth, App Check, profil, právní souhlas, ban, žádost o smazání a omezení tvorby. Přijímá také Firestore transakci jako reader, aby budoucí kontrola a zápis mohly být atomické. |
 | `functions/index.js` | Serverový reverse geocoding nových Shoutů přes Google. |
 | `firestore.rules` | Autorizace, schéma zápisů, rate limiting a integrita čítačů. |
 | `storage.rules` | Pravidla Firebase Storage pro Business loga a screenshoty bug reportů. |
@@ -187,6 +188,11 @@ zvýší `eventCount`, změní posledního aktéra, čas a vrátí záznam mezi 
 Kliknutí načte živý Shout, otevře detail a případně zvýrazní poslední komentář.
 Push mimo otevřenou aplikaci a fan-out sledujícím zatím nejsou implementované;
 jsou v `TODO.md` a vyžadují Cloud Functions/FCM.
+
+Společná callable brána je připravená a vyžaduje App Check, ale zatím ji
+nepoužívá žádný veřejný endpoint ani klientský tok. Přesun jednotlivých zápisů
+na server musí přidat vlastní validaci vstupu, rate limit a idempotenci ve stejné
+transakci; samotná existence brány neznamená dokončený serverový gateway.
 
 ## Bezpečnostní model
 

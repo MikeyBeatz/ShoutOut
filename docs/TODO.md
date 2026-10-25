@@ -950,7 +950,8 @@ projektu a integrity release artefaktů, ochrana tří starších Admin SDK
 skriptů (tutorial, zaokrouhlení polohy, přidělení moderátora) a testy.
 Cílová adresa byla změněna na `go.shoutout-app.eu`. Postup a omezení jsou v
 `WEB_ENVIRONMENTS.md`. Produkční SDK konfigurace a app Hosting site jsou od
-25. října doplněné; DNS, služby, IAM a nákladové pojistky zůstávají otevřené.
+25. října doplněné a doména je `Connected` s platným HTTPS; služby, IAM a
+nákladové pojistky zůstávají otevřené.
 Tento milník tím není dokončený.
 
 Ověření lokální přípravy: Flutter a Node testy, analyzátor, debug i release
@@ -961,7 +962,7 @@ v `WEB_ENVIRONMENTS.md`. Externí nasazení nebylo provedeno.
 - připravit služby aplikace ve stávajícím projektu `shoutout-production-a1b34`,
   odděleném od vývojového projektu,
 - webová aplikace a samostatný Hosting site jsou vytvořené; dokončit jejich
-  provozní konfiguraci a připojení domény,
+  provozní konfiguraci a první release; doména a HTTPS jsou ověřené,
 - přidat bezpečné přepínání vývojové a produkční webové konfigurace,
 - zabránit spuštění seedovacích a migračních skriptů proti produkci,
 - nepřenášet testovací účty ani demo data do produkce,
@@ -997,6 +998,14 @@ Android App Check debug tokeny, Play Integrity a produkční podpis i iOS App
 Attest zůstávají podmínkami pozdějších mobilních vydání.
 
 ## 3. Důvěryhodná serverová brána pro obsah — MVP
+
+Dne 25. října 2026 vznikl testovaný společný základ
+`functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a
+kontroluje profil, aktuální právní souhlas, ban, žádost o smazání a podle typu
+operace omezení tvorby. Podporuje Firestore transakci jako reader, ale zatím
+není připojený k veřejnému endpointu ani klientovi. Functions lint a testy jsou
+nově v CI na Node.js 22; přímé Firebase závislosti a bezpečné tranzitivní verze
+byly aktualizované a `npm audit --omit=dev` hlásí nula nálezů.
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,
