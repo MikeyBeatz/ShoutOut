@@ -190,8 +190,9 @@ Kliknutí načte živý Shout, otevře detail a případně zvýrazní poslední
 Push mimo otevřenou aplikaci a fan-out sledujícím zatím nejsou implementované;
 jsou v `TODO.md` a vyžadují Cloud Functions/FCM.
 
-Společnou callable bránu používá připravený endpoint `createShout`, který zatím
-není nasazený ani zapojený do klienta. Ověřuje vstup a ve stejné transakci
+Společnou callable bránu používá endpoint `createShout`, nasazený pouze ve
+vývoji v codebase `content`. Klient ho má za vypnutým konfiguračním přepínačem.
+Ověřuje vstup a ve stejné transakci
 vytváří obsah, spotřebuje limit a uloží `serverOperations/{hash}` s otiskem
 požadavku a ID výsledku. Záznam neobsahuje text ani přesné souřadnice. Stejný
 klíč se stejným obsahem vrátí původní ID, s jiným obsahem se odmítne.

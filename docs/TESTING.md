@@ -11,6 +11,10 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 
 ## Automatické vrstvy
 
+Celokořenový analyzátor ignoruje generované `build/**`; projektové `lib/` a
+`test/` zůstávají kontrolované. Tím se vyloučí i Dart ukázky staženého Firebase
+CLI, které nejsou zdrojem aplikace.
+
 `functions/create_shout.integration.test.js` běží pouze s lokálním emulator
 hostem `127.0.0.1:8080` a pevným izolovaným projektem `shoutout-rules-test`.
 Ověřuje souběžnou idempotenci, transakční limity, serverovou identitu/polohu,

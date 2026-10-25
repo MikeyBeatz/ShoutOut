@@ -4,8 +4,8 @@ Připravená serverová callable `createShout` používá `serverOperations/{has
 pro idempotenci: `userId`, `action: createShout`, `fingerprint`, `shoutId`,
 `createdAt`. Hash ID je odvozen z UID a klíče požadavku. Záznam vzniká atomicky
 se Shoutem a existujícím `rateLimits/{uid}/actions/shout`; klient k němu nemá
-oprávnění. Neuchovává původní text ani přesné souřadnice. Nasazení a retenční
-úklid těchto nových záznamů zatím nejsou dokončené.
+oprávnění. Neuchovává původní text ani přesné souřadnice. Callable je nasazená
+pouze ve vývoji; retenční úklid těchto nových záznamů zatím není dokončený.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,

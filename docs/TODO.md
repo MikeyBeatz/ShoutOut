@@ -140,10 +140,9 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
     Lokální integrace 25. října prošla 147 Flutter testy, 12 testy nástrojů,
     64 testy Firestore Rules, 3 testy Functions, cíleným analyzátorem aplikace,
     kontrolou formátu, vývojovým release buildem i produkčním debug buildem.
-    Zbývá opravit deklaraci/configuraci ESLintu ve `functions/`; současný
-    `npm run lint` nenajde binárku. Celokořenový lokální analyzátor navíc zachytí
-    ignorovanou Dart šablonu ve Firebase CLI cache pod `build/`, zatímco
-    analyzátor všech projektových Dart zdrojů v `lib/` a `test/` prochází.
+    ESLint ve `functions/` byl následně doplněný a prošel pod Node.js 22;
+    CI zahrnuje Functions lint i testy. Generované artefakty `build/` jsou
+    explicitně vyloučené z analyzátoru a celokořenová analýza prochází.
 16. ⬜ Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
     přijmout nebo odstranit zbývající rizika.
 
@@ -986,6 +985,17 @@ Při přepnutí nepoužívá klient při chybě serveru přímý fallback. Klí�
 i původní poloha se při retry zachovávají, upravený koncept má nové ID.
 Lokálně prošlo 150 Flutter testů, 13 nástrojových testů a cílený analyzátor.
 Externí nasazení této klientské verze a její end-to-end ověření ještě zbývá.
+
+Callable `createShout` byla po výslovném souhlasu nasazená pouze do vývoje
+`shoutout-dev-46c81`, codebase `content`, region `europe-west3`, ze zdrojů
+commitu `34aee41`. API potvrdilo stav `ACTIVE`, revizi `createshout-00001-zik`,
+Node.js 22, 256 MiB, 15 s, nejvýše jednu instanci a jeden souběžný požadavek.
+Požadavky bez App Check i s neplatným tokenem vracejí 401. Registrace
+App Check je ověřená čtením API; lokální browserový pokus získat token skončil
+`appCheck/recaptcha-error`, proto klientské přepnutí zůstává vypnuté. Zbývá
+ověřit skutečnou vývojovou doménu a úspěšnou tvorbu přihlášeným testovacím účtem.
+Úložiště `gcf-artifacts` v `europe-west3` má standardní Firebase politiku úklidu
+obrazů starších než 24 hodin. Produkce ani geografická Function nebyly nasazené.
 
 - ověřit metriky platných/neplatných App Check požadavků a teprve potom
   postupně zapnout vynucení pro Firestore a podporované Authentication toky,
