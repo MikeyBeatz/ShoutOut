@@ -191,7 +191,8 @@ Push mimo otevřenou aplikaci a fan-out sledujícím zatím nejsou implementovan
 jsou v `TODO.md` a vyžadují Cloud Functions/FCM.
 
 Společnou callable bránu používá endpoint `createShout`, nasazený pouze ve
-vývoji v codebase `content`. Klient ho má za vypnutým konfiguračním přepínačem.
+vývoji v codebase `content`. Vývojový web jej používá přes zapnutý přepínač
+`serverShoutCreation`; produkční konfigurace jej zatím nezapíná.
 Ověřuje vstup a ve stejné transakci
 vytváří obsah, spotřebuje limit a uloží `serverOperations/{hash}` s otiskem
 požadavku a ID výsledku. Záznam neobsahuje text ani přesné souřadnice. Stejný
