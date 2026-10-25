@@ -12,6 +12,20 @@ class WebEnvironment {
     if (!['dev', 'prod'].contains(name)) {
       throw StateError('Choose a configured dev or prod web environment.');
     }
+    final key = json['appCheckSiteKey'];
+    final gateway = json['serverShoutCreation'];
+    if (key != null &&
+        (key is! String || !RegExp(r'^[A-Za-z0-9_-]{20,200}$').hasMatch(key))) {
+      throw StateError('Invalid reCAPTCHA Enterprise site key.');
+    }
+    if (gateway != null && gateway is! bool) {
+      throw StateError('serverShoutCreation must be a boolean.');
+    }
+    appCheckSiteKey = key as String?;
+    serverShoutCreation = gateway == true;
+    if (serverShoutCreation && appCheckSiteKey == null) {
+      throw StateError('Server Shout creation requires web App Check.');
+    }
     for (final key in [
       'apiKey',
       'appId',
@@ -96,6 +110,8 @@ class WebEnvironment {
   final String appUrl;
   final String hostingSite;
   final Map<String, dynamic> firebase;
+  late final String? appCheckSiteKey;
+  late final bool serverShoutCreation;
 
   FirebaseOptions get firebaseOptions => FirebaseOptions(
     apiKey: firebase['apiKey'] as String,

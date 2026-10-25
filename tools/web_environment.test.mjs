@@ -8,6 +8,14 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const dev = loadConfig('dev');
+
+test('web App Check configuration gates server publishing', () => {
+  assert.throws(() => validateConfig({ ...dev, serverShoutCreation: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, appCheckSiteKey: '' }, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev,
+    appCheckSiteKey: 'test-only-recaptcha-enterprise-key', serverShoutCreation: true }, 'dev'));
+});
 const prod = {
   ...dev, environment: 'prod', appUrl: 'https://go.shoutout-app.eu',
   hostingSite: 'example-shoutout-live', firebase: {

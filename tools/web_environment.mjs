@@ -13,6 +13,16 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.appCheckSiteKey !== undefined &&
+      (typeof config.appCheckSiteKey !== 'string' || !/^[A-Za-z0-9_-]{20,200}$/.test(config.appCheckSiteKey))) {
+    throw new Error('Invalid reCAPTCHA Enterprise site key.');
+  }
+  if (config.serverShoutCreation !== undefined && typeof config.serverShoutCreation !== 'boolean') {
+    throw new Error('serverShoutCreation must be a boolean.');
+  }
+  if (config.serverShoutCreation === true && !config.appCheckSiteKey) {
+    throw new Error('Server Shout creation requires web App Check.');
+  }
   if (!['dev', 'prod'].includes(environment) || config.environment !== environment) {
     throw new Error('Choose a matching dev or prod configuration.');
   }

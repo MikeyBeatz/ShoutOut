@@ -35,6 +35,19 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Volitelný `appCheckSiteKey` nastavuje veřejný reCAPTCHA Enterprise klíč a při
+startu webu aktivuje App Check. Volitelný boolean `serverShoutCreation`
+přepíná vytvoření Shoutu na callable `createShout` v `europe-west3`; vyžaduje
+App Check klíč. Bez přepínače zůstává současný přímý zápis. Při chybě callable
+se klient nepřepne na přímý zápis. Retry stejného konceptu drží stejné ID a
+původní polohu, úprava konceptu vytvoří nové ID.
+
+Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
+reCAPTCHA Enterprise API a registrovaný webový App Check. Veřejný klíč v
+`config/dev.json` dovoluje pouze obě vývojové Firebase domény a `localhost`.
+Token TTL je 3600 s, práh zůstává výchozí 0,5. Globální enforcement Firestore
+ani Auth se neměnil a `serverShoutCreation` je zatím `false`.
+
 `config/dev.json` je společný zdroj veřejné webové Firebase konfigurace,
 návratové adresy e-mailů a Hosting site ID. Produkční šablona je
 `config/prod.json.example`; její prázdné SDK hodnoty ji záměrně činí

@@ -21,6 +21,7 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
   bool _extendedBusinessDuration = false;
   bool _businessHighlighted = false;
   bool _businessSpotlight = false;
+  final _publicationAttempt = PublicationAttempt();
   late final FixedExtentScrollController _hoursController;
   late final FixedExtentScrollController _minutesController;
 
@@ -327,8 +328,18 @@ class _CreateShoutSheetState extends State<CreateShoutSheet> {
       return;
     }
     final now = DateTime.now();
+    final publicationId = _publicationAttempt.keyFor([
+      _title.text,
+      _text.text,
+      _selected.toList(),
+      _duration.inMinutes,
+      _businessLocationId,
+      _businessHighlighted,
+      _businessSpotlight,
+      _extendedBusinessDuration,
+    ]);
     final shout = Shout(
-      id: now.microsecondsSinceEpoch.toString(),
+      id: publicationId,
       author: 'Nový_soused',
       title: titleWithInitialCapital(_title.text),
       text: _text.text.trim(),

@@ -978,6 +978,15 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Webový klient umí App Check přes `appCheckSiteKey` a řízené přepnutí tvorby
+Shoutu přes `serverShoutCreation`. Ve vývoji byl po souhlasu vlastníka
+registrovaný reCAPTCHA Enterprise provider (TTL 1 hodina, výchozí práh 0,5).
+Vynucení pro Auth/Firestore a přepnutí klienta zatím zůstávají vypnuté.
+Při přepnutí nepoužívá klient při chybě serveru přímý fallback. Klíč požadavku
+i původní poloha se při retry zachovávají, upravený koncept má nové ID.
+Lokálně prošlo 150 Flutter testů, 13 nástrojových testů a cílený analyzátor.
+Externí nasazení této klientské verze a její end-to-end ověření ještě zbývá.
+
 - ověřit metriky platných/neplatných App Check požadavků a teprve potom
   postupně zapnout vynucení pro Firestore a podporované Authentication toky,
 - pro web vytvořit samostatný App Check provider a klíč reCAPTCHA

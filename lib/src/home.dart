@@ -32,6 +32,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   KeyedLiveState<Shout, _ShoutInteraction>? _interactions;
 
   int _tab = 0;
+  Map<String, dynamic>? _pendingServerShout;
   late final Timer _expiryTimer;
 
   @override
@@ -189,6 +190,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .get();
     final role = AccountRole.fromData(roleSnapshot.data());
     final isBusiness = role == AccountRole.business;
+    final useServer = kIsWeb && WebEnvironment.current.serverShoutCreation;
+    if (useServer && _pendingServerShout?['idempotencyKey'] == shout.id) {
+      await _publishServerShout(_pendingServerShout!);
+      return;
+    }
     Position? position;
     if (!isBusiness) {
       // Personal Shouts always use a fresh device position.
@@ -203,6 +209,30 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       }
     } else if (shout.businessLocationId == null) {
       throw StateError('business-location-required');
+    }
+    if (useServer) {
+      final payload = <String, dynamic>{
+        'idempotencyKey': shout.id,
+        'title': shout.title,
+        'text': shout.text,
+        'categories': shout.categories,
+        'durationMinutes': shout.expiresAt
+            .difference(shout.createdAt)
+            .inMinutes,
+        if (isBusiness) ...{
+          'businessLocationId': shout.businessLocationId,
+          'businessHighlighted': shout.businessHighlighted,
+          'businessSpotlight': shout.businessSpotlight,
+          'businessExtendedDuration': shout.businessExtendedDuration,
+        } else
+          'location': {
+            'latitude': position!.latitude,
+            'longitude': position.longitude,
+          },
+      };
+      _pendingServerShout = payload;
+      await _publishServerShout(payload);
+      return;
     }
     final shoutReference = firestore.collection('shouts').doc(shout.id);
     final profileReference = firestore.collection('users').doc(user.uid);
@@ -315,6 +345,28 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       'status': 'deleted',
     });
     // The active feed listener removes this document without another query.
+  }
+
+  Future<void> _publishServerShout(Map<String, dynamic> payload) async {
+    try {
+      await FirebaseFunctions.instanceFor(
+        region: 'europe-west3',
+      ).httpsCallable('createShout').call<Map<String, dynamic>>(payload);
+      _pendingServerShout = null;
+    } on FirebaseFunctionsException catch (error) {
+      if (error.code == 'resource-exhausted' &&
+          [
+            'rate-shout-cooldown',
+            'rate-shout-daily-limit',
+          ].contains(error.message)) {
+        throw StateError(error.message!);
+      }
+      if (error.code == 'failed-precondition' &&
+          error.message == 'business-location-unavailable') {
+        throw StateError('business-location-unavailable');
+      }
+      rethrow;
+    }
   }
 
   Future<void> _toggleSaved(Shout shout) async {

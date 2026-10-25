@@ -207,6 +207,14 @@ debug provider a release App Attest s fallbackem na DeviceCheck. Postup:
 
 ### 5. Cloud Function pro geografii
 
+Obsahové callable mají oddělený vstup `functions/content.js`. Pro jejich
+samostatnou přípravu spustit `node tools/prepare_content_functions.mjs` a
+`npm --prefix build/functions-content ci`. Vznikne konfigurace
+`build/firebase-content.json` s codebase `content`, která nevyžaduje Google
+Maps secret. Po samostatném souhlasu je přesný vývojový příkaz
+`firebase deploy --config build/firebase-content.json --only functions:content:createShout --project shoutout-dev-46c81`.
+Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
+
 `functions/index.js` obsahuje jedinou současnou Function
 `enrichShoutGeography`. Trigger `shouts/{shoutId}` v `europe-west1` provede
 serverový reverse geocoding přes Google Geocoding API a doplní moderátorský

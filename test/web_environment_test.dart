@@ -49,6 +49,26 @@ void main() {
     expect(environment.hostingSite, 'example-shoutout-live');
   });
 
+  test('server publishing requires a valid web App Check configuration', () {
+    expect(WebEnvironment.fromJson(development()).serverShoutCreation, isFalse);
+    for (final change in [
+      {'serverShoutCreation': true},
+      {'serverShoutCreation': 'true'},
+      {'appCheckSiteKey': ''},
+    ]) {
+      expect(
+        () => WebEnvironment.fromJson({...development(), ...change}),
+        throwsStateError,
+      );
+    }
+    final environment = WebEnvironment.fromJson({
+      ...development(),
+      'appCheckSiteKey': 'test-only-recaptcha-enterprise-key',
+      'serverShoutCreation': true,
+    });
+    expect(environment.serverShoutCreation, isTrue);
+  });
+
   test('production refuses development and unapproved projects', () {
     for (final project in ['shoutout-dev-46c81', 'unapproved-project']) {
       final config = production();

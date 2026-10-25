@@ -11,6 +11,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -39,6 +40,7 @@ import 'l10n/business_text.dart';
 import 'l10n/bug_report_text.dart';
 import 'nickname_validation.dart';
 import 'registration_timing.dart';
+import 'publication_attempt.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';
@@ -84,7 +86,14 @@ Future<void> main() async {
         ? WebEnvironment.current.firebaseOptions
         : DefaultFirebaseOptions.currentPlatform,
   );
-  if (!kIsWeb) {
+  if (kIsWeb) {
+    final siteKey = WebEnvironment.current.appCheckSiteKey;
+    if (siteKey != null) {
+      await FirebaseAppCheck.instance.activate(
+        providerWeb: ReCaptchaEnterpriseProvider(siteKey),
+      );
+    }
+  } else {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         await FirebaseAppCheck.instance.activate(
