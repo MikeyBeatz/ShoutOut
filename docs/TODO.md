@@ -988,6 +988,19 @@ vrací 403; úspěch ostré domény zatím není potvrzený. Připravená vývoj
 diagnostika `--app-check-probe` rozliší tento krok bez zápisů obsahu a bez
 vypisování tokenů. Serverové publikování zůstává vypnuté do úspěšného ověření.
 
+Ověření po opravě IAM: build commitu `5c3034e` s opravou právní brány a
+výslovně zapnutou diagnostikou byl nasazen pouze na vývojový Hosting jako
+verze `63c6c0ab3e299be3`. Otisky HTML, JavaScriptu a konfigurace odpovídají
+lokálnímu release. CI `40226532742` prošlo. Samostatná diagnostika na
+`shoutout-dev-46c81.web.app` ale nadále vrací `appCheck/recaptcha-error` před
+výměnou tokenu (`exchange: null`). Chybějící servisní účet byl skutečný
+nedostatek konfigurace, nikoli prokázané úplné vysvětlení této klientské chyby.
+Aktivace App Check v aplikaci i serverové publikování zůstávají vypnuté.
+Následné ověření v aktivním okně přerušila bezpečnostní kontrola Computer Use,
+protože nebyla schopná bezpečně určit URL; další UI vstupy nebyly provedené.
+Zbývá test v běžném aktivním Chrome okně a teprve po úspěchu přihlášený test
+callable. Produkce, `main` a Firestore Rules se neměnily.
+
 Vývojový rollout 25. října: CI `40206757797` prošlo a release odpovídal
 lokálním otiskům. Smoke test ale zjistil `appCheck/recaptcha-error` také na
 `shoutout-dev-46c81.web.app`, zpožděné načítání Firestore a přechodné zobrazení

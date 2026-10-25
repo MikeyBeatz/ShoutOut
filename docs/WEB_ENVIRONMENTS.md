@@ -56,6 +56,13 @@ Hosting byl přes ověřené API vrácen na verzi `c8ec155e05b4a3b3` (release
 obejít vypnutím její ochrany. Příčina chyby získávání reCAPTCHA tokenu zatím
 není potvrzená.
 
+Následná verze `63c6c0ab3e299be3` ve vývoji obsahuje opravenou právní bránu a
+výslovně přibalenou stránku `/__dev/app-check.html`. App Check v hlavní
+aplikaci ani serverové publikování nejsou zapnuté. Přestože byla doplněná
+chybějící servisní identita App Check s úzkou standardní rolí, izolovaný test
+na `web.app` stále selhal před výměnou tokenu. Dokončení ověření v aktivním
+prohlížeči zůstává otevřené; ochrana callable nebyla vypnutá.
+
 `config/dev.json` je společný zdroj veřejné webové Firebase konfigurace,
 návratové adresy e-mailů a Hosting site ID. Produkční šablona je
 `config/prod.json.example`; její prázdné SDK hodnoty ji záměrně činí
