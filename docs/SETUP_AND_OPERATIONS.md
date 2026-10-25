@@ -193,6 +193,19 @@ zápis vyžaduje `--apply` a potvrzení project ID, UID a adresy pobočky.
 
 ### 4. App Check
 
+Před registrací provideru ověřit přes Service Usage stav **obou** API v cílovém
+projektu: `recaptchaenterprise.googleapis.com` i
+`firebaseappcheck.googleapis.com` musí být `ENABLED`. Úspěšné administrátorské
+čtení konfigurace provideru tento stav nedokládá: používá jiný kvótový kontext
+než webový klient s Firebase API klíčem. Dne 25. října uživatelský test přesně
+odhalil `SERVICE_DISABLED` u App Check API projektu `696035472864`; Service
+Usage následně potvrdilo `DISABLED`. Služba byla v rámci schváleného vývojového
+nastavení zapnutá a stav `ENABLED` ověřený opakovaným čtením. Negativní klientský
+požadavek na výměnu s prázdným tokenem pak správně vrátil `400 INVALID_ARGUMENT`
+(`The recaptcha_enterprise_token cannot be empty.`), nikoli blokaci API.
+Úspěšnou výměnu platného tokenu je nutné ověřit zvlášť. Po opravě konfigurace
+obnovit diagnostickou stránku, aby nepoužívala lokální backoff po předchozí 403.
+
 Registrace reCAPTCHA Enterprise přes REST sama nemusí vytvořit servisní
 identitu App Check. Ve vývojovém projektu byl 25. října ověřen chybějící účet
 `service-696035472864@gcp-sa-firebaseappcheck.iam.gserviceaccount.com` a chybějící

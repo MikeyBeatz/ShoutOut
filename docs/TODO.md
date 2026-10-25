@@ -979,6 +979,15 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Uživatelský ruční test 25. října poskytl přesnou odpověď výměny tokenu:
+`403 PERMISSION_DENIED`, App Check API je v projektu `696035472864` vypnuté.
+Service Usage potvrdilo `firebaseappcheck.googleapis.com: DISABLED`; služba
+byla zapnutá pouze ve vývoji a následně ověřená jako `ENABLED`. Klientský
+požadavek s Firebase API klíčem a prázdným tokenem už prošel k validaci a
+správně vrátil `400 INVALID_ARGUMENT` místo `SERVICE_DISABLED`. Tato kontrola
+nepotvrzuje úspěšnou atestaci: zbývá ruční opakování po obnovení stránky a
+potom přihlášený test callable. Serverové publikování zůstává vypnuté.
+
 Navazující diagnostika 25. října potvrdila správný projekt, SCORE klíč,
 doménové omezení, aktivní billing i povolené App Check API na Firebase API
 klíči. Ve vývoji ale chyběla servisní identita App Check i její standardní
