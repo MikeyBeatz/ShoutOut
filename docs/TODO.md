@@ -2,7 +2,7 @@
 
 ## Rychlý přehled postupu
 
-Aktualizováno 24. října 2026.
+Aktualizováno 25. října 2026.
 
 ### Postup do MVP
 
@@ -27,11 +27,13 @@ loga a dosavadní bezplatné propagační funkce. Současné webové moderační
 rozhraní musí umožnit bezpečný provoz této veřejné aplikace. Všechny
 rozpracované toky, které tyto funkce potřebují, se dokončí před vydáním.
 
-Webová aplikace bude na `go.shoutout-app.eu` ve vlastním produkčním Firebase
-projektu. Statická prezentace zůstává na `shoutout-app.eu` v projektu
-`shoutout-production-a1b34`. Vývojový web je již funkční cíl, ale jeho Firebase
-konfigurace stále míří na vývojový projekt; nový produkční projekt aplikace
-zatím není v repozitáři nakonfigurovaný.
+Webová aplikace bude na `go.shoutout-app.eu` ve stávajícím produkčním projektu
+`shoutout-production-a1b34`, který sdílí se vstupní stránkou na `shoutout-app.eu`.
+Každá část bude mít vlastní Hosting site, obsah a nasazování. Vývojový web a
+data zůstávají v projektu `shoutout-dev-46c81`. Produkční SDK konfigurace je
+v `config/prod.json`; app Hosting site `shoutout-go-a1b34` je vytvořený a
+propojený s registrovanou webovou aplikací. Vlastní doména, runtime služby
+a nasazení aplikace ještě zbývají.
 
 Android a iOS, jejich distribuce a Business monetizace formou předplatného
 zůstávají v plánu po webovém MVP. Již při webovém MVP musí mít bezplatné
@@ -57,6 +59,10 @@ provozní minimum v `docs/LAUNCH_READINESS.md`.
 - Téhož dne byl původní model Business tokenů zrušen. Budoucí monetizace má být
   založená na předplatném; jeho konkrétní podoba se teprve navrhne. Platební
   položky a prázdné statistiky se do té doby v Business rozhraní skryjí.
+- Dne 25. října 2026 bylo rozhodnuto využít již existující produkční projekt
+  `shoutout-production-a1b34` pro vstupní stránku i aplikaci. Každá část bude
+  mít vlastní Hosting site; třetí projekt se nezakládá. Tím se nahrazuje
+  původní požadavek samostatného projektu aplikace ze dne 20. října.
 
 ### Prezentační web před MVP
 
@@ -81,7 +87,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 ### Postup k MVP
 
-Aktualizováno 20. října 2026.
+Aktualizováno 25. října 2026.
 
 `█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░` **33 %** — 8 z 24 milníků
 
@@ -104,8 +110,9 @@ nesplněný blokující milník může vydání zastavit bez ohledu na celkové 
 
 1. ⬜ Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
    stávající prezentace.
-2. ⬜ Vytvořit samostatný produkční Firebase projekt aplikace, nakonfigurovat
-   webové služby a bezpečně oddělit vývojová a produkční data i nástroje.
+2. ⬜ Nakonfigurovat aplikaci ve stávajícím projektu `shoutout-production-a1b34`,
+   oddělit její Hosting site od vstupní stránky a bezpečně oddělit vývojová
+   a produkční data i nástroje.
 3. ⬜ Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.
 4. ⬜ Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči
    mimo Litoměřice.
@@ -287,7 +294,7 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Aktualizováno 24. října 2026.
+Aktualizováno 25. října 2026.
 
 `███████████████████████████░░░░░░░░░░░░░` **69 %** — pokročilá fáze
 
@@ -431,8 +438,8 @@ odložené nápady až za hlavními uživatelskými cestami.
     adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
   - [ ] **MVP** — Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho
     platnosti ve webovém toku obnovy hesla.
-  - [ ] **MVP** — Po připojení `go.shoutout-app.eu` k novému produkčnímu
-    projektu aplikace přepnout jeho globální Firebase Authentication Action URL
+  - [ ] **MVP** — Po připojení `go.shoutout-app.eu` k produkčnímu
+    projektu `shoutout-production-a1b34` přepnout jeho globální Firebase Authentication Action URL
     na připravený `/auth/action`. Handler už bezpečně obsluhuje ověření e-mailu,
     reset hesla i obnovení změněné adresy; výchozí domény projektu Firebase při
     ukládání vlastní Action URL odmítá. Prezentační projekt není cílem této změny.
@@ -893,6 +900,29 @@ v projektu není žádný administrátorský klíč.
 
 ## 1. Oddělit vývojové a produkční prostředí — MVP pro web
 
+Dne 25. října 2026 byla doména `go.shoutout-app.eu` přidaná ve Firebase k
+app site `shoutout-go-a1b34`. Na Hostingeru je nový CNAME `go` →
+`shoutout-go-a1b34.web.app`, TTL 300 s, bez přepsání ostatních záznamů.
+Autoritativní DNS i Google a Cloudflare změnu potvrzují. Firebase DNS uznal
+a nyní hlásí `Minting certificate`; vydání HTTPS certifikátu ještě čeká, milník
+připojení domény proto zatím není uzavřený. Podrobnosti jsou v `WEB_ENVIRONMENTS.md`.
+
+Rozhodnutí 25. října 2026: třetí Firebase projekt se nevytváří. Produkční
+aplikace sdílí `shoutout-production-a1b34` se vstupní stránkou, ale má vlastní
+Hosting site. Lokálně upravené kontroly povolují tento projekt a odmítají site
+vstupní stránky. V `presentation/` je připravené tlačítko do aplikace; jeho
+nasazení počká na zprovoznění `go.shoutout-app.eu`. Následně byl po souhlasu
+uživatele vytvořen app site `shoutout-go-a1b34` a registrována webová aplikace
+`ShoutOut Web Production`; propojení ověřil výpis Firebase Hosting a veřejná
+SDK konfigurace byla uložena do `config/prod.json`.
+Následně prošel produkční debug build a 12 testů nástrojů. Release čeká na
+produkční Geoapify klíč; doména, provozní služby a nasazení aplikace zbývají.
+
+Ověření této úpravy: 137 Flutter testů, 12 testů nástrojů, analyzátor a debug
+build prošly; tlačítko bylo vizuálně ověřené na desktopu a při mobilní šířce
+390 px. Produkční SDK konfigurace a vlastnictví app site byly následně ověřené;
+nastavení služeb Firebase zatím nebylo ověřené a vlastní doména nebyla připojená.
+
 Pravidla výběru změn a publikování zapsána 25. října 2026 do `AGENTS.md` a
 `RELEASING.md`: samostatné větve, uživatelské schválení, produkční commit
 a verze, čistá pracovní kopie a oddělený souhlas s nasazením. Automatické
@@ -904,17 +934,19 @@ Flutter, e-mailové návraty a Auth handler, oddělené buildy, kontrola cílov�
 projektu a integrity release artefaktů, ochrana tří starších Admin SDK
 skriptů (tutorial, zaokrouhlení polohy, přidělení moderátora) a testy.
 Cílová adresa byla změněna na `go.shoutout-app.eu`. Postup a omezení jsou v
-`WEB_ENVIRONMENTS.md`. Produkční projekt, DNS, služby, IAM a nákladové pojistky
-zůstávají otevřené; tento milník tím není dokončený.
+`WEB_ENVIRONMENTS.md`. Produkční SDK konfigurace a app Hosting site jsou od
+25. října doplněné; DNS, služby, IAM a nákladové pojistky zůstávají otevřené.
+Tento milník tím není dokončený.
 
 Ověření lokální přípravy: Flutter a Node testy, analyzátor, debug i release
 build a pozitivní/negativní nasazovací kontroly prošly. Celorepozitářový formát
 má starší nálezy ve dvou nezměněných překladových souborech; podrobnosti jsou
 v `WEB_ENVIRONMENTS.md`. Externí nasazení nebylo provedeno.
 
-- vytvořit samostatný produkční Firebase projekt aplikace oddělený od
-  vývojového projektu i od projektu statické prezentace,
-- vytvořit produkční webovou Firebase aplikaci a samostatný Hosting cíl,
+- připravit služby aplikace ve stávajícím projektu `shoutout-production-a1b34`,
+  odděleném od vývojového projektu,
+- webová aplikace a samostatný Hosting site jsou vytvořené; dokončit jejich
+  provozní konfiguraci a připojení domény,
 - přidat bezpečné přepínání vývojové a produkční webové konfigurace,
 - zabránit spuštění seedovacích a migračních skriptů proti produkci,
 - nepřenášet testovací účty ani demo data do produkce,

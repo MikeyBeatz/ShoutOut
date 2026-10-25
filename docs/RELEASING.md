@@ -67,11 +67,12 @@ opakovat potvrzení pro již schválený konkrétní krok a cíl.
 | Prostředí | Cíl |
 |---|---|
 | Vývoj | projekt/site `shoutout-dev-46c81` |
-| Produkční aplikace | `go.shoutout-app.eu`; samostatný projekt/site zatím nejsou nakonfigurované |
+| Produkční aplikace | projekt `shoutout-production-a1b34`, site `shoutout-go-a1b34`, doména `go.shoutout-app.eu` (DNS ověřené, HTTPS certifikát se vystavuje) |
 | Prezentace | projekt `shoutout-production-a1b34`, vlastní `presentation/firebase.json` |
 
-Produkční cíl aplikace se nesmí odvozovat z aliasu `web`, který patří
-prezentaci. Předchozí souhlas s vývojovým Hostingem neopravňuje k nasazení
+Alias `web` označuje společný produkční projekt a nevybírá Hosting web.
+Při nasazení aplikace musí být explicitně vybraný její app site; site
+`shoutout-production-a1b34` je vyhrazený vstupní stránce. Předchozí souhlas s vývojovým Hostingem neopravňuje k nasazení
 produkční aplikace, prezentace, Rules, Functions ani k zásahům do dat.
 
 ## Co už kontrolují nástroje

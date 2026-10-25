@@ -16,8 +16,10 @@ Linux mají pouze Flutter kostru. Tyto platformy proto zatím nejsou součástí
 aktuálně podporovaného vývojového prostředí.
 
 Cílem MVP je veřejně dostupná funkční webová aplikace pro běžné uživatele a
-Business účty na `go.shoutout-app.eu` ve vlastním produkčním Firebase
-projektu. Prezentace na `shoutout-app.eu` zůstává samostatná. Vývoj a vydání
+Business účty na `go.shoutout-app.eu`. Produkční projekt
+`shoutout-production-a1b34` bude sdílet s veřejnou vstupní stránkou na
+`shoutout-app.eu`; každý web má samostatný Hosting site a nasazování. Vstupní
+stránka odkazuje tlačítkem do aplikace. Vývojový projekt zůstává oddělený. Vývoj a vydání
 Androidu a iOS zůstávají v plánu po webovém MVP.
 Rozsah vydání a zbývající produkční předpoklady jsou v `docs/TODO.md` a
 `docs/LAUNCH_READINESS.md`.

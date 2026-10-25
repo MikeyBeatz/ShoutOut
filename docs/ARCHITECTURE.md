@@ -37,8 +37,13 @@ Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.
 Webový build, návratová URL e-mailů a HTML Auth handler používají společnou
 konfiguraci z `config/`. `WebEnvironment` kontroluje projekt a hostitele před
 připojením Firebase. Vývojové a produkční artefakty a nasazovací kontroly jsou
-popsané v [oddělení prostředí](WEB_ENVIRONMENTS.md). Produkční projekt aplikace
-zatím není nakonfigurovaný.
+popsané v [oddělení prostředí](WEB_ENVIRONMENTS.md). Produkce používá projekt
+`shoutout-production-a1b34` společný pro vstupní stránku a aplikaci; každý web
+má vlastní Hosting site a konfiguraci. Webová aplikace nesmí použít site
+vstupní stránky. App site `shoutout-go-a1b34` je registrovaný a produkční
+SDK konfigurace je v `config/prod.json`. Nastavení a funkčnost runtime služeb zatím nebyly ověřené;
+vlastní doména je přidaná a má nastavený CNAME, DNS ověření ve Firebase proběhlo
+a HTTPS certifikát se nyní vystavuje.
 
 ## Spouštěcí a přístupový tok
 

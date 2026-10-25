@@ -24,8 +24,9 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 
 ## 1. Produkční prostředí a bezpečné nasazení
 
-- [ ] Vytvořit samostatný produkční Firebase projekt aplikace, oddělený od
-  vývojového projektu i od projektu statické prezentace.
+- [ ] Připravit existující produkční projekt `shoutout-production-a1b34`
+  pro aplikaci, oddělený od vývoje; aplikace a vstupní stránka musí mít
+  samostatné Hosting weby a přesné cíle nasazení.
 - [ ] Přidat bezpečné přepínání vývojové a produkční konfigurace.
 - [ ] Zabránit seedovacím, testovacím a migračním nástrojům zasáhnout produkci.
 - [ ] Vytvořit minimálně oprávněné service accounts a uložit klíče a hesla mimo
@@ -45,8 +46,9 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 
 ## 2. Webová aplikace a veřejná distribuce MVP
 
-- [ ] Připravit `go.shoutout-app.eu` a Hosting v produkčním projektu
-  aplikace; prezentace na `shoutout-app.eu` zůstává v původním projektu.
+- [ ] Připravit `go.shoutout-app.eu` a app Hosting site ve společném
+  projektu `shoutout-production-a1b34`; vstupní stránka
+  na `shoutout-app.eu` má vlastní Hosting site a tlačítko do aplikace.
 - [ ] Sestavit a nasadit produkční web s konfigurací správného Firebase
   projektu, Auth Action URL a autorizovaných domén.
 - [ ] Ověřit, že běžný účet má na webu feed a tvorbu Shoutů, Business účet své

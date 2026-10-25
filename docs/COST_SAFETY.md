@@ -1,9 +1,9 @@
 # Nákladové pojistky Firebase a Google Cloud
 
 Tento dokument je povinný checklist před prvním nasazením Cloud Functions ve
-vývojovém projektu `shoutout-dev-46c81`. Samostatný produkční projekt webové
-aplikace musí před veřejným provozem projít stejnou nákladovou bránou s
-vlastními limity. Cílem vývojového prostředí je zůstat v bezplatných kvótách a
+vývojovém projektu `shoutout-dev-46c81`. Produkční projekt
+`shoutout-production-a1b34` musí před veřejným provozem aplikace projít stejnou
+nákladovou bránou; limity zahrnují aplikaci i vstupní stránku. Cílem vývojového prostředí je zůstat v bezplatných kvótách a
 omezit škodu při chybě nebo zneužití.
 
 ## Zásadní omezení
@@ -93,8 +93,9 @@ kontrola metrik, chyb a spotřeby před otevřením dalšího kroku.
    selhání.
 
 Pořadí je závazné pro vývojové prostředí. Produkční aplikace vznikne ve
-vlastním Firebase projektu odděleném od vývoje i statické prezentace a projde
-stejnou nákladovou bránou s vlastními limity.
+Firebase projektu `shoutout-production-a1b34`, odděleném od vývoje. Projekt
+sdílí se vstupní stránkou; jejich projektové kvóty a náklady je nutné posuzovat
+společně. Před aktivací služeb projde stejnou nákladovou bránou.
 
 ## Limity jednotlivých služeb
 

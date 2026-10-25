@@ -124,16 +124,18 @@ produkčního projektu.
 
 ### 1. Založení a registrace aplikací
 
-1. Založte oddělený Firebase projekt pro prostředí; region databáze zvolte před
-   vytvořením Firestore, protože ho později nelze jednoduše změnit.
+1. Vývoj používá `shoutout-dev-46c81`, produkce `shoutout-production-a1b34`.
+   Produkční projekt je společný pro vstupní stránku a aplikaci; ta potřebuje
+   druhý Hosting web. Před vytvořením Firestore ověřte existující služby a
+   zvolte region databáze, protože ho později nelze jednoduše změnit.
 2. Zapněte Authentication provider **Email/Password**. Klient vyžaduje heslo
    nejméně 10 znaků a před vytvořením profilu ověření e-mailu.
 3. Pro webové MVP zaregistrujte webovou aplikaci. Android aplikaci s package
    name `cz.shoutout.app` a iOS aplikaci se správným bundle ID připravte pro
    pozdější mobilní vydání.
 4. Nainstalujte Firebase CLI a FlutterFire CLI a přihlaste se. Produkční
-   klientskou konfiguraci získejte odděleně pro nový projekt. Následující
-   FlutterFire příkaz je pouze příklad pro samostatnou pracovní kopii;
+   klientskou konfiguraci získejte pro webovou aplikaci v produkčním projektu.
+   Následující FlutterFire příkaz je pouze příklad pro samostatnou pracovní kopii;
    v této kopii by přepsal vývojové `lib/firebase_options.dart`:
 
    ```powershell
@@ -148,14 +150,16 @@ produkčního projektu.
    tento společný zdroj. Stávající `lib/firebase_options.dart` a mobilní
    konfigurace zůstávají vývojové; produkčním generováním je nepřepisujte.
 
-Repozitář obsahuje `.firebaserc` s aliasem `web` pro produkční projekt
-prezentačního webu `shoutout-production-a1b34`. Výchozí projekt (`default`)
+Repozitář obsahuje `.firebaserc` s aliasem `web` pro společný produkční projekt
+`shoutout-production-a1b34`. Výchozí projekt (`default`)
 nastavený není. Každý nasazovací příkaz proto musí obsahovat `--project` a musí
 být spuštěný ze správného adresáře podle příslušného `firebase.json`.
 
-Webové MVP bude na `go.shoutout-app.eu` ve vlastním produkčním Firebase
-projektu aplikace. Jeho ID zatím není v repozitáři nakonfigurované a nesmí se
-odvozovat z aliasu `web`, který patří statické prezentaci.
+Webové MVP bude na `go.shoutout-app.eu` ve společném produkčním projektu
+`shoutout-production-a1b34`, ale na jiném Hosting site než vstupní stránka
+`shoutout-app.eu`. Alias `web` sám neurčuje Hosting site. App site je
+`shoutout-go-a1b34`, propojený s webovou aplikací `ShoutOut Web Production`;
+produkční SDK konfigurace je uložená v `config/prod.json`.
 
 ### 2. Firestore, pravidla a indexy
 
@@ -300,8 +304,8 @@ moderaci a různá zařízení jsou v `TESTING.md`.
 Hosting označený jako demo není samostatná Flutter build varianta. Jde o běžný
 release web připojený k vývojovému Firebase projektu; po povolení používá
 skutečnou polohu prohlížeče. Pevná poloha Litoměřice se do buildu nevkládá.
-Produkční Firebase projekt zatím není nakonfigurovaný. Buildy už mají oddělené
-konfigurace a výstupy podle `WEB_ENVIRONMENTS.md`.
+Produkční app Hosting site a SDK konfigurace už jsou připravené. Doména a
+nastavení provozních služeb aplikace zatím nebylo ověřené. Buildy mají oddělené konfigurace a výstupy podle `WEB_ENVIRONMENTS.md`.
 
 1. Ověřte čistý pracovní strom a cílový projekt.
 2. Sestavte release s Geoapify hodnotou.
@@ -324,17 +328,20 @@ Každá část se nasazuje explicitním `--only` až po příslušných testech.
 
 ## Produkční webové MVP
 
-Cílem je `go.shoutout-app.eu` v samostatném produkčním Firebase projektu
-aplikace. Před nasazením je potřeba vytvořit projekt a webovou Firebase
-aplikaci, doplnit připravenou konfiguraci v `config/prod.json` podle
-`WEB_ENVIRONMENTS.md`, připravit Hosting,
+Cílem je `go.shoutout-app.eu` ve stávajícím projektu `shoutout-production-a1b34`,
+odděleném od vývoje. Webová aplikace `ShoutOut Web Production`, site
+`shoutout-go-a1b34` a `config/prod.json` jsou připravené. Před nasazením
+prověřit služby podle `WEB_ENVIRONMENTS.md`, připravit vlastní doménu Hostingu,
 Auth Action URL a autorizované domény, nasadit pravidla, indexy a potřebné
 služby a projít bránu v `LAUNCH_READINESS.md`.
 
 Kořenový `firebase.json` nasazuje ověřený vývojový Flutter build z `build/web-dev`;
 `presentation/firebase.json` nasazuje statický web. Při budoucím nasazení je
-třeba explicitně určit nový project ID a pracovat v kořeni repozitáře. ID
-projektu prezentace `shoutout-production-a1b34` není cílem aplikace.
+třeba explicitně určit project ID, app Hosting site a pracovat v kořeni repozitáře. ID
+projektu `shoutout-production-a1b34` je společné; rozdílný je Hosting site.
+Výchozí site `shoutout-production-a1b34` patří vstupní stránce a app build
+jej odmítá. Tlačítko na vstupní stránce má být veřejně nasazené až po
+zprovoznění cílové aplikace.
 
 ## Android release
 
