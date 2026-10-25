@@ -979,6 +979,15 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Navazující diagnostika 25. října potvrdila správný projekt, SCORE klíč,
+doménové omezení, aktivní billing i povolené App Check API na Firebase API
+klíči. Ve vývoji ale chyběla servisní identita App Check i její standardní
+role. Identita a `roles/firebaseappcheck.serviceAgent` byly doplněné a ověřené
+čtením IAM. Samostatný test nyní dosáhl výměny tokenu, která na localhostu
+vrací 403; úspěch ostré domény zatím není potvrzený. Připravená vývojová
+diagnostika `--app-check-probe` rozliší tento krok bez zápisů obsahu a bez
+vypisování tokenů. Serverové publikování zůstává vypnuté do úspěšného ověření.
+
 Vývojový rollout 25. října: CI `40206757797` prošlo a release odpovídal
 lokálním otiskům. Smoke test ale zjistil `appCheck/recaptcha-error` také na
 `shoutout-dev-46c81.web.app`, zpožděné načítání Firestore a přechodné zobrazení

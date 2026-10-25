@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="cs">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShoutOut – vývojová diagnostika App Check</title>
+<style>body{font:16px system-ui;max-width:800px;margin:40px auto;padding:0 20px}input{width:100%;box-sizing:border-box;margin:10px 0;padding:8px}button{padding:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>Vývojová diagnostika App Check</h1>
+<p>Jeden pokus bez přihlášení a bez databázového zápisu. Attestační token se nezobrazuje ani neukládá do logu.</p>
+<label>Veřejný reCAPTCHA Enterprise site key<input id="site-key" autocomplete="off" spellcheck="false"></label>
+<button id="run">Ověřit App Check</button>
+<pre id="result">Připraveno</pre>
+<script>
+  // Capture only sanitized error information, never success bodies or headers.
+  window.appCheckDiagnosticError = null;
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+    const url = new URL(typeof args[0] === 'string' ? args[0] : args[0].url, window.location.href);
+    if (url.hostname.endsWith('firebaseappcheck.googleapis.com') && !response.ok) {
+      try {
+        const data = await response.clone().json();
+        window.appCheckDiagnosticError = {
+          status: response.status,
+          code: data.error?.status,
+          message: String(data.error?.message ?? '').slice(0, 500).replace(/eyJ[A-Za-z0-9_.-]+/g, '[redacted]'),
+        };
+      } catch { /* Keep the original SDK error. */ }
+    }
+    return response;
+  };
+</script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+  import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app-check.js';
+  const output = document.querySelector('#result');
+  const button = document.querySelector('#run');
+  button.onclick = async () => {
+    button.disabled = true;
+    output.textContent = 'Ověřuji…';
+    try {
+      const config = await fetch('/app-config.json').then(r => r.json());
+      if (config.environment !== 'dev' || config.firebase.projectId !== 'shoutout-dev-46c81') throw Error('Development project required.');
+      const key = document.querySelector('#site-key').value.trim();
+      if (!/^[A-Za-z0-9_-]{20,200}$/.test(key)) throw Error('Invalid public site key.');
+      const app = initializeApp(config.firebase);
+      const check = initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(key), isTokenAutoRefreshEnabled: false });
+      const result = await getToken(check, false);
+      // No user credential is sent: success means App Check passed, then Auth
+      // correctly rejected the call before any operation or database read.
+      const response = await fetch('https://europe-west3-shoutout-dev-46c81.cloudfunctions.net/createShout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Firebase-AppCheck': result.token },
+        body: JSON.stringify({ data: {} }),
+      });
+      const data = await response.json();
+      output.textContent = JSON.stringify({ tokenObtained: !!result.token, callableStatus: response.status,
+        callableMessage: data.error?.message }, null, 2);
+    } catch (error) {
+      output.textContent = JSON.stringify({ code: error.code, message: error.message,
+        exchange: window.appCheckDiagnosticError }, null, 2);
+    }
+  };
+</script>
+</html>

@@ -108,6 +108,41 @@ test('unknown environment exits before launching Flutter', () => {
   assert.match(result.stderr, /Expected dev or prod/);
 });
 
+test('App Check probe cannot be included in production or non-build commands', () => {
+  for (const args of [['build', 'prod'], ['prepare', 'dev'], ['deploy', 'dev']]) {
+    const result = spawnSync(process.execPath, [join(root, 'tools/web_environment.mjs'), ...args, '--app-check-probe'], { encoding: 'utf8' });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /build dev only/);
+  }
+});
+
+test('development probe never displays an attestation token or initializes production', async () => {
+  const source = readFileSync(join(root, 'tools/app_check_probe.html'), 'utf8')
+    .match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^\s*import .*;$/gm, '');
+  for (const config of [dev, prod]) {
+    const elements = new Map([
+      ['#result', {textContent: ''}], ['#run', {}], ['#site-key', {value: 'test-only-public-site-key'}],
+    ]);
+    let starts = 0;
+    let calls = 0;
+    await runInNewContext(`(async()=>{${source}; await button.onclick();})()`, {
+      document: {querySelector: key => elements.get(key)},
+      window: {appCheckDiagnosticError: null},
+      initializeApp: () => {starts++;return {};},
+      initializeAppCheck: () => ({}),
+      ReCaptchaEnterpriseProvider: function () {},
+      getToken: async () => ({token:'private-attestation-token'}),
+      fetch: async url => url === '/app-config.json'
+        ? {json: async () => config}
+        : (calls++, {status:401,json:async()=>({error:{message:'Authentication is required.'}})}),
+    });
+    const displayed = elements.get('#result').textContent;
+    assert.equal(displayed.includes('private-attestation-token'), false);
+    assert.equal(starts, config === dev ? 1 : 0);
+    assert.equal(calls, config === dev ? 1 : 0);
+  }
+});
+
 test('auth action uses supplied project and rejects missing config or cross-environment hosts', async () => {
   const source = readFileSync(join(root, 'web/auth-action.html'), 'utf8')
     .match(/<script type="module">([\s\S]*?)<\/script>/)[1]

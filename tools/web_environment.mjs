@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -121,10 +121,11 @@ function run(program, args) {
 export function main(args) {
   const [command, environment, ...flags] = args;
   if (!['prepare', 'build', 'check', 'deploy'].includes(command) ||
-      flags.some(flag => !['--debug', '--apply'].includes(flag) && !/^--project=[a-z0-9-]+$/.test(flag)) ||
+      flags.some(flag => !['--debug', '--apply', '--app-check-probe'].includes(flag) && !/^--project=[a-z0-9-]+$/.test(flag)) ||
+      (flags.includes('--app-check-probe') && (command !== 'build' || environment !== 'dev')) ||
       (command !== 'build' && flags.includes('--debug')) ||
       (command !== 'deploy' && flags.includes('--apply'))) {
-    throw new Error('Usage: node tools/web_environment.mjs prepare|build|check|deploy dev|prod [--debug] [--project=ID] [--apply]');
+    throw new Error('Usage: node tools/web_environment.mjs prepare|build|check|deploy dev|prod [--debug] [--project=ID] [--apply] [--app-check-probe (build dev only)]');
   }
   const config = loadConfig(environment);
   const directory = join(root, 'build', `web-${environment}`);
@@ -155,6 +156,10 @@ export function main(args) {
     if (existsSync(geoPath)) buildArgs.push(`--dart-define-from-file=${geoPath}`);
     run('flutter', buildArgs);
     writeJson(join(directory, 'app-config.json'), config);
+    if (flags.includes('--app-check-probe')) {
+      mkdirSync(join(directory, '__dev'), { recursive: true });
+      copyFileSync(join(root, 'tools/app_check_probe.html'), join(directory, '__dev/app-check.html'));
+    }
     writeJson(manifestPath, { mode: debug ? 'debug' : 'release', config, files: fingerprint(directory) });
     return;
   }

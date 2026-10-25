@@ -193,6 +193,27 @@ zápis vyžaduje `--apply` a potvrzení project ID, UID a adresy pobočky.
 
 ### 4. App Check
 
+Registrace reCAPTCHA Enterprise přes REST sama nemusí vytvořit servisní
+identitu App Check. Ve vývojovém projektu byl 25. října ověřen chybějící účet
+`service-696035472864@gcp-sa-firebaseappcheck.iam.gserviceaccount.com` a chybějící
+role `roles/firebaseappcheck.serviceAgent`. Po schválené registraci App Check
+byla identita zřízena přes Service Usage `generateServiceIdentity` a standardní
+role přidaná pouze této identitě, s kontrolou IAM etagu a zachováním ostatních
+vazeb. Role obsahuje jen `recaptchaenterprise.assessments.create`,
+`recaptchaenterprise.assessments.annotate` a `serviceusage.services.use`.
+Nevztahuje se na uživatelská data Firestore. Při zřizování dalších prostředí
+existenci a roli ověřit; role servisních agentů se nepřidělují lidem ani běžným
+aplikačním účtům.
+
+Pro izolované ověření na skutečné vývojové doméně lze sestavit
+`node tools/web_environment.mjs build dev --app-check-probe`. Jen tento
+vývojový build obsahuje `/__dev/app-check.html`; běžný build ji odstraní a
+produkční příkaz tento přepínač odmítne. Stránka přijímá veřejný site key,
+nepoužívá přihlášení, nezapisuje obsah a token nikdy nevypisuje. Ověří získání
+App Check tokenu a jeho přijetí callable před očekávaným odmítnutím chybějícího
+Auth. Případnou chybu výměny zobrazí bez tokenů. Diagnostika není dokladem
+úspěšného publikování Shoutu; to vyžaduje navazující přihlášený test.
+
 Android debug používá debug provider a release Play Integrity. iOS debug používá
 debug provider a release App Attest s fallbackem na DeviceCheck. Postup:
 
