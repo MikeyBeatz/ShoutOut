@@ -17,6 +17,9 @@ test('web App Check configuration gates server publishing', () => {
   assert.throws(() => validateConfig({ ...dev, appCheckSiteKey: '' }, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev,
     appCheckSiteKey: 'test-only-recaptcha-enterprise-key', serverShoutCreation: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: false, serverCommentCreation: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverCommentCreation: 'true' }, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverCommentCreation: true }, 'dev'));
 });
 const prod = {
   ...dev, environment: 'prod', appUrl: 'https://go.shoutout-app.eu',

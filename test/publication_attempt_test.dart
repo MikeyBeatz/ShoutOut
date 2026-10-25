@@ -54,4 +54,18 @@ void main() {
     final first = attempt.keyFor(['a, b', 'c']);
     expect(attempt.keyFor(['a', 'b, c']), isNot(first));
   });
+
+  test('comment retry keys include account, Shout and public reply target', () {
+    final attempt = PublicationAttempt(clock: () => DateTime(2026));
+    final initial = attempt.keyFor(['uid', 'shout', 'text', null]);
+    expect(attempt.keyFor(['uid', 'shout', 'text', null]), initial);
+    final reply = attempt.keyFor(['uid', 'shout', 'text', 'parent']);
+    expect(reply, isNot(initial));
+    final otherShout = attempt.keyFor(['uid', 'other', 'text', 'parent']);
+    expect(otherShout, isNot(reply));
+    expect(
+      attempt.keyFor(['other-uid', 'other', 'text', 'parent']),
+      isNot(otherShout),
+    );
+  });
 }

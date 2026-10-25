@@ -1001,7 +1001,11 @@ geohash a odpovídající idempotentní záznam i limit se společným timestamp
 Test byl následně v aplikaci odstraněn; stav `deleted` je ověřený čtením.
 CI `40227813927` prošlo a otisky nasazených souborů odpovídají release buildu.
 Globální enforcement Auth/Firestore, produkce a `main` se neměnily.
-Běžný účet s polohou zařízení zatím nebyl živě otestovaný.
+Uživatelský test osobního Shoutu „Test Shout“ následně také prošel. Firestore
+potvrdil osobní publikační cestu, kanonického autora, zaokrouhlenou veřejnou
+polohu, odpovídající geohash a atomický receipt i limit. Přechodný problém
+s přepisem hesla po odhlášení uživatel přestal pozorovat; příčina se nepotvrdila
+a přihlašovací formulář se neměnil.
 
 Následující odstavce zaznamenávají starší pokusy; jejich vypnuté přepínače
 a čekající ověření jsou historický stav překonaný výše uvedeným testem.
@@ -1106,10 +1110,24 @@ aktivní profil. Shout, rate limit a idempotentní záznam vznikají v jedné
 transakci. Limity odpovídají současným Rules (50/500 za den, 120/1 sekund).
 16 Functions unit testů a 68 emulatorových testů (64 Rules + 4 serverové)
 prošlo; emulator zahrnuje souběžné retry a souběžné odlišné požadavky.
-Vývojový web již používá callable a Business průchod prošel živým testem
-popsaným výše. Přímé vytváření v Rules zatím není uzavřené. Zbývá živý test
-běžného účtu, retence serverových idempotentních záznamů sladěná s mazáním
+Vývojový web již používá callable a Business i osobní průchod prošly živými
+testy popsanými výše. Přímé vytváření v Rules zatím není uzavřené. Zbývá
+retence serverových idempotentních záznamů sladěná s mazáním
 účtů a převod ostatních obsahových operací. Milník zůstává otevřený.
+
+Ve větvi `feature/server-comment-creation` je připravená callable
+`createComment` a klientský přepínač `serverCommentCreation` (výchozí `false`,
+v aktuálních konfiguracích není zapnutý). Server atomicky vytvoří komentář
+nebo veřejnou odpověď, zvýší čítač, spotřebuje existující limit 60/h s odstupem
+10 s a zapíše idempotentní potvrzení i slučovaná oznámení podle preferencí.
+Ověřuje aktivní Shout, rodiče ve stejném Shoutu a společnou Auth/App Check
+bránu. Autor, čas a příjemci oznámení pocházejí ze serveru. Retry neobnoví ani
+smazaný komentář a neúčtuje další událost. Klient při chybě callable nemá
+přímý fallback a zachovává klíč konceptu; při odesílání nelze změnit koncept.
+Prošlo 156 Flutter testů, 18 Functions unit testů, lint, celkový analyzátor,
+9 cílených testů webových nástrojů, 75 emulatorových testů (64 Rules, 4 Shout
+a 7 komentářových), vývojový release build a lokální kontrola nasazovacího cíle.
+Externí nasazení nové Function, zapnutí klienta a živý test komentářů zbývají.
 
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a

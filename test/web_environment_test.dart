@@ -71,6 +71,29 @@ void main() {
     expect(environment.serverShoutCreation, isTrue);
   });
 
+  test('server comments are independent and require App Check', () {
+    final config = development();
+    expect(WebEnvironment.fromJson(config).serverCommentCreation, isFalse);
+    expect(
+      WebEnvironment.fromJson({
+        ...config,
+        'serverCommentCreation': true,
+      }).serverCommentCreation,
+      isTrue,
+    );
+    for (final invalid in [
+      {...config, 'serverCommentCreation': 'true'},
+      {
+        ...config,
+        'appCheckSiteKey': null,
+        'serverShoutCreation': false,
+        'serverCommentCreation': true,
+      },
+    ]) {
+      expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
+    }
+  });
+
   test('production refuses development and unapproved projects', () {
     for (final project in ['shoutout-dev-46c81', 'unapproved-project']) {
       final config = production();

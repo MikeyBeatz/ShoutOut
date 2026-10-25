@@ -202,6 +202,13 @@ pozdějšího řízeného přepnutí po App Check a end-to-end ověření.
 
 ## Bezpečnostní model
 
+Pro veřejné komentáře a odpovědi je lokálně připravený stejný tok přes
+`createComment`. Webový přepínač `serverCommentCreation` je zatím vypnutý;
+soukromé odpovědi používají dosavadní cestu. Server načítá rodiče pouze pod
+daným Shoutem, odvozuje autora i příjemce oznámení a atomicky zapisuje komentář,
+čítač, limit, idempotentní receipt a oznámení podle preferencí. Retry má stejný
+výsledek a neobnovuje fyzicky smazaný komentář. Nový endpoint není nasazený.
+
 Klient je považován za nedůvěryhodný. Základní pravidla:
 
 - e-mail musí být ověřený,

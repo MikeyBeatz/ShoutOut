@@ -23,6 +23,12 @@ export function validateConfig(config, environment) {
   if (config.serverShoutCreation === true && !config.appCheckSiteKey) {
     throw new Error('Server Shout creation requires web App Check.');
   }
+  if (config.serverCommentCreation !== undefined && typeof config.serverCommentCreation !== 'boolean') {
+    throw new Error('serverCommentCreation must be a boolean.');
+  }
+  if (config.serverCommentCreation === true && !config.appCheckSiteKey) {
+    throw new Error('Server comment creation requires web App Check.');
+  }
   if (!['dev', 'prod'].includes(environment) || config.environment !== environment) {
     throw new Error('Choose a matching dev or prod configuration.');
   }

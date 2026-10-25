@@ -32,6 +32,8 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   String? _privateRecipientNickname;
   String? _privateTargetType;
   bool _initialFocusScheduled = false;
+  bool _sendingComment = false;
+  PublicationAttempt _commentAttempt = PublicationAttempt();
 
   @override
   void dispose() {
@@ -200,20 +202,23 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                             ? '${tr(context, 'Soukromá odpověď')} · @$_privateRecipientNickname'
                             : '${tr(context, 'Odpovídáš')} @$_replyToNickname',
                       ),
-                      onDeleted: () => setState(() {
-                        _replyToCommentId = null;
-                        _replyToNickname = null;
-                        _privateRecipientId = null;
-                        _privateRecipientNickname = null;
-                        _privateTargetType = null;
-                        _commentController.clear();
-                      }),
+                      onDeleted: _sendingComment
+                          ? null
+                          : () => setState(() {
+                              _replyToCommentId = null;
+                              _replyToNickname = null;
+                              _privateRecipientId = null;
+                              _privateRecipientNickname = null;
+                              _privateTargetType = null;
+                              _commentController.clear();
+                            }),
                     ),
                   ),
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
+                        enabled: !_sendingComment,
                         controller: _commentController,
                         focusNode: _commentFocusNode,
                         keyboardType: TextInputType.text,
@@ -258,6 +263,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       _commentKeys.putIfAbsent(commentId, GlobalKey<_CommentTileState>.new);
 
   void _replyTo(String commentId, String nickname) {
+    if (_sendingComment) return;
     setState(() {
       _replyToCommentId = commentId;
       _replyToNickname = nickname;
@@ -274,6 +280,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     required String targetType,
     String? parentCommentId,
   }) {
+    if (_sendingComment) return;
     setState(() {
       _privateRecipientId = recipientId;
       _privateRecipientNickname = recipientNickname;
@@ -349,12 +356,14 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _sendComment() async {
+    if (_sendingComment) return;
     final comment = _commentController.text.trim();
     if (comment.isEmpty) return;
     final user = FirebaseAuth.instance.currentUser!;
     final firestore = FirebaseFirestore.instance;
     final profileRef = firestore.collection('users').doc(user.uid);
     final shoutRef = firestore.collection('shouts').doc(widget.shout.id);
+    setState(() => _sendingComment = true);
     try {
       if (_privateRecipientId != null) {
         final recipientId = _privateRecipientId!;
@@ -415,6 +424,22 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             }, SetOptions(merge: true));
           }
         });
+      } else if (kIsWeb && WebEnvironment.current.serverCommentCreation) {
+        final key = _commentAttempt.keyFor([
+          user.uid,
+          widget.shout.id,
+          comment,
+          _replyToCommentId,
+        ]);
+        await FirebaseFunctions.instanceFor(
+          region: 'europe-west3',
+        ).httpsCallable('createComment').call({
+          'idempotencyKey': key,
+          'shoutId': widget.shout.id,
+          'text': comment,
+          if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
+        });
+        widget.shout.comments++;
       } else {
         final commentRef = shoutRef.collection('comments').doc();
         final rateRef = _rateLimitReference('comment');
@@ -539,9 +564,12 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         );
       }
       return;
+    } finally {
+      if (mounted) setState(() => _sendingComment = false);
     }
     if (!mounted) return;
     setState(() {
+      _commentAttempt = PublicationAttempt();
       _commentController.clear();
       _replyToCommentId = null;
       _replyToNickname = null;

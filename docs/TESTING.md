@@ -19,11 +19,24 @@ vytvořil jediný Shout s ověřenou pobočkou. Read-only kontrola Firestore
 potvrdila serverové ID, kanonickou identitu i polohu pobočky, nulové čítače,
 geohash a odpovídající receipt i rate limit se shodnými timestampy.
 Odstranění přes aplikaci bylo ověřené stavem `deleted`; žádný obsah nebyl
-vytvořen administrátorským zápisem. Živý test běžného účtu s polohou zařízení,
-souběžných retry a ostatních obsahových operací tento průchod nepokrývá.
+vytvořen administrátorským zápisem. Navazující uživatelský test osobního Shoutu
+„Test Shout“ také prošel kontrolou serverového ID, kanonického autora,
+zaokrouhlené veřejné polohy, geohashe, nulových čítačů a atomického receipt/limitu.
+Přechodný problém při přepisování hesla po odhlášení se nepodařilo potvrdit
+jako chybu kódu; uživatel následně pokračoval v přihlášení bez změny aplikace.
+Živý test souběžných retry a ostatních obsahových operací tento průchod nepokrývá.
 Souběh a idempotenci pokrývají lokální emulatorové testy uvedené níže.
 
 ## Automatické vrstvy
+
+`functions/create_comment.integration.test.js` používá stejný izolovaný
+emulator jako Shout testy. Sedm scénářů pokrývá souběžná retry, cooldown,
+atomické čítače/limity/oznámení, rodiče odpovědi, preference a slučování
+oznámení, vlastní obsah, neaktivní Shout, poškozená data a blokované účty.
+Retry po smazání výsledku jej znovu nevytvoří. Sada běží v `npm run test:rules`;
+bez emulatoru je přeskočená. Celkem prošlo 75 emulatorových testů, 18 Functions
+unit testů, 156 Flutter testů, lint, analyzátor a vývojový release build.
+Nové komentářové callable ani klientské přepnutí zatím nebyly nasazené.
 
 `test/legal_acceptance_state_test.dart` ověřuje rozdíl mezi chybějící cache
 a serverem potvrzeným chybějícím právním souhlasem, čekání na potvrzení zápisu,

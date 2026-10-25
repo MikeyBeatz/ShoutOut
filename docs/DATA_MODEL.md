@@ -7,6 +7,13 @@ se Shoutem a existujícím `rateLimits/{uid}/actions/shout`; klient k němu nem�
 oprávnění. Neuchovává původní text ani přesné souřadnice. Callable je nasazená
 pouze ve vývoji; retenční úklid těchto nových záznamů zatím není dokončený.
 
+Lokálně připravená `createComment` používá tutéž kolekci, s action namespace
+v hash ID a poli `userId`, `action: createComment`, `fingerprint`, `shoutId`,
+`commentId`, `createdAt`. Nevkládá text komentáře do receipt. Komentář,
+`shouts.commentsCount`, `rateLimits/{uid}/actions/comment`, receipt a oznámení
+vznikají v jediné transakci. Zůstává stávající limit 60 za hodinu a odstup 10 s.
+Úklid receipt je i zde otevřený; nová callable zatím není nasazená.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v
