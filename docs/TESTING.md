@@ -11,6 +11,12 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 
 ## Automatické vrstvy
 
+`test/legal_acceptance_state_test.dart` ověřuje rozdíl mezi chybějící cache
+a serverem potvrzeným chybějícím právním souhlasem, čekání na potvrzení zápisu,
+známý souhlas v offline režimu a chyby streamu. Widgetový scénář kontroluje,
+že při pomalém spojení neproblikne formulář souhlasu. Metadata listenery mají
+oddělený klíč od běžných dokumentových streamů a nadále se sdílí.
+
 Celokořenový analyzátor ignoruje generované `build/**`; projektové `lib/` a
 `test/` zůstávají kontrolované. Tím se vyloučí i Dart ukázky staženého Firebase
 CLI, které nejsou zdrojem aplikace.

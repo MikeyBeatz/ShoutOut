@@ -24,6 +24,18 @@ void main() {
       setupFirebaseCoreMocks();
       final app = await Firebase.initializeApp();
       final firestore = FirebaseFirestore.instanceFor(app: app);
+      final document = firestore.doc('users/test/legal/acceptance_2026_07_25');
+      expect(
+        identical(document.liveSnapshots(), document.liveSnapshots()),
+        isTrue,
+      );
+      expect(
+        identical(
+          document.liveSnapshots(),
+          document.liveSnapshots(includeMetadataChanges: true),
+        ),
+        isFalse,
+      );
       Query<Map<String, dynamic>> feed({
         int limit = 50,
         String status = 'active',

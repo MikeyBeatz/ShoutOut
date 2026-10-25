@@ -19,6 +19,14 @@ projektu.
 7. Zobrazí se úvodní nápověda s volbou další zobrazování vypnout.
 8. Uživatel vstoupí do feedu.
 
+Právní brána rozlišuje potvrzený chybějící souhlas od prázdné offline cache.
+Z prázdné cache zobrazí načítání, dokud server nepotvrdí, že aktuální souhlas
+opravdu chybí. Metadata změn odebírá stejným sdíleným listenerem; změna pouze
+`isFromCache` nebo `hasPendingWrites` proto nezůstane přehlédnutá. Dříve
+potvrzený souhlas lze použít z cache, ale neodeslaný lokální zápis ještě
+neotevře aplikaci. Chyba streamu zobrazí nedostupnost služby místo formuláře
+souhlasu nebo přístupu do aplikace.
+
 Ověření e-mailu lze znovu odeslat. Volba opravit e-mail odstraní ještě
 nedokončený Authentication účet a vrátí uživatele na začátek. Reset hesla vrací
 neutrální zprávu bez prozrazení existence účtu.

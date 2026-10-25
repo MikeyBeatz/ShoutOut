@@ -138,8 +138,12 @@ Object liveDataKey(Object source) {
 }
 
 extension LiveDocument on DocumentReference<Map<String, dynamic>> {
-  Stream<DocumentSnapshot<Map<String, dynamic>>> liveSnapshots() =>
-      liveStreams.watch(liveDataKey(this), snapshots);
+  Stream<DocumentSnapshot<Map<String, dynamic>>> liveSnapshots({
+    bool includeMetadataChanges = false,
+  }) => liveStreams.watch(
+    includeMetadataChanges ? (liveDataKey(this), true) : liveDataKey(this),
+    () => snapshots(includeMetadataChanges: includeMetadataChanges),
+  );
 }
 
 extension LiveQuery on Query<Map<String, dynamic>> {

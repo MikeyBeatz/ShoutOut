@@ -17,6 +17,58 @@ class LegalSection {
   final String body;
 }
 
+enum LegalAcceptanceState { checking, accepted, required, unavailable }
+
+LegalAcceptanceState legalAcceptanceState({
+  required bool? exists,
+  required bool isFromCache,
+  required bool hasPendingWrites,
+  bool hasError = false,
+}) {
+  if (hasError) return LegalAcceptanceState.unavailable;
+  if (exists == null || hasPendingWrites) return LegalAcceptanceState.checking;
+  if (exists) return LegalAcceptanceState.accepted;
+  return isFromCache
+      ? LegalAcceptanceState.checking
+      : LegalAcceptanceState.required;
+}
+
+class LegalAcceptanceStateView extends StatelessWidget {
+  const LegalAcceptanceStateView({
+    super.key,
+    required this.state,
+    required this.child,
+    required this.requestAcceptance,
+  });
+
+  final LegalAcceptanceState state;
+  final Widget child;
+  final WidgetBuilder requestAcceptance;
+
+  @override
+  Widget build(BuildContext context) => switch (state) {
+    LegalAcceptanceState.accepted => child,
+    LegalAcceptanceState.required => requestAcceptance(context),
+    LegalAcceptanceState.checking => const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    ),
+    LegalAcceptanceState.unavailable => Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            tr(
+              context,
+              'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    ),
+  };
+}
+
 class LegalAcceptanceGate extends StatelessWidget {
   const LegalAcceptanceGate({
     super.key,
@@ -34,16 +86,22 @@ class LegalAcceptanceGate extends StatelessWidget {
         .collection('legal')
         .doc(_acceptanceDocument);
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: acceptance.liveSnapshots(),
+      // Server acknowledgement can change metadata without changing data.
+      // Missing offline cache is not proof that the user has not accepted.
+      stream: acceptance.liveSnapshots(includeMetadataChanges: true),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        return snapshot.data!.exists
-            ? child
-            : LegalAcceptancePage(userId: user.uid, acceptance: acceptance);
+        final document = snapshot.data;
+        return LegalAcceptanceStateView(
+          state: legalAcceptanceState(
+            exists: document?.exists,
+            isFromCache: document?.metadata.isFromCache ?? true,
+            hasPendingWrites: document?.metadata.hasPendingWrites ?? false,
+            hasError: snapshot.hasError,
+          ),
+          child: child,
+          requestAcceptance: (_) =>
+              LegalAcceptancePage(userId: user.uid, acceptance: acceptance),
+        );
       },
     );
   }

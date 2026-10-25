@@ -986,8 +986,11 @@ právní brány z prázdné cache. Hosting byl vrácen na dříve ověřenou ver
 `c8ec155e05b4a3b3`; lokální App Check aktivace a serverové publikování jsou
 opět vypnuté. Příčina reCAPTCHA chyby zůstává k ověření. Úspěšná tvorba Shoutu
 přes veřejný endpoint zatím nebyla ověřená a žádný testovací Shout tímto
-rolloutem nevznikl. Samostatně opravit právní bránu, aby prázdnou offline cache
-nevykládala jako chybějící právní souhlas.
+rolloutem nevznikl. Právní brána je následně lokálně opravená ve větvi
+`fix/legal-acceptance-offline`: prázdná offline cache již není považovaná za
+chybějící souhlas, čeká se na serverové potvrzení včetně metadata událostí.
+Oprava prošla 154 Flutter testy, celkovou analýzou a 14 cílenými testy stavů
+a sdílení streamů; nasazení této opravy zatím neproběhlo.
 
 Webový klient umí App Check přes `appCheckSiteKey` a řízené přepnutí tvorby
 Shoutu přes `serverShoutCreation`. Ve vývoji byl po souhlasu vlastníka
