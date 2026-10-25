@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "shoutout-production-a1b34",
     "public": ".",
     "ignore": [
       "firebase.json",
