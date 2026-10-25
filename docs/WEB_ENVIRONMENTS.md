@@ -35,6 +35,12 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
+diagnostika získala platný App Check token a callable jej přijala, pak správně
+odmítla chybějící Auth. `config/dev.json` znovu aktivuje registrovaný provider
+a serverové vytváření Shoutů pro schválený přihlášený test. Produkční
+konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže jsou historie.
+
 Volitelný `appCheckSiteKey` nastavuje veřejný reCAPTCHA Enterprise klíč a při
 startu webu aktivuje App Check. Volitelný boolean `serverShoutCreation`
 přepíná vytvoření Shoutu na callable `createShout` v `europe-west3`; vyžaduje

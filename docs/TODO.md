@@ -979,6 +979,13 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Po zapnutí App Check API uživatelský test na vývojové doméně potvrdil
+`tokenObtained: true` a odpověď callable `401 Authentication is required.`.
+To prokazuje získání tokenu i jeho přijetí App Check vrstvou; následná Auth
+kontrola správně zastavila nepřihlášený požadavek. Vývojová konfigurace proto
+znovu zapíná App Check a `serverShoutCreation` pro schválený přihlášený test.
+Úspěšný zápis obsahu ještě není tímto diagnostickým testem prokázaný.
+
 Uživatelský ruční test 25. října poskytl přesnou odpověď výměny tokenu:
 `403 PERMISSION_DENIED`, App Check API je v projektu `696035472864` vypnuté.
 Service Usage potvrdilo `firebaseappcheck.googleapis.com: DISABLED`; služba

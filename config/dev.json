@@ -1,6 +1,7 @@
 {
   "environment": "dev",
-  "serverShoutCreation": false,
+  "appCheckSiteKey": "6LfVIAAuAAAAAL4qhDiIlyWoI5Mp1Q1GJBmEJe7e",
+  "serverShoutCreation": true,
   "appUrl": "https://shoutout-dev-46c81.web.app",
   "hostingSite": "shoutout-dev-46c81",
   "firebase": {
