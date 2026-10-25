@@ -43,10 +43,18 @@ se klient nepřepne na přímý zápis. Retry stejného konceptu drží stejné 
 původní polohu, úprava konceptu vytvoří nové ID.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
-reCAPTCHA Enterprise API a registrovaný webový App Check. Veřejný klíč v
-`config/dev.json` dovoluje pouze obě vývojové Firebase domény a `localhost`.
+reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč
+dovoluje pouze obě vývojové Firebase domény a `localhost`.
 Token TTL je 3600 s, práh zůstává výchozí 0,5. Globální enforcement Firestore
 ani Auth se neměnil a `serverShoutCreation` je zatím `false`.
+
+Vývojový rollout z 25. října byl vrácen: browserový smoke test na localhostu
+i skutečné vývojové doméně hlásil `appCheck/recaptcha-error`. Klíč proto není
+aktivovaný v `config/dev.json` a serverové publikování zůstává vypnuté.
+Hosting byl přes ověřené API vrácen na verzi `c8ec155e05b4a3b3` (release
+`1792942480312000`). Callable zůstává nasazená s povinným App Check; nesmí se
+obejít vypnutím její ochrany. Příčina chyby získávání reCAPTCHA tokenu zatím
+není potvrzená.
 
 `config/dev.json` je společný zdroj veřejné webové Firebase konfigurace,
 návratové adresy e-mailů a Hosting site ID. Produkční šablona je

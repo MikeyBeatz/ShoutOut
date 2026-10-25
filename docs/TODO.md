@@ -979,6 +979,16 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
+Vývojový rollout 25. října: CI `40206757797` prošlo a release odpovídal
+lokálním otiskům. Smoke test ale zjistil `appCheck/recaptcha-error` také na
+`shoutout-dev-46c81.web.app`, zpožděné načítání Firestore a přechodné zobrazení
+právní brány z prázdné cache. Hosting byl vrácen na dříve ověřenou verzi
+`c8ec155e05b4a3b3`; lokální App Check aktivace a serverové publikování jsou
+opět vypnuté. Příčina reCAPTCHA chyby zůstává k ověření. Úspěšná tvorba Shoutu
+přes veřejný endpoint zatím nebyla ověřená a žádný testovací Shout tímto
+rolloutem nevznikl. Samostatně opravit právní bránu, aby prázdnou offline cache
+nevykládala jako chybějící právní souhlas.
+
 Webový klient umí App Check přes `appCheckSiteKey` a řízené přepnutí tvorby
 Shoutu přes `serverShoutCreation`. Ve vývoji byl po souhlasu vlastníka
 registrovaný reCAPTCHA Enterprise provider (TTL 1 hodina, výchozí práh 0,5).
@@ -1029,14 +1039,14 @@ transakci. Limity odpovídají současným Rules (50/500 za den, 120/1 sekund).
 16 Functions unit testů a 68 emulatorových testů (64 Rules + 4 serverové)
 prošlo; emulator zahrnuje souběžné retry a souběžné odlišné požadavky.
 Klient ani přímé zápisy v Rules zatím přepnuté nejsou. Před aktivací zbývá
-webový App Check, řízené nasazení, end-to-end ověření a retence serverových
+funkční získávání webového App Check tokenu, end-to-end ověření a retence serverových
 idempotentních záznamů sladěná s mazáním účtů. Milník zůstává otevřený.
 
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a
 kontroluje profil, aktuální právní souhlas, ban, žádost o smazání a podle typu
-operace omezení tvorby. Podporuje Firestore transakci jako reader, ale zatím
-není připojený k veřejnému endpointu ani klientovi. Functions lint a testy jsou
+operace omezení tvorby. Podporuje Firestore transakci jako reader; nyní ji
+používá vývojový endpoint `createShout`. Functions lint a testy jsou
 nově v CI na Node.js 22; přímé Firebase závislosti a bezpečné tranzitivní verze
 byly aktualizované a `npm audit --omit=dev` hlásí nula nálezů.
 
