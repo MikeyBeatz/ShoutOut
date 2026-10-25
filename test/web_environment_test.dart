@@ -50,6 +50,7 @@ void main() {
   });
 
   test('server publishing requires a valid web App Check configuration', () {
+    final withoutAppCheck = development()..remove('appCheckSiteKey');
     expect(WebEnvironment.fromJson(development()).serverShoutCreation, isFalse);
     for (final change in [
       {'serverShoutCreation': true},
@@ -57,7 +58,7 @@ void main() {
       {'appCheckSiteKey': ''},
     ]) {
       expect(
-        () => WebEnvironment.fromJson({...development(), ...change}),
+        () => WebEnvironment.fromJson({...withoutAppCheck, ...change}),
         throwsStateError,
       );
     }

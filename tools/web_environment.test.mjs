@@ -10,7 +10,9 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 const dev = loadConfig('dev');
 
 test('web App Check configuration gates server publishing', () => {
-  assert.throws(() => validateConfig({ ...dev, serverShoutCreation: true }, 'dev'));
+  const withoutAppCheck = { ...dev };
+  delete withoutAppCheck.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, appCheckSiteKey: '' }, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev,
