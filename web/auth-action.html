@@ -123,8 +123,11 @@
             config.appUrl !== expectedUrl ||
             config.firebase.authDomain !== `${project}.firebaseapp.com` ||
             (config.environment === 'prod' &&
-              (!project || config.firebase.messagingSenderId === '696035472864' ||
-               ['shoutout-dev-46c81', 'shoutout-production-a1b34'].includes(project))) ||
+              (project !== 'shoutout-production-a1b34' ||
+               config.firebase.messagingSenderId === '696035472864' ||
+               typeof config.hostingSite !== 'string' ||
+               !/^[a-z0-9][a-z0-9-]*$/.test(config.hostingSite) ||
+               ['shoutout-dev-46c81', 'shoutout-production-a1b34'].includes(config.hostingSite))) ||
             (config.environment === 'dev' &&
               config.firebase.projectId !== 'shoutout-dev-46c81')) {
           throw new Error('Unexpected environment');

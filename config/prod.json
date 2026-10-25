@@ -1,0 +1,13 @@
+{
+  "environment": "prod",
+  "appUrl": "https://go.shoutout-app.eu",
+  "hostingSite": "shoutout-go-a1b34",
+  "firebase": {
+    "apiKey": "AIzaSyDEyX-YyUjiKsELyJA5waqmRT9OY0NSZYA",
+    "appId": "1:391665039159:web:ee4fea2f25a49d04ec0cb2",
+    "messagingSenderId": "391665039159",
+    "projectId": "shoutout-production-a1b34",
+    "authDomain": "shoutout-production-a1b34.firebaseapp.com",
+    "storageBucket": "shoutout-production-a1b34.firebasestorage.app"
+  }
+}

@@ -1,11 +1,13 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const devProject = 'shoutout-dev-46c81';
+export const prodProject = 'shoutout-production-a1b34';
+export const presentationSite = prodProject;
 export function assertDevelopmentProject(project) {
   if (project !== devProject) throw new Error('Development tools only support shoutout-dev-46c81.');
 }
@@ -31,11 +33,11 @@ export function validateConfig(config, environment) {
     if (config.appUrl !== `https://${devProject}.web.app` || config.hostingSite !== devProject) {
       throw new Error('Development URL and Hosting site must match the dev project.');
     }
-  } else if ([devProject, 'shoutout-production-a1b34'].includes(f.projectId) ||
+  } else if (f.projectId !== prodProject ||
       f.messagingSenderId === '696035472864' ||
-      [devProject, 'shoutout-production-a1b34'].includes(config.hostingSite) ||
+      [devProject, presentationSite].includes(config.hostingSite) ||
       config.appUrl !== 'https://go.shoutout-app.eu') {
-    throw new Error('Production needs its own project, Hosting site and go domain.');
+    throw new Error('Production must use the shared production project, a separate app Hosting site and go domain.');
   }
   return config;
 }
@@ -73,6 +75,17 @@ export function verifyBuild(config, manifest, project, directory) {
   if (JSON.stringify(manifest.files) !== JSON.stringify(fingerprint(directory))) {
     throw new Error('Build files changed; rebuild before deployment.');
   }
+}
+
+export function buildHostingConfig(config, hosting) {
+  validateConfig(config, config.environment);
+  // Never inherit a presentation or development target from another config.
+  const { target, ...settings } = hosting;
+  return { hosting: {
+    ...settings, public: `build/web-${config.environment}`,
+    site: config.hostingSite,
+    predeploy: [`node tools/web_environment.mjs check ${config.environment}`],
+  } };
 }
 
 function run(program, args) {
@@ -146,10 +159,7 @@ export function main(args) {
   }
   const hosting = readJson(join(root, 'firebase.json')).hosting;
   const deploymentConfig = join(root, `.firebase-hosting-${environment}.json`);
-  writeJson(deploymentConfig, { hosting: {
-    ...hosting, public: relative(root, directory).replaceAll('\\', '/'),
-    site: config.hostingSite, predeploy: [`node tools/web_environment.mjs check ${environment}`],
-  } });
+  writeJson(deploymentConfig, buildHostingConfig(config, hosting));
   run('firebase', ['deploy', '--only', 'hosting', '--project', project, '--config', deploymentConfig]);
 }
 

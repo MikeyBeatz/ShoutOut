@@ -7,6 +7,7 @@ class WebEnvironment {
   WebEnvironment.fromJson(Map<String, dynamic> json)
     : name = json['environment'] as String? ?? '',
       appUrl = json['appUrl'] as String? ?? '',
+      hostingSite = json['hostingSite'] as String? ?? '',
       firebase = Map<String, dynamic>.from(json['firebase'] as Map? ?? {}) {
     if (!['dev', 'prod'].contains(name)) {
       throw StateError('Choose a configured dev or prod web environment.');
@@ -30,17 +31,22 @@ class WebEnvironment {
     }
     if (name == 'dev' &&
         (project != 'shoutout-dev-46c81' ||
+            hostingSite != 'shoutout-dev-46c81' ||
             appUrl != 'https://shoutout-dev-46c81.web.app')) {
       throw StateError('Development configuration must use the dev project.');
     }
     if (name == 'prod' &&
-        ([
+        (project != 'shoutout-production-a1b34' ||
+            !RegExp(r'^[a-z0-9][a-z0-9-]*$').hasMatch(hostingSite) ||
+            [
               'shoutout-dev-46c81',
               'shoutout-production-a1b34',
-            ].contains(project) ||
+            ].contains(hostingSite) ||
             firebase['messagingSenderId'] == '696035472864' ||
             appUrl != 'https://go.shoutout-app.eu')) {
-      throw StateError('Production requires its own project and go domain.');
+      throw StateError(
+        'Production requires the shared project, a separate app Hosting site and go domain.',
+      );
     }
     if (firebase['authDomain'] != '$project.firebaseapp.com' ||
         !RegExp(r'^1:\d+:web:[a-zA-Z0-9]+$').hasMatch(firebase['appId']) ||
@@ -88,6 +94,7 @@ class WebEnvironment {
 
   final String name;
   final String appUrl;
+  final String hostingSite;
   final Map<String, dynamic> firebase;
 
   FirebaseOptions get firebaseOptions => FirebaseOptions(

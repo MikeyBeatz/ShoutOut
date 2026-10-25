@@ -28,36 +28,65 @@ void main() {
     );
   });
 
-  test('production refuses development and presentation projects', () {
-    for (final project in ['shoutout-dev-46c81', 'shoutout-production-a1b34']) {
-      final config = development();
-      config['environment'] = 'prod';
-      config['appUrl'] = 'https://go.shoutout-app.eu';
+  Map<String, dynamic> production() {
+    final config = development();
+    config['environment'] = 'prod';
+    config['appUrl'] = 'https://go.shoutout-app.eu';
+    config['hostingSite'] = 'example-shoutout-live';
+    config['firebase']['projectId'] = 'shoutout-production-a1b34';
+    config['firebase']['messagingSenderId'] = '123456789000';
+    config['firebase']['appId'] = '1:123456789000:web:abc123';
+    config['firebase']['authDomain'] =
+        'shoutout-production-a1b34.firebaseapp.com';
+    config['firebase']['storageBucket'] =
+        'shoutout-production-a1b34.firebasestorage.app';
+    return config;
+  }
+
+  test('production accepts the shared project with a separate app site', () {
+    final environment = WebEnvironment.fromJson(production());
+    expect(environment.firebaseOptions.projectId, 'shoutout-production-a1b34');
+    expect(environment.hostingSite, 'example-shoutout-live');
+  });
+
+  test('production refuses development and unapproved projects', () {
+    for (final project in ['shoutout-dev-46c81', 'unapproved-project']) {
+      final config = production();
       config['firebase']['projectId'] = project;
+      config['firebase']['authDomain'] = '$project.firebaseapp.com';
+      config['firebase']['storageBucket'] = '$project.firebasestorage.app';
       expect(() => WebEnvironment.fromJson(config), throwsStateError);
     }
   });
 
-  test('production uses the go domain and refuses development hosts', () {
-    final config = development();
-    config['environment'] = 'prod';
-    config['appUrl'] = 'https://go.shoutout-app.eu';
-    config['firebase']['projectId'] = 'example-shoutout-live';
-    config['firebase']['messagingSenderId'] = '123456789000';
-    config['firebase']['appId'] = '1:123456789000:web:abc123';
-    config['firebase']['authDomain'] = 'example-shoutout-live.firebaseapp.com';
-    config['firebase']['storageBucket'] =
-        'example-shoutout-live.firebasestorage.app';
-    final environment = WebEnvironment.fromJson(config);
+  test(
+    'production refuses the landing site, development site and missing site',
+    () {
+      for (final site in [
+        'shoutout-production-a1b34',
+        'shoutout-dev-46c81',
+        '',
+      ]) {
+        final config = production();
+        config['hostingSite'] = site;
+        expect(() => WebEnvironment.fromJson(config), throwsStateError);
+      }
+    },
+  );
+
+  test('production uses the go domain and refuses other hosts', () {
+    final environment = WebEnvironment.fromJson(production());
     expect(
       () => environment.validateHost('go.shoutout-app.eu'),
       returnsNormally,
     );
-    expect(
-      () => environment.validateHost('shoutout-dev-46c81.web.app'),
-      throwsStateError,
-    );
-    expect(() => environment.validateHost('localhost'), throwsStateError);
+    for (final host in [
+      'shoutout-dev-46c81.web.app',
+      'shoutout-app.eu',
+      'localhost',
+    ]) {
+      expect(() => environment.validateHost(host), throwsStateError);
+    }
   });
 
   test('incomplete or inconsistent configuration is rejected', () {

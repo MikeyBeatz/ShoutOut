@@ -5,29 +5,32 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
-import { assertDevelopmentProject, devProject, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
+import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const dev = loadConfig('dev');
 const prod = {
   ...dev, environment: 'prod', appUrl: 'https://go.shoutout-app.eu',
   hostingSite: 'example-shoutout-live', firebase: {
-    ...dev.firebase, projectId: 'example-shoutout-live',
+    ...dev.firebase, apiKey: 'test-only-api-key', projectId: prodProject,
     messagingSenderId: '123456789000', appId: '1:123456789000:web:abc123',
-    authDomain: 'example-shoutout-live.firebaseapp.com',
-    storageBucket: 'example-shoutout-live.firebasestorage.app',
+    authDomain: `${prodProject}.firebaseapp.com`,
+    storageBucket: `${prodProject}.firebasestorage.app`,
   },
 };
 
-test('configuration rejects wrong environment, incomplete production and reused projects', () => {
+test('production accepts the shared project with a separate app site and rejects unsafe configurations', () => {
   assert.equal(validateConfig(prod, 'prod'), prod);
   assert.throws(() => validateConfig(dev, 'prod'));
   const example = JSON.parse(readFileSync(join(root, 'config/prod.json.example'), 'utf8'));
   assert.throws(() => validateConfig(example, 'prod'));
-  for (const projectId of [devProject, 'shoutout-production-a1b34']) {
+  for (const projectId of [devProject, 'unapproved-project']) {
     assert.throws(() => validateConfig({ ...prod, firebase: {
       ...prod.firebase, projectId, authDomain: `${projectId}.firebaseapp.com`,
       storageBucket: `${projectId}.firebasestorage.app`,
     } }, 'prod'));
+  }
+  for (const hostingSite of [presentationSite, devProject, '']) {
+    assert.throws(() => validateConfig({ ...prod, hostingSite }, 'prod'));
   }
   assert.throws(() => validateConfig({ ...prod, appUrl: dev.appUrl }, 'prod'));
   assert.throws(() => validateConfig({ ...prod, firebase: { ...prod.firebase,
@@ -36,13 +39,28 @@ test('configuration rejects wrong environment, incomplete production and reused 
   assert.throws(() => validateConfig({ ...prod, firebase: { ...prod.firebase, messagingSenderId: '0' } }, 'prod'));
 });
 
+test('Hosting configuration keeps the application separate from the landing site', () => {
+  const presentation = JSON.parse(readFileSync(join(root, 'presentation/firebase.json'), 'utf8'));
+  assert.equal(presentation.hosting.site, presentationSite);
+  const base = JSON.parse(readFileSync(join(root, 'firebase.json'), 'utf8')).hosting;
+  const config = buildHostingConfig(prod, { ...base, target: 'landing' });
+  assert.deepEqual(Object.keys(config), ['hosting']);
+  assert.equal(config.hosting.site, prod.hostingSite);
+  assert.notEqual(config.hosting.site, presentation.hosting.site);
+  assert.equal(config.hosting.public, 'build/web-prod');
+  assert.equal(config.hosting.target, undefined);
+  assert.deepEqual(config.hosting.predeploy, ['node tools/web_environment.mjs check prod']);
+  assert.deepEqual(buildHostingConfig(dev, base).hosting, base);
+  assert.throws(() => buildHostingConfig({ ...prod, hostingSite: presentationSite }, base));
+});
+
 test('deployment rejects wrong target, debug builds, changed configuration and changed files', () => {
   const dir = mkdtempSync(join(tmpdir(), 'shoutout-build-'));
   try {
     writeFileSync(join(dir, 'main.dart.js'), 'test compiled application');
     const manifest = { mode: 'release', config: dev, files: fingerprint(dir) };
     assert.doesNotThrow(() => verifyBuild(dev, manifest, devProject, dir));
-    for (const project of [undefined, prod.firebase.projectId, 'shoutout-production-a1b34']) {
+    for (const project of [undefined, prodProject, 'unapproved-project']) {
       assert.throws(() => verifyBuild(dev, manifest, project, dir));
     }
     assert.throws(() => verifyBuild(dev, { ...manifest, mode: 'debug' }, devProject, dir));
@@ -59,7 +77,7 @@ test('development guard rejects non-dev credentials before Admin SDK initializat
   assert.doesNotThrow(() => assertDevelopmentProject(devProject));
   const dir = mkdtempSync(join(tmpdir(), 'shoutout-credentials-'));
   try {
-    for (const project of [prod.firebase.projectId, 'shoutout-production-a1b34', undefined]) {
+    for (const project of [prodProject, 'unapproved-project', undefined]) {
       assert.throws(() => assertDevelopmentProject(project));
       const key = join(dir, 'fake.json');
       writeFileSync(key, JSON.stringify({ project_id: project }));
@@ -90,6 +108,11 @@ test('auth action uses supplied project and rejects missing config or cross-envi
     [dev, 'go.shoutout-app.eu', false],
     [prod, 'shoutout-dev-46c81.web.app', false],
     [{ ...prod, firebase: dev.firebase }, 'go.shoutout-app.eu', false],
+    [{ ...prod, hostingSite: presentationSite }, 'go.shoutout-app.eu', false],
+    [{ ...prod, hostingSite: '' }, 'go.shoutout-app.eu', false],
+    [prod, 'shoutout-app.eu', false],
+    [{ ...prod, firebase: { ...prod.firebase, projectId: 'unapproved-project',
+      authDomain: 'unapproved-project.firebaseapp.com' } }, 'go.shoutout-app.eu', false],
     [null, 'go.shoutout-app.eu', false],
   ]) {
     const elements = new Map();
