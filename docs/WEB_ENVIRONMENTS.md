@@ -69,10 +69,12 @@ původní polohu, úprava konceptu vytvoří nové ID.
 
 Nezávislý `serverCommentCreation` připravuje stejný přechod veřejných komentářů
 a odpovědí na `createComment` v `europe-west3`. Vyžaduje App Check klíč;
-výchozí hodnota je `false` a aktuální konfigurace jej nezapínají. Soukromé
+výchozí hodnota je `false`; `config/dev.json` jej po souhlasu vlastníka zapíná
+pro vývojový rollout. Produkční konfigurace jej nezapíná. Soukromé
 odpovědi tím nejsou přepnuté. Při chybě callable klient nepoužije přímý fallback.
-Příprava prošla vývojovým release buildem; nasazení nové Function, aktivace
-klienta a živé komentářové testy vyžadují samostatný vývojový rollout.
+Příprava prošla vývojovým release buildem. Dne 25. října vlastník výslovně
+schválil nasazení nové Function, aktivaci klienta a živé komentářové testy
+včetně úklidu pouze ve `shoutout-dev-46c81`; výsledek rollout testu se doplní.
 Předchozí souhlas s nasazením pouze `createShout` se na novou Function nevztahuje.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý

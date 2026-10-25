@@ -72,7 +72,7 @@ void main() {
   });
 
   test('server comments are independent and require App Check', () {
-    final config = development();
+    final config = development()..remove('serverCommentCreation');
     expect(WebEnvironment.fromJson(config).serverCommentCreation, isFalse);
     expect(
       WebEnvironment.fromJson({

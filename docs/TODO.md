@@ -1117,7 +1117,7 @@ retence serverových idempotentních záznamů sladěná s mazáním
 
 Ve větvi `feature/server-comment-creation` je připravená callable
 `createComment` a klientský přepínač `serverCommentCreation` (výchozí `false`,
-v aktuálních konfiguracích není zapnutý). Server atomicky vytvoří komentář
+vývojová konfigurace jej zapíná pro výslovně schválený rollout). Server atomicky vytvoří komentář
 nebo veřejnou odpověď, zvýší čítač, spotřebuje existující limit 60/h s odstupem
 10 s a zapíše idempotentní potvrzení i slučovaná oznámení podle preferencí.
 Ověřuje aktivní Shout, rodiče ve stejném Shoutu a společnou Auth/App Check
