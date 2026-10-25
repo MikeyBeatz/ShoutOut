@@ -22,6 +22,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -55,6 +60,18 @@ jobs:
       - name: Test Firestore Rules
         working-directory: tools
         run: npm run test:rules
+
+      - name: Install Cloud Functions dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Lint Cloud Functions
+        working-directory: functions
+        run: npm run lint
+
+      - name: Test Cloud Functions
+        working-directory: functions
+        run: npm test
 
       - name: Build web
         run: node tools/web_environment.mjs build dev --debug
