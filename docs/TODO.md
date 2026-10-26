@@ -1280,8 +1280,14 @@ a receipt zůstávají. Externí smazání odhalilo zastaralý čítač komentá
 kartě otevřeného detailu. Oprava používá `commentsCount` ze stávajícího
 realtime dokumentu a při živém odběru vynechává lokální inkrementy i starý
 výsledek mazání. Nové testy pokrývají externí změny, počty nad limitem 50
-a zrušení odběrů. Prošlo 173 Flutter testů a čistá analýza; nasazení opravy
-a živá regrese čekají na její CI.
+a zrušení odběrů. Prošlo 173 Flutter testů, čistá analýza a formát, release
+build i CI `40411478509`. Oprava `987398f` je ve vývoji na Hosting verzi
+`a6756b787e4655de`, release `1793053435595000` z `2026-10-26T22:23:55.595Z`;
+otisky tří hlavních souborů souhlasí. Živá regrese potvrdila 0 → 1 → 0
+na ikoně i v hlavičce stejného detailu, včetně externího smazání bez callbacku
+a bez obnovení stránky. Poslední regresní komentář byl odstraněný a jeho
+dočasný Shout smazaný přes UI; create receipt zůstaly zachované. Tím je
+dokončený vývojový rollout obou reakcí, nikoli celý milník serverové brány.
 Produkční prostředí ani Rules se nemění.
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení

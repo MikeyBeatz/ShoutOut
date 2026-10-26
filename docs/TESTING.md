@@ -73,8 +73,16 @@ a starou jedničkou u ikony na kartě. `test/live_shout_state_test.dart`
 ověřuje společný realtime zdroj čítačů včetně externího 0 → 1 → 0, počty
 73 → 72 nezávisle na limitu zobrazených komentářů, nezávislou vlastní reakci
 a ukončení obou odběrů. Oprava nepřičítá lokální jedničku ani neaplikuje starší
-výsledek mazání, pokud je zapnuté live zobrazení. Prošlo 173 Flutter testů
-a čistá analýza; vývojové nasazení opravy a živá regrese čekají na její CI.
+výsledek mazání, pokud je zapnuté live zobrazení. Prošlo 173 Flutter testů,
+čistá analýza, formát, release build a CI `40411478509`. Oprava `987398f`
+byla nasazená na vývojový site jako verze `a6756b787e4655de`; hlavní otisky
+souhlasí s buildem. Na novém dočasném Shoutu byl živě ověřen začátek 0,
+serverové vytvoření jediného komentáře a ikona i hlavička 1, následně externí
+atomické smazání komentáře a dekrement parentu na 0. Bez návratu nebo obnovy
+stránky se oba počty změnily na 0. Nedošlo k dvojímu lokálnímu přičtení.
+Dočasný Shout byl poté smazaný přes UI a databáze potvrdila `deleted`, nulový
+čítač, nepřítomnost komentáře a zachování obou create receipt. Produkce,
+`main`, Rules ani Functions se při této opravě neměnily.
 
 ## Živý vývojový test serverového publikování 25. října 2026
 

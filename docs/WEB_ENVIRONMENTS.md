@@ -78,7 +78,7 @@ Function ze zdrojů `8a8d05733d00ef0e099723e2453cccf493549f17` prošla CI
 Node.js 22, 256 MiB, timeout 15 s, min. 0 / max. 1 instance, concurrency 1.
 Předchozí čtyři Functions zůstaly na stejných revizích. Vývojová konfigurace
 zapíná schválenou aktivaci, produkční ji nezapíná. Aktivační commit
-`45a5d024c3cbe7c234c20793116e91d94bf51395` prošel CI `40409557055` a je na
+`45a5d024c3cbe7c234c20793116e91d94bf51395` prošel CI `40409557055` a byl na
 vývojovém Hostingu, verze `3fc2f80232d34ff3`, release `1793052566828000`
 z `2026-10-26T22:09:26.828Z`. Tři hlavní otisky odpovídají release buildu;
 návratová verze je `a03706f90b97706c`. Živě prošel celý cyklus palců autora
@@ -87,7 +87,15 @@ Shoutové čítače, žádné vlastní oznámení a dvě kanonická oznámení d
 Komentář a dvě čistě testovací notifikace byly odstraněné, parent je `deleted`;
 receipt zůstávají. Při externím úklidu se projevilo zastaralé číslo u ikony
 komentářů v otevřeném detailu. Lokální oprava čte `commentsCount` ze stávajícího
-odběru Shoutu a vynechává lokální inkrementy; její nasazení čeká na CI.
+odběru Shoutu a vynechává lokální inkrementy. Oprava z commitu
+`987398f2f60f5375b0413402322ab829970bcff3` prošla CI `40411478509` a je nyní
+nasazená pouze na vývojovém site: verze `a6756b787e4655de`, release
+`1793053435595000`, čas `2026-10-26T22:23:55.595Z`. Tři hlavní otisky souhlasí
+s release buildem. Návratová verze je `3fc2f80232d34ff3`. Živý test potvrdil
+0 → 1 → 0 na ikoně i v hlavičce bez obnovení detailu, včetně externího smazání
+komentáře. Nevznikla druhá lokální jednička. Regresní komentář byl odstraněný,
+jeho dočasný Shout smazaný běžnou UI akcí, receipt zachované. Functions se
+při opravě neaktualizovaly; produkce, `main` a Rules zůstaly beze změny.
 Klient nemá přímý fallback, HTTP výsledek ignoruje a počty i vlastní reakci
 zobrazuje z existujících realtime odběrů komentářů a vlastních reakcí.
 Retry drží neměnný klíč v paměti otevřeného detailu; zavření detailu nebo
