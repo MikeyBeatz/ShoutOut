@@ -29,6 +29,12 @@ export function validateConfig(config, environment) {
   if (config.serverCommentCreation === true && !config.appCheckSiteKey) {
     throw new Error('Server comment creation requires web App Check.');
   }
+  if (config.serverPrivateReplyCreation !== undefined && typeof config.serverPrivateReplyCreation !== 'boolean') {
+    throw new Error('serverPrivateReplyCreation must be a boolean.');
+  }
+  if (config.serverPrivateReplyCreation === true && !config.appCheckSiteKey) {
+    throw new Error('Server private replies require web App Check.');
+  }
   if (!['dev', 'prod'].includes(environment) || config.environment !== environment) {
     throw new Error('Choose a matching dev or prod configuration.');
   }

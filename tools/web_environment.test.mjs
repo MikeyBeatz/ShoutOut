@@ -20,6 +20,9 @@ test('web App Check configuration gates server publishing', () => {
   assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: false, serverCommentCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverCommentCreation: 'true' }, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev, serverCommentCreation: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: false, serverCommentCreation: false, serverPrivateReplyCreation: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverPrivateReplyCreation: 'true' }, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverPrivateReplyCreation: true }, 'dev'));
 });
 const prod = {
   ...dev, environment: 'prod', appUrl: 'https://go.shoutout-app.eu',

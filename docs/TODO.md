@@ -1160,6 +1160,24 @@ používá vývojový endpoint `createShout`. Functions lint a testy jsou
 nově v CI na Node.js 22; přímé Firebase závislosti a bezpečné tranzitivní verze
 byly aktualizované a `npm audit --omit=dev` hlásí nula nálezů.
 
+Ve větvi `feature/server-private-replies` je od 26. října připravená callable
+`createPrivateReply` a nezávislý klientský přepínač `serverPrivateReplyCreation`
+(výchozí `false`, v konfiguracích není zapnutý). Podporuje odpověď na Shout,
+na veřejný komentář a na přijatou soukromou odpověď. Příjemce i přezdívky
+odvozuje server z daného cíle a profilů. Pokračování soukromé konverzace
+vyžaduje ID zdrojové zprávy ve stejném Shoutu a ověřuje příjemce i oba účastníky.
+Soukromá odpověď, limit 60/h s odstupem 10 s, idempotentní potvrzení a oznámení
+vznikají atomicky. Text není v receipt ani oznámení; veřejný čítač komentářů
+se nemění. Retry neobnoví smazanou zprávu. Klient při chybě nepoužije přímý
+fallback. Přepnutí ze soukromé na veřejnou odpověď nově vyčistí soukromý cíl.
+Lokálně prošlo 158 Flutter testů, analyzátor, Functions lint, 20 unit testů,
+9 cílených testů webových nástrojů a 84 emulatorových testů (65 Rules a 19
+serverových, z toho 8 scénářů soukromých odpovědí). Vývojový release build a
+lokální kontrola cíle nasazení prošly. CI, samostatné schválení nové Function
+a živý test mezi dvěma účty zbývají.
+Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
+zůstávají společnými navazujícími podmínkami celé serverové brány.
+
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,
 - u každého požadavku ověřit Firebase Auth, App Check, stav účtu, právní

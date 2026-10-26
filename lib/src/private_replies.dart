@@ -15,6 +15,7 @@ class PrivateReplyList extends StatelessWidget {
     required String recipientNickname,
     required String targetType,
     String? parentCommentId,
+    String? parentPrivateReplyId,
   })
   onReply;
   final Future<void> Function(QueryDocumentSnapshot<Map<String, dynamic>> reply)
@@ -68,6 +69,7 @@ class PrivateReplyList extends StatelessWidget {
                             recipientNickname: data['authorNickname'] as String,
                             targetType: 'privateReply',
                             parentCommentId: data['parentCommentId'] as String?,
+                            parentPrivateReplyId: reply.id,
                           );
                         },
                         onReport: () => onReport(reply),

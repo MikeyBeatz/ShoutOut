@@ -68,4 +68,44 @@ void main() {
       isNot(otherShout),
     );
   });
+
+  test(
+    'private retries keep their key while changing source starts a new operation',
+    () {
+      final attempt = PublicationAttempt(clock: () => DateTime(2026));
+      final draft = [
+        'privateReply',
+        'uid',
+        'shout',
+        'text',
+        'shout',
+        null,
+        null,
+      ];
+      final key = attempt.keyFor(draft);
+      expect(attempt.keyFor(draft), key);
+      final comment = attempt.keyFor([
+        'privateReply',
+        'uid',
+        'shout',
+        'text',
+        'comment',
+        'parent',
+        null,
+      ]);
+      expect(comment, isNot(key));
+      expect(
+        attempt.keyFor([
+          'privateReply',
+          'uid',
+          'shout',
+          'text',
+          'privateReply',
+          null,
+          'source',
+        ]),
+        isNot(comment),
+      );
+    },
+  );
 }

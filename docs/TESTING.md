@@ -29,6 +29,19 @@ Souběh a idempotenci pokrývají lokální emulatorové testy uvedené níže.
 
 ## Automatické vrstvy
 
+`functions/create_private_reply.integration.test.js` přidává osm scénářů pro
+všechny tři druhy cílů, kanonické identity (včetně Business pobočky), ověření
+účastníků, cizí Shout, souběžná retry, cooldown, preference a slučování
+oznámení, neaktivní cíl, poškozená data a blokované účty. Soukromý text nesmí
+být v receipt ani v oznámení a veřejný čítač nesmí být změněn. Retry po smazání
+výsledku jej neobnovuje. Nový Rules scénář kontroluje čtení serverového formátu
+oběma účastníky a zamítnutí třetího účtu i enumerace celé kolekce. Receipt nemůže
+číst ani autor zprávy. Lokálně prošlo celkem 84 emulatorových testů, 20 unit
+testů Functions, 158 Flutter testů, lint, analyzátor a 9 testů webových nástrojů.
+Nová callable zatím není nasazená a přepínač klienta zůstává vypnutý.
+Před aktivací doplnit živý průchod dvěma účty pro Shout, komentář, pokračování
+soukromé konverzace a přepnutí ze soukromé na veřejnou odpověď.
+
 `functions/create_comment.integration.test.js` používá stejný izolovaný
 emulator jako Shout testy. Sedm scénářů pokrývá souběžná retry, cooldown,
 atomické čítače/limity/oznámení, rodiče odpovědi, preference a slučování

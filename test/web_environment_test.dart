@@ -94,6 +94,36 @@ void main() {
     }
   });
 
+  test(
+    'private reply gateway defaults off and requires independent App Check validation',
+    () {
+      final config = development()..remove('serverPrivateReplyCreation');
+      expect(
+        WebEnvironment.fromJson(config).serverPrivateReplyCreation,
+        isFalse,
+      );
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverPrivateReplyCreation': true,
+        }).serverPrivateReplyCreation,
+        isTrue,
+      );
+      for (final invalid in [
+        {...config, 'serverPrivateReplyCreation': 'true'},
+        {
+          ...config,
+          'appCheckSiteKey': null,
+          'serverShoutCreation': false,
+          'serverCommentCreation': false,
+          'serverPrivateReplyCreation': true,
+        },
+      ]) {
+        expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
+      }
+    },
+  );
+
   test('production refuses development and unapproved projects', () {
     for (final project in ['shoutout-dev-46c81', 'unapproved-project']) {
       final config = production();

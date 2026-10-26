@@ -252,6 +252,10 @@ s `--only functions:content:createComment`. Obě callable jsou nasazené ve
 vývoji; klient je řídí nezávislými přepínači `serverShoutCreation` a
 `serverCommentCreation`. Nepoužívat obecné `--only functions`, pokud souhlas
 platí jen pro jeden endpoint.
+Lokálně připravená `createPrivateReply` se vybírá samostatně přes
+`--only functions:content:createPrivateReply`; dosud není nasazená.
+Přepínač `serverPrivateReplyCreation` má výchozí hodnotu `false` a před
+aktivací vyžaduje samostatný vývojový rollout a ověření dvěma účty.
 Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
 
 `functions/index.js` obsahuje jedinou současnou Function

@@ -15,6 +15,7 @@ class WebEnvironment {
     final key = json['appCheckSiteKey'];
     final gateway = json['serverShoutCreation'];
     final commentsGateway = json['serverCommentCreation'];
+    final privateRepliesGateway = json['serverPrivateReplyCreation'];
     if (key != null &&
         (key is! String || !RegExp(r'^[A-Za-z0-9_-]{20,200}$').hasMatch(key))) {
       throw StateError('Invalid reCAPTCHA Enterprise site key.');
@@ -25,14 +26,21 @@ class WebEnvironment {
     if (commentsGateway != null && commentsGateway is! bool) {
       throw StateError('serverCommentCreation must be a boolean.');
     }
+    if (privateRepliesGateway != null && privateRepliesGateway is! bool) {
+      throw StateError('serverPrivateReplyCreation must be a boolean.');
+    }
     appCheckSiteKey = key as String?;
     serverShoutCreation = gateway == true;
     serverCommentCreation = commentsGateway == true;
+    serverPrivateReplyCreation = privateRepliesGateway == true;
     if (serverShoutCreation && appCheckSiteKey == null) {
       throw StateError('Server Shout creation requires web App Check.');
     }
     if (serverCommentCreation && appCheckSiteKey == null) {
       throw StateError('Server comment creation requires web App Check.');
+    }
+    if (serverPrivateReplyCreation && appCheckSiteKey == null) {
+      throw StateError('Server private replies require web App Check.');
     }
     for (final key in [
       'apiKey',
@@ -121,6 +129,7 @@ class WebEnvironment {
   late final String? appCheckSiteKey;
   late final bool serverShoutCreation;
   late final bool serverCommentCreation;
+  late final bool serverPrivateReplyCreation;
 
   FirebaseOptions get firebaseOptions => FirebaseOptions(
     apiKey: firebase['apiKey'] as String,

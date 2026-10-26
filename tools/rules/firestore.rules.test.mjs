@@ -1659,6 +1659,34 @@ describe('comments, reactions, saves and reports', () => {
     await assertSucceeds(reactionBatch.commit());
   });
 
+  test('server-format private replies are readable only by their two participants', async () => {
+    await seedEligibleUser('writer', 'SafeWriter');
+    await seedEligibleUser('recipient', 'SafeRecipient');
+    await seedEligibleUser('outsider', 'SafeOutsider');
+    await seedShout();
+    const id = 'a'.repeat(64);
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'shouts', 'shout-1', 'privateReplies', id), {
+        authorId: 'writer', authorNickname: 'SafeWriter', recipientId: 'recipient',
+        recipientNickname: 'SafeRecipient', participants: ['writer', 'recipient'],
+        text: 'Private server-format fixture', createdAt: serverTimestamp(), targetType: 'shout',
+      });
+      await setDoc(doc(db, 'serverOperations', id), {
+        userId: 'writer', action: 'createPrivateReply', fingerprint: 'test-fingerprint',
+        shoutId: 'shout-1', privateReplyId: id, createdAt: serverTimestamp(),
+      });
+    });
+    for (const uid of ['writer', 'recipient']) {
+      const db = authenticatedDb(uid);
+      await assertSucceeds(getDoc(doc(db, 'shouts', 'shout-1', 'privateReplies', id)));
+      await assertFails(getDoc(doc(db, 'serverOperations', id)));
+    }
+    const outsider = authenticatedDb('outsider');
+    await assertFails(getDoc(doc(outsider, 'shouts', 'shout-1', 'privateReplies', id)));
+    await assertFails(getDocs(query(collection(outsider, 'shouts', 'shout-1', 'privateReplies'), limit(50))));
+  });
+
   test('reaction and save collections cannot be enumerated', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     await seedShout();

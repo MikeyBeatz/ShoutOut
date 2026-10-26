@@ -31,6 +31,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   String? _privateRecipientId;
   String? _privateRecipientNickname;
   String? _privateTargetType;
+  String? _parentPrivateReplyId;
   bool _initialFocusScheduled = false;
   bool _sendingComment = false;
   PublicationAttempt _commentAttempt = PublicationAttempt();
@@ -214,6 +215,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                               _privateRecipientId = null;
                               _privateRecipientNickname = null;
                               _privateTargetType = null;
+                              _parentPrivateReplyId = null;
                               _commentController.clear();
                             }),
                     ),
@@ -269,6 +271,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   void _replyTo(String commentId, String nickname) {
     if (_sendingComment) return;
     setState(() {
+      _privateRecipientId = null;
+      _privateRecipientNickname = null;
+      _privateTargetType = null;
+      _parentPrivateReplyId = null;
       _replyToCommentId = commentId;
       _replyToNickname = nickname;
     });
@@ -283,12 +289,14 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     required String recipientNickname,
     required String targetType,
     String? parentCommentId,
+    String? parentPrivateReplyId,
   }) {
     if (_sendingComment) return;
     setState(() {
       _privateRecipientId = recipientId;
       _privateRecipientNickname = recipientNickname;
       _privateTargetType = targetType;
+      _parentPrivateReplyId = parentPrivateReplyId;
       _replyToCommentId = parentCommentId;
       _replyToNickname = null;
       _commentController.clear();
@@ -369,7 +377,31 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     final shoutRef = firestore.collection('shouts').doc(widget.shout.id);
     setState(() => _sendingComment = true);
     try {
-      if (_privateRecipientId != null) {
+      if (_privateRecipientId != null &&
+          kIsWeb &&
+          WebEnvironment.current.serverPrivateReplyCreation) {
+        final key = _commentAttempt.keyFor([
+          'privateReply',
+          user.uid,
+          widget.shout.id,
+          comment,
+          _privateTargetType,
+          _replyToCommentId,
+          _parentPrivateReplyId,
+        ]);
+        await FirebaseFunctions.instanceFor(
+          region: 'europe-west3',
+        ).httpsCallable('createPrivateReply').call({
+          'idempotencyKey': key,
+          'shoutId': widget.shout.id,
+          'text': comment,
+          'targetType': _privateTargetType,
+          if (_privateTargetType == 'comment')
+            'parentCommentId': _replyToCommentId,
+          if (_privateTargetType == 'privateReply')
+            'parentPrivateReplyId': _parentPrivateReplyId,
+        });
+      } else if (_privateRecipientId != null) {
         final recipientId = _privateRecipientId!;
         final recipientNickname = _privateRecipientNickname!;
         final targetType = _privateTargetType!;
@@ -580,6 +612,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       _privateRecipientId = null;
       _privateRecipientNickname = null;
       _privateTargetType = null;
+      _parentPrivateReplyId = null;
     });
   }
 
