@@ -36,6 +36,17 @@ Operace je nasazená jako callable pouze ve vývoji. Volitelné vstupní
 `expectedUserId` pouze porovnává očekávaný účet s Auth; neurčuje identitu autora
 ani cestu zápisu. Neshoda se odmítne ještě před přístupem k databázi.
 
+Lokálně připravená `toggleCommentReaction` používá samostatný action namespace
+a receipt s `userId`, `action: toggleCommentReaction`, `fingerprint`, `shoutId`,
+`commentId`, `result: {type, likes, dislikes}` a `createdAt`. Text komentáře
+ani přezdívka se do receipt nepřidávají. Reakce zůstává v
+`shouts/{shoutId}/comments/{commentId}/reactions/{uid}` a sdílí limit
+`rateLimits/{uid}/actions/interaction` s reakcemi na Shouty a ukládáním.
+Mění pouze dva čítače příslušného komentáře; rodičovský Shout nepřepisuje.
+Oznámení zachovává existující ID
+`commentReaction_{type}_{shoutId}_{commentId}` a kanonický veřejný profil.
+Tato Function zatím není nasazená ani zapojená do klienta.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v

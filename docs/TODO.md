@@ -1236,6 +1236,25 @@ konfigurace Flutteru a všemi 16 testy vývojových nástrojů.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 
+Navazující serverová část reakcí na komentáře je lokálně připravená ve větvi
+`feature/server-comment-reactions` (navazuje na připravené reakce na Shouty).
+`toggleCommentReaction` používá tentýž přechod palců a společný limit
+`interaction` 120/h s odstupem 1 s. Reakce, čítače komentáře, limit, receipt
+a případné oznámení autorovi komentáře vznikají atomicky. Autor Shoutu není
+příjemcem oznámení, pokud není současně autorem komentáře. Respektují se
+preference a veřejná identita, odebrání ani vlastní reakce oznámení nevytváří.
+Nový požadavek musí mít existující komentář i rodičovský Shout; osiřelý
+komentář pod odstraněným rodičem se odmítne bez zápisů. Uchované expirované
+nebo označené smazané Shouty a omezení tvorby obsahu neblokují reakce, stejně
+jako v současných Rules. Bezpečnost účtu se kontroluje i při replay.
+Samostatný namespace receipt brání kolizi stejného klíče s reakcí na Shout;
+historická odpověď nesmí aktualizovat UI. Lokálně prošel lint, 26 Functions
+unit testů a 97 emulatorových testů (65 Rules + 32 serverových, z toho
+7 nových scénářů komentářových reakcí), také příprava a syntaxe artefaktu.
+Tato nová Function není nasazená a klient ji zatím nevolá. Další krok je
+klientské napojení s výchozím vypnutím, retry testy a následný samostatně
+schválený vývojový rollout. Produkční prostředí ani Rules se nemění.
+
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,
 - u každého požadavku ověřit Firebase Auth, App Check, stav účtu, právní

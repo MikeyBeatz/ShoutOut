@@ -31,6 +31,21 @@ Lokální výsledek úseku: 167 Flutter testů, čistá analýza a formát, Func
 lint a 24 unit testů, 90 emulatorových testů (65 Rules + 25 serverových),
 10 testů webových nástrojů a úspěšný vývojový release build webu.
 
+## Lokální serverové reakce na komentáře 26. října 2026
+
+`functions/toggle_comment_reaction.test.js` ověřuje striktní vstup a kontrolu
+identity před přístupem k databázi. Sedm scénářů v
+`functions/toggle_comment_reaction.integration.test.js` ověřuje přidání,
+změnu a odebrání, zachování textu i rodičovských čítačů, kanonické oznámení
+autorovi komentáře, souběh a idempotenci, odlišné receipt namespace při
+sdíleném limitu s reakcemi na Shout, preference, vlastní reakce, poškozená
+data a nedostupné cíle bez částečných zápisů. Replay neobchází ban a vrací
+historický snapshot, který si klient nesmí promítnout zpět do UI. Uchované neaktivní Shouty
+a omezení tvorby obsahu zachovávají dosavadní interakční politiku.
+Lokálně prošel lint, 26 Functions unit testů a 97 emulatorových testů
+(65 Rules + 32 serverových), příprava artefaktu a kontrola syntaxe.
+Klientské a živé ověření komentářových reakcí tím nejsou doložené.
+
 ## Živý vývojový test serverového publikování 25. října 2026
 
 Hosting `shoutout-dev-46c81`, commit

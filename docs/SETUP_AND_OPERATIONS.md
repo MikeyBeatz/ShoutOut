@@ -273,6 +273,12 @@ produkce a reakce na komentáře se tím neaktivují. Klient ignoruje historick�
 HTTP výsledek a UI se řídí realtime daty; po nejasném selhání stejné kliknutí
 opakuje se stejným klíčem v rámci otevřené relace.
 
+Lokálně připravená `toggleCommentReaction` má samostatný selektor
+`--only functions:content:toggleCommentReaction` a stejné malé provozní limity.
+Není nasazená a klient ji zatím nevolá. Příprava přes
+`tools/prepare_content_functions.mjs` ji pouze přibalí; neznamená souhlas
+s jejím nasazením ani s aktualizací ostatních Functions.
+
 `functions/index.js` obsahuje jedinou současnou Function
 `enrichShoutGeography`. Trigger `shouts/{shoutId}` v `europe-west1` provede
 serverový reverse geocoding přes Google Geocoding API a doplní moderátorský
