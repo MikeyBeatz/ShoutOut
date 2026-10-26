@@ -53,11 +53,12 @@ a serverové vytváření Shoutů. Přihlášený Business test úspěšně vytv
 Shout přes callable a následně jej odstranil. Firestore potvrdil serverové ID,
 kanonické údaje ověřené pobočky, čítače, geohash, idempotentní záznam a limit
 se společným časem zápisu; po úklidu potvrdil stav `deleted`.
-Poslední dokončený komentářový rollout používá commit
-`9d85327aab4a52cee411d6a122c3b036fab009eb`, Hosting verzi `4333ea9ad939c510`,
-release `1792960022970000` z `2026-10-25T20:27:02.970Z`.
+Aktuálně nasazený klient obsahuje i opravu čítače detailu: commit
+`4a1a7a0594f5eae7f871527a49346fa2849f6a3d`, Hosting verze `d70f5fa95b367f22`,
+release `1793030834457000` z `2026-10-26T16:07:14.457Z`.
 Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
-CI `40230321972` i `40230718884` prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
+CI implementace `40230321972`, aktivace `40230718884` a opravy `40355266790`
+prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
 Produkční konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže
 jsou historie, včetně tehdy vypnutého přepínače a čekajícího ověření.
 
@@ -81,6 +82,14 @@ jedna instance/souběžný požadavek. Živý test komentáře a veřejné odpov
 kontrolou databáze (autor, rodič, receipt, přesné zvýšení limitu a čítače).
 Testovací komentáře byly odstraněné; původní Shout uživatele zůstává zachovaný.
 `createShout` nebyla aktualizovaná. Produkce ani Rules se neměnily.
+
+Oprava čítače z 26. října prošla automatickými kontrolami a nasazením; vlastník
+následně ručně potvrdil přechod 0 → 1 → 0 ve stejném detailu bez opuštění stránky.
+Nová automatizovaná relace při startu hlásila `appCheck/recaptcha-error`
+a testovací komentář nevytvořila. Příčina nedokončeného odeslání není potvrzená.
+API App Check bylo opakovaně ověřené jako `ENABLED`; prázdná výměna tokenu
+správně vrací `400 INVALID_ARGUMENT`. Serverový provider ani jeho ochrana
+se při tomto ověření neměnily.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
 reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč

@@ -49,6 +49,12 @@ otevřeném detailu jej odstranit a bez opuštění stránky ověřit shodu čí
 kartě se seznamem a Firestore. Smazání předává potvrzený čítač z transakce,
 nikoli počet položek omezeného dotazu. Ověřit i selhání zápisu bez falešného
 lokálního snížení a bezpečný callback po realtime odstranění widgetu.
+Oprava `4a1a7a0` prošla 156 Flutter testy, analyzátorem, release buildem a CI
+`40355266790`; vývojové nasazení odpovídá lokálním otiskům. Automatizované
+opakování živého scénáře 26. října se nedokončilo a nevytvořilo komentář;
+start nové relace zaznamenal `appCheck/recaptcha-error`. Vlastník následně
+ručně potvrdil přechod čísla na kartě 0 → 1 → 0 ve stejném otevřeném detailu
+bez návratu na feed. Oprava UI je tedy živě ověřená uživatelským průchodem.
 
 `test/legal_acceptance_state_test.dart` ověřuje rozdíl mezi chybějící cache
 a serverem potvrzeným chybějícím právním souhlasem, čekání na potvrzení zápisu,

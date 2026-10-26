@@ -2,7 +2,7 @@
 
 ## Rychlý přehled postupu
 
-Aktualizováno 25. října 2026.
+Aktualizováno 26. října 2026.
 
 ### Postup do MVP
 
@@ -87,7 +87,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 ### Postup k MVP
 
-Aktualizováno 25. října 2026.
+Aktualizováno 26. října 2026.
 
 `███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
 
@@ -1138,10 +1138,19 @@ se zvýšily právě o dvě. Oba testovací komentáře byly odstraněné a data
 čítač je zpět na původní hodnotě. Oznámení mezi různými účty pokrývá emulator,
 nikoli tento živý průchod na vlastním Shoutu.
 
-Navazující lokální oprava detailu po smazání komentáře použije čítač vrácený
+Navazující oprava detailu po smazání komentáře používá čítač vrácený
 úspěšnou transakcí. Původně se aktualizoval seznam i databáze, ale karta Shoutu
 v otevřeném detailu zobrazovala staré číslo. Oprava nepřidává čtení a zachovává
-atomický zápis i současné Rules; před vývojovým nasazením se znovu ověří.
+atomický zápis i současné Rules. Commit `4a1a7a0` prošel 156 Flutter testy,
+celkovým analyzátorem, release buildem a CI `40355266790`. Dne 26. října byl
+nasazen pouze na vývojový Hosting jako verze `d70f5fa95b367f22`; otisky HTML,
+JavaScriptu a konfigurace odpovídají buildu. Functions se znovu nenasazovaly.
+Závěrečný automatizovaný průchod se v nové prohlížečové relaci nedokončil;
+při startu relace byla zaznamenána `appCheck/recaptcha-error`, žádný testovací
+komentář nevznikl. Příčina čekajícího odeslání není potvrzená. Vlastník následně
+ručně potvrdil správný přechod 0 → 1 → 0 ve stejném otevřeném detailu bez
+návratu na feed. Oprava čítače je tím živě ověřená. API App Check zůstává
+`ENABLED`; prázdná výměna tokenu správně vrací `400 INVALID_ARGUMENT`.
 
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a
