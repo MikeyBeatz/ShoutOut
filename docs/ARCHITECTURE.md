@@ -223,7 +223,9 @@ pokračování cizí soukromé konverzace. Úspěšná transakce vytvoří zprá
 spotřebuje stávající limit a podle preferencí sloučí oznámení bez privátního textu.
 Veřejné čítače se nemění. Soukromé cílení se v klientovi při přepnutí na veřejnou
 odpověď vyčistí; klíč retry zahrnuje typ a ID cíle. Function je nasazená pouze
-ve vývoji; živý průchod mezi dvěma účty se dokončuje.
+ve vývoji; všechny tři cíle a přepnutí na veřejnou odpověď prošly živým
+průchodem Business a běžného účtu. Přímé vytváření v Rules zůstává otevřené
+do dokončení ostatních obsahových operací a koordinovaného přepnutí klientů.
 
 Klient je považován za nedůvěryhodný. Základní pravidla:
 

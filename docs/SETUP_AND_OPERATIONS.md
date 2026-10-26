@@ -255,7 +255,8 @@ platí jen pro jeden endpoint.
 `createPrivateReply` se vybírá samostatně přes
 `--only functions:content:createPrivateReply`; je nasazená pouze ve vývoji.
 Přepínač `serverPrivateReplyCreation` má výchozí hodnotu `false`, ve vývoji
-je samostatně schválený rollout zapnutý; živé ověření dvěma účty se dokončuje.
+je samostatně schválený rollout zapnutý; živé ověření všech tří druhů cíle,
+přepnutí na veřejný komentář a úklid dvěma účty prošly.
 Při nasazení 26. října jednou vypršel lokální desetisekundový discovery limit.
 Samostatný import artefaktu prošel za přibližně 0,824 s; další nasazení prošlo
 s jednorázovým `$env:FUNCTIONS_DISCOVERY_TIMEOUT='30'`. Jde pouze o limit CLI,

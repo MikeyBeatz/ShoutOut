@@ -103,7 +103,11 @@ Vlastník dne 26. října výslovně schválil nasazení pouze nové Function
 účty včetně úklidu ve vývoji. Function je `ACTIVE`, revize
 `createprivatereply-00001-baw`, zdroje `113050f`, Node.js 22, 256 MiB, 15 s,
 max. jedna instance/souběžný požadavek. Existující dvě Functions se neměnily.
-Živý průchod dvěma účty se dokončuje; výsledek se doplní.
+Živý průchod dvěma účty prošel pro všechny tři cíle i přepnutí ze soukromé na
+veřejnou odpověď. Metadata serverových operací a oznámení odpovídají databázi.
+Pět testovacích obsahových dokumentů a čtyři čistě testovací agregáty oznámení
+byly odstraněné; původní Shout zůstal zachovaný a čítač je na výchozí hodnotě.
+Produkce, `main` a Firestore Rules se neměnily.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
 reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč

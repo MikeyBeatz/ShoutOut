@@ -41,13 +41,17 @@ testů Functions, 158 Flutter testů, lint, analyzátor a 9 testů webových ná
 Nová callable je po samostatném souhlasu nasazená pouze ve vývoji jako
 `createprivatereply-00001-baw`; klient `9545946` má přepínač ve vývoji zapnutý.
 CI implementace `40359475834` a aktivace `40360446321` prošlo.
-Před uzavřením kroku doplnit živý průchod dvěma účty pro Shout, komentář, pokračování
-soukromé konverzace a přepnutí ze soukromé na veřejnou odpověď.
-První živá soukromá odpověď z Business účtu autorovi Shoutu již prošla
-kontrolou Firestore: ID, canonical autor/příjemce, účastníci, receipt,
-limit a oznámení bez textu odpovídají. Vlastník hlásí zobrazení zprávy, ale
-nenašel možnost odpovědi; ověřuje se identita aktivní relace.
-Zbývající směry a úklid nejsou tímto prvním průchodem prokázané.
+Živý průchod 26. října prošel dvěma účty pro Shout, komentář i pokračování
+přijaté soukromé zprávy v opačném směru. Firestore potvrdil serverová ID,
+kanonické identity, účastníky, receipt, limit a správná oznámení bez privátního
+textu. Příjemce viděl zprávu i akci odpovědi. Regresní přepnutí ze soukromé na
+veřejnou odpověď vytvořilo veřejný komentář a žádnou soukromou kopii textu.
+Po ověření se v jediné transakci odstranilo pět testovacích obsahových dokumentů
+a čtyři oznámení, jejichž přesný počet událostí, poslední cíl, autor i čas
+odpovídaly výhradně fixture. Čtení potvrdilo smazání, zachovaný původní Shout
+a nulový čítač; feed následně také ukázal nulu. Receipt se kvůli idempotenci
+nemažou. Živý test třetího účtu není provedený; odmítnutí cizího čtení a
+enumerace soukromých zpráv je potvrzené emulatorovými Rules testy.
 
 `functions/create_comment.integration.test.js` používá stejný izolovaný
 emulator jako Shout testy. Sedm scénářů pokrývá souběžná retry, cooldown,

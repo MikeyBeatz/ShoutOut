@@ -1175,17 +1175,21 @@ Lokálně prošlo 158 Flutter testů, analyzátor, Functions lint, 20 unit test�
 serverových, z toho 8 scénářů soukromých odpovědí). Vývojový release build a
 lokální kontrola cíle nasazení prošly. CI `40359475834` prošlo. Vlastník
 samostatně schválil vývojové nasazení nové Function, zapnutí klienta a živý
-test mezi dvěma testovacími účty včetně úklidu. Výsledek rollout testu zbývá.
+test mezi dvěma testovacími účty včetně úklidu. Vývojový rollout je dokončený.
 Function je nasazená jako `createprivatereply-00001-baw`, Node.js 22, 256 MiB,
 15 s a max. jedna instance/souběžný požadavek. Původní dvě Functions nebyly
 aktualizované. Hosting commitu `9545946` má verzi `ebede43dc57e569c`; otisky
-odpovídají release buildu a CI aktivace `40360446321` prošlo. Živý test probíhá.
-První živý směr Business → autor Shoutu prošel: serverové ID, kanonické
-identity, dvojice účastníků, receipt, spotřeba limitu a oznámení bez textu
-zprávy byly ověřené čtením Firestore. Vlastník hlásí viditelnou zprávu, ale
-možnost odpovědi nenašel; identita aktivní relace se ještě ověřuje. Připravený veřejný testovací komentář má také
-serverové ID a receipt. Pokračování opačným směrem, soukromá odpověď na komentář,
-přepnutí na veřejnou odpověď a úklid testovacích dat se ještě dokončují.
+odpovídají release buildu a CI aktivace `40360446321` prošlo. Živě prošly všechny
+tři cíle mezi Business a běžným účtem: odpověď autorovi Shoutu, pokračování
+přijaté soukromé zprávy v opačném směru a soukromá odpověď na veřejný komentář.
+Serverová ID, kanonické identity, dvojice účastníků, receipt, limit a oznámení
+bez textu byly ověřené čtením Firestore. Příjemce zprávu viděl a měl dostupnou
+akci odpovědi. Přepnutí ze soukromé na veřejnou odpověď vytvořilo veřejný
+komentář; tentýž text v soukromé kolekci nevznikl.
+Po ověření se jednou transakcí odstranily 3 soukromé zprávy, 2 veřejné
+testovací komentáře a 4 prokazatelně čistě testovací agregáty oznámení. Původní
+Shout zůstal zachovaný; databázový čítač i feed jsou zpět na výchozí nule.
+Idempotentní receipt zůstávají zachované; jejich retence je nadále otevřená.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 
