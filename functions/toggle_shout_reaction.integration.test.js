@@ -33,6 +33,7 @@ const rate = (uid) => db.doc(`rateLimits/${uid}/actions/interaction`);
 
 test('add, switch and remove atomically update counters while only additions notify', { skip: !enabled }, async () => {
   const { uid, owner, shoutRef, request } = await fixture();
+  request.data.expectedUserId = uid;
   assert.deepEqual(await toggleShoutReactionOperation(request, db, at()), { type: 'like', likes: 3, dislikes: 3 });
   assert.deepEqual(await toggleShoutReactionOperation(change(request, 'switch', 'dislike'), db, at(1000)), { type: 'dislike', likes: 2, dislikes: 4 });
   assert.deepEqual(await toggleShoutReactionOperation(change(request, 'remove', 'dislike'), db, at(2000)), { type: null, likes: 2, dislikes: 3 });

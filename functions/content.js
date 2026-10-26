@@ -5,6 +5,7 @@ import { secureCallableOptions } from './callable_security.js';
 import { createShoutOperation } from './create_shout.js';
 import { createCommentOperation } from './create_comment.js';
 import { createPrivateReplyOperation } from './create_private_reply.js';
+import { toggleShoutReactionOperation } from './toggle_shout_reaction.js';
 
 if (getApps().length === 0) initializeApp();
 
@@ -34,3 +35,12 @@ export const createPrivateReply = onCall({
   memory: '256MiB',
   timeoutSeconds: 15,
 }, (request) => createPrivateReplyOperation(request, getFirestore()));
+
+export const toggleShoutReaction = onCall({
+  ...secureCallableOptions,
+  minInstances: 0,
+  maxInstances: 1,
+  concurrency: 1,
+  memory: '256MiB',
+  timeoutSeconds: 15,
+}, (request) => toggleShoutReactionOperation(request, getFirestore()));

@@ -24,6 +24,14 @@ a pravidla. UI přebírá výsledek transakce místo obrácení aktuálního tla
 či přičtení k čítači, který už mohl aktualizovat listener. Tím se předchází
 dvojímu přepnutí při souběhu potvrzení zápisu a živých událostí.
 
+Lokálně připravená serverová cesta reakcí na Shouty (26. října) se po zapnutí
+`serverShoutReactions` řídí pouze realtime stavem, protože receipt vrací
+historické čítače. Otevřený detail přidává jeden sdílený dokumentový odběr
+Shoutu; vlastní reakci sdílí s existujícím odběrem feedu/profilu. Neprovádí
+GET po kliknutí ani nové odběry při překreslení. Dokumentový odběr se nesdílí
+s query feedu a jeho čtení je proto nutné započítat zvlášť; končí zavřením
+detailu. Přepínač je zatím vypnutý a dopad nebyl měřen na účtu Firebase.
+
 ## Životní cyklus a funkce
 
 `lib/live_data.dart` sdílí aktivní zdroje. Poslední odpojení zruší zdroj i

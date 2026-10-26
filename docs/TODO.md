@@ -1205,9 +1205,22 @@ Budoucí klient musí čítače i vlastní reakci zobrazovat z realtime zdrojů;
 historická odpověď nesmí přepsat novější stav po akci téhož ani jiného uživatele.
 Lokálně prošel Functions lint, 23 unit testů a 90 emulatorových testů
 (65 Rules a 25 serverových, z toho 6 nových scénářů reakcí na Shout).
-Úsek zatím neobsahuje callable export, klienta, přepínač, reakce na komentáře
-ani nasazení. Další krátký úsek: callable a klientské napojení pouze pro Shouty;
-vývojové nasazení a živé ověření budou samostatný navazující krok.
+Navazující krátký úsek 2 přidává callable export a balení Function,
+klientské napojení pouze pro Shouty a volitelný přepínač `serverShoutReactions`.
+Přepínač je výchozí `false` a žádná konfigurace jej nezapíná. Klient nepoužívá
+přímý fallback; při nejasném selhání opakuje neměnný požadavek se stejným
+klíčem, souběžné kliknutí na stejný Shout neodešle další toggle. Před změnou
+na opačný palec nejprve dořeší původní nejasný požadavek. Čekající klíče žijí
+jen v paměti dané relace, ne napříč obnovením stránky. Definitivní odmítnutí
+(včetně limitu) umožní nový pokus s novým klíčem. Kontrola účtu je na klientu
+i serveru. HTTP výsledek se do UI nepřenáší; feed používá dosavadní realtime
+zdroje a detail při zapnutí přepínače odebírá dokument Shoutu a vlastní reakci
+přes sdílené listenery. Reakce na komentáře nejsou součástí této změny.
+Vývojové nasazení, aktivace a živé ověření jsou samostatný navazující krok
+vyžadující výslovný souhlas; tento úsek žádné externí prostředí nemění.
+Lokálně prošlo 167 Flutter testů, analýza i kontrola formátu, Functions lint
+a 24 unit testů, 90 emulatorových testů a 10 testů konfigurace/nástrojů webu.
+Vývojový release build webu prošel; živé chování přepínače dosud ověřené není.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 

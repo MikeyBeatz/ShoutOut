@@ -35,6 +35,68 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   bool _initialFocusScheduled = false;
   bool _sendingComment = false;
   PublicationAttempt _commentAttempt = PublicationAttempt();
+  Stream<({int likes, int dislikes, String? reaction})>? _liveReaction;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb && WebEnvironment.current.serverShoutReactions) {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        final ref = FirebaseFirestore.instance
+            .collection('shouts')
+            .doc(widget.shout.id);
+        _liveReaction = combineLatestValues(
+          ref.liveSnapshots(),
+          ref.collection('reactions').doc(uid).liveSnapshots(),
+          (shout, reaction) => (
+            likes: (shout.data()?['likesCount'] as num?)?.toInt() ?? 0,
+            dislikes: (shout.data()?['dislikesCount'] as num?)?.toInt() ?? 0,
+            reaction: reaction.data()?['type'] as String?,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _reactionCard() {
+    if (_liveReaction == null) return _shoutCard();
+    return StreamBuilder<({int likes, int dislikes, String? reaction})>(
+      stream: _liveReaction,
+      builder: (context, snapshot) {
+        final value = snapshot.data;
+        if (value != null) {
+          widget.shout
+            ..likes = value.likes
+            ..dislikes = value.dislikes
+            ..isLiked = value.reaction == 'like'
+            ..isDisliked = value.reaction == 'dislike';
+        }
+        return _shoutCard();
+      },
+    );
+  }
+
+  Widget _shoutCard() => ShoutCard(
+    shout: widget.shout,
+    onSave: () {
+      widget.onSave();
+      setState(() {});
+    },
+    onReaction: (like) async {
+      await widget.onReaction(like);
+      if (mounted) setState(() {});
+    },
+    openOnTap: false,
+    onPrivateReply:
+        widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid
+        ? () => _replyPrivately(
+            recipientId: widget.shout.authorId,
+            recipientNickname: widget.shout.author,
+            targetType: 'shout',
+          )
+        : null,
+  );
 
   @override
   void dispose() {
@@ -121,27 +183,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           controller: _commentsScrollController,
           padding: const EdgeInsets.all(16),
           children: [
-            ShoutCard(
-              shout: widget.shout,
-              onSave: () {
-                widget.onSave();
-                setState(() {});
-              },
-              onReaction: (like) async {
-                await widget.onReaction(like);
-                if (mounted) setState(() {});
-              },
-              openOnTap: false,
-              onPrivateReply:
-                  widget.shout.authorId !=
-                      FirebaseAuth.instance.currentUser?.uid
-                  ? () => _replyPrivately(
-                      recipientId: widget.shout.authorId,
-                      recipientNickname: widget.shout.author,
-                      targetType: 'shout',
-                    )
-                  : null,
-            ),
+            _reactionCard(),
             const SizedBox(height: 16),
             Text(
               '${tr(context, 'Komentáře')} (${comments.length})',

@@ -5,6 +5,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/web_environment.dart';
 
 void main() {
+  test('Shout reaction gateway defaults off and requires App Check', () {
+    final config =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(config).serverShoutReactions, isFalse);
+    expect(
+      WebEnvironment.fromJson({
+        ...config,
+        'serverShoutReactions': true,
+      }).serverShoutReactions,
+      isTrue,
+    );
+    for (final invalid in [
+      {...config, 'serverShoutReactions': 'true'},
+      {
+        ...config,
+        'appCheckSiteKey': null,
+        'serverShoutCreation': false,
+        'serverCommentCreation': false,
+        'serverPrivateReplyCreation': false,
+        'serverShoutReactions': true,
+      },
+    ]) {
+      expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
+    }
+  });
   test('web initialization has no implicit development fallback', () {
     expect(() => WebEnvironment.current, throwsStateError);
   });

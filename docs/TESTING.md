@@ -9,6 +9,23 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Lokální příprava serverových reakcí 26. října 2026
+
+Lokální příprava serverových reakcí na Shouty (26. října):
+`test/shout_reaction_gateway_test.dart` pokrývá nejasný retry se stejným klíčem,
+nový klíč po úspěchu nebo definitivním odmítnutí, pořadí při změně palce,
+sloučení souběžných kliknutí, nezávislé cíle a účty a změnu účtu před retry
+i během něj. Functions test kontroluje očekávaný účet před přístupem k DB;
+emulátor prověřuje úspěšnou akci s tímto polem. Konfigurační testy Dart i Node
+ověřují výchozí vypnutí, typ přepínače a povinný App Check.
+Živý test zatím neproběhl. Po schváleném vývojovém rollout ověřit přidání,
+změnu i odebrání palce, realtime čítače a vlastní palec ve feedu i otevřeném
+detailu, druhého uživatele, retry po výpadku bez dvojího přepnutí, limit a
+oznámení. Odpověď HTTP obsahuje historické čítače a klient ji musí ignorovat.
+Lokální výsledek úseku: 167 Flutter testů, čistá analýza a formát, Functions
+lint a 24 unit testů, 90 emulatorových testů (65 Rules + 25 serverových),
+10 testů webových nástrojů a úspěšný vývojový release build webu.
+
 ## Živý vývojový test serverového publikování 25. října 2026
 
 Hosting `shoutout-dev-46c81`, commit

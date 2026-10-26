@@ -41,6 +41,7 @@ import 'l10n/bug_report_text.dart';
 import 'nickname_validation.dart';
 import 'registration_timing.dart';
 import 'publication_attempt.dart';
+import 'shout_reaction_gateway.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';

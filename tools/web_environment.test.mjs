@@ -35,6 +35,16 @@ const prod = {
   },
 };
 
+test('Shout reactions remain optional and require a boolean and App Check', () => {
+  assert.equal(dev.serverShoutReactions, undefined);
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutReactions: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverShoutReactions: 'true' }, 'dev'));
+  const config = { ...dev, serverShoutCreation: false, serverCommentCreation: false,
+    serverPrivateReplyCreation: false, serverShoutReactions: true };
+  delete config.appCheckSiteKey;
+  assert.throws(() => validateConfig(config, 'dev'));
+});
+
 test('production accepts the shared project with a separate app site and rejects unsafe configurations', () => {
   assert.equal(validateConfig(prod, 'prod'), prod);
   assert.throws(() => validateConfig(dev, 'prod'));

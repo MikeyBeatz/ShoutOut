@@ -1,9 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Timestamp } from 'firebase-admin/firestore';
-import { validateShoutReaction, reactionTransition, nextInteractionRate } from './toggle_shout_reaction.js';
+import { validateShoutReaction, reactionTransition, nextInteractionRate, toggleShoutReactionOperation } from './toggle_shout_reaction.js';
 
-test('reaction requests accept only a button and target, never client identity or counters', () => {
+test('expected account is a safety fence, never a replacement for Auth', async () => {
+  const data = { idempotencyKey: 'request-1', shoutId: 'shout-1', button: 'like', expectedUserId: 'alice' };
+  assert.deepEqual(validateShoutReaction(data), data);
+  for (const expectedUserId of ['', 12, '../user', null]) {
+    assert.throws(() => validateShoutReaction({ ...data, expectedUserId }), (e) => e.code === 'invalid-argument');
+  }
+  // No db is supplied: rejection must happen before even constructing a path.
+  await assert.rejects(toggleShoutReactionOperation({ data,
+    auth: { uid: 'bob', token: { email: 'bob@example.test', email_verified: true } }, app: { appId: 'test' } }, null),
+  (e) => e.code === 'unauthenticated');
+});
+
+test('reaction requests reject client-supplied authors, counters and malformed targets', () => {
   const input = { idempotencyKey: 'request-1', shoutId: 'shout-1', button: 'like' };
   for (const change of [{ authorId: 'fake' }, { likesCount: 100 }, { button: null },
     { button: 'other' }, { shoutId: '../path' }, { idempotencyKey: '' }]) {

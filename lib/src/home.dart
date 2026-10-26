@@ -18,6 +18,26 @@ enum _LocationRefreshResult {
 
 class _ShoutOutHomeState extends State<ShoutOutHome> {
   final List<Shout> _shouts = [];
+  late final _reactionGateway = ShoutReactionGateway(
+    currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+    send: (request) async {
+      await FirebaseFunctions.instanceFor(
+        region: 'europe-west3',
+      ).httpsCallable('toggleShoutReaction').call(request.toPayload());
+    },
+    isDefinitiveFailure: (error) =>
+        error is FirebaseFunctionsException &&
+        const {
+          'invalid-argument',
+          'permission-denied',
+          'unauthenticated',
+          'failed-precondition',
+          'not-found',
+          'already-exists',
+          'resource-exhausted',
+          'unimplemented',
+        }.contains(error.code),
+  );
   final FeedFilters _feedFilters = FeedFilters();
   Set<String> _blockedUserIds = {};
   Set<String> _followedUserIds = {};
@@ -428,6 +448,20 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _toggleReaction(Shout shout, {required bool like}) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
+    if (kIsWeb && WebEnvironment.current.serverShoutReactions) {
+      try {
+        await _reactionGateway.toggle(
+          userId: uid,
+          shoutId: shout.id,
+          like: like,
+        );
+      } on ReactionAccountChanged {
+        return;
+      } on FirebaseException {
+        if (mounted) _showWriteFailure();
+      }
+      return;
+    }
     final firestore = FirebaseFirestore.instance;
     final shoutRef = firestore.collection('shouts').doc(shout.id);
     final reactionRef = shoutRef.collection('reactions').doc(uid);

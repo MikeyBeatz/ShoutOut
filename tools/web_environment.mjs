@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverShoutReactions !== undefined && typeof config.serverShoutReactions !== 'boolean') {
+    throw new Error('serverShoutReactions must be a boolean.');
+  }
+  if (config.serverShoutReactions === true && !config.appCheckSiteKey) {
+    throw new Error('Server Shout reactions require web App Check.');
+  }
   if (config.appCheckSiteKey !== undefined &&
       (typeof config.appCheckSiteKey !== 'string' || !/^[A-Za-z0-9_-]{20,200}$/.test(config.appCheckSiteKey))) {
     throw new Error('Invalid reCAPTCHA Enterprise site key.');
