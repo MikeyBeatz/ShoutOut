@@ -50,7 +50,10 @@ void main() {
   });
 
   test('server publishing requires a valid web App Check configuration', () {
-    final withoutAppCheck = development()..remove('appCheckSiteKey');
+    final withoutAppCheck = development()
+      ..remove('appCheckSiteKey')
+      ..['serverCommentCreation'] = false
+      ..['serverPrivateReplyCreation'] = false;
     final defaultConfig = development()..remove('serverShoutCreation');
     expect(WebEnvironment.fromJson(defaultConfig).serverShoutCreation, isFalse);
     for (final change in [
@@ -88,6 +91,7 @@ void main() {
         'appCheckSiteKey': null,
         'serverShoutCreation': false,
         'serverCommentCreation': true,
+        'serverPrivateReplyCreation': false,
       },
     ]) {
       expect(() => WebEnvironment.fromJson(invalid), throwsStateError);

@@ -91,12 +91,15 @@ API App Check bylo opakovaně ověřené jako `ENABLED`; prázdná výměna toke
 správně vrací `400 INVALID_ARGUMENT`. Serverový provider ani jeho ochrana
 se při tomto ověření neměnily.
 
-Lokální `serverPrivateReplyCreation` připravuje přechod soukromých odpovědí
+`serverPrivateReplyCreation` připravuje přechod soukromých odpovědí
 na `createPrivateReply` v `europe-west3`. Má výchozí `false`, vyžaduje platný
-App Check klíč a současné konfigurace jej nezapínají. Veřejné komentáře i Shouty
+App Check klíč; vývojová konfigurace jej zapíná pro samostatně schválený rollout.
+Produkční konfigurace jej nezapíná. Veřejné komentáře i Shouty
 mají vlastní nezávislé přepínače. Nová Function vyžaduje samostatný souhlas
 s vývojovým nasazením a následným živým testem mezi dvěma testovacími účty.
-Žádná další externí změna touto lokální přípravou nevzniká.
+Vlastník dne 26. října výslovně schválil nasazení pouze nové Function
+`createPrivateReply`, navazující zapnutí klienta a testy mezi dvěma testovacími
+účty včetně úklidu ve vývoji. Výsledek rollout testu se doplní.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
 reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč

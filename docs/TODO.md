@@ -1162,7 +1162,7 @@ byly aktualizované a `npm audit --omit=dev` hlásí nula nálezů.
 
 Ve větvi `feature/server-private-replies` je od 26. října připravená callable
 `createPrivateReply` a nezávislý klientský přepínač `serverPrivateReplyCreation`
-(výchozí `false`, v konfiguracích není zapnutý). Podporuje odpověď na Shout,
+(výchozí `false`, vývojová konfigurace jej zapíná pro schválený rollout). Podporuje odpověď na Shout,
 na veřejný komentář a na přijatou soukromou odpověď. Příjemce i přezdívky
 odvozuje server z daného cíle a profilů. Pokračování soukromé konverzace
 vyžaduje ID zdrojové zprávy ve stejném Shoutu a ověřuje příjemce i oba účastníky.
@@ -1173,8 +1173,9 @@ fallback. Přepnutí ze soukromé na veřejnou odpověď nově vyčistí soukrom
 Lokálně prošlo 158 Flutter testů, analyzátor, Functions lint, 20 unit testů,
 9 cílených testů webových nástrojů a 84 emulatorových testů (65 Rules a 19
 serverových, z toho 8 scénářů soukromých odpovědí). Vývojový release build a
-lokální kontrola cíle nasazení prošly. CI, samostatné schválení nové Function
-a živý test mezi dvěma účty zbývají.
+lokální kontrola cíle nasazení prošly. CI `40359475834` prošlo. Vlastník
+samostatně schválil vývojové nasazení nové Function, zapnutí klienta a živý
+test mezi dvěma testovacími účty včetně úklidu. Výsledek rollout testu zbývá.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 
