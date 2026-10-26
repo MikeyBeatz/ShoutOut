@@ -11,6 +11,7 @@ class CommentTile extends StatefulWidget {
     required this.onJumpToReply,
     required this.onSave,
     required this.onReaction,
+    required this.onDeleted,
   });
 
   final QueryDocumentSnapshot<Map<String, dynamic>> comment;
@@ -22,6 +23,7 @@ class CommentTile extends StatefulWidget {
   final ValueChanged<String> onJumpToReply;
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
+  final ValueChanged<int> onDeleted;
 
   @override
   State<CommentTile> createState() => _CommentTileState();
@@ -320,8 +322,12 @@ class _CommentTileState extends State<CommentTile> {
   }
 
   Future<void> _deleteComment() async {
+    // Realtime removal can dispose this tile before the transaction completes.
+    final onDeleted = widget.onDeleted;
+    final reference = widget.comment.reference;
     try {
-      await _deleteCommentWithCounter(widget.comment.reference);
+      final remainingComments = await _deleteCommentWithCounter(reference);
+      onDeleted(remainingComments);
     } on FirebaseException {
       _showWriteFailure();
     }

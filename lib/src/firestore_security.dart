@@ -108,23 +108,22 @@ String _commentReactionEventId(String shoutId, String commentId) =>
     'commentReaction_${shoutId}_$commentId';
 String _commentDeleteEventId(String commentId) => commentId;
 
-Future<void> _deleteCommentWithCounter(
+Future<int> _deleteCommentWithCounter(
   DocumentReference<Map<String, dynamic>> commentReference,
 ) async {
   final shoutReference = commentReference.parent.parent!;
   final rateReference = _rateLimitReference('delete');
   final eventId = _commentDeleteEventId(commentReference.id);
 
-  await FirebaseFirestore.instance.runTransaction((transaction) async {
+  return FirebaseFirestore.instance.runTransaction<int>((transaction) async {
     final rateSnapshot = await transaction.get(rateReference);
     final shoutSnapshot = await transaction.get(shoutReference);
     final currentComments = shoutSnapshot.data()?['commentsCount'] as int? ?? 0;
+    final remainingComments = currentComments > 0 ? currentComments - 1 : 0;
 
     transaction
       ..delete(commentReference)
-      ..update(shoutReference, {
-        'commentsCount': currentComments > 0 ? currentComments - 1 : 0,
-      })
+      ..update(shoutReference, {'commentsCount': remainingComments})
       ..set(
         rateReference,
         _nextRateLimitData(
@@ -133,5 +132,6 @@ Future<void> _deleteCommentWithCounter(
           window: _deleteRateWindow,
         ),
       );
+    return remainingComments;
   });
 }

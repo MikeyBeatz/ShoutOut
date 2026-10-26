@@ -991,7 +991,7 @@ podpisový klíč zůstávají navazujícími úkoly mobilní distribuce po MVP.
 
 ## 2. App Check, registrace a ochrana proti farmám účtů — MVP pro web
 
-Aktuální stav po úspěšném rollout testu 25. října 2026: vývojový Hosting
+Stav po úspěšném rollout testu 25. října 2026: vývojový Hosting
 `shoutout-dev-46c81` běží na commitu
 `36f42e241ce9d6d43175db076a3c726d0c306b0b`, verzi `d9c867abfdb9e20e`.
 App Check i `serverShoutCreation` jsou zapnuté. Přihlášený Business účet
@@ -1127,7 +1127,21 @@ přímý fallback a zachovává klíč konceptu; při odesílání nelze změnit
 Prošlo 156 Flutter testů, 18 Functions unit testů, lint, celkový analyzátor,
 9 cílených testů webových nástrojů, 75 emulatorových testů (64 Rules, 4 Shout
 a 7 komentářových), vývojový release build a lokální kontrola nasazovacího cíle.
-Externí nasazení nové Function, zapnutí klienta a živý test komentářů zbývají.
+Schválený rollout následně prošel: `createComment` je `ACTIVE`, revize
+`createcomment-00001-lep`, ze zdrojů `4dce3d2`, v `europe-west3` s 256 MiB,
+15 s a max. jednou instancí/souběžným požadavkem. `createShout` zůstala na
+stejné revizi. Vývojový Hosting commitu `9d85327` má verzi `4333ea9ad939c510`;
+otisky nasazených souborů odpovídají buildu. CI `40230321972` i `40230718884`
+prošlo. Živě vznikl komentář i veřejná odpověď se serverovým autorem, správným
+rodičem, nulovými čítači reakcí a odpovídajícími receipt; limit i čítač Shoutu
+se zvýšily právě o dvě. Oba testovací komentáře byly odstraněné a databázový
+čítač je zpět na původní hodnotě. Oznámení mezi různými účty pokrývá emulator,
+nikoli tento živý průchod na vlastním Shoutu.
+
+Navazující lokální oprava detailu po smazání komentáře použije čítač vrácený
+úspěšnou transakcí. Původně se aktualizoval seznam i databáze, ale karta Shoutu
+v otevřeném detailu zobrazovala staré číslo. Oprava nepřidává čtení a zachovává
+atomický zápis i současné Rules; před vývojovým nasazením se znovu ověří.
 
 Dne 25. října 2026 vznikl testovaný společný základ
 `functions/callable_security.js`. Vyžaduje Auth, ověřený e-mail a App Check a

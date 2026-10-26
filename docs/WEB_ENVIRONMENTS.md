@@ -53,10 +53,11 @@ a serverové vytváření Shoutů. Přihlášený Business test úspěšně vytv
 Shout přes callable a následně jej odstranil. Firestore potvrdil serverové ID,
 kanonické údaje ověřené pobočky, čítače, geohash, idempotentní záznam a limit
 se společným časem zápisu; po úklidu potvrdil stav `deleted`.
-Nasazený commit je `36f42e241ce9d6d43175db076a3c726d0c306b0b`, Hosting verze
-`d9c867abfdb9e20e`, release `1792957831296000` z `2026-10-25T19:50:31.296Z`.
+Poslední dokončený komentářový rollout používá commit
+`9d85327aab4a52cee411d6a122c3b036fab009eb`, Hosting verzi `4333ea9ad939c510`,
+release `1792960022970000` z `2026-10-25T20:27:02.970Z`.
 Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
-CI `40227813927` prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
+CI `40230321972` i `40230718884` prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
 Produkční konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže
 jsou historie, včetně tehdy vypnutého přepínače a čekajícího ověření.
 
@@ -74,8 +75,12 @@ pro vývojový rollout. Produkční konfigurace jej nezapíná. Soukromé
 odpovědi tím nejsou přepnuté. Při chybě callable klient nepoužije přímý fallback.
 Příprava prošla vývojovým release buildem. Dne 25. října vlastník výslovně
 schválil nasazení nové Function, aktivaci klienta a živé komentářové testy
-včetně úklidu pouze ve `shoutout-dev-46c81`; výsledek rollout testu se doplní.
-Předchozí souhlas s nasazením pouze `createShout` se na novou Function nevztahuje.
+včetně úklidu pouze ve `shoutout-dev-46c81`. Function je `ACTIVE`, revize
+`createcomment-00001-lep`, zdroje `4dce3d2`, Node.js 22, 256 MiB, 15 s a max.
+jedna instance/souběžný požadavek. Živý test komentáře a veřejné odpovědi prošel
+kontrolou databáze (autor, rodič, receipt, přesné zvýšení limitu a čítače).
+Testovací komentáře byly odstraněné; původní Shout uživatele zůstává zachovaný.
+`createShout` nebyla aktualizovaná. Produkce ani Rules se neměnily.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
 reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč

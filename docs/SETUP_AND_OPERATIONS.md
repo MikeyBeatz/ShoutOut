@@ -247,6 +247,11 @@ samostatnou přípravu spustit `node tools/prepare_content_functions.mjs` a
 `build/firebase-content.json` s codebase `content`, která nevyžaduje Google
 Maps secret. Po samostatném souhlasu je přesný vývojový příkaz
 `firebase deploy --config build/firebase-content.json --only functions:content:createShout --project shoutout-dev-46c81`.
+Pro samostatné schválené nasazení veřejných komentářů použít stejný postup
+s `--only functions:content:createComment`. Obě callable jsou nasazené ve
+vývoji; klient je řídí nezávislými přepínači `serverShoutCreation` a
+`serverCommentCreation`. Nepoužívat obecné `--only functions`, pokud souhlas
+platí jen pro jeden endpoint.
 Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
 
 `functions/index.js` obsahuje jedinou současnou Function

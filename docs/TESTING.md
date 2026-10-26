@@ -36,7 +36,19 @@ oznámení, vlastní obsah, neaktivní Shout, poškozená data a blokované úč
 Retry po smazání výsledku jej znovu nevytvoří. Sada běží v `npm run test:rules`;
 bez emulatoru je přeskočená. Celkem prošlo 75 emulatorových testů, 18 Functions
 unit testů, 156 Flutter testů, lint, analyzátor a vývojový release build.
-Nové komentářové callable ani klientské přepnutí zatím nebyly nasazené.
+Následné vývojové nasazení `createComment` (`createcomment-00001-lep`) a
+Hostingu commitu `9d85327` prošlo živým testem komentáře a veřejné odpovědi.
+Firestore potvrdil kanonického autora, rodiče odpovědi, nulové čítače reakcí,
+receipt a přesné zvýšení limitu i počtu komentářů o dvě. Po odstranění obou
+testovacích komentářů je databázový čítač na výchozí hodnotě. CI implementace
+`40230321972` a aktivace `40230718884` prošlo. Živý test proběhl pod jedním
+účtem na vlastním Shoutu; příjemce oznámení mezi účty ověřuje emulator.
+
+Regresní scénář opravy detailu: vytvořit testovací komentář, ve stejném
+otevřeném detailu jej odstranit a bez opuštění stránky ověřit shodu čísla na
+kartě se seznamem a Firestore. Smazání předává potvrzený čítač z transakce,
+nikoli počet položek omezeného dotazu. Ověřit i selhání zápisu bez falešného
+lokálního snížení a bezpečný callback po realtime odstranění widgetu.
 
 `test/legal_acceptance_state_test.dart` ověřuje rozdíl mezi chybějící cache
 a serverem potvrzeným chybějícím právním souhlasem, čekání na potvrzení zápisu,

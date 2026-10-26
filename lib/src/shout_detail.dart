@@ -166,6 +166,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 onJumpToReply: _jumpToComment,
                 onSave: (_) => widget.onSave(),
                 onReaction: (_, {required like}) => widget.onReaction(like),
+                onDeleted: (remainingComments) {
+                  if (!mounted) return;
+                  setState(() => widget.shout.comments = remainingComments);
+                },
               );
             }),
             PrivateReplyList(
