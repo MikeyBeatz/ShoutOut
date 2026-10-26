@@ -14,7 +14,7 @@ v hash ID a poli `userId`, `action: createComment`, `fingerprint`, `shoutId`,
 vznikají v jediné transakci. Zůstává stávající limit 60 za hodinu a odstup 10 s.
 Úklid receipt je i zde otevřený; callable je nasazená pouze ve vývoji.
 
-Lokálně připravená `createPrivateReply` používá action namespace v hash ID a
+Vývojová `createPrivateReply` používá action namespace v hash ID a
 receipt s poli `userId`, `action: createPrivateReply`, `fingerprint`, `shoutId`,
 `privateReplyId`, `createdAt`. Text, přezdívky ani ID zdrojové soukromé zprávy
 v něm neuchovává. Vstup obsahuje typ cíle a podle něj `parentCommentId` nebo
@@ -23,7 +23,7 @@ v něm neuchovává. Vstup obsahuje typ cíle a podle něj `parentCommentId` neb
 jejích účastníků, nepřidává nové pole do uložené soukromé odpovědi.
 `parentCommentId` se při pokračování převezme z původní soukromé zprávy a
 musí stále odkazovat na existující komentář, stejně jako v současných Rules.
-Úložiště zpráv a pravidla jejich čtení se nemění. Callable zatím není nasazená.
+Úložiště zpráv a pravidla jejich čtení se nemění. Callable je nasazená pouze ve vývoji.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,

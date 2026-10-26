@@ -38,9 +38,16 @@ výsledku jej neobnovuje. Nový Rules scénář kontroluje čtení serverového 
 oběma účastníky a zamítnutí třetího účtu i enumerace celé kolekce. Receipt nemůže
 číst ani autor zprávy. Lokálně prošlo celkem 84 emulatorových testů, 20 unit
 testů Functions, 158 Flutter testů, lint, analyzátor a 9 testů webových nástrojů.
-Nová callable zatím není nasazená a přepínač klienta zůstává vypnutý.
-Před aktivací doplnit živý průchod dvěma účty pro Shout, komentář, pokračování
+Nová callable je po samostatném souhlasu nasazená pouze ve vývoji jako
+`createprivatereply-00001-baw`; klient `9545946` má přepínač ve vývoji zapnutý.
+CI implementace `40359475834` a aktivace `40360446321` prošlo.
+Před uzavřením kroku doplnit živý průchod dvěma účty pro Shout, komentář, pokračování
 soukromé konverzace a přepnutí ze soukromé na veřejnou odpověď.
+První živá soukromá odpověď z Business účtu autorovi Shoutu již prošla
+kontrolou Firestore: ID, canonical autor/příjemce, účastníci, receipt,
+limit a oznámení bez textu odpovídají. Vlastník hlásí zobrazení zprávy, ale
+nenašel možnost odpovědi; ověřuje se identita aktivní relace.
+Zbývající směry a úklid nejsou tímto prvním průchodem prokázané.
 
 `functions/create_comment.integration.test.js` používá stejný izolovaný
 emulator jako Shout testy. Sedm scénářů pokrývá souběžná retry, cooldown,

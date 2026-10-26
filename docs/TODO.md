@@ -1176,6 +1176,16 @@ serverových, z toho 8 scénářů soukromých odpovědí). Vývojový release b
 lokální kontrola cíle nasazení prošly. CI `40359475834` prošlo. Vlastník
 samostatně schválil vývojové nasazení nové Function, zapnutí klienta a živý
 test mezi dvěma testovacími účty včetně úklidu. Výsledek rollout testu zbývá.
+Function je nasazená jako `createprivatereply-00001-baw`, Node.js 22, 256 MiB,
+15 s a max. jedna instance/souběžný požadavek. Původní dvě Functions nebyly
+aktualizované. Hosting commitu `9545946` má verzi `ebede43dc57e569c`; otisky
+odpovídají release buildu a CI aktivace `40360446321` prošlo. Živý test probíhá.
+První živý směr Business → autor Shoutu prošel: serverové ID, kanonické
+identity, dvojice účastníků, receipt, spotřeba limitu a oznámení bez textu
+zprávy byly ověřené čtením Firestore. Vlastník hlásí viditelnou zprávu, ale
+možnost odpovědi nenašel; identita aktivní relace se ještě ověřuje. Připravený veřejný testovací komentář má také
+serverové ID a receipt. Pokračování opačným směrem, soukromá odpověď na komentář,
+přepnutí na veřejnou odpověď a úklid testovacích dat se ještě dokončují.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 

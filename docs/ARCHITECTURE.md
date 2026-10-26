@@ -214,15 +214,16 @@ Mazání komentáře vrací potvrzený zbývající počet z téže Firestore tr
 Detail jej předá do své karty, i když realtime odběr mezitím odstranil widget
 komentáře. Nevzniká další dotaz ani odhad počtu z nejvýše 50 načtených komentářů.
 
-Pro soukromé odpovědi je lokálně připravená `createPrivateReply`. Přepínač
-`serverPrivateReplyCreation` zůstává vypnutý. Cíl je Shout, komentář nebo přijatá
+Pro soukromé odpovědi používá vývojový web `createPrivateReply`. Přepínač
+`serverPrivateReplyCreation` je ve vývoji zapnutý. Cíl je Shout, komentář nebo přijatá
 soukromá zpráva; server z něj odvodí příjemce a ověří aktuální profily. U přijaté
 zprávy ověří, že volající je skutečně příjemce a uložená dvojice účastníků
 odpovídá autorovi a příjemci. Typ cíle ani UID příjemce nelze použít pro
 pokračování cizí soukromé konverzace. Úspěšná transakce vytvoří zprávu, receipt,
 spotřebuje stávající limit a podle preferencí sloučí oznámení bez privátního textu.
 Veřejné čítače se nemění. Soukromé cílení se v klientovi při přepnutí na veřejnou
-odpověď vyčistí; klíč retry zahrnuje typ a ID cíle. Nasazení a živý test zbývají.
+odpověď vyčistí; klíč retry zahrnuje typ a ID cíle. Function je nasazená pouze
+ve vývoji; živý průchod mezi dvěma účty se dokončuje.
 
 Klient je považován za nedůvěryhodný. Základní pravidla:
 

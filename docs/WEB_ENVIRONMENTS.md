@@ -53,12 +53,13 @@ a serverové vytváření Shoutů. Přihlášený Business test úspěšně vytv
 Shout přes callable a následně jej odstranil. Firestore potvrdil serverové ID,
 kanonické údaje ověřené pobočky, čítače, geohash, idempotentní záznam a limit
 se společným časem zápisu; po úklidu potvrdil stav `deleted`.
-Aktuálně nasazený klient obsahuje i opravu čítače detailu: commit
-`4a1a7a0594f5eae7f871527a49346fa2849f6a3d`, Hosting verze `d70f5fa95b367f22`,
-release `1793030834457000` z `2026-10-26T16:07:14.457Z`.
+Aktuálně nasazený klient obsahuje i soukromé odpovědi a opravu čítače detailu:
+commit `9545946983c284a344a273aab231608677529eb5`, Hosting verze `ebede43dc57e569c`,
+release `1793032800630000` z `2026-10-26T16:40:00.630Z`.
 Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
 CI implementace `40230321972`, aktivace `40230718884` a opravy `40355266790`
-prošlo. Diagnostická stránka není součástí tohoto běžného buildu.
+prošlo; soukromé odpovědi prošly CI `40359475834` a aktivace `40360446321`.
+Diagnostická stránka není součástí tohoto běžného buildu.
 Produkční konfigurace se tím nemění. Starší neúspěšné pokusy a rollback níže
 jsou historie, včetně tehdy vypnutého přepínače a čekajícího ověření.
 
@@ -99,7 +100,10 @@ mají vlastní nezávislé přepínače. Nová Function vyžaduje samostatný so
 s vývojovým nasazením a následným živým testem mezi dvěma testovacími účty.
 Vlastník dne 26. října výslovně schválil nasazení pouze nové Function
 `createPrivateReply`, navazující zapnutí klienta a testy mezi dvěma testovacími
-účty včetně úklidu ve vývoji. Výsledek rollout testu se doplní.
+účty včetně úklidu ve vývoji. Function je `ACTIVE`, revize
+`createprivatereply-00001-baw`, zdroje `113050f`, Node.js 22, 256 MiB, 15 s,
+max. jedna instance/souběžný požadavek. Existující dvě Functions se neměnily.
+Živý průchod dvěma účty se dokončuje; výsledek se doplní.
 
 Dne 25. října 2026 byl ve vývojovém projektu po souhlasu vlastníka zapnutý
 reCAPTCHA Enterprise API a registrovaný webový App Check. Registrovaný klíč

@@ -252,10 +252,15 @@ s `--only functions:content:createComment`. Obě callable jsou nasazené ve
 vývoji; klient je řídí nezávislými přepínači `serverShoutCreation` a
 `serverCommentCreation`. Nepoužívat obecné `--only functions`, pokud souhlas
 platí jen pro jeden endpoint.
-Lokálně připravená `createPrivateReply` se vybírá samostatně přes
-`--only functions:content:createPrivateReply`; dosud není nasazená.
-Přepínač `serverPrivateReplyCreation` má výchozí hodnotu `false` a před
-aktivací vyžaduje samostatný vývojový rollout a ověření dvěma účty.
+`createPrivateReply` se vybírá samostatně přes
+`--only functions:content:createPrivateReply`; je nasazená pouze ve vývoji.
+Přepínač `serverPrivateReplyCreation` má výchozí hodnotu `false`, ve vývoji
+je samostatně schválený rollout zapnutý; živé ověření dvěma účty se dokončuje.
+Při nasazení 26. října jednou vypršel lokální desetisekundový discovery limit.
+Samostatný import artefaktu prošel za přibližně 0,824 s; další nasazení prošlo
+s jednorázovým `$env:FUNCTIONS_DISCOVERY_TIMEOUT='30'`. Jde pouze o limit CLI,
+nikoli provozní `timeoutSeconds: 15`. Tento postup popisuje
+[oficiální dokumentace](https://firebase.google.com/docs/functions/tips#avoid_deployment_timeouts_during_initialization).
 Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
 
 `functions/index.js` obsahuje jedinou současnou Function
