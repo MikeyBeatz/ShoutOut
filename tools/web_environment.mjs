@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverCommentReactions !== undefined && typeof config.serverCommentReactions !== 'boolean') {
+    throw new Error('serverCommentReactions must be a boolean.');
+  }
+  if (config.serverCommentReactions === true && !config.appCheckSiteKey) {
+    throw new Error('Server comment reactions require web App Check.');
+  }
   if (config.serverShoutReactions !== undefined && typeof config.serverShoutReactions !== 'boolean') {
     throw new Error('serverShoutReactions must be a boolean.');
   }

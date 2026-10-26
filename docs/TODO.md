@@ -1224,13 +1224,19 @@ Předchozí tři Functions zůstaly na stejných revizích. Aktivační commit `
 prošel CI `40405135293` a je nasazený pouze na vývojovém Hostingu, verze
 `a03706f90b97706c`, release `1793050577697000` z `2026-10-26T21:36:17.697Z`.
 Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
-Bez App Check endpoint správně vrací 401. Automatická relace hlásila
-`appCheck/recaptcha-error` a první pokus nevytvořil receipt; probíhá ruční
-ověření s vlastníkem. Test Shout je nyní po expiraci a přístupný v Mé shouty
+Bez App Check endpoint správně vrací 401. Automatická relace nejprve hlásila
+`appCheck/recaptcha-error`; po ručním ověření vlastníkem prošel celý cyklus
+nahoru → dolů → odebrání běžného i Business účtu. Šest serverových receipt
+a limity odpovídají přesně šesti akcím, UI ve feedu/detailu ukazuje realtime
+stav. Vlastní reakce nevytvořily oznámení; dvě Business oznámení autorovi měla
+kanonickou identitu a byla po testu odstraněná. Dočasný Shout byl označen
+`deleted`, oba cíle jsou zpět na nulových palcích, původní Shout zůstal zachovaný.
+Test Shout je nyní po expiraci a přístupný v Mé shouty
 → Expirované; současná Rules i server dovolují reakce na uchovaný Shout.
 Lokálně prošlo 167 Flutter testů, analýza i kontrola formátu, Functions lint
 a 24 unit testů, 90 emulatorových testů a 10 testů konfigurace/nástrojů webu.
-Vývojový release build webu prošel; živé chování přepínače dosud ověřené není.
+Vývojový release build webu a popsané živé průchody prošly. Retry po nejasném
+síťovém selhání a souběhy jsou zatím doložené automatickými testy.
 CI implementace `40370550763` prošlo. Aktivace lokálně prošla 11 testy webové
 konfigurace Flutteru a všemi 16 testy vývojových nástrojů.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
@@ -1251,9 +1257,18 @@ Samostatný namespace receipt brání kolizi stejného klíče s reakcí na Shou
 historická odpověď nesmí aktualizovat UI. Lokálně prošel lint, 26 Functions
 unit testů a 97 emulatorových testů (65 Rules + 32 serverových, z toho
 7 nových scénářů komentářových reakcí), také příprava a syntaxe artefaktu.
-Tato nová Function není nasazená a klient ji zatím nevolá. Další krok je
-klientské napojení s výchozím vypnutím, retry testy a následný samostatně
-schválený vývojový rollout. Produkční prostředí ani Rules se nemění.
+Tato nová Function není nasazená. Klientské napojení je připravené za
+nezávislým `serverCommentReactions`, výchozím `false`; dev ani prod jej
+nezapíná. Společný `ReactionGateway` rozlišuje UID, Shout i komentář, drží
+neměnný retry klíč v otevřeném detailu a slučuje souběžná kliknutí stejného
+cíle. HTTP výsledek neaplikuje a při chybě nepoužije přímý fallback. Komentáře
+využívají dosavadní realtime dotaz i odběr vlastní reakce. Klientské testy
+ověřují izolaci Shoutu/komentářů, skutečné callable chyby a nejasný retry.
+Prošlo 171 Flutter testů, analýza, formát, všech 17 testů vývojových nástrojů
+a vývojový release build webu.
+CI serverové části `40407708443` prošlo. Další krok po CI celého klienta je
+samostatně schválený vývojový rollout a živé ověření komentářových palců.
+Produkční prostředí ani Rules se nemění.
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,

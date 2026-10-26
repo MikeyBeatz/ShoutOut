@@ -11,7 +11,7 @@ const dev = loadConfig('dev');
 
 test('web App Check configuration gates server publishing', () => {
   const withoutAppCheck = { ...dev, serverShoutCreation: false,
-    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false };
+    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false };
   delete withoutAppCheck.appCheckSiteKey;
   assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
@@ -35,6 +35,18 @@ const prod = {
   },
 };
 
+test('comment reactions have an independent optional flag requiring App Check', () => {
+  const defaults = { ...dev };
+  delete defaults.serverCommentReactions;
+  assert.doesNotThrow(() => validateConfig(defaults, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...defaults, serverCommentReactions: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...defaults, serverCommentReactions: 'true' }, 'dev'));
+  const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: true };
+  delete config.appCheckSiteKey;
+  assert.throws(() => validateConfig(config, 'dev'));
+});
+
 test('Shout reactions remain optional and require a boolean and App Check', () => {
   const defaults = { ...dev };
   delete defaults.serverShoutReactions;
@@ -42,7 +54,7 @@ test('Shout reactions remain optional and require a boolean and App Check', () =
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutReactions: 'true' }, 'dev'));
   const config = { ...dev, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: true };
+    serverPrivateReplyCreation: false, serverShoutReactions: true, serverCommentReactions: false };
   delete config.appCheckSiteKey;
   assert.throws(() => validateConfig(config, 'dev'));
 });

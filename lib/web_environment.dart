@@ -17,6 +17,7 @@ class WebEnvironment {
     final commentsGateway = json['serverCommentCreation'];
     final privateRepliesGateway = json['serverPrivateReplyCreation'];
     final reactionsGateway = json['serverShoutReactions'];
+    final commentReactionsGateway = json['serverCommentReactions'];
     if (key != null &&
         (key is! String || !RegExp(r'^[A-Za-z0-9_-]{20,200}$').hasMatch(key))) {
       throw StateError('Invalid reCAPTCHA Enterprise site key.');
@@ -35,6 +36,13 @@ class WebEnvironment {
       throw StateError('serverShoutReactions must be a boolean.');
     }
     serverShoutReactions = reactionsGateway == true;
+    if (commentReactionsGateway != null && commentReactionsGateway is! bool) {
+      throw StateError('serverCommentReactions must be a boolean.');
+    }
+    serverCommentReactions = commentReactionsGateway == true;
+    if (serverCommentReactions && key == null) {
+      throw StateError('Server comment reactions require web App Check.');
+    }
     if (serverShoutReactions && key == null) {
       throw StateError('Server Shout reactions require web App Check.');
     }
@@ -139,6 +147,7 @@ class WebEnvironment {
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;
   late final bool serverShoutReactions;
+  late final bool serverCommentReactions;
 
   FirebaseOptions get firebaseOptions => FirebaseOptions(
     apiKey: firebase['apiKey'] as String,

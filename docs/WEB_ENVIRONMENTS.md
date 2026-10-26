@@ -61,9 +61,22 @@ Aktivační commit `eea077a347b17d9a902f23835beb7ab6658a430e` prošel CI
 Otisky HTML, JavaScriptu a veřejné konfigurace odpovídají lokálnímu release
 buildu. Předchozí Hosting verze pro návrat je `ebede43dc57e569c`.
 Požadavek bez App Check byl odmítnut 401. Automatická relace při obnovení
-hlásila `appCheck/recaptcha-error`; první pokus o reakci nevytvořil receipt.
-Živý test s vlastníkem probíhá, ochrana se nevypínala. Reakce na komentáře
-tento přepínač neovládá. Produkce, `main` a Firestore Rules se neměnily.
+nejprve hlásila `appCheck/recaptcha-error`; první pokus nevytvořil receipt.
+Po ručním ověření vlastníkem prošel celý cyklus nahoru → dolů → odebrání
+běžným i Business účtem. Šest serverových receipt, rate eventy, čítače a
+realtime stav ve feedu/detailu odpovídají. Vlastní reakce neoznámila sebe sama;
+dvě Business oznámení autorovi měla kanonickou veřejnou identitu. Reakce jsou
+zpět na nule, dvě čistě testovací notifikace byly odstraněné a dočasný Shout
+označený `deleted`; původní Test Shout zůstal zachovaný. Ochrana se nevypínala.
+Reakce na komentáře tento přepínač neovládá. Produkce, `main` a Rules se neměnily.
+
+Lokálně připravený nezávislý `serverCommentReactions` (výchozí `false`) volá
+`toggleCommentReaction` v `europe-west3` a vyžaduje App Check klíč.
+V dev ani prod konfiguraci není zapnutý a nová Function není nasazená.
+Klient nemá přímý fallback, HTTP výsledek ignoruje a počty i vlastní reakci
+zobrazuje z existujících realtime odběrů komentářů a vlastních reakcí.
+Retry drží neměnný klíč v paměti otevřeného detailu; zavření detailu nebo
+obnovení stránky jej nezachová. Nasazení a aktivace vyžadují samostatný souhlas.
 
 Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
 diagnostika získala platný App Check token a callable jej přijala, pak správně
@@ -72,7 +85,7 @@ a serverové vytváření Shoutů. Přihlášený Business test úspěšně vytv
 Shout přes callable a následně jej odstranil. Firestore potvrdil serverové ID,
 kanonické údaje ověřené pobočky, čítače, geohash, idempotentní záznam a limit
 se společným časem zápisu; po úklidu potvrdil stav `deleted`.
-Aktuálně nasazený klient obsahuje i soukromé odpovědi a opravu čítače detailu:
+Předchozí klient již obsahoval soukromé odpovědi a opravu čítače detailu:
 commit `9545946983c284a344a273aab231608677529eb5`, Hosting verze `ebede43dc57e569c`,
 release `1793032800630000` z `2026-10-26T16:40:00.630Z`.
 Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.

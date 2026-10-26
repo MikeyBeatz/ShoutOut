@@ -18,25 +18,14 @@ enum _LocationRefreshResult {
 
 class _ShoutOutHomeState extends State<ShoutOutHome> {
   final List<Shout> _shouts = [];
-  late final _reactionGateway = ShoutReactionGateway(
+  late final _reactionGateway = ReactionGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
       await FirebaseFunctions.instanceFor(
         region: 'europe-west3',
       ).httpsCallable('toggleShoutReaction').call(request.toPayload());
     },
-    isDefinitiveFailure: (error) =>
-        error is FirebaseFunctionsException &&
-        const {
-          'invalid-argument',
-          'permission-denied',
-          'unauthenticated',
-          'failed-precondition',
-          'not-found',
-          'already-exists',
-          'resource-exhausted',
-          'unimplemented',
-        }.contains(error.code),
+    isDefinitiveFailure: isDefinitiveReactionFailure,
   );
   final FeedFilters _feedFilters = FeedFilters();
   Set<String> _blockedUserIds = {};

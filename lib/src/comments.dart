@@ -30,6 +30,15 @@ class CommentTile extends StatefulWidget {
 }
 
 class _CommentTileState extends State<CommentTile> {
+  late final _reactionGateway = ReactionGateway(
+    currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+    send: (request) async {
+      await FirebaseFunctions.instanceFor(
+        region: 'europe-west3',
+      ).httpsCallable('toggleCommentReaction').call(request.toPayload());
+    },
+    isDefinitiveFailure: isDefinitiveReactionFailure,
+  );
   bool _revealed = false;
   bool _highlighted = false;
 
@@ -224,6 +233,21 @@ class _CommentTileState extends State<CommentTile> {
 
   Future<void> _toggleReaction(String type) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
+    if (kIsWeb && WebEnvironment.current.serverCommentReactions) {
+      try {
+        await _reactionGateway.toggle(
+          userId: uid,
+          shoutId: widget.comment.reference.parent.parent!.id,
+          commentId: widget.comment.id,
+          like: type == 'like',
+        );
+      } on ReactionAccountChanged {
+        return;
+      } on FirebaseException {
+        _showWriteFailure();
+      }
+      return;
+    }
     final firestore = FirebaseFirestore.instance;
     final reference = widget.comment.reference.collection('reactions').doc(uid);
     final shoutReference = widget.comment.reference.parent.parent!;

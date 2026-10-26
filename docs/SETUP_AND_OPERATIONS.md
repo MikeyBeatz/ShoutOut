@@ -275,7 +275,8 @@ opakuje se stejným klíčem v rámci otevřené relace.
 
 Lokálně připravená `toggleCommentReaction` má samostatný selektor
 `--only functions:content:toggleCommentReaction` a stejné malé provozní limity.
-Není nasazená a klient ji zatím nevolá. Příprava přes
+Není nasazená; připravený klient ji používá pouze po zapnutí nezávislého
+`serverCommentReactions`, který je v dev i prod zatím vypnutý. Příprava přes
 `tools/prepare_content_functions.mjs` ji pouze přibalí; neznamená souhlas
 s jejím nasazením ani s aktualizací ostatních Functions.
 

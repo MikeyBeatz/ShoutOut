@@ -5,6 +5,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/web_environment.dart';
 
 void main() {
+  test(
+    'comment reactions are independently optional and require App Check',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+                as Map<String, dynamic>
+            ..remove('serverCommentReactions');
+      expect(WebEnvironment.fromJson(config).serverCommentReactions, isFalse);
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverCommentReactions': true,
+        }).serverCommentReactions,
+        isTrue,
+      );
+      expect(
+        () => WebEnvironment.fromJson({
+          ...config,
+          'serverCommentReactions': 'true',
+        }),
+        throwsStateError,
+      );
+      expect(
+        () => WebEnvironment.fromJson({
+          ...config,
+          'appCheckSiteKey': null,
+          'serverShoutCreation': false,
+          'serverCommentCreation': false,
+          'serverPrivateReplyCreation': false,
+          'serverShoutReactions': false,
+          'serverCommentReactions': true,
+        }),
+        throwsStateError,
+      );
+    },
+  );
   test('Shout reaction gateway defaults off and requires App Check', () {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())
@@ -27,6 +63,7 @@ void main() {
         'serverCommentCreation': false,
         'serverPrivateReplyCreation': false,
         'serverShoutReactions': true,
+        'serverCommentReactions': false,
       },
     ]) {
       expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
@@ -81,6 +118,7 @@ void main() {
       ..remove('appCheckSiteKey')
       ..['serverCommentCreation'] = false
       ..['serverShoutReactions'] = false
+      ..['serverCommentReactions'] = false
       ..['serverPrivateReplyCreation'] = false;
     final defaultConfig = development()..remove('serverShoutCreation');
     expect(WebEnvironment.fromJson(defaultConfig).serverShoutCreation, isFalse);
@@ -121,6 +159,7 @@ void main() {
         'serverCommentCreation': true,
         'serverPrivateReplyCreation': false,
         'serverShoutReactions': false,
+        'serverCommentReactions': false,
       },
     ]) {
       expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
@@ -151,6 +190,7 @@ void main() {
           'serverCommentCreation': false,
           'serverPrivateReplyCreation': true,
           'serverShoutReactions': false,
+          'serverCommentReactions': false,
         },
       ]) {
         expect(() => WebEnvironment.fromJson(invalid), throwsStateError);

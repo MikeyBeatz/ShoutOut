@@ -33,6 +33,12 @@ s query feedu a jeho čtení je proto nutné započítat zvlášť; končí zav�
 detailu. Přepínač vývojová konfigurace zapíná pro schválený rollout;
 produkční jej nezapíná. Dopad nebyl měřen na účtu Firebase.
 
+Připravené komentářové reakce používají dosavadní realtime seznam komentářů
+a vlastní reakci; nepřidávají klientské GETy ani listenery. Server navíc
+ověřuje existenci rodičovského Shoutu i bez oznámení, aby nevytvářel reakce
+na osiřelé komentáře. Jde o kontrolu integrity v transakci. Nový klientský
+přepínač je stále vypnutý; provozní dopad této cesty není měřený.
+
 ## Životní cyklus a funkce
 
 `lib/live_data.dart` sdílí aktivní zdroje. Poslední odpojení zruší zdroj i

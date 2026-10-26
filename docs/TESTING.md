@@ -12,7 +12,7 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 ## Lokální příprava serverových reakcí 26. října 2026
 
 Lokální příprava serverových reakcí na Shouty (26. října):
-`test/shout_reaction_gateway_test.dart` pokrývá nejasný retry se stejným klíčem,
+`test/reaction_gateway_test.dart` pokrývá nejasný retry se stejným klíčem,
 nový klíč po úspěchu nebo definitivním odmítnutí, pořadí při změně palce,
 sloučení souběžných kliknutí, nezávislé cíle a účty a změnu účtu před retry
 i během něj. Functions test kontroluje očekávaný účet před přístupem k DB;
@@ -22,11 +22,17 @@ Schválený vývojový rollout klienta `eea077a` prošel CI `40405135293` a byl
 nasazen jako Hosting verze `a03706f90b97706c`; otisky tří hlavních souborů
 odpovídají release buildu. Function `toggleshoutreaction-00001-lek` je aktivní
 se schválenými limity. Požadavek bez App Check vrací 401. Automatická relace
-hlásila `appCheck/recaptcha-error`; první pokus nevytvořil receipt. Živý test
-s vlastníkem probíhá. Zbývá ověřit přidání,
-změnu i odebrání palce, realtime čítače a vlastní palec ve feedu i otevřeném
-detailu, druhého uživatele, retry po výpadku bez dvojího přepnutí, limit a
-oznámení. Odpověď HTTP obsahuje historické čítače a klient ji musí ignorovat.
+nejprve hlásila `appCheck/recaptcha-error`; první pokus nevytvořil receipt.
+Po ručním ověření vlastníkem prošlo přidání, změna i odebrání běžným účtem
+na uchovaném Test Shoutu a Business účtem na novém dočasném Shoutu. Šest
+receipt, serverové čítače a rate eventy odpovídají šesti akcím. Realtime stav
+byl ověřen v seznamu i otevřeném detailu; vlastní reakce neoznámila autora
+sobě, Business reakce vytvořily dvě kanonická oznámení autorovi. Obě reakce
+jsou odstraněné, čítače na výchozí nule, dvě čistě testovací notifikace byly
+odstraněné a dočasný Shout je `deleted`. Původní Test Shout byl zachovaný,
+receipt se nemažou (retence je otevřená). Reálný výpadek s nejasným potvrzením
+ani živý souběh nebyly simulované; ty pokrývají automatické testy.
+HTTP odpověď obsahuje historické čítače a klient ji musí ignorovat.
 Lokální výsledek úseku: 167 Flutter testů, čistá analýza a formát, Functions
 lint a 24 unit testů, 90 emulatorových testů (65 Rules + 25 serverových),
 10 testů webových nástrojů a úspěšný vývojový release build webu.
@@ -40,11 +46,18 @@ změnu a odebrání, zachování textu i rodičovských čítačů, kanonické o
 autorovi komentáře, souběh a idempotenci, odlišné receipt namespace při
 sdíleném limitu s reakcemi na Shout, preference, vlastní reakce, poškozená
 data a nedostupné cíle bez částečných zápisů. Replay neobchází ban a vrací
-historický snapshot, který si klient nesmí promítnout zpět do UI. Uchované neaktivní Shouty
-a omezení tvorby obsahu zachovávají dosavadní interakční politiku.
+historický snapshot, který si klient nesmí promítnout zpět do UI. Uchované
+neaktivní Shouty a omezení tvorby obsahu zachovávají dosavadní interakční politiku.
 Lokálně prošel lint, 26 Functions unit testů a 97 emulatorových testů
 (65 Rules + 32 serverových), příprava artefaktu a kontrola syntaxe.
-Klientské a živé ověření komentářových reakcí tím nejsou doložené.
+Navazující klient používá sdílený `ReactionGateway` s klíčem UID/Shout/komentář.
+Testy navíc ověřují izolaci různých komentářů a Shoutu, souběžné kliknutí
+a klasifikaci skutečných `FirebaseFunctionsException`: transportní chyby
+drží klíč, definitivní odmítnutí dovolí nový pokus. Celkem prošlo 171 Flutter
+testů, čistá analýza, formát, 17 testů vývojových nástrojů a vývojový release
+build webu. CI serverové části
+`40407708443` prošlo. `serverCommentReactions` má výchozí `false` a žádná
+konfigurace jej nezapíná; živé ověření komentářových reakcí zatím neproběhlo.
 
 ## Živý vývojový test serverového publikování 25. října 2026
 

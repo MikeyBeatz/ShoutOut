@@ -1,21 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shoutout/shout_reaction_gateway.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:shoutout/reaction_gateway.dart';
 
 void main() {
-  late List<ShoutReactionRequest> sent;
+  late List<ReactionRequest> sent;
   late String? uid;
   late int sequence;
-  late Future<void> Function(ShoutReactionRequest) transport;
-  late ShoutReactionGateway gateway;
+  late Future<void> Function(ReactionRequest) transport;
+  late ReactionGateway gateway;
 
   setUp(() {
     sent = [];
     uid = 'alice';
     sequence = 0;
     transport = (_) async {};
-    gateway = ShoutReactionGateway(
+    gateway = ReactionGateway(
       currentUserId: () => uid,
       newKey: () => 'key-${++sequence}',
       isDefinitiveFailure: (error) => error == 'rejected',
@@ -28,6 +29,115 @@ void main() {
 
   Future<void> toggle([bool like = true, String shout = 'target']) =>
       gateway.toggle(userId: 'alice', shoutId: shout, like: like);
+
+  test(
+    'comment retry retains its target without colliding with its Shout or another comment',
+    () async {
+      transport = (_) async => throw 'offline';
+      await expectLater(
+        gateway.toggle(
+          userId: 'alice',
+          shoutId: 'target',
+          commentId: 'first',
+          like: true,
+        ),
+        throwsA('offline'),
+      );
+      transport = (_) async {};
+      await toggle();
+      await gateway.toggle(
+        userId: 'alice',
+        shoutId: 'target',
+        commentId: 'second',
+        like: true,
+      );
+      await gateway.toggle(
+        userId: 'alice',
+        shoutId: 'target',
+        commentId: 'first',
+        like: true,
+      );
+      expect(sent.map((r) => r.idempotencyKey), [
+        'key-1',
+        'key-2',
+        'key-3',
+        'key-1',
+      ]);
+      expect(sent.last.toPayload()['commentId'], 'first');
+      expect(sent[1].toPayload().containsKey('commentId'), isFalse);
+      expect(identical(sent.first, sent.last), isTrue);
+    },
+  );
+
+  test('in-flight comments in one Shout do not block each other', () async {
+    final response = Completer<void>();
+    transport = (_) => response.future;
+    final first = gateway.toggle(
+      userId: 'alice',
+      shoutId: 'target',
+      commentId: 'first',
+      like: true,
+    );
+    final second = gateway.toggle(
+      userId: 'alice',
+      shoutId: 'target',
+      commentId: 'second',
+      like: true,
+    );
+    final duplicate = gateway.toggle(
+      userId: 'alice',
+      shoutId: 'target',
+      commentId: 'first',
+      like: false,
+    );
+    expect(sent.map((r) => r.commentId), ['first', 'second']);
+    response.complete();
+    await Future.wait([first, second, duplicate]);
+  });
+
+  test(
+    'real callable errors preserve ambiguous attempts and discard server rejections',
+    () async {
+      final calls = <ReactionRequest>[];
+      Object? failure;
+      final service = ReactionGateway(
+        currentUserId: () => 'alice',
+        isDefinitiveFailure: isDefinitiveReactionFailure,
+        newKey: () => 'key-${++sequence}',
+        send: (request) async {
+          calls.add(request);
+          if (failure != null) throw failure;
+        },
+      );
+      Future<void> click() => service.toggle(
+        userId: 'alice',
+        shoutId: 'target',
+        commentId: 'first',
+        like: true,
+      );
+      for (final code in ['unavailable', 'deadline-exceeded', 'internal']) {
+        failure = FirebaseFunctionsException(
+          code: code,
+          message: 'Test transport failure',
+        );
+        await expectLater(click(), throwsA(isA<FirebaseFunctionsException>()));
+      }
+      failure = FirebaseFunctionsException(
+        code: 'resource-exhausted',
+        message: 'Test rate rejection',
+      );
+      await expectLater(click(), throwsA(isA<FirebaseFunctionsException>()));
+      failure = null;
+      await click();
+      expect(calls.map((r) => r.idempotencyKey), [
+        'key-1',
+        'key-1',
+        'key-1',
+        'key-1',
+        'key-2',
+      ]);
+    },
+  );
 
   test(
     'ambiguous retry keeps immutable payload; next successful click gets a new key',
