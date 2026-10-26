@@ -49,6 +49,16 @@ Tato Function je nasazená pouze ve vývoji. Klientské napojení řídí
 `serverCommentReactions` (výchozí `false`); vývojová konfigurace jej po
 souhlasu vlastníka zapíná, produkční nikoli.
 
+Lokálně připravená `toggleShoutSaveOperation` používá namespace
+`toggleShoutSave` a receipt s `userId`, `action`, `fingerprint`, `shoutId`,
+`result: {saved, count}` a `createdAt`. Nevkládá text, polohu ani přezdívky.
+Uložení zůstává v `shouts/{id}/saves/{uid}` pouze s `createdAt`; odebrání
+dokument odstraní. V jediné transakci se změní záložka, `savesCount`, sdílený
+limit `interaction` a receipt; ostatní čítače i obsah Shoutu zůstávají stejné.
+Replay vrací historický výsledek, nikoli aktuální stav záložky. Budoucí klient
+musí zobrazovat realtime data. Operace zatím nemá callable export, není
+v nasazovacím artefaktu ani v klientu a nebyla nasazená. Retence receipt je otevřená.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v
@@ -57,8 +67,9 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 ## Konvence
 
 - `uid` je Firebase Authentication UID a je kanonickým identifikátorem účtu.
-- Všechny bezpečnostně významné časy zapisuje `FieldValue.serverTimestamp()` a
-  pravidla je porovnávají s `request.time`.
+- Bezpečnostně významné časy určuje server. Klient používá
+  `FieldValue.serverTimestamp()` a Rules je porovnávají s `request.time`;
+  Admin SDK operace používají `Timestamp` ze serverových hodin.
 - Firestore `GeoPoint` je níže označen jako `latlng` a čas jako `timestamp`.
 - Veřejné souřadnice mají sedmimístný geohash. Běžný účet ukládá zaokrouhlenou
   polohu, Business účet přesnou ověřenou polohu provozovny.

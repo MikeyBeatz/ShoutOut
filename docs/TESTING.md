@@ -84,6 +84,21 @@ Dočasný Shout byl poté smazaný přes UI a databáze potvrdila `deleted`, nul
 čítač, nepřítomnost komentáře a zachování obou create receipt. Produkce,
 `main`, Rules ani Functions se při této opravě neměnily.
 
+## Lokální serverová logika ukládání Shoutů
+
+`functions/toggle_shout_save.test.js` ověřuje striktní vstup, Auth/App Check,
+ověřený e-mail a očekávaný účet před přístupem k databázi, přesné přechody
+uložit/odebrat a neplatné čítače. Sedm scénářů v
+`functions/toggle_shout_save.integration.test.js` ověřuje atomický celý cyklus,
+historický replay bez dalšího přepnutí nebo čerpání limitu, ban při replay,
+konflikt klíče s jiným cílem, souběžná opakování, odlišné aktéry, společné
+limity s reakcemi při nezávislém namespace receipt, chybná data a účet bez
+částečných zápisů, reset hodinového limitu a zachování interakční politiky.
+Lokálně prošel Functions lint, 29 unit testů a 104 emulatorových testů
+(65 Rules + 39 serverových). Nové scénáře jsou součástí CI přes `test:rules`.
+Testy používají pouze lokální projekt `shoutout-rules-test`. Klientské,
+callable a živé ověření nejsou součástí tohoto omezeného úseku.
+
 ## Živý vývojový test serverového publikování 25. října 2026
 
 Hosting `shoutout-dev-46c81`, commit

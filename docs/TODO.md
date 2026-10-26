@@ -1290,6 +1290,23 @@ dočasný Shout smazaný přes UI; create receipt zůstaly zachované. Tím je
 dokončený vývojový rollout obou reakcí, nikoli celý milník serverové brány.
 Produkční prostředí ani Rules se nemění.
 
+Malý navazující úsek ukládání Shoutů je připravený ve větvi
+`feature/server-shout-saves`: pouze `toggleShoutSaveOperation` a její testy.
+Uložení/odebrání, `savesCount`, společný limit `interaction` (120/h, odstup 1 s)
+a receipt vznikají atomicky. Identita pochází z Auth, očekávaný účet slouží
+jen jako pojistka při změně přihlášení. Replay nekonzumuje další limit ani
+záložku nepřepne znovu a vrací historický výsledek. Nevznikají oznámení ani
+načítání jejich podkladů. Uchované expirované/smazané Shouty a omezení tvorby
+obsahu zachovávají dosavadní politiku interakcí. Poškozené čítače nebo
+chybějící cíl se odmítnou bez částečných zápisů. Budoucí klient musí používat
+realtime stav záložky a počtu, nikoli historickou HTTP odpověď.
+Tento úsek neobsahuje callable export, přibalení do nasazovacího artefaktu,
+klienta, přepínač ani nasazení. Navazující klient a vývojový rollout zůstávají
+samostatným balíkem; produkce, `main` a Firestore Rules se nemění.
+Lokálně prošel Functions lint, 29 unit testů a všech 104 emulatorových testů
+(65 Rules + 39 serverových, z toho 7 nových scénářů ukládání). Nové integrační
+scénáře jsou zařazené i do stávajícího CI příkazu `test:rules`.
+
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
   a hlášení do callable Cloud Functions nebo Cloud Run,
 - u každého požadavku ověřit Firebase Auth, App Check, stav účtu, právní
