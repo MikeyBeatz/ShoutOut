@@ -70,13 +70,20 @@ zpět na nule, dvě čistě testovací notifikace byly odstraněné a dočasný 
 označený `deleted`; původní Test Shout zůstal zachovaný. Ochrana se nevypínala.
 Reakce na komentáře tento přepínač neovládá. Produkce, `main` a Rules se neměnily.
 
-Lokálně připravený nezávislý `serverCommentReactions` (výchozí `false`) volá
+Nezávislý `serverCommentReactions` (výchozí `false`) volá
 `toggleCommentReaction` v `europe-west3` a vyžaduje App Check klíč.
-V dev ani prod konfiguraci není zapnutý a nová Function není nasazená.
+Vlastník schválil vývojové nasazení, aktivaci a testovací obsah včetně úklidu.
+Function ze zdrojů `8a8d05733d00ef0e099723e2453cccf493549f17` prošla CI
+`40408691708` a je ve vývoji `ACTIVE`, revize `togglecommentreaction-00001-dit`,
+Node.js 22, 256 MiB, timeout 15 s, min. 0 / max. 1 instance, concurrency 1.
+Předchozí čtyři Functions zůstaly na stejných revizích. Vývojová konfigurace
+zapíná schválenou aktivaci, produkční ji nezapíná. Hosting a živé testy čekají
+na CI aktivačního commitu.
 Klient nemá přímý fallback, HTTP výsledek ignoruje a počty i vlastní reakci
 zobrazuje z existujících realtime odběrů komentářů a vlastních reakcí.
 Retry drží neměnný klíč v paměti otevřeného detailu; zavření detailu nebo
-obnovení stránky jej nezachová. Nasazení a aktivace vyžadují samostatný souhlas.
+obnovení stránky jej nezachová. Souhlas platí jen pro vývojový projekt/site
+`shoutout-dev-46c81`, nikoli produkci nebo Rules.
 
 Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
 diagnostika získala platný App Check token a callable jej přijala, pak správně

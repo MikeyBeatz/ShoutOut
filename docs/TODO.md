@@ -1257,17 +1257,21 @@ Samostatný namespace receipt brání kolizi stejného klíče s reakcí na Shou
 historická odpověď nesmí aktualizovat UI. Lokálně prošel lint, 26 Functions
 unit testů a 97 emulatorových testů (65 Rules + 32 serverových, z toho
 7 nových scénářů komentářových reakcí), také příprava a syntaxe artefaktu.
-Tato nová Function není nasazená. Klientské napojení je připravené za
-nezávislým `serverCommentReactions`, výchozím `false`; dev ani prod jej
-nezapíná. Společný `ReactionGateway` rozlišuje UID, Shout i komentář, drží
+Function ze zdrojů `8a8d057` prošla CI `40408691708` a po souhlasu vlastníka
+je nasazená pouze ve vývoji, revize `togglecommentreaction-00001-dit`,
+256 MiB, 15 s, max. 1 instance/concurrency 1. Předchozí čtyři Functions se
+nezměnily. Nezávislý `serverCommentReactions` má výchozí `false`; dev konfigurace
+jej po souhlasu zapíná, produkční nikoli. Společný `ReactionGateway`
+rozlišuje UID, Shout i komentář, drží
 neměnný retry klíč v otevřeném detailu a slučuje souběžná kliknutí stejného
 cíle. HTTP výsledek neaplikuje a při chybě nepoužije přímý fallback. Komentáře
 využívají dosavadní realtime dotaz i odběr vlastní reakce. Klientské testy
 ověřují izolaci Shoutu/komentářů, skutečné callable chyby a nejasný retry.
 Prošlo 171 Flutter testů, analýza, formát, všech 17 testů vývojových nástrojů
 a vývojový release build webu.
-CI serverové části `40407708443` prošlo. Další krok po CI celého klienta je
-samostatně schválený vývojový rollout a živé ověření komentářových palců.
+CI serverové části `40407708443` a klienta `40408691708` prošla. Další krok
+je CI aktivačního commitu a již schválený vývojový Hosting a živé ověření
+komentářových palců mezi testovacími účty včetně úklidu.
 Produkční prostředí ani Rules se nemění.
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení

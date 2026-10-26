@@ -37,7 +37,8 @@ Připravené komentářové reakce používají dosavadní realtime seznam komen
 a vlastní reakci; nepřidávají klientské GETy ani listenery. Server navíc
 ověřuje existenci rodičovského Shoutu i bez oznámení, aby nevytvářel reakce
 na osiřelé komentáře. Jde o kontrolu integrity v transakci. Nový klientský
-přepínač je stále vypnutý; provozní dopad této cesty není měřený.
+přepínač vývojová konfigurace zapíná pro schválený rollout, produkční nikoli;
+provozní dopad této cesty není měřený.
 
 ## Životní cyklus a funkce
 

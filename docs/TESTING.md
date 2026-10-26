@@ -56,8 +56,12 @@ a klasifikaci skutečných `FirebaseFunctionsException`: transportní chyby
 drží klíč, definitivní odmítnutí dovolí nový pokus. Celkem prošlo 171 Flutter
 testů, čistá analýza, formát, 17 testů vývojových nástrojů a vývojový release
 build webu. CI serverové části
-`40407708443` prošlo. `serverCommentReactions` má výchozí `false` a žádná
-konfigurace jej nezapíná; živé ověření komentářových reakcí zatím neproběhlo.
+`40407708443` i klienta `40408691708` prošla. Nová Function je po souhlasu
+ve vývoji `ACTIVE`, revize `togglecommentreaction-00001-dit`, se schválenými
+limity. `serverCommentReactions` má výchozí `false`; dev konfigurace zapíná
+schválenou aktivaci, produkční nikoli. Hosting a živé ověření čekají na CI
+aktivačního commitu. Připravený testovací komentář vznikl přes `createComment`
+pod dočasným Business Shoutem a má nulové reakce a platný create receipt.
 
 ## Živý vývojový test serverového publikování 25. října 2026
 

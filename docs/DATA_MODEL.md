@@ -45,8 +45,9 @@ ani přezdívka se do receipt nepřidávají. Reakce zůstává v
 Mění pouze dva čítače příslušného komentáře; rodičovský Shout nepřepisuje.
 Oznámení zachovává existující ID
 `commentReaction_{type}_{shoutId}_{commentId}` a kanonický veřejný profil.
-Tato Function zatím není nasazená. Klientské napojení řídí výchozí vypnutý
-`serverCommentReactions`; žádná konfigurace jej zatím nezapíná.
+Tato Function je nasazená pouze ve vývoji. Klientské napojení řídí
+`serverCommentReactions` (výchozí `false`); vývojová konfigurace jej po
+souhlasu vlastníka zapíná, produkční nikoli.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,

@@ -273,10 +273,13 @@ produkce a reakce na komentáře se tím neaktivují. Klient ignoruje historick�
 HTTP výsledek a UI se řídí realtime daty; po nejasném selhání stejné kliknutí
 opakuje se stejným klíčem v rámci otevřené relace.
 
-Lokálně připravená `toggleCommentReaction` má samostatný selektor
+`toggleCommentReaction` má samostatný selektor
 `--only functions:content:toggleCommentReaction` a stejné malé provozní limity.
-Není nasazená; připravený klient ji používá pouze po zapnutí nezávislého
-`serverCommentReactions`, který je v dev i prod zatím vypnutý. Příprava přes
+Po souhlasu vlastníka je ve vývoji `ACTIVE`, revize
+`togglecommentreaction-00001-dit`, zdroje `8a8d057`, Node.js 22, 256 MiB,
+timeout 15 s, max. jedna instance/concurrency 1. Klient ji používá pouze po
+zapnutí nezávislého `serverCommentReactions`, který vývojová konfigurace po
+souhlasu zapíná; produkční zůstává vypnutá. Příprava přes
 `tools/prepare_content_functions.mjs` ji pouze přibalí; neznamená souhlas
 s jejím nasazením ani s aktualizací ostatních Functions.
 
