@@ -264,6 +264,15 @@ nikoli provozní `timeoutSeconds: 15`. Tento postup popisuje
 [oficiální dokumentace](https://firebase.google.com/docs/functions/tips#avoid_deployment_timeouts_during_initialization).
 Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
 
+Reakce na Shouty mají samostatný selektor
+`--only functions:content:toggleShoutReaction`. Vývojová Function byla po
+souhlasu vlastníka nasazená ze zdrojů `5262784` a je `ACTIVE`, revize
+`toggleshoutreaction-00001-lek`, Node.js 22, 256 MiB, timeout 15 s, max. jedna
+instance/concurrency 1. Vývojovou aktivaci řídí `serverShoutReactions`;
+produkce a reakce na komentáře se tím neaktivují. Klient ignoruje historický
+HTTP výsledek a UI se řídí realtime daty; po nejasném selhání stejné kliknutí
+opakuje se stejným klíčem v rámci otevřené relace.
+
 `functions/index.js` obsahuje jedinou současnou Function
 `enrichShoutGeography`. Trigger `shouts/{shoutId}` v `europe-west1` provede
 serverový reverse geocoding přes Google Geocoding API a doplní moderátorský

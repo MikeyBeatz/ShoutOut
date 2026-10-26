@@ -30,7 +30,8 @@ historické čítače. Otevřený detail přidává jeden sdílený dokumentový
 Shoutu; vlastní reakci sdílí s existujícím odběrem feedu/profilu. Neprovádí
 GET po kliknutí ani nové odběry při překreslení. Dokumentový odběr se nesdílí
 s query feedu a jeho čtení je proto nutné započítat zvlášť; končí zavřením
-detailu. Přepínač je zatím vypnutý a dopad nebyl měřen na účtu Firebase.
+detailu. Přepínač vývojová konfigurace zapíná pro schválený rollout;
+produkční jej nezapíná. Dopad nebyl měřen na účtu Firebase.
 
 ## Životní cyklus a funkce
 

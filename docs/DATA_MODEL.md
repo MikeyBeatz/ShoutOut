@@ -32,7 +32,7 @@ výsledku může být `null` při odebrání reakce. Hash odděluje UID, název 
 klíč požadavku. Receipt vrací historický výsledek, nikoli aktuální snapshot po
 dalších reakcích. Samotný záznam reakce zachovává `type` a `updatedAt` pod
 `shouts/{id}/reactions/{uid}` a sdílený `rateLimits/{uid}/actions/interaction`.
-Operace je exportovaná jako callable, zatím není nasazená. Volitelné vstupní
+Operace je nasazená jako callable pouze ve vývoji. Volitelné vstupní
 `expectedUserId` pouze porovnává očekávaný účet s Auth; neurčuje identitu autora
 ani cestu zápisu. Neshoda se odmítne ještě před přístupem k databázi.
 

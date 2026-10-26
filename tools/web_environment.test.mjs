@@ -11,7 +11,7 @@ const dev = loadConfig('dev');
 
 test('web App Check configuration gates server publishing', () => {
   const withoutAppCheck = { ...dev, serverShoutCreation: false,
-    serverCommentCreation: false, serverPrivateReplyCreation: false };
+    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false };
   delete withoutAppCheck.appCheckSiteKey;
   assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
@@ -36,7 +36,9 @@ const prod = {
 };
 
 test('Shout reactions remain optional and require a boolean and App Check', () => {
-  assert.equal(dev.serverShoutReactions, undefined);
+  const defaults = { ...dev };
+  delete defaults.serverShoutReactions;
+  assert.doesNotThrow(() => validateConfig(defaults, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutReactions: 'true' }, 'dev'));
   const config = { ...dev, serverShoutCreation: false, serverCommentCreation: false,

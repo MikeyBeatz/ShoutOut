@@ -8,7 +8,8 @@ void main() {
   test('Shout reaction gateway defaults off and requires App Check', () {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())
-            as Map<String, dynamic>;
+              as Map<String, dynamic>
+          ..remove('serverShoutReactions');
     expect(WebEnvironment.fromJson(config).serverShoutReactions, isFalse);
     expect(
       WebEnvironment.fromJson({
@@ -79,6 +80,7 @@ void main() {
     final withoutAppCheck = development()
       ..remove('appCheckSiteKey')
       ..['serverCommentCreation'] = false
+      ..['serverShoutReactions'] = false
       ..['serverPrivateReplyCreation'] = false;
     final defaultConfig = development()..remove('serverShoutCreation');
     expect(WebEnvironment.fromJson(defaultConfig).serverShoutCreation, isFalse);
@@ -118,6 +120,7 @@ void main() {
         'serverShoutCreation': false,
         'serverCommentCreation': true,
         'serverPrivateReplyCreation': false,
+        'serverShoutReactions': false,
       },
     ]) {
       expect(() => WebEnvironment.fromJson(invalid), throwsStateError);
@@ -147,6 +150,7 @@ void main() {
           'serverShoutCreation': false,
           'serverCommentCreation': false,
           'serverPrivateReplyCreation': true,
+          'serverShoutReactions': false,
         },
       ]) {
         expect(() => WebEnvironment.fromJson(invalid), throwsStateError);

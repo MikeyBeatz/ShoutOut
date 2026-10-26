@@ -46,14 +46,17 @@ připravenost Storage služby.
 
 ## Konfigurace
 
-Lokální příprava reakcí na Shouty přidává volitelný boolean
+Reakce na Shouty používají volitelný boolean
 `serverShoutReactions` (výchozí `false`). Vyžaduje `appCheckSiteKey` a volá
-`toggleShoutReaction` v `europe-west3` bez přímého fallbacku. V dev ani prod
-konfiguraci zatím není zapnutý; Function zatím není nasazená. Připravený
-export má 256 MiB, timeout 15 s, min. 0 / max. 1 instanci a concurrency 1.
-Před aktivací je nutné samostatně schválit a nasadit Function do
-`shoutout-dev-46c81`, poté zapnout přepínač v navazujícím commitu a schválit
-odpovídající vývojový Hosting. Reakce na komentáře tento přepínač neovládá.
+`toggleShoutReaction` v `europe-west3` bez přímého fallbacku. Vlastník schválil
+26. října vývojové nasazení, aktivaci a testy včetně úklidu. Function ze zdrojů
+`52627843cc1547229d7b40fb9b137b00f97336fc` je `ACTIVE`, revize
+`toggleshoutreaction-00001-lek`, Node.js 22, 256 MiB, timeout 15 s,
+min. 0 / max. 1 instanci a concurrency 1. Předchozí tři Functions zůstaly na
+stejných revizích. `config/dev.json` zapíná schválený rollout; produkční
+konfigurace jej nezapíná. Implementace prošla CI `40370550763`.
+Nasazení navazujícího vývojového klienta a živé ověření zatím čekají na CI
+aktivačního commitu. Reakce na komentáře tento přepínač neovládá.
 
 Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
 diagnostika získala platný App Check token a callable jej přijala, pak správně

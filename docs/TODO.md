@@ -1207,7 +1207,8 @@ Lokálně prošel Functions lint, 23 unit testů a 90 emulatorových testů
 (65 Rules a 25 serverových, z toho 6 nových scénářů reakcí na Shout).
 Navazující krátký úsek 2 přidává callable export a balení Function,
 klientské napojení pouze pro Shouty a volitelný přepínač `serverShoutReactions`.
-Přepínač je výchozí `false` a žádná konfigurace jej nezapíná. Klient nepoužívá
+Přepínač je výchozí `false`; po souhlasu vlastníka jej vývojová konfigurace
+zapíná pro samostatný rollout, produkční nikoli. Klient nepoužívá
 přímý fallback; při nejasném selhání opakuje neměnný požadavek se stejným
 klíčem, souběžné kliknutí na stejný Shout neodešle další toggle. Před změnou
 na opačný palec nejprve dořeší původní nejasný požadavek. Čekající klíče žijí
@@ -1216,11 +1217,16 @@ jen v paměti dané relace, ne napříč obnovením stránky. Definitivní odmí
 i serveru. HTTP výsledek se do UI nepřenáší; feed používá dosavadní realtime
 zdroje a detail při zapnutí přepínače odebírá dokument Shoutu a vlastní reakci
 přes sdílené listenery. Reakce na komentáře nejsou součástí této změny.
-Vývojové nasazení, aktivace a živé ověření jsou samostatný navazující krok
-vyžadující výslovný souhlas; tento úsek žádné externí prostředí nemění.
+Vlastník výslovně schválil samostatné vývojové nasazení a testy včetně úklidu.
+Function ze zdrojů `5262784` je ve `shoutout-dev-46c81` `ACTIVE`, revize
+`toggleshoutreaction-00001-lek` (256 MiB, 15 s, max. 1 instance/concurrency 1).
+Předchozí tři Functions zůstaly na stejných revizích. Aktivační commit zapíná
+klienta pouze ve vývoji; jeho Hosting a živé testy čekají na CI tohoto commitu.
 Lokálně prošlo 167 Flutter testů, analýza i kontrola formátu, Functions lint
 a 24 unit testů, 90 emulatorových testů a 10 testů konfigurace/nástrojů webu.
 Vývojový release build webu prošel; živé chování přepínače dosud ověřené není.
+CI implementace `40370550763` prošlo. Aktivace lokálně prošla 11 testy webové
+konfigurace Flutteru a všemi 16 testy vývojových nástrojů.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 
