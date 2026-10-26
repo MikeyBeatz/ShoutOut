@@ -200,6 +200,16 @@ klíč se stejným obsahem vrátí původní ID, s jiným obsahem se odmítne.
 Přímé klientské zápisy stále chrání současné Rules; jejich uzavření je součást
 pozdějšího řízeného přepnutí po App Check a end-to-end ověření.
 
+Vývojové `toggleShoutReaction` a `toggleCommentReaction` přepínají like/dislike
+ve společném limitu `interaction`. Transakce zapisuje reakci, cílové čítače,
+limit, receipt a případné oznámení. Každá akce má vlastní namespace receipt;
+replay vrací historické čítače a nepřepíná znovu. Klient používá
+`ReactionGateway` s klíčem UID/Shout/volitelný komentář, drží nejasný retry
+a nemá přímý fallback. UI se řídí realtime daty. Detail při serverových
+cestách Shoutů nebo komentářů používá sdílený dokument Shoutu a vlastní
+reakci; `LiveShoutState` přebírá i plný `commentsCount`. Tím funguje změna
+počtu z jiné relace i při stránkování a nezávisí na dokončení lokálního zápisu.
+
 ## Bezpečnostní model
 
 Pro veřejné komentáře a odpovědi používá vývojový web stejný tok přes

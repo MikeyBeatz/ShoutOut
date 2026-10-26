@@ -59,9 +59,22 @@ build webu. CI serverové části
 `40407708443` i klienta `40408691708` prošla. Nová Function je po souhlasu
 ve vývoji `ACTIVE`, revize `togglecommentreaction-00001-dit`, se schválenými
 limity. `serverCommentReactions` má výchozí `false`; dev konfigurace zapíná
-schválenou aktivaci, produkční nikoli. Hosting a živé ověření čekají na CI
-aktivačního commitu. Připravený testovací komentář vznikl přes `createComment`
-pod dočasným Business Shoutem a má nulové reakce a platný create receipt.
+schválenou aktivaci, produkční nikoli. CI aktivace `40409557055` prošlo;
+klient `45a5d02` byl nasazen jako Hosting verze `3fc2f80232d34ff3`, otisky tří
+hlavních souborů odpovídají release buildu. Testovací komentář vznikl přes
+`createComment` pod dočasným Business Shoutem. Autorský i cizí cyklus nahoru
+→ dolů → odebrání prošel kontrolou šesti receipt, limitů, časů, čítačů a
+zachování textu. Vlastní reakce neoznámily autora sobě; cizí vytvořily dvě
+kanonická oznámení s cílem komentáře. Úklid odstranil komentář a dvě čistě
+testovací notifikace, rodiče označil `deleted` a zachoval šest receipt.
+
+Externí odstranění komentáře odhalilo rozdíl mezi hlavičkou Komentáře (0)
+a starou jedničkou u ikony na kartě. `test/live_shout_state_test.dart`
+ověřuje společný realtime zdroj čítačů včetně externího 0 → 1 → 0, počty
+73 → 72 nezávisle na limitu zobrazených komentářů, nezávislou vlastní reakci
+a ukončení obou odběrů. Oprava nepřičítá lokální jedničku ani neaplikuje starší
+výsledek mazání, pokud je zapnuté live zobrazení. Prošlo 173 Flutter testů
+a čistá analýza; vývojové nasazení opravy a živá regrese čekají na její CI.
 
 ## Živý vývojový test serverového publikování 25. října 2026
 

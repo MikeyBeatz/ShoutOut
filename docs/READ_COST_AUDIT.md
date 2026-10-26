@@ -40,6 +40,13 @@ na osiřelé komentáře. Jde o kontrolu integrity v transakci. Nový klientský
 přepínač vývojová konfigurace zapíná pro schválený rollout, produkční nikoli;
 provozní dopad této cesty není měřený.
 
+Při živém testu komentářových reakcí se opravuje čítač komentářů otevřeného
+detailu po smazání z jiné relace. `LiveShoutState` používá `commentsCount`
+z téhož dokumentového odběru jako palce, nikoli délku posledních 50 komentářů
+ani lokální inkrement. V současné vývojové konfiguraci nevzniká další odběr
+ani GET. Sdílený parent/own-reaction odběr se používá také při samostatně
+zapnutém serverovém vytváření nebo reakcích komentářů.
+
 ## Životní cyklus a funkce
 
 `lib/live_data.dart` sdílí aktivní zdroje. Poslední odpojení zruší zdroj i

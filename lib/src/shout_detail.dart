@@ -35,40 +35,43 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   bool _initialFocusScheduled = false;
   bool _sendingComment = false;
   PublicationAttempt _commentAttempt = PublicationAttempt();
-  Stream<({int likes, int dislikes, String? reaction})>? _liveReaction;
+  Stream<LiveShoutState>? _liveShout;
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb && WebEnvironment.current.serverShoutReactions) {
+    if (kIsWeb &&
+        (WebEnvironment.current.serverShoutReactions ||
+            WebEnvironment.current.serverCommentCreation ||
+            WebEnvironment.current.serverCommentReactions)) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
         final ref = FirebaseFirestore.instance
             .collection('shouts')
             .doc(widget.shout.id);
-        _liveReaction = combineLatestValues(
-          ref.liveSnapshots(),
-          ref.collection('reactions').doc(uid).liveSnapshots(),
-          (shout, reaction) => (
-            likes: (shout.data()?['likesCount'] as num?)?.toInt() ?? 0,
-            dislikes: (shout.data()?['dislikesCount'] as num?)?.toInt() ?? 0,
-            reaction: reaction.data()?['type'] as String?,
-          ),
+        _liveShout = watchLiveShoutState(
+          ref.liveSnapshots().map((shout) => shout.data()),
+          ref
+              .collection('reactions')
+              .doc(uid)
+              .liveSnapshots()
+              .map((reaction) => reaction.data()),
         );
       }
     }
   }
 
   Widget _reactionCard() {
-    if (_liveReaction == null) return _shoutCard();
-    return StreamBuilder<({int likes, int dislikes, String? reaction})>(
-      stream: _liveReaction,
+    if (_liveShout == null) return _shoutCard();
+    return StreamBuilder<LiveShoutState>(
+      stream: _liveShout,
       builder: (context, snapshot) {
         final value = snapshot.data;
         if (value != null) {
           widget.shout
             ..likes = value.likes
             ..dislikes = value.dislikes
+            ..comments = value.comments
             ..isLiked = value.reaction == 'like'
             ..isDisliked = value.reaction == 'dislike';
         }
@@ -210,7 +213,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 onSave: (_) => widget.onSave(),
                 onReaction: (_, {required like}) => widget.onReaction(like),
                 onDeleted: (remainingComments) {
-                  if (!mounted) return;
+                  if (!mounted || _liveShout != null) return;
                   setState(() => widget.shout.comments = remainingComments);
                 },
               );
@@ -517,7 +520,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           'text': comment,
           if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
         });
-        widget.shout.comments++;
+        if (_liveShout == null) widget.shout.comments++;
       } else {
         final commentRef = shoutRef.collection('comments').doc();
         final rateRef = _rateLimitReference('comment');
@@ -629,7 +632,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             );
           }
         });
-        widget.shout.comments++;
+        if (_liveShout == null) widget.shout.comments++;
       }
     } on FirebaseException {
       if (mounted) {

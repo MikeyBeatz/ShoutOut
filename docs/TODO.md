@@ -1269,9 +1269,19 @@ využívají dosavadní realtime dotaz i odběr vlastní reakce. Klientské test
 ověřují izolaci Shoutu/komentářů, skutečné callable chyby a nejasný retry.
 Prošlo 171 Flutter testů, analýza, formát, všech 17 testů vývojových nástrojů
 a vývojový release build webu.
-CI serverové části `40407708443` a klienta `40408691708` prošla. Další krok
-je CI aktivačního commitu a již schválený vývojový Hosting a živé ověření
-komentářových palců mezi testovacími účty včetně úklidu.
+CI serverové části `40407708443`, klienta `40408691708` a aktivace
+`40409557055` prošla. Aktivační commit `45a5d02` je na vývojovém Hostingu,
+verze `3fc2f80232d34ff3`, release `1793052566828000` z `2026-10-26T22:09:26.828Z`;
+otisky tří hlavních souborů odpovídají release buildu. Živě prošly palce
+autora komentáře i druhého účtu (nahoru → dolů → odebrání), šest receipt,
+kanonická oznámení, nezměněný text i čítače rodičovského Shoutu. Komentář
+a dvě čistě testovací notifikace byly odstraněné; dočasný parent je `deleted`
+a receipt zůstávají. Externí smazání odhalilo zastaralý čítač komentářů na
+kartě otevřeného detailu. Oprava používá `commentsCount` ze stávajícího
+realtime dokumentu a při živém odběru vynechává lokální inkrementy i starý
+výsledek mazání. Nové testy pokrývají externí změny, počty nad limitem 50
+a zrušení odběrů. Prošlo 173 Flutter testů a čistá analýza; nasazení opravy
+a živá regrese čekají na její CI.
 Produkční prostředí ani Rules se nemění.
 
 - přesunout vytváření Shoutů, komentářů, soukromých odpovědí, reakcí, uložení
