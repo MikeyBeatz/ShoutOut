@@ -55,8 +55,15 @@ Reakce na Shouty používají volitelný boolean
 min. 0 / max. 1 instanci a concurrency 1. Předchozí tři Functions zůstaly na
 stejných revizích. `config/dev.json` zapíná schválený rollout; produkční
 konfigurace jej nezapíná. Implementace prošla CI `40370550763`.
-Nasazení navazujícího vývojového klienta a živé ověření zatím čekají na CI
-aktivačního commitu. Reakce na komentáře tento přepínač neovládá.
+Aktivační commit `eea077a347b17d9a902f23835beb7ab6658a430e` prošel CI
+`40405135293` a byl nasazen pouze na vývojový site. Hosting verze
+`a03706f90b97706c`, release `1793050577697000`, čas `2026-10-26T21:36:17.697Z`.
+Otisky HTML, JavaScriptu a veřejné konfigurace odpovídají lokálnímu release
+buildu. Předchozí Hosting verze pro návrat je `ebede43dc57e569c`.
+Požadavek bez App Check byl odmítnut 401. Automatická relace při obnovení
+hlásila `appCheck/recaptcha-error`; první pokus o reakci nevytvořil receipt.
+Živý test s vlastníkem probíhá, ochrana se nevypínala. Reakce na komentáře
+tento přepínač neovládá. Produkce, `main` a Firestore Rules se neměnily.
 
 Aktuální vývojové nastavení po opravě Service Usage a IAM: uživatelská
 diagnostika získala platný App Check token a callable jej přijala, pak správně

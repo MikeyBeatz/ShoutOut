@@ -18,7 +18,12 @@ sloučení souběžných kliknutí, nezávislé cíle a účty a změnu účtu p
 i během něj. Functions test kontroluje očekávaný účet před přístupem k DB;
 emulátor prověřuje úspěšnou akci s tímto polem. Konfigurační testy Dart i Node
 ověřují výchozí vypnutí, typ přepínače a povinný App Check.
-Živý test zatím neproběhl. Po schváleném vývojovém rollout ověřit přidání,
+Schválený vývojový rollout klienta `eea077a` prošel CI `40405135293` a byl
+nasazen jako Hosting verze `a03706f90b97706c`; otisky tří hlavních souborů
+odpovídají release buildu. Function `toggleshoutreaction-00001-lek` je aktivní
+se schválenými limity. Požadavek bez App Check vrací 401. Automatická relace
+hlásila `appCheck/recaptcha-error`; první pokus nevytvořil receipt. Živý test
+s vlastníkem probíhá. Zbývá ověřit přidání,
 změnu i odebrání palce, realtime čítače a vlastní palec ve feedu i otevřeném
 detailu, druhého uživatele, retry po výpadku bez dvojího přepnutí, limit a
 oznámení. Odpověď HTTP obsahuje historické čítače a klient ji musí ignorovat.

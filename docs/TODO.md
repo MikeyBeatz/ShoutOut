@@ -1220,8 +1220,14 @@ přes sdílené listenery. Reakce na komentáře nejsou součástí této změny
 Vlastník výslovně schválil samostatné vývojové nasazení a testy včetně úklidu.
 Function ze zdrojů `5262784` je ve `shoutout-dev-46c81` `ACTIVE`, revize
 `toggleshoutreaction-00001-lek` (256 MiB, 15 s, max. 1 instance/concurrency 1).
-Předchozí tři Functions zůstaly na stejných revizích. Aktivační commit zapíná
-klienta pouze ve vývoji; jeho Hosting a živé testy čekají na CI tohoto commitu.
+Předchozí tři Functions zůstaly na stejných revizích. Aktivační commit `eea077a`
+prošel CI `40405135293` a je nasazený pouze na vývojovém Hostingu, verze
+`a03706f90b97706c`, release `1793050577697000` z `2026-10-26T21:36:17.697Z`.
+Otisky HTML, JavaScriptu a konfigurace odpovídají lokálnímu release buildu.
+Bez App Check endpoint správně vrací 401. Automatická relace hlásila
+`appCheck/recaptcha-error` a první pokus nevytvořil receipt; probíhá ruční
+ověření s vlastníkem. Test Shout je nyní po expiraci a přístupný v Mé shouty
+→ Expirované; současná Rules i server dovolují reakce na uchovaný Shout.
 Lokálně prošlo 167 Flutter testů, analýza i kontrola formátu, Functions lint
 a 24 unit testů, 90 emulatorových testů a 10 testů konfigurace/nástrojů webu.
 Vývojový release build webu prošel; živé chování přepínače dosud ověřené není.
