@@ -13,7 +13,7 @@
     "inspect:integration": "node inspect_integration_scenario.mjs",
     "verify:moderator-client": "node verify_moderator_client_access.mjs",
     "seed:moderation-queue": "node seed_moderation_queue.mjs",
-    "test:rules": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 rules/firestore.rules.test.mjs ../functions/create_shout.integration.test.js ../functions/create_comment.integration.test.js ../functions/create_private_reply.integration.test.js\""
+    "test:rules": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 rules/firestore.rules.test.mjs ../functions/create_shout.integration.test.js ../functions/create_comment.integration.test.js ../functions/create_private_reply.integration.test.js ../functions/toggle_shout_reaction.integration.test.js\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",

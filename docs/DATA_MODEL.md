@@ -25,6 +25,15 @@ jejích účastníků, nepřidává nové pole do uložené soukromé odpovědi.
 musí stále odkazovat na existující komentář, stejně jako v současných Rules.
 Úložiště zpráv a pravidla jejich čtení se nemění. Callable je nasazená pouze ve vývoji.
 
+Lokální serverová logika `toggleShoutReactionOperation` připravuje akci
+`toggleShoutReaction`. Její `serverOperations/{hash}` obsahuje `userId`, `action`,
+`fingerprint`, `shoutId`, `result: {type, likes, dislikes}` a `createdAt`. Typ
+výsledku může být `null` při odebrání reakce. Hash odděluje UID, název akce a
+klíč požadavku. Receipt vrací historický výsledek, nikoli aktuální snapshot po
+dalších reakcích. Samotný záznam reakce zachovává `type` a `updatedAt` pod
+`shouts/{id}/reactions/{uid}` a sdílený `rateLimits/{uid}/actions/interaction`.
+Tato operace zatím není exportovaná jako callable ani nasazená.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v

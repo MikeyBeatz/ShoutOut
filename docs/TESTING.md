@@ -29,6 +29,17 @@ Souběh a idempotenci pokrývají lokální emulatorové testy uvedené níže.
 
 ## Automatické vrstvy
 
+`functions/toggle_shout_reaction.test.js` testuje přechody přidat/změnit/odebrat,
+odmítnutí podvržených polí a existující limit 120/h s odstupem 1 s. Šest scénářů
+v `toggle_shout_reaction.integration.test.js` běží pouze v izolovaném emulatoru
+`shoutout-rules-test` na `127.0.0.1:8080`: souběžná retry, starý retry po novější
+akci, více aktérů nad jedním Shoutem, společný interaction limit, atomické čítače
+a oznámení, preference a poškozená data. Ověřují také zachování současné politiky
+pro omezení tvorby obsahu a uchované neaktivní Shouty. Bez emulatoru jsou
+integrační testy přeskočené. Prošlo 23 unit testů Functions, lint a všech 90
+emulatorových testů (65 Rules + 25 serverových). Klient ani nový callable zatím neexistují;
+živé ověření reakcí tímto krokem není prokázané.
+
 `functions/create_private_reply.integration.test.js` přidává osm scénářů pro
 všechny tři druhy cílů, kanonické identity (včetně Business pobočky), ověření
 účastníků, cizí Shout, souběžná retry, cooldown, preference a slučování

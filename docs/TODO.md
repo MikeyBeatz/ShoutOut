@@ -1190,6 +1190,24 @@ Po ověření se jednou transakcí odstranily 3 soukromé zprávy, 2 veřejné
 testovací komentáře a 4 prokazatelně čistě testovací agregáty oznámení. Původní
 Shout zůstal zachovaný; databázový čítač i feed jsou zpět na výchozí nule.
 Idempotentní receipt zůstávají zachované; jejich retence je nadále otevřená.
+
+Krátký úsek 1 pro reakce na Shouty je implementovaný ve větvi
+`feature/server-shout-reactions`: `functions/toggle_shout_reaction.js` obsahuje
+samostatnou serverovou operaci pro kliknutí na like/dislike. Přidání, změna
+i odebrání, čítače, společný limit `interaction` a receipt se zapisují atomicky.
+Zůstává 120 interakcí/h a odstup 1 s, sdílený s dosavadními reakcemi a uložením.
+Oznámení se vytváří jen při přidání nebo změně, respektuje preference a čerpá
+jméno z veřejného profilu. Vlastní reakce a odebrání oznámení nevytvářejí.
+Současné Rules dovolují reakce i na uchované neaktivní Shouty a při omezení
+tvorby obsahu; tento úsek tato produktová pravidla nemění.
+Retry stejného klíče neprovede toggle znovu a vrací historický výsledek z receipt.
+Budoucí klient musí čítače i vlastní reakci zobrazovat z realtime zdrojů;
+historická odpověď nesmí přepsat novější stav po akci téhož ani jiného uživatele.
+Lokálně prošel Functions lint, 23 unit testů a 90 emulatorových testů
+(65 Rules a 25 serverových, z toho 6 nových scénářů reakcí na Shout).
+Úsek zatím neobsahuje callable export, klienta, přepínač, reakce na komentáře
+ani nasazení. Další krátký úsek: callable a klientské napojení pouze pro Shouty;
+vývojové nasazení a živé ověření budou samostatný navazující krok.
 Firestore Rules se nemění; uzavření přímého vytváření a retence receipt
 zůstávají společnými navazujícími podmínkami celé serverové brány.
 
