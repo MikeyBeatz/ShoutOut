@@ -99,15 +99,30 @@ Prošlo 181 Flutter testů, čistá analýza a formát, 18 testů vývojových n
 Functions lint a 29 unit testů, 104 emulatorových testů (65 Rules + 39 serverových)
 a release build webu pro dev. Příprava artefaktu zahrnuje `toggle_shout_save.js`;
 syntaxe prošla. Lokální import callable exportu ověřil region, limity a odmítnutí
-Auth/App Check přes handler bez databázového zápisu. HTTP middleware nebyl živě
-testovaný. Lokální prostředí použilo Node 24.13.1; CI používá podporovaný Node 22.
+Auth/App Check přes handler bez databázového zápisu. Lokální prostředí použilo
+Node 24.13.1; CI používá podporovaný Node 22.
 CI `40914821162` pro `5fceccb` prošlo. Po souhlasu byla nasazená pouze Function
 do vývoje, revize `toggleshoutsave-00001-fal`. Její limity byly ověřené přes API
-a skutečný HTTP požadavek bez App Check byl odmítnut 401. Aktivační web zatím
-není nasazený; přepínač v dev konfiguraci připravuje schválenou aktivaci,
-v produkční je vypnutý. Dosavadní provozní revize ostatních Functions se nezměnily.
-Živé uložení/odebrání oběma rolemi, receipt, společný limit a úklid zbývají
-pro samostatně schválený vývojový rollout.
+a skutečný HTTP požadavek bez App Check byl odmítnut 401. Aktivační commit
+`02b8b2846c6b4488188e1f58f84fb06db3320e52` prošel CI `40916381788` a byl nasazený
+jako Hosting verze `8abd91f97aada32f`, release `1793293260043000`. Otisky tří
+hlavních souborů souhlasí; přepínač je zapnutý pouze ve vývojové konfiguraci.
+Dosavadní provozní revize ostatních Functions se nezměnily.
+
+Běžný účet uložil vlastní uchovaný Test Shout v seznamu (0 → 1), poté jej odebral
+v otevřeném detailu bez obnovení; seznam i databáze potvrdily návrat na 0.
+TestBusiness uložil cizí dočasný aktivní Shout, ověřil jeho přítomnost ve
+Sledované → Shouty a odebral jej přímo v detailu. Tlačítko se živě přepnulo zpět
+na Uložit a položka zmizela ze seznamu uložených. Čtyři nové receipt odpovídají
+čtyřem akcím, výsledkům, časům záložek a `lastAt`/`lastEventId` ve společném
+interaction bucketu; ostatní pole Shoutů se nezměnila. Živý souběh, nejasný retry
+a vyčerpání hodinového limitu nebyly simulované; pokrývají je automatické testy.
+Lokálně evidované Business přihlášení bylo odmítnuté z nepotvrzené příčiny,
+vlastník se přihlásil ručně; žádné heslo ani ochrana se neměnily.
+Úklid ověřil nepřítomnost obou záložek a nulové čítače, původní Test Shout
+zachoval a dočasný „MVP ukladani 29.10.“ označil `deleted` s kontrolou aktuální
+verze dokumentu a prázdných podkolekcí. Čtyři receipt zůstaly zachované.
+Produkce, `main` a Rules se nezměnily.
 
 ## Lokální serverová logika ukládání Shoutů
 

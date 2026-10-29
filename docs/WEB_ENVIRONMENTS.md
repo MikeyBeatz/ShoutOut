@@ -58,8 +58,17 @@ Zdroj `5fceccb98f145174acd7917b26356d04e65604a1` prošel CI `40914821162`;
 nasazená Function je `ACTIVE`, revize `toggleshoutsave-00001-fal`, Node.js 22,
 256 MiB, 15 s, min. 0 / max. 1 instance a concurrency 1. Požadavek bez App Check
 vrací 401; ostatních pět Functions zůstalo na předchozích revizích.
-Dev konfigurace připravuje schválenou aktivaci `serverShoutSaves`; aktivační
-Hosting a živé testy zatím zbývají. Produkční konfigurace přepínač nezapíná.
+Aktivační commit `02b8b2846c6b4488188e1f58f84fb06db3320e52` prošel CI
+`40916381788` a je nasazený pouze na vývojovém Hostingu: verze `8abd91f97aada32f`,
+release `1793293260043000`, čas UTC `2026-10-29T17:01:00.043Z`. Otisky HTML,
+JavaScriptu a konfigurace odpovídají lokálnímu release buildu. Předchozí verze
+pro návrat je `a6756b787e4655de`. `serverShoutSaves` je ve vývoji zapnutý;
+produkční konfigurace jej nezapíná. Běžný účet ověřil vlastní uchovaný Shout
+a Business cizí aktivní Shout včetně seznamu uložených a otevřeného detailu.
+Databáze potvrdila čtyři serverové receipt, kanonické časy, společné rate eventy,
+počty 0 → 1 → 0 a zachování ostatních polí. Obě testovací záložky jsou odstraněné,
+dočasný Shout má `deleted`, původní Test Shout je zachovaný a receipt se ponechaly.
+Produkce, `main` a Rules se nezměnily; samostatný souhlas pokrýval tento rollout.
 
 Reakce na Shouty používají volitelný boolean
 `serverShoutReactions` (výchozí `false`). Vyžaduje `appCheckSiteKey` a volá

@@ -22,13 +22,12 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
-Serverová logika ukládání a její testy jsou hotové v commitu cc62831.
-Navazující klient a export `5fceccb` prošly CI. Function je po souhlasu aktivní
-ve vývoji; aktivační web ve větvi `feature/server-shout-save-client` a živý test zbývají.
+Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace
+`02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.
 [Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).
 
-1. Po kontrolách a CI dokončit schválený vývojový rollout ukládání a živé testy.
-2. Doplnit serverové hlášení obsahu a zbývající změny čítačů včetně mazání komentářů.
+1. Doplnit serverové hlášení obsahu.
+2. Přesunout zbývající změny čítačů včetně mazání komentářů.
 3. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
 4. Dokončit prostorové dotazy a stránkování feedu.
 5. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.

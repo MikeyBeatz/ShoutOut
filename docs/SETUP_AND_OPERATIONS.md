@@ -268,8 +268,10 @@ pouze přes `--only functions:content:toggleShoutSave` v projektu
 `shoutout-dev-46c81`. Má stejné limity jako reakce (max. 1 instance, concurrency 1,
 256 MiB, 15 s). Dne 29. října byl po souhlasu nasazený z `5fceccb`, revize
 `toggleshoutsave-00001-fal`; App Check odmítnutí 401 je ověřené. Přepínač
-`serverShoutSaves` je výchozí vypnutý; dev konfigurace připravuje schválenou
-aktivaci, která ještě vyžaduje úspěšné kontroly a Hosting rollout.
+`serverShoutSaves` je výchozí vypnutý; schválená vývojová aktivace `02b8b28`
+prošla CI `40916381788` a je nasazená jako Hosting `8abd91f97aada32f`.
+Živý cyklus uložení/odebrání prošel běžným i Business účtem včetně úklidu;
+podrobnosti a návratová verze jsou v [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po
