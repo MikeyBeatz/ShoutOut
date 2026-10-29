@@ -6,6 +6,52 @@ import 'package:shoutout/web_environment.dart';
 
 void main() {
   test(
+    'content reports default off and independently require a boolean and App Check',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+                as Map<String, dynamic>
+            ..remove('serverContentReports');
+      expect(WebEnvironment.fromJson(config).serverContentReports, isFalse);
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverContentReports': true,
+        }).serverContentReports,
+        isTrue,
+      );
+      for (final invalid in [null, 'true', 1, <String, dynamic>{}]) {
+        expect(
+          () => WebEnvironment.fromJson({
+            ...config,
+            'serverContentReports': invalid,
+          }),
+          throwsStateError,
+        );
+      }
+      final withoutAppCheck = {
+        ...config,
+        'serverShoutCreation': false,
+        'serverCommentCreation': false,
+        'serverPrivateReplyCreation': false,
+        'serverShoutReactions': false,
+        'serverCommentReactions': false,
+        'serverShoutSaves': false,
+      }..remove('appCheckSiteKey');
+      expect(
+        WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
+        isFalse,
+      );
+      expect(
+        () => WebEnvironment.fromJson({
+          ...withoutAppCheck,
+          'serverContentReports': true,
+        }),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'Shout saves default off and independently require App Check and a boolean',
     () {
       final config =

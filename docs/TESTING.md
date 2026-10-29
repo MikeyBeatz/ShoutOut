@@ -9,6 +9,40 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Lokální příprava obsahových hlášení 29. října 2026
+
+`functions/create_content_report.test.js` ověřuje pouze tři povolené druhy
+cílů, odmítnutí podvržené identity, soukromého snapshotu, stavu, času a priority,
+Unicode délku důvodu, Auth/App Check, očekávaný účet a hranice společného limitu
+20/den s odstupem jedné minuty. Sedm scénářů v
+`create_content_report.integration.test.js` ověřuje všechna tři stávající
+schémata a ID, důvěryhodný soukromý snapshot jen pro příjemce, zákaz vlastních
+hlášení a clearance, neexistující cíle, nezměněné čítače, souběh stejných i různých
+klíčů, nezávislé reportéry, cooldown a sdílení report/bug-report bucketu, denní
+reset a neplatné účty či poškozená data bez částečných zápisů. Replay po moderaci
+nezmění uzavřený případ ani limit; replay po banu je odmítnutý. Receipt nekopíruje
+soukromý text ani důvod hlášení. Testy běží jen v projektu `shoutout-rules-test`
+s přesným lokálním emulator hostem; bez něj jsou integrační testy přeskočené.
+
+`test/report_gateway_test.dart` pokrývá neměnný retry, změnu důvodu, rozlišení
+cílů a účtů, sloučení rychlých odeslání, chybu sdílenou oběma volajícími a změnu
+účtu/odhlášení. Klient odešle pouze cíl, důvod, očekávaný účet a klíč; nemůže dodat
+autora nebo soukromý snapshot. Konfigurace v Dartu i Node testuje výchozí vypnutí,
+booleany včetně odmítnutí explicitního null a samostatnou podmínku App Check.
+
+Prošlo 189 Flutter testů, 32 Functions unit testů, lint Functions a 19 testů
+vývojových nástrojů. Celá emulatorová sada prošla 111/111 (65 Rules + 46 serverových).
+Prošly také analýza, formát a release build vývojového webu. Po sjednocení
+validace typu přepínače byly cílené konfigurační testy i analýza/build opakované
+úspěšně; šlo pouze o lokální přípravu, nikoli nasazení.
+Lokální import callable ověřil region, provozní limity a odmítnutí chybějící
+identity či App Check přes handler; skutečný HTTP middleware a moderační UI
+zatím živě ověřené nejsou. Artefakt zahrnuje `create_content_report.js` a syntaxe
+prošla. `serverContentReports` zůstává vypnutý v dev/prod; Function není nasazená.
+Hlášení účtů a technických chyb zůstávají na současné cestě. Před nasazením
+vyžadovat CI konkrétního commitu a samostatný souhlas s vývojovým rolloutem,
+testovacími případy v moderační frontě a úklidem.
+
 ## Lokální příprava serverových reakcí 26. října 2026
 
 Lokální příprava serverových reakcí na Shouty (26. října):

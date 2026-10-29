@@ -21,6 +21,14 @@ class ShoutDetailPage extends StatefulWidget {
 }
 
 class _ShoutDetailPageState extends State<ShoutDetailPage> {
+  late final _reportGateway = ReportGateway(
+    currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+    send: (request) async {
+      await FirebaseFunctions.instanceFor(
+        region: 'europe-west3',
+      ).httpsCallable('createContentReport').call(request.toPayload());
+    },
+  );
   final _commentController = TextEditingController();
   final _commentFocusNode = FocusNode();
   final _commentsScrollController = ScrollController();
@@ -794,6 +802,41 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     String reportId,
     Map<String, Object?> data,
   ) async {
+    if (kIsWeb && WebEnvironment.current.serverContentReports) {
+      final targetType = switch (collection) {
+        'reports' => 'shout',
+        'commentReports' => 'comment',
+        'privateReplyReports' => 'privateReply',
+        _ => throw StateError('Unsupported report collection.'),
+      };
+      try {
+        await _reportGateway.submit(
+          userId: data['reporterId'] as String,
+          shoutId: data['shoutId'] as String,
+          targetType: targetType,
+          targetId:
+              (targetType == 'comment'
+                      ? data['commentId']
+                      : data['privateReplyId'])
+                  as String?,
+          reason: data['reason'] as String,
+        );
+        return true;
+      } on ReportAccountChanged {
+        return false;
+      } on FirebaseException {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
+              ),
+            ),
+          );
+        }
+        return false;
+      }
+    }
     final firestore = FirebaseFirestore.instance;
     final reportRef = firestore.collection(collection).doc(reportId);
     final rateRef = _rateLimitReference('report');

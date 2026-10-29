@@ -208,7 +208,7 @@ funkcích `validRateLimitWrite` a `consumedRate` ve `firestore.rules`.
 
 | Kolekce | Účel |
 |---|---|
-| `reports` | Hlášení Shoutu se snapshotem důležitých údajů a stavem zpracování. |
+| `reports` | Hlášení Shoutu s odkazem na cíl, důvodem a stavem zpracování. |
 | `commentReports` | Hlášení komentáře. |
 | `privateReplyReports` | Prioritní hlášení soukromé odpovědi, které smí založit její příjemce. |
 | `accountReports` | Jedno otevřené hlášení cílového účtu na dvojici reporter–target. |
@@ -225,6 +225,16 @@ funkcích `validRateLimitWrite` a `consumedRate` ve `firestore.rules`.
 Podrobné stavy, hierarchie rolí, regionální rozsah a postup zpracování jsou v
 `INTERNAL_MODERATION.md`. Schémata reportů a sankcí jsou záměrně přísně
 validována pravidly a nemají se reimplementovat jen podle této tabulky.
+
+Lokálně připravená callable `createContentReport` zachovává ID
+`{reporterUid}_{shoutId}` nebo `{reporterUid}_{shoutId}_{childId}` a stávající
+pole těchto tří obsahových kolekcí. Privátní snapshot `authorId`/`text` čte
+server z původní zprávy a dovolí jej pouze příjemci. Stav je `open`, priorita
+soukromého hlášení `high`, čas je serverový. Hlášení, společný rate bucket
+`report` a receipt zapisuje jedna transakce. Receipt obsahuje odkaz na případ
+a hash vstupu, nikoli důvod nebo soukromý text. Jeho historický replay případ
+znovu neotevře. Existence clearance brání novému hlášení. Function není dosud
+nasazená a klientský přepínač `serverContentReports` je vypnutý.
 
 ## Indexy, TTL a Storage
 

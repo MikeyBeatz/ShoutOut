@@ -43,6 +43,7 @@ import 'registration_timing.dart';
 import 'publication_attempt.dart';
 import 'reaction_gateway.dart';
 import 'save_gateway.dart';
+import 'report_gateway.dart';
 import 'live_shout_state.dart';
 
 part 'src/create_shout.dart';

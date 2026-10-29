@@ -46,6 +46,17 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Hlášení Shoutů, komentářů a soukromých odpovědí má volitelný boolean
+`serverContentReports` (výchozí `false`), který vyžaduje App Check klíč.
+Klient pak volá `createContentReport` v `europe-west3` a při chybě nepřechází
+na přímý Firestore zápis. Odešle pouze cíl, důvod, očekávaný účet a klíč operace;
+identitu, časy, stav a soukromý snapshot přidává server. Nejasný pokus se stejným
+důvodem drží neměnný klíč po dobu otevřeného detailu; změna důvodu má nový klíč,
+ale stávající deterministické ID hlášení brání přepsání již založeného případu.
+Lokální příprava 29. října není nasazená a dev/prod konfigurace přepínač nezapínají.
+Hlášení účtů a technických chyb nejsou součástí této migrace. Moderační kolekce,
+schémata, clearance i společný limit 20 hlášení/den s odstupem 1 minuty se zachovávají.
+
 Ukládání Shoutů má volitelný boolean `serverShoutSaves` (výchozí `false`).
 Při zapnutí vyžaduje `appCheckSiteKey` a volá `toggleShoutSave` v `europe-west3`;
 chyba callable nevede k přímému zápisu do Firestore. Klient ignoruje historický

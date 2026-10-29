@@ -9,6 +9,21 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('content reports default off and independently require a boolean and App Check', () => {
+  const config = { ...dev };
+  delete config.serverContentReports;
+  assert.doesNotThrow(() => validateConfig(config,'dev'));
+  assert.doesNotThrow(() => validateConfig({...config,serverContentReports:true},'dev'));
+  for (const invalid of [null, 'true', 1, {}]) {
+    assert.throws(() => validateConfig({...config,serverContentReports:invalid},'dev'));
+  }
+  const withoutAppCheck = {...config,serverShoutCreation:false,serverCommentCreation:false,
+    serverPrivateReplyCreation:false,serverShoutReactions:false,serverCommentReactions:false,serverShoutSaves:false};
+  delete withoutAppCheck.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(withoutAppCheck,'dev'));
+  assert.throws(() => validateConfig({...withoutAppCheck,serverContentReports:true},'dev'));
+});
+
 test('Shout saves default off and independently require App Check and a boolean', () => {
   const defaults = { ...dev };
   delete defaults.serverShoutSaves;

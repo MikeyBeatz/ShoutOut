@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverContentReports !== undefined && typeof config.serverContentReports !== 'boolean') {
+    throw new Error('serverContentReports must be a boolean.');
+  }
+  if (config.serverContentReports === true && !config.appCheckSiteKey) {
+    throw new Error('Server content reports require web App Check.');
+  }
   if (config.serverShoutSaves !== undefined && typeof config.serverShoutSaves !== 'boolean') {
     throw new Error('serverShoutSaves must be a boolean.');
   }
