@@ -1,10 +1,10 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Přehled sestaven 29. října 2026. Kódový základ je commit
-`cc62831c5fe999721b39a0ce9c1a2fe0a28ded5d` ve větvi `feature/server-shout-saves`.
-Dokumentační větev `feature/docs-project-overview` na něj navazuje.
-Provozní údaje níže jsou poslední ověřený stav z 26. října; tato reorganizace
-neprovádí nové cloudové ověření, nasazení ani změnu dat.
+Aktualizováno 29. října 2026. Aktuální práce je ve větvi
+`feature/server-shout-save-client`; navazuje na serverovou operaci `cc62831`
+a reorganizaci dokumentace zakončenou `29b3722`.
+Provozní údaje níže jsou poslední ověřený stav z 26. října; lokální příprava
+klienta ukládání neprovádí nasazení ani změnu cloudových dat.
 
 ## Jak přehled používat
 
@@ -43,13 +43,14 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Soukromá odpověď | Hotovo | Hotovo; `createprivatereply-00001-baw` |
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
-| Uložení/odebrání Shoutu | Jen serverová operace a testy v `cc62831` | Chybí export, balení, klient, přepínač, nasazení a živý test. |
+| Uložení/odebrání Shoutu | Serverová operace, callable export, balení, klient, výchozí vypnutý přepínač a testy připravené lokálně | Nenasazené; zbývá schválený rollout a živý test. |
 
 Pět nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
 Pět odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
 produkční konfigurace tyto serverové cesty nezapíná.
-Ukládání v klientu stále používá původní Firestore transakci.
+Nový přepínač `serverShoutSaves` je výchozí `false` a v dev/prod konfiguraci
+není zapnutý. Aplikace proto stále používá původní ukládání přes Firestore.
 
 Reakce byly ověřené běžným i Business účtem včetně přidání, změny, odebrání,
 receipt, limitů a oznámení. Oprava detailu ověřila 0 → 1 → 0 také při externím
@@ -64,6 +65,12 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Poslední ověření a důkazy
 
+- Klient ukládání 29. října: 181 Flutter testů, čistá analýza a formát,
+  18 testů vývojových nástrojů, Functions lint a 29 unit testů, 104 emulatorových
+  testů (65 Rules + 39 serverových), release build vývojového webu a příprava
+  Functions artefaktu. CI této navazující větve zatím není potvrzené.
+- Lokální import exportu `toggleShoutSave` ověřil region/provozní limity a
+  odmítnutí chybějící Auth nebo App Check přes handler; nejde o živý HTTP test.
 - Serverová logika ukládání: lint, 29 unit testů a 104 emulatorových testů
   (65 Rules + 39 serverových), z toho 7 nových scénářů ukládání.
 - [CI ukládání `40414165546`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40414165546) prošlo pro `cc62831`.
@@ -75,12 +82,14 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Navázat na `functions/toggle_shout_save.js`: doplnit callable export a balení,
-klientské napojení, výchozí vypnutý přepínač a testy retry/realtime stavu.
-Receipt vrací historický výsledek, který nesmí přepsat aktuální záložku a čítač.
-Zachovat společný limit interakcí 120/h a odstup 1 s. Nasazení ukládání
-nebylo schválené; pro konkrétní vývojový rollout získat samostatný souhlas.
-Další práci seskupovat do souvisejících ověřitelných balíků.
+Po úspěšných lokálních kontrolách a CI předložit konkrétní commit pro nasazení
+pouze `toggleShoutSave` do `shoutout-dev-46c81`, poté samostatnou aktivaci
+`serverShoutSaves` a vývojový Hosting. Získat výslovný souhlas s rolloutem a testy.
+Živě ověřit uložit/odebrat běžným i Business účtem, seznam i otevřený detail,
+serverový čítač, receipt, společný limit a úklid testovacích záložek.
+Klient ignoruje historický HTTP výsledek; retry zachovává neměnný klíč v paměti
+relace domovské obrazovky. Obnovení stránky jej nezachová. Limity zůstávají
+120 interakcí/h a odstup 1 s. Produkce, main ani Rules nejsou součástí rolloutu.
 
 ## Rozhodnutí, nejistoty a hranice oprávnění
 

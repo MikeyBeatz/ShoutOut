@@ -18,6 +18,14 @@ enum _LocationRefreshResult {
 
 class _ShoutOutHomeState extends State<ShoutOutHome> {
   final List<Shout> _shouts = [];
+  late final _saveGateway = SaveGateway(
+    currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+    send: (request) async {
+      await FirebaseFunctions.instanceFor(
+        region: 'europe-west3',
+      ).httpsCallable('toggleShoutSave').call(request.toPayload());
+    },
+  );
   late final _reactionGateway = ReactionGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
@@ -380,6 +388,16 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _toggleSaved(Shout shout) async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
+    if (kIsWeb && WebEnvironment.current.serverShoutSaves) {
+      try {
+        await _saveGateway.toggle(userId: uid, shoutId: shout.id);
+      } on SaveAccountChanged {
+        return;
+      } on FirebaseException {
+        if (mounted) _showWriteFailure();
+      }
+      return;
+    }
     final firestore = FirebaseFirestore.instance;
     final shoutRef = firestore.collection('shouts').doc(shout.id);
     final actualSaveRef = shoutRef.collection('saves').doc(uid);

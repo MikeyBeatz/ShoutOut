@@ -84,6 +84,27 @@ Dočasný Shout byl poté smazaný přes UI a databáze potvrdila `deleted`, nul
 čítač, nepřítomnost komentáře a zachování obou create receipt. Produkce,
 `main`, Rules ani Functions se při této opravě neměnily.
 
+## Lokální klient ukládání Shoutů 29. října 2026
+
+`test/save_gateway_test.dart` pokrývá ztracené potvrzení se stejným neměnným
+klíčem, nový klíč po potvrzení nebo definitivním odmítnutí, transportní chyby,
+sloučení rychlých kliknutí včetně chyby sdílené oběma volajícími, nezávislé cíle,
+změnu účtu a odhlášení. `test/live_shout_state_test.dart` navíc ověřuje samostatné
+změny vlastní záložky a celkového počtu od dalších účtů a ukončení všech tří
+odběrů. Detail používá tyto live hodnoty, nikoli historický výsledek callable.
+Testy konfigurace v Dartu i Node ověřují výchozí vypnutí `serverShoutSaves`,
+boolean typ a nezávislou podmínku App Check.
+
+Prošlo 181 Flutter testů, čistá analýza a formát, 18 testů vývojových nástrojů,
+Functions lint a 29 unit testů, 104 emulatorových testů (65 Rules + 39 serverových)
+a release build webu pro dev. Příprava artefaktu zahrnuje `toggle_shout_save.js`;
+syntaxe prošla. Lokální import callable exportu ověřil region, limity a odmítnutí
+Auth/App Check přes handler bez databázového zápisu. HTTP middleware nebyl živě
+testovaný. Lokální prostředí použilo Node 24.13.1; CI používá podporovaný Node 22.
+Function ani nový klient nebyly nasazené, přepínač v dev/prod není zapnutý.
+Živé uložení/odebrání oběma rolemi, receipt, společný limit a úklid zbývají
+pro samostatně schválený vývojový rollout.
+
 ## Lokální serverová logika ukládání Shoutů
 
 `functions/toggle_shout_save.test.js` ověřuje striktní vstup, Auth/App Check,

@@ -6,6 +6,46 @@ import 'package:shoutout/web_environment.dart';
 
 void main() {
   test(
+    'Shout saves default off and independently require App Check and a boolean',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+                as Map<String, dynamic>
+            ..remove('serverShoutSaves');
+      expect(WebEnvironment.fromJson(config).serverShoutSaves, isFalse);
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverShoutSaves': true,
+        }).serverShoutSaves,
+        isTrue,
+      );
+      expect(
+        () => WebEnvironment.fromJson({...config, 'serverShoutSaves': 'true'}),
+        throwsStateError,
+      );
+      final withoutAppCheck = {
+        ...config,
+        'serverShoutCreation': false,
+        'serverCommentCreation': false,
+        'serverPrivateReplyCreation': false,
+        'serverShoutReactions': false,
+        'serverCommentReactions': false,
+      }..remove('appCheckSiteKey');
+      expect(
+        WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
+        isFalse,
+      );
+      expect(
+        () => WebEnvironment.fromJson({
+          ...withoutAppCheck,
+          'serverShoutSaves': true,
+        }),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'comment reactions are independently optional and require App Check',
     () {
       final config =

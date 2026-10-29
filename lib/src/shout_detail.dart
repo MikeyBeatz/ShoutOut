@@ -42,6 +42,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     super.initState();
     if (kIsWeb &&
         (WebEnvironment.current.serverShoutReactions ||
+            WebEnvironment.current.serverShoutSaves ||
             WebEnvironment.current.serverCommentCreation ||
             WebEnvironment.current.serverCommentReactions)) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -56,6 +57,13 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
               .doc(uid)
               .liveSnapshots()
               .map((reaction) => reaction.data()),
+          ownSave: WebEnvironment.current.serverShoutSaves
+              ? ref
+                    .collection('saves')
+                    .doc(uid)
+                    .liveSnapshots()
+                    .map((save) => save.exists)
+              : null,
         );
       }
     }
@@ -74,6 +82,11 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             ..comments = value.comments
             ..isLiked = value.reaction == 'like'
             ..isDisliked = value.reaction == 'dislike';
+          if (kIsWeb && WebEnvironment.current.serverShoutSaves) {
+            widget.shout
+              ..saves = value.saves
+              ..isSaved = value.saved;
+          }
         }
         return _shoutCard();
       },

@@ -9,6 +9,19 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('Shout saves default off and independently require App Check and a boolean', () => {
+  const defaults = { ...dev };
+  delete defaults.serverShoutSaves;
+  assert.doesNotThrow(() => validateConfig(defaults, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutSaves: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverShoutSaves: 'true' }, 'dev'));
+  const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false };
+  delete config.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(config, 'dev'));
+  assert.throws(() => validateConfig({ ...config, serverShoutSaves: true }, 'dev'));
+});
+
 test('web App Check configuration gates server publishing', () => {
   const withoutAppCheck = { ...dev, serverShoutCreation: false,
     serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false };

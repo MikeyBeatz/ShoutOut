@@ -46,6 +46,17 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Ukládání Shoutů má volitelný boolean `serverShoutSaves` (výchozí `false`).
+Při zapnutí vyžaduje `appCheckSiteKey` a volá `toggleShoutSave` v `europe-west3`;
+chyba callable nevede k přímému zápisu do Firestore. Klient ignoruje historický
+HTTP výsledek a stav záložky i čítač zobrazuje z realtime dat. Nejasný pokus
+opakuje se stejným klíčem v paměti domovské obrazovky, rychlé souběžné kliknutí
+slučuje. Obnovení aplikace klíč nezachová. V detailu se odběr vlastní záložky
+zapíná jen pro tuto serverovou cestu a sdílí existující realtime zdroje.
+Export, balení a klient jsou připravené lokálně 29. října 2026; Function není
+nasazená a dev/prod konfigurace přepínač nezapínají. Nasazení vyžaduje nový
+výslovný souhlas pro přesný commit a cíl, včetně navazující aktivace klienta.
+
 Reakce na Shouty používají volitelný boolean
 `serverShoutReactions` (výchozí `false`). Vyžaduje `appCheckSiteKey` a volá
 `toggleShoutReaction` v `europe-west3` bez přímého fallbacku. Vlastník schválil

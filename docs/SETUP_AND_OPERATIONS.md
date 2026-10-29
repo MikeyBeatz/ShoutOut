@@ -263,6 +263,11 @@ s jednorázovým `$env:FUNCTIONS_DISCOVERY_TIMEOUT='30'`. Jde pouze o limit CLI,
 nikoli provozní `timeoutSeconds: 15`. Tento postup popisuje
 [oficiální dokumentace](https://firebase.google.com/docs/functions/tips#avoid_deployment_timeouts_during_initialization).
 Příprava nic nenasazuje. Vždy připravovat z čistého schváleného commitu.
+Připravený endpoint ukládání `toggleShoutSave` se po samostatném souhlasu vybírá
+pouze přes `--only functions:content:toggleShoutSave` v projektu
+`shoutout-dev-46c81`. Má stejné limity jako reakce (max. 1 instance, concurrency 1,
+256 MiB, 15 s). Zatím není nasazený a přepínač `serverShoutSaves` je výchozí
+vypnutý; zapnout jej až po ověření Function a schválení vývojového klienta.
 
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po

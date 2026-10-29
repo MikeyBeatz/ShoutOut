@@ -7,6 +7,7 @@ import { createCommentOperation } from './create_comment.js';
 import { createPrivateReplyOperation } from './create_private_reply.js';
 import { toggleShoutReactionOperation } from './toggle_shout_reaction.js';
 import { toggleCommentReactionOperation } from './toggle_comment_reaction.js';
+import { toggleShoutSaveOperation } from './toggle_shout_save.js';
 
 if (getApps().length === 0) initializeApp();
 
@@ -54,3 +55,12 @@ export const toggleCommentReaction = onCall({
   memory: '256MiB',
   timeoutSeconds: 15,
 }, (request) => toggleCommentReactionOperation(request, getFirestore()));
+
+export const toggleShoutSave = onCall({
+  ...secureCallableOptions,
+  minInstances: 0,
+  maxInstances: 1,
+  concurrency: 1,
+  memory: '256MiB',
+  timeoutSeconds: 15,
+}, (request) => toggleShoutSaveOperation(request, getFirestore()));
