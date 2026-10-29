@@ -57,8 +57,16 @@ zůstal dostupný přes Mé shouty → Komentáře. První testovací hlášení
 skončilo 401 a nevytvořilo report ani receipt. Log serveru potvrdil Auth VALID,
 App Check MISSING; prohlížeč měl starší chyby reCAPTCHA. Vlastník byl požádán
 o ruční Ctrl+R a stejné testovací hlášení. Příčina potíží reCAPTCHA není uzavřená,
-ochrana se nevypínala. Dokončení všech tří hlášení, duplicity, cooldownu,
-moderační fronty a úklidu stále zbývá. Do té doby fixture neodstraňovat.
+ochrana se nevypínala. Ruční hlášení 20:38 UTC potom prošlo 200; databáze
+potvrdila kanonický report, receipt, společný rate event, count 1 a nezměněný
+parent. Původní automatická karta i další pokus v ní vrátily 401. Vlastník použil
+jinou kartu; po převzetí právě této ručně ověřené relace prošel test duplicity
+409 ve 20:41 UTC. Report, receipt i rate dokument zůstaly přesně stejné.
+Příčinu chyb App Check v původní kartě to samo o sobě nevysvětluje; nezaměňovat
+odmítnutí bez tokenu za ověření aplikačního limitu nebo duplicity.
+Vlastník byl požádán o přepnutí na TestBusiness pro hlášení komentáře a přijaté
+soukromé odpovědi, test minutového cooldownu a moderační frontu. Tyto kroky
+a úklid stále zbývají. Do té doby fixture neodstraňovat.
 
 ## Lokální příprava serverových reakcí 26. října 2026
 

@@ -45,7 +45,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
-| Hlášení Shoutu, komentáře a soukromé odpovědi | `79082d8` i aktivace `be5a88f` prošly CI | Function `createcontentreport-00001-yas` a web aktivní; živé testy probíhají, poslední pokus neměl App Check token. |
+| Hlášení Shoutu, komentáře a soukromé odpovědi | `79082d8` i aktivace `be5a88f` prošly CI | Function `createcontentreport-00001-yas` a web aktivní; Shout a duplicita ověřené, komentář/soukromá odpověď a fronta/úklid zbývají. |
 
 Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -110,10 +110,16 @@ pro `be5a88f` prošlo, otisky souhlasí. Dokončit živé testy.
 soukromých zpráv, duplicitní hlášení a sdílený report limit. Následují zbývající
 čítače včetně mazání komentářů.
 Fixture „MVP hlaseni 29.10.“ s komentářem a soukromou odpovědí existuje;
-po přerušení už vypršel a je dostupný přes historii komentářů. Pokus běžného
-účtu 29. října ve 20:27 UTC skončil HTTP 401 bez reportu/receipt. Serverový log
-uvádí Auth VALID a App Check MISSING. Vlastník byl požádán o ruční obnovení
-a testovací hlášení; nevypínat ochranu ani tento pokus označit za úspěšný.
+po přerušení vypršel a je dostupný přes historii komentářů nebo autorovy
+Expirované. Ruční hlášení Bright_Otter_182 prošlo ve 20:38 UTC (HTTP 200,
+kanonický report/receipt, report count 1, parent beze změny). Duplicita ve 20:41 UTC
+vrátila 409; report, receipt a rate dokument se nezměnily.
+Původní automatická karta měla App Check MISSING a 401; ručně ověřená karta
+funguje i při následném ovládání AI. Pokračovat v aktuální uživatelově kartě,
+nikoli ve staré relaci. Příčina chyb reCAPTCHA v původní kartě není uzavřená.
+Vlastník byl požádán o přepnutí ověřené karty na TestBusiness a Ctrl+R. Poté
+nahlásit komentář, hned vyzkoušet soukromé hlášení před 60 s (429, bez zápisů)
+a po cooldownu je dokončit. Nakonec ověřit moderační UI a uklidit fixture.
 Ukládání ignoruje historický HTTP výsledek a drží retry klíč jen v paměti relace
 domovské obrazovky; obnovení stránky jej nezachová. Limity jsou 120 interakcí/h
 a odstup 1 s. Produkce, main ani Rules nebyly rolloutem změněné.

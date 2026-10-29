@@ -61,9 +61,12 @@ bez App Check vrací 401. Aktivační commit `be5a88f58cbf88870ac5f90a81f088660e
 prošel CI `40922593743` a byl nasazený pouze na dev Hosting, verze `884138efa765d64a`,
 release `1793295581345000`, čas UTC `2026-10-29T17:39:41.345Z`. HTML, JS i konfigurace
 mají shodné otisky s lokálním release buildem; návratová verze je `8abd91f97aada32f`.
-`serverContentReports` je ve vývoji zapnutý, produkční jej nezapíná. Živé hlášení
-ještě není ověřené: pokus 20:27 UTC měl podle serveru Auth VALID, App Check MISSING
-a skončil 401 bez reportu/receipt; vlastník byl požádán o ruční obnovení relace.
+`serverContentReports` je ve vývoji zapnutý, produkční jej nezapíná. Hlášení Shoutu
+běžným účtem prošlo 20:38 UTC (200, jeden report/receipt a limit count 1).
+Opakování v právě ručně ověřené kartě vrátilo 409 bez změny reportu nebo limitu.
+Původní automatická karta vracela 401 s Auth VALID a App Check MISSING; příčina
+starších chyb reCAPTCHA není potvrzená. Hlášení komentáře a soukromé odpovědi,
+moderační fronta a úklid stále zbývají. Nepovažovat celý rollout za uzavřený.
 Hlášení účtů a technických chyb nejsou součástí této migrace. Moderační kolekce,
 schémata, clearance i společný limit 20 hlášení/den s odstupem 1 minuty se zachovávají.
 
