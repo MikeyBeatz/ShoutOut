@@ -2,6 +2,23 @@
 
 Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
 
+## Postup
+
+### Postup do MVP
+
+`███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
+
+Počítají se celé vydávací milníky níže.
+
+### Postup celého backlogu
+
+`███████████████████████████░░░░░░░░░░░░░` **69 %** — 107 ze 155 úkolů
+
+Kanonické checkboxy jsou pouze v [BACKLOG.md](BACKLOG.md).
+
+- Podkroky serverové brány samy nezvyšují počet dokončených milníků.
+- Reorganizace nepřidává nové úkoly ani nemění žádný checkbox.
+
 ## Jak navázat
 
 1. Přečíst [aktuální stav a další krok](PROJECT_STATUS.md).
@@ -12,13 +29,6 @@ Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
 Historie nasazení a staré protichůdné stavy nepatří do tohoto přehledu.
 Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026-10-29.md);
 [archivní index](archive/README.md) uvádí kontrolní součet a rozdělení informací.
-
-## Postup
-
-- **MVP: 38 % — 9 z 24 milníků.** Počítají se celé vydávací milníky níže.
-- **Celý evidovaný backlog: 69 % — 107 ze 155 úkolů.** Kanonické checkboxy jsou pouze v BACKLOG.md.
-- Podkroky serverové brány samy nezvyšují počet dokončených milníků.
-- Reorganizace nepřidává nové úkoly ani nemění žádný checkbox.
 
 ## Nejbližší práce – serverová brána
 
