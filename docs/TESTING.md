@@ -36,16 +36,29 @@ Prošly také analýza, formát a release build vývojového webu. Po sjednocen�
 validace typu přepínače byly cílené konfigurační testy i analýza/build opakované
 úspěšně; šlo pouze o lokální přípravu, nikoli nasazení.
 Lokální import callable ověřil region, provozní limity a odmítnutí chybějící
-identity či App Check přes handler; skutečný HTTP middleware a moderační UI
+identity či App Check přes handler; autorizovaný report tok a moderační UI
 zatím živě ověřené nejsou. Artefakt zahrnuje `create_content_report.js` a syntaxe
 prošla. CI `40921153845` pro `79082d8` prošlo. Po souhlasu byla nasazená jediná
 nová Function ve vývoji, revize `createcontentreport-00001-yas`; API potvrdilo
-limity a HTTP požadavek bez App Check byl odmítnut 401. Dev konfigurace připravuje
-schválenou aktivaci `serverContentReports`, která na Hostingu zatím není; produkční
-konfigurace jej nezapíná. Kontroly konfigurace po aktivaci prošly (14 Dart, 19 nástrojových).
+limity a HTTP požadavek bez App Check byl odmítnut 401. Aktivace
+`be5a88f58cbf88870ac5f90a81f088660eebbdaa` prošla CI `40922593743` a je nasazená na
+dev Hostingu jako `884138efa765d64a`, release `1793295581345000`, čas UTC
+`2026-10-29T17:39:41.345Z`. Otisky HTML, JS i konfigurace souhlasí s lokálním
+release buildem. Produkční konfigurace přepínač nezapíná. Kontroly konfigurace
+po aktivaci prošly (14 Dart, 19 nástrojových).
 Hlášení účtů a technických chyb zůstávají na současné cestě. Před nasazením
 vyžadovat CI konkrétního commitu; souhlas s tímto vývojovým rolloutem, případy
 v moderační frontě a úklidem vlastník výslovně udělil 29. října.
+
+TestBusiness přes aplikaci vytvořil dočasný „MVP hlaseni 29.10.“; Bright_Otter_182
+přidal „MVP report comment“ a zprávu „MVP report private“ pro TestBusiness.
+Databáze potvrdila kanonické účastníky. Během přerušení Shout vypršel, ale
+zůstal dostupný přes Mé shouty → Komentáře. První testovací hlášení 20:27 UTC
+skončilo 401 a nevytvořilo report ani receipt. Log serveru potvrdil Auth VALID,
+App Check MISSING; prohlížeč měl starší chyby reCAPTCHA. Vlastník byl požádán
+o ruční Ctrl+R a stejné testovací hlášení. Příčina potíží reCAPTCHA není uzavřená,
+ochrana se nevypínala. Dokončení všech tří hlášení, duplicity, cooldownu,
+moderační fronty a úklidu stále zbývá. Do té doby fixture neodstraňovat.
 
 ## Lokální příprava serverových reakcí 26. října 2026
 

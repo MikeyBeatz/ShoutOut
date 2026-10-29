@@ -279,7 +279,8 @@ concurrency 1, 256 MiB a 15 s. `serverContentReports` zůstává výchozí vypnu
 aktivace vyžaduje otestovanou Function a zvlášť schválený vývojový rollout.
 Schválená Function byla 29. října nasazená z `79082d8`, revize
 `createcontentreport-00001-yas`; parametry i HTTP odmítnutí bez App Check 401
-jsou ověřené. Navazující schválená aktivace webu a živé testy zatím zbývají.
+jsou ověřené. Aktivace `be5a88f` prošla CI `40922593743` a běží na dev Hostingu
+jako `884138efa765d64a`; živé testy ještě nejsou dokončené, viz PROJECT_STATUS.md.
 
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po

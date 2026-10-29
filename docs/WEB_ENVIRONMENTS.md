@@ -57,8 +57,13 @@ Vlastník 29. října schválil vývojový rollout i testovací obsah, hlášen�
 frontu a úklid. Zdroj `79082d8c3796b0e5f18335be975fe9f2bbf5a576` prošel CI
 `40921153845`; nasazená Function je `ACTIVE`, revize `createcontentreport-00001-yas`,
 Node.js 22, 256 MiB, 15 s, min. 0 / max. 1 instance a concurrency 1. HTTP požadavek
-bez App Check vrací 401. Dev konfigurace připravuje schválenou aktivaci klienta,
-Hosting a živé testy zatím zbývají. Produkční konfigurace přepínač nezapíná.
+bez App Check vrací 401. Aktivační commit `be5a88f58cbf88870ac5f90a81f088660eebbdaa`
+prošel CI `40922593743` a byl nasazený pouze na dev Hosting, verze `884138efa765d64a`,
+release `1793295581345000`, čas UTC `2026-10-29T17:39:41.345Z`. HTML, JS i konfigurace
+mají shodné otisky s lokálním release buildem; návratová verze je `8abd91f97aada32f`.
+`serverContentReports` je ve vývoji zapnutý, produkční jej nezapíná. Živé hlášení
+ještě není ověřené: pokus 20:27 UTC měl podle serveru Auth VALID, App Check MISSING
+a skončil 401 bez reportu/receipt; vlastník byl požádán o ruční obnovení relace.
 Hlášení účtů a technických chyb nejsou součástí této migrace. Moderační kolekce,
 schémata, clearance i společný limit 20 hlášení/den s odstupem 1 minuty se zachovávají.
 

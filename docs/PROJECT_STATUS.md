@@ -5,7 +5,7 @@ Aktualizováno 29. října 2026. Aktuální práce je ve větvi
 provozní záznam `5208e58` ve větvi `feature/server-shout-save-client`.
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Function hlášení obsahu je nasazená ve vývoji;
-aktivace klienta a živé ověření této nové části ještě zbývají.
+klient je aktivní a živé ověření této nové části probíhá.
 
 ## Jak přehled používat
 
@@ -21,11 +21,11 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 |---|---|
 | Vývojový projekt i Hosting site | `shoutout-dev-46c81` |
 | Vývojová aplikace | https://shoutout-dev-46c81.web.app |
-| Zdroj webu | `02b8b2846c6b4488188e1f58f84fb06db3320e52` |
-| Hosting verze | `8abd91f97aada32f` |
-| Release / čas UTC | `1793293260043000` / `2026-10-29T17:01:00.043Z` |
-| Předchozí verze pro případ návratu | `a6756b787e4655de` |
-| Ověření | Otisky HTML, JS a konfigurace souhlasily; živé průchody a CI prošly. |
+| Zdroj webu | `be5a88f58cbf88870ac5f90a81f088660eebbdaa` |
+| Hosting verze | `884138efa765d64a` |
+| Release / čas UTC | `1793295581345000` / `2026-10-29T17:39:41.345Z` |
+| Předchozí verze pro případ návratu | `8abd91f97aada32f` |
+| Ověření | Otisky HTML, JS a konfigurace souhlasily; CI prošlo, živá hlášení ještě nejsou uzavřená. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -45,16 +45,16 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
-| Hlášení Shoutu, komentáře a soukromé odpovědi | Operace a klient `79082d8` prošly CI | Function aktivní `createcontentreport-00001-yas`; schválená aktivace webu a živé testy zbývají. |
+| Hlášení Shoutu, komentáře a soukromé odpovědi | `79082d8` i aktivace `be5a88f` prošly CI | Function `createcontentreport-00001-yas` a web aktivní; živé testy probíhají, poslední pokus neměl App Check token. |
 
 Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
-Šest odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
+Sedm odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
 produkční konfigurace tyto serverové cesty nezapíná.
 Přepínač `serverShoutSaves` má výchozí `false`; vývojový web jej má aktivní,
 produkční konfigurace jej nezapíná.
-Nový `serverContentReports` je výchozí `false`; dev konfigurace připravuje
-schválenou aktivaci, nasazený web ji zatím nemá. Produkční jej nezapíná.
+Nový `serverContentReports` je výchozí `false`; vývojový web jej má aktivní.
+Produkční konfigurace jej nezapíná.
 Hlášení účtů a technických chyb tento přepínač neovládá.
 
 Reakce byly ověřené běžným i Business účtem včetně přidání, změny, odebrání,
@@ -103,11 +103,17 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 Vlastník 29. října výslovně schválil Function z `79082d8`, navazující otestovanou
 aktivaci `serverContentReports`, vývojový Hosting i obsahová hlášení, moderační
-frontu a úklid testovacích dat. Function je aktivní. Dokončit CI aktivačního
-commitu a nasadit pouze Hosting site `shoutout-dev-46c81`.
+frontu a úklid testovacích dat. Function je aktivní. CI aktivačního commitu
+i Hosting rollout jsou hotové: [CI `40922593743`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40922593743)
+pro `be5a88f` prošlo, otisky souhlasí. Dokončit živé testy.
 Živě ověřit všechny tři druhy cílů, stávající moderační frontu, serverové snapshoty
 soukromých zpráv, duplicitní hlášení a sdílený report limit. Následují zbývající
 čítače včetně mazání komentářů.
+Fixture „MVP hlaseni 29.10.“ s komentářem a soukromou odpovědí existuje;
+po přerušení už vypršel a je dostupný přes historii komentářů. Pokus běžného
+účtu 29. října ve 20:27 UTC skončil HTTP 401 bez reportu/receipt. Serverový log
+uvádí Auth VALID a App Check MISSING. Vlastník byl požádán o ruční obnovení
+a testovací hlášení; nevypínat ochranu ani tento pokus označit za úspěšný.
 Ukládání ignoruje historický HTTP výsledek a drží retry klíč jen v paměti relace
 domovské obrazovky; obnovení stránky jej nezachová. Limity jsou 120 interakcí/h
 a odstup 1 s. Produkce, main ani Rules nebyly rolloutem změněné.

@@ -234,8 +234,8 @@ soukromého hlášení `high`, čas je serverový. Hlášení, společný rate b
 `report` a receipt zapisuje jedna transakce. Receipt obsahuje odkaz na případ
 a hash vstupu, nikoli důvod nebo soukromý text. Jeho historický replay případ
 znovu neotevře. Existence clearance brání novému hlášení. Function je po souhlasu
-nasazená pouze ve vývoji; dev konfigurace připravuje aktivaci `serverContentReports`,
-která na Hostingu ještě není nasazená. Produkční přepínač je vypnutý.
+nasazená pouze ve vývoji a `serverContentReports` je aktivní na vývojovém Hostingu.
+Produkční přepínač je vypnutý. Živé ověření nového toku ještě není dokončené.
 
 ## Indexy, TTL a Storage
 
