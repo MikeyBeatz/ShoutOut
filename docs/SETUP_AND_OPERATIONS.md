@@ -272,12 +272,14 @@ pouze přes `--only functions:content:toggleShoutSave` v projektu
 prošla CI `40916381788` a je nasazená jako Hosting `8abd91f97aada32f`.
 Živý cyklus uložení/odebrání prošel běžným i Business účtem včetně úklidu;
 podrobnosti a návratová verze jsou v [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
-Pro obsahová hlášení je lokálně připravená `createContentReport`; zatím není
-nasazená. Po samostatném souhlasu se vybírá pouze
+Pro obsahová hlášení se `createContentReport` po samostatném souhlasu vybírá pouze
 `--only functions:content:createContentReport` v projektu `shoutout-dev-46c81`.
 Používá společné Auth/App Check ověření, `europe-west3`, max. 1 instanci,
 concurrency 1, 256 MiB a 15 s. `serverContentReports` zůstává výchozí vypnutý;
 aktivace vyžaduje otestovanou Function a zvlášť schválený vývojový rollout.
+Schválená Function byla 29. října nasazená z `79082d8`, revize
+`createcontentreport-00001-yas`; parametry i HTTP odmítnutí bez App Check 401
+jsou ověřené. Navazující schválená aktivace webu a živé testy zatím zbývají.
 
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po

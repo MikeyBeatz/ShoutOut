@@ -32,8 +32,9 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
 4. Dokončit prostorové dotazy a stránkování feedu.
 5. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 
-Hlášení: serverová operace, export a klient jsou připravené lokálně ve větvi
-`feature/server-content-reports`; nový přepínač je vypnutý, nasazení a živé testy zbývají.
+Hlášení: operace a klient `79082d8` prošly CI; Function je po souhlasu aktivní
+ve vývoji. Ve větvi `feature/server-content-reports` zbývá schválená aktivace
+webu a živé testy včetně moderační fronty a úklidu.
 
 Jde o pracovní rozpad existujícího milníku, nikoli nové požadavky.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).

@@ -4,8 +4,8 @@ Aktualizováno 29. října 2026. Aktuální práce je ve větvi
 `feature/server-content-reports`; navazuje na dokončené ukládání a jeho
 provozní záznam `5208e58` ve větvi `feature/server-shout-save-client`.
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
-prošly oběma rolemi včetně úklidu. Serverové hlášení obsahu je připravené lokálně;
-nasazení a živé ověření této nové části ještě zbývají.
+prošly oběma rolemi včetně úklidu. Function hlášení obsahu je nasazená ve vývoji;
+aktivace klienta a živé ověření této nové části ještě zbývají.
 
 ## Jak přehled používat
 
@@ -45,15 +45,16 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
-| Hlášení Shoutu, komentáře a soukromé odpovědi | Operace, callable export, balení, klient a vypnutý přepínač připravené lokálně | Nenasazené; CI a samostatně schválený rollout/živé testy zbývají. |
+| Hlášení Shoutu, komentáře a soukromé odpovědi | Operace a klient `79082d8` prošly CI | Function aktivní `createcontentreport-00001-yas`; schválená aktivace webu a živé testy zbývají. |
 
-Šest nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
+Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
 Šest odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
 produkční konfigurace tyto serverové cesty nezapíná.
 Přepínač `serverShoutSaves` má výchozí `false`; vývojový web jej má aktivní,
 produkční konfigurace jej nezapíná.
-Nový `serverContentReports` je výchozí `false` a konfigurace jej nezapínají.
+Nový `serverContentReports` je výchozí `false`; dev konfigurace připravuje
+schválenou aktivaci, nasazený web ji zatím nemá. Produkční jej nezapíná.
 Hlášení účtů a technických chyb tento přepínač neovládá.
 
 Reakce byly ověřené běžným i Business účtem včetně přidání, změny, odebrání,
@@ -76,7 +77,9 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
   lint, 19 testů nástrojů a 111 emulatorových testů (65 Rules + 46 serverových).
   Ověřený export/balení, souběh, idempotence po moderaci, soukromí, schémata
   a sdílené limity. Čistá analýza/formát a release build dev prošly; CI konkrétního
-  commitu před rolloutem ještě potvrdit.
+  commitu před rolloutem ještě potvrdit. [CI `40921153845`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40921153845)
+  pro `79082d8c3796b0e5f18335be975fe9f2bbf5a576` prošlo; Function je aktivní,
+  limity ověřené a HTTP požadavek bez App Check vrací 401.
 - Klient ukládání 29. října: 181 Flutter testů, čistá analýza a formát,
   18 testů vývojových nástrojů, Functions lint a 29 unit testů, 104 emulatorových
   testů (65 Rules + 39 serverových), release build vývojového webu a příprava
@@ -98,10 +101,10 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Po dokončení kontrol a CI předložit konkrétní commit pro nasazení pouze
-`createContentReport` do `shoutout-dev-46c81`, navazující aktivaci přepínače
-a vývojový Hosting včetně testů a úklidu. Nasazení report endpointu vyžaduje
-nový konkrétní souhlas; souhlas pro dokončené ukládání jej nepokrývá.
+Vlastník 29. října výslovně schválil Function z `79082d8`, navazující otestovanou
+aktivaci `serverContentReports`, vývojový Hosting i obsahová hlášení, moderační
+frontu a úklid testovacích dat. Function je aktivní. Dokončit CI aktivačního
+commitu a nasadit pouze Hosting site `shoutout-dev-46c81`.
 Živě ověřit všechny tři druhy cílů, stávající moderační frontu, serverové snapshoty
 soukromých zpráv, duplicitní hlášení a sdílený report limit. Následují zbývající
 čítače včetně mazání komentářů.

@@ -233,8 +233,9 @@ server z původní zprávy a dovolí jej pouze příjemci. Stav je `open`, prior
 soukromého hlášení `high`, čas je serverový. Hlášení, společný rate bucket
 `report` a receipt zapisuje jedna transakce. Receipt obsahuje odkaz na případ
 a hash vstupu, nikoli důvod nebo soukromý text. Jeho historický replay případ
-znovu neotevře. Existence clearance brání novému hlášení. Function není dosud
-nasazená a klientský přepínač `serverContentReports` je vypnutý.
+znovu neotevře. Existence clearance brání novému hlášení. Function je po souhlasu
+nasazená pouze ve vývoji; dev konfigurace připravuje aktivaci `serverContentReports`,
+která na Hostingu ještě není nasazená. Produkční přepínač je vypnutý.
 
 ## Indexy, TTL a Storage
 

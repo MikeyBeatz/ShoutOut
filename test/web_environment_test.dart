@@ -29,15 +29,18 @@ void main() {
           throwsStateError,
         );
       }
-      final withoutAppCheck = {
-        ...config,
-        'serverShoutCreation': false,
-        'serverCommentCreation': false,
-        'serverPrivateReplyCreation': false,
-        'serverShoutReactions': false,
-        'serverCommentReactions': false,
-        'serverShoutSaves': false,
-      }..remove('appCheckSiteKey');
+      final withoutAppCheck =
+          {
+              ...config,
+              'serverShoutCreation': false,
+              'serverCommentCreation': false,
+              'serverPrivateReplyCreation': false,
+              'serverShoutReactions': false,
+              'serverCommentReactions': false,
+              'serverShoutSaves': false,
+            }
+            ..remove('appCheckSiteKey')
+            ..['serverContentReports'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
         isFalse,
@@ -70,14 +73,17 @@ void main() {
         () => WebEnvironment.fromJson({...config, 'serverShoutSaves': 'true'}),
         throwsStateError,
       );
-      final withoutAppCheck = {
-        ...config,
-        'serverShoutCreation': false,
-        'serverCommentCreation': false,
-        'serverPrivateReplyCreation': false,
-        'serverShoutReactions': false,
-        'serverCommentReactions': false,
-      }..remove('appCheckSiteKey');
+      final withoutAppCheck =
+          {
+              ...config,
+              'serverShoutCreation': false,
+              'serverCommentCreation': false,
+              'serverPrivateReplyCreation': false,
+              'serverShoutReactions': false,
+              'serverCommentReactions': false,
+            }
+            ..remove('appCheckSiteKey')
+            ..['serverContentReports'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
         isFalse,
@@ -117,6 +123,7 @@ void main() {
         () => WebEnvironment.fromJson({
           ...config,
           'appCheckSiteKey': null,
+          'serverContentReports': false,
           'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,
@@ -146,6 +153,7 @@ void main() {
       {
         ...config,
         'appCheckSiteKey': null,
+        'serverContentReports': false,
         'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': false,
@@ -244,6 +252,7 @@ void main() {
       {
         ...config,
         'appCheckSiteKey': null,
+        'serverContentReports': false,
         'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': true,
@@ -276,6 +285,7 @@ void main() {
         {
           ...config,
           'appCheckSiteKey': null,
+          'serverContentReports': false,
           'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,

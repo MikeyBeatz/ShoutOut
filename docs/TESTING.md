@@ -38,10 +38,14 @@ validace typu přepínače byly cílené konfigurační testy i analýza/build o
 Lokální import callable ověřil region, provozní limity a odmítnutí chybějící
 identity či App Check přes handler; skutečný HTTP middleware a moderační UI
 zatím živě ověřené nejsou. Artefakt zahrnuje `create_content_report.js` a syntaxe
-prošla. `serverContentReports` zůstává vypnutý v dev/prod; Function není nasazená.
+prošla. CI `40921153845` pro `79082d8` prošlo. Po souhlasu byla nasazená jediná
+nová Function ve vývoji, revize `createcontentreport-00001-yas`; API potvrdilo
+limity a HTTP požadavek bez App Check byl odmítnut 401. Dev konfigurace připravuje
+schválenou aktivaci `serverContentReports`, která na Hostingu zatím není; produkční
+konfigurace jej nezapíná. Kontroly konfigurace po aktivaci prošly (14 Dart, 19 nástrojových).
 Hlášení účtů a technických chyb zůstávají na současné cestě. Před nasazením
-vyžadovat CI konkrétního commitu a samostatný souhlas s vývojovým rolloutem,
-testovacími případy v moderační frontě a úklidem.
+vyžadovat CI konkrétního commitu; souhlas s tímto vývojovým rolloutem, případy
+v moderační frontě a úklidem vlastník výslovně udělil 29. října.
 
 ## Lokální příprava serverových reakcí 26. října 2026
 

@@ -53,7 +53,12 @@ na přímý Firestore zápis. Odešle pouze cíl, důvod, očekávaný účet a 
 identitu, časy, stav a soukromý snapshot přidává server. Nejasný pokus se stejným
 důvodem drží neměnný klíč po dobu otevřeného detailu; změna důvodu má nový klíč,
 ale stávající deterministické ID hlášení brání přepsání již založeného případu.
-Lokální příprava 29. října není nasazená a dev/prod konfigurace přepínač nezapínají.
+Vlastník 29. října schválil vývojový rollout i testovací obsah, hlášení, moderační
+frontu a úklid. Zdroj `79082d8c3796b0e5f18335be975fe9f2bbf5a576` prošel CI
+`40921153845`; nasazená Function je `ACTIVE`, revize `createcontentreport-00001-yas`,
+Node.js 22, 256 MiB, 15 s, min. 0 / max. 1 instance a concurrency 1. HTTP požadavek
+bez App Check vrací 401. Dev konfigurace připravuje schválenou aktivaci klienta,
+Hosting a živé testy zatím zbývají. Produkční konfigurace přepínač nezapíná.
 Hlášení účtů a technických chyb nejsou součástí této migrace. Moderační kolekce,
 schémata, clearance i společný limit 20 hlášení/den s odstupem 1 minuty se zachovávají.
 

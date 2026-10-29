@@ -18,7 +18,7 @@ test('content reports default off and independently require a boolean and App Ch
     assert.throws(() => validateConfig({...config,serverContentReports:invalid},'dev'));
   }
   const withoutAppCheck = {...config,serverShoutCreation:false,serverCommentCreation:false,
-    serverPrivateReplyCreation:false,serverShoutReactions:false,serverCommentReactions:false,serverShoutSaves:false};
+    serverPrivateReplyCreation:false,serverShoutReactions:false,serverCommentReactions:false,serverShoutSaves:false,serverContentReports:false};
   delete withoutAppCheck.appCheckSiteKey;
   assert.doesNotThrow(() => validateConfig(withoutAppCheck,'dev'));
   assert.throws(() => validateConfig({...withoutAppCheck,serverContentReports:true},'dev'));
@@ -31,7 +31,7 @@ test('Shout saves default off and independently require App Check and a boolean'
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutSaves: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutSaves: 'true' }, 'dev'));
   const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverContentReports: false };
   delete config.appCheckSiteKey;
   assert.doesNotThrow(() => validateConfig(config, 'dev'));
   assert.throws(() => validateConfig({ ...config, serverShoutSaves: true }, 'dev'));
@@ -39,7 +39,7 @@ test('Shout saves default off and independently require App Check and a boolean'
 
 test('web App Check configuration gates server publishing', () => {
   const withoutAppCheck = { ...dev, serverShoutCreation: false,
-    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverShoutSaves: false };
+    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false };
   delete withoutAppCheck.appCheckSiteKey;
   assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
@@ -70,7 +70,7 @@ test('comment reactions have an independent optional flag requiring App Check', 
   assert.doesNotThrow(() => validateConfig({ ...defaults, serverCommentReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...defaults, serverCommentReactions: 'true' }, 'dev'));
   const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: true, serverShoutSaves: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: true, serverShoutSaves: false, serverContentReports: false };
   delete config.appCheckSiteKey;
   assert.throws(() => validateConfig(config, 'dev'));
 });
@@ -82,7 +82,7 @@ test('Shout reactions remain optional and require a boolean and App Check', () =
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutReactions: 'true' }, 'dev'));
   const config = { ...dev, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: true, serverCommentReactions: false, serverShoutSaves: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: true, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false };
   delete config.appCheckSiteKey;
   assert.throws(() => validateConfig(config, 'dev'));
 });
