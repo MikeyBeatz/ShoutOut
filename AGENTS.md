@@ -12,8 +12,11 @@
 
 - Za skutečné chování považuj aktuální kód a konfiguraci; dokumentace může být
   zastaralá a při rozporu ji oprav.
-- Produktové požadavky a stav práce ověřuj v `docs/TODO.md` a souvisejících
-  dokumentech v `docs/`. Architekturu a provozní postupy ověřuj v
+- Při navazování nejdřív přečti `docs/PROJECT_STATUS.md` a `docs/TODO.md`.
+  Podrobné checkboxy jsou v `docs/BACKLOG.md`, serverové požadavky a kritéria
+  dokončení v `docs/MVP_SERVER_PLAN.md`. Archiv v `docs/archive/` zachovává
+  historii; jeho staré stavy nejsou důkaz současného chování nebo nasazení.
+  Architekturu a provozní postupy ověřuj v
   `docs/ARCHITECTURE.md` a `docs/SETUP_AND_OPERATIONS.md`.
 - Před změnou vyhledej existující implementaci, testy a podobné vzory. Nedoplňuj
   nové role, limity, ceny, oprávnění ani produktová pravidla bez podkladu.
@@ -27,6 +30,8 @@
 - Zachovej nesouvisející uživatelské změny a upravuj jen rozsah aktuálního úkolu.
 - Diagnózu bez výslovné žádosti automaticky neměň na implementaci.
 - Při změně chování aktualizuj příslušný dokument a stav v `docs/TODO.md`.
+  Připravený kód, výsledky kontrol, skutečné nasazení a další krok stručně
+  rozlišuj v `docs/PROJECT_STATUS.md`; dlouhou historii do přehledů nepřidávej.
 - Změnu ověř přiměřeným testem, analyzátorem nebo sestavením a uveď, co bylo a
   nebylo ověřeno. Úspěch netvrď bez důkazu.
 - Firebase Hosting, pravidla, Functions, data ani jiné externí prostředí

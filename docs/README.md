@@ -2,6 +2,18 @@
 
 Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu.
 
+## Navázání práce
+
+1. [Aktuální stav](PROJECT_STATUS.md) – kódový základ, poslední ověřené nasazení,
+   hotové části, omezení a konkrétní další krok.
+2. [TODO](TODO.md) – stručné pořadí práce a původních 24 milníků MVP.
+3. [Podrobná evidence](BACKLOG.md) nebo [serverový plán](MVP_SERVER_PLAN.md) –
+   otevřít jen podrobnosti relevantní pro vybraný úkol.
+
+[Úplný archiv původního TODO](archive/README.md) zachovává všechna rozhodnutí,
+požadavky a historii. Jeho kontrolní součet ověřuje zachování původního souboru;
+staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
+
 ## Současná implementace
 
 - [Architektura](ARCHITECTURE.md) – hranice systému, moduly, stav, role,
@@ -29,8 +41,8 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 
 ## Plánované a specializované oblasti
 
-- [TODO](TODO.md) – jediný projektový backlog a pořadí další práce. Popisuje
-  budoucí stav, nikoli automaticky současnou funkčnost.
+- [TODO](TODO.md) – hlavní přehled priorit a milníků; podrobnosti jsou
+  v [BACKLOG](BACKLOG.md) a [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
   `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
@@ -54,7 +66,8 @@ Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu
 
 ## Zdroj pravdy
 
-Při rekonstrukci začněte kořenovým `README.md`, pokračujte architekturou,
+Při navazování začněte PROJECT_STATUS.md a TODO.md. Při rekonstrukci začněte
+kořenovým `README.md`, pokračujte architekturou,
 produktovými toky, datovým modelem a provozním runbookem. `firestore.rules`,
 `storage.rules`, `firestore.indexes.json`, implementace v `lib/` a automatické
 testy jsou konečným zdrojem technické pravdy. Dokumentace vysvětluje jejich

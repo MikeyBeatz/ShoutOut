@@ -228,8 +228,11 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `docs/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
 - `docs/COST_SAFETY.md` – povinné nákladové limity, kvóty a nouzový postup
 - `docs/TESTING.md` – automatická a ruční regresní matice
-- `docs/TODO.md` – jediný společný projektový backlog, hranice webového MVP
-  a oddělené počítadlo postupu k MVP i celému backlogu
+- `docs/PROJECT_STATUS.md` – stručný aktuální stav a další krok pro navázání práce
+- `docs/TODO.md` – priority, hranice webového MVP a přehled milníků
+- `docs/BACKLOG.md` – úplná kanonická checkboxová evidence úkolů
+- `docs/MVP_SERVER_PLAN.md` – podrobné serverové a produkční požadavky
+- `docs/archive/README.md` – nezměněný původní TODO a rozcestník historie
 - `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace
