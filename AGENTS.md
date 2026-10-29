@@ -13,6 +13,7 @@
 - Za skutečné chování považuj aktuální kód a konfiguraci; dokumentace může být
   zastaralá a při rozporu ji oprav.
 - Při navazování nejdřív přečti `docs/PROJECT_STATUS.md` a `docs/TODO.md`.
+  Ostatní dokumenty vyhledej přes [hlavní rozcestník](docs/README.md).
   Podrobné checkboxy jsou v `docs/BACKLOG.md`, serverové požadavky a kritéria
   dokončení v `docs/MVP_SERVER_PLAN.md`. Archiv v `docs/archive/` zachovává
   historii; jeho staré stavy nejsou důkaz současného chování nebo nasazení.

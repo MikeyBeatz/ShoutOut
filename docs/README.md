@@ -34,6 +34,8 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
   regresní matice pro účty, feed, Business, oznámení a moderaci.
 - [Design archiv](../design/README.md) – logo, barvy, písmo, splash, avatary a
   jejich mapování na runtime assety.
+- [iOS launch screen assety](../ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md)
+  – pomocný návod Flutter šablony k výměně obrázků úvodní obrazovky iOS.
 - [Promo balíček](../promo/README.md) – přenositelné marketingové podklady;
   screenshoty jsou verzovaný vizuální snapshot, ne technický zdroj pravdy.
 - [Vývojové nástroje](../tools/README.md) – seedování, role, migrace, opravy dat

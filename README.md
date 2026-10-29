@@ -221,6 +221,8 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `test/` – automatizované Flutter testy
 - `tools/` – vývojové administrační a seedovací skripty
 - `firestore.rules` – oprávnění a validace Firestore dat
+- [Rozcestník dokumentace](docs/README.md) – přehled všech produktových,
+  provozních a specializovaných dokumentů
 - `docs/ARCHITECTURE.md` – hranice systému a odpovědnosti modulů
 - `docs/PRODUCT_FLOWS.md` – skutečné uživatelské toky současné verze
 - `docs/UI_SPECIFICATION.md` – obrazovky, navigace a globální UI pravidla
