@@ -64,9 +64,30 @@ jinou kartu; po převzetí právě této ručně ověřené relace prošel test 
 409 ve 20:41 UTC. Report, receipt i rate dokument zůstaly přesně stejné.
 Příčinu chyb App Check v původní kartě to samo o sobě nevysvětluje; nezaměňovat
 odmítnutí bez tokenu za ověření aplikačního limitu nebo duplicity.
-Vlastník byl požádán o přepnutí na TestBusiness pro hlášení komentáře a přijaté
-soukromé odpovědi, test minutového cooldownu a moderační frontu. Tyto kroky
-a úklid stále zbývají. Do té doby fixture neodstraňovat.
+Po ručním přihlášení TestBusiness prošlo hlášení komentáře 21:04 UTC (200,
+kanonický report/receipt, count 1). Hlášení přijaté soukromé odpovědi před minutou
+vrátilo 429 v 21:05 UTC; report ani receipt nevznikly a rate dokument zůstal
+přesně stejný. Opakování v 21:06 UTC prošlo 200, count 2, `priority: high`,
+autor i text odpovídají původní zprávě. Receipt neobsahuje důvod ani soukromý
+text. Všechna hlášení zachovala celý parent dokument beze změny.
+Lokální údaje TestModerator byly odmítnuté z nepotvrzené příčiny; vlastník se
+přihlásil ručně. Moderační fronta zobrazila všechny 3 případy, každý 1× nahlášený.
+Všechny detaily byly otevřené bez výběru rozhodnutí nebo uložení postihu.
+Shout a komentář zobrazily správný obsah/autora, soukromý report správný text
+a UID autora z důvěryhodného snapshotu. Stávající `_ReportDetailDialog` u
+soukromého snapshotu nemá přezdívku, proto ukazuje „Neznámý (UID)“ a obecný
+titulek Detail Shoutu; všechny testovací cíle mají „Region není doplněný“.
+Jde o dosavadní UI/datová omezení, nikoli opravu provedenou tímto rolloutem
+(soubor moderation.dart se nezměnil). Návazné geografické a moderační milníky
+zůstávají otevřené. Nevykazovat nové hlášení jako vyřešení těchto omezení.
+
+Úklid ověřil shodu dokumentů, jejich verze a absenci nesouvisejících interakcí.
+Jedním atomickým commitem odstranil 7 testovacích dokumentů (3 reporty,
+komentář, soukromá odpověď a 2 notifikace) a dočasný Shout označil `deleted`
+s commentsCount 0. API potvrdilo odstranění všech 7 dokumentů a zachování
+3 report receipt. Fronta se bez obnovení změnila na „Žádná otevřená hlášení“.
+Nebyl uložen postih, rozhodnutí ani změna role; produkce, main a Rules zůstaly
+beze změny. Toto vývojové ověření je dokončené; obecná serverová brána zatím ne.
 
 ## Lokální příprava serverových reakcí 26. října 2026
 

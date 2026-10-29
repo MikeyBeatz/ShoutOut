@@ -4,8 +4,8 @@ Aktualizováno 29. října 2026. Aktuální práce je ve větvi
 `feature/server-content-reports`; navazuje na dokončené ukládání a jeho
 provozní záznam `5208e58` ve větvi `feature/server-shout-save-client`.
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
-prošly oběma rolemi včetně úklidu. Function hlášení obsahu je nasazená ve vývoji;
-klient je aktivní a živé ověření této nové části probíhá.
+prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
+včetně duplicity, cooldownu, moderační fronty a úklidu. Další krok jsou čítače/mazání.
 
 ## Jak přehled používat
 
@@ -25,7 +25,7 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 | Hosting verze | `884138efa765d64a` |
 | Release / čas UTC | `1793295581345000` / `2026-10-29T17:39:41.345Z` |
 | Předchozí verze pro případ návratu | `8abd91f97aada32f` |
-| Ověření | Otisky HTML, JS a konfigurace souhlasily; CI prošlo, živá hlášení ještě nejsou uzavřená. |
+| Ověření | Otisky HTML, JS a konfigurace souhlasily; CI, všechny tři druhy hlášení, moderační fronta a úklid prošly. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -45,7 +45,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
-| Hlášení Shoutu, komentáře a soukromé odpovědi | `79082d8` i aktivace `be5a88f` prošly CI | Function `createcontentreport-00001-yas` a web aktivní; Shout a duplicita ověřené, komentář/soukromá odpověď a fronta/úklid zbývají. |
+| Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
 
 Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -67,7 +67,7 @@ nové receipt a společné rate eventy souhlasí; obě záložky jsou odstraněn
 čítače zpět na 0, dočasný Shout má `deleted` a původní Test Shout zůstal zachovaný.
 
 Přímé zápisy v Rules ještě nejsou uzavřené. Celý milník serverové brány tedy
-není hotový. Chybí také serverové hlášení, zbývající změny čítačů včetně
+není hotový. Chybí zbývající změny čítačů včetně
 mazání komentářů, retence receipt a prostorový feed; úplná kritéria jsou
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
@@ -76,10 +76,13 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 - Lokální hlášení obsahu: 189 Flutter testů, 32 Functions unit testů, Functions
   lint, 19 testů nástrojů a 111 emulatorových testů (65 Rules + 46 serverových).
   Ověřený export/balení, souběh, idempotence po moderaci, soukromí, schémata
-  a sdílené limity. Čistá analýza/formát a release build dev prošly; CI konkrétního
-  commitu před rolloutem ještě potvrdit. [CI `40921153845`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40921153845)
+  a sdílené limity. Čistá analýza/formát a release build dev prošly. [CI `40921153845`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40921153845)
   pro `79082d8c3796b0e5f18335be975fe9f2bbf5a576` prošlo; Function je aktivní,
   limity ověřené a HTTP požadavek bez App Check vrací 401.
+- Aktivace `be5a88f` prošla [CI `40922593743`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40922593743).
+  Živě prošly 3 reporty/receipt, duplicita bez zápisu, cooldown 429 a úspěch
+  po vyčkání. TestModerator viděl 3 případy a jejich detaily. Úklid odstranil
+  7 testovacích dokumentů a parent označil `deleted` s čítačem 0; receipt zůstaly.
 - Klient ukládání 29. října: 181 Flutter testů, čistá analýza a formát,
   18 testů vývojových nástrojů, Functions lint a 29 unit testů, 104 emulatorových
   testů (65 Rules + 39 serverových), release build vývojového webu a příprava
@@ -101,28 +104,14 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Vlastník 29. října výslovně schválil Function z `79082d8`, navazující otestovanou
-aktivaci `serverContentReports`, vývojový Hosting i obsahová hlášení, moderační
-frontu a úklid testovacích dat. Function je aktivní. CI aktivačního commitu
-i Hosting rollout jsou hotové: [CI `40922593743`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40922593743)
-pro `be5a88f` prošlo, otisky souhlasí. Dokončit živé testy.
-Živě ověřit všechny tři druhy cílů, stávající moderační frontu, serverové snapshoty
-soukromých zpráv, duplicitní hlášení a sdílený report limit. Následují zbývající
-čítače včetně mazání komentářů.
-Fixture „MVP hlaseni 29.10.“ s komentářem a soukromou odpovědí existuje;
-po přerušení vypršel a je dostupný přes historii komentářů nebo autorovy
-Expirované. Ruční hlášení Bright_Otter_182 prošlo ve 20:38 UTC (HTTP 200,
-kanonický report/receipt, report count 1, parent beze změny). Duplicita ve 20:41 UTC
-vrátila 409; report, receipt a rate dokument se nezměnily.
-Původní automatická karta měla App Check MISSING a 401; ručně ověřená karta
-funguje i při následném ovládání AI. Pokračovat v aktuální uživatelově kartě,
-nikoli ve staré relaci. Příčina chyb reCAPTCHA v původní kartě není uzavřená.
-Vlastník byl požádán o přepnutí ověřené karty na TestBusiness a Ctrl+R. Poté
-nahlásit komentář, hned vyzkoušet soukromé hlášení před 60 s (429, bez zápisů)
-a po cooldownu je dokončit. Nakonec ověřit moderační UI a uklidit fixture.
-Ukládání ignoruje historický HTTP výsledek a drží retry klíč jen v paměti relace
-domovské obrazovky; obnovení stránky jej nezachová. Limity jsou 120 interakcí/h
-a odstup 1 s. Produkce, main ani Rules nebyly rolloutem změněné.
+Navázat zbývajícími serverovými čítači, zejména mazáním komentářů: nejdřív
+zmapovat současné přímé zápisy, Rules a testy. Zachovat oprávnění, existující
+limity a atomický úklid komentáře s dekrementem parentu; nesmí vzniknout dvojí
+odečet při retry ani zastaralý lokální čítač. Potom připravit operaci, klienta
+a testy podle zavedených vzorů. Nasazení nového endpointu vyžaduje samostatný
+konkrétní souhlas; souhlas pro dokončená hlášení jej nepokrývá.
+Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
+nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 
 ## Rozhodnutí, nejistoty a hranice oprávnění
 
@@ -144,6 +133,12 @@ a odstup 1 s. Produkce, main ani Rules nebyly rolloutem změněné.
 - Dokončení jednorázového srovnání starších čítačů/poloh není tímto přehledem
   potvrzené; [původní ruční krok zůstává evidovaný](MVP_SERVER_PLAN.md#data-reconciliation).
 - Testovací údaje a hesla patří jen do ignorované složky `docs/local/`.
+- Při hlášeních fungovala právě ručně ověřená uživatelova karta i pro další
+  automatické kroky; původní karta neměla App Check token a vracela 401.
+  Pro další testy používat aktuálně ověřenou relaci. Podrobnosti jsou v TESTING.md.
+- Soukromý moderační detail nadále ukazuje „Neznámý (UID)“ bez přezdívky a
+  u testovacích cílů chybí region. UID/text jsou správné; stávající UI a geografické
+  omezení nebylo tímto rolloutem opravené. Nezaměňovat je za nový nehotový report tok.
 
 ## Údržba
 

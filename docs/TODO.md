@@ -26,15 +26,14 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
 `02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.
 [Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).
 
-1. Doplnit serverové hlášení obsahu.
-2. Přesunout zbývající změny čítačů včetně mazání komentářů.
-3. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
-4. Dokončit prostorové dotazy a stránkování feedu.
-5. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
+1. Přesunout zbývající změny čítačů včetně mazání komentářů.
+2. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
+3. Dokončit prostorové dotazy a stránkování feedu.
+4. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 
-Hlášení: operace a klient `79082d8` prošly CI; Function je po souhlasu aktivní
-ve vývoji a aktivace `be5a88f` je nasazená po úspěšném CI. Ve větvi
-`feature/server-content-reports` zbývají živé testy včetně moderační fronty a úklidu.
+Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
+obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
+prošly. Celý milník serverové brány zůstává otevřený do dokončení bodů výše.
 
 Jde o pracovní rozpad existujícího milníku, nikoli nové požadavky.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).

@@ -235,7 +235,8 @@ soukromého hlášení `high`, čas je serverový. Hlášení, společný rate b
 a hash vstupu, nikoli důvod nebo soukromý text. Jeho historický replay případ
 znovu neotevře. Existence clearance brání novému hlášení. Function je po souhlasu
 nasazená pouze ve vývoji a `serverContentReports` je aktivní na vývojovém Hostingu.
-Produkční přepínač je vypnutý. Živé ověření nového toku ještě není dokončené.
+Produkční přepínač je vypnutý. Živé ověření všech tří typů, duplicity, cooldownu,
+moderační fronty i úklidu prošlo 29. října 2026.
 
 ## Indexy, TTL a Storage
 

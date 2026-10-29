@@ -65,8 +65,13 @@ mají shodné otisky s lokálním release buildem; návratová verze je `8abd91f
 běžným účtem prošlo 20:38 UTC (200, jeden report/receipt a limit count 1).
 Opakování v právě ručně ověřené kartě vrátilo 409 bez změny reportu nebo limitu.
 Původní automatická karta vracela 401 s Auth VALID a App Check MISSING; příčina
-starších chyb reCAPTCHA není potvrzená. Hlášení komentáře a soukromé odpovědi,
-moderační fronta a úklid stále zbývají. Nepovažovat celý rollout za uzavřený.
+starších chyb reCAPTCHA není potvrzená. Business hlášení komentáře prošlo 200,
+rychlé soukromé hlášení vrátilo 429 bez zápisů a po vyčkání prošlo 200 s důvěryhodným
+snapshotem. Business report bucket má count 2. TestModerator ověřil všechny tři
+případy i jejich detaily bez uložení rozhodnutí. Úklid odstranil 3 reporty,
+komentář, soukromou zprávu a 2 čistě testovací notifikace; dočasný Shout má
+`deleted` a commentsCount 0. Tři report receipt zůstaly. Fronta se živě vyprázdnila.
+Tento vývojový rollout je ověřený a uzavřený; produkce, main a Rules se nezměnily.
 Hlášení účtů a technických chyb nejsou součástí této migrace. Moderační kolekce,
 schémata, clearance i společný limit 20 hlášení/den s odstupem 1 minuty se zachovávají.
 

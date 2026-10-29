@@ -280,7 +280,8 @@ aktivace vyžaduje otestovanou Function a zvlášť schválený vývojový rollo
 Schválená Function byla 29. října nasazená z `79082d8`, revize
 `createcontentreport-00001-yas`; parametry i HTTP odmítnutí bez App Check 401
 jsou ověřené. Aktivace `be5a88f` prošla CI `40922593743` a běží na dev Hostingu
-jako `884138efa765d64a`; živé testy ještě nejsou dokončené, viz PROJECT_STATUS.md.
+jako `884138efa765d64a`. Živé testy tří typů, duplicity, cooldownu, moderační
+fronty i úklidu prošly; omezení a důkazy jsou v TESTING.md a PROJECT_STATUS.md.
 
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po
