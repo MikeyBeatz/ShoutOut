@@ -71,6 +71,7 @@ void main() {
         () => WebEnvironment.fromJson({
           ...config,
           'appCheckSiteKey': null,
+          'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,
           'serverPrivateReplyCreation': false,
@@ -99,6 +100,7 @@ void main() {
       {
         ...config,
         'appCheckSiteKey': null,
+        'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': false,
         'serverPrivateReplyCreation': false,
@@ -156,6 +158,7 @@ void main() {
   test('server publishing requires a valid web App Check configuration', () {
     final withoutAppCheck = development()
       ..remove('appCheckSiteKey')
+      ..['serverShoutSaves'] = false
       ..['serverCommentCreation'] = false
       ..['serverShoutReactions'] = false
       ..['serverCommentReactions'] = false
@@ -195,6 +198,7 @@ void main() {
       {
         ...config,
         'appCheckSiteKey': null,
+        'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': true,
         'serverPrivateReplyCreation': false,
@@ -226,6 +230,7 @@ void main() {
         {
           ...config,
           'appCheckSiteKey': null,
+          'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,
           'serverPrivateReplyCreation': true,

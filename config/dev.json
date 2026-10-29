@@ -6,6 +6,7 @@
   "serverPrivateReplyCreation": true,
   "serverShoutReactions": true,
   "serverCommentReactions": true,
+  "serverShoutSaves": true,
   "appUrl": "https://shoutout-dev-46c81.web.app",
   "hostingSite": "shoutout-dev-46c81",
   "firebase": {

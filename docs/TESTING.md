@@ -101,7 +101,11 @@ a release build webu pro dev. Příprava artefaktu zahrnuje `toggle_shout_save.j
 syntaxe prošla. Lokální import callable exportu ověřil region, limity a odmítnutí
 Auth/App Check přes handler bez databázového zápisu. HTTP middleware nebyl živě
 testovaný. Lokální prostředí použilo Node 24.13.1; CI používá podporovaný Node 22.
-Function ani nový klient nebyly nasazené, přepínač v dev/prod není zapnutý.
+CI `40914821162` pro `5fceccb` prošlo. Po souhlasu byla nasazená pouze Function
+do vývoje, revize `toggleshoutsave-00001-fal`. Její limity byly ověřené přes API
+a skutečný HTTP požadavek bez App Check byl odmítnut 401. Aktivační web zatím
+není nasazený; přepínač v dev konfiguraci připravuje schválenou aktivaci,
+v produkční je vypnutý. Dosavadní provozní revize ostatních Functions se nezměnily.
 Živé uložení/odebrání oběma rolemi, receipt, společný limit a úklid zbývají
 pro samostatně schválený vývojový rollout.
 

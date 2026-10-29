@@ -3,8 +3,8 @@
 Aktualizováno 29. října 2026. Aktuální práce je ve větvi
 `feature/server-shout-save-client`; navazuje na serverovou operaci `cc62831`
 a reorganizaci dokumentace zakončenou `29b3722`.
-Provozní údaje níže jsou poslední ověřený stav z 26. října; lokální příprava
-klienta ukládání neprovádí nasazení ani změnu cloudových dat.
+Hosting níže je poslední ověřený stav z 26. října. Dne 29. října byla po souhlasu
+nasazená jediná nová Function ukládání; aktivace vývojového webu je připravená.
 
 ## Jak přehled používat
 
@@ -43,14 +43,14 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Soukromá odpověď | Hotovo | Hotovo; `createprivatereply-00001-baw` |
 | Palce na Shoutu | Hotovo | Hotovo; `toggleshoutreaction-00001-lek` |
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
-| Uložení/odebrání Shoutu | Serverová operace, callable export, balení, klient, výchozí vypnutý přepínač a testy připravené lokálně | Nenasazené; zbývá schválený rollout a živý test. |
+| Uložení/odebrání Shoutu | Serverová operace a klient v `5fceccb`, CI úspěšné | Function aktivní `toggleshoutsave-00001-fal`; aktivační web a živý test zbývají. |
 
-Pět nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
+Šest nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
 Pět odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
 produkční konfigurace tyto serverové cesty nezapíná.
-Nový přepínač `serverShoutSaves` je výchozí `false` a v dev/prod konfiguraci
-není zapnutý. Aplikace proto stále používá původní ukládání přes Firestore.
+Přepínač `serverShoutSaves` má výchozí `false`; dev konfigurace připravuje
+schválenou aktivaci, produkční jej nezapíná. Nasazený web jej zatím nemá aktivní.
 
 Reakce byly ověřené běžným i Business účtem včetně přidání, změny, odebrání,
 receipt, limitů a oznámení. Oprava detailu ověřila 0 → 1 → 0 také při externím
@@ -68,7 +68,8 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 - Klient ukládání 29. října: 181 Flutter testů, čistá analýza a formát,
   18 testů vývojových nástrojů, Functions lint a 29 unit testů, 104 emulatorových
   testů (65 Rules + 39 serverových), release build vývojového webu a příprava
-  Functions artefaktu. CI této navazující větve zatím není potvrzené.
+  Functions artefaktu. [CI `40914821162`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/40914821162)
+  pro `5fceccb98f145174acd7917b26356d04e65604a1` prošlo.
 - Lokální import exportu `toggleShoutSave` ověřil region/provozní limity a
   odmítnutí chybějící Auth nebo App Check přes handler; nejde o živý HTTP test.
 - Serverová logika ukládání: lint, 29 unit testů a 104 emulatorových testů
@@ -82,9 +83,10 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Po úspěšných lokálních kontrolách a CI předložit konkrétní commit pro nasazení
-pouze `toggleShoutSave` do `shoutout-dev-46c81`, poté samostatnou aktivaci
-`serverShoutSaves` a vývojový Hosting. Získat výslovný souhlas s rolloutem a testy.
+Vlastník 29. října výslovně schválil Function z `5fceccb`, navazující otestovanou
+aktivaci `serverShoutSaves`, vývojový Hosting i testy a úklid. Function je aktivní
+a požadavek bez App Check vrací 401. Dokončit kontroly a CI aktivačního commitu,
+nasadit pouze Hosting site `shoutout-dev-46c81` a ověřit otisky buildu.
 Živě ověřit uložit/odebrat běžným i Business účtem, seznam i otevřený detail,
 serverový čítač, receipt, společný limit a úklid testovacích záložek.
 Klient ignoruje historický HTTP výsledek; retry zachovává neměnný klíč v paměti

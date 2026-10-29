@@ -53,9 +53,13 @@ HTTP výsledek a stav záložky i čítač zobrazuje z realtime dat. Nejasný po
 opakuje se stejným klíčem v paměti domovské obrazovky, rychlé souběžné kliknutí
 slučuje. Obnovení aplikace klíč nezachová. V detailu se odběr vlastní záložky
 zapíná jen pro tuto serverovou cestu a sdílí existující realtime zdroje.
-Export, balení a klient jsou připravené lokálně 29. října 2026; Function není
-nasazená a dev/prod konfigurace přepínač nezapínají. Nasazení vyžaduje nový
-výslovný souhlas pro přesný commit a cíl, včetně navazující aktivace klienta.
+Vlastník 29. října schválil vývojový rollout včetně aktivace klienta a testů.
+Zdroj `5fceccb98f145174acd7917b26356d04e65604a1` prošel CI `40914821162`;
+nasazená Function je `ACTIVE`, revize `toggleshoutsave-00001-fal`, Node.js 22,
+256 MiB, 15 s, min. 0 / max. 1 instance a concurrency 1. Požadavek bez App Check
+vrací 401; ostatních pět Functions zůstalo na předchozích revizích.
+Dev konfigurace připravuje schválenou aktivaci `serverShoutSaves`; aktivační
+Hosting a živé testy zatím zbývají. Produkční konfigurace přepínač nezapíná.
 
 Reakce na Shouty používají volitelný boolean
 `serverShoutReactions` (výchozí `false`). Vyžaduje `appCheckSiteKey` a volá
