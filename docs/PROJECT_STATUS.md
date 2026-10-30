@@ -16,7 +16,8 @@ CI klientského zdroje `c3ad17d`, run `41100166067`, attempt 4 je `completed/suc
 (4 min 19 s). Dřívější rozpor metadat už neblokuje CI; attempt 2 selhal při
 stahování emulatoru. Rollout dosud neproběhl. Aktuální schválená odbočka
 sjednocuje testovací Node/CLI, přidává npm a emulator cache, timeouty a logy
-při selhání; rozsah a ověření jsou v [TESTING](TESTING.md#ci-reliability).
+při selhání. Implementace `48247fe` prošla úplným CI `41136220552` za 3 min 42 s;
+obě nové cache byly uložené. Rozsah a ověření jsou v [TESTING](TESTING.md#ci-reliability).
 Rozpracovaný cutover a úklid retence zůstává samostatně ve větvi
 `feature/operation-retention-cleanup`; do CI změny se nezahrnuje.
 

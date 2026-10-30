@@ -24,7 +24,11 @@ samotná konfigurace nedokazuje cache hit ani provedený upload při chybě.
 Lokálně prošel actionlint 1.7.12, kontrola diffu, Functions lint, 41 unit testů
 (58 integračních bez emulatoru správně přeskočeno) a 20 tools testů pod
 Node 22.23.4; CLI výpis potvrzuje projektovou instalaci 15.31.0.
-Nový úplný průchod, cache a sestavení se ověřují na GitHub Actions po pushi.
+Úplné [CI 41136220552](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41136220552)
+pro `48247fea2cf557731fef1b9fb6c9841f4a51e2dc` prošlo za 3 min 42 s
+(22:09:40–22:13:22 UTC): Flutter formát/analýza/testy, 20 tools, 41 unit,
+123 emulatorových testů a debug build. Log potvrzuje Node 22.23.4 a CLI 15.31.0.
+První běh uložil npm i emulator cache; opakovaný průchod ověřuje její obnovení.
 Upload při selhání nebyl lokálně simulovaný. Audit Functions má 0 nálezů;
 tools včetně CLI hlásí 21 nálezů v tranzitivních vývojových závislostech
 (9 moderate, 12 high), jejich plošná aktualizace není součástí tohoto kroku.
