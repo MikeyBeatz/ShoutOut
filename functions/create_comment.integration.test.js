@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +11,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'creat
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-25T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const clock = () => now;
 const code = (expected) => (error) => error.code === expected;
 async function fixture() {
@@ -23,7 +25,7 @@ async function fixture() {
   await shoutRef.set({ authorId: owner, title: 'Serverový nadpis', status: 'active', commentsCount: 0,
     expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test-app' }, data: { idempotencyKey: 'comment-1', shoutId, text: 'Komentář' } };
+    app: { appId: 'test-app' }, data: { idempotencyKey: timedKey('comment-1'), shoutId, text: 'Komentář' } };
   return { uid, owner, parentAuthor, shoutRef, request };
 }
 const notification = (uid, kind, shoutId) => db.doc(`users/${uid}/notifications/${kind}_${shoutId}`);
@@ -90,7 +92,7 @@ test('a later comment aggregates the notice while a retry cannot create it again
   await createCommentOperation(request, db, clock);
   const noticeRef = notification(owner, 'comment', shoutRef.id);
   await noticeRef.update({ readAt: Timestamp.fromDate(now) });
-  const next = { ...request, data: { ...request.data, idempotencyKey: 'next', text: 'Další' } };
+  const next = { ...request, data: { ...request.data, idempotencyKey: timedKey('next'), text: 'Další' } };
   const later = () => new Date(now.getTime() + 10000);
   const result = await createCommentOperation(next, db, later);
   assert.equal((await noticeRef.get()).data().eventCount, 2);
@@ -118,7 +120,7 @@ test('expired/deleted Shout and missing parent fail without consuming a rate or 
 test('concurrent distinct comments cannot bypass cooldown or double increment counts', { skip: !enabled }, async () => {
   const { uid, shoutRef, request } = await fixture();
   const results = await Promise.allSettled(['one', 'two'].map((idempotencyKey) =>
-    createCommentOperation({ ...request, data: { ...request.data, idempotencyKey } }, db, clock)));
+    createCommentOperation({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey) } }, db, clock)));
   assert.equal(results.filter((result) => result.status === 'fulfilled').length, 1);
   assert.equal(results.find((result) => result.status === 'rejected').reason.code, 'resource-exhausted');
   assert.equal((await shoutRef.get()).data().commentsCount, 1);

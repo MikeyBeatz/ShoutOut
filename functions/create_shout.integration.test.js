@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
@@ -11,6 +12,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'creat
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-25T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const profile = { nickname: 'Tester', avatarId: 'avatar_01', avatarBackgroundStart: 1,
   avatarBackgroundEnd: 2, avatarGradientDirection: 'horizontal' };
 async function fixture(business = false) {
@@ -24,7 +26,7 @@ async function fixture(business = false) {
       active: true, deleted: false, geocodingStatus: 'verified', location: new GeoPoint(49.1234, 16.4567) });
   }
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test-app' }, data: { idempotencyKey: 'request-1', title: 'Dotaz', text: 'Ahoj',
+    app: { appId: 'test-app' }, data: { idempotencyKey: timedKey('request-1'), title: 'Dotaz', text: 'Ahoj',
       categories: ['Dotaz'], durationMinutes: 120,
       ...(business ? { businessLocationId: 'branch' } : { location: { latitude: 50.0755, longitude: 14.4378 } }) } };
   return { uid, request };
@@ -49,7 +51,7 @@ test('concurrent retries create one Shout and charge the rate once', { skip: !en
 test('concurrent distinct requests cannot bypass the cooldown', { skip: !enabled }, async () => {
   const { uid, request } = await fixture();
   const results = await Promise.allSettled(['one', 'two'].map((idempotencyKey) =>
-    createShoutOperation({ ...request, data: { ...request.data, idempotencyKey } }, db, () => now)));
+    createShoutOperation({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey) } }, db, () => now)));
   assert.equal(results.filter((r) => r.status === 'fulfilled').length, 1);
   assert.equal(results.find((r) => r.status === 'rejected').reason.code, 'resource-exhausted');
   assert.equal((await db.doc(`rateLimits/${uid}/actions/shout`).get()).data().count, 1);
@@ -67,7 +69,7 @@ test('Business uses the active verified branch and rejects suspended profiles', 
   assert.equal(shout.businessAuthorFormat, 'branch');
   assert.equal(shout.businessHighlighted, true);
   await db.doc(`businessProfiles/${uid}`).update({ status: 'suspended' });
-  await assert.rejects(createShoutOperation({ ...request, data: { ...request.data, idempotencyKey: 'new' } },
+  await assert.rejects(createShoutOperation({ ...request, data: { ...request.data, idempotencyKey: timedKey('new') } },
     db, () => new Date(now.getTime() + 2000)), (e) => e.code === 'failed-precondition');
 });
 

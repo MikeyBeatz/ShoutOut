@@ -36,8 +36,9 @@ test('receipt expiry uses actual server commit time, including a request first e
 });
 
 test('compatibility phase preserves legacy clients and never makes legacy receipts eligible for cleanup', () => {
-  assert.deepEqual(check('legacy-key', now), {});
-  assert.deepEqual(check('legacy-key', now, { createdAt: Timestamp.fromMillis(0) }), {});
+  assert.deepEqual(check('legacy-key', now, undefined, { allowLegacy: true }), {});
+  assert.deepEqual(check('legacy-key', now, { createdAt: Timestamp.fromMillis(0) }, { allowLegacy: true }), {});
+  assert.throws(() => check('legacy-key', now), error('operation-key-upgrade-required'));
   assert.throws(() => check('legacy-key', now, undefined, { allowLegacy: false }), error('operation-key-upgrade-required'));
   assert.deepEqual(check('legacy-key', now, { createdAt: now }, { allowLegacy: false }), {});
   assert.throws(() => check('legacy-key', Timestamp.fromMillis(now.toMillis() + week), { createdAt: now },

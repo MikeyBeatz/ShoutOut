@@ -86,7 +86,7 @@ přijímání starého formátu bez časového omezení. Návrh musí řešit ne
 čas zařízení, souběh, přepnutí účtu, přerušený rollout a zachování původního
 potvrzení během platného okna. Klient nesmí nejistý prošlý pokus automaticky
 změnit na novou akci. Vlastník 30. října schválil délku okna 7 dní;
-implementace tohoto omezení a úklidu teprve následuje. Dosavadních 60 dní po smazání účtu
+kompatibilní omezení je již nasazené ve vývoji, úklid ještě neběží. Dosavadních 60 dní po smazání účtu
 se tím nemění. Produkční změna retence vyžaduje odpovídající rozhodnutí.
 
 První lokálně připravená kompatibilní vrstva používá `operation_retention.js`
@@ -99,8 +99,9 @@ je stejný starý klíč také odmítnutý, takže se akce znovu neprovede.
 
 Přechodný `legacyOperationKeysAccepted: true` zachovává dosavadní klienty;
 jejich receipt nedostávají deadline a nesmějí se zatím automaticky mazat.
-Vrstva neprovádí cleanup, nemění oprávnění/limity a není ještě nasazená.
-Následuje klientský přechod, ověření a ukončení přijímání nových legacy klíčů.
+Tato kompatibilní fáze je ve vývoji nasazená z `079d053`, neprovádí cleanup
+a nemění oprávnění/limity. Následuje dokončení živého ověření nového klienta
+a ukončení přijímání nových legacy klíčů.
 
 Lokálně připravený `TimedOperationGateway` navazuje původní logický klíč
 klienta na neměnný `op1` payload. Epochu odvozuje z `IdTokenResult.issuedAtTime`
@@ -115,9 +116,19 @@ i po potvrzení, aby případný pozdější retry po UI chybě nezaložil novou
 Souběžná odeslání se slučují, změna payloadu pod stejným klíčem se odmítne.
 Prošlý pokus automaticky nevygeneruje nový klíč; rozhraní v sedmi jazycích
 vyzve k obnovení aplikace a kontrole skutečného výsledku. Reload tyto vazby
-nezachová; klientské klíče se zatím neukládají trvale. Nic z této nové vrstvy
-není ještě nasazené. Rollout musí začít všemi Functions a teprve poté webem;
-legacy klienti zůstávají po dobu přechodu kompatibilní.
+nezachová; klientské klíče se zatím neukládají trvale. Ve vývoji jsou Functions
+i web nasazené a běžný účet ověřil nové klíče; legacy klienti zůstávají po dobu
+přechodu kompatibilní. [Přesný stav](TESTING.md#retention-rollout).
+
+Lokální navazující větev přepíná `legacyOperationKeysAccepted` na `false`:
+nové legacy požadavky odmítá, existující receipt dovolí přehrát jen uvnitř
+jejich původního sedmidenního okna. Dávkový úklid smí běžet až po tomto cutoveru.
+`maintenanceState/operationReceiptCleanup` je neveřejný technický checkpoint
+pro datum/ID posledního prohlédnutého receipt a souhrnné počty; neobsahuje
+obsah, tokeny ani přezdívky. Chrání jej výchozí zákaz přístupu klientů v Rules.
+Při souběhu používá updateTime precondition, na konci průchodu kurzor resetuje.
+Mazání receipt také používá updateTime precondition a odmítne neznámé či
+poškozené retenční údaje. Tento cutover ani plánovač ještě nejsou nasazené.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,

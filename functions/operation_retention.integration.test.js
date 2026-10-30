@@ -58,6 +58,18 @@ test('all eight operations reject expired timed requests before any content, rat
   }
 });
 
+test('cutover rejects new legacy keys in every operation without writes', { skip: !enabled }, async () => {
+  for (const [operation, data] of operations) {
+    const r = await request(data);
+    r.data.idempotencyKey = 'old-client-operation-key';
+    await assert.rejects(operation(r, db, at(0)), actual => actual.code === 'failed-precondition' &&
+      actual.message === 'operation-key-upgrade-required', operation.name);
+    assert.equal((await db.collection(`rateLimits/${r.auth.uid}/actions`).get()).size, 0);
+    assert.equal((await db.collection('serverOperations').where('userId', '==', r.auth.uid).get()).size, 0);
+    assert.equal((await db.collection('shouts').where('authorId', '==', r.auth.uid).get()).size, 0);
+  }
+});
+
 test('cleanup cannot turn the same timed save request into a second toggle', { skip: !enabled }, async () => {
   const f = await savedFixture();
   assert.deepEqual(await toggleShoutSaveOperation(f.r, db, at(0)), { saved: true, count: 1 });

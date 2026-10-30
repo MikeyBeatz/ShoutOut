@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +11,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'shout
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-26T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const at = (ms = 0) => () => new Date(now.getTime() + ms);
 async function actor() {
   const uid = randomUUID();
@@ -24,10 +26,10 @@ async function fixture() {
   await shoutRef.set({ authorId: owner, title: 'Target', status: 'active',
     likesCount: 2, dislikesCount: 3, commentsCount: 4, savesCount: 5 });
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test-app' }, data: { idempotencyKey: 'first', shoutId: shoutRef.id, button: 'like' } };
+    app: { appId: 'test-app' }, data: { idempotencyKey: timedKey('first'), shoutId: shoutRef.id, button: 'like' } };
   return { uid, owner, shoutRef, request };
 }
-const change = (request, key, button) => ({ ...request, data: { ...request.data, idempotencyKey: key, button } });
+const change = (request, key, button) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(key), button } });
 const notice = (uid, type, shoutId) => db.doc(`users/${uid}/notifications/reaction_${type}_${shoutId}`);
 const rate = (uid) => db.doc(`rateLimits/${uid}/actions/interaction`);
 

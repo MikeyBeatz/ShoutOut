@@ -46,13 +46,22 @@ připravenost Storage služby.
 
 ## Konfigurace
 
-Lokálně připravená retence zavádí `op1` klíče ve všech osmi serverových cestách
-přes `TimedOperationGateway`; stávající konfigurační přepínače cest zůstávají.
-Serverová kompatibilní vrstva musí být nasazená ve všech osmi Functions před
-novým webem, protože publikační endpointy nově přijímají `expectedUserId`.
-Čas klíče klient bere z vydání Auth tokenu, ne z hodin zařízení. Server určuje
-7denní deadline receipt. Nový kód zatím není nasazený; legacy příjem a přímé
-Rules zápisy se touto fází nevypínají a žádný úklid ještě neběží.
+Retence `op1` je ve vývoji nasazená z čistého `079d053d24fe04705d13baad7f8307bd25848094`
+po CI `41136744088`: nejdřív osm kompatibilních Functions, potom web. Klient
+bere čas z Auth a server určuje sedmidenní deadline; dvanáct testovacích
+receipt má `keyVersion: 1` a přesný interval 604800000 ms. Legacy příjem,
+Rules a stávající feature flags se touto fází nemění; úklid ještě neběží.
+Hosting `02cdb989d4f18ee2`, release `1793399239632000` z
+`2026-10-30T22:27:19.632Z`, má shodné otisky HTML/JS/konfigurace s release buildem.
+Návratová Hosting verze je `8d7e3f3fed920529`; po budoucím zákazu legacy klíčů
+ji nelze samostatně vrátit bez obnovení serverové kompatibility.
+Nové revize: createShout `00002-tug`, createComment `00002-qid`,
+createPrivateReply `00002-low`, toggleShoutReaction `00002-jan`,
+toggleCommentReaction `00002-yoj`, toggleShoutSave `00002-nub`,
+createContentReport `00002-pas`, deleteComment `00002-cet` (s názvem služby jako prefixem).
+ACTIVE, Node 22, europe-west3, min. 0 / max. 1 instance, concurrency 1,
+256 MiB, 15 s a HTTP 401 bez App Check jsou ověřené. Business průchod i úklid prošly;
+[aktuální důkazy](TESTING.md#retention-rollout). Produkce se neměnila.
 
 Lokálně připravené mazání komentářů má volitelný boolean `serverCommentDeletion`
 (výchozí `false`); při `true` musí být nastavený App Check klíč. Nová callable

@@ -1,25 +1,29 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/ci-reliability` (samostatná pracovní kopie); navazuje na klientskou retenci
-`e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
+`feature/operation-retention-cleanup`; přebrala ověřené CI `079d053` a navazuje
+na klientskou retenci `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Další krok je schválená sedmidenní retence potvrzení operací.
-Kompatibilní serverová vrstva i klientské časové klíče jsou lokálně připravené
-a otestované. Nejsou ještě nasazené; živý web stále používá původní klíče
-a úklid není zapnutý. Nejdřív aktualizovat všech osm Functions, potom Hosting.
-CI klientského zdroje `c3ad17d`, run `41100166067`, attempt 4 je `completed/success`
-(4 min 19 s). Dřívější rozpor metadat už neblokuje CI; attempt 2 selhal při
-stahování emulatoru. Rollout dosud neproběhl. Aktuální schválená odbočka
-sjednocuje testovací Node/CLI, přidává npm a emulator cache, timeouty a logy
-při selhání. Implementace `48247fe` prošla úplným CI `41136220552` za 3 min 42 s;
-obě nové cache byly uložené. Rozsah a ověření jsou v [TESTING](TESTING.md#ci-reliability).
-Rozpracovaný cutover a úklid retence zůstává samostatně ve větvi
-`feature/operation-retention-cleanup`; do CI změny se nezahrnuje.
+Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
+`079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
+Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
+limity a HTTP 401 bez App Check ověřené. HTML/JS/konfigurace odpovídají buildu.
+Běžný účet ověřil publikaci, komentář, reakce, záložku a mazání; Business
+soukromou odpověď a hlášení. Právě 12 receipt má `keyVersion: 1` a přesně
+sedmidenní serverové deadline. Testovací obsah/report/notifikace jsou uklizené.
+Automatické mazání neběží.
+Lokálně je připravený zákaz nových legacy klíčů a dávkový úklid s pokračováním;
+živý průchod již prošel. Vlastník schválil plánovač jednou denně v DEV
+(02:15 UTC, nejvýše 500 receipt/běh). Lokálně prošlo 44 unit a 129 integračních
+testů, lint a příprava balíčku; další krok je CI přesného commitu a cutover
+všech osmi Functions před nasazením plánovače. [Důkazy](TESTING.md#retention-rollout).
+Nové CI prošlo dvakrát; druhý běh 3 min 14 s, npm i emulator cache hit potvrzené.
+[Podrobnosti CI](TESTING.md#ci-reliability).
 
 ## Jak přehled používat
 
@@ -35,11 +39,11 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 |---|---|
 | Vývojový projekt i Hosting site | `shoutout-dev-46c81` |
 | Vývojová aplikace | https://shoutout-dev-46c81.web.app |
-| Zdroj webu | `fcbc23d58bfd94498131a126059fe58b645c79a4` |
-| Hosting verze | `8d7e3f3fed920529` |
-| Release / čas UTC | `1793378523613000` / `2026-10-30T16:42:03.613Z` |
-| Předchozí verze pro případ návratu | `884138efa765d64a` |
-| Ověření | Obě CI, release build a shoda otisků prošly. Function ACTIVE, limity/HTTP 401 ověřené. Živé mazání 3 → 2 → 1 → 0, tři receipt a úklid potvrzené. |
+| Zdroj webu | `079d053d24fe04705d13baad7f8307bd25848094` |
+| Hosting verze | `02cdb989d4f18ee2` |
+| Release / čas UTC | `1793399239632000` / `2026-10-30T22:27:19.632Z` |
+| Předchozí verze pro případ návratu | `8d7e3f3fed920529` (před zákazem legacy klíčů) |
+| Ověření | CI, release build a shoda otisků prošly. Osm Functions ACTIVE, limity/HTTP 401 ověřené; živě všech 8 cest, 12 timed receipt a úklid. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -61,8 +65,9 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
 | Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Hotovo; `deletecomment-00001-zuc`, tři role, počet 3 → 2 → 1 → 0, právě 3 receipt a úklid. |
-| Sedmidenní retence – kompatibilní serverový základ | Lokálně 40 unit / 123 emulatorových testů, lint a balení prošly | Nenasazený; staré klíče se nadále přijímají a jejich receipt se nesmějí automaticky mazat. |
-| Klientské časově omezené klíče | Lokálně napojených 8 operací; čas z Auth, immutable payload, očekávaný účet a 7 jazyků pro recovery | Nenasazené; nasazovat až po nových Functions. |
+| Sedmidenní retence – kompatibilní serverový základ | `079d053`, úplné CI prošlo | Osm Functions aktualizovaných; staré klíče se stále přijímají, automatický úklid neběží. |
+| Klientské časově omezené klíče | Osm operací; čas z Auth, immutable payload, očekávaný účet a 7 jazyků | Nasazené; všech osm cest živě ověřených oběma účty včetně úklidu. |
+| Zákaz nových legacy klíčů a dávkový úklid | Lokálně připravené, nejvýše 500 receipt/běh, checkpoint a CAS | Nenasazené; vyžaduje dokončený průchod nového klienta a CI přesného commitu. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -104,9 +109,9 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
   dokončený log jobu `124215878506` všech 202 Flutter / 41 unit / 123 emulatorových
   / 20 tools testů a build zelené (log skončil v 17:39:49 UTC). Run/check/suite
   metadata ale zůstala `in_progress` bez conclusion a jobs API vracelo 502/504.
-  Zrušení bylo odmítnuté jako již dokončený běh; následný re-run přijat, attempt 2
-  je zatím `queued`. Toto není potvrzený konečný úspěch CI a nic nového se
-  nenasazuje. Vlastník je požádán o kontrolu stejného run URL.
+  Zrušení bylo odmítnuté jako již dokončený běh; attempt 2 následně selhal při
+  downloadu emulatoru. Attempt 4 prošel. Finální `079d053` prošel vlastním CI
+  `41136744088` a kompatibilní fáze je z něj nasazená, viz aktuální stav výše.
 
 - První serverová vrstva retence: Functions lint, 40 unit testů a 123
   emulatorových (65 Rules + 58 serverových) prošlo. Nové časově omezené

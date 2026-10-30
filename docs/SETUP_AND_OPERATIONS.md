@@ -380,6 +380,17 @@ Business registrace ani vytvoření/změna pobočky se nesmí považovat za otes
 
 ## Automatické kontroly
 
+Retence operací má kompatibilní fázi `079d053` nasazenou ve vývoji a živě
+ověřenou všemi osmi cestami. Navazující cutover a denní úklid jsou připravené,
+ale ještě nenasazené. Po CI nejdřív aktualizovat všech osm callable Functions,
+ověřit ACTIVE/revize a pak samostatně nasadit `functions:content:cleanupOperationReceipts`
+ze stejné čisté pracovní kopie. Nespouštět úklid proti starým Functions.
+Schválený DEV plán je 02:15 UTC, nejvýše 500 receipt/běh; min. 0 / max. 1,
+concurrency 1, 256 MiB, timeout 60 s, bez retry. Nutná kontrola soukromého
+IAM endpointu a prvního spuštění. Návrat na starý web s legacy klíči vyžaduje
+obnovit kompatibilní server a pozastavit plánovač. Produkční frekvence není
+tímto rozhodnutá. Stav a důkazy: [TESTING](TESTING.md#retention-rollout).
+
 Lokálně spusťte stejné kontroly jako CI:
 
 ```powershell

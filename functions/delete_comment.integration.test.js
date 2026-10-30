@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
@@ -10,6 +11,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'comme
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-30T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const at = (ms = 0) => () => new Date(now.getTime() + ms);
 const errorCode = code => error => error.code === code;
 async function actor() {
@@ -27,12 +29,12 @@ async function fixture() {
   await shout.set(original);
   await comment.set({ authorId: uid, text: 'Comment', likesCount: 1, dislikesCount: 0 });
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'web' }, data: { shoutId: shout.id, commentId: comment.id, expectedUserId: uid, idempotencyKey: 'first' } };
+    app: { appId: 'web' }, data: { shoutId: shout.id, commentId: comment.id, expectedUserId: uid, idempotencyKey: timedKey('first') } };
   return { uid, shout, comment, original, request };
 }
 const rate = f => db.doc(`rateLimits/${f.uid}/actions/delete`);
-const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ndeleteComment\n${key}`).digest('hex')}`);
-const change = (request, key) => ({ ...request, data: { ...request.data, idempotencyKey: key } });
+const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ndeleteComment\n${timedKey(key)}`).digest('hex')}`);
+const change = (request, key) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(key) } });
 
 test('author deletion changes one parent counter and writes one rate event and private receipt atomically', { skip: !enabled }, async () => {
   const f = await fixture();
@@ -48,7 +50,7 @@ test('author deletion changes one parent counter and writes one rate event and p
   assert.deepEqual((await rate(f).get()).data(), { count: 1, lastEventId: f.comment.id,
     lastAt: Timestamp.fromDate(now), windowStartedAt: Timestamp.fromDate(now) });
   const saved = (await receipt(f).get()).data();
-  assert.deepEqual(Object.keys(saved).sort(), ['action','authorId','commentId','createdAt','fingerprint','result','shoutId','userId']);
+  assert.deepEqual(Object.keys(saved).sort(), ['action','authorId','commentId','createdAt','expiresAt','fingerprint','keyVersion','result','shoutId','userId']);
   assert.equal(saved.authorId, f.uid);
   assert.deepEqual(saved.result, { deleted: true });
   assert.equal((await db.collection(`users/${f.original.authorId}/notifications`).get()).size, 0);

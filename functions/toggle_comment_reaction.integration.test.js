@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
@@ -11,6 +12,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'comme
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-26T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const at = (ms = 0) => () => new Date(now.getTime() + ms);
 async function actor() {
   const uid = randomUUID();
@@ -29,13 +31,13 @@ async function fixture() {
   await shoutRef.set(shoutData);
   await commentRef.set(commentData);
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test' }, data: { idempotencyKey: 'first', shoutId: shoutRef.id, commentId: commentRef.id, button: 'like', expectedUserId: uid } };
+    app: { appId: 'test' }, data: { idempotencyKey: timedKey('first'), shoutId: shoutRef.id, commentId: commentRef.id, button: 'like', expectedUserId: uid } };
   return { uid, owner, shoutOwner, shoutRef, commentRef, shoutData, commentData, request };
 }
 const rate = uid => db.doc(`rateLimits/${uid}/actions/interaction`);
-const change = (request, idempotencyKey, button) => ({ ...request, data: { ...request.data, idempotencyKey, button } });
+const change = (request, idempotencyKey, button) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey), button } });
 const notice = (f, type) => db.doc(`users/${f.owner}/notifications/commentReaction_${type}_${f.shoutRef.id}_${f.commentRef.id}`);
-const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleCommentReaction\n${key}`).digest('hex')}`);
+const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleCommentReaction\n${timedKey(key)}`).digest('hex')}`);
 
 test('comment add, switch and removal are atomic and notify the comment author only', { skip: !enabled }, async () => {
   const f = await fixture();

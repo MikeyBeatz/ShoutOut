@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
@@ -11,6 +12,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'shout
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-26T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const at = (ms = 0) => () => new Date(now.getTime() + ms);
 async function actor() {
   const uid = randomUUID();
@@ -25,13 +27,13 @@ async function fixture() {
     likesCount: 2, dislikesCount: 3, commentsCount: 4, savesCount: 5 };
   await shoutRef.set(shoutData);
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test' }, data: { idempotencyKey: 'first', shoutId: shoutRef.id, expectedUserId: uid } };
+    app: { appId: 'test' }, data: { idempotencyKey: timedKey('first'), shoutId: shoutRef.id, expectedUserId: uid } };
   return { uid, owner, shoutRef, shoutData, request };
 }
 const rate = uid => db.doc(`rateLimits/${uid}/actions/interaction`);
 const saved = f => f.shoutRef.collection('saves').doc(f.uid);
-const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleShoutSave\n${key}`).digest('hex')}`);
-const change = (request, idempotencyKey) => ({ ...request, data: { ...request.data, idempotencyKey } });
+const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleShoutSave\n${timedKey(key)}`).digest('hex')}`);
+const change = (request, idempotencyKey) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey) } });
 
 test('save and removal atomically update one counter, rate and receipt without notifications', { skip: !enabled }, async () => {
   const f = await fixture();
@@ -43,7 +45,7 @@ test('save and removal atomically update one counter, rate and receipt without n
   assert.equal(first.shoutId, f.shoutRef.id);
   assert.deepEqual(first.result, { saved: true, count: 6 });
   assert.equal(first.createdAt.toMillis(), now.getTime());
-  assert.deepEqual(Object.keys(first).sort(), ['action','createdAt','fingerprint','result','shoutId','userId']);
+  assert.deepEqual(Object.keys(first).sort(), ['action','createdAt','expiresAt','fingerprint','keyVersion','result','shoutId','userId']);
   assert.deepEqual(await toggle(change(f.request, 'remove'), db, at(1000)), { saved: false, count: 5 });
   assert.equal((await saved(f).get()).exists, false);
   assert.deepEqual((await f.shoutRef.get()).data(), f.shoutData);

@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
@@ -10,12 +11,13 @@ const app=enabled?initializeApp({projectId:'shoutout-rules-test'},'content-repor
 const db=app?getFirestore(app):null;
 after(async()=>{if(app){await db.terminate();await deleteApp(app);}});
 const now=new Date('2026-10-29T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const at=(ms=0)=>()=>new Date(now.getTime()+ms);
 const collection={shout:'reports',comment:'commentReports',privateReply:'privateReplyReports'};
 async function actor(){const uid=randomUUID();await db.doc(`users/${uid}`).set({nickname:'Reporter'});await db.doc(`users/${uid}/legal/acceptance_2026_07_25`).set({});return uid;}
 async function fixture(targetType='shout'){
   const uid=await actor(),owner=randomUUID(),shoutId=randomUUID(),targetId=targetType==='shout'?undefined:randomUUID();
-  const data={idempotencyKey:'first',expectedUserId:uid,targetType,shoutId,reason:'Spam',...(targetId?{targetId}:{})};
+  const data={idempotencyKey: timedKey('first'),expectedUserId:uid,targetType,shoutId,reason:'Spam',...(targetId?{targetId}:{})};
   const request={auth:{uid,token:{email:'reporter@example.test',email_verified:true}},app:{appId:'web'},data};
   const shoutRef=db.doc(`shouts/${shoutId}`);
   await shoutRef.set({authorId:owner,status:'deleted',likesCount:3,dislikesCount:2,commentsCount:7,savesCount:4});
@@ -78,14 +80,14 @@ test('retry stays historical after moderation; another reason/key cannot overwri
   await db.doc(`bans/${f.uid}`).set({});
   await assert.rejects(create(f.request,db,at(60000)),e=>e.code==='permission-denied');
   const g=await fixture();await create(g.request,db,at());
-  await assert.rejects(create(change(g.request,{idempotencyKey:'second',reason:'Changed'}),db,at(60000)),e=>e.code==='already-exists');
+  await assert.rejects(create(change(g.request,{idempotencyKey: timedKey('second'),reason:'Changed'}),db,at(60000)),e=>e.code==='already-exists');
   assert.equal((await g.reportRef.get()).data().reason,'Spam');assert.equal((await rateRef(g).get()).data().count,1);
-  assert.equal((await receiptRef(change(g.request,{idempotencyKey:'second'})).get()).exists,false);
+  assert.equal((await receiptRef(change(g.request,{idempotencyKey: timedKey('second')})).get()).exists,false);
 });
 
 test('concurrent same-key and distinct-key duplicates create one report and charge one report event', {skip:!enabled},async()=>{
   for(const keys of [['first','first','first'],['first','second']]){
-    const f=await fixture('comment');const results=await Promise.allSettled(keys.map(k=>create(change(f.request,{idempotencyKey:k}),db,at())));
+    const f=await fixture('comment');const results=await Promise.allSettled(keys.map(k=>create(change(f.request,{idempotencyKey: timedKey(k)}),db,at())));
     const rejected=results.filter(x=>x.status==='rejected').map(x=>({code:x.reason.code,message:x.reason.message}));
     assert.equal(results.filter(x=>x.status==='fulfilled').length,keys[0]===keys[1]?keys.length:1,
       `Unexpected concurrent results: ${JSON.stringify(rejected)}`);
@@ -98,12 +100,12 @@ test('different reporters remain independent; different targets by one reporter 
   const f=await fixture(),other=await actor();
   await Promise.all([create(f.request,db,at()),create({...f.request,auth:{...f.request.auth,uid:other},data:{...f.request.data,expectedUserId:other}},db,at())]);
   const target=randomUUID();await db.doc(`shouts/${target}`).set({authorId:f.owner});
-  const next=change(f.request,{shoutId:target,idempotencyKey:'next'});
+  const next=change(f.request,{shoutId:target,idempotencyKey: timedKey('next')});
   await assert.rejects(create(next,db,at(59999)),e=>e.code==='resource-exhausted');
   await create(next,db,at(60000));assert.equal((await rateRef(f).get()).data().count,2);
   await rateRef(f).set({lastAt:Timestamp.fromDate(now),lastEventId:'bug_existing',windowStartedAt:Timestamp.fromDate(now),count:20});
   const third=randomUUID();await db.doc(`shouts/${third}`).set({authorId:f.owner});
-  const last=change(f.request,{shoutId:third,idempotencyKey:'last'});
+  const last=change(f.request,{shoutId:third,idempotencyKey: timedKey('last')});
   await assert.rejects(create(last,db,at(60000)),e=>e.code==='resource-exhausted');
   await create(last,db,at(86400000));assert.equal((await rateRef(f).get()).data().count,1);
 });

@@ -42,13 +42,12 @@ Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě
 1. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
    Vlastník schválil 7denní okno opakování; před úklidem je nutné odmítání
    prošlých požadavků. První kompatibilní serverová vrstva prošla lokálními
-   testy. Klient je lokálně napojený na čas z Auth; CI prošlo, čeká rollout
-   Functions před Hostingem, živé ověření a úklid. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
-   Zdroj `c3ad17d` prošel CI `41100166067`, attempt 4; rollout zatím neproběhl.
-   Před návratem k retenci je schválená samostatná úprava spolehlivosti CI:
-   sjednocení verzí, cache, logy při chybě a timeouty, při zachování všech testů.
-   Implementace `48247fe` prošla úplným CI `41136220552`; cache se uložily.
-   [Rozsah a důkazy](TESTING.md#ci-reliability); metriky milníků se nemění.
+   testy. Kompatibilní Functions a nový klient `079d053` jsou po CI nasazené
+   ve vývoji; všech osm cest, 12 timed receipt i úklid testů prošly. Čeká CI
+   a nasazení zákazu nových legacy klíčů a automatického úklidu. Lokálně
+   44 unit / 129 integračních testů prošlo; vlastník schválil denní DEV plánovač
+   (02:15 UTC, nejvýše 500 receipt/běh). [Důkazy](TESTING.md#retention-rollout).
+   Nové CI je dokončené včetně ověřeného cache hitu; metriky milníků se nemění.
 2. Dokončit prostorové dotazy a stránkování feedu.
 3. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 

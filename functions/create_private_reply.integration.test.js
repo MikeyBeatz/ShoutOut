@@ -1,3 +1,4 @@
+import { operationTestKey } from './test_helpers.js';
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +11,7 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'priva
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = new Date('2026-10-26T12:00:00Z');
+const timedKey = label => operationTestKey(label, now);
 const clock = () => now;
 const code = (expected) => (error) => error.code === expected;
 async function fixture() {
@@ -22,7 +24,7 @@ async function fixture() {
   await shoutRef.set({ authorId: owner, authorNickname: 'Ověřená pobočka', title: 'Veřejný nadpis',
     status: 'active', commentsCount: 7, expiresAt: Timestamp.fromMillis(now.getTime() + 3600000) });
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'test-app' }, data: { idempotencyKey: 'private-1', shoutId, text: 'Private payload fixture', targetType: 'shout' } };
+    app: { appId: 'test-app' }, data: { idempotencyKey: timedKey('private-1'), shoutId, text: 'Private payload fixture', targetType: 'shout' } };
   return { uid, owner, commenter, shoutRef, request };
 }
 const noticeRef = (recipient, shoutId) => db.doc(`users/${recipient}/notifications/privateReply_${shoutId}`);
@@ -122,7 +124,7 @@ test('private notification preferences and aggregation preserve privacy and rese
     await createPrivateReplyOperation(request, db, clock);
     const notice = noticeRef(owner, shoutRef.id);
     if (enabled) await notice.update({ readAt: Timestamp.fromDate(now) });
-    await createPrivateReplyOperation({ ...request, data: { ...request.data, idempotencyKey: 'next' } },
+    await createPrivateReplyOperation({ ...request, data: { ...request.data, idempotencyKey: timedKey('next') } },
       db, () => new Date(now.getTime() + 10000));
     const snapshot = await notice.get();
     assert.equal(snapshot.exists, enabled);
@@ -137,7 +139,7 @@ test('private notification preferences and aggregation preserve privacy and rese
 test('concurrent distinct private replies cannot bypass their independent cooldown', { skip: !enabled }, async () => {
   const f = await fixture();
   const results = await Promise.allSettled(['one', 'two'].map((idempotencyKey) =>
-    createPrivateReplyOperation({ ...f.request, data: { ...f.request.data, idempotencyKey } }, db, clock)));
+    createPrivateReplyOperation({ ...f.request, data: { ...f.request.data, idempotencyKey: timedKey(idempotencyKey) } }, db, clock)));
   assert.equal(results.filter((result) => result.status === 'fulfilled').length, 1);
   assert.equal(results.find((result) => result.status === 'rejected').reason.code, 'resource-exhausted');
   assert.equal((await db.doc(`rateLimits/${f.uid}/actions/privateReply`).get()).data().count, 1);

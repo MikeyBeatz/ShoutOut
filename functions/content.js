@@ -13,6 +13,8 @@ import { deleteCommentOperation } from './delete_comment.js';
 
 if (getApps().length === 0) initializeApp();
 
+export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
+
 export const deleteComment = onCall({
   ...secureCallableOptions,
   minInstances: 0,

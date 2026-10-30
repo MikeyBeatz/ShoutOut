@@ -2,9 +2,9 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 
 export const operationRetryWindowMillis = 7 * 24 * 60 * 60 * 1000;
-// Compatibility phase: do not purge legacy receipts while old clients can still
-// execute keys without an age. Disable only after the timed-key client rollout.
-export const legacyOperationKeysAccepted = true;
+// Cutover phase: deploy only after all clients use timed keys. Existing legacy
+// receipts remain replayable inside their original seven-day server window.
+export const legacyOperationKeysAccepted = false;
 
 const reject = (message) => { throw new HttpsError('failed-precondition', message); };
 

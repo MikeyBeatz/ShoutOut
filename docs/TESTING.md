@@ -28,7 +28,8 @@ Node 22.23.4; CLI výpis potvrzuje projektovou instalaci 15.31.0.
 pro `48247fea2cf557731fef1b9fb6c9841f4a51e2dc` prošlo za 3 min 42 s
 (22:09:40–22:13:22 UTC): Flutter formát/analýza/testy, 20 tools, 41 unit,
 123 emulatorových testů a debug build. Log potvrzuje Node 22.23.4 a CLI 15.31.0.
-První běh uložil npm i emulator cache; opakovaný průchod ověřuje její obnovení.
+První běh uložil npm i emulator cache. Finální `079d053` prošel CI `41136744088`
+za 3 min 14 s (22:14:10–22:17:24 UTC); npm i emulator cache hit jsou potvrzené.
 Upload při selhání nebyl lokálně simulovaný. Audit Functions má 0 nálezů;
 tools včetně CLI hlásí 21 nálezů v tranzitivních vývojových závislostech
 (9 moderate, 12 high), jejich plošná aktualizace není součástí tohoto kroku.
@@ -42,6 +43,62 @@ bez uloženého podrobného logu nelze určit příčinu stažení. Cache primá
 omezuje opakovanou závislost na tomto downloadu. Souběžné transakční testy
 (jednotlivě přibližně 3–7 s) zůstávají beze změny. Zrychlení nové konfigurace
 je nutné měřit zvlášť pro studenou a naplněnou cache.
+
+<a id="retention-rollout"></a>
+
+## Retence – vývojový rollout a připravený cutover 30. října 2026
+
+Z čisté pracovní kopie `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném
+CI `41136744088` byly aktualizované pouze existující osmičky content Functions
+v `shoutout-dev-46c81`, následně vývojový Hosting `02cdb989d4f18ee2`
+(release `1793399239632000`, 22:27:19.632 UTC). Revize a rollback jsou v
+[WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md#konfigurace). API potvrdilo všech osm
+ACTIVE, Node 22, europe-west3, 256 MiB, 15 s, min. 0 / max. 1 instance a
+concurrency 1. Všech osm odmítlo požadavek bez App Check HTTP 401. HTML,
+`main.dart.js` a konfigurace mají shodné SHA-256 s místním release buildem.
+
+Po ručním znovuotevření aplikace vlastník publikoval „MVP retence 30.10.“;
+automatická karta předtím hlásila reCAPTCHA error. Ochrany se neměnily.
+Stejná funkční karta běžného účtu ověřila komentář, palec Shoutu 0 → 1 → 0,
+záložku 0 → 1 → 0, palec komentáře 0 → 1 → 0 a smazání komentáře 1 → 0.
+Druhý komentář Business nahlásil jako spam a odeslal soukromou odpověď.
+Právě dvanáct receipt má
+`keyVersion: 1`, správnou identitu a `expiresAt - createdAt = 604800000 ms`.
+Business identita, příjemce zprávy i moderační dokument jsou ověřené přes REST.
+Úklid v 22:39:48 UTC soft-deleted parent, odstranil komentář, soukromou zprávu,
+testovací report a jeho notifikaci s precondition na původní updateTime.
+Všech 12 receipt zůstalo zachovaných; původní uživatelský obsah se neměnil.
+Důkaz UI je v ignorovaném `build/timed-operation-private-proof.png`.
+Důkazy bez credentials: ignorované `build/retention-before.json`,
+`retention-functions-after.json`, `retention-hosting-after.json` a
+`timed-operation-live-state.json`. Legacy příjem je v nasazené fázi stále zapnutý.
+
+Ve větvi `feature/operation-retention-cleanup` je připravený zákaz nových
+legacy klíčů. Platný replay existujícího starého receipt funguje pouze do
+sedmi dní od serverového vytvoření; po odstranění se starý formát vždy odmítne.
+Emulatorové fixtures přešly na deterministické časové klíče bez změny očekávání.
+Úklid prověřuje jen podporované akce a platné datum/metadata, nejvýše 500
+receipt v dávkách po 50. Mazání má precondition na původní updateTime; změna
+záznamu zruší celou dávku. `maintenanceState/operationReceiptCleanup` ukládá
+kurzor přes CAS, takže zachovaná neznámá data nezablokují další stránky a
+souběžný běh nepřepíše novější checkpoint. Po konci průchodu kurzor resetuje.
+Lokálně prošel lint, 44 unit a finálních 129 emulatorových scénářů bez chyby.
+Původní sady zachovávají stejná očekávání. Nově se ověřuje odmítnutí nových
+legacy klíčů všemi osmi operacemi bez zápisů, bezpečné opakování po úklidu,
+CAS dávky při změně receipt, stránkování přes zachovaná data a závod při
+založení checkpointu. Bez emulatoru se 64 integračních scénářů přeskočí.
+Logy: `build/retention-cleanup-emulator-final.log` a `retention-cleanup-unit.log`.
+
+Připravená plánovaná Function `cleanupOperationReceipts` má schválený plán denně
+02:15 UTC, 256 MiB, 60 s, max. 1 instanci/concurrency 1 a bez automatických
+retry. Loguje pouze počty a stavy. Vlastník výslovně vybral denní DEV variantu;
+žádný plánovač ještě není nasazený ani zapnutý. Nasadit až po úspěšném CI
+přesného commitu, po aktualizaci všech osmi Functions. Potom ověřit i IAM: žádný veřejný
+invoker, bez přihlášení musí být endpoint odmítnutý, Scheduler smí úlohu volat.
+[Oficiální postup a cena plánovače](https://firebase.google.com/docs/functions/schedule-functions).
+Před zapnutím produkce znovu posoudit kapacitu a frekvenci podle provozu.
+Sedmidenní deadline operace se vynucuje nezávisle na fyzickém úklidu;
+ostatní 60denní retenční požadavky a dokončení mazání účtu se tím nemění.
 
 ## První kompatibilní serverová vrstva retence 30. října 2026
 
