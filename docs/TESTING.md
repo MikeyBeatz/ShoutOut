@@ -59,6 +59,24 @@ a 1 otevřený report. `build/comment-delete-live-state.json` a
 podmíněné ověření/úklid. Běžný, Business a moderátorský průchod ani úklid
 nesmějí být označené za dokončené bez navazujících důkazů.
 
+Později 30. října se moderátorská karta načetla. Schválený pokus „Skrýt obsah
+bez postihu“ na výhradně testovacím komentáři vrátil „Rozhodnutí se nepodařilo
+uložit“. Log požadavku z `2026-10-30T16:53:41Z` má HTTP 401; strukturované
+ověření potvrzuje Auth VALID / App Check MISSING. Další dva požadavky v
+16:58 UTC mají stejný stav ověření. Všechny 3 komentáře a parent čítač 3
+zůstaly zachované. Vlastník je požádán o ruční uložení bez sankce.
+App Check API přijímá požadavky (prázdný token správně vrací 400), klíč je typu
+SCORE s povolenými vývojovými doménami a `minValidScore: 0.5`; běžné JS adresy
+vracejí 200. To neprokazuje úspěšnou attestation v konkrétní relaci. Nic z
+nastavení nebylo změněné. Jedno čtení Logging API vrátilo 429, pozdější prošlo.
+
+Lokální `build/receipt_expiry_probe.mjs` nad izolovaným emulátorem prokázal
+riziko prostého úklidu receipt: první uložení vrátí `{saved:true,count:1}`,
+po smazání jeho receipt stejný požadavek vrátí `{saved:false,count:0}`.
+Skript i emulátor skončily kódem 0, externí data nebyla dotčená. Potvrzuje to
+potřebu odmítnout prošlé požadavky před zavedením úklidu; nejde o schválenou
+implementaci retence. [Návrh a otevřené rozhodnutí](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
+
 ## Lokální příprava obsahových hlášení 29. října 2026
 
 `functions/create_content_report.test.js` ověřuje pouze tři povolené druhy

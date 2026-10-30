@@ -49,6 +49,9 @@
   produkci nadále vydávej z čistého označeného commitu v `main`.
   Souhlas s rolloutem sám nemění pravidla pro
   schvalování implementace, sloučení do `main` a vydávání tagů.
+  Uživatel upřesnil, že nová produkční a jiná podstatná rozhodnutí chce
+  nadále schvalovat. Trvalý souhlas pokrývá rutinní provedení schváleného
+  postupu po úspěšných kontrolách; nové rozhodnutí jím nenahrazuj.
 
 ## Výběr změn a publikování
 

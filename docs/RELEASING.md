@@ -53,6 +53,10 @@ Pro produkci nadále platí schválený obsah vydání, označený commit v `mai
 První veřejné vydání vyžaduje dokončené MVP a splněnou startovní bránu.
 Samotný rollout po splnění těchto podmínek už nevyžaduje nový dotaz na souhlas;
 dosud neschválené Git operace nebo změny rozsahu práce tím nejsou schválené.
+Následné upřesnění vlastníka zachovává dotazování na nová produkční a jiná
+podstatná rozhodnutí. Rutinní rollout podle schválených pravidel po úspěšných
+kontrolách znovu schvalovat netřeba; nové produktové či provozní volby se
+předkládají vlastníkovi. Úspěšné CI není důkaz absolutní bezchybnosti aplikace.
 
 ### Jednotlivé kroky
 

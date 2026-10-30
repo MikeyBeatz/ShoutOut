@@ -1,14 +1,15 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/server-comment-deletion`; navazuje na uzavřená obsahová hlášení
+`feature/server-comment-deletion-verification`; navazuje na uzavřená obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované a Function i aktivace webu jsou nasazené. Živé průchody
-čekají na obnovení ovladatelné moderátorské relace vlastníkem; po reloadu karta
-zůstala na načítání, příčina zatím není potvrzená.
+nejsou hotové: moderátorská karta již funguje, ale testovací odstranění bylo
+odmítnuté HTTP 401. Server ověřil Auth jako VALID a App Check jako MISSING.
+Vlastník je požádán o ruční průchod; žádný testovací komentář zatím nebyl smazaný.
 
 ## Jak přehled používat
 
@@ -49,7 +50,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
-| Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Function `deletecomment-00001-zuc` a Hosting `8d7e3f3fed920529` nasazené; živé testy čekají na funkční relaci. |
+| Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Function `deletecomment-00001-zuc` a Hosting `8d7e3f3fed920529` nasazené; moderátorský pokus odmítnut 401 (App Check MISSING), ruční ověření čeká. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -122,8 +123,11 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Obnovit ovladatelnou relaci TestModerator v ručně ověřené kartě a dokončit
-schválené živé mazání včetně úklidu. Oprávnění autora nebo
+Dokončit ruční průchod TestModerator v ověřené kartě a navazující schválené
+živé mazání včetně úklidu. Rozhraní už funguje; poslední pokus o rozhodnutí
+„Skrýt obsah bez postihu“ skončil 401 bez App Check tokenu. Konfigurace domén,
+App Check API a dostupnost JS byly znovu ověřené bez změny ochran.
+Oprávnění autora nebo
 moderátora i limit 120/hodinu a 1 s zůstávají stejné. Transakce maže pouze
 komentář a snižuje parent čítač nejvýše jednou; klient zobrazuje živý čítač.
 Moderační rozhodnutí/zavření reportu, reakční subkolekce a navazující odpovědi
@@ -141,6 +145,9 @@ Po dokončení tohoto průchodu navázat retencí receipt/mazáním účtu. Prů
 30. října nenašel další běžnou webovou mutaci těchto čtyř obsahových čítačů
 mimo připravené serverové cesty; staré větve zápisů stále chrání přepínače,
 Rules se dosud neuzavírají.
+Při čekání na ruční průchod lokální emulatorová zkouška doložila, že prosté
+mazání receipt umožní opětovné provedení starého požadavku. Bezpečný návrh
+retence a otevřená volba 7/30 dní jsou v [DATA_MODEL](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
 nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 
@@ -152,6 +159,8 @@ nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rul
   [Rozsah a podmínky](RELEASING.md#trvaly-souhlas-s-rollouty).
   Vlastník výslovně potvrdil vývoj i produkční aplikaci. Tato změna
   nemění zbývající živé testy mazání ani nepovoluje libovolné zásahy do dat.
+  Vlastník dále upřesnil, že nová produkční a jiná podstatná rozhodnutí chce
+  nadále schvalovat; rutinní rollout po úspěšných kontrolách se znovu neptá.
 
 - MVP je veřejný web pro běžné i Business účty. Mobilní vydání a placené
   Business předplatné jsou po MVP; ruční Business aktivace zůstává.

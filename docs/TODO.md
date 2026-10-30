@@ -41,6 +41,8 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
    vývoji. Živé testy a úklid čekají na obnovení ovladatelné moderátorské relace.
    Podrobnosti fixture a další krok uvádí [PROJECT_STATUS](PROJECT_STATUS.md).
 2. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
+   Lokálně je prokázané riziko prostého úklidu; před implementací čeká
+   rozhodnutí o 7/30denním okně. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 3. Dokončit prostorové dotazy a stránkování feedu.
 4. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 

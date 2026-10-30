@@ -59,7 +59,7 @@ Replay vrací historický výsledek, nikoli aktuální stav záložky. Budoucí 
 musí zobrazovat realtime data. Callable i klient jsou nasazené ve vývoji;
 aktuální důkazy uvádí [PROJECT_STATUS](PROJECT_STATUS.md). Retence receipt je otevřená.
 
-Lokálně připravené `deleteComment` ukládá do `serverOperations/{hash}` pole
+Ve vývoji nasazené `deleteComment` ukládá do `serverOperations/{hash}` pole
 `userId`, `action: deleteComment`, `fingerprint`, `shoutId`, `commentId`,
 `authorId`, `result: {deleted: true}` a `createdAt`. Hash má oddělený jmenný
 prostor účtu/operace/klíče. `authorId` pochází z mazaného dokumentu; umožňuje
@@ -72,6 +72,22 @@ Samotná odpověď čítač nevrací. Nový klíč pro už neexistující koment
 `not-found` bez zápisů; stejný klíč vrací uložené potvrzení bez dalšího odečtu.
 Podkolekce reakcí, odpovědi, hlášení a oznámení tato operace stejně jako původní
 klientská transakce nemaže. Retence receipt a další úklid zůstávají otevřené.
+
+### Retence potvrzení operací – ověřený problém a další návrh
+
+Potvrzení se zatím automaticky nemažou. Lokální emulatorová zkouška
+30. října doložila, že prosté odstranění receipt a opakování téhož
+`toggleShoutSave` znovu přepne záložku (1 → 0). Není to současný výpadek
+idempotence při zachovaném receipt, ale překážka zavedení samotného TTL/úklidu.
+
+Před úklidem je potřeba zavést časově omezené identifikátory požadavků,
+odmítat prošlé pokusy před mutací i po smazání receipt a bezpečně ukončit
+přijímání starého formátu bez časového omezení. Návrh musí řešit nesprávný
+čas zařízení, souběh, přepnutí účtu, přerušený rollout a zachování původního
+potvrzení během platného okna. Klient nesmí nejistý prošlý pokus automaticky
+změnit na novou akci. Délka okna 7 nebo 30 dní je předložená vlastníkovi;
+zatím není rozhodnutá ani implementovaná. Dosavadních 60 dní po smazání účtu
+se tím nemění. Produkční změna retence vyžaduje odpovídající rozhodnutí.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
