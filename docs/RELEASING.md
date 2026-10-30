@@ -21,6 +21,34 @@ splněná celá startovní brána MVP.
 
 ## Postup jednoho úkolu
 
+<a id="trvaly-souhlas-s-vyvojovymi-rollouty"></a>
+
+### Trvalý souhlas s vývojovými rollouty
+
+Dne 30. října 2026 uživatel uvedl: „Pro příští dotazy povoluji všechny rollout
+pokud jsou úspěné CI“. Pro vývojový projekt `shoutout-dev-46c81` jde o předem
+udělený souhlas s dalšími rollouty v rámci schválené práce. Není potřeba
+opakovat dotaz na nasazení každé nové Function, klientské aktivace, Hostingu
+nebo Rules, pokud úspěšně prošlo CI pro přesný nasazovaný commit.
+
+Před nasazením zkontrolovat aktuální SHA a úspěšný konečný stav příslušného
+CI běhu, čistou pracovní kopii a shodu artefaktu s daným commitem/prostředím.
+Uvést konkrétní změny a cílový projekt/site či endpoint. Po nasazení provést
+odpovídající živé ověření a zaznamenat výsledek i návratovou verzi. Chybějící,
+běžící nebo neúspěšné CI podmínku nesplňuje; úspěch staršího commitu nestačí.
+To nenahrazuje potřebné testy ani automaticky nevynucuje žádnou CI/CD pojistku.
+
+Dosavadní souhlas s testovacím obsahem a úklidem pro právě schválený průchod
+zůstává platný. Tato věta sama nepovoluje libovolné mazání dat, migrace,
+změny tarifu nebo oprávnění. Schvalování implementace, slučování do `main`
+a vytváření/publikování tagů se řídí dosavadním rozsahem oprávnění.
+
+Uživatel je dotázán, zda nové povolení zahrnuje i produkční aplikaci; do jeho
+upřesnění se trvalý souhlas používá pouze pro vývoj. Po odpovědi tento záznam
+aktualizovat, nikoli odvozovat produkční oprávnění z neodpovězené otázky.
+
+### Jednotlivé kroky
+
 1. Ověřit kód, backlog, aktuální větev a pracovní strom. Před úpravami
    předložit konkrétní rozsah uživateli a získat souhlas. Již udělený souhlas
    pro stejný rozsah znovu nevyžadovat.
@@ -28,7 +56,7 @@ splněná celá startovní brána MVP.
    od `main`. Nesouvisející rozpracované úkoly držet v jiných větvích.
 3. Provést změnu, odpovídající kontroly a aktualizaci dokumentace. Uživatel
    dostane přehled diffu nebo pull requestu, ověření a známých omezení.
-4. Po výslovném souhlasu nasadit vybranou verzi na vývojový Hosting
+4. V rámci výslovného nebo výše uvedeného trvalého souhlasu nasadit vybranou verzi na vývojový Hosting
    `shoutout-dev-46c81`. Uvést commit a případné lokální změny, které testovaný
    build obsahuje. Před sloučením ověřit konečnou uloženou podobu změny;
    pozdější úpravy vyžadují přiměřené opakování kontrol a schválení.

@@ -37,6 +37,15 @@
   nebylo ověřeno. Úspěch netvrď bez důkazu.
 - Firebase Hosting, pravidla, Functions, data ani jiné externí prostředí
   nenasazuj bez výslovného souhlasu uživatele. Vždy uveď přesný cíl nasazení.
+- Od 30. října 2026 uživatel předem schvaluje další vývojové rollouty do
+  `shoutout-dev-46c81`, pokud úspěšně prošlo CI pro přesný nasazovaný commit.
+  V tomto rozsahu se na souhlas s každým rolloutem znovu neptej. Před nasazením
+  ověř commit, výsledky CI, odpovídající artefakt a přesný cíl; po nasazení
+  ověř skutečný výsledek. Podrobnosti a hranice jsou v
+  [RELEASING](docs/RELEASING.md#trvaly-souhlas-s-vyvojovymi-rollouty).
+  Rozsah tohoto nového souhlasu pro produkci se právě upřesňuje; bez odpovědi
+  jej na produkci nerozšiřuj. Souhlas s rolloutem sám nemění pravidla pro
+  schvalování implementace, sloučení do `main` a vydávání tagů.
 
 ## Výběr změn a publikování
 

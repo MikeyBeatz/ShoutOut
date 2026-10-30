@@ -146,6 +146,13 @@ nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rul
 
 ## Rozhodnutí, nejistoty a hranice oprávnění
 
+- Od 30. října jsou další vývojové rollouty do `shoutout-dev-46c81` předem
+  schválené po úspěšném CI přesného commitu. Nový dotaz na každý rollout není
+  potřeba; kontrola artefaktu/cíle a živé ověření zůstávají povinné.
+  [Rozsah a podmínky](RELEASING.md#trvaly-souhlas-s-vyvojovymi-rollouty).
+  Zda souhlas zahrnuje i produkci, čeká na odpověď vlastníka. Tato změna
+  nemění zbývající živé testy mazání ani nepovoluje libovolné zásahy do dat.
+
 - MVP je veřejný web pro běžné i Business účty. Mobilní vydání a placené
   Business předplatné jsou po MVP; ruční Business aktivace zůstává.
 - První veřejné vydání má být `v1.0.0`, až bude MVP dokončené, otestované
