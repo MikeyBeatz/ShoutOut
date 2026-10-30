@@ -102,6 +102,23 @@ jejich receipt nedostávají deadline a nesmějí se zatím automaticky mazat.
 Vrstva neprovádí cleanup, nemění oprávnění/limity a není ještě nasazená.
 Následuje klientský přechod, ověření a ukončení přijímání nových legacy klíčů.
 
+Lokálně připravený `TimedOperationGateway` navazuje původní logický klíč
+klienta na neměnný `op1` payload. Epochu odvozuje z `IdTokenResult.issuedAtTime`
+(bez force refresh), nikoli z hodin zařízení; nonce má 128 náhodných bitů.
+Používá jej všech osm serverových cest. Metadata ani tokeny se do payloadu
+neukládají, pouze výsledný klíč a `expectedUserId`; identity Auth zůstává
+autoritativní. Volitelnou očekávanou identitu nově přijímají i tři publikační
+endpointy a odmítnou přepnutí účtu ještě před přístupem do databáze.
+
+Vazba původního logického klíče na payload přetrvává v paměti této relace
+i po potvrzení, aby případný pozdější retry po UI chybě nezaložil novou akci.
+Souběžná odeslání se slučují, změna payloadu pod stejným klíčem se odmítne.
+Prošlý pokus automaticky nevygeneruje nový klíč; rozhraní v sedmi jazycích
+vyzve k obnovení aplikace a kontrole skutečného výsledku. Reload tyto vazby
+nezachová; klientské klíče se zatím neukládají trvale. Nic z této nové vrstvy
+není ještě nasazené. Rollout musí začít všemi Functions a teprve poté webem;
+legacy klienti zůstávají po dobu přechodu kompatibilní.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v

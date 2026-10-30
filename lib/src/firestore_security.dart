@@ -108,12 +108,55 @@ String _commentReactionEventId(String shoutId, String commentId) =>
     'commentReaction_${shoutId}_$commentId';
 String _commentDeleteEventId(String commentId) => commentId;
 
+String _serverWriteFailureText(
+  BuildContext context,
+  Object? error, {
+  String fallback = 'Akci se nepodařilo dokončit. Zkus to znovu.',
+}) =>
+    expiredOperationText(error, Localizations.localeOf(context).languageCode) ??
+    tr(context, fallback);
+
+final _serverContentOperations = TimedOperationGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  issuedAt: (userId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != userId) {
+      throw FirebaseFunctionsException(
+        code: 'unauthenticated',
+        message: 'The signed-in account changed.',
+      );
+    }
+    final metadata = await user.getIdTokenResult().timeout(
+      const Duration(seconds: 20),
+      onTimeout: () => throw FirebaseFunctionsException(
+        code: 'unavailable',
+        message: 'operation-clock-unavailable',
+      ),
+    );
+    final issuedAt = metadata.issuedAtTime;
+    if (issuedAt == null) {
+      throw FirebaseFunctionsException(
+        code: 'failed-precondition',
+        message: 'operation-clock-unavailable',
+      );
+    }
+    return issuedAt;
+  },
+  send: (operation, payload) async {
+    await FirebaseFunctions.instanceFor(
+      region: 'europe-west3',
+    ).httpsCallable(operation).call(payload);
+  },
+);
+
 final _commentDeletionGateway = CommentDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {
-    await FirebaseFunctions.instanceFor(
-      region: 'europe-west3',
-    ).httpsCallable('deleteComment').call(request.toPayload());
+    await _serverContentOperations.call(
+      userId: request.userId,
+      operation: 'deleteComment',
+      payload: request.toPayload(),
+    );
   },
 );
 

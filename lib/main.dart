@@ -38,6 +38,7 @@ import 'l10n/app_localizations.dart';
 import 'l10n/text.dart';
 import 'l10n/business_text.dart';
 import 'l10n/bug_report_text.dart';
+import 'l10n/operation_text.dart';
 import 'nickname_validation.dart';
 import 'registration_timing.dart';
 import 'publication_attempt.dart';
@@ -45,6 +46,7 @@ import 'reaction_gateway.dart';
 import 'save_gateway.dart';
 import 'report_gateway.dart';
 import 'comment_deletion_gateway.dart';
+import 'timed_operation_gateway.dart';
 import 'live_shout_state.dart';
 
 part 'src/create_shout.dart';

@@ -1,15 +1,16 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/operation-retention`; navazuje na uzavřené živé mazání (`c65338d`), obsahová hlášení
+`feature/operation-retention-client`; navazuje na uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Další krok je schválená sedmidenní retence potvrzení operací.
-Její první kompatibilní serverová vrstva je lokálně připravená a otestovaná;
-není ještě nasazená, klient stále používá původní klíče a úklid není zapnutý.
+Kompatibilní serverová vrstva i klientské časové klíče jsou lokálně připravené
+a otestované. Nejsou ještě nasazené; živý web stále používá původní klíče
+a úklid není zapnutý. Nejdřív aktualizovat všech osm Functions, potom Hosting.
 
 ## Jak přehled používat
 
@@ -52,6 +53,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
 | Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Hotovo; `deletecomment-00001-zuc`, tři role, počet 3 → 2 → 1 → 0, právě 3 receipt a úklid. |
 | Sedmidenní retence – kompatibilní serverový základ | Lokálně 40 unit / 123 emulatorových testů, lint a balení prošly | Nenasazený; staré klíče se nadále přijímají a jejich receipt se nesmějí automaticky mazat. |
+| Klientské časově omezené klíče | Lokálně napojených 8 operací; čas z Auth, immutable payload, očekávaný účet a 7 jazyků pro recovery | Nenasazené; nasazovat až po nových Functions. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -78,6 +80,16 @@ mazání komentářů, retence receipt a prostorový feed; úplná kritéria jso
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Poslední ověření a důkazy
+
+- Klient časově omezených operací: šest cílených testů gateway, dva překladové
+  testy, čistá analýza/formát a všech 202 Flutter testů prošly; release build se dokončuje.
+  Backend navíc přijímá a ověřuje očekávaný účet u publikace Shoutu, komentáře
+  a soukromé odpovědi: 41 unit / 123 emulatorových testů prošlo.
+  CI `41097603906` na `aeeaec8` selhalo v původním souběžném report testu
+  (2 ze 3 stejných pokusů uspěly). Přidaná diagnostika nemění očekávání;
+  `89247e9` prošel [CI `41098701651`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41098701651).
+  Příčina prvního neúspěchu nebyla potvrzená. Konečný klientský commit musí
+  před rolloutem projít vlastním CI; úspěch staršího commitu jej nenahrazuje.
 
 - První serverová vrstva retence: Functions lint, 40 unit testů a 123
   emulatorových (65 Rules + 58 serverových) prošlo. Nové časově omezené
@@ -133,9 +145,9 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 Navázat retencí receipt/mazáním účtu. Vlastník 30. října schválil sedmidenní
 okno bezpečného opakování jedné akce; dosavadní 60denní retence po smazání účtu
-se nemění. Ověřit CI a nasadit první kompatibilní serverovou vrstvu.
-Potom připravit klientské klíče s časem z Auth (bez závislosti na hodinách
-zařízení), ověřit skutečná metadata/deadline a dokončit odmítání nových
+se nemění. Dokončit kontroly/CI klientského commitu a nasadit všech osm
+kompatibilních Functions z téhož zdroje, teprve potom nový Hosting.
+Ověřit živé časové klíče, očekávaný účet a metadata/deadline, dokončit odmítání nových
 legacy požadavků. Teprve potom uklidit legacy receipt a dokončit úklid.
 Současný `legacyOperationKeysAccepted: true` je výslovně přechodný stav;
 existující klienti se nesmějí rozbít a legacy receipt se nesmějí zatím mazat.

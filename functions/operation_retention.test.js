@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Timestamp } from 'firebase-admin/firestore';
 import { receiptRetentionFields as check, operationRetryWindowMillis as week } from './operation_retention.js';
+import { createShoutOperation, validateCreateShout } from './create_shout.js';
+import { createCommentOperation, validateCreateComment } from './create_comment.js';
+import { createPrivateReplyOperation, validateCreatePrivateReply } from './create_private_reply.js';
 
 const now = Timestamp.fromDate(new Date('2026-10-30T12:00:00Z'));
 const keyAt = millis => `op1_${Math.floor(millis / 1000)}_${'a'.repeat(32)}`;
@@ -45,5 +48,22 @@ test('malformed or extended receipt deadlines fail closed', () => {
   for (const stored of [{}, { createdAt: now }, { createdAt: now, keyVersion: 1, expiresAt: 'tomorrow' },
     { createdAt: now, keyVersion: 1, expiresAt: Timestamp.fromMillis(now.toMillis() + week + 1) }]) {
     assert.throws(() => check(key, now, stored), error('invalid-operation-retention'));
+  }
+});
+
+test('publication endpoints accept an expected account and fence account switches before database access', async () => {
+  const identity = { auth: { uid: 'actor', token: { email: 'actor@example.test', email_verified: true } }, app: { appId: 'web' } };
+  const publications = [
+    [createShoutOperation, validateCreateShout, { title: 'Title', text: 'Text', categories: ['Dotaz'],
+      durationMinutes: 120, location: { latitude: 50, longitude: 14 } }],
+    [createCommentOperation, validateCreateComment, { shoutId: 'shout', text: 'Comment' }],
+    [createPrivateReplyOperation, validateCreatePrivateReply, { shoutId: 'shout', text: 'Private', targetType: 'shout' }],
+  ];
+  for (const [operation, validate, payload] of publications) {
+    const data = { ...payload, idempotencyKey: key, expectedUserId: 'actor' };
+    assert.equal(validate(data).expectedUserId, 'actor');
+    assert.throws(() => validate({ ...data, expectedUserId: '../forged' }), actual => actual.code === 'invalid-argument');
+    await assert.rejects(operation({ ...identity, data: { ...data, expectedUserId: 'other' } }, {}),
+      actual => actual.code === 'unauthenticated');
   }
 });

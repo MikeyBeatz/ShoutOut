@@ -54,13 +54,16 @@ export function validateCreateShout(input) {
   const allowed = new Set([
     'idempotencyKey', 'title', 'text', 'categories', 'durationMinutes',
     'location', 'businessLocationId', 'businessHighlighted',
-    'businessSpotlight', 'businessExtendedDuration',
+    'businessSpotlight', 'businessExtendedDuration', 'expectedUserId',
   ]);
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
       Object.keys(input).some((key) => !allowed.has(key))) {
     fail('invalid-argument', 'Invalid Shout fields.');
   }
   if (!identifier(input.idempotencyKey)) fail('invalid-argument', 'Invalid idempotency key.');
+  if (input.expectedUserId !== undefined && !identifier(input.expectedUserId)) {
+    fail('invalid-argument', 'Invalid expected account.');
+  }
   for (const [key, maximum] of [['title', 60], ['text', 220]]) {
     if (typeof input[key] !== 'string' || input[key].trim().length === 0 ||
         [...input[key]].length > maximum) fail('invalid-argument', `Invalid ${key}.`);
@@ -112,6 +115,9 @@ export function nextShoutRate(data, isBusiness, now, eventId) {
 export async function createShoutOperation(request, db, clock = () => new Date()) {
   const { uid } = requireCallableIdentity(request);
   const input = validateCreateShout(request.data);
+  if (input.expectedUserId !== undefined && input.expectedUserId !== uid) {
+    fail('unauthenticated', 'The signed-in account changed.');
+  }
   const key = digest(`${uid}\n${input.idempotencyKey}`);
   const fingerprint = digest(JSON.stringify(input));
   const receiptRef = db.doc(`serverOperations/${key}`);

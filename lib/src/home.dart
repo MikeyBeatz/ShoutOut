@@ -21,17 +21,21 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   late final _saveGateway = SaveGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
-      await FirebaseFunctions.instanceFor(
-        region: 'europe-west3',
-      ).httpsCallable('toggleShoutSave').call(request.toPayload());
+      await _serverContentOperations.call(
+        userId: request.userId,
+        operation: 'toggleShoutSave',
+        payload: request.toPayload(),
+      );
     },
   );
   late final _reactionGateway = ReactionGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
-      await FirebaseFunctions.instanceFor(
-        region: 'europe-west3',
-      ).httpsCallable('toggleShoutReaction').call(request.toPayload());
+      await _serverContentOperations.call(
+        userId: request.userId,
+        operation: 'toggleShoutReaction',
+        payload: request.toPayload(),
+      );
     },
     isDefinitiveFailure: isDefinitiveReactionFailure,
   );
@@ -230,6 +234,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     if (useServer) {
       final payload = <String, dynamic>{
         'idempotencyKey': shout.id,
+        'expectedUserId': user.uid,
         'title': shout.title,
         'text': shout.text,
         'categories': shout.categories,
@@ -366,9 +371,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _publishServerShout(Map<String, dynamic> payload) async {
     try {
-      await FirebaseFunctions.instanceFor(
-        region: 'europe-west3',
-      ).httpsCallable('createShout').call<Map<String, dynamic>>(payload);
+      await _serverContentOperations.call(
+        userId: payload['expectedUserId'] as String,
+        operation: 'createShout',
+        payload: payload,
+      );
       _pendingServerShout = null;
     } on FirebaseFunctionsException catch (error) {
       if (error.code == 'resource-exhausted' &&
@@ -393,8 +400,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         await _saveGateway.toggle(userId: uid, shoutId: shout.id);
       } on SaveAccountChanged {
         return;
-      } on FirebaseException {
-        if (mounted) _showWriteFailure();
+      } on FirebaseException catch (error) {
+        if (mounted) _showWriteFailure(error);
       }
       return;
     }
@@ -464,8 +471,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         );
       } on ReactionAccountChanged {
         return;
-      } on FirebaseException {
-        if (mounted) _showWriteFailure();
+      } on FirebaseException catch (error) {
+        if (mounted) _showWriteFailure(error);
       }
       return;
     }
@@ -573,14 +580,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     });
   }
 
-  void _showWriteFailure() {
+  void _showWriteFailure([Object? error]) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
-        ),
-      ),
+      SnackBar(content: Text(_serverWriteFailureText(context, error))),
     );
   }
 
@@ -733,7 +736,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                         _ => 'Akci se nepodařilo dokončit. Zkus to znovu.',
                       };
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(tr(context, message))),
+                        SnackBar(
+                          content: Text(
+                            _serverWriteFailureText(
+                              context,
+                              error,
+                              fallback: message,
+                            ),
+                          ),
+                        ),
                       );
                     }
                   }

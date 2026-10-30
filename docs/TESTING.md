@@ -11,6 +11,23 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 
 ## První kompatibilní serverová vrstva retence 30. října 2026
 
+Navazující klient `timed_operation_gateway_test.dart` pokrývá ztracenou odpověď
+a změnu Auth času při retry, opakování i po potvrzení, současné získávání času,
+přepnutí účtu během await, změnu/mutaci payloadu, pořadí JSON klíčů, prošlý
+nejistý pokus bez nového klíče a oddělení účtů/operací. Šest scénářů prošlo.
+Dva `operation_text_test.dart` ověřují recovery v sedmi jazycích a zachování
+ostatních chyb. Všech osm klientských cest je napojených; pro tři publikace
+přibyl test očekávané identity před DB přístupem. Celkem 41 unit a 123
+emulatorových testů a všech 202 Flutter testů prošlo, analýza/formát jsou čisté.
+Release build a konečné CI se dokončují; nejde o důkaz nového živého rolloutem
+ověřeného stavu.
+
+První CI serverové vrstvy `41097603906` (`aeeaec8`) selhalo v dosavadním
+souběžném testu hlášení, protože z 3 stejných žádostí uspěly 2. Lokální běhy
+prošly. Test dostal výpis kódu/zprávy odmítnutých pokusů, jeho přísné očekávání
+se neměnilo; `89247e9` prošel CI `41098701651`. Příčina prvního selhání není
+potvrzená a nesmí být zaměněná za ověřenou opravu produkčního chování.
+
 Pět unit testů `operation_retention.test.js` pokrývá přesnou sedmidenní
 hranici, pozdější první provedení, opakování před/po deadline i po fyzickém
 úklidu, budoucí/poškozené klíče a neplatná či prodloužená serverová metadata.

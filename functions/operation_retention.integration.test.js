@@ -37,7 +37,7 @@ async function request(data = {}) {
   await db.doc(`users/${uid}`).set({ nickname: 'Retention test' });
   await db.doc(`users/${uid}/legal/acceptance_2026_07_25`).set({});
   return { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
-    app: { appId: 'web' }, data: { ...data, idempotencyKey: key } };
+    app: { appId: 'web' }, data: { ...data, idempotencyKey: key, expectedUserId: uid } };
 }
 async function savedFixture() {
   const r = await request({ shoutId: randomUUID() });

@@ -447,11 +447,15 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
     try {
       await widget.onDecision(decision, _noteController.text.trim());
       if (mounted) widget.onCompleted();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = 'Rozhodnutí se nepodařilo uložit.';
+        _error = _serverWriteFailureText(
+          context,
+          error,
+          fallback: 'Rozhodnutí se nepodařilo uložit.',
+        );
       });
     }
   }

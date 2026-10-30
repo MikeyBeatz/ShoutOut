@@ -24,9 +24,11 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   late final _reportGateway = ReportGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
-      await FirebaseFunctions.instanceFor(
-        region: 'europe-west3',
-      ).httpsCallable('createContentReport').call(request.toPayload());
+      await _serverContentOperations.call(
+        userId: request.userId,
+        operation: 'createContentReport',
+        payload: request.toPayload(),
+      );
     },
   );
   final _commentController = TextEditingController();
@@ -460,18 +462,20 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           _replyToCommentId,
           _parentPrivateReplyId,
         ]);
-        await FirebaseFunctions.instanceFor(
-          region: 'europe-west3',
-        ).httpsCallable('createPrivateReply').call({
-          'idempotencyKey': key,
-          'shoutId': widget.shout.id,
-          'text': comment,
-          'targetType': _privateTargetType,
-          if (_privateTargetType == 'comment')
-            'parentCommentId': _replyToCommentId,
-          if (_privateTargetType == 'privateReply')
-            'parentPrivateReplyId': _parentPrivateReplyId,
-        });
+        await _serverContentOperations.call(
+          userId: user.uid,
+          operation: 'createPrivateReply',
+          payload: {
+            'idempotencyKey': key,
+            'shoutId': widget.shout.id,
+            'text': comment,
+            'targetType': _privateTargetType,
+            if (_privateTargetType == 'comment')
+              'parentCommentId': _replyToCommentId,
+            if (_privateTargetType == 'privateReply')
+              'parentPrivateReplyId': _parentPrivateReplyId,
+          },
+        );
       } else if (_privateRecipientId != null) {
         final recipientId = _privateRecipientId!;
         final recipientNickname = _privateRecipientNickname!;
@@ -538,14 +542,17 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           comment,
           _replyToCommentId,
         ]);
-        await FirebaseFunctions.instanceFor(
-          region: 'europe-west3',
-        ).httpsCallable('createComment').call({
-          'idempotencyKey': key,
-          'shoutId': widget.shout.id,
-          'text': comment,
-          if (_replyToCommentId != null) 'replyToCommentId': _replyToCommentId,
-        });
+        await _serverContentOperations.call(
+          userId: user.uid,
+          operation: 'createComment',
+          payload: {
+            'idempotencyKey': key,
+            'shoutId': widget.shout.id,
+            'text': comment,
+            if (_replyToCommentId != null)
+              'replyToCommentId': _replyToCommentId,
+          },
+        );
         if (_liveShout == null) widget.shout.comments++;
       } else {
         final commentRef = shoutRef.collection('comments').doc();
@@ -660,14 +667,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         });
         if (_liveShout == null) widget.shout.comments++;
       }
-    } on FirebaseException {
+    } on FirebaseException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
-            ),
-          ),
+          SnackBar(content: Text(_serverWriteFailureText(context, error))),
         );
       }
       return;
@@ -829,14 +832,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         return true;
       } on ReportAccountChanged {
         return false;
-      } on FirebaseException {
+      } on FirebaseException catch (error) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
-              ),
-            ),
+            SnackBar(content: Text(_serverWriteFailureText(context, error))),
           );
         }
         return false;

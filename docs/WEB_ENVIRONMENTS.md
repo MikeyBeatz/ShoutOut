@@ -46,6 +46,14 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Lokálně připravená retence zavádí `op1` klíče ve všech osmi serverových cestách
+přes `TimedOperationGateway`; stávající konfigurační přepínače cest zůstávají.
+Serverová kompatibilní vrstva musí být nasazená ve všech osmi Functions před
+novým webem, protože publikační endpointy nově přijímají `expectedUserId`.
+Čas klíče klient bere z vydání Auth tokenu, ne z hodin zařízení. Server určuje
+7denní deadline receipt. Nový kód zatím není nasazený; legacy příjem a přímé
+Rules zápisy se touto fází nevypínají a žádný úklid ještě neběží.
+
 Lokálně připravené mazání komentářů má volitelný boolean `serverCommentDeletion`
 (výchozí `false`); při `true` musí být nastavený App Check klíč. Nová callable
 `deleteComment` v `europe-west3` je po souhlasu z 30. října nasazená z `34f7cad`

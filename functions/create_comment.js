@@ -9,10 +9,11 @@ const digest = (value) => createHash('sha256').update(value).digest('hex');
 const identifier = (value) => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 
 export function validateCreateComment(input) {
-  const fields = ['idempotencyKey', 'shoutId', 'text', 'replyToCommentId'];
+  const fields = ['idempotencyKey', 'shoutId', 'text', 'replyToCommentId', 'expectedUserId'];
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
       Object.keys(input).some((key) => !fields.includes(key)) ||
       !identifier(input.idempotencyKey) || !identifier(input.shoutId) ||
+      (input.expectedUserId !== undefined && !identifier(input.expectedUserId)) ||
       (input.replyToCommentId !== undefined && !identifier(input.replyToCommentId)) ||
       typeof input.text !== 'string' || input.text.trim().length === 0 ||
       [...input.text].length > 220) {
@@ -50,6 +51,9 @@ function nickname(value) {
 export async function createCommentOperation(request, db, clock = () => new Date()) {
   const { uid } = requireCallableIdentity(request);
   const input = validateCreateComment(request.data);
+  if (input.expectedUserId !== undefined && input.expectedUserId !== uid) {
+    fail('unauthenticated', 'The signed-in account changed.');
+  }
   // The action namespace prevents a Shout key from colliding with a comment.
   const key = digest(`${uid}\ncreateComment\n${input.idempotencyKey}`);
   const fingerprint = digest(JSON.stringify(input));

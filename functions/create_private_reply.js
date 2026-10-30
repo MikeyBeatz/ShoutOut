@@ -10,10 +10,11 @@ const identifier = (value) => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128
 
 export function validateCreatePrivateReply(input) {
   const fields = ['idempotencyKey', 'shoutId', 'text', 'targetType',
-    'parentCommentId', 'parentPrivateReplyId'];
+    'parentCommentId', 'parentPrivateReplyId', 'expectedUserId'];
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
       Object.keys(input).some((key) => !fields.includes(key)) ||
       !identifier(input.idempotencyKey) || !identifier(input.shoutId) ||
+      (input.expectedUserId !== undefined && !identifier(input.expectedUserId)) ||
       typeof input.text !== 'string' || input.text.length > 440 ||
       input.text.trim().length === 0 || [...input.text].length > 220 ||
       !['shout', 'comment', 'privateReply'].includes(input.targetType) ||
@@ -53,6 +54,9 @@ function nickname(value) {
 export async function createPrivateReplyOperation(request, db, clock = () => new Date()) {
   const { uid } = requireCallableIdentity(request);
   const input = validateCreatePrivateReply(request.data);
+  if (input.expectedUserId !== undefined && input.expectedUserId !== uid) {
+    fail('unauthenticated', 'The signed-in account changed.');
+  }
   const key = digest(`${uid}\ncreatePrivateReply\n${input.idempotencyKey}`);
   const fingerprint = digest(JSON.stringify(input));
   const shoutRef = db.doc(`shouts/${input.shoutId}`);

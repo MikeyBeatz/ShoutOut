@@ -33,9 +33,11 @@ class _CommentTileState extends State<CommentTile> {
   late final _reactionGateway = ReactionGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
-      await FirebaseFunctions.instanceFor(
-        region: 'europe-west3',
-      ).httpsCallable('toggleCommentReaction').call(request.toPayload());
+      await _serverContentOperations.call(
+        userId: request.userId,
+        operation: 'toggleCommentReaction',
+        payload: request.toPayload(),
+      );
     },
     isDefinitiveFailure: isDefinitiveReactionFailure,
   );
@@ -243,8 +245,8 @@ class _CommentTileState extends State<CommentTile> {
         );
       } on ReactionAccountChanged {
         return;
-      } on FirebaseException {
-        _showWriteFailure();
+      } on FirebaseException catch (error) {
+        _showWriteFailure(error);
       }
       return;
     }
@@ -352,19 +354,15 @@ class _CommentTileState extends State<CommentTile> {
     try {
       final remainingComments = await _deleteCommentWithCounter(reference);
       onDeleted(remainingComments);
-    } on FirebaseException {
-      _showWriteFailure();
+    } on FirebaseException catch (error) {
+      _showWriteFailure(error);
     }
   }
 
-  void _showWriteFailure() {
+  void _showWriteFailure([Object? error]) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          tr(context, 'Akci se nepodařilo dokončit. Zkus to znovu.'),
-        ),
-      ),
+      SnackBar(content: Text(_serverWriteFailureText(context, error))),
     );
   }
 
