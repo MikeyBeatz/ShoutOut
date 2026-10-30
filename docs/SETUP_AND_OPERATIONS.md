@@ -10,8 +10,10 @@ projekt `shoutout-dev-46c81`. Produkci vždy nahraďte samostatným project ID.
 - Android s Java/JVM 17 pro sestavení; Firestore Emulator vyžaduje Java 21 nebo
   kompatibilní novější runtime.
 - web v aktuálním Chrome.
-- Node.js 22 pro Cloud Functions; aktuální LTS je vhodný i pro `tools/`.
-- Firebase CLI 15.24.0 odpovídá CI.
+- Node.js 22.23.4 pro lokální kontroly i CI; verzi určuje kořenový `.nvmrc`.
+  Functions nadále používají spravovaný runtime Node.js 22.
+- Firebase CLI 15.31.0 je přesně připnuté v `tools/package.json` a lockfilu;
+  `npm run test:rules` používá tuto lokální instalaci stejně jako CI.
 
 iOS má připravenou vývojovou Firebase konfiguraci a identitu
 `cz.shoutout.app.dev`, ale build zatím nebyl sestaven ani podepsán na macOS.
@@ -23,6 +25,12 @@ Webová prostředí a přesné buildovací a nasazovací příkazy jsou v
 připravený pro nasazení; vyžaduje explicitní konfiguraci prostředí.
 
 ## Lokální instalace existujícího projektu
+
+Před instalací vyberte Node podle `.nvmrc` (např. `nvm install 22.23.4` a
+`nvm use 22.23.4`, pokud máte nvm). Ověřte `node --version`.
+Samotný soubor `.nvmrc` systémový Node automaticky nepřepíná.
+Připnuté CLI lze z kořene spustit přes `npm --prefix tools run firebase -- --version`
+a stejným způsobem s dalšími Firebase argumenty. Globální CLI se pro testy nepoužívá.
 
 ```powershell
 flutter doctor
@@ -139,7 +147,7 @@ produkčního projektu.
    v této kopii by přepsal vývojové `lib/firebase_options.dart`:
 
    ```powershell
-   npm install --global firebase-tools@15.24.0
+   npm install --global firebase-tools@15.31.0
    dart pub global activate flutterfire_cli
    firebase login
    flutterfire configure --project your-project-id --platforms web
@@ -406,9 +414,19 @@ npm run test:rules
 Pop-Location
 ```
 
-GitHub Actions v `.github/workflows/flutter.yml` používá Node.js 22 a kontroluje
+GitHub Actions v `.github/workflows/flutter.yml` čte Node.js z `.nvmrc` a kontroluje
 formát, analyzátor, Flutter testy, čisté testy vývojových nástrojů, Firestore
 Rules, Functions lint a unit testy i debug web build při pushi a pull requestu.
+Npm cache obsahuje stažené balíčky, nikoli `node_modules`; `npm ci` zůstává
+povinné pro oba lockfily. Firestore binárky jsou v cache
+`~/.cache/firebase/emulators`, s klíčem podle OS a tools lockfilu bez fallbacku
+na jinou verzi. Flutter cache zůstává zapnutá. První běh cache teprve naplní.
+Každý krok má timeout 2–5 minut, celý job nadále 20 minut; žádná kontrola
+nemá `continue-on-error`. Při chybě nebo zrušení se krok pokusí uložit pouze
+Firebase/Firestore debug logy z kořene a `tools/` jako artifact
+`emulator-diagnostics-<run_id>-<attempt>` na 7 dní. Emulatorový krok má zapnutý
+debug výpis. Při úplném ukončení runneru není upload garantovaný.
+Tato změna nepřidává automatické nasazování ani neuvolňuje pravidla vydání.
 `npm audit --omit=dev` zůstává povinná lokální kontrola při změně Functions
 závislostí; automatický `npm audit fix --force` se nepoužívá.
 Povinné ruční scénáře pro dva účty, Business pobočky, realtime oznámení,

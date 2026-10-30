@@ -14,20 +14,35 @@ jobs:
 
     steps:
       - name: Check out repository
+        timeout-minutes: 2
         uses: actions/checkout@v7
 
       - name: Set up Java for Firestore Emulator
+        timeout-minutes: 3
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Set up Node.js
+        timeout-minutes: 3
         uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            tools/package-lock.json
+            functions/package-lock.json
+
+      - name: Cache Firestore Emulator
+        timeout-minutes: 3
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-firestore-${{ hashFiles('tools/package-lock.json') }}
 
       - name: Set up Flutter
+        timeout-minutes: 5
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.44.8
@@ -35,43 +50,75 @@ jobs:
           cache: true
 
       - name: Install dependencies
+        timeout-minutes: 3
         run: flutter pub get --enforce-lockfile
 
       - name: Verify formatting
+        timeout-minutes: 2
         run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze
+        timeout-minutes: 3
         run: flutter analyze
 
       - name: Test
+        timeout-minutes: 5
         run: flutter test
 
       - name: Install Firestore Rules test dependencies
+        timeout-minutes: 4
         working-directory: tools
         run: npm ci
 
       - name: Test development tools
+        timeout-minutes: 2
         working-directory: tools
         run: npm run test:tools
 
-      - name: Install Firebase CLI
-        run: npm install --global firebase-tools@15.24.0
+      - name: Show test tool versions
+        timeout-minutes: 2
+        run: |
+          node --version
+          npm --version
+          npm --prefix tools run firebase -- --version
 
       - name: Install Cloud Functions dependencies
+        timeout-minutes: 4
         working-directory: functions
         run: npm ci
 
       - name: Lint Cloud Functions
+        timeout-minutes: 2
         working-directory: functions
         run: npm run lint
 
       - name: Test Cloud Functions
+        timeout-minutes: 3
         working-directory: functions
         run: npm test
 
       - name: Test Firestore Rules and server transactions
+        timeout-minutes: 5
         working-directory: tools
+        # Debug output is kept in firebase-debug.log for failure diagnostics.
+        env:
+          DEBUG: 'true'
         run: npm run test:rules
 
       - name: Build web
+        timeout-minutes: 5
         run: node tools/web_environment.mjs build dev --debug
+
+      - name: Upload emulator failure logs
+        if: ${{ failure() || cancelled() }}
+        timeout-minutes: 2
+        uses: actions/upload-artifact@v7
+        with:
+          name: emulator-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            firebase-debug.log
+            firestore-debug.log
+            tools/firebase-debug.log
+            tools/firestore-debug.log
+          if-no-files-found: ignore
+          retention-days: 7

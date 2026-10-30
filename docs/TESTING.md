@@ -9,6 +9,36 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+<a id="ci-reliability"></a>
+
+## Spolehlivost CI – 30. října 2026
+
+Schválená změna ve větvi `feature/ci-reliability` zachovává všechny dosavadní
+testovací příkazy a vydávací podmínky. Node 22.23.4 určuje `.nvmrc`, Firebase
+CLI 15.31.0 je lokální přesná závislost tools s lockfilem, shodná pro CI i
+`npm run test:rules`. Přibyly npm cache pro oba lockfily, cache emulatorových
+binárek, limity kroků a upload diagnostiky při selhání/zrušení. Provedení a
+umístění artifactu popisuje [runbook](SETUP_AND_OPERATIONS.md#automatické-kontroly).
+Úspěch konkrétní verze musí dokládat její dokončený GitHub Actions běh;
+samotná konfigurace nedokazuje cache hit ani provedený upload při chybě.
+Lokálně prošel actionlint 1.7.12, kontrola diffu, Functions lint, 41 unit testů
+(58 integračních bez emulatoru správně přeskočeno) a 20 tools testů pod
+Node 22.23.4; CLI výpis potvrzuje projektovou instalaci 15.31.0.
+Nový úplný průchod, cache a sestavení se ověřují na GitHub Actions po pushi.
+Upload při selhání nebyl lokálně simulovaný. Audit Functions má 0 nálezů;
+tools včetně CLI hlásí 21 nálezů v tranzitivních vývojových závislostech
+(9 moderate, 12 high), jejich plošná aktualizace není součástí tohoto kroku.
+
+Výchozí debug průchod `41100166067`, attempt 4, job `124324799559` pro přesný
+zdroj `c3ad17dafd916915c0af7e01e935fb61466ec7c7` skončil `success`:
+21:33:43–21:38:02 UTC, tedy 4 min 19 s. Emulatorový krok trval 89 s, build
+49 s; npm/CLI instalace dohromady přibližně 45 s. Flutter cache již fungovala.
+Pokus 2 selhal při stahování `cloud-firestore-emulator-v1.21.0.jar` před testy;
+bez uloženého podrobného logu nelze určit příčinu stažení. Cache primárně
+omezuje opakovanou závislost na tomto downloadu. Souběžné transakční testy
+(jednotlivě přibližně 3–7 s) zůstávají beze změny. Zrychlení nové konfigurace
+je nutné měřit zvlášť pro studenou a naplněnou cache.
+
 ## První kompatibilní serverová vrstva retence 30. října 2026
 
 Navazující klient `timed_operation_gateway_test.dart` pokrývá ztracenou odpověď
@@ -27,11 +57,11 @@ emulatorových a 20 tools testů, čistou analýzu a build; skončil v 17:39:49 
 Metadata runu/checku/suite ale zůstala `in_progress` bez výsledku a prázdných
 kroků, jobs API vracelo 502/504 a rozhraní také načítalo. Příkaz cancel byl
 odmítnutý, protože backend považoval běh za dokončený. Re-run stejného commitu
-byl přijat; attempt 2 zatím čeká ve frontě. Vlastník je požádán o kontrolu
-stavu na GitHubu. Lokální log prvního pokusu je v ignorovaném
+byl přijat; attempt 2 následně selhal při stahování emulatoru a attempt 4
+jednoznačně prošel (viz výše). Lokální log prvního pokusu je v ignorovaném
 `build/timed-operation-ci-job-attempt1.log`. Příčina rozporu není potvrzená;
-žádný rollout neproběhl a samotný pozitivní log nenahrazuje požadovaný
-jednoznačný konečný stav CI.
+žádný rollout neproběhl. Samotný pozitivní log nenahrazuje požadovaný
+jednoznačný konečný stav CI, který už čtvrtý pokus doložil.
 
 První CI serverové vrstvy `41097603906` (`aeeaec8`) selhalo v dosavadním
 souběžném testu hlášení, protože z 3 stejných žádostí uspěly 2. Lokální běhy

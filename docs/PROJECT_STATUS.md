@@ -1,7 +1,8 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/operation-retention-client`; navazuje na uzavřené živé mazání (`c65338d`), obsahová hlášení
+`feature/ci-reliability` (samostatná pracovní kopie); navazuje na klientskou retenci
+`e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
@@ -11,9 +12,13 @@ je lokálně otestované, nasazené a živě ověřené moderátorem, Business i
 Kompatibilní serverová vrstva i klientské časové klíče jsou lokálně připravené
 a otestované. Nejsou ještě nasazené; živý web stále používá původní klíče
 a úklid není zapnutý. Nejdřív aktualizovat všech osm Functions, potom Hosting.
-Rollout klientského zdroje `c3ad17d` čeká na jednoznačný konečný výsledek CI:
-log prvního pokusu potvrzuje všechny kontroly, metadata GitHubu zůstala
-nekonzistentní. Opakované spuštění je ve frontě; vlastník je požádán o kontrolu.
+CI klientského zdroje `c3ad17d`, run `41100166067`, attempt 4 je `completed/success`
+(4 min 19 s). Dřívější rozpor metadat už neblokuje CI; attempt 2 selhal při
+stahování emulatoru. Rollout dosud neproběhl. Aktuální schválená odbočka
+sjednocuje testovací Node/CLI, přidává npm a emulator cache, timeouty a logy
+při selhání; rozsah a ověření jsou v [TESTING](TESTING.md#ci-reliability).
+Rozpracovaný cutover a úklid retence zůstává samostatně ve větvi
+`feature/operation-retention-cleanup`; do CI změny se nezahrnuje.
 
 ## Jak přehled používat
 
