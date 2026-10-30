@@ -6,10 +6,8 @@ Aktualizováno 30. října 2026. Aktuální práce je ve větvi
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
-je lokálně otestované a Function i aktivace webu jsou nasazené. Živé průchody
-nejsou hotové: moderátorská karta již funguje, ale testovací odstranění bylo
-odmítnuté HTTP 401. Server ověřil Auth jako VALID a App Check jako MISSING.
-Vlastník je požádán o ruční průchod; žádný testovací komentář zatím nebyl smazaný.
+je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
+účtem včetně úklidu. Další krok je schválená sedmidenní retence potvrzení operací.
 
 ## Jak přehled používat
 
@@ -29,7 +27,7 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 | Hosting verze | `8d7e3f3fed920529` |
 | Release / čas UTC | `1793378523613000` / `2026-10-30T16:42:03.613Z` |
 | Předchozí verze pro případ návratu | `884138efa765d64a` |
-| Ověření | Obě CI, lokální release build a shoda otisků HTML/JS/konfigurace prošly. Function ACTIVE, limity a HTTP 401 bez App Check ověřené. Živé mazání dosud neověřené. |
+| Ověření | Obě CI, release build a shoda otisků prošly. Function ACTIVE, limity/HTTP 401 ověřené. Živé mazání 3 → 2 → 1 → 0, tři receipt a úklid potvrzené. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -50,7 +48,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
-| Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Function `deletecomment-00001-zuc` a Hosting `8d7e3f3fed920529` nasazené; moderátorský pokus odmítnut 401 (App Check MISSING), ruční ověření čeká. |
+| Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Hotovo; `deletecomment-00001-zuc`, tři role, počet 3 → 2 → 1 → 0, právě 3 receipt a úklid. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -123,31 +121,29 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Dokončit ruční průchod TestModerator v ověřené kartě a navazující schválené
-živé mazání včetně úklidu. Rozhraní už funguje; poslední pokus o rozhodnutí
-„Skrýt obsah bez postihu“ skončil 401 bez App Check tokenu. Konfigurace domén,
-App Check API a dostupnost JS byly znovu ověřené bez změny ochran.
-Oprávnění autora nebo
-moderátora i limit 120/hodinu a 1 s zůstávají stejné. Transakce maže pouze
-komentář a snižuje parent čítač nejvýše jednou; klient zobrazuje živý čítač.
-Moderační rozhodnutí/zavření reportu, reakční subkolekce a navazující odpovědi
-mají dosavadní samostatný životní cyklus. Nejde o dokončení milníku důvěryhodné
-moderace. Výslovný souhlas 30. října pokrývá pouze tuto Function, následnou
-aktivaci a vývojový Hosting `shoutout-dev-46c81`, testovací obsah/hlášení a úklid.
-Výhradně testovací fixture „MVP mazani 30.10.“ má 3 komentáře a 1 otevřený
-komentářový report; zatím nic z ní nebylo smazané. Identifikátory, baseline,
-ověřovací a podmíněný úklidový skript jsou v ignorovaných souborech
-`build/comment-delete-live-state.json` a `build/comment_delete_live.cjs`.
-Po moderačním průchodu přepnout na TestBusiness a Bright_Otter_182, ověřit
-vlastní mazání a živý počet v detailu, teprve potom uklidit testovací report
-a parent označit `deleted`; receipt a skutečné rate eventy ponechat.
-Po dokončení tohoto průchodu navázat retencí receipt/mazáním účtu. Průzkum
+Navázat retencí receipt/mazáním účtu. Vlastník 30. října schválil sedmidenní
+okno bezpečného opakování jedné akce; dosavadní 60denní retence po smazání účtu
+se nemění. Připravit časově omezené klíče, odmítání prošlých pokusů před mutací,
+kompatibilní přechod klienta/serveru a teprve potom bezpečný úklid.
+Samotné TTL nad současnými klíči nestačí. Produkční rozhodnutí se stále
+předkládají vlastníkovi; rutinní vývojové rollouty mají trvalý souhlas po CI.
+
+Mazání je uzavřené: TestModerator po novém otevření aplikace odstranil
+testovací komentář bez postihu; Business a Bright_Otter_182 pak odstranili
+vlastní komentáře automatizovaně ve fungující kartě `722303372`.
+Právě tři receipt a odpovídající delete rate eventy souhlasí. Počet v detailu
+šel bez obnovy 2 → 1 → 0; moderátorský krok snížil parent 3 → 2.
+Dočasný parent má `deleted`, testovací report je odstraněný, komentáře žádné.
+Receipt/rate eventy jsou zachované. Důkazy a poslední fixture state jsou
+v TESTING.md a ignorovaném `build/comment-delete-live-state.json`.
+Nejde o dokončení celého milníku důvěryhodné moderace ani serverové brány.
+Průzkum
 30. října nenašel další běžnou webovou mutaci těchto čtyř obsahových čítačů
 mimo připravené serverové cesty; staré větve zápisů stále chrání přepínače,
 Rules se dosud neuzavírají.
 Při čekání na ruční průchod lokální emulatorová zkouška doložila, že prosté
 mazání receipt umožní opětovné provedení starého požadavku. Bezpečný návrh
-retence a otevřená volba 7/30 dní jsou v [DATA_MODEL](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
+retence a schválené sedmidenní okno jsou v [DATA_MODEL](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
 nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 

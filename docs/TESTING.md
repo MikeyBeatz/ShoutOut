@@ -77,6 +77,26 @@ Skript i emulátor skončily kódem 0, externí data nebyla dotčená. Potvrzuje
 potřebu odmítnout prošlé požadavky před zavedením úklidu; nejde o schválenou
 implementaci retence. [Návrh a otevřené rozhodnutí](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 
+Živý průchod mazání je následně dokončený. Po zavření původní aplikace a
+novém otevření vlastníkem (`722303372`) TestModerator uložil odstranění bez
+postihu. REST ověření doložilo smazaný cíl, uzavřený report, právě jeden receipt,
+správný actor/author a nezměněné ostatní parent fields; počet 3 → 2.
+Ve stejné ručně ověřené kartě automatizovaně prošlo vlastní mazání TestBusiness
+(2 → 1) i Bright_Otter_182 (1 → 0), vždy živě v otevřeném detailu bez reloadu.
+Business u cizího komentáře neměl ovládání mazání; serverové odmítnutí cizího
+autora pokrývá emulatorový test, nikoli živý pokus o podvržené volání.
+HTTP log má úspěchy 200 v `17:02:17`, `17:05:57`, `17:07:39` UTC.
+Každý ze tří cílů má právě jeden receipt a správný delete rate event.
+
+Podmíněný úklid `17:08:02Z` ověřil nulové komentáře a nezměněný parent, poté
+atomicky označil výhradně dočasný parent `deleted` a odstranil vyřešený
+testovací report. Tři receipt a skutečné rate eventy ponechal zachované.
+Ignorované důkazy: `comment-delete-live-state.json`, `comment-delete-http-proof.json`
+a snímky `comment-delete-moderation-proof.jpg`, `comment-delete-business-proof.jpg`,
+`comment-delete-personal-proof.jpg` v `build/`. Úplné zavření a otevření stránky
+pomohlo této relaci; úplná příčina původní App Check chyby zůstává neurčená.
+Vlastník také schválil 7denní okno opakování; 60denní retence účtu se nemění.
+
 ## Lokální příprava obsahových hlášení 29. října 2026
 
 `functions/create_content_report.test.js` ověřuje pouze tři povolené druhy

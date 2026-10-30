@@ -291,7 +291,8 @@ byl 30. října nasazený z `34f7cad` (CI `41090758502`), revize
 `deletecomment-00001-zuc`; skutečné limity a odmítnutí bez App Check 401 ověřené.
 Přepínač `serverCommentDeletion` zůstává výchozí vypnutý; vývojová aktivace
 `fcbc23d` je po úspěšném CI `41091651584` nasazená ve vývoji jako Hosting
-`8d7e3f3fed920529`. Živé testy a úklid ještě čekají na funkční relaci.
+`8d7e3f3fed920529`. Živé testy tří rolí i úklid prošly; počet se snížil
+3 → 2 → 1 → 0, právě tři receipt a rate eventy zůstaly zachované.
 nevypínat přímé zápisy v Rules před schváleným rolloutem a živými testy.
 Limit používá dosavadní bucket `delete` (120/hodinu, 1 s), nikoli `interaction`.
 Oprávnění podle Rules zůstává autor nebo moderátor (důvěryhodný level >= 3

@@ -85,8 +85,8 @@ odmítat prošlé pokusy před mutací i po smazání receipt a bezpečně ukon�
 přijímání starého formátu bez časového omezení. Návrh musí řešit nesprávný
 čas zařízení, souběh, přepnutí účtu, přerušený rollout a zachování původního
 potvrzení během platného okna. Klient nesmí nejistý prošlý pokus automaticky
-změnit na novou akci. Délka okna 7 nebo 30 dní je předložená vlastníkovi;
-zatím není rozhodnutá ani implementovaná. Dosavadních 60 dní po smazání účtu
+změnit na novou akci. Vlastník 30. října schválil délku okna 7 dní;
+implementace tohoto omezení a úklidu teprve následuje. Dosavadních 60 dní po smazání účtu
 se tím nemění. Produkční změna retence vyžaduje odpovídající rozhodnutí.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,

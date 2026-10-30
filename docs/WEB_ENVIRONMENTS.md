@@ -55,8 +55,10 @@ Aktivace `fcbc23d58bfd94498131a126059fe58b645c79a4` prošla CI `41091651584`.
 Hosting `8d7e3f3fed920529`, release `1793378523613000` z
 `2026-10-30T16:42:03.613Z`, je nasazený a HTML/JS/konfigurace souhlasí s lokálním
 release buildem. Návratová Hosting verze je `884138efa765d64a`.
-Živé testy a úklid čekají na obnovení ovladatelné relace; reload moderátorské
-karty zůstal na načítání. Nelze zatím potvrdit příčinu ani živé mazání.
+Živé mazání a úklid jsou dokončené: TestModerator, TestBusiness a běžný účet,
+počet 3 → 2 → 1 → 0, právě tři receipt; dočasný parent soft-deleted a testovací
+report odstraněný. Po problému s App Check pomohlo nové otevření aplikace;
+ochrany se nezměnily. Důkazy jsou v [TESTING](TESTING.md).
 Produkční konfigurace cestu nezapíná. Po aktivaci společný helper autora i moderátora používá
 server; při chybě nepřechází na přímý zápis. Klient uchovává nejasný pokus
 v paměti relace i po zániku komentářové dlaždice, souběžná kliknutí sdílí požadavek.

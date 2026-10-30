@@ -36,15 +36,14 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
 `02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.
 [Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).
 
-1. Dokončit schválenou vývojovou aktivaci a živé testy mazání komentářů:
-   `deleteComment` z `34f7cad` i aktivace `fcbc23d` prošly CI a jsou nasazené ve
-   vývoji. Živé testy a úklid čekají na obnovení ovladatelné moderátorské relace.
-   Podrobnosti fixture a další krok uvádí [PROJECT_STATUS](PROJECT_STATUS.md).
-2. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
-   Lokálně je prokázané riziko prostého úklidu; před implementací čeká
-   rozhodnutí o 7/30denním okně. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
-3. Dokončit prostorové dotazy a stránkování feedu.
-4. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
+Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě CI,
+živé průchody třemi rolemi a úklid prošly. [Důkazy](PROJECT_STATUS.md).
+
+1. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
+   Vlastník schválil 7denní okno opakování; před úklidem je nutné odmítání
+   prošlých požadavků. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
+2. Dokončit prostorové dotazy a stránkování feedu.
+3. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 
 Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
 obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
