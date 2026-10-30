@@ -6,7 +6,7 @@ Aktualizováno 30. října 2026. Aktuální práce je ve větvi
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
-je připravené lokálně; není nasazené ani aktivované.
+je lokálně otestované a Function je nasazená; aktivace klienta čeká na CI/build/Hosting.
 
 ## Jak přehled používat
 
@@ -47,11 +47,12 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
-| Mazání komentářů a dekrement parentu | Lokálně připravená operace, klient a testy | Nenasazené; `serverCommentDeletion` výchozí vypnutý a dosud neaktivovaný. |
+| Mazání komentářů a dekrement parentu | `34f7cad`, CI `41090758502` prošlo; klient lokálně aktivovaný a otestovaný | Function `deletecomment-00001-zuc` aktivní, limity i HTTP 401 ověřené; nový Hosting/živé testy čekají. |
 
-Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
+Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
-Sedm odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
+Osm odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
+nasazený web zatím používá původních sedm, nový Hosting čeká.
 produkční konfigurace tyto serverové cesty nezapíná.
 Přepínač `serverShoutSaves` má výchozí `false`; vývojový web jej má aktivní,
 produkční konfigurace jej nezapíná.
@@ -81,7 +82,11 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
   Optimalizace čtení rolí prošla osmi cílenými transakčními testy; jejich
   následný CLI shutdown timeout je rozlišený v [TESTING](TESTING.md).
   Export/balení, region/limity a lokální handler bez Auth/App Check ověřené.
-  Nová Function ani klientský přepínač zatím nejsou nasazené/aktivované.
+  [CI `41090758502`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41090758502)
+  pro `34f7cade0489e6fe28811cd88693edc2ea0e619c` prošlo. Po výslovném souhlasu
+  je Function nasazená (`deletecomment-00001-zuc`), skutečné limity a HTTP 401
+  bez App Check ověřené. Lokální aktivace prošla 19 cílenými Flutter a 20 tools
+  testy; nový Hosting a živé testy dosud neproběhly.
 
 - Lokální hlášení obsahu: 189 Flutter testů, 32 Functions unit testů, Functions
   lint, 19 testů nástrojů a 111 emulatorových testů (65 Rules + 46 serverových).
@@ -114,14 +119,14 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Dokončit commit/push a CI připraveného `deleteComment`, potom
-předložit konkrétní vývojový rollout ke schválení. Oprávnění autora nebo
+Dokončit CI/build/Hosting schválené vývojové aktivace `serverCommentDeletion`
+a živé testy včetně úklidu. Oprávnění autora nebo
 moderátora i limit 120/hodinu a 1 s zůstávají stejné. Transakce maže pouze
 komentář a snižuje parent čítač nejvýše jednou; klient zobrazuje živý čítač.
 Moderační rozhodnutí/zavření reportu, reakční subkolekce a navazující odpovědi
 mají dosavadní samostatný životní cyklus. Nejde o dokončení milníku důvěryhodné
-moderace. Nasazení vyžaduje samostatný konkrétní souhlas; souhlas pro dokončená
-hlášení jej nepokrývá.
+moderace. Výslovný souhlas 30. října pokrývá pouze tuto Function, následnou
+aktivaci a vývojový Hosting `shoutout-dev-46c81`, testovací obsah/hlášení a úklid.
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
 nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 

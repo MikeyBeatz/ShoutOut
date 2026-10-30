@@ -286,8 +286,11 @@ fronty i úklidu prošly; omezení a důkazy jsou v TESTING.md a PROJECT_STATUS.
 Lokálně připravené mazání komentářů se po samostatném souhlasu vybírá pouze
 `--only functions:content:deleteComment` v projektu `shoutout-dev-46c81`.
 Obsahový artefakt zahrnuje nový endpoint s Auth/App Check, `europe-west3`,
-min. 0 / max. 1 instancí, concurrency 1, 256 MiB a 15 s. Zatím není nasazený.
-Přepínač `serverCommentDeletion` zůstává výchozí vypnutý i neaktivovaný;
+min. 0 / max. 1 instancí, concurrency 1, 256 MiB a 15 s. Po výslovném souhlasu
+byl 30. října nasazený z `34f7cad` (CI `41090758502`), revize
+`deletecomment-00001-zuc`; skutečné limity a odmítnutí bez App Check 401 ověřené.
+Přepínač `serverCommentDeletion` zůstává výchozí vypnutý; vývojová aktivace
+je připravená v `config/dev.json`, nový Hosting a živé testy ještě čekají.
 nevypínat přímé zápisy v Rules před schváleným rolloutem a živými testy.
 Limit používá dosavadní bucket `delete` (120/hodinu, 1 s), nikoli `interaction`.
 Oprávnění podle Rules zůstává autor nebo moderátor (důvěryhodný level >= 3

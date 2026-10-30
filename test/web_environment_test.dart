@@ -40,7 +40,8 @@ void main() {
               'serverShoutSaves': false,
             }
             ..remove('appCheckSiteKey')
-            ..['serverContentReports'] = false;
+            ..['serverContentReports'] = false
+            ..['serverCommentDeletion'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
         isFalse,
@@ -83,7 +84,8 @@ void main() {
               'serverCommentReactions': false,
             }
             ..remove('appCheckSiteKey')
-            ..['serverContentReports'] = false;
+            ..['serverContentReports'] = false
+            ..['serverCommentDeletion'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
         isFalse,
@@ -124,6 +126,7 @@ void main() {
           ...config,
           'appCheckSiteKey': null,
           'serverContentReports': false,
+          'serverCommentDeletion': false,
           'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,
@@ -154,6 +157,7 @@ void main() {
         ...config,
         'appCheckSiteKey': null,
         'serverContentReports': false,
+        'serverCommentDeletion': false,
         'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': false,
@@ -253,6 +257,7 @@ void main() {
         ...config,
         'appCheckSiteKey': null,
         'serverContentReports': false,
+        'serverCommentDeletion': false,
         'serverShoutSaves': false,
         'serverShoutCreation': false,
         'serverCommentCreation': true,
@@ -286,6 +291,7 @@ void main() {
           ...config,
           'appCheckSiteKey': null,
           'serverContentReports': false,
+          'serverCommentDeletion': false,
           'serverShoutSaves': false,
           'serverShoutCreation': false,
           'serverCommentCreation': false,

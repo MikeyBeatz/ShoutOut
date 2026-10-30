@@ -38,7 +38,11 @@ ohlásilo timeout při ukončování emulátoru; předchozí plný běh skončil
 Release build dev a kontrola manifestu/otisků pro `shoutout-dev-46c81` prošly.
 Lokální import připraveného obsahového artefaktu ověřil export, region,
 provozní limity a odmítnutí bez Auth/App Check. Nejde o živý HTTP test.
-Přepínač zůstává neaktivovaný, externí rollout a živé průchody ještě neproběhly.
+CI `41090758502` pro `34f7cad` prošlo. Výslovný souhlas z 30. října pokrývá
+samostatnou Function i následnou otestovanou aktivaci a vývojové živé testy
+s úklidem. Function je nasazená (`deletecomment-00001-zuc`); API potvrdilo
+limity i živé HTTP odmítnutí bez App Check 401. Připravená aktivace prošla
+19 cílenými Flutter a 20 tools testy. Hosting a živé průchody ještě čekají.
 
 ## Lokální příprava obsahových hlášení 29. října 2026
 

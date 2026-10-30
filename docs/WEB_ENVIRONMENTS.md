@@ -48,12 +48,16 @@ připravenost Storage služby.
 
 Lokálně připravené mazání komentářů má volitelný boolean `serverCommentDeletion`
 (výchozí `false`); při `true` musí být nastavený App Check klíč. Nová callable
-`deleteComment` v `europe-west3` zatím není nasazená a žádná konfigurace tuto
-cestu nezapíná. Po její aktivaci společný helper autora i moderátora používá
+`deleteComment` v `europe-west3` je po souhlasu z 30. října nasazená z `34f7cad`
+(CI `41090758502`), revize `deletecomment-00001-zuc`. Parametry 256 MiB, 15 s,
+min. 0 / max. 1 instance a concurrency 1 i HTTP 401 bez App Check jsou ověřené.
+`config/dev.json` má připravenou aktivaci; nový Hosting a živé testy zatím čekají.
+Produkční konfigurace cestu nezapíná. Po aktivaci společný helper autora i moderátora používá
 server; při chybě nepřechází na přímý zápis. Klient uchovává nejasný pokus
 v paměti relace i po zániku komentářové dlaždice, souběžná kliknutí sdílí požadavek.
 Obnovení stránky klíč nezachová. Odpověď neobsahuje čítač; aktuální počet
-v detailu dodává živý parent stream. Nasazení vyžaduje samostatný souhlas.
+v detailu dodává živý parent stream. Výslovný souhlas zahrnuje následnou
+otestovanou aktivaci a vývojové testy s úklidem.
 
 Hlášení Shoutů, komentářů a soukromých odpovědí má volitelný boolean
 `serverContentReports` (výchozí `false`), který vyžaduje App Check klíč.
