@@ -86,7 +86,9 @@ test('retry stays historical after moderation; another reason/key cannot overwri
 test('concurrent same-key and distinct-key duplicates create one report and charge one report event', {skip:!enabled},async()=>{
   for(const keys of [['first','first','first'],['first','second']]){
     const f=await fixture('comment');const results=await Promise.allSettled(keys.map(k=>create(change(f.request,{idempotencyKey:k}),db,at())));
-    assert.equal(results.filter(x=>x.status==='fulfilled').length,keys[0]===keys[1]?keys.length:1);
+    const rejected=results.filter(x=>x.status==='rejected').map(x=>({code:x.reason.code,message:x.reason.message}));
+    assert.equal(results.filter(x=>x.status==='fulfilled').length,keys[0]===keys[1]?keys.length:1,
+      `Unexpected concurrent results: ${JSON.stringify(rejected)}`);
     for(const r of results.filter(x=>x.status==='rejected'))assert.equal(r.reason.code,'already-exists');
     assert.equal((await rateRef(f).get()).data().count,1);assert.equal((await f.reportRef.get()).exists,true);
   }
