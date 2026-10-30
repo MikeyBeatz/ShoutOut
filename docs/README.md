@@ -45,6 +45,9 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 
 - [TODO](TODO.md) – hlavní přehled priorit a milníků; podrobnosti jsou
   v [BACKLOG](BACKLOG.md) a [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
+- [Nová logika feedu, přečtení a refresh](FEED_READ_REFRESH_PLAN.md) – analýza
+  zadání z 31. října 2026, návrh návazností na prostorové stránkování,
+  nákladové varianty a rozhodnutí před implementací; obsahuje odkaz na úplné zadání.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
   `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána

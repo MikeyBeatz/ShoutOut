@@ -1,6 +1,7 @@
 # ShoutOut – aktuální TODO a pořadí práce
 
 Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
+Aktualizace 31. října: přidaný požadavek na novou logiku feedu, viz nejbližší práce.
 
 ## Postup
 
@@ -12,12 +13,14 @@ Počítají se celé vydávací milníky níže.
 
 ### Postup celého backlogu
 
-`███████████████████████████░░░░░░░░░░░░░` **69 %** — 107 ze 155 úkolů
+`███████████████████████████░░░░░░░░░░░░░` **69 %** — 107 ze 156 úkolů
 
 Kanonické checkboxy jsou pouze v [BACKLOG.md](BACKLOG.md).
 
 - Podkroky serverové brány samy nezvyšují počet dokončených milníků.
 - Reorganizace nepřidává nové úkoly ani nemění žádný checkbox.
+- Nové zadání feedu z 31. října přidává jeden otevřený úkol nad původních 155;
+  počet hotových úkolů ani 24 milníků se tím nemění.
 
 ## Jak navázat
 
@@ -47,14 +50,24 @@ Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný
 deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
-1. Dokončit prostorové dotazy a stránkování feedu.
-2. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
+1. **Nejdřív uzavřít návrh nové logiky feedu:** nepřečtené/přečtené, stabilní
+   relace, skutečná viditelnost obsahu, trvalá lokální evidence a dávková sync,
+   refresh s počtem nově dostupných Shoutů a nákladový model. Návrh spojit
+   s prostorovými dotazy a stránkováním; vztah ke stávajícím řazením a Business
+   výjimkám vyžaduje rozhodnutí. [Analýza a pořadí](FEED_READ_REFRESH_PLAN.md).
+   **Implementaci nezačínat bez schválení technického návrhu a finálního rozsahu pro MVP.**
+2. Podle schváleného kontraktu dokončit prostorové dotazy, stránkování a
+   navazující read/refresh UX; zachovat živé interakce a ověřit náklady i regresi.
+3. Po ověření všech toků uzavřít přímé klientské obsahové zápisy v Rules.
+   Osobní metadata přečtení vyžadují vlastní soukromá oprávnění.
 
 Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
 obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
 prošly. Celý milník serverové brány zůstává otevřený do dokončení bodů výše.
 
-Jde o pracovní rozpad existujícího milníku, nikoli nové požadavky.
+Serverové podkroky rozpracovávají existující milník. Read/refresh UX je nový
+požadavek z 31. října, jehož finální MVP rozsah čeká na schválení návrhu;
+nesmí být považovaný za již implementované chování.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).
 Vývojové i produkční rollouty mají od 30. října trvalý souhlas po úspěšném CI
 přesného commitu a splnění pravidel vydání; nevyžadují nový dotaz. První veřejné

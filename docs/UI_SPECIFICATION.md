@@ -2,6 +2,12 @@
 
 ## Schválené směry příští revize UI
 
+Nový požadavek z 31. října na nepřečtené/přečtené Shouty, stabilní scroll a
+refresh s indikátorem novinek je samostatně v [návrhu feedu](FEED_READ_REFRESH_PLAN.md).
+Technický návrh a vztah ke stávajícím řazením/Spotlightu čekají na schválení;
+nejde o již implementované UI. Zkrácený text karty níže nesmí být při budoucí
+detekci čtení zaměněný za skutečné zobrazení celého Shoutu.
+
 - Autor komentáře je klikací přes avatar i přezdívku a otevře veřejný profil.
 - Veřejné flairy `Business`, `Moderátor`, `Admin` a `Owner` jsou malé
   obdélníkové štítky za jménem. Business autor Shoutu má současně `Business` a
@@ -11,7 +17,9 @@
 - Revize Shout karty zachová avatar, zvětší jméno, pod něj kompaktně umístí
   vzdálenost, vložení a expiraci a zachová snadno dostupné uložení.
 - Nadpis se ověří proti skutečné šířce. Text ve feedu má nejvýše tři řádky a
-  výpustku, celý obsah je v detailu. Kategorie mohou být menší při zachování
+  výpustku, celý obsah má být přístupný v detailu. Kontrola kódu 31. října
+  zjistila, že současný detail znovu používá oříznutou ShoutCard; plné zobrazení
+  je tedy potřeba doplnit, není nyní potvrzenou funkcí. Kategorie mohou být menší při zachování
   čitelnosti a dotykové plochy.
 - Like/dislike zůstávají; je nutné ověřit práh skrytí a možnost vědomě rozbalit
   Shout skrytý kvůli negativním reakcím.

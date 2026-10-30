@@ -2,7 +2,9 @@
 
 Aktuální priority a milníky: [TODO](TODO.md). Poslední ověřený stav: [PROJECT_STATUS](PROJECT_STATUS.md).
 
-Tento soubor je kanonická checkboxová evidence původních 155 úkolů: 107 hotových a 48 otevřených.
+Tento soubor je kanonická checkboxová evidence. Původních 155 úkolů
+(107 hotových, 48 otevřených) zůstává zachovaných. Dne 31. října 2026 přibyl
+nový požadavek na feed; aktuálně je zde 156 úkolů: 107 hotových a 49 otevřených.
 Při reorganizaci se žádný checkbox ani jeho stav nezměnil. Hotové bloky jsou zkrácené na názvy;
 jejich úplné požadavky, rozhodnutí a ověření jsou v odkazovaném nezměněném archivu.
 Bloky s otevřeným podúkolem zůstávají celé, včetně kontextu a již hotových podúkolů.
@@ -38,6 +40,29 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 
 ## Nové podněty z uživatelského testování
+
+<a id="feed-read-refresh"></a>
+
+- [ ] **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
+  **Navržené MVP — nejprve návrh a rozhodnutí před implementací prostorového feedu.**
+  - Nový požadavek vlastníka z 31. října 2026; rozšiřuje původní rozsah, nejde
+    o přepsání historického dokončení základního feedu ani o další milník MVP.
+  - Nepřečtené před přečtenými, obě skupiny podle vzdálenosti se stabilními
+    shodami; jeden souvislý seznam, neměnné pořadí během relace a připojované stránky.
+  - Označení až po skutečném zobrazení celého relevantního obsahu včetně
+    dlouhých/rozbalovaných Shoutů; ihned uložit osobní stav bez přesunu karty.
+  - Nový obsah nevkládat průběžně; refresh s indikátorem 1–99/99+ počítá nově
+    dostupné položky platných filtrů od baseline, nikoli všechny nepřečtené.
+  - Po úspěšném refreshi přepočítat skupiny, vrátit scroll nahoru a posunout
+    baseline; zachovat přečtení po restartu, navrhnout dávkovou synchronizaci zařízení.
+  - Před implementací schválit vztah k Top/Končící/Sledované, nízkému hodnocení
+    a Spotlightu, podmínku expozice, změny polohy a čerstvost počítadla.
+  - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
+    nepsat každý read automaticky zvlášť ani nepředstírat, že batch snižuje počet dokumentových zápisů.
+  - [Analýza, návrh, otevřené volby a akceptace](FEED_READ_REFRESH_PLAN.md).
+    [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
+  - Implementace, migrace ani nasazení zatím nejsou schválené. Nezaměňovat
+    osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).

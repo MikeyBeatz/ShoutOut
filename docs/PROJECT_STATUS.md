@@ -1,15 +1,18 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/operation-retention-cleanup`; přebrala ověřené CI `079d053` a navazuje
-na klientskou retenci `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
+Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
+`feature/feed-read-refresh-plan`; navazuje na dokončenou retenci
+`feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
+`e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Sedmidenní retence potvrzení je nyní ve vývoji dokončená;
-další krok jsou prostorové dotazy a stránkování feedu.
+další krok je nejdřív schválit návrh nové logiky feedu společně s prostorovými
+dotazy a stránkováním. [Zadání, analýza a otevřené volby](FEED_READ_REFRESH_PLAN.md).
+V této plánovací změně se upravuje pouze dokumentace, ne chování aplikace.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
@@ -211,6 +214,14 @@ závěrečné uzavření přímých zápisů v Rules.
 ## Rozhodnutí, nejistoty a hranice oprávnění
 
 ### Další krok – prostorový feed
+
+**Aktualizace 31. října:** vlastník dodal nový read/refresh požadavek.
+Nejdřív předložit a schválit [společný návrh](FEED_READ_REFRESH_PLAN.md), včetně
+vztahu k dnešním čtyřem řazením, nízkému hodnocení a Spotlightu. Níže uvedený
+technický postup je mu podřízený; původní pokyn zachovat všechna řazení není
+automatickým řešením konfliktu s novým unread-first podle vzdálenosti.
+Požadavek je zaevidovaný jako jeden nový otevřený backlogový úkol (107/156);
+24 milníků MVP se nemění. Původní zadání je zachované a prolinkované.
 
 Pořadí vychází z prvního zbývajícího bodu TODO a kritérií serverové brány.
 `lib/src/home.dart::_startFeedListeners` nyní načítá poslední globální stránku

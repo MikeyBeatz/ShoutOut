@@ -148,6 +148,10 @@ zakázané Shouty, komentáře a soukromé odpovědi, nikoli čtení.
 
 ## Feed a řazení
 
+Následuje současné chování. Budoucí unread/read skupiny, stabilní relace a
+ruční obnovení s počítadlem jsou popsané v [návrhu z 31. října](FEED_READ_REFRESH_PLAN.md);
+implementace ani související změny produktového řazení zatím nejsou schválené.
+
 Feed načítá nejvýše 50 aktivních Shoutů a filtruje blokované autory. Uživatel
 volí poloměr, kategorii a řazení: nejbližší, top, končící nebo sledované. Výběr
 se zachová při přechodu mezi kartami po celou relaci. Vzdálenost se počítá vůči
@@ -163,6 +167,11 @@ Detail používá stejné údaje a ovládání jako karta ve feedu. Uživatel m�
 - odpovědět veřejně na konkrétní komentář,
 - poslat soukromou odpověď autorovi Shoutu nebo komentáře,
 - nahlásit obsah nebo zablokovat autora.
+
+Kontrola 31. října 2026: `_shoutCard()` v detailu používá sdílenou ShoutCard,
+která omezuje nadpis na dva a text na tři řádky. Otevření detailu tedy samo
+negarantuje přístup k celému dlouhému textu. Náprava je předpokladem plánované
+detekce přečtení, zatím není implementovaná.
 
 Komentář a aktualizace `commentsCount` jsou jedna atomická operace. Totéž platí
 pro reakce, saves a jejich souhrnné čítače. Soukromá odpověď je čitelná pouze

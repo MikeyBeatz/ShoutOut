@@ -124,6 +124,13 @@ Attest zůstávají podmínkami pozdějších mobilních vydání.
 Hotovo, když upravený klient nemůže podvrhnout autora, čas, polohu, čítač,
 limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
+Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](FEED_READ_REFRESH_PLAN.md).
+Nejdřív schválit jeho technický návrh a finální MVP rozsah, pak navrhovat geo
+kurzory společně se stabilní relací a pořadím nepřečtené/přečtené. Samotné
+seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
+Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
+metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
+
 <a id="antispam"></a>
 
 ## 4. Antispam a obsahová moderace — MVP
