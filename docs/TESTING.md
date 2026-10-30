@@ -71,10 +71,10 @@ Všech 12 receipt zůstalo zachovaných; původní uživatelský obsah se neměn
 Důkaz UI je v ignorovaném `build/timed-operation-private-proof.png`.
 Důkazy bez credentials: ignorované `build/retention-before.json`,
 `retention-functions-after.json`, `retention-hosting-after.json` a
-`timed-operation-live-state.json`. Legacy příjem je v nasazené fázi stále zapnutý.
+`timed-operation-live-state.json`. Během této první fáze byl legacy příjem zapnutý.
 
-Ve větvi `feature/operation-retention-cleanup` je připravený zákaz nových
-legacy klíčů. Platný replay existujícího starého receipt funguje pouze do
+Ve větvi `feature/operation-retention-cleanup` je implementovaný zákaz nových
+legacy klíčů, nyní i nasazený ve vývoji. Platný replay existujícího starého receipt funguje pouze do
 sedmi dní od serverového vytvoření; po odstranění se starý formát vždy odmítne.
 Emulatorové fixtures přešly na deterministické časové klíče bez změny očekávání.
 Úklid prověřuje jen podporované akce a platné datum/metadata, nejvýše 500
@@ -87,18 +87,42 @@ Původní sady zachovávají stejná očekávání. Nově se ověřuje odmítnut
 legacy klíčů všemi osmi operacemi bez zápisů, bezpečné opakování po úklidu,
 CAS dávky při změně receipt, stránkování přes zachovaná data a závod při
 založení checkpointu. Bez emulatoru se 64 integračních scénářů přeskočí.
-Logy: `build/retention-cleanup-emulator-final.log` a `retention-cleanup-unit.log`.
+Logy: `build/retention-cleanup-emulator-final.log` a `retention-cleanup-unit-final.log`.
 
-Připravená plánovaná Function `cleanupOperationReceipts` má schválený plán denně
+Nasazená plánovaná Function `cleanupOperationReceipts` má schválený plán denně
 02:15 UTC, 256 MiB, 60 s, max. 1 instanci/concurrency 1 a bez automatických
-retry. Loguje pouze počty a stavy. Vlastník výslovně vybral denní DEV variantu;
-žádný plánovač ještě není nasazený ani zapnutý. Nasadit až po úspěšném CI
-přesného commitu, po aktualizaci všech osmi Functions. Potom ověřit i IAM: žádný veřejný
-invoker, bez přihlášení musí být endpoint odmítnutý, Scheduler smí úlohu volat.
+retry. Loguje pouze počty a stavy. Vlastník výslovně vybral denní DEV variantu.
+Čistý `9b748d7d9698f4ef99b2ec718180f338ea979da6` prošel
+[CI 41139730936](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41139730936)
+(22:41:06–22:45:46 UTC): 44 unit, 129 emulatorových, 20 tools, Flutter a build.
+Nejdřív bylo aktualizovaných všech osm callable, API ověřilo nové revize,
+ACTIVE, původní limity a 401 bez App Check. Teprve potom byl nasazený plánovač
+`cleanupoperationreceipts-00001-nuh` a vytvořený job
+`firebase-schedule-cleanupOperationReceipts-europe-west3` (ENABLED).
+Cloud Run IAM nemá `allUsers` ani `allAuthenticatedUsers`, povoluje OIDC účet
+Scheduleru; nepřihlášený POST vrací 403. API/scheduler status i checkpoint byly ověřené.
+Živá Business záložka po cutoveru prošla 0 → 1 → 0; další dvě timed receipt
+zůstaly, původních dvanáct i ostatní pole parentu se nezměnily.
+První ruční job po počáteční konfiguraci projektu doběhl 22:52:42.425 UTC:
+scanned 1 / deleted 1 / skipped 0, odstranil pouze izolovaný prošlý testovací
+receipt. Všech 14 platných receipt zůstalo beze změny. Opakování 22:53:13.333 UTC:
+scanned 0 / deleted 0 / skipped 0, stejných 14 potvrzení zachováno.
+Důkazy: `build/retention-cutover-after.json`, `retention-cutover-live-state.json`,
+`retention-scheduler-inspect.json`, `retention-scheduler-live-state.json`
+a `retention-cutover-ci.log`. Nové API a job jsou pouze ve vývoji; produkce,
+Hosting po `079d053`, main a Rules se neměnily.
 [Oficiální postup a cena plánovače](https://firebase.google.com/docs/functions/schedule-functions).
 Před zapnutím produkce znovu posoudit kapacitu a frekvenci podle provozu.
 Sedmidenní deadline operace se vynucuje nezávisle na fyzickém úklidu;
 ostatní 60denní retenční požadavky a dokončení mazání účtu se tím nemění.
+
+**Návrat po zapnutí úklidu:** nepovolovat znovu nové legacy klíče. U odstraněných
+legacy receipt již nelze poznat původní nečasovaný požadavek, takže návrat na
+kompatibilní `allowLegacy: true` by mohl zopakovat jeho účinek. Případně pozastavit
+job, ale zachovat striktní kontrolu klíčů v každé operaci a vracet jen timed klienta
+(`079d053`/Hosting `02cdb989d4f18ee2`). Starší Hosting `8d7e3f3fed920529` není
+po cutoveru bezpečná samostatná návratová verze. Obnovení legacy příjmu by vyžadovalo
+samostatný návrh obnovy původních potvrzení a schválení; není rutinní rollback.
 
 ## První kompatibilní serverová vrstva retence 30. října 2026
 

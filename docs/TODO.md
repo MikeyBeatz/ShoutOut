@@ -39,17 +39,16 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
 Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě CI,
 živé průchody třemi rolemi a úklid prošly. [Důkazy](PROJECT_STATUS.md).
 
-1. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
-   Vlastník schválil 7denní okno opakování; před úklidem je nutné odmítání
-   prošlých požadavků. První kompatibilní serverová vrstva prošla lokálními
-   testy. Kompatibilní Functions a nový klient `079d053` jsou po CI nasazené
-   ve vývoji; všech osm cest, 12 timed receipt i úklid testů prošly. Čeká CI
-   a nasazení zákazu nových legacy klíčů a automatického úklidu. Lokálně
-   44 unit / 129 integračních testů prošlo; vlastník schválil denní DEV plánovač
-   (02:15 UTC, nejvýše 500 receipt/běh). [Důkazy](TESTING.md#retention-rollout).
-   Nové CI je dokončené včetně ověřeného cache hitu; metriky milníků se nemění.
-2. Dokončit prostorové dotazy a stránkování feedu.
-3. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
+Retence potvrzení je ve vývoji dokončená: klient `079d053`, cutover a úklid
+`9b748d7`, obě CI a živé testy osmi cest prošly. Nové legacy klíče se odmítají;
+DEV plánovač běží denně 02:15 UTC, nejvýše 500 receipt/běh. První zkouška
+odstranila 1 prošlý testovací receipt, opakování 0; všech 14 platných zůstalo.
+Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný account
+deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
+Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
+
+1. Dokončit prostorové dotazy a stránkování feedu.
+2. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 
 Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
 obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu

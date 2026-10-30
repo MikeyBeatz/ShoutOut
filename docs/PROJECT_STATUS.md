@@ -8,7 +8,8 @@ Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé t
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
-účtem včetně úklidu. Další krok je schválená sedmidenní retence potvrzení operací.
+účtem včetně úklidu. Sedmidenní retence potvrzení je nyní ve vývoji dokončená;
+další krok jsou prostorové dotazy a stránkování feedu.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
@@ -16,12 +17,16 @@ limity a HTTP 401 bez App Check ověřené. HTML/JS/konfigurace odpovídají bui
 Běžný účet ověřil publikaci, komentář, reakce, záložku a mazání; Business
 soukromou odpověď a hlášení. Právě 12 receipt má `keyVersion: 1` a přesně
 sedmidenní serverové deadline. Testovací obsah/report/notifikace jsou uklizené.
-Automatické mazání neběží.
-Lokálně je připravený zákaz nových legacy klíčů a dávkový úklid s pokračováním;
-živý průchod již prošel. Vlastník schválil plánovač jednou denně v DEV
-(02:15 UTC, nejvýše 500 receipt/běh). Lokálně prošlo 44 unit a 129 integračních
-testů, lint a příprava balíčku; další krok je CI přesného commitu a cutover
-všech osmi Functions před nasazením plánovače. [Důkazy](TESTING.md#retention-rollout).
+Cutover `9b748d7d9698f4ef99b2ec718180f338ea979da6` prošel úplným CI
+`41139730936` (4 min 40 s, 44 unit / 129 integrací / 20 tools a Flutter/build).
+Z čistého zdroje jsou nasazené všechny osm operací bez nových legacy klíčů,
+potom `cleanupOperationReceipts`. Denní DEV job je ENABLED, 02:15 UTC,
+nejvýše 500 receipt/běh, max. 1 instance; IAM je neveřejné a bez Auth vrací 403.
+Živá záložka po cutoveru prošla 0 → 1 → 0 se dvěma dalšími timed receipt.
+První ruční běh odstranil 1 izolovaný prošlý receipt a zachoval 14 platných;
+opakování odstranilo 0 a všech 14 opět zachovalo. Testovací obsah je uklizený.
+Po úklidu se nesmí znovu povolit nový legacy formát; rollback musí zachovat
+odmítání starých klíčů. [Důkazy a návrat](TESTING.md#retention-rollout).
 Nové CI prošlo dvakrát; druhý běh 3 min 14 s, npm i emulator cache hit potvrzené.
 [Podrobnosti CI](TESTING.md#ci-reliability).
 
@@ -42,8 +47,9 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 | Zdroj webu | `079d053d24fe04705d13baad7f8307bd25848094` |
 | Hosting verze | `02cdb989d4f18ee2` |
 | Release / čas UTC | `1793399239632000` / `2026-10-30T22:27:19.632Z` |
-| Předchozí verze pro případ návratu | `8d7e3f3fed920529` (před zákazem legacy klíčů) |
-| Ověření | CI, release build a shoda otisků prošly. Osm Functions ACTIVE, limity/HTTP 401 ověřené; živě všech 8 cest, 12 timed receipt a úklid. |
+| Starší Hosting verze | `8d7e3f3fed920529` má legacy klienta; po cutoveru se nesmí samostatně vrátit. |
+| Zdroj aktuálních Functions | `9b748d7d9698f4ef99b2ec718180f338ea979da6`, CI `41139730936` |
+| Ověření | Osm callable + soukromý plánovač ACTIVE, limity/401/403 ověřené; všech 8 cest, 14 timed receipt, úklid a bezpečné opakování jobu. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -65,9 +71,9 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
 | Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Hotovo; `deletecomment-00001-zuc`, tři role, počet 3 → 2 → 1 → 0, právě 3 receipt a úklid. |
-| Sedmidenní retence – kompatibilní serverový základ | `079d053`, úplné CI prošlo | Osm Functions aktualizovaných; staré klíče se stále přijímají, automatický úklid neběží. |
+| Sedmidenní retence – serverový základ | `079d053`, poté cutover `9b748d7`; obě CI prošla | Nové legacy klíče se nepřijímají; všechny Functions ACTIVE. |
 | Klientské časově omezené klíče | Osm operací; čas z Auth, immutable payload, očekávaný účet a 7 jazyků | Nasazené; všech osm cest živě ověřených oběma účty včetně úklidu. |
-| Zákaz nových legacy klíčů a dávkový úklid | Lokálně připravené, nejvýše 500 receipt/běh, checkpoint a CAS | Nenasazené; vyžaduje dokončený průchod nového klienta a CI přesného commitu. |
+| Zákaz nových legacy klíčů a dávkový úklid | Hotovo; nejvýše 500 receipt/běh, checkpoint a CAS | Denní DEV plánovač aktivní; 1 prošlý testovací receipt odstraněný, opakování 0, 14 platných zachováno. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -83,14 +89,15 @@ Reakce byly ověřené běžným i Business účtem včetně přidání, změny,
 receipt, limitů a oznámení. Oprava detailu ověřila 0 → 1 → 0 také při externím
 smazání komentáře bez obnovení stránky. Testovací komentáře a čistě testovací
 oznámení jsou odstraněné, dočasné Shouty mají `deleted`; původní Test Shout je
-zachovaný. Idempotentní receipt zůstaly zachované; jejich retence je otevřená.
+zachovaný. Platné idempotentní receipt zůstaly zachované; sedmidenní retence
+a denní úklid jsou nyní ve vývoji ověřené, viz výše.
 Ukládání prošlo vlastním uchovaným Shoutem i cizím aktivním Shoutem. Čtyři
 nové receipt a společné rate eventy souhlasí; obě záložky jsou odstraněné,
 čítače zpět na 0, dočasný Shout má `deleted` a původní Test Shout zůstal zachovaný.
 
 Přímé zápisy v Rules ještě nejsou uzavřené. Celý milník serverové brány tedy
 není hotový. Mazání komentářů i běžné obsahové čítače jsou ve vývoji ověřené;
-chybí dokončení retence receipt, prostorový feed a uzavření přímých zápisů.
+chybí prostorový feed a uzavření přímých zápisů.
 Úplná kritéria jsou
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
@@ -198,9 +205,28 @@ Při čekání na ruční průchod lokální emulatorová zkouška doložila, ž
 mazání receipt umožní opětovné provedení starého požadavku. Bezpečný návrh
 retence a schválené sedmidenní okno jsou v [DATA_MODEL](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
-nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
+nezachová. Retence receipt je ve vývoji uzavřená; zbývá prostorový feed a
+závěrečné uzavření přímých zápisů v Rules.
 
 ## Rozhodnutí, nejistoty a hranice oprávnění
+
+### Další krok – prostorový feed
+
+Pořadí vychází z prvního zbývajícího bodu TODO a kritérií serverové brány.
+`lib/src/home.dart::_startFeedListeners` nyní načítá poslední globální stránku
+aktivních Shoutů podle createdAt; radius, kategorie a řazení se použijí až
+v `lib/src/feed.dart`. Starší místní Shout proto může vypadnout kvůli novějším
+vzdáleným záznamům. Navazující práce:
+
+1. Ověřit pokrytí existujících dat důvěryhodným geohashem a stávající chování
+   bez polohy, změny radiusu/kategorie, blokací a všech čtyř řazení.
+2. Připravit serverové prostorové dotazy a kurzory s omezenou velikostí stránky
+   i skenování; zachovat produktové filtry a limit 50. Řešit hranice buněk,
+   duplicity a neplatný kurzor bez globálního listeneru či neomezených čtení.
+3. Ověřit scénář s více než 50 novějšími vzdálenými záznamy a starším místním
+   Shoutem, přechody stránek bez duplicit a živé reakce/čítače na načtených kartách.
+4. Napojit klienta přes vývojový přepínač, projít CI a živé ověření podle
+   pravidel vydání. Produkční data ani Rules neuzavírat před regresí všech toků.
 
 - Od 30. října jsou další vývojové i produkční rollouty předem schválené
   po úspěšném CI přesného commitu a splnění pravidel vydání. Nový dotaz na každý rollout není

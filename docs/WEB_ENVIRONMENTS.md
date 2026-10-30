@@ -53,8 +53,9 @@ receipt má `keyVersion: 1` a přesný interval 604800000 ms. Legacy příjem,
 Rules a stávající feature flags se touto fází nemění; úklid ještě neběží.
 Hosting `02cdb989d4f18ee2`, release `1793399239632000` z
 `2026-10-30T22:27:19.632Z`, má shodné otisky HTML/JS/konfigurace s release buildem.
-Návratová Hosting verze je `8d7e3f3fed920529`; po budoucím zákazu legacy klíčů
-ji nelze samostatně vrátit bez obnovení serverové kompatibility.
+Starší Hosting verze `8d7e3f3fed920529` používá legacy klíče. Po cutoveru
+ji samostatně nevracet a nepovolovat znovu legacy příjem; bezpečný návrat
+musí zachovat striktní server a timed klienta. [Postup](TESTING.md#retention-rollout).
 Nové revize: createShout `00002-tug`, createComment `00002-qid`,
 createPrivateReply `00002-low`, toggleShoutReaction `00002-jan`,
 toggleCommentReaction `00002-yoj`, toggleShoutSave `00002-nub`,
@@ -62,6 +63,19 @@ createContentReport `00002-pas`, deleteComment `00002-cet` (s názvem služby ja
 ACTIVE, Node 22, europe-west3, min. 0 / max. 1 instance, concurrency 1,
 256 MiB, 15 s a HTTP 401 bez App Check jsou ověřené. Business průchod i úklid prošly;
 [aktuální důkazy](TESTING.md#retention-rollout). Produkce se neměnila.
+
+Následný cutover `9b748d7d9698f4ef99b2ec718180f338ea979da6` prošel CI
+`41139730936` a je nasazený ve vývoji: createShout `00003-vex`, createComment
+`00003-vel`, createPrivateReply `00003-cit`, toggleShoutReaction `00003-gos`,
+toggleCommentReaction `00003-tuc`, toggleShoutSave `00003-cet`,
+createContentReport `00003-jay`, deleteComment `00003-woz` (prefix je název služby).
+Všech osm ACTIVE, původní limity a 401 ověřené. Klient zůstává `079d053`.
+Po těchto aktualizacích je nasazený soukromý plánovač
+`cleanupoperationreceipts-00001-nuh` (Node 22, europe-west3, 256 MiB, 60 s,
+min. 0 / max. 1, concurrency 1). Job je ENABLED, denně 02:15 UTC, bez retry,
+nejvýše 500 receipt/běh; anonymní POST 403 a OIDC invoker ověřené. První běh
+odstranil 1 prošlý testovací receipt a zachoval 14 platných, opakování 0.
+Hosting, Rules a produkce se při tomto cutoveru neměnily.
 
 Lokálně připravené mazání komentářů má volitelný boolean `serverCommentDeletion`
 (výchozí `false`); při `true` musí být nastavený App Check klíč. Nová callable

@@ -381,14 +381,16 @@ Business registrace ani vytvoření/změna pobočky se nesmí považovat za otes
 ## Automatické kontroly
 
 Retence operací má kompatibilní fázi `079d053` nasazenou ve vývoji a živě
-ověřenou všemi osmi cestami. Navazující cutover a denní úklid jsou připravené,
-ale ještě nenasazené. Po CI nejdřív aktualizovat všech osm callable Functions,
-ověřit ACTIVE/revize a pak samostatně nasadit `functions:content:cleanupOperationReceipts`
-ze stejné čisté pracovní kopie. Nespouštět úklid proti starým Functions.
+ověřenou všemi osmi cestami. Navazující cutover `9b748d7` prošel CI `41139730936`:
+nejdřív aktualizovaných všech osm callable Functions, API ověřilo ACTIVE/revize,
+pak samostatně nasazený `functions:content:cleanupOperationReceipts` ze stejné
+čisté pracovní kopie. Nespouštět úklid proti starým Functions.
 Schválený DEV plán je 02:15 UTC, nejvýše 500 receipt/běh; min. 0 / max. 1,
-concurrency 1, 256 MiB, timeout 60 s, bez retry. Nutná kontrola soukromého
-IAM endpointu a prvního spuštění. Návrat na starý web s legacy klíči vyžaduje
-obnovit kompatibilní server a pozastavit plánovač. Produkční frekvence není
+concurrency 1, 256 MiB, timeout 60 s, bez retry. Soukromý IAM endpoint/403
+i první dva běhy jsou ověřené: odstraněn 1 prošlý testovací receipt, pak 0;
+14 platných zachováno. Po zahájení úklidu se nesmí znovu povolit nový legacy
+formát: pozastavení plánovače samo neobnoví již odstraněná potvrzení. Návrat
+musí zachovat striktní server a timed klienta `079d053`. Produkční frekvence není
 tímto rozhodnutá. Stav a důkazy: [TESTING](TESTING.md#retention-rollout).
 
 Lokálně spusťte stejné kontroly jako CI:
