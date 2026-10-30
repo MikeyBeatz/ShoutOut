@@ -56,8 +56,22 @@ Uložení zůstává v `shouts/{id}/saves/{uid}` pouze s `createdAt`; odebrání
 dokument odstraní. V jediné transakci se změní záložka, `savesCount`, sdílený
 limit `interaction` a receipt; ostatní čítače i obsah Shoutu zůstávají stejné.
 Replay vrací historický výsledek, nikoli aktuální stav záložky. Budoucí klient
-musí zobrazovat realtime data. Operace zatím nemá callable export, není
-v nasazovacím artefaktu ani v klientu a nebyla nasazená. Retence receipt je otevřená.
+musí zobrazovat realtime data. Callable i klient jsou nasazené ve vývoji;
+aktuální důkazy uvádí [PROJECT_STATUS](PROJECT_STATUS.md). Retence receipt je otevřená.
+
+Lokálně připravené `deleteComment` ukládá do `serverOperations/{hash}` pole
+`userId`, `action: deleteComment`, `fingerprint`, `shoutId`, `commentId`,
+`authorId`, `result: {deleted: true}` a `createdAt`. Hash má oddělený jmenný
+prostor účtu/operace/klíče. `authorId` pochází z mazaného dokumentu; umožňuje
+ověřit oprávnění i při replay po smazání, bez textu či přezdívky v receipt.
+Aktuální způsobilost účtu a u cizího komentáře také moderátorské oprávnění se
+ověřují znovu před každým replay. Změna payloadu pod stejným klíčem se odmítá.
+Jedna transakce smaže existující komentář, sníží `commentsCount` nejméně na 0,
+zapíše společný limit `delete` a receipt. Ostatní čítače zůstanou stejné.
+Samotná odpověď čítač nevrací. Nový klíč pro už neexistující komentář vrací
+`not-found` bez zápisů; stejný klíč vrací uložené potvrzení bez dalšího odečtu.
+Podkolekce reakcí, odpovědi, hlášení a oznámení tato operace stejně jako původní
+klientská transakce nemaže. Retence receipt a další úklid zůstávají otevřené.
 
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,

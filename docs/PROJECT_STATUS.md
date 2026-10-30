@@ -1,11 +1,12 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Aktualizováno 29. října 2026. Aktuální práce je ve větvi
-`feature/server-content-reports`; navazuje na dokončené ukládání a jeho
-provozní záznam `5208e58` ve větvi `feature/server-shout-save-client`.
+Aktualizováno 30. října 2026. Aktuální práce je ve větvi
+`feature/server-comment-deletion`; navazuje na uzavřená obsahová hlášení
+(`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
-včetně duplicity, cooldownu, moderační fronty a úklidu. Další krok jsou čítače/mazání.
+včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
+je připravené lokálně; není nasazené ani aktivované.
 
 ## Jak přehled používat
 
@@ -46,6 +47,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
+| Mazání komentářů a dekrement parentu | Lokálně připravená operace, klient a testy | Nenasazené; `serverCommentDeletion` výchozí vypnutý a dosud neaktivovaný. |
 
 Sedm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -72,6 +74,14 @@ mazání komentářů, retence receipt a prostorový feed; úplná kritéria jso
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Poslední ověření a důkazy
+
+- Lokální mazání komentářů 30. října: 194 Flutter, 35 Functions unit,
+  20 tools a 119 emulatorových testů (65 Rules + 54 serverových) prošlo;
+  čistá analýza/formát, Functions lint, release build dev a kontrola manifestu.
+  Optimalizace čtení rolí prošla osmi cílenými transakčními testy; jejich
+  následný CLI shutdown timeout je rozlišený v [TESTING](TESTING.md).
+  Export/balení, region/limity a lokální handler bez Auth/App Check ověřené.
+  Nová Function ani klientský přepínač zatím nejsou nasazené/aktivované.
 
 - Lokální hlášení obsahu: 189 Flutter testů, 32 Functions unit testů, Functions
   lint, 19 testů nástrojů a 111 emulatorových testů (65 Rules + 46 serverových).
@@ -104,12 +114,14 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Navázat zbývajícími serverovými čítači, zejména mazáním komentářů: nejdřív
-zmapovat současné přímé zápisy, Rules a testy. Zachovat oprávnění, existující
-limity a atomický úklid komentáře s dekrementem parentu; nesmí vzniknout dvojí
-odečet při retry ani zastaralý lokální čítač. Potom připravit operaci, klienta
-a testy podle zavedených vzorů. Nasazení nového endpointu vyžaduje samostatný
-konkrétní souhlas; souhlas pro dokončená hlášení jej nepokrývá.
+Dokončit commit/push a CI připraveného `deleteComment`, potom
+předložit konkrétní vývojový rollout ke schválení. Oprávnění autora nebo
+moderátora i limit 120/hodinu a 1 s zůstávají stejné. Transakce maže pouze
+komentář a snižuje parent čítač nejvýše jednou; klient zobrazuje živý čítač.
+Moderační rozhodnutí/zavření reportu, reakční subkolekce a navazující odpovědi
+mají dosavadní samostatný životní cyklus. Nejde o dokončení milníku důvěryhodné
+moderace. Nasazení vyžaduje samostatný konkrétní souhlas; souhlas pro dokončená
+hlášení jej nepokrývá.
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
 nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 

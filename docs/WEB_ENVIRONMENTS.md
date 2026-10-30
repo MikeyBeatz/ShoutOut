@@ -46,6 +46,15 @@ připravenost Storage služby.
 
 ## Konfigurace
 
+Lokálně připravené mazání komentářů má volitelný boolean `serverCommentDeletion`
+(výchozí `false`); při `true` musí být nastavený App Check klíč. Nová callable
+`deleteComment` v `europe-west3` zatím není nasazená a žádná konfigurace tuto
+cestu nezapíná. Po její aktivaci společný helper autora i moderátora používá
+server; při chybě nepřechází na přímý zápis. Klient uchovává nejasný pokus
+v paměti relace i po zániku komentářové dlaždice, souběžná kliknutí sdílí požadavek.
+Obnovení stránky klíč nezachová. Odpověď neobsahuje čítač; aktuální počet
+v detailu dodává živý parent stream. Nasazení vyžaduje samostatný souhlas.
+
 Hlášení Shoutů, komentářů a soukromých odpovědí má volitelný boolean
 `serverContentReports` (výchozí `false`), který vyžaduje App Check klíč.
 Klient pak volá `createContentReport` v `europe-west3` a při chybě nepřechází

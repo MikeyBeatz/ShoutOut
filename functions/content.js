@@ -9,8 +9,18 @@ import { toggleShoutReactionOperation } from './toggle_shout_reaction.js';
 import { toggleCommentReactionOperation } from './toggle_comment_reaction.js';
 import { toggleShoutSaveOperation } from './toggle_shout_save.js';
 import { createContentReportOperation } from './create_content_report.js';
+import { deleteCommentOperation } from './delete_comment.js';
 
 if (getApps().length === 0) initializeApp();
+
+export const deleteComment = onCall({
+  ...secureCallableOptions,
+  minInstances: 0,
+  maxInstances: 1,
+  concurrency: 1,
+  memory: '256MiB',
+  timeoutSeconds: 15,
+}, (request) => deleteCommentOperation(request, getFirestore()));
 
 export const createShout = onCall({
   ...secureCallableOptions,

@@ -52,7 +52,8 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         (WebEnvironment.current.serverShoutReactions ||
             WebEnvironment.current.serverShoutSaves ||
             WebEnvironment.current.serverCommentCreation ||
-            WebEnvironment.current.serverCommentReactions)) {
+            WebEnvironment.current.serverCommentReactions ||
+            WebEnvironment.current.serverCommentDeletion)) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
         final ref = FirebaseFirestore.instance
@@ -234,7 +235,11 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 onSave: (_) => widget.onSave(),
                 onReaction: (_, {required like}) => widget.onReaction(like),
                 onDeleted: (remainingComments) {
-                  if (!mounted || _liveShout != null) return;
+                  if (!mounted ||
+                      _liveShout != null ||
+                      remainingComments == null) {
+                    return;
+                  }
                   setState(() => widget.shout.comments = remainingComments);
                 },
               );

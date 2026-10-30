@@ -283,6 +283,18 @@ jsou ověřené. Aktivace `be5a88f` prošla CI `40922593743` a běží na dev Ho
 jako `884138efa765d64a`. Živé testy tří typů, duplicity, cooldownu, moderační
 fronty i úklidu prošly; omezení a důkazy jsou v TESTING.md a PROJECT_STATUS.md.
 
+Lokálně připravené mazání komentářů se po samostatném souhlasu vybírá pouze
+`--only functions:content:deleteComment` v projektu `shoutout-dev-46c81`.
+Obsahový artefakt zahrnuje nový endpoint s Auth/App Check, `europe-west3`,
+min. 0 / max. 1 instancí, concurrency 1, 256 MiB a 15 s. Zatím není nasazený.
+Přepínač `serverCommentDeletion` zůstává výchozí vypnutý i neaktivovaný;
+nevypínat přímé zápisy v Rules před schváleným rolloutem a živými testy.
+Limit používá dosavadní bucket `delete` (120/hodinu, 1 s), nikoli `interaction`.
+Oprávnění podle Rules zůstává autor nebo moderátor (důvěryhodný level >= 3
+nebo existující legacy membership); nejde o novou regionální politiku.
+Nová operace neuzavírá report a nepřidává moderační audit, sankce ani rekurzivní
+úklid. Tyto navazující kroky patří do stávajících samostatných milníků.
+
 Reakce na Shouty mají samostatný selektor
 `--only functions:content:toggleShoutReaction`. Vývojová Function byla po
 souhlasu vlastníka nasazená ze zdrojů `5262784` a je `ACTIVE`, revize

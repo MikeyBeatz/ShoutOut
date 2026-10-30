@@ -9,6 +9,37 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Lokální příprava mazání komentářů 30. října 2026
+
+`functions/delete_comment.test.js` ověřuje striktní payload bez klientské
+identity autora či čítače, Auth/App Check, ověřený e-mail a očekávaný účet,
+poškozené rate dokumenty a přesné hranice 1 s / 120 za hodinu. Osm scénářů v
+`delete_comment.integration.test.js` provádí skutečné transakce nad emulátorem:
+autor, současné retry, soupeřící klíče/účty, cizí komentář i vlastník parentu,
+Business, důvěryhodné role 3–5 a legacy moderátor, odebrání role před replay,
+ban či nedokončený účet, chybějící cíle a vadné čítače bez částečného zápisu,
+neaktivní parent, clamp na 0, tvorbová restrikce a sdílený dosavadní delete bucket.
+Ověřují zachování ostatních čítačů a navazujících dokumentů; historický replay
+nesmí měnit novější parent stav ani spotřebovat další limit.
+
+`test/comment_deletion_gateway_test.dart` ověřuje neměnný klíč při nejasném
+výsledku, sloučení současných kliknutí, oddělení targetů, nový pokus po
+definitivním odmítnutí, přepnutí/odhlášení účtu a samostatnou konfiguraci.
+Klíč přežívá zánik dlaždice díky session helperu, ne obnovení stránky.
+Klient nedostává čítač z callable; detail odebírá živý parent i při samostatně
+aktivovaném `serverCommentDeletion`. Chyba serveru nespouští přímý fallback.
+
+Lokálně prošlo 194 Flutter testů, čistá analýza a formát 96 souborů, Functions
+lint a 35 unit testů, 20 testů nástrojů a 119 emulatorových testů (65 Rules +
+54 serverových), včetně osmi nových. Po odstranění dvou zbytečných čtení rolí
+při mazání vlastního komentáře prošlo znovu všech osm cílených transakčních
+testů a tři unit testy. U tohoto cíleného běhu Firebase CLI po úspěšném scriptu
+ohlásilo timeout při ukončování emulátoru; předchozí plný běh skončil kódem 0.
+Release build dev a kontrola manifestu/otisků pro `shoutout-dev-46c81` prošly.
+Lokální import připraveného obsahového artefaktu ověřil export, region,
+provozní limity a odmítnutí bez Auth/App Check. Nejde o živý HTTP test.
+Přepínač zůstává neaktivovaný, externí rollout a živé průchody ještě neproběhly.
+
 ## Lokální příprava obsahových hlášení 29. října 2026
 
 `functions/create_content_report.test.js` ověřuje pouze tři povolené druhy

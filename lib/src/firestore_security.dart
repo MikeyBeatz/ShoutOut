@@ -108,10 +108,27 @@ String _commentReactionEventId(String shoutId, String commentId) =>
     'commentReaction_${shoutId}_$commentId';
 String _commentDeleteEventId(String commentId) => commentId;
 
-Future<int> _deleteCommentWithCounter(
+final _commentDeletionGateway = CommentDeletionGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) async {
+    await FirebaseFunctions.instanceFor(
+      region: 'europe-west3',
+    ).httpsCallable('deleteComment').call(request.toPayload());
+  },
+);
+
+Future<int?> _deleteCommentWithCounter(
   DocumentReference<Map<String, dynamic>> commentReference,
 ) async {
   final shoutReference = commentReference.parent.parent!;
+  if (kIsWeb && WebEnvironment.current.serverCommentDeletion) {
+    await _commentDeletionGateway.delete(
+      userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+      shoutId: shoutReference.id,
+      commentId: commentReference.id,
+    );
+    return null; // The parent stream supplies the current count.
+  }
   final rateReference = _rateLimitReference('delete');
   final eventId = _commentDeleteEventId(commentReference.id);
 

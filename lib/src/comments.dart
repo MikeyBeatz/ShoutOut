@@ -23,7 +23,7 @@ class CommentTile extends StatefulWidget {
   final ValueChanged<String> onJumpToReply;
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
-  final ValueChanged<int> onDeleted;
+  final ValueChanged<int?> onDeleted;
 
   @override
   State<CommentTile> createState() => _CommentTileState();

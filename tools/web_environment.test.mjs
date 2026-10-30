@@ -9,6 +9,22 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('comment deletion defaults off and independently requires a boolean and App Check', () => {
+  const config = { ...dev };
+  delete config.serverCommentDeletion;
+  assert.doesNotThrow(() => validateConfig(config, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...config, serverCommentDeletion: true }, 'dev'));
+  for (const invalid of [null, 'true', 1, {}]) {
+    assert.throws(() => validateConfig({ ...config, serverCommentDeletion: invalid }, 'dev'));
+  }
+  const withoutAppCheck = { ...config };
+  for (const key of ['serverShoutCreation', 'serverCommentCreation', 'serverPrivateReplyCreation',
+    'serverShoutReactions', 'serverCommentReactions', 'serverShoutSaves', 'serverContentReports']) withoutAppCheck[key] = false;
+  delete withoutAppCheck.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(withoutAppCheck, 'dev'));
+  assert.throws(() => validateConfig({ ...withoutAppCheck, serverCommentDeletion: true }, 'dev'));
+});
+
 test('content reports default off and independently require a boolean and App Check', () => {
   const config = { ...dev };
   delete config.serverContentReports;
