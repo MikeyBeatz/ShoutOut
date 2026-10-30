@@ -50,9 +50,9 @@ prošly. Celý milník serverové brány zůstává otevřený do dokončení bo
 
 Jde o pracovní rozpad existujícího milníku, nikoli nové požadavky.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).
-Vývojové rollouty do `shoutout-dev-46c81` mají od 30. října trvalý souhlas po
-úspěšném CI přesného commitu; nevyžadují nový dotaz. Podmínky a dosud otevřený
-rozsah souhlasu pro produkci uvádí [RELEASING](RELEASING.md#trvaly-souhlas-s-vyvojovymi-rollouty).
+Vývojové i produkční rollouty mají od 30. října trvalý souhlas po úspěšném CI
+přesného commitu a splnění pravidel vydání; nevyžadují nový dotaz. První veřejné
+vydání nadále vyžaduje dokončené MVP. [Podmínky](RELEASING.md#trvaly-souhlas-s-rollouty).
 
 ## Hranice MVP
 

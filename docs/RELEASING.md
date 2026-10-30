@@ -22,14 +22,19 @@ splněná celá startovní brána MVP.
 ## Postup jednoho úkolu
 
 <a id="trvaly-souhlas-s-vyvojovymi-rollouty"></a>
+<a id="trvaly-souhlas-s-rollouty"></a>
 
-### Trvalý souhlas s vývojovými rollouty
+### Trvalý souhlas s vývojovými a produkčními rollouty
 
 Dne 30. října 2026 uživatel uvedl: „Pro příští dotazy povoluji všechny rollout
-pokud jsou úspěné CI“. Pro vývojový projekt `shoutout-dev-46c81` jde o předem
-udělený souhlas s dalšími rollouty v rámci schválené práce. Není potřeba
+pokud jsou úspěné CI“. Na dotaz po rozsahu potvrdil: „Vývoj i produkce při
+splnění pravidel vydání“. Jde o předem udělený souhlas s dalšími rollouty
+v rámci schválené práce do vývojového projektu `shoutout-dev-46c81` i produkční
+aplikace `go.shoutout-app.eu` (projekt `shoutout-production-a1b34`, app Hosting
+site `shoutout-go-a1b34`). Není potřeba
 opakovat dotaz na nasazení každé nové Function, klientské aktivace, Hostingu
-nebo Rules, pokud úspěšně prošlo CI pro přesný nasazovaný commit.
+nebo Rules, pokud úspěšně prošlo CI pro přesný nasazovaný commit a jsou splněna
+pravidla vydání pro dané prostředí.
 
 Před nasazením zkontrolovat aktuální SHA a úspěšný konečný stav příslušného
 CI běhu, čistou pracovní kopii a shodu artefaktu s daným commitem/prostředím.
@@ -43,9 +48,11 @@ zůstává platný. Tato věta sama nepovoluje libovolné mazání dat, migrace,
 změny tarifu nebo oprávnění. Schvalování implementace, slučování do `main`
 a vytváření/publikování tagů se řídí dosavadním rozsahem oprávnění.
 
-Uživatel je dotázán, zda nové povolení zahrnuje i produkční aplikaci; do jeho
-upřesnění se trvalý souhlas používá pouze pro vývoj. Po odpovědi tento záznam
-aktualizovat, nikoli odvozovat produkční oprávnění z neodpovězené otázky.
+Pro produkci nadále platí schválený obsah vydání, označený commit v `main`,
+čistá pracovní kopie, produkční konfigurace/build a všechny kroky níže.
+První veřejné vydání vyžaduje dokončené MVP a splněnou startovní bránu.
+Samotný rollout po splnění těchto podmínek už nevyžaduje nový dotaz na souhlas;
+dosud neschválené Git operace nebo změny rozsahu práce tím nejsou schválené.
 
 ### Jednotlivé kroky
 
@@ -82,8 +89,9 @@ opakovat potvrzení pro již schválený konkrétní krok a cíl.
    Pro první veřejné vydání navíc splnit [LAUNCH_READINESS.md](LAUNCH_READINESS.md).
 4. Předložit uživateli konkrétní vydání: verzi, úplné SHA, obsah změn,
    výsledky kontrol, známé vady, projekt, Hosting site, doménu a předchozí
-   verzi pro případ návratu. Získat výslovné oprávnění k produkčnímu nasazení
-   a případným dosud neschváleným Git operacím.
+   verzi pro případ návratu. Souhlas s produkčním rolloutem je výše udělený
+   předem při splnění CI a pravidel vydání; nevyžadovat jej znovu. Případné
+   dosud neschválené Git operace vyžadují odpovídající oprávnění.
 5. Schválený commit označit tagem `vX.Y.Z`; existující vydaný tag nepřesouvat.
    Nasadit přesně ověřený artefakt. Dodatečná změna zdrojů nebo buildu vyžaduje
    nové ověření; podstatná změna obsahu také nové schválení.
