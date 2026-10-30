@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -63,6 +64,7 @@ export async function createPrivateReplyOperation(request, db, clock = () => new
     const actor = await requireEligibleActor({ request, db, reader: transaction,
       requireContentPermission: true, now: now.toDate() });
     const [receipt, shoutSnapshot, rate] = await transaction.getAll(receiptRef, shoutRef, rateRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       if (receipt.data().action !== 'createPrivateReply' || receipt.data().fingerprint !== fingerprint) {
         fail('already-exists', 'Idempotency key was already used for another payload.');
@@ -118,7 +120,7 @@ export async function createPrivateReplyOperation(request, db, clock = () => new
       ...(parentCommentId !== undefined ? { parentCommentId } : {}) });
     transaction.set(rateRef, rateData);
     // No private text, participant name or parent private-message ID in receipt.
-    transaction.create(receiptRef, { userId: uid, action: 'createPrivateReply', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'createPrivateReply', fingerprint,
       shoutId: input.shoutId, privateReplyId: key, createdAt: now });
     if (enabled !== false) {
       transaction.set(db.doc(`users/${recipientId}/notifications/privateReply_${input.shoutId}`), {

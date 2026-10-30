@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -60,6 +61,7 @@ export async function createContentReportOperation(request, db, clock = () => ne
     // Content restrictions deliberately do not remove the ability to report.
     await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const data = receipt.data();
       if (data.action !== 'createContentReport' || data.fingerprint !== fingerprint) {
@@ -94,7 +96,7 @@ export async function createContentReportOperation(request, db, clock = () => ne
     transaction.create(reportRef, data);
     transaction.set(rateRef, rateData);
     // Private text and report reason are not copied into the receipt.
-    transaction.create(receiptRef, { userId: uid, action: 'createContentReport', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'createContentReport', fingerprint,
       collection, reportId, targetType, shoutId, ...(targetId === undefined ? {} : { targetId }), createdAt: now });
     return { reportId };
   });

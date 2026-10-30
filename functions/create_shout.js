@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { GeoPoint, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -121,6 +122,7 @@ export async function createShoutOperation(request, db, clock = () => new Date()
     const actor = await requireEligibleActor({ request, db, reader: transaction,
       requireContentPermission: true, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       if (receipt.data().fingerprint !== fingerprint) {
         fail('already-exists', 'Idempotency key was already used for another payload.');
@@ -183,7 +185,7 @@ export async function createShoutOperation(request, db, clock = () => new Date()
       status: 'active', likesCount: 0, dislikesCount: 0, commentsCount: 0, savesCount: 0,
     });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'createShout', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'createShout', fingerprint,
       shoutId: key, createdAt: now });
     return { shoutId: key };
   });

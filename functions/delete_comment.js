@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -53,6 +54,7 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
     const now = Timestamp.fromDate(clock());
     await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     const authorize = async (authorId) => {
       if (typeof authorId !== 'string' || !authorId) {
         fail('failed-precondition', 'Invalid stored comment author.');
@@ -93,7 +95,7 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
     transaction.delete(commentRef);
     transaction.update(shoutRef, { commentsCount: Math.max(0, comments - 1) });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'deleteComment', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'deleteComment', fingerprint,
       shoutId: input.shoutId, commentId: input.commentId, authorId, result, createdAt: now });
     return result;
   });

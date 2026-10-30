@@ -41,7 +41,8 @@ Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě
 
 1. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
    Vlastník schválil 7denní okno opakování; před úklidem je nutné odmítání
-   prošlých požadavků. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
+   prošlých požadavků. První kompatibilní serverová vrstva prošla lokálními
+   testy; čeká CI, rollout, klientský přechod a úklid. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
 2. Dokončit prostorové dotazy a stránkování feedu.
 3. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 

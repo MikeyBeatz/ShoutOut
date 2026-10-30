@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -46,6 +47,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     // Saves use eligibleUser(), not the content-creation restriction, in Rules.
     await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const data = receipt.data();
       if (data.action !== 'toggleShoutSave' || data.fingerprint !== fingerprint) {
@@ -71,7 +73,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     else transaction.delete(saveRef);
     transaction.update(shoutRef, { savesCount: result.count });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'toggleShoutSave', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'toggleShoutSave', fingerprint,
       shoutId: input.shoutId, result, createdAt: now });
     return result;
   });

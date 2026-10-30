@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -61,6 +62,7 @@ export async function createCommentOperation(request, db, clock = () => new Date
     const actor = await requireEligibleActor({ request, db, reader: transaction,
       requireContentPermission: true, now: now.toDate() });
     const [receipt, shoutSnapshot, rate] = await transaction.getAll(receiptRef, shoutRef, rateRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       if (receipt.data().action !== 'createComment' || receipt.data().fingerprint !== fingerprint) {
         fail('already-exists', 'Idempotency key was already used for another payload.');
@@ -103,7 +105,7 @@ export async function createCommentOperation(request, db, clock = () => new Date
       createdAt: now, likesCount: 0, dislikesCount: 0, ...reply });
     transaction.update(shoutRef, { commentsCount: count + 1 });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'createComment', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'createComment', fingerprint,
       shoutId: input.shoutId, commentId: key, createdAt: now });
     for (const [index, recipient] of recipients.entries()) {
       // The current client uses the 'replies' preference for both public kinds.

@@ -89,6 +89,19 @@ změnit na novou akci. Vlastník 30. října schválil délku okna 7 dní;
 implementace tohoto omezení a úklidu teprve následuje. Dosavadních 60 dní po smazání účtu
 se tím nemění. Produkční změna retence vyžaduje odpovídající rozhodnutí.
 
+První lokálně připravená kompatibilní vrstva používá `operation_retention.js`
+ve všech osmi operacích. Klíč `op1_<epoch seconds>_<32 hex>` nesmí být z
+budoucnosti ani poprvé proveden po sedmi dnech. Receipt dostává `keyVersion: 1`
+a `expiresAt` přesně sedm dní od skutečného serverového `createdAt`.
+Platný replay se potvrzuje podle tohoto serverového deadline; po něm server
+vrací `operation-expired`, i když fyzický úklid ještě neproběhl. Po úklidu
+je stejný starý klíč také odmítnutý, takže se akce znovu neprovede.
+
+Přechodný `legacyOperationKeysAccepted: true` zachovává dosavadní klienty;
+jejich receipt nedostávají deadline a nesmějí se zatím automaticky mazat.
+Vrstva neprovádí cleanup, nemění oprávnění/limity a není ještě nasazená.
+Následuje klientský přechod, ověření a ukončení přijímání nových legacy klíčů.
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v

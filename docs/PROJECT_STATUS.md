@@ -1,13 +1,15 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 30. října 2026. Aktuální práce je ve větvi
-`feature/server-comment-deletion-verification`; navazuje na uzavřená obsahová hlášení
+`feature/operation-retention`; navazuje na uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Další krok je schválená sedmidenní retence potvrzení operací.
+Její první kompatibilní serverová vrstva je lokálně připravená a otestovaná;
+není ještě nasazená, klient stále používá původní klíče a úklid není zapnutý.
 
 ## Jak přehled používat
 
@@ -49,6 +51,7 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
 | Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Hotovo; `deletecomment-00001-zuc`, tři role, počet 3 → 2 → 1 → 0, právě 3 receipt a úklid. |
+| Sedmidenní retence – kompatibilní serverový základ | Lokálně 40 unit / 123 emulatorových testů, lint a balení prošly | Nenasazený; staré klíče se nadále přijímají a jejich receipt se nesmějí automaticky mazat. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
@@ -75,6 +78,13 @@ mazání komentářů, retence receipt a prostorový feed; úplná kritéria jso
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Poslední ověření a důkazy
+
+- První serverová vrstva retence: Functions lint, 40 unit testů a 123
+  emulatorových (65 Rules + 58 serverových) prošlo. Nové časově omezené
+  klíče jsou ošetřené ve všech osmi operacích; opakování po deadline odmítne
+  server i po fyzickém odstranění receipt. Původních 119 scénářů zůstalo zelených.
+  Balení modulu a lokální export handleru ověřené. Flutter klient se v tomto
+  kroku nemění; CI a nasazení kompatibilní vrstvy teprve následují.
 
 - Lokální mazání komentářů 30. října: 194 Flutter, 35 Functions unit,
   20 tools a 119 emulatorových testů (65 Rules + 54 serverových) prošlo;
@@ -123,8 +133,12 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 Navázat retencí receipt/mazáním účtu. Vlastník 30. října schválil sedmidenní
 okno bezpečného opakování jedné akce; dosavadní 60denní retence po smazání účtu
-se nemění. Připravit časově omezené klíče, odmítání prošlých pokusů před mutací,
-kompatibilní přechod klienta/serveru a teprve potom bezpečný úklid.
+se nemění. Ověřit CI a nasadit první kompatibilní serverovou vrstvu.
+Potom připravit klientské klíče s časem z Auth (bez závislosti na hodinách
+zařízení), ověřit skutečná metadata/deadline a dokončit odmítání nových
+legacy požadavků. Teprve potom uklidit legacy receipt a dokončit úklid.
+Současný `legacyOperationKeysAccepted: true` je výslovně přechodný stav;
+existující klienti se nesmějí rozbít a legacy receipt se nesmějí zatím mazat.
 Samotné TTL nad současnými klíči nestačí. Produkční rozhodnutí se stále
 předkládají vlastníkovi; rutinní vývojové rollouty mají trvalý souhlas po CI.
 

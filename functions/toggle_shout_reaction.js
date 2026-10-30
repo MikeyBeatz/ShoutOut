@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -72,6 +73,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
     // Reactions use eligibleUser(), not canCreateContent(), in current Rules.
     await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const data = receipt.data();
       if (data.action !== 'toggleShoutReaction' || data.fingerprint !== fingerprint) {
@@ -115,7 +117,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
     else transaction.set(reactionRef, { type: result.type, updatedAt: now });
     transaction.update(shoutRef, { likesCount: result.likes, dislikesCount: result.dislikes });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'toggleShoutReaction', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'toggleShoutReaction', fingerprint,
       shoutId: input.shoutId, result, createdAt: now });
     if (publicProfile?.exists) {
       transaction.set(db.doc(`users/${data.authorId}/notifications/reaction_${result.type}_${input.shoutId}`), {

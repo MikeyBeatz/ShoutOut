@@ -1,3 +1,4 @@
+import { receiptRetentionFields } from './operation_retention.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -39,6 +40,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     // Current Rules use eligibleUser(), not the content-creation restriction.
     await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
+    const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const data = receipt.data();
       if (data.action !== 'toggleCommentReaction' || data.fingerprint !== fingerprint) {
@@ -78,7 +80,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     else transaction.set(reactionRef, { type: result.type, updatedAt: now });
     transaction.update(commentRef, { likesCount: result.likes, dislikesCount: result.dislikes });
     transaction.set(rateRef, rateData);
-    transaction.create(receiptRef, { userId: uid, action: 'toggleCommentReaction', fingerprint,
+    transaction.create(receiptRef, { ...retention, userId: uid, action: 'toggleCommentReaction', fingerprint,
       shoutId: input.shoutId, commentId: input.commentId, result, createdAt: now });
     if (publicProfile?.exists) {
       transaction.set(db.doc(`users/${data.authorId}/notifications/commentReaction_${result.type}_${input.shoutId}_${input.commentId}`), {

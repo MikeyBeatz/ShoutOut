@@ -9,6 +9,24 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## První kompatibilní serverová vrstva retence 30. října 2026
+
+Pět unit testů `operation_retention.test.js` pokrývá přesnou sedmidenní
+hranici, pozdější první provedení, opakování před/po deadline i po fyzickém
+úklidu, budoucí/poškozené klíče a neplatná či prodloužená serverová metadata.
+Výslovně rozlišují kompatibilní legacy režim od jeho budoucího ukončení.
+Čtyři emulatorové testy `operation_retention.integration.test.js` ověřují
+odmítnutí prošlého nového klíče všemi osmi operacemi bez obsahového/rate/receipt
+zápisu; skutečné uložení, smazání receipt a starý retry bez druhého přepnutí;
+deadline i před fyzickým úklidem; a prioritu současné způsobilosti účtu/banů.
+
+Functions lint, všech 40 unit a 123 emulatorových testů (65 Rules + 58 serverových)
+prošlo. Původních 119 scénářů prošlo beze změny očekávání; legacy klient zůstává
+kompatibilní. Příprava obsahového artefaktu zahrnuje nový modul a lokální import
+exportu ověřil region/limity a odmítnutí bez Auth/App Check. Flutter zdroje se
+v tomto kroku nemění. CI, nasazení této vrstvy a nové živé klíče ještě čekají;
+úklid receipt není touto změnou zapnutý.
+
 ## Lokální příprava mazání komentářů 30. října 2026
 
 `functions/delete_comment.test.js` ověřuje striktní payload bez klientské
