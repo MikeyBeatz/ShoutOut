@@ -44,6 +44,8 @@ Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě
    prošlých požadavků. První kompatibilní serverová vrstva prošla lokálními
    testy. Klient je lokálně napojený na čas z Auth; čeká konečné CI, rollout
    Functions před Hostingem, živé ověření a úklid. [Návrh](DATA_MODEL.md#retence-potvrzení-operací--ověřený-problém-a-další-návrh).
+   Zdroj `c3ad17d` čeká na konečný stav CI `41100166067` kvůli rozporu logu
+   a metadat GitHubu; podrobnosti a připravené artefakty jsou v PROJECT_STATUS.md.
 2. Dokončit prostorové dotazy a stránkování feedu.
 3. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
 

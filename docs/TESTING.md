@@ -19,8 +19,19 @@ Dva `operation_text_test.dart` ověřují recovery v sedmi jazycích a zachován
 ostatních chyb. Všech osm klientských cest je napojených; pro tři publikace
 přibyl test očekávané identity před DB přístupem. Celkem 41 unit a 123
 emulatorových testů a všech 202 Flutter testů prošlo, analýza/formát jsou čisté.
-Release build a konečné CI se dokončují; nejde o důkaz nového živého rolloutem
-ověřeného stavu.
+Release build dev i kontrola manifestu prošly. Nový zdroj zatím není živě nasazený.
+
+Klientský commit `c3ad17dafd916915c0af7e01e935fb61466ec7c7`, run `41100166067`:
+dokončený log prvního jobu `124215878506` dokládá 202 Flutter, 41 unit, 123
+emulatorových a 20 tools testů, čistou analýzu a build; skončil v 17:39:49 UTC.
+Metadata runu/checku/suite ale zůstala `in_progress` bez výsledku a prázdných
+kroků, jobs API vracelo 502/504 a rozhraní také načítalo. Příkaz cancel byl
+odmítnutý, protože backend považoval běh za dokončený. Re-run stejného commitu
+byl přijat; attempt 2 zatím čeká ve frontě. Vlastník je požádán o kontrolu
+stavu na GitHubu. Lokální log prvního pokusu je v ignorovaném
+`build/timed-operation-ci-job-attempt1.log`. Příčina rozporu není potvrzená;
+žádný rollout neproběhl a samotný pozitivní log nenahrazuje požadovaný
+jednoznačný konečný stav CI.
 
 První CI serverové vrstvy `41097603906` (`aeeaec8`) selhalo v dosavadním
 souběžném testu hlášení, protože z 3 stejných žádostí uspěly 2. Lokální běhy

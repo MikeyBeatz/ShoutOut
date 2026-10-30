@@ -11,6 +11,9 @@ je lokálně otestované, nasazené a živě ověřené moderátorem, Business i
 Kompatibilní serverová vrstva i klientské časové klíče jsou lokálně připravené
 a otestované. Nejsou ještě nasazené; živý web stále používá původní klíče
 a úklid není zapnutý. Nejdřív aktualizovat všech osm Functions, potom Hosting.
+Rollout klientského zdroje `c3ad17d` čeká na jednoznačný konečný výsledek CI:
+log prvního pokusu potvrzuje všechny kontroly, metadata GitHubu zůstala
+nekonzistentní. Opakované spuštění je ve frontě; vlastník je požádán o kontrolu.
 
 ## Jak přehled používat
 
@@ -75,14 +78,15 @@ nové receipt a společné rate eventy souhlasí; obě záložky jsou odstraněn
 čítače zpět na 0, dočasný Shout má `deleted` a původní Test Shout zůstal zachovaný.
 
 Přímé zápisy v Rules ještě nejsou uzavřené. Celý milník serverové brány tedy
-není hotový. Chybí zbývající změny čítačů včetně
-mazání komentářů, retence receipt a prostorový feed; úplná kritéria jsou
+není hotový. Mazání komentářů i běžné obsahové čítače jsou ve vývoji ověřené;
+chybí dokončení retence receipt, prostorový feed a uzavření přímých zápisů.
+Úplná kritéria jsou
 v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Poslední ověření a důkazy
 
 - Klient časově omezených operací: šest cílených testů gateway, dva překladové
-  testy, čistá analýza/formát a všech 202 Flutter testů prošly; release build se dokončuje.
+  testy, čistá analýza/formát, všech 202 Flutter testů a release build/manifest prošly.
   Backend navíc přijímá a ověřuje očekávaný účet u publikace Shoutu, komentáře
   a soukromé odpovědi: 41 unit / 123 emulatorových testů prošlo.
   CI `41097603906` na `aeeaec8` selhalo v původním souběžném report testu
@@ -90,6 +94,13 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
   `89247e9` prošel [CI `41098701651`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41098701651).
   Příčina prvního neúspěchu nebyla potvrzená. Konečný klientský commit musí
   před rolloutem projít vlastním CI; úspěch staršího commitu jej nenahrazuje.
+  U `c3ad17dafd916915c0af7e01e935fb61466ec7c7` v CI `41100166067` má
+  dokončený log jobu `124215878506` všech 202 Flutter / 41 unit / 123 emulatorových
+  / 20 tools testů a build zelené (log skončil v 17:39:49 UTC). Run/check/suite
+  metadata ale zůstala `in_progress` bez conclusion a jobs API vracelo 502/504.
+  Zrušení bylo odmítnuté jako již dokončený běh; následný re-run přijat, attempt 2
+  je zatím `queued`. Toto není potvrzený konečný úspěch CI a nic nového se
+  nenasazuje. Vlastník je požádán o kontrolu stejného run URL.
 
 - První serverová vrstva retence: Functions lint, 40 unit testů a 123
   emulatorových (65 Rules + 58 serverových) prošlo. Nové časově omezené
@@ -147,6 +158,11 @@ Navázat retencí receipt/mazáním účtu. Vlastník 30. října schválil sedm
 okno bezpečného opakování jedné akce; dosavadní 60denní retence po smazání účtu
 se nemění. Dokončit kontroly/CI klientského commitu a nasadit všech osm
 kompatibilních Functions z téhož zdroje, teprve potom nový Hosting.
+Vybraný zdroj je `c3ad17dafd916915c0af7e01e935fb61466ec7c7`, připravený také
+v čistém detached worktree `build/operation-retention-deploy`; obsahový artefakt
+a závislosti tam jsou připravené. Kořenový `build/web-dev` je release tohoto
+zdroje a manifest prošel kontrolou pro `shoutout-dev-46c81`.
+Další dokumentační commit není součástí tohoto zvoleného aplikačního zdroje.
 Ověřit živé časové klíče, očekávaný účet a metadata/deadline, dokončit odmítání nových
 legacy požadavků. Teprve potom uklidit legacy receipt a dokončit úklid.
 Současný `legacyOperationKeysAccepted: true` je výslovně přechodný stav;
