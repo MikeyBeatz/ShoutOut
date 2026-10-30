@@ -51,7 +51,12 @@ Lokálně připravené mazání komentářů má volitelný boolean `serverComme
 `deleteComment` v `europe-west3` je po souhlasu z 30. října nasazená z `34f7cad`
 (CI `41090758502`), revize `deletecomment-00001-zuc`. Parametry 256 MiB, 15 s,
 min. 0 / max. 1 instance a concurrency 1 i HTTP 401 bez App Check jsou ověřené.
-`config/dev.json` má připravenou aktivaci; nový Hosting a živé testy zatím čekají.
+Aktivace `fcbc23d58bfd94498131a126059fe58b645c79a4` prošla CI `41091651584`.
+Hosting `8d7e3f3fed920529`, release `1793378523613000` z
+`2026-10-30T16:42:03.613Z`, je nasazený a HTML/JS/konfigurace souhlasí s lokálním
+release buildem. Návratová Hosting verze je `884138efa765d64a`.
+Živé testy a úklid čekají na obnovení ovladatelné relace; reload moderátorské
+karty zůstal na načítání. Nelze zatím potvrdit příčinu ani živé mazání.
 Produkční konfigurace cestu nezapíná. Po aktivaci společný helper autora i moderátora používá
 server; při chybě nepřechází na přímý zápis. Klient uchovává nejasný pokus
 v paměti relace i po zániku komentářové dlaždice, souběžná kliknutí sdílí požadavek.

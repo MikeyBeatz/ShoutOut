@@ -6,7 +6,9 @@ Aktualizováno 30. října 2026. Aktuální práce je ve větvi
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
-je lokálně otestované a Function je nasazená; aktivace klienta čeká na CI/build/Hosting.
+je lokálně otestované a Function i aktivace webu jsou nasazené. Živé průchody
+čekají na obnovení ovladatelné moderátorské relace vlastníkem; po reloadu karta
+zůstala na načítání, příčina zatím není potvrzená.
 
 ## Jak přehled používat
 
@@ -22,11 +24,11 @@ Staré neúspěšné pokusy v [archivu](archive/README.md) nejsou aktuální sta
 |---|---|
 | Vývojový projekt i Hosting site | `shoutout-dev-46c81` |
 | Vývojová aplikace | https://shoutout-dev-46c81.web.app |
-| Zdroj webu | `be5a88f58cbf88870ac5f90a81f088660eebbdaa` |
-| Hosting verze | `884138efa765d64a` |
-| Release / čas UTC | `1793295581345000` / `2026-10-29T17:39:41.345Z` |
-| Předchozí verze pro případ návratu | `8abd91f97aada32f` |
-| Ověření | Otisky HTML, JS a konfigurace souhlasily; CI, všechny tři druhy hlášení, moderační fronta a úklid prošly. |
+| Zdroj webu | `fcbc23d58bfd94498131a126059fe58b645c79a4` |
+| Hosting verze | `8d7e3f3fed920529` |
+| Release / čas UTC | `1793378523613000` / `2026-10-30T16:42:03.613Z` |
+| Předchozí verze pro případ návratu | `884138efa765d64a` |
+| Ověření | Obě CI, lokální release build a shoda otisků HTML/JS/konfigurace prošly. Function ACTIVE, limity a HTTP 401 bez App Check ověřené. Živé mazání dosud neověřené. |
 
 Produkční aplikace dosud nemá první release. Připravená doména
 `go.shoutout-app.eu` a site `shoutout-go-a1b34` jsou v projektu
@@ -47,13 +49,12 @@ Podrobnosti a historie verzí: [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
 | Palce na komentáři | Hotovo | Hotovo; `togglecommentreaction-00001-dit` |
 | Uložení/odebrání Shoutu | Hotovo; operace/klient `5fceccb`, aktivace `02b8b28`, obě CI prošla | Hotovo; `toggleshoutsave-00001-fal`, běžný i Business účet, seznam/detail a úklid ověřené. |
 | Hlášení Shoutu, komentáře a soukromé odpovědi | Hotovo; `79082d8` i aktivace `be5a88f` prošly CI | Hotovo; `createcontentreport-00001-yas`, 3 cíle, duplicita 409, cooldown 429, moderační UI a úklid. |
-| Mazání komentářů a dekrement parentu | `34f7cad`, CI `41090758502` prošlo; klient lokálně aktivovaný a otestovaný | Function `deletecomment-00001-zuc` aktivní, limity i HTTP 401 ověřené; nový Hosting/živé testy čekají. |
+| Mazání komentářů a dekrement parentu | Operace `34f7cad`, aktivace `fcbc23d`; obě CI prošla | Function `deletecomment-00001-zuc` a Hosting `8d7e3f3fed920529` nasazené; živé testy čekají na funkční relaci. |
 
 Osm nasazených Functions používá Node.js 22, `europe-west3`, 256 MiB, 15 s,
 min. 0 / max. 1 instanci a concurrency 1. Callable vyžadují Auth a App Check.
 Osm odpovídajících klientských přepínačů je v `config/dev.json` zapnutých;
-nasazený web zatím používá původních sedm, nový Hosting čeká.
-produkční konfigurace tyto serverové cesty nezapíná.
+nasazený web používá všech osm. Produkční konfigurace tyto serverové cesty nezapíná.
 Přepínač `serverShoutSaves` má výchozí `false`; vývojový web jej má aktivní,
 produkční konfigurace jej nezapíná.
 Nový `serverContentReports` je výchozí `false`; vývojový web jej má aktivní.
@@ -86,7 +87,9 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
   pro `34f7cade0489e6fe28811cd88693edc2ea0e619c` prošlo. Po výslovném souhlasu
   je Function nasazená (`deletecomment-00001-zuc`), skutečné limity a HTTP 401
   bez App Check ověřené. Lokální aktivace prošla 19 cílenými Flutter a 20 tools
-  testy; nový Hosting a živé testy dosud neproběhly.
+  testy. Aktivace `fcbc23d58bfd94498131a126059fe58b645c79a4` prošla
+  [CI `41091651584`](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41091651584),
+  release build/manifest i Hosting otisky prošly. Živé mazání dosud neověřené.
 
 - Lokální hlášení obsahu: 189 Flutter testů, 32 Functions unit testů, Functions
   lint, 19 testů nástrojů a 111 emulatorových testů (65 Rules + 46 serverových).
@@ -119,14 +122,25 @@ v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md#gateway).
 
 ## Další konkrétní krok
 
-Dokončit CI/build/Hosting schválené vývojové aktivace `serverCommentDeletion`
-a živé testy včetně úklidu. Oprávnění autora nebo
+Obnovit ovladatelnou relaci TestModerator v ručně ověřené kartě a dokončit
+schválené živé mazání včetně úklidu. Oprávnění autora nebo
 moderátora i limit 120/hodinu a 1 s zůstávají stejné. Transakce maže pouze
 komentář a snižuje parent čítač nejvýše jednou; klient zobrazuje živý čítač.
 Moderační rozhodnutí/zavření reportu, reakční subkolekce a navazující odpovědi
 mají dosavadní samostatný životní cyklus. Nejde o dokončení milníku důvěryhodné
 moderace. Výslovný souhlas 30. října pokrývá pouze tuto Function, následnou
 aktivaci a vývojový Hosting `shoutout-dev-46c81`, testovací obsah/hlášení a úklid.
+Výhradně testovací fixture „MVP mazani 30.10.“ má 3 komentáře a 1 otevřený
+komentářový report; zatím nic z ní nebylo smazané. Identifikátory, baseline,
+ověřovací a podmíněný úklidový skript jsou v ignorovaných souborech
+`build/comment-delete-live-state.json` a `build/comment_delete_live.cjs`.
+Po moderačním průchodu přepnout na TestBusiness a Bright_Otter_182, ověřit
+vlastní mazání a živý počet v detailu, teprve potom uklidit testovací report
+a parent označit `deleted`; receipt a skutečné rate eventy ponechat.
+Po dokončení tohoto průchodu navázat retencí receipt/mazáním účtu. Průzkum
+30. října nenašel další běžnou webovou mutaci těchto čtyř obsahových čítačů
+mimo připravené serverové cesty; staré větve zápisů stále chrání přepínače,
+Rules se dosud neuzavírají.
 Ukládání i hlášení drží retry klíče pouze v paměti relace; obnovení stránky je
 nezachová. Retence receipt a závěrečné uzavření přímých zápisů v Rules zbývají.
 

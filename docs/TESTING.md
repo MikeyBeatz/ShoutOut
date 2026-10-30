@@ -42,7 +42,22 @@ CI `41090758502` pro `34f7cad` prošlo. Výslovný souhlas z 30. října pokrýv
 samostatnou Function i následnou otestovanou aktivaci a vývojové živé testy
 s úklidem. Function je nasazená (`deletecomment-00001-zuc`); API potvrdilo
 limity i živé HTTP odmítnutí bez App Check 401. Připravená aktivace prošla
-19 cílenými Flutter a 20 tools testy. Hosting a živé průchody ještě čekají.
+19 cílenými Flutter a 20 tools testy. Aktivační commit
+`fcbc23d58bfd94498131a126059fe58b645c79a4` prošel CI `41091651584`.
+Release build, manifest a shoda HTML/JS/konfigurace na nasazeném Hostingu
+`8d7e3f3fed920529` prošly. Předchozí Hosting verze je `884138efa765d64a`.
+
+Živé mazání zatím nebylo provedeno. Po reloadu původní ručně ověřené karty
+`722302950` zůstalo rozhraní na načítání (5 prázdných Flutter semantics uzlů,
+centrální prvek velikosti spinneru); screenshot API jednou vypršelo. Zachycená
+konzole obsahovala starší App Check 401 a Firestore transport warnings před
+nasazením, ne důkaz nové chyby endpointu. Vlastník je požádán o ruční Ctrl+R
+a potvrzení TestModerator. Ochrany zůstaly zapnuté.
+Samostatná schválená fixture „MVP mazani 30.10.“ má 3 dosud zachované komentáře
+a 1 otevřený report. `build/comment-delete-live-state.json` a
+`build/comment_delete_live.cjs` v ignorované složce zachovávají baseline a
+podmíněné ověření/úklid. Běžný, Business a moderátorský průchod ani úklid
+nesmějí být označené za dokončené bez navazujících důkazů.
 
 ## Lokální příprava obsahových hlášení 29. října 2026
 

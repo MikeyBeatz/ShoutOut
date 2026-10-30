@@ -37,9 +37,9 @@ Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktiv
 [Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).
 
 1. Dokončit schválenou vývojovou aktivaci a živé testy mazání komentářů:
-   `deleteComment` z `34f7cad` prošlo CI a Function je nasazená; klientská aktivace
-   ve větvi `feature/server-comment-deletion` čeká na CI/Hosting a ověření s úklidem.
-   Poté ověřit zbývající změny čítačů.
+   `deleteComment` z `34f7cad` i aktivace `fcbc23d` prošly CI a jsou nasazené ve
+   vývoji. Živé testy a úklid čekají na obnovení ovladatelné moderátorské relace.
+   Podrobnosti fixture a další krok uvádí [PROJECT_STATUS](PROJECT_STATUS.md).
 2. Dokončit retenci záznamů idempotence a sladit ji s mazáním účtu.
 3. Dokončit prostorové dotazy a stránkování feedu.
 4. Po ověření všech toků uzavřít přímé klientské zápisy v Rules a provést regresi.
