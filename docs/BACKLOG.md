@@ -44,7 +44,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 <a id="feed-read-refresh"></a>
 
 - [ ] **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
-  **Navržené MVP — nejprve návrh a rozhodnutí před implementací prostorového feedu.**
+  **Navržené Po MVP (B1–B4); příprava kontraktu a plného detailu před MVP (A0–A3). Rozdělení čeká na schválení.**
   - Nový požadavek vlastníka z 31. října 2026; rozšiřuje původní rozsah, nejde
     o přepsání historického dokončení základního feedu ani o další milník MVP.
   - Nepřečtené před přečtenými, obě skupiny podle vzdálenosti se stabilními
@@ -55,11 +55,13 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     dostupné položky platných filtrů od baseline, nikoli všechny nepřečtené.
   - Po úspěšném refreshi přepočítat skupiny, vrátit scroll nahoru a posunout
     baseline; zachovat přečtení po restartu, navrhnout dávkovou synchronizaci zařízení.
-  - Před implementací schválit vztah k Top/Končící/Sledované, nízkému hodnocení
-    a Spotlightu, podmínku expozice, změny polohy a čerstvost počítadla.
+  - Před implementací příslušné etapy schválit vztah k Top/Končící/Sledované,
+    nízkému hodnocení a Spotlightu, podmínku expozice, změny polohy a čerstvost
+    počítadla. Volby budoucího B nesmějí zbytečně blokovat samostatné A0/A1.
   - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
     nepsat každý read automaticky zvlášť ani nepředstírat, že batch snižuje počet dokumentových zápisů.
-  - [Analýza, návrh, otevřené volby a akceptace](FEED_READ_REFRESH_PLAN.md).
+  - [Etapový návrh a schvalovací brány](FEED_IMPLEMENTATION_STAGES.md).
+    [Analýza, otevřené volby a akceptace cílového rozšíření](FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
   - Implementace, migrace ani nasazení zatím nejsou schválené. Nezaměňovat
     osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.

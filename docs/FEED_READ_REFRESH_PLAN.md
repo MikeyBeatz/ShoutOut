@@ -2,17 +2,21 @@
 
 Zapsáno 31. října 2026. Stav: požadavek zařazený do plánu, předběžná technická
 analýza; implementace ani konečné produktové volby nejsou schválené.
+Po následné diskusi je připravený [etapový plán a tři návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md):
+doporučení je prostorový základ a plný detail před MVP, personalizace přečtením
+a číslovaný indikátor po MVP. Tato analýza zachovává celé cílové chování;
+jeho úplná akceptace neblokuje MVP, pokud vlastník schválí etapový odklad.
 Úplné zadání je zachované [beze změny zde](requests/FEED_READ_REFRESH_2026-10-31.md).
 [TODO](TODO.md), [checkboxová evidence](BACKLOG.md#feed-read-refresh) a
 [serverová brána](MVP_SERVER_PLAN.md#gateway) na tento dokument odkazují.
 
 ## Zařazení a rozsah
 
-Návrh patří před implementaci prostorového feedu a stránkování. Společně určit
-kontrakt relace, pořadí a kurzorů; dodatečné přilepení přečtení by tento kontrakt
-měnilo. Navržené zařazení je do existujícího milníku serverové brány a navazující
-webové regrese před MVP. Finální rozsah pro MVP potvrdit s technickým návrhem;
-tento zápis neopravňuje k implementaci, migraci ani nasazení.
+Kontrakt relace, pořadí a kurzorů navrhnout před prostorovým stránkováním,
+aby měl připravené rozhraní pro osobní metadata. Doporučené rozdělení po diskusi:
+etapy A0–A3 před MVP, B1–B4 po MVP, viz etapový plán. Finální rozsah i konkrétní
+implementace čekají na schválení; tento zápis neopravňuje k implementaci,
+migraci ani nasazení. Příprava nezaručuje nulové budoucí změny backendu.
 
 Přibývá jeden otevřený backlogový úkol, nikoli nový milník MVP. Návrh nemění
 hotovou retenci potvrzení operací ani 60denní požadavky mazání účtu. Osobní
@@ -203,19 +207,16 @@ počtu aktivních uživatelů a frekvence použití; bez těchto vstupů nelze o
 
 ## Pořadí práce a akceptační zkoušky
 
-1. **Nyní:** zapsat zadání, ověřit současný stav, předložit tento návrh a uzavřít
-   uvedené volby. Získat výslovné schválení konkrétního rozsahu implementace.
-2. Společně navrhnout prostorové dotazy, read model a kontrakt relace/kurzorů;
-   po schválení ověřit správnost a náklady na syntetickém vzorku bez zásahu do produkce.
-3. Implementovat lokální trvalé přečtení a detekci viditelnosti, potom schválenou
-   synchronizaci a ochranu dat. Přidat stabilní relaci a append-only stránky.
-4. Doplnit omezené zjišťování novinek, počítadlo a atomický refresh. Zachovat
-   živé interakce načtených karet, lokalizace a přístupnost.
-5. Regrese, nákladové měření, CI a schválený vývojový rollout. Teprve po regresi
-   pokračovat uzavíráním přímých obsahových zápisů v Rules; osobní read metadata
-   mají vlastní oprávnění. Produkční rollout podléhá stávajícím pravidlům vydání.
+Pořadí vydání a schvalovací brány určuje [etapový plán](FEED_IMPLEMENTATION_STAGES.md).
+Nejdřív schválit R1 a dokončit A0/A1, podle výsledků zvolit konkrétní A2,
+potom A3 a navázat ostatními milníky MVP. Celé přečtení/synchronizace/počítadlo
+se při schváleném rozdělení implementují až v B1–B4 po MVP.
+Rozhodnutí o viditelnosti a polling čerstvosti nejsou důvod blokovat A0/A1,
+ale před jejich vlastní implementací zůstávají povinná. Původní požadavky na
+regresi, nákladové měření a kontrolované rollouty platí pro každou etapu.
 
-Akceptace vychází ze všech deseti bodů původního zadání. Testovat navíc globální
+Akceptace celého cílového rozšíření B vychází ze všech deseti bodů původního zadání;
+nejde o automatické podmínky vydání omezené etapy A. Testovat navíc globální
 unread/read pořadí přes více stránek (nejen uvnitř jedné), shodné vzdálenosti,
 překryvy buněk, starší místní Shout za více než 50 vzdálenými, mnoho nepřečtených,
 novinku mezi dvěma načtenými vzdálenostmi, změnu polohy/filtrů, expiraci a smazání,

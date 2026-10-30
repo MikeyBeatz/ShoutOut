@@ -1,7 +1,8 @@
 # ShoutOut – aktuální TODO a pořadí práce
 
 Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
-Aktualizace 31. října: přidaný požadavek na novou logiku feedu, viz nejbližší práce.
+Aktualizace 31. října: přidaný požadavek na novou logiku feedu a návrh etap
+před/po MVP, viz nejbližší práce. Implementace čeká na schválení rozsahu.
 
 ## Postup
 
@@ -50,23 +51,25 @@ Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný
 deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
-1. **Nejdřív uzavřít návrh nové logiky feedu:** nepřečtené/přečtené, stabilní
-   relace, skutečná viditelnost obsahu, trvalá lokální evidence a dávková sync,
-   refresh s počtem nově dostupných Shoutů a nákladový model. Návrh spojit
-   s prostorovými dotazy a stránkováním; vztah ke stávajícím řazením a Business
-   výjimkám vyžaduje rozhodnutí. [Analýza a pořadí](FEED_READ_REFRESH_PLAN.md).
-   **Implementaci nezačínat bez schválení technického návrhu a finálního rozsahu pro MVP.**
-2. Podle schváleného kontraktu dokončit prostorové dotazy, stránkování a
-   navazující read/refresh UX; zachovat živé interakce a ověřit náklady i regresi.
-3. Po ověření všech toků uzavřít přímé klientské obsahové zápisy v Rules.
-   Osobní metadata přečtení vyžadují vlastní soukromá oprávnění.
+1. **Schválit etapový návrh R1:** A0–A3 před MVP, osobní přečtení a číslované
+   novinky B1–B4 až po MVP. [Etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md).
+   **Implementace zatím není schválená.** R2 (fallback polohy) a R3 (budoucí
+   unread-first jen v Nejblíž) lze rozhodnout samostatně; neblokují A0/A1.
+2. Po souhlasu opravit plný obsah detailu (A0), připravit kontrakt stabilní
+   relace/kurzorů a porovnat prostorové strategie na lokálních syntetických
+   datech (A1). Nevytvářet předem cloudovou historii přečtení ani polling.
+3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
+   obnovu bez čísla a regresi (A3). Zachovat současné filtry, živé interakce,
+   čtyři řazení a Business výjimky; žádné tiché omezení celého okolí na 50.
+4. Po ověření všech toků uzavřít přímé klientské obsahové zápisy v Rules.
+   Na budoucí B nečekat; osobní metadata pak dostanou vlastní soukromá oprávnění.
 
 Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
 obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
 prošly. Celý milník serverové brány zůstává otevřený do dokončení bodů výše.
 
 Serverové podkroky rozpracovávají existující milník. Read/refresh UX je nový
-požadavek z 31. října, jehož finální MVP rozsah čeká na schválení návrhu;
+požadavek z 31. října, jehož navržený odklad personalizace po MVP čeká na schválení;
 nesmí být považovaný za již implementované chování.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).
 Vývojové i produkční rollouty mají od 30. října trvalý souhlas po úspěšném CI
@@ -151,6 +154,10 @@ Po MVP patří vydání Androidu a iOS, kompletní placená Business monetizace,
 interaktivní tutorial, telefonní ověření, FCM push a fan-out sledujícím a
 obecné žebříčky či gamifikace. Tyto plány se neruší; zůstávají v detailním
 backlogu v [BACKLOG.md](BACKLOG.md) se štítkem **Po MVP**.
+
+Nově je navržené po MVP také osobní přečtení, synchronizace zařízení,
+unread-first a číslovaný indikátor novinek (B1–B4). Původní zadání zůstává
+zachované; toto rozdělení čeká na schválení R1 v etapovém plánu.
 
 Navazující mobilní etapa zachovává fyzické testování Androidu, Play Integrity,
 podpis a Google Play, stejně jako sestavení iOS na Macu, App Attest, fyzický

@@ -125,8 +125,10 @@ Hotovo, když upravený klient nemůže podvrhnout autora, čas, polohu, číta�
 limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
 Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](FEED_READ_REFRESH_PLAN.md).
-Nejdřív schválit jeho technický návrh a finální MVP rozsah, pak navrhovat geo
-kurzory společně se stabilní relací a pořadím nepřečtené/přečtené. Samotné
+Nejdřív schválit [rozdělení do etap](FEED_IMPLEMENTATION_STAGES.md): navržené
+A0–A3 řeší před MVP plný detail, kontrakt relace, prostorový feed a ruční obnovu;
+B1–B4 s osobním přečtením a číslovanými novinkami jsou navržené po MVP.
+Geo kurzory připravit na budoucí osobní pořadí, ale neimplementovat celé B předem. Samotné
 seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.

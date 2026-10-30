@@ -10,8 +10,10 @@ prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazen�
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Sedmidenní retence potvrzení je nyní ve vývoji dokončená;
-další krok je nejdřív schválit návrh nové logiky feedu společně s prostorovými
-dotazy a stránkováním. [Zadání, analýza a otevřené volby](FEED_READ_REFRESH_PLAN.md).
+další krok je schválit [etapy feedu a rozsah A0/A1](FEED_IMPLEMENTATION_STAGES.md).
+Doporučení: prostorový základ/plný detail/stabilní relace/ruční obnova před MVP,
+přečtení a číslované novinky po MVP. Implementace zatím není schválená.
+[Zadání, analýza a otevřené volby](FEED_READ_REFRESH_PLAN.md).
 V této plánovací změně se upravuje pouze dokumentace, ne chování aplikace.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
@@ -216,10 +218,13 @@ závěrečné uzavření přímých zápisů v Rules.
 ### Další krok – prostorový feed
 
 **Aktualizace 31. října:** vlastník dodal nový read/refresh požadavek.
-Nejdřív předložit a schválit [společný návrh](FEED_READ_REFRESH_PLAN.md), včetně
-vztahu k dnešním čtyřem řazením, nízkému hodnocení a Spotlightu. Níže uvedený
-technický postup je mu podřízený; původní pokyn zachovat všechna řazení není
-automatickým řešením konfliktu s novým unread-first podle vzdálenosti.
+Po následné diskusi byl připravený [etapový návrh R1–R3](FEED_IMPLEMENTATION_STAGES.md).
+Navržené A0–A3 před MVP zachová všechna dnešní řazení a výjimky; osobní přečtení,
+sync a číslované novinky B1–B4 jsou navržené po MVP. R1 ještě není schválený.
+Případný souhlas s R1 opravňuje začít A0/A1, po výsledku A1 následuje konkrétní
+volba dotazů/limitů před A2. R2 o poloze a R3 o budoucím unread-first jsou
+samostatné produktové volby; jejich neuzavření neblokuje A0/A1. Níže uvedený
+technický postup se řídí tímto rozdělením; volby B neřešit jako podmínku MVP.
 Požadavek je zaevidovaný jako jeden nový otevřený backlogový úkol (107/156);
 24 milníků MVP se nemění. Původní zadání je zachované a prolinkované.
 
