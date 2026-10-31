@@ -237,6 +237,13 @@ ve vývoji; všechny tři cíle a přepnutí na veřejnou odpověď prošly živ
 průchodem Business a běžného účtu. Přímé vytváření v Rules zůstává otevřené
 do dokončení ostatních obsahových operací a koordinovaného přepnutí klientů.
 
+V DEV je od 31. října aktivní oddělená codebase account-deletion: Firestore
+událost založí soukromý pracovní průběh, plánovač po minutě obnovuje nejvýše
+jednu žádost/50 Shoutů. Auth účet musí být odstraněný; zámek a průběh se ověřují
+při každé zdrojové transakci. Živý pilot čekání → skrytí 3/3 → replay a úklid
+prošel. Stará klientská cesta ještě existuje; soukromá data a 60denní dokončení
+zůstávají otevřené. [Aktuální rozsah a provoz](ACCOUNT_DELETION_DEV_PROPOSAL.md).
+
 Klient je považován za nedůvěryhodný. Základní pravidla:
 
 - e-mail musí být ověřený,

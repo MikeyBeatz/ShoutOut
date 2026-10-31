@@ -134,6 +134,20 @@ všech 14 platných zůstalo beze změny. Po úklidu se nesmí znovu povolit nov
 legacy klíče, protože odstraněná potvrzení jejich původního účinku už nejsou
 dostupná. [Bezpečný postup návratu](TESTING.md#retention-rollout).
 
+## Pracovní průběh skrytí Shoutů po smazání Auth – DEV
+
+Od 31. října je po schváleném pilotu aktivní `accountDeletionJobs/{hash}`:
+hash váže projekt, UID a createTime žádosti. Záznam obsahuje identitu žádosti,
+phase, attempts, atomický hiddenCount, časy, leaseToken/leaseUntil, nextAttemptAt,
+lastErrorCode a retainUntil (serverová žádost + 60 dní). E-mail ani obsah se
+nekopírují. LeaseToken je pouze neveřejný identifikátor vlastnictví práce.
+`maintenanceState/accountDeletionShoutJobs` uchovává rotující scan cursor.
+Obě cesty jsou klientům zakázané; server používá Admin SDK a vlastní kontroly.
+
+Shouts-hidden značí pouze dokončené skrytí veřejných Shoutů, nikoli celé smazání
+účtu. RetainUntil není aktivovaná TTL politika ani hotové automatické dočištění.
+[Schéma, limity a skutečný živý výsledek](ACCOUNT_DELETION_DEV_PROPOSAL.md).
+
 Tento dokument je katalog dat současné aplikace. Popisuje význam dokumentů,
 vlastnictví a vazby potřebné pro rekonstrukci. Přesný povolený seznam polí,
 typy, délky a autorizační podmínky jsou vždy závazně definované v

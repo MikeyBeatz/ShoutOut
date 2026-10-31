@@ -12,7 +12,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
-| Mazání účtu | `hideActiveShoutsBeforeAccountDeletion` stále stránkuje a mění statusy z klienta | Serverový dávkový postup a index; neuzavírat přímé Rules dříve. |
+| Mazání účtu | Klientská cesta stále existuje; DEV pilot navíc serverově skrývá obsah po odstranění Auth a ukládá trvalý průběh | Pilot 3/3 živě ověřený; celý účtový proces a klientské napojení zbývají, indexWriter je živě vypnutý. Neuzavírat Rules dříve. |
 | Expirace | Lokální indexový prune; současná dostupnost zohledňuje expiresAt | Provozní worker a budget jsou před aktivací nové kolekce samostatnou bránou. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
@@ -151,4 +151,6 @@ Navazující větší lokální úsek již přidává atomický pracovní zázna
 průběh ve stejné transakci jako každý Shout a omezenou obnovu po pádu. Stav
 zůstává oddělený od dokončení celého smazání účtu. [Schéma, 99 cílených testů,
 nákladové meze a konkrétní DEV návrh](ACCOUNT_DELETION_DEV_PROPOSAL.md) jsou
-připravené; nové živé kolekce a plánovač čekají na vlastní souhlas.
+připravené. Vlastník následně schválil DEV pilot; dva endpointy a plánovač jsou
+nasazené z `ef49f25` po CI `41236718912`, živé čekání/skrytí 3/3, replay,
+soukromost a úklid prošly. Aktuální důkazy jsou v odkazovaném dokumentu.

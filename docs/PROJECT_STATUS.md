@@ -114,8 +114,16 @@ jsou připravené: atomické převzetí, vlastnický zámek, průběh ve zdrojov
 obnova po pádu, omezený scan s rotací a návrh dvou samostatných DEV Functions.
 99 cílených account/job/Rules případů prošlo, 87 Functions unit / 126 skip bez
 emulátoru a lint čistý. Artefakt se instaluje/importuje, limity SDK manifestu ověřené.
-Nové kolekce/plánovač/timing a jednorázový Auth test ještě čekají na samostatné
-schválení. Nic z tohoto úseku není nasazené; klient ani celá 60denní retence nejsou hotové.
+Vlastník schválil DEV pilot včetně provozních/datových voleb a jednorázového Auth
+testu. CI `41236718912` pro `ef49f2573f488df9b9e6f782bb493df9b4eae71b` prošlo;
+obě nové Functions jsou v DEV ACTIVE (europe-west3, Node 22, 256 MiB, max 1 /
+concurrency 1, 60 s každá), source hash `32de6cf5e387959db32687b6d9a8e594f03e8c80`.
+Nový plánovač ENABLED každou minutu UTC; anonymní HTTP vstup 403. Živě ověřeno
+waiting-auth 0 → odstranění nového disabled Auth fixture → shouts-hidden 3/3,
+ostatní pole nezměněná, replay beze změny a anonymní čtení jobu 403. Testovací
+Auth/obsah/žádost/job/checkpoint uklizené, původní pending žádost zachovaná.
+Původních 10 Functions beze změny. První Eventarc inicializace vyžadovala propagaci;
+detail a důkazy jsou v návrhu pilotu. Klient a celá 60denní retence stále nejsou hotové.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
