@@ -10,9 +10,10 @@ milníku serverové brány. Živý web zůstává A0 `b56fbbe`.
 
 | Cesta v emulátoru | Obsah |
 |---|---|
-| `feedIndexLab/{namespace}` | Marker verze laboratorního datasetu. |
-| `.../cells/{geohash4}` | `v`, hash kořenového bloku, revize, celočíselné `latCell` a `lonCell`. |
+| `feedIndexLab/{namespace}` | Marker verze a monotónní `prunedThrough` pro členství expirovaných metadat. |
+| `.../cells/{geohash4}` | `v`, hash kořenového bloku, revize, celočíselné `latCell` a `lonCell`, `minExpiry` pro objevování úklidu. |
 | `.../nodes/{sha256}` | Neměnný obsahově adresovaný blok: verze, cesta stromu, souhrny a potomci nebo list metadat. |
+| `.../retiredRoots/{cell-operationId}` | Předchozí kořen, oblast a serverový čas vyřazení; atomicky se změnou aktuálního kořene. |
 | `.../source/{shoutId}` | Pouze laboratorní náhrada kanonického dokumentu. V aplikaci zůstane pravdou `shouts/{id}`; druhé plné Shout úložiště není navržené. |
 
 Metadata: ID Shoutu, UID autora, zveřejněná poloha a sedmimístný geohash,
@@ -162,27 +163,12 @@ přenos a Functions. Teplý pracovní set, podíl cold startů, četnost reakcí
 načtených stránek jsou vstupy modelu, nikoli automatické konstanty. Rozpočet
 5 000 Kč nelze převést na garantovaný počet návštěvníků z těchto dvou vzorků.
 
-**Historické bloky se v prototypu automaticky neuklízejí. Bez dalšího úklidového
-protokolu by rostly bez omezení, takže tato verze není připravená k živému provozu.**
-Staré bloky zároveň potřebují otevřené relace. Samotné TTL podle data vytvoření
-by mohlo odstranit dosud používaný aktuální blok a není zvoleným řešením.
-
-Expirace se nyní pouze filtruje při výběru/hydrataci. Pokud kanonický dokument
-stále má `status: active`, metadata zůstávají v aktuálním stromu. Úklid historických
-verzí tedy sám nestačí: je nutné navrhnout i vyřazování expirovaných metadat.
-To nesmí svévolně smazat kanonický Shout, změnit jeho dosavadní retenci ani
-znemožnit dnes podporované interakce z Expirovaných. Chybějící expirovaný indexový
-záznam musí být při dalších obsahových operacích rozlišený od neúplného indexu.
-Tento membership/úklidový protokol v lokálním modelu zatím není implementovaný.
-
-Návrh k dalšímu ověření: uchovat při změně také předchozí kořen s časem vyřazení,
-potom mazat pouze bloky nedosažitelné z aktuálních a ještě potřebných historických
-kořenů. Sweep musí mít cutoff a precondition na updateTime, aby nesmazal blok,
-který byl mezitím znovu použitý nebo publikovaný. Délka relace/ochranné doby
-zatím není schválená. Archivace by přidala další zápis pro dotčenou oblast a GC
-čtení/mazání; to v naměřených třech indexových zápisech reakce zahrnuté není.
-Tento GC návrh ještě není implementovaný ani ověřený. Dosavadní 7denní okno
-potvrzení operací a 60denní požadavky po smazání účtu se nemění.
+Lokální protokol historie a úklidu je doplněný podle schváleného R4:
+relace platí pevně **1 hodinu od otevření/obnovy**, další stránka dobu neprodlužuje.
+Po expiraci zůstanou načtené karty, pokračování vyžaduje obnovu. Osobní přečtení,
+uložené Shouty, 7denní potvrzení operací ani 60denní požadavky mazání se nemění.
+Detaily, meze a výsledky jsou v [ověření retence indexu](FEED_INDEX_RETENTION.md).
+Jde stále o lokální model, nikoli nasazený worker nebo zapojené UI.
 
 ## Novinky podle změněných bloků
 
@@ -199,8 +185,9 @@ obsahu nově zpřístupněného moderací se tímto nerozhoduje.
 
 ## Konkrétní návaznost před živým napojením
 
-1. Uzavřít protokol historie a GC včetně expirovaných metadat, délku platnosti relace, rozpočet na úklid a
-   kapacitní chování. Ověřit v emulátoru i znovupoužití starého hashe při GC.
+1. Lokální protokol historie/GC a expirovaných metadat je ověřený; před provozem
+   určit rozpočet, frekvenci a kapacitní chování workeru, trvalé checkpointy a obnovu
+   po přerušení procesu. R4 určuje hodinovou relaci; veřejné API/UI zbývá napojit.
 2. Vyjmenovat a zapojit všechny změny indexovaných polí do stejných transakcí:
    createShout, reakce Shoutu, vlastní/moderátorské odstranění, dostupnost,
    související account worker. Zápisy ignorující index nesmějí zůstat povolenou

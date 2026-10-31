@@ -1,5 +1,10 @@
 // Emulator-only adapter. Deliberately cannot run against DEV or production.
 import { Buffer } from 'node:buffer';
+import { performance } from 'node:perf_hooks';
+import { randomUUID } from 'node:crypto';
+import { FieldValue } from 'firebase-admin/firestore';
+import { sessionDeadline } from './feed_session_policy.js';
+import { beginIndexGcLab } from './feed_index_gc_lab.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
 
@@ -11,13 +16,17 @@ const frozen = value => { if (value && typeof value === 'object') { Object.value
 
 export function blockCache({ maxBytes = 4194304, maxEntries = 1024 } = {}) {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || !Number.isSafeInteger(maxEntries) || maxEntries < 1) throw new Error('invalid-cache-config');
-  const entries = new Map(), flights = new Map();
+  const entries = new Map(), flights = new Map(), invalidated = new Set();
   let bytes = 0;
   return {
     get size() { return entries.size; }, get bytes() { return bytes; },
     get prefetchWidth() { return Math.max(1, Math.min(8, maxEntries, Math.floor(maxBytes / 65536))); },
     contains(key) { return entries.has(key) || flights.has(key); },
     clear() { entries.clear(); bytes = 0; },
+    invalidate(key) {
+      if (entries.has(key)) { bytes -= entries.get(key).bytes; entries.delete(key); }
+      if (flights.has(key)) invalidated.add(flights.get(key));
+    },
     async load(key, fetcher) {
       if (entries.has(key)) {
         const entry = entries.get(key); entries.delete(key); entries.set(key, entry);
@@ -26,7 +35,7 @@ export function blockCache({ maxBytes = 4194304, maxEntries = 1024 } = {}) {
       if (flights.has(key)) return { ...await flights.get(key), hit: true };
       const flight = (async () => {
         const node = frozen(await fetcher()), size = encodedBytes(node);
-        if (size <= maxBytes) {
+        if (size <= maxBytes && !invalidated.has(flight)) {
           while (entries.size >= maxEntries || bytes + size > maxBytes) {
             const oldest = entries.keys().next().value;
             bytes -= entries.get(oldest).bytes; entries.delete(oldest);
@@ -36,7 +45,7 @@ export function blockCache({ maxBytes = 4194304, maxEntries = 1024 } = {}) {
         return { node, hit: false, bytes: size };
       })();
       flights.set(key, flight);
-      try { return await flight; } finally { flights.delete(key); }
+      try { return await flight; } finally { flights.delete(key); invalidated.delete(flight); }
     },
   };
 }
@@ -71,7 +80,7 @@ export function directoryWindows(point, radiusKm) {
 function directoryEntry(cell, data) {
   const grid = cellGrid(cell);
   if (!data || data.v !== 1 || !/^[a-f0-9]{64}$/.test(data.hash) || !Number.isSafeInteger(data.revision) ||
-    data.revision < 1 || grid.latCell !== data.latCell || grid.lonCell !== data.lonCell) throw new Error('invalid-index-directory');
+    data.revision < 1 || !Number.isFinite(data.minExpiry) || grid.latCell !== data.latCell || grid.lonCell !== data.lonCell) throw new Error('invalid-index-directory');
   return data;
 }
 
@@ -118,11 +127,12 @@ function nodeKey(summary, c) {
     -summary.maxCreated, summary.minId];
 }
 
-export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...blockOptions }) {
+export function createLabBlockIndex(db, { namespace, cache = blockCache(), elapsedClock = () => performance.now(), ...blockOptions }) {
   if (db.projectId !== 'shoutout-rules-test' || process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8080') throw new Error('index-lab-emulator-only');
   if (!/^[a-z][a-z0-9-]{0,39}$/.test(namespace)) throw new Error('invalid-index-namespace');
   const base = db.collection('feedIndexLab').doc(namespace);
   const cells = base.collection('cells'), nodes = base.collection('nodes'), source = base.collection('source');
+  const reconcile = Symbol('reconcile-current-source');
   const views = new WeakMap();
   let queuedReads = [], flushScheduled = false;
   const assertId = id => { if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error('invalid-index-id'); };
@@ -170,26 +180,31 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
     if (writes > 450) throw new Error('lab-seed-too-large');
     await db.runTransaction(async tx => {
       if ((await tx.get(base)).exists) throw new Error('index-already-seeded');
-      tx.create(base, { v: 1 });
+      tx.create(base, { v: 1, prunedThrough: -1 });
       for (const row of rows) tx.create(source.doc(row.id), row);
       for (const [key, node] of builder.writes) tx.set(nodes.doc(key), node);
-      for (const [cell, descriptor] of roots) tx.create(cells.doc(cell), { v: 1, hash: descriptor.hash, revision: 1, ...cellGrid(cell) });
+      for (const [cell, descriptor] of roots) tx.create(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: 1, ...cellGrid(cell) });
     });
     return { sourceWrites: rows.length, nodeWrites: builder.writes.size, directoryWrites: roots.length, guardWrites: 1 };
   }
 
   async function mutate(id, value, { beforeCommit } = {}) {
     assertId(id);
-    const next = value === null ? null : metadataOf(value);
-    if (next && next.id !== id) throw new Error('invalid-index-id');
+    const requested = value === reconcile || value === null ? null : metadataOf(value);
+    if (requested && requested.id !== id) throw new Error('invalid-index-id');
+    const retirement = randomUUID();
     let attempts = 0, reads = 0;
     const committed = await db.runTransaction(async tx => {
       attempts++;
       const [original, marker] = await tx.getAll(source.doc(id), base); reads += 2;
       if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
       const old = original.exists ? metadataOf(original.data()) : null;
-      if (canonical(old) === canonical(next)) return { sourceWrites: 0, nodeWrites: 0, directoryWrites: 0 };
-      const oldIndex = old?.status === 'active' ? old : null, newIndex = next?.status === 'active' ? next : null;
+      const next = value === reconcile ? old : requested;
+      const sourceChanged = canonical(old) !== canonical(next);
+      if (!sourceChanged && value !== reconcile) return { sourceWrites: 0, nodeWrites: 0, directoryWrites: 0, historyWrites: 0 };
+      const cutoff = marker.data().prunedThrough ?? -1;
+      let oldIndex = old?.status === 'active' ? old : null;
+      const newIndex = next?.status === 'active' && next.expiresAt > cutoff ? next : null;
       const regionIds = [...new Set([oldIndex, newIndex].filter(Boolean).map(row => row.geohash.slice(0, 4)))];
       const roots = new Map();
       for (const cell of regionIds) {
@@ -205,29 +220,39 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
         return loaded.get(key);
       };
       const updates = new Map();
+      if (oldIndex && oldIndex.expiresAt <= cutoff) {
+        const root = roots.get(oldIndex.geohash.slice(0, 4));
+        if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
+      }
       for (const cell of regionIds) {
         const originalRoot = roots.get(cell);
+        if (!oldIndex?.geohash.startsWith(cell) && !newIndex?.geohash.startsWith(cell)) continue;
         const descriptor = await builder.edit(originalRoot ? { hash: originalRoot.hash } : null, cell,
           oldIndex?.geohash.startsWith(cell) ? oldIndex : null, newIndex?.geohash.startsWith(cell) ? newIndex : null, load);
         if (descriptor?.hash !== originalRoot?.hash) updates.set(cell, descriptor);
       }
       const reachable = builder.reachable([...updates.values()].filter(Boolean));
       for (const key of [...reachable.keys()]) if (loaded.has(key)) reachable.delete(key);
-      if (reachable.size + updates.size + 1 > 450) throw new Error('lab-mutation-too-large');
+      const historyWrites = [...updates.keys()].filter(cell => roots.get(cell)).length;
+      if (reachable.size + updates.size + historyWrites + Number(sourceChanged) > 450) throw new Error('lab-mutation-too-large');
       // All reads precede any writes, ready to compose with real operation checks later.
-      if (next) tx.set(source.doc(id), next); else tx.delete(source.doc(id));
+      if (sourceChanged) { if (next) tx.set(source.doc(id), next); else tx.delete(source.doc(id)); }
       for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
       for (const [cell, descriptor] of updates) {
+        if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${retirement}`), {
+          v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
+        });
         if (!descriptor) tx.delete(cells.doc(cell));
-        else tx.set(cells.doc(cell), { v: 1, hash: descriptor.hash, revision: (roots.get(cell)?.revision ?? 0) + 1, ...cellGrid(cell) });
+        else tx.set(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: (roots.get(cell)?.revision ?? 0) + 1, ...cellGrid(cell) });
       }
       if (beforeCommit) await beforeCommit();
-      return { sourceWrites: 1, nodeWrites: reachable.size, directoryWrites: updates.size };
+      return { sourceWrites: Number(sourceChanged), nodeWrites: reachable.size, directoryWrites: updates.size, historyWrites };
     });
     return { ...committed, reads, attempts };
   }
 
   async function open(input) {
+    const alive = sessionDeadline(elapsedClock);
     const c = context(input), ranges = directoryWindows(c.point, c.radiusKm);
     const metrics = { rootQueries: 0, rootDocuments: 0, emptyRootQueries: 0, nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0, metadataExamined: 0 };
     const roots = await db.runTransaction(async tx => {
@@ -246,6 +271,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
       }
       return [...result].map(([path, key]) => ({ hash: key, path, summary: null }));
     }, { readOnly: true });
+    alive();
     const frontier = new FeedMinHeap((a, b) => tupleCompare(a.key, b.key));
     const candidates = new FeedMinHeap((a, b) => tupleCompare(a.key, b.key)), seen = new Set();
     for (const node of roots) frontier.push({ ...node, exact: false, key: nodeKey(null, c) });
@@ -275,7 +301,10 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
           batch.push(candidate);
         }
         if (!batch.length) return { state: 'preparing', rows: [], next: token, metrics: { ...metrics } };
-        const [node] = await Promise.all(batch.map(candidate => loadBlock(candidate.hash, metrics)));
+        let node;
+        try { [node] = await Promise.all(batch.map(candidate => loadBlock(candidate.hash, metrics))); }
+        catch (error) { alive(); throw error; }
+        alive();
         if ((item.exact ? node.path !== item.path : !node.path.startsWith(item.path)) ||
           (item.summary && canonical(node.summary) !== canonical(item.summary))) throw new Error('index-descriptor-mismatch');
         frontier.pop();
@@ -295,6 +324,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
         }
       }
       const next = frontier.peek() || candidates.peek() ? issue() : null;
+      alive();
       page.result = { state: next ? 'continuation' : 'end', rows: clone(page.rows), next, metrics: { ...metrics } };
       active = next;
       return { ...page.result, rows: clone(page.result.rows) };
@@ -302,6 +332,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
     const view = {
       first,
       page(token, work = { nodes: 32 }) {
+        try { alive(); } catch (error) { return Promise.reject(error); }
         if (!pages.has(token) || (!pages.get(token).result && token !== active)) return Promise.reject(new Error('invalid-index-cursor'));
         if (!work || !Number.isInteger(work.nodes) || work.nodes < 1) return Promise.reject(new Error('invalid-index-work'));
         const page = pages.get(token);
@@ -310,7 +341,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
         return page.flight;
       },
     };
-    views.set(view, { context: c, roots });
+    views.set(view, { context: c, roots, alive });
     return view;
   }
 
@@ -331,6 +362,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
       c.category, [...c.blocked].sort(), [...c.followed].sort()];
     if (!before || !after || after.context.now < before.context.now ||
         canonical(identity(before.context)) !== canonical(identity(after.context))) throw new Error('incompatible-index-views');
+    before.alive(); after.alive();
     const oldRoots = new Map(before.roots.map(root => [root.path, root.hash]));
     const newRoots = new Map(after.roots.map(root => [root.path, root.hash]));
     const oldRows = new Map(), newRows = new Map();
@@ -364,12 +396,69 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
     for (const [id, row] of newRows) if (!oldRows.has(id)) added.push(row);
     // Raw index delta, not the UI novelty count. Expiry/access changes require
     // availability checks even when immutable index hashes do not change.
+    before.alive(); after.alive();
     return clone({ added, removed, updated, metrics });
   }
 
-  return { seed, mutate, open, hydrate, indexChanges, cache, base,
+  async function beginExpiryPrune(cell, now) {
+    cellGrid(cell);
+    if (!Number.isSafeInteger(now) || now < 0) throw new Error('invalid-prune-time');
+    const alive = sessionDeadline(elapsedClock);
+    const root = await db.runTransaction(async tx => {
+      const [marker, header] = await tx.getAll(base, cells.doc(cell));
+      if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+      if (now > (marker.data().prunedThrough ?? -1)) tx.update(base, { prunedThrough: now });
+      return header.exists ? directoryEntry(cell, header.data()).hash : null;
+    });
+    const queue = root ? [root] : [], pending = [];
+    const metrics = { nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0,
+      reconciled: 0, sourceWrites: 0, nodeWrites: 0, directoryWrites: 0, historyWrites: 0 };
+    let flight = null, cancelled = false;
+    async function step(work, hooks) {
+      alive();
+      let processed = 0, entries = 0;
+      while (!cancelled && (pending.length || queue.length)) {
+        alive();
+        if (pending.length) {
+          if (entries >= work.entries) break;
+          const id = pending[0];
+          if (hooks.beforeReconcile) await hooks.beforeReconcile(id);
+          alive();
+          const result = await mutate(id, reconcile);
+          pending.shift(); entries++; metrics.reconciled++;
+          for (const key of ['sourceWrites', 'nodeWrites', 'directoryWrites', 'historyWrites']) metrics[key] += result[key];
+        } else {
+          if (processed >= work.nodes) break;
+          const node = await loadBlock(queue[0], metrics);
+          alive(); queue.shift(); processed++;
+          if (node.summary.minExpiry > now) continue;
+          if (node.kind === 'branch') {
+            for (const child of Object.values(node.children)) if (child.minExpiry <= now) queue.push(child.hash);
+          } else pending.push(...node.rows.filter(row => row.expiresAt <= now).map(row => row.id));
+        }
+      }
+      return { state: cancelled ? 'cancelled' : pending.length || queue.length ? 'preparing' : 'done', metrics: { ...metrics } };
+    }
+    return {
+      cancel() { cancelled = true; },
+      step(work = { nodes: 32, entries: 16 }, hooks = {}) {
+        if (!Number.isInteger(work.nodes) || work.nodes < 1 || !Number.isInteger(work.entries) || work.entries < 1) return Promise.reject(new Error('invalid-prune-work'));
+        if (!flight) flight = step(work, hooks).finally(() => { flight = null; });
+        return flight;
+      },
+    };
+  }
+
+  return { seed, mutate, open, hydrate, indexChanges, cache, base, beginExpiryPrune,
+    async expiredCells(now, limit = 32) {
+      if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');
+      const result = await cells.where('minExpiry', '<=', now).orderBy('minExpiry').limit(limit).get();
+      return result.docs.map(doc => doc.id);
+    },
+    beginGc(cell, testOptions = {}) { return beginIndexGcLab(db, base, cell, { ...testOptions, onNodeDeleted: key => cache.invalidate(cacheKey(key)) }); },
     async audit() {
-      const [rootDocs, sourceDocs, nodeDocs] = await Promise.all([cells.get(), source.get(), nodes.get()]);
+      const [rootDocs, sourceDocs, nodeDocs, marker] = await Promise.all([cells.get(), source.get(), nodes.get(), base.get()]);
+      const cutoff = marker.data()?.prunedThrough ?? -1;
       const blocks = new Map(nodeDocs.docs.map(doc => [doc.id, doc.data()])), current = new Set(), found = [];
       function visit(key, prefix) {
         if (current.has(key)) throw new Error('duplicate-index-node');
@@ -379,11 +468,18 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), ...bl
         if (node.kind === 'leaf') found.push(...node.rows);
         else for (const [part, child] of Object.entries(node.children)) visit(child.hash, node.path + part);
       }
-      for (const doc of rootDocs.docs) visit(directoryEntry(doc.id, doc.data()).hash, doc.id);
+      for (const doc of rootDocs.docs) {
+        const header = directoryEntry(doc.id, doc.data());
+        visit(header.hash, doc.id);
+        if (blocks.get(header.hash).summary.minExpiry !== header.minExpiry) throw new Error('invalid-index-directory');
+      }
       const expected = sourceDocs.docs.map(doc => metadataOf(doc.data())).filter(row => row.status === 'active');
       const sort = rows => rows.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-      if (canonical(sort(found)) !== canonical(sort(expected))) throw new Error('incomplete-index');
-      return { valid: true, activeMetadata: expected.length, currentNodes: current.size,
+      const byId = new Map(expected.map(row => [row.id, row]));
+      if (found.some(row => canonical(row) !== canonical(byId.get(row.id) ?? null)) || new Set(found.map(row => row.id)).size !== found.length ||
+          canonical(sort(found.filter(row => row.expiresAt > cutoff))) !== canonical(sort(expected.filter(row => row.expiresAt > cutoff)))) throw new Error('incomplete-index');
+      return { valid: true, activeMetadata: expected.filter(row => row.expiresAt > cutoff).length,
+        expiredPending: found.filter(row => row.expiresAt <= cutoff).length, currentNodes: current.size,
         retainedNodes: blocks.size, historicalNodes: blocks.size - current.size };
     },
     async inspect() {

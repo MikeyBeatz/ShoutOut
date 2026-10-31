@@ -151,6 +151,13 @@ export function treeBuilder(options = {}) {
     for (const key of Object.keys(children)) if (!children[key]) delete children[key];
     return branch(path, children);
   }
+  async function find(descriptor, row, load) {
+    if (!descriptor) return null;
+    const node = writes.get(descriptor.hash) ?? await load(descriptor.hash);
+    if (!route(row).startsWith(node.path)) return null;
+    if (node.kind === 'leaf') return node.rows.find(value => value.id === row.id) ?? null;
+    return find(node.children[route(row)[node.path.length]], row, load);
+  }
   function reachable(descriptors) {
     const result = new Map();
     function visit(descriptor) {
@@ -161,7 +168,7 @@ export function treeBuilder(options = {}) {
     }
     descriptors.forEach(visit); return result;
   }
-  return { build, edit, reachable, writes, config };
+  return { build, edit, find, reachable, writes, config };
 }
 
 export function verifyNode(key, node) {

@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/shared-spatial-index`; navazuje na dokončenou retenci
+`feature/feed-index-retention`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -26,15 +26,18 @@ Progresivní základ `90c93ee` má úspěšné CI `41194526738` (212 Flutter tes
 Následně vlastník schválil lokální návrh a ověření sdíleného prostorového indexu.
 [Schéma, důkazy, náklady a migrační návrh](FEED_BLOCK_INDEX_PLAN.md) jsou připravené:
 10 nových unit testů a 9 emulátorových testů prošlo, celkem 66 Functions unit
-bez chyb a lint čistý. CI přesného commitu se ověřuje přes [běhy větve](https://github.com/MikeyBeatz/ShoutOut/actions?query=branch%3Afeature%2Fshared-spatial-index). Prototyp odmítá
+bez chyb a lint čistý. CI `41200644473` pro `86fc171` prošlo. Prototyp odmítá
 projekty jiné než lokální `shoutout-rules-test`. Živý web zůstává A0 `b56fbbe`.
 Vzorek 300: 18 metadata čtení za studena / 2 teplá proti 285 u přímého geo
 postupu, plus 50 source čtení pro karty. Test pracuje se syntetickými metadaty,
 ne skutečnými těly karet nebo cloudovou fakturou. Současné Functions/Rules se nemění.
-Další krok před napojením: protokol historie/GC a délka relace, atomické zapojení
-všech indexovaných zápisů a migrační dry-run. Historické bloky se zatím neuklízejí;
-bez toho nelze index aktivovat. Query API ani klientské napojení nejsou hotové.
-Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill. R2/R3 rozhodnuté.
+R4 schválené: pevná hodina od otevření/obnovy, načtené karty zůstávají;
+přečtení a uložené Shouty neexpirují. Lokální archivace kořenů, GC a vyřazování
+expirovaných metadat jsou lokálně ověřené (69 Functions unit, lint, 19/19
+cílených emulátorových případů); [ověření a meze](FEED_INDEX_RETENTION.md).
+Původní index `86fc171` má úspěšné CI `41200644473`. CI nového úseku sleduj v [bězích větve](https://github.com/MikeyBeatz/ShoutOut/actions?query=branch%3Afeature%2Ffeed-index-retention); živý web zůstává A0. Další krok: pokrytí všech zapisovacích cest,
+migrační dry-run a provozní rozpočet workeru před zapojením zabezpečeného API/UI.
+Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

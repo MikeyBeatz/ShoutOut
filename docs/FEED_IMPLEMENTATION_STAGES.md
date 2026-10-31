@@ -70,6 +70,9 @@ Pro velký hustý feed může být nutný dražší index; není předem rozhodn
   pokud existuje, s jasným upozorněním. Jinak výzvu k získání polohy a opakování;
   ostatní sekce aplikace zůstanou použitelné. Nepředstírat všem Shoutům 0 km.
   Vlastník tento fallback schválil v R2. Ruční výběr města není součástí změny.
+- R4 schválené: pořadí platí pevně hodinu od otevření/obnovy. Po expiraci
+  načtené karty zůstanou, další stránka nabídne obnovu; přečtení a záložky neexpirují.
+  [Lokální protokol a ověření](FEED_INDEX_RETENTION.md).
 - Po restartu A vytvoří novou relaci; návrat z detailu/přepnutí karty v otevřené
   aplikaci zachová rozpracovanou relaci a scroll. Trvalé obnovení celého seznamu
   ani přesné polohy mezi restarty se do MVP tímto nepřidává.

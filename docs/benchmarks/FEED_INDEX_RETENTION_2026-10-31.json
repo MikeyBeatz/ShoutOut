@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-31",
+  "environment": "local Firestore STANDARD emulator, synthetic metadata only",
+  "sessionLifetimeMillis": 3600000,
+  "records": [
+    {
+      "mutation": {
+        "sourceWrites": 1,
+        "nodeWrites": 1,
+        "directoryWrites": 1,
+        "historyWrites": 1,
+        "reads": 4,
+        "attempts": 1
+      },
+      "protectedGc": {
+        "initialReads": 2,
+        "historyReadUnits": 2,
+        "markReads": 2,
+        "scanReadUnits": 3,
+        "archiveReadUnits": 2,
+        "rootCheckReads": 0,
+        "nodesDeleted": 0,
+        "archivesDeleted": 0,
+        "casAttempts": 0,
+        "deleteRequests": 0,
+        "changedOrGone": 0
+      }
+    },
+    {
+      "reclaimedGc": {
+        "initialReads": 2,
+        "historyReadUnits": 2,
+        "markReads": 1,
+        "scanReadUnits": 3,
+        "archiveReadUnits": 2,
+        "rootCheckReads": 2,
+        "nodesDeleted": 1,
+        "archivesDeleted": 1,
+        "casAttempts": 2,
+        "deleteRequests": 2,
+        "changedOrGone": 0
+      }
+    },
+    {
+      "expiryPrune": {
+        "nodeReads": 1,
+        "nodeFetchRequests": 1,
+        "nodeBytes": 707,
+        "cacheHits": 0,
+        "reconciled": 1,
+        "sourceWrites": 0,
+        "nodeWrites": 1,
+        "directoryWrites": 1,
+        "historyWrites": 1
+      },
+      "expiredReaction": {
+        "sourceWrites": 1,
+        "nodeWrites": 0,
+        "directoryWrites": 0,
+        "historyWrites": 0,
+        "reads": 4,
+        "attempts": 1
+      }
+    }
+  ],
+  "notes": [
+    "GC read budgets exclude initial capture and transactional root checks; rootCheckReads is reported separately.",
+    "Prune traversal metrics exclude source/guard/path transaction reads and initial watermark update.",
+    "No cloud latency, index entry fees, scheduler frequency or total monthly bill measured."
+  ]
+}

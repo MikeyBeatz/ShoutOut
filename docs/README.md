@@ -91,3 +91,5 @@ interní marketingový plán. Testovací účty se před vytvořením produkčn�
 prostředí odstraní a lokální přístupové údaje se nesmějí převzít do produkce.
 
 Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).
+
+- [Retence prostorového indexu](FEED_INDEX_RETENTION.md) – schválená hodinová relace, lokální archivace, GC a úklid expirací.

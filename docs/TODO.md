@@ -61,7 +61,8 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    připravené a lokálně ověřené. [Stav a nákladový problém](FEED_PROGRESSIVE_PLAN.md).
    Sdílený index byl následně schválený pro lokální návrh a ověření; hotovo:
    [model, měření a hranice](FEED_BLOCK_INDEX_PLAN.md). Další krok před napojením:
-   historie/GC, délka relace, pokrytí všech zapisovacích cest a migrační dry-run.
+   R4 a lokální historie/GC jsou doplněné ([ověření](FEED_INDEX_RETENTION.md)).
+   Následuje pokrytí všech zapisovacích cest, provozní rozpočet a migrační dry-run.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
