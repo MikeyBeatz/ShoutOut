@@ -40,11 +40,20 @@ migrační dry-run a provozní rozpočet workeru před zapojením zabezpečenéh
 Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill.
 Retenční krok `415631e` má úspěšné CI `41208467738`. Vlastník následně schválil
 pokračování podle plánu. Připravená je serverová `deleteShout` a společné klientské
-napojení feed/detail/moderace; přepínač zůstává vypnutý. Lokálně: 71 Functions unit,
+napojení feed/detail/moderace. Aktivace přepínače je připravená do dalšího webu. Lokálně: 71 Functions unit,
 lint/analyze, 24 cílených Flutter testů a 6 nových emulátorových případů prošlo.
 [Přehled zápisových cest a přesný rozsah](FEED_WRITER_INTEGRATION.md).
-CI této větve, rollout a živá regrese ještě zbývají. Index není připojený k živým
-zápisům a účetní dávkové mazání zůstává klientské; Rules se nesmí předčasně uzavřít.
+CI `41210929174` pro `868bc8904f04798f227a78384dbdb4eec4c0361c` prošlo.
+Z čistého worktree je do DEV nasazená pouze `deleteShout` a aktualizovaný
+`cleanupOperationReceipts`, obě ACTIVE; artifact hash
+`4c1e36b0740665598d6dc5fcc4a18c013ab616fa`. Node 22, europe-west3,
+256 MiB, max 1/concurrency 1; timeout 15 s a původních 60 s pro cleanup.
+Anonymní endpointy vrací 401/403. Aktivace webu čeká na další CI a Hosting,
+živé role/retry ještě nejsou ověřené. Index není připojený k živým
+zápisům. Lokálně už reálné operace createShout/toggleShoutReaction/deleteShout
+umějí složit indexový plán do vlastní transakce; 22 cílených emulátorových testů
+včetně rollbacku a zachování plných těl prošlo. Wrappery indexWriter nezapínají.
+Účetní dávkové mazání zůstává klientské; Rules se nesmí předčasně uzavřít.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

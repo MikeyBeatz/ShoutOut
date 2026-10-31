@@ -9,6 +9,7 @@
   "serverShoutSaves": true,
   "serverContentReports": true,
   "serverCommentDeletion": true,
+  "serverShoutDeletion": true,
   "appUrl": "https://shoutout-dev-46c81.web.app",
   "hostingSite": "shoutout-dev-46c81",
   "firebase": {

@@ -54,7 +54,7 @@ export function nextInteractionRate(data, now, eventId) {
     windowStartedAt: reset ? now : data.windowStartedAt, count };
 }
 
-export async function toggleShoutReactionOperation(request, db, clock = () => new Date()) {
+export async function toggleShoutReactionOperation(request, db, clock = () => new Date(), { indexWriter = null } = {}) {
   const { uid } = requireCallableIdentity(request);
   const input = validateShoutReaction(request.data);
   // A retry must not run under a different account after a client-side switch.
@@ -113,6 +113,9 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
         }
       }
     }
+    const indexPlan = await indexWriter?.prepare(transaction, input.shoutId, data,
+      { ...data, likesCount: result.likes, dislikesCount: result.dislikes }, { operationId: receiptRef.id });
+    indexPlan?.apply();
     if (result.type === null) transaction.delete(reactionRef);
     else transaction.set(reactionRef, { type: result.type, updatedAt: now });
     transaction.update(shoutRef, { likesCount: result.likes, dislikesCount: result.dislikes });

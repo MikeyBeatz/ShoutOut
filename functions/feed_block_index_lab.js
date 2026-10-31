@@ -188,65 +188,88 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     return { sourceWrites: rows.length, nodeWrites: builder.writes.size, directoryWrites: roots.length, guardWrites: 1 };
   }
 
+  // Read-only planning inside the caller's existing transaction. No nested
+  // transaction and no source write: production operations retain full bodies.
+  async function prepare(tx, id, beforeValue, afterValue, { operationId = randomUUID(), reconcileExpired = false } = {}) {
+    assertId(id); assertId(operationId);
+    const old = beforeValue === null ? null : metadataOf({ ...beforeValue, id });
+    const next = afterValue === null ? null : metadataOf({ ...afterValue, id });
+    let reads = 1;
+    const marker = await tx.get(base);
+    if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+    const sourceChanged = canonical(old) !== canonical(next);
+    if (!sourceChanged && !reconcileExpired) return {
+      reads, sourceChanged, nodeWrites: 0, directoryWrites: 0, historyWrites: 0, apply() {},
+    };
+    const retirement = operationId;
+    const cutoff = marker.data().prunedThrough ?? -1;
+    let oldIndex = old?.status === 'active' ? old : null;
+    const newIndex = next?.status === 'active' && next.expiresAt > cutoff ? next : null;
+    const regionIds = [...new Set([oldIndex, newIndex].filter(Boolean).map(row => row.geohash.slice(0, 4)))];
+    const roots = new Map();
+    for (const cell of regionIds) {
+      const doc = await tx.get(cells.doc(cell)); reads++;
+      roots.set(cell, doc.exists ? directoryEntry(cell, doc.data()) : null);
+    }
+    const builder = treeBuilder(blockOptions), loaded = new Map();
+    const load = async key => {
+      if (!loaded.has(key)) {
+        const doc = await tx.get(nodes.doc(key)); reads++;
+        loaded.set(key, verifyNode(key, doc.data()));
+      }
+      return loaded.get(key);
+    };
+    const updates = new Map();
+    if (oldIndex && oldIndex.expiresAt <= cutoff) {
+      const root = roots.get(oldIndex.geohash.slice(0, 4));
+      if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
+    }
+    for (const cell of regionIds) {
+      const originalRoot = roots.get(cell);
+      if (!oldIndex?.geohash.startsWith(cell) && !newIndex?.geohash.startsWith(cell)) continue;
+      const descriptor = await builder.edit(originalRoot ? { hash: originalRoot.hash } : null, cell,
+        oldIndex?.geohash.startsWith(cell) ? oldIndex : null, newIndex?.geohash.startsWith(cell) ? newIndex : null, load);
+      if (descriptor?.hash !== originalRoot?.hash) updates.set(cell, descriptor);
+    }
+    const reachable = builder.reachable([...updates.values()].filter(Boolean));
+    for (const key of [...reachable.keys()]) if (loaded.has(key)) reachable.delete(key);
+    const historyWrites = [...updates.keys()].filter(cell => roots.get(cell)).length;
+    if (reachable.size + updates.size + historyWrites + Number(sourceChanged) > 450) throw new Error('lab-mutation-too-large');
+    let applied = false;
+    return { reads, sourceChanged, nodeWrites: reachable.size, directoryWrites: updates.size, historyWrites,
+      apply() {
+        if (applied) throw new Error('index-plan-already-applied');
+        applied = true;
+        for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
+        for (const [cell, descriptor] of updates) {
+          if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${retirement}`), {
+            v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
+          });
+          if (!descriptor) tx.delete(cells.doc(cell));
+          else tx.set(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: (roots.get(cell)?.revision ?? 0) + 1, ...cellGrid(cell) });
+        }
+      },
+    };
+  }
+
   async function mutate(id, value, { beforeCommit } = {}) {
     assertId(id);
     const requested = value === reconcile || value === null ? null : metadataOf(value);
     if (requested && requested.id !== id) throw new Error('invalid-index-id');
-    const retirement = randomUUID();
+    const operationId = randomUUID();
     let attempts = 0, reads = 0;
     const committed = await db.runTransaction(async tx => {
       attempts++;
-      const [original, marker] = await tx.getAll(source.doc(id), base); reads += 2;
-      if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
-      const old = original.exists ? metadataOf(original.data()) : null;
+      const original = await tx.get(source.doc(id)); reads++;
+      const old = original.exists ? metadataOf({ ...original.data(), id }) : null;
       const next = value === reconcile ? old : requested;
-      const sourceChanged = canonical(old) !== canonical(next);
-      if (!sourceChanged && value !== reconcile) return { sourceWrites: 0, nodeWrites: 0, directoryWrites: 0, historyWrites: 0 };
-      const cutoff = marker.data().prunedThrough ?? -1;
-      let oldIndex = old?.status === 'active' ? old : null;
-      const newIndex = next?.status === 'active' && next.expiresAt > cutoff ? next : null;
-      const regionIds = [...new Set([oldIndex, newIndex].filter(Boolean).map(row => row.geohash.slice(0, 4)))];
-      const roots = new Map();
-      for (const cell of regionIds) {
-        const doc = await tx.get(cells.doc(cell)); reads++;
-        roots.set(cell, doc.exists ? directoryEntry(cell, doc.data()) : null);
-      }
-      const builder = treeBuilder(blockOptions), loaded = new Map();
-      const load = async key => {
-        if (!loaded.has(key)) {
-          const doc = await tx.get(nodes.doc(key)); reads++;
-          loaded.set(key, verifyNode(key, doc.data()));
-        }
-        return loaded.get(key);
-      };
-      const updates = new Map();
-      if (oldIndex && oldIndex.expiresAt <= cutoff) {
-        const root = roots.get(oldIndex.geohash.slice(0, 4));
-        if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
-      }
-      for (const cell of regionIds) {
-        const originalRoot = roots.get(cell);
-        if (!oldIndex?.geohash.startsWith(cell) && !newIndex?.geohash.startsWith(cell)) continue;
-        const descriptor = await builder.edit(originalRoot ? { hash: originalRoot.hash } : null, cell,
-          oldIndex?.geohash.startsWith(cell) ? oldIndex : null, newIndex?.geohash.startsWith(cell) ? newIndex : null, load);
-        if (descriptor?.hash !== originalRoot?.hash) updates.set(cell, descriptor);
-      }
-      const reachable = builder.reachable([...updates.values()].filter(Boolean));
-      for (const key of [...reachable.keys()]) if (loaded.has(key)) reachable.delete(key);
-      const historyWrites = [...updates.keys()].filter(cell => roots.get(cell)).length;
-      if (reachable.size + updates.size + historyWrites + Number(sourceChanged) > 450) throw new Error('lab-mutation-too-large');
-      // All reads precede any writes, ready to compose with real operation checks later.
-      if (sourceChanged) { if (next) tx.set(source.doc(id), next); else tx.delete(source.doc(id)); }
-      for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
-      for (const [cell, descriptor] of updates) {
-        if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${retirement}`), {
-          v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
-        });
-        if (!descriptor) tx.delete(cells.doc(cell));
-        else tx.set(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: (roots.get(cell)?.revision ?? 0) + 1, ...cellGrid(cell) });
-      }
+      const plan = await prepare(tx, id, old, next, { operationId, reconcileExpired: value === reconcile });
+      reads += plan.reads;
+      if (plan.sourceChanged) { if (next) tx.set(source.doc(id), next); else tx.delete(source.doc(id)); }
+      plan.apply();
       if (beforeCommit) await beforeCommit();
-      return { sourceWrites: Number(sourceChanged), nodeWrites: reachable.size, directoryWrites: updates.size, historyWrites };
+      return { sourceWrites: Number(plan.sourceChanged), nodeWrites: plan.nodeWrites,
+        directoryWrites: plan.directoryWrites, historyWrites: plan.historyWrites };
     });
     return { ...committed, reads, attempts };
   }
@@ -351,7 +374,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     ids.forEach(assertId);
     const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
     return { sourceReads: docs.length, items: docs.map(doc => {
-      const row = doc.exists ? metadataOf(doc.data()) : null;
+      const row = doc.exists ? metadataOf({ ...doc.data(), id: doc.id }) : null;
       return row && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
     }) };
   }
@@ -449,7 +472,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     };
   }
 
-  return { seed, mutate, open, hydrate, indexChanges, cache, base, beginExpiryPrune,
+  return { seed, mutate, prepare, open, hydrate, indexChanges, cache, base, beginExpiryPrune,
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');
       const result = await cells.where('minExpiry', '<=', now).orderBy('minExpiry').limit(limit).get();
@@ -473,7 +496,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
         visit(header.hash, doc.id);
         if (blocks.get(header.hash).summary.minExpiry !== header.minExpiry) throw new Error('invalid-index-directory');
       }
-      const expected = sourceDocs.docs.map(doc => metadataOf(doc.data())).filter(row => row.status === 'active');
+      const expected = sourceDocs.docs.map(doc => metadataOf({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
       const sort = rows => rows.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
       const byId = new Map(expected.map(row => [row.id, row]));
       if (found.some(row => canonical(row) !== canonical(byId.get(row.id) ?? null)) || new Set(found.map(row => row.id)).size !== found.length ||

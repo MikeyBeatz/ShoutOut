@@ -10,7 +10,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 |---|---|---|
 | Publikace Shoutu | Serverová `createShout` | Index ve stejné transakci jako dokument a receipt. |
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
-| Mazání autorem/moderátorem | Nová `deleteShout` připravená, přepínač zatím vypnutý | Nejprve DEV rollout a regrese, následně atomické vyřazení z indexu. |
+| Mazání autorem/moderátorem | Nová `deleteShout` nasazená ve vývoji, aktivace webu čeká na CI/Hosting | Nejprve DEV rollout a regrese, následně atomické vyřazení z indexu. |
 | Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | `hideActiveShoutsBeforeAccountDeletion` stále stránkuje a mění statusy z klienta | Serverový dávkový postup a index; neuzavírat přímé Rules dříve. |
 | Expirace | Lokální indexový prune; současná dostupnost zohledňuje expiresAt | Provozní worker a budget jsou před aktivací nové kolekce samostatnou bránou. |
@@ -53,3 +53,32 @@ společně. Skutečný no-op a replay nesmějí přidávat archivní verze.
 
 Názvy živých kolekcí/generací, migrace, provozní budget a aktivace indexu stále
 vyžadují konkrétní návrh a schválení; dřívější lokální souhlas je neurčil.
+
+## Doložený rollout a transakční skládání
+
+CI `41210929174` pro `868bc8904f04798f227a78384dbdb4eec4c0361c` je success.
+Z čistého worktree byl připraven a nasazen content artifact hash
+`4c1e36b0740665598d6dc5fcc4a18c013ab616fa` pouze pro `deleteShout` a
+`cleanupOperationReceipts` do `shoutout-dev-46c81`. Obě ACTIVE; CLI potvrdilo
+Node 22, europe-west3, 256 MiB, max 1/concurrency 1, timeout 15/60 s.
+Bez tokenů je callable 401 a soukromý cleanup 403. Živá klientská regrese ještě
+není důkazem pokrytá. Připravený dev.json zapíná serverShoutDeletion, skutečný
+Hosting se tímto samotným commitem nemění.
+
+Laboratorní adaptér má `prepare(transaction, id, before, after, {operationId})`.
+Provede pouze čtení a vrátí apply plán pro tutéž transakci; neotevírá vnořenou
+transakci a nezapisuje zdrojový dokument. Volitelná důvěryhodná závislost
+`indexWriter` v createShout, toggleShoutReaction a deleteShout je aktuálně
+využitá pouze v emulátorových testech. Není polem klientského payloadu,
+callable wrapper ji nepředává a živé kolekce se nevytvářejí.
+
+Reálné operation testy potvrdily atomickou publikaci/reakci/mazání se zachováním
+plného textu, idempotentní souběh, žádné další verze při replay, úplný rollback
+obsahu/indexu/receipt/rate při chybě plánu a reakci na expirovaný prune source bez
+návratu do indexu. Spolu s předchozími index/retention testy prošlo 22 případů.
+Test se souběžným prvním zápisem narazil na emulator lock retry (cca 20 s);
+konzistence prošla, není to důkaz přijatelné cloudové latence pod zátěží.
+
+Dávkové mazání účtu a migrace nejsou ještě zapojené. Více změn jedné oblasti
+se nesmí slepě plánovat nezávisle nad týmž původním kořenem: přepsaly by se navzájem.
+Je potřeba sdílený plán dávky, nebo omezené samostatné transakce s opakováním.

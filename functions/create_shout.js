@@ -112,7 +112,7 @@ export function nextShoutRate(data, isBusiness, now, eventId) {
     windowStartedAt: reset ? now : data.windowStartedAt, count };
 }
 
-export async function createShoutOperation(request, db, clock = () => new Date()) {
+export async function createShoutOperation(request, db, clock = () => new Date(), { indexWriter = null } = {}) {
   const { uid } = requireCallableIdentity(request);
   const input = validateCreateShout(request.data);
   if (input.expectedUserId !== undefined && input.expectedUserId !== uid) {
@@ -183,13 +183,16 @@ export async function createShoutOperation(request, db, clock = () => new Date()
       avatar[field] = actor.profile[field];
     }
     const rateData = nextShoutRate(rate.data(), isBusiness, now, key);
-    transaction.create(shoutRef, {
+    const shoutData = {
       ...businessFields, ...avatar, authorId: uid, authorNickname: nickname,
       title: input.title, text: input.text, categories: input.categories,
       location, geohash: encodeGeohash(location.latitude, location.longitude),
       createdAt: now, expiresAt: Timestamp.fromMillis(now.toMillis() + input.durationMinutes * 60000),
       status: 'active', likesCount: 0, dislikesCount: 0, commentsCount: 0, savesCount: 0,
-    });
+    };
+    const indexPlan = await indexWriter?.prepare(transaction, key, null, shoutData, { operationId: receiptRef.id });
+    transaction.create(shoutRef, shoutData);
+    indexPlan?.apply();
     transaction.set(rateRef, rateData);
     transaction.create(receiptRef, { ...retention, userId: uid, action: 'createShout', fingerprint,
       shoutId: key, createdAt: now });

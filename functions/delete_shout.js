@@ -19,7 +19,7 @@ export function validateShoutDeletion(input) {
   return Object.fromEntries(fields.filter(key => input[key] !== undefined).map(key => [key, input[key]]));
 }
 
-export async function deleteShoutOperation(request, db, clock = () => new Date()) {
+export async function deleteShoutOperation(request, db, clock = () => new Date(), { indexWriter = null } = {}) {
   const { uid } = requireCallableIdentity(request);
   const input = validateShoutDeletion(request.data);
   if (input.expectedUserId !== undefined && input.expectedUserId !== uid) fail('unauthenticated', 'The signed-in account changed.');
@@ -54,6 +54,9 @@ export async function deleteShoutOperation(request, db, clock = () => new Date()
     const result = { deleted: true };
     // Preserve current Rules: soft deletion only, including retained/expired
     // Shouts, with no new deletion rate bucket or recursive child cleanup.
+    const indexPlan = await indexWriter?.prepare(transaction, input.shoutId, data,
+      { ...data, status: 'deleted' }, { operationId: receiptRef.id });
+    indexPlan?.apply();
     if (data.status !== 'deleted') transaction.update(shoutRef, { status: 'deleted' });
     transaction.create(receiptRef, { ...retention, action: 'deleteShout', userId: uid,
       fingerprint, shoutId: input.shoutId, authorId: data.authorId, result, createdAt: now });

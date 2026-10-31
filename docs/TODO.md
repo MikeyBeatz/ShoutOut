@@ -63,7 +63,8 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    [model, měření a hranice](FEED_BLOCK_INDEX_PLAN.md). Další krok před napojením:
    R4 a lokální historie/GC jsou doplněné ([ověření](FEED_INDEX_RETENTION.md)).
    Následuje pokrytí všech zapisovacích cest, provozní rozpočet a migrační dry-run.
-   Serverové mazání Shoutů je připravené, vypnuté do rolloutu a regrese;
+   Serverové mazání Shoutů má nasazenou DEV Function; aktivace webu a živá regrese
+   ještě zbývají. Tři serverové cesty mají lokálně ověřené skládání s indexem;
    [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční

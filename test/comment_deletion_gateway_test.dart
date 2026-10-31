@@ -173,6 +173,7 @@ void main() {
           'serverCommentReactions',
           'serverShoutSaves',
           'serverContentReports',
+          'serverShoutDeletion',
         ])
           key: false,
       }..remove('appCheckSiteKey');
