@@ -1,10 +1,11 @@
 // Emulator-only adapter. Deliberately cannot run against DEV or production.
 import { Buffer } from 'node:buffer';
 import { performance } from 'node:perf_hooks';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sessionDeadline } from './feed_session_policy.js';
 import { beginIndexGcLab } from './feed_index_gc_lab.js';
+import { portableIndexPage } from './feed_portable_selection.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
 
@@ -281,6 +282,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     const alive = sessionDeadline(elapsedClock);
     const c = context(input), ranges = directoryWindows(c.point, c.radiusKm);
     const metrics = { rootQueries: 0, rootDocuments: 0, emptyRootQueries: 0, nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0, metadataExamined: 0 };
+    let readTime;
     const roots = await db.runTransaction(async tx => {
       const result = new Map();
       for (const window of ranges) {
@@ -288,6 +290,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
         const snapshot = await tx.get(cells.where('latCell', '>=', window.latStart).where('latCell', '<=', window.latEnd)
           .where('lonCell', '>=', window.lonStart).where('lonCell', '<=', window.lonEnd)
           .orderBy('latCell').orderBy('lonCell'));
+        readTime = snapshot.readTime;
         metrics.rootDocuments += snapshot.size;
         if (snapshot.empty) metrics.emptyRootQueries++;
         for (const doc of snapshot.docs) {
@@ -367,7 +370,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
         return page.flight;
       },
     };
-    views.set(view, { context: c, roots, alive });
+    views.set(view, { context: c, roots, alive, readTime });
     return view;
   }
 
@@ -475,7 +478,31 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     };
   }
 
-  return { seed, mutate, prepare, open, hydrate, indexChanges, cache, base, beginExpiryPrune,
+  const readDigest = ids => createHash('sha256').update(canonical([...new Set(ids)].sort())).digest('hex');
+  async function capturePortable(input, { readIdsAt } = {}) {
+    if (typeof input.uid !== 'string' || !input.uid.length) throw new Error('invalid-portable-context');
+    const view = await open(input), captured = views.get(view), c = captured.context;
+    const readIds = readIdsAt ? await readIdsAt(captured.readTime) : c.readIds;
+    captured.alive();
+    return clone({ v: 1, project: db.projectId, namespace, roots: captured.roots,
+      readTime: { seconds: captured.readTime.seconds, nanoseconds: captured.readTime.nanoseconds },
+      context: { uid: c.uid, point: c.point, radiusKm: c.radiusKm, now: c.now, order: c.order,
+        unreadFirst: c.unreadFirst, blocked: [...c.blocked], followed: [...c.followed], category: c.category,
+        readDigest: readDigest(readIds) } });
+  }
+  async function portablePage(snapshot, position, { uid, readIds = [], assertSessionAlive, nodes: workNodes = 32 } = {}) {
+    if (snapshot?.v !== 1 || snapshot.project !== db.projectId || snapshot.namespace !== namespace ||
+        uid !== snapshot.context?.uid || readDigest(readIds) !== snapshot.context?.readDigest) throw new Error('incompatible-portable-context');
+    const c = context({ ...snapshot.context, readIds });
+    const metrics = { nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0 };
+    const result = await portableIndexPage({ roots: snapshot.roots, position,
+      readNode: key => loadBlock(key, metrics), eligible: row => available(row, c),
+      mayContainRows: summary => minimumDistance(c.point, summary) <= c.radiusKm,
+      rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c), assertSessionAlive }, { nodes: workNodes });
+    return { ...result, metrics: { ...result.metrics, ...metrics } };
+  }
+
+  return { seed, mutate, prepare, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage,
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');
       const result = await cells.where('minExpiry', '<=', now).orderBy('minExpiry').limit(limit).get();

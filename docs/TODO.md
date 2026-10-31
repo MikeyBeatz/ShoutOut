@@ -69,7 +69,9 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    [Migrace a zbývající brány](FEED_MIGRATION_READINESS.md): read-only preflight
    našel 17 chybných geohashů; po samostatném souhlasu a CI opraveno, 35/35 valid.
    [Čtení a rating](FEED_READING_POLICY.md): 1 s na každou část, mimo Top bez
-   odsouvání negativních Shoutů; UI napojení expozice a synchronizace ještě chybí.
+   odsouvání negativních Shoutů; řazení nasazené v DEV z ca67ebd, expozice/sync ještě nenapojené.
+   [Přenositelný kurzor](FEED_PORTABLE_CURSOR.md) lokálně ověřený bez per-user
+   serverové session; Auth/API, živý klíč, generace a budget ještě zbývají.
    [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční

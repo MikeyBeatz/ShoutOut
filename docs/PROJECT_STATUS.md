@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-reading-policy`; navazuje na dokončenou retenci
+`feature/feed-portable-cursor`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -67,7 +67,7 @@ chybných geohashů. Vlastník schválil přesný plán, CI `41213628558` pro
 `a5480a737aa621c9090494c688de3e2520e373c8` prošlo. Z čisté kopie je opravených
 17 geohashů; SHA porovnání všech ostatních polí souhlasí. Následný preflight
 35/35 valid, nula chyb. Původní hodnoty/výsledek jsou v docs/local/migrations/. B1: schválena 1 s na každou část, mimo Top rating nemění pořadí, pouze sbalení.
-+Další data/provozní volby mají vlastní brány.
+Další data/provozní volby mají vlastní brány.
 [Migrační důkazy, lokální plán a další kroky](FEED_MIGRATION_READINESS.md).
 
 [Čtení a rating](FEED_READING_POLICY.md): připravená změna pořadí mimo Top,
@@ -75,6 +75,20 @@ lokální jádro jednosekundové expozice a hodinová hranice klientského koord
 21 cílených Flutter a 23 emulátorových případů prošlo. Expozice ani koordinátor
 nejsou v živém Home napojené, nic neukládá read historii. Pro API potvrzený
 read-only historický snapshot v DEV starý 2 269 s, bez nových zápisů.
+CI `41216198053` pro `ca67ebd4fc8dfdf06e65bf72865616dc6eae169b` prošlo.
+Web řazení mimo Top je v DEV na Hosting `42d86a762a74a2dd`, release
+`1793462869474000`, 16:07:49.474 UTC; HTML/JS/config SHA-256 odpovídají buildu.
+První pokus měl síťovou chybu před releasem, opakování uspělo. Expozice/koordinátor
+jsou nadále nepřipojené ke skutečné geometrii/read úložišti.
+[Přenositelný kurzor](FEED_PORTABLE_CURSOR.md): podpis/UID/projekt/H, nejvýše
+50 rozepsaných kandidátů, JSON pokračování přes nové instance; 7 unit a 1 nový
+emulátorový případ prošly. 10 000 metadat jen RAM, checkpoint max 16 947 B;
+160 emulátorových metadat: 16 kroků, 28 uzlových čtení při prázdné cache na každém
+kroku. Včetně změněného read fixture zachovává readTime a digest. Není to živé API,
+žádný skutečný signing key ani nové živé kolekce. Celá Functions sada má 82 pass,
+100 emulator-only skip, nula chyb; lint prošel. Živý UI test ratingu pod TestBusiness
+potvrdil sbalený negativní Shout první v Nejblíž a druhý v Top. Oba explicitní
+DEV fixtures jsou soft-deleted a úklid ověřený v DB i UI; dosah vrácený na 5 km.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

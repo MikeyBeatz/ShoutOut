@@ -45,7 +45,12 @@ Ve skutečném Home feedu tento koordinátor ještě není zapojený.
 
 Lokálně prošlo 21 cílených Flutter testů (11 koordinátor, 7 expozice, 3 řazení)
 a 23 cílených emulátorových případů indexu/retence/zápisových cest. Pořadí na
-skutečném webu má vlastní rollout po CI; expozice/koordinátor zůstávají přípravou.
+skutečném webu je nasazené z `ca67ebd4fc8dfdf06e65bf72865616dc6eae169b`
+po CI `41216198053` na DEV Hosting `42d86a762a74a2dd`. Živý test pod TestBusiness
+potvrdil negativní sbalený Shout před běžným v Nejblíž a za ním v Top.
+Oba disposable fixtures byly soft-deleted a úklid ověřený v DB i UI; původní
+dosah 5 km a Nejblíž obnovené. Důkazy: build/feed-rating-nearest.png a
+build/feed-rating-fixture-cleanup.json. Expozice/koordinátor zůstávají přípravou.
 
 ## Důkaz pro přenositelný API kurzor
 
@@ -58,9 +63,10 @@ Lokální důkaz: build/historical-feed-read-proof.json.
 
 To umožňuje před dalším API návrhem ověřit kurzor podepsaný serverem s readTime,
 kontextem a polohou přenášenou klientem, bez povinné per-user session v databázi
-nebo závislosti na životě serverové instance. Současné view/WeakMap není tento
-protokol. Je nutné doplnit kontrolu UID/projektu/kontextu, hodinový limit,
-přenositelné pokračování omezené práce a aktuální hydrataci. Historické čtení
+nebo závislosti na životě serverové instance. Současné view/WeakMap samo není tento
+protokol. [Lokální přenositelný kurzor](FEED_PORTABLE_CURSOR.md) již ověřuje
+UID/projekt/kontext, hodinový limit a pokračování omezené práce; aktuální hydratace
+a živé API zůstávají navazujícím krokem. Historické čtení
 nenahrazuje dnešní ověření Auth/App Check a dostupnosti obsahu.
 
 Před živými kolekcemi/klíčem/API zůstávají brány ve
