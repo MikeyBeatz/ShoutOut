@@ -126,4 +126,23 @@ už před Auth kontrolou, ne jen uvnitř stránky. Worker tak může zachovat id
 jako novou práci. Dva další emulátorové testy ověřily pokračování stejné žádosti,
 odmítnutí staré po nahrazení a souběh dvou běhů bez dvojího skrytí/archivace.
 Celkem 13/13 cílených testů a cílený ESLint prošly, bez nového CI a nasazení.
-Zpracování události, trvalý stav průběhu a plánování opakování stále zbývají.
+Při tomto kroku zůstalo zpracování události otevřené; lokální návaznost je níže.
+
+## Lokální adaptér události vytvoření žádosti
+
+`account_deletion_event.js` přijímá důvěryhodný snapshot vytvořené žádosti,
+kontroluje UID, cestu, projekt a pending obsah. Identitu createTime bere vždy
+z původní události, i při opakovaném doručení; nezamění ji za novou žádost.
+Zpracuje jednu stránku přes ověřenou Auth bránu. Zastaralou/odvolanou žádost
+ignoruje; provozní chyby Auth/DB/indexu propaguje. Pro rozlišení používá typ
+AccountDeletionRequestUnavailable, nikoli shodu libovolného textu chyby.
+
+Výstup retry-required rozlišuje čekání na odstranění Auth a zbývající Shouty.
+Budoucí trigger jej nesmí pouze vrátit jako úspěch: musí zajistit další pokus
+podle dosud neschválené provozní strategie. Výstup shouts-hidden znamená pouze
+dokončenou fázi skrytí Shoutů. Adaptér neukládá nové statusy, neodstraňuje Auth,
+neplánuje opakování a není exportovaný jako Cloud Function. Celý účtový worker,
+trvalý audit, retenční úklid a napojení klienta zůstávají otevřené.
+Ověření: 18/18 cílených testů bez přeskočení ve Firestore emulátoru se simulovaným
+Auth, včetně redelivery, cizího projektu/cesty, nové/odvolané žádosti a propagace
+chyb. Cílený ESLint prošel. CI, živý Auth ani skutečné doručování nebyly ověřené.

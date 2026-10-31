@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`fix/account-hide-resume-identity`; navazuje na dokončenou retenci
+`feature/account-deletion-event-adapter`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -104,8 +104,13 @@ zachovává expectedRequestCreateTime dodané důvěryhodným workerem i mezi st
 stará žádost se odmítne ještě před kontrolou Auth. Souběh dvou běhů nevytváří
 duplicitní indexovou historii. Ověření: 13/13 cílených testů, Firestore emulátor
 a simulovaný Auth, cílený lint čistý.
-Bez nového CI/push/nasazení. Další malý krok: návrh převzetí žádosti a opakování
-zpracování, poté skutečné napojení; celý worker, 60denní úklid a klient zůstávají otevřené.
+Lokální `account_deletion_event.js` již zpracuje jednu stránku podle původní
+události vytvoření žádosti; ověřuje projekt/cestu/UID a ignoruje zastaralou žádost.
+Výstup retry-required je explicitní požadavek na další pokus, nikoli nasazené
+plánování. Provozní chyby propaguje; rozlišuje je od typované chyby neplatné žádosti.
+Ověření: 18/18 cílených testů, Firestore emulátor + simulovaný Auth; cílený lint
+čistý. Bez nového CI/push/nasazení. Další krok: konkrétní návrh provozního spuštění,
+opakování, převzetí žádosti a auditu; celý worker, 60denní úklid a klient zůstávají otevřené.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

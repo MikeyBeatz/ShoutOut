@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { hideRequestedAccountShoutsPage as hide, hideDeletedAuthAccountShoutsPage as hideAfterAuth } from './account_shout_hiding.js';
+import { handleAccountDeletionRequestCreated as handleEvent } from './account_deletion_event.js';
 import { createLabBlockIndex } from './feed_block_index_lab.js';
 import { encodeGeohash } from './create_shout.js';
 
@@ -25,7 +26,7 @@ async function fixture() {
   const lab = createLabBlockIndex(db, { namespace }); await lab.seed(rows);
   const requestRef = db.doc(`accountDeletionRequests/${uid}`); requests.push(requestRef);
   await requestRef.set({ userId: uid, status: 'pending' });
-  const scoped = { runTransaction: db.runTransaction.bind(db), doc: db.doc.bind(db),
+  const scoped = { projectId: db.projectId, runTransaction: db.runTransaction.bind(db), doc: db.doc.bind(db),
     collection: name => name === 'shouts' ? lab.base.collection('source') : db.collection(name) };
   return { uid, lab, db: scoped, requestRef, options: { indexWriter: lab } };
 }
@@ -184,4 +185,59 @@ test('concurrent page workers hide each source once and can drain the remaining 
   assert.equal(remainder.state, 'shouts-hidden');
   assert.equal((await f.lab.audit()).activeMetadata, 2);
   assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});
+
+test('creation event waits for Auth deletion, drains pages, and handles redelivery without new history', { skip: !enabled }, async () => {
+  const f = await fixture(), event = { params: { userId: f.uid }, data: await f.requestRef.get() };
+  assert.deepEqual(await handleEvent(event, f.db, { getUser: async uid => ({ uid }) }, f.options),
+    { state: 'retry-required', reason: 'auth-user-present' });
+  assert.equal((await f.lab.audit()).activeMetadata, 5);
+  const auth = { getUser: authNotFound }, options = { ...f.options, pageSize: 2 };
+  const first = await handleEvent(event, f.db, auth, options);
+  assert.equal(first.state, 'retry-required'); assert.equal(first.reason, 'more-shouts'); assert.equal(first.hidden, 2);
+  const last = await handleEvent(event, f.db, auth, options);
+  assert.equal(last.state, 'shouts-hidden'); assert.equal(last.hidden, 1);
+  assert.equal((await handleEvent(event, f.db, auth, options)).hidden, 0);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});
+
+test('cancelled and replaced creation events are ignored before Auth access', { skip: !enabled }, async () => {
+  for (const replace of [false, true]) {
+    const f = await fixture(), event = { params: { userId: f.uid }, data: await f.requestRef.get() };
+    await f.requestRef.delete();
+    if (replace) await f.requestRef.set({ userId: f.uid, status: 'pending' });
+    assert.deepEqual(await handleEvent(event, f.db, { getUser() { assert.fail('stale event must not access Auth'); } }, f.options),
+      { state: 'ignored', reason: replace ? 'replaced' : 'not-pending' });
+    assert.equal((await f.lab.audit()).activeMetadata, 5);
+    assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 0);
+  }
+});
+
+test('event adapter propagates Auth and index failures instead of acknowledging success', { skip: !enabled }, async () => {
+  const f = await fixture(), event = { params: { userId: f.uid }, data: await f.requestRef.get() };
+  const failure = Object.assign(new Error('unavailable'), { code: 'auth/internal-error' });
+  await assert.rejects(handleEvent(event, f.db, { getUser: async () => { throw failure; } }, f.options), error => error === failure);
+  // A plain index error with a similar message must not be mistaken for a stale request.
+  const indexWriter = { prepare() { throw new Error('account-deletion-request-replaced'); } };
+  await assert.rejects(handleEvent(event, f.db, { getUser: authNotFound }, { indexWriter }), /account-deletion-request-replaced/);
+  assert.equal((await f.lab.audit()).activeMetadata, 5);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 0);
+});
+
+test('event adapter rejects mismatched paths, projects and source payloads', { skip: !enabled }, async () => {
+  const f = await fixture(), snapshot = await f.requestRef.get();
+  const auth = { getUser() { assert.fail('invalid event must not access Auth'); } };
+  for (const event of [
+    { params: { userId: 'different' }, data: snapshot },
+    { params: { userId: f.uid }, data: { exists: true, ref: snapshot.ref, createTime: snapshot.createTime, data: () => ({ userId: f.uid, status: 'done' }) } },
+  ]) await assert.rejects(handleEvent(event, f.db, auth), /invalid-account-deletion-event/);
+  await assert.rejects(handleEvent({ params: { userId: f.uid }, data: snapshot }, { projectId: 'other-project' }, auth), /invalid-account-deletion-event/);
+  assert.equal((await f.lab.audit()).activeMetadata, 5);
+});
+
+test('invalid event envelope is rejected without database access', async () => {
+  for (const event of [null, {}, { params: { userId: '../victim' } }]) {
+    await assert.rejects(handleEvent(event, {}, {}), /invalid-account-deletion-event/);
+  }
 });

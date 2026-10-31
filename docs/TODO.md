@@ -76,8 +76,9 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    Malý lokální úsek: account hiding rozlišuje původní a znovu vytvořenou žádost;
    celý účtový worker a jeho napojení stále zbývají.
    Lokální zpracování stránky ověřuje neexistenci účtu v Auth a stejnou žádost
-   mezi stránkami; souběh dvou běhů ověřený. 13 cílených testů prošlo,
-   napojení klienta/workeru a živé ověření stále zbývají.
+   mezi stránkami; souběh dvou běhů ověřený. Lokální adaptér vytvoření žádosti
+   rozlišuje opakování, hotové skrytí a zastaralou událost; 18 cílených testů
+   prošlo. Provozní trigger/opakování, klient a živé ověření stále zbývají.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení

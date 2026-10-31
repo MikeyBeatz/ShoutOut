@@ -1,16 +1,24 @@
 // Internal worker building block only: no callable or scheduled export.
 import { createHash } from 'node:crypto';
 
+export class AccountDeletionRequestUnavailable extends Error {
+  constructor(reason) {
+    super(`account-deletion-request-${reason}`);
+    this.name = 'AccountDeletionRequestUnavailable';
+    this.reason = reason;
+  }
+}
+
 function validatePage(userId, pageSize) {
   if (typeof userId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(userId) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('invalid-account-hide-page');
 }
 function assertPending(request, userId) {
   const marker = request.data();
-  if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new Error('account-deletion-request-not-pending');
+  if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new AccountDeletionRequestUnavailable('not-pending');
 }
 function assertSameRequest(request, expectedCreateTime) {
-  if (expectedCreateTime && !request.createTime.isEqual(expectedCreateTime)) throw new Error('account-deletion-request-replaced');
+  if (expectedCreateTime && !request.createTime.isEqual(expectedCreateTime)) throw new AccountDeletionRequestUnavailable('replaced');
 }
 
 // Internal orchestration only. Does not delete Auth users or write request state.
