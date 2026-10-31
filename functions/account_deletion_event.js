@@ -1,7 +1,7 @@
 // Local event adapter only. No deployed trigger, queue, retry policy or request writes.
 import { AccountDeletionRequestUnavailable, hideDeletedAuthAccountShoutsPage } from './account_shout_hiding.js';
 
-export async function handleAccountDeletionRequestCreated(event, db, auth, options = {}) {
+export function accountDeletionEventIdentity(event, db) {
   const userId = event?.params?.userId, snapshot = event?.data;
   if (typeof userId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(userId) ||
       !snapshot?.exists || snapshot.ref?.path !== `accountDeletionRequests/${userId}` ||
@@ -12,11 +12,16 @@ export async function handleAccountDeletionRequestCreated(event, db, auth, optio
   }
   const marker = snapshot.data();
   if (marker?.userId !== userId || marker?.status !== 'pending') throw new Error('invalid-account-deletion-event');
+  return { userId, projectId: db.projectId, requestCreateTime: snapshot.createTime };
+}
+
+export async function handleAccountDeletionRequestCreated(event, db, auth, options = {}) {
+  const { userId, requestCreateTime } = accountDeletionEventIdentity(event, db);
   let result;
   try {
     // Identity always comes from the original trusted event, including redelivery.
     result = await hideDeletedAuthAccountShoutsPage(db, auth, userId,
-      { ...options, expectedRequestCreateTime: snapshot.createTime });
+      { ...options, expectedRequestCreateTime: requestCreateTime });
   } catch (error) {
     if (error instanceof AccountDeletionRequestUnavailable) return { state: 'ignored', reason: error.reason };
     throw error;

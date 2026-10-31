@@ -77,8 +77,10 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    celý účtový worker a jeho napojení stále zbývají.
    Lokální zpracování stránky ověřuje neexistenci účtu v Auth a stejnou žádost
    mezi stránkami; souběh dvou běhů ověřený. Lokální adaptér vytvoření žádosti
-   rozlišuje opakování, hotové skrytí a zastaralou událost; 18 cílených testů
-   prošlo. Provozní trigger/opakování, klient a živé ověření stále zbývají.
+   rozlišuje opakování, hotové skrytí a zastaralou událost. Trvalý průběh a obnova
+   jsou lokálně ověřené (99 cílených account/job/Rules případů).
+   [Konkrétní návrh DEV pilotu](ACCOUNT_DELETION_DEV_PROPOSAL.md) čeká na schválení
+   nových provozních/datových voleb; klient, živé ověření a 60denní úklid zbývají.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení

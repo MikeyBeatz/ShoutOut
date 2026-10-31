@@ -146,3 +146,9 @@ trvalý audit, retenční úklid a napojení klienta zůstávají otevřené.
 Ověření: 18/18 cílených testů bez přeskočení ve Firestore emulátoru se simulovaným
 Auth, včetně redelivery, cizího projektu/cesty, nové/odvolané žádosti a propagace
 chyb. Cílený ESLint prošel. CI, živý Auth ani skutečné doručování nebyly ověřené.
+
+Navazující větší lokální úsek již přidává atomický pracovní záznam, zámek,
+průběh ve stejné transakci jako každý Shout a omezenou obnovu po pádu. Stav
+zůstává oddělený od dokončení celého smazání účtu. [Schéma, 99 cílených testů,
+nákladové meze a konkrétní DEV návrh](ACCOUNT_DELETION_DEV_PROPOSAL.md) jsou
+připravené; nové živé kolekce a plánovač čekají na vlastní souhlas.

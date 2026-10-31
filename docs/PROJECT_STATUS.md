@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/account-deletion-event-adapter`; navazuje na dokončenou retenci
+`feature/account-deletion-job-progress`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -109,8 +109,13 @@ události vytvoření žádosti; ověřuje projekt/cestu/UID a ignoruje zastaral
 Výstup retry-required je explicitní požadavek na další pokus, nikoli nasazené
 plánování. Provozní chyby propaguje; rozlišuje je od typované chyby neplatné žádosti.
 Ověření: 18/18 cílených testů, Firestore emulátor + simulovaný Auth; cílený lint
-čistý. Bez nového CI/push/nasazení. Další krok: konkrétní návrh provozního spuštění,
-opakování, převzetí žádosti a auditu; celý worker, 60denní úklid a klient zůstávají otevřené.
+čistý. [Navazující pracovní záznam a návrh DEV pilotu](ACCOUNT_DELETION_DEV_PROPOSAL.md)
+jsou připravené: atomické převzetí, vlastnický zámek, průběh ve zdrojové transakci,
+obnova po pádu, omezený scan s rotací a návrh dvou samostatných DEV Functions.
+99 cílených account/job/Rules případů prošlo, 87 Functions unit / 126 skip bez
+emulátoru a lint čistý. Artefakt se instaluje/importuje, limity SDK manifestu ověřené.
+Nové kolekce/plánovač/timing a jednorázový Auth test ještě čekají na samostatné
+schválení. Nic z tohoto úseku není nasazené; klient ani celá 60denní retence nejsou hotové.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

@@ -1687,6 +1687,24 @@ describe('comments, reactions, saves and reports', () => {
     await assertFails(getDocs(query(collection(outsider, 'shouts', 'shout-1', 'privateReplies'), limit(50))));
   });
 
+  test('account deletion jobs and recovery checkpoints remain server-only', async () => {
+    await seedEligibleUser('job-owner', 'JobOwner');
+    const paths = ['accountDeletionJobs/' + 'a'.repeat(64), 'maintenanceState/accountDeletionShoutJobs'];
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      for (const path of paths) await setDoc(doc(context.firestore(), path), { userId: 'job-owner', phase: 'waiting-auth' });
+    });
+    for (const db of [authenticatedDb('job-owner'), testEnvironment.unauthenticatedContext().firestore()]) {
+      for (const path of paths) {
+        const ref = doc(db, path);
+        await assertFails(getDoc(ref));
+        await assertFails(setDoc(ref, { userId: 'job-owner' }));
+        await assertFails(updateDoc(ref, { phase: 'shouts-hidden' }));
+        await assertFails(deleteDoc(ref));
+      }
+      await assertFails(getDocs(collection(db, 'accountDeletionJobs')));
+    }
+  });
+
   test('reaction and save collections cannot be enumerated', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     await seedShout();

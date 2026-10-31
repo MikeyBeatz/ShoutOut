@@ -55,6 +55,7 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 - [Čtení, rating a relace](FEED_READING_POLICY.md) – rozhodnutí vlastníka, jádro expozice, hodinová platnost a API návaznost.
 - [Migrační připravenost feedu](FEED_MIGRATION_READINESS.md) – skutečný DEV rollout, read-only kontrola dat a přesný návrh oprav.
 - [Zápisové cesty prostorového indexu](FEED_WRITER_INTEGRATION.md) – serverové mazání a postup atomického zapojení změn obsahu.
+- [Průběh mazání účtu a návrh DEV pilotu](ACCOUNT_DELETION_DEV_PROPOSAL.md) – lokální pracovní záznamy, obnova a konkrétní brána před spuštěním.
 - [Sdílený prostorový index](FEED_BLOCK_INDEX_PLAN.md) – lokálně ověřené schéma,
   čtení/zápisy, cache, konzistence a podmínky před migrací/nasazením.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na

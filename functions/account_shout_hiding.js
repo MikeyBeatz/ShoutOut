@@ -43,7 +43,7 @@ export async function hideDeletedAuthAccountShoutsPage(db, auth, userId, options
 }
 
 export async function hideRequestedAccountShoutsPage(db, userId, {
-  pageSize = 50, indexWriter = null, beforeTransaction = null, expectedRequestCreateTime = null,
+  pageSize = 50, indexWriter = null, beforeTransaction = null, expectedRequestCreateTime = null, transactionGuard = null,
 } = {}) {
   validatePage(userId, pageSize);
   const requestRef = db.doc(`accountDeletionRequests/${userId}`);
@@ -60,6 +60,8 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
       assertPending(request, userId);
       // A restarted request belongs to a new worker run, even for the same UID.
       assertSameRequest(request, initialRequest.createTime);
+      // Trusted job coordination reads its lease before any index/source writes.
+      const recordHidden = await transactionGuard?.(transaction);
       if (!shout.exists || shout.data().authorId !== userId || shout.data().status !== 'active') return false;
       const before = shout.data();
       // Different request/source incarnations must not reuse an old archive ID.
@@ -67,6 +69,7 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
       const plan = await indexWriter?.prepare(transaction, shout.id, before,
         { ...before, status: 'deleted' }, { operationId });
       plan?.apply();
+      recordHidden?.();
       transaction.update(candidate.ref, { status: 'deleted' });
       return true;
     });
