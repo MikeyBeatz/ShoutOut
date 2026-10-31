@@ -67,3 +67,40 @@ test('invalid worker input is rejected before database access', async () => {
     await assert.rejects(hide({}, uid, options), /invalid-account-hide-page/);
   }
 });
+
+test('recreated pending request fences the old page and a fresh run can continue', { skip: !enabled }, async () => {
+  const f = await fixture();
+  await assert.rejects(hide(f.db, f.uid, { ...f.options, async beforeTransaction() {
+    await f.requestRef.delete();
+    await f.requestRef.set({ userId: f.uid, status: 'pending' });
+  } }), /account-deletion-request-replaced/);
+  assert.equal((await f.lab.audit()).activeMetadata, 5);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 0);
+  assert.equal((await hide(f.db, f.uid, f.options)).hidden, 3);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+});
+
+test('updates to the same pending request do not invalidate the page', { skip: !enabled }, async () => {
+  const f = await fixture();
+  const result = await hide(f.db, f.uid, { ...f.options, async beforeTransaction() {
+    await f.requestRef.update({ workerNote: 'same-request' });
+  } });
+  assert.equal(result.hidden, 3);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+});
+
+test('index apply failure rolls back its source and history while keeping prior completed work', { skip: !enabled }, async () => {
+  const f = await fixture(); let planned = 0;
+  const indexWriter = { async prepare(...args) {
+    const plan = await f.lab.prepare(...args), fail = ++planned === 2;
+    return { apply() { plan.apply(); if (fail) throw new Error('injected-account-index-failure'); } };
+  } };
+  await assert.rejects(hide(f.db, f.uid, { indexWriter }), /injected-account-index-failure/);
+  const sources = (await f.lab.base.collection('source').get()).docs.map(doc => doc.data());
+  assert.equal(sources.filter(row => row.status === 'deleted').length, 1);
+  assert.equal((await f.lab.audit()).activeMetadata, 4);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 1);
+  assert.equal((await hide(f.db, f.uid, f.options)).hidden, 2);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});

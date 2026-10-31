@@ -73,6 +73,8 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    [Přenositelný kurzor](FEED_PORTABLE_CURSOR.md) lokálně ověřený bez per-user
    serverové session; Auth/API, živý klíč, generace a budget ještě zbývají.
    [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
+   Malý lokální úsek: account hiding rozlišuje původní a znovu vytvořenou žádost;
+   celý účtový worker a jeho napojení stále zbývají.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení

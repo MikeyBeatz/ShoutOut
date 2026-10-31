@@ -86,3 +86,18 @@ Je potřeba sdílený plán dávky, nebo omezené samostatné transakce s opakov
 Aktuální DEV Hosting, stav ručního testu a návazná kontrola historických dat:
 [migrační připravenost](FEED_MIGRATION_READINESS.md). Výše uvedené čekání na CI/Hosting
 popisuje přípravu prvního rolloutu; aktuální aktivace `3b159f2` již nasazená je.
+
+## Malý lokální úsek – identita žádosti o smazání účtu
+
+Interní `account_shout_hiding.js` si zachytí createTime původní pending žádosti.
+Každá transakce ověří nejen UID/status, ale i tutéž inkarnaci žádosti. Smazání
+a nové vytvoření pending žádosti tedy ukončí starý běh před dalším skrytím;
+nový běh může pokračovat podle nové žádosti. Běžná aktualizace metadat téže
+pending žádosti není důvodem k zastavení. Již dokončené transakce se nevracejí.
+
+Testy navíc kontrolují selhání po naplánování indexových zápisů: rozpracovaný
+zdroj i historie se vrátí společně, dříve dokončený Shout zůstane konzistentní
+a další běh práci dokončí. Jde stále pouze o interní lokální helper, nikoli
+exportovaný worker, nasazení nebo změnu stávajícího klientského mazání účtu.
+Ověření tohoto úseku: 7/7 cílených testů ve Firestore emulátoru bez přeskočení
+a cílený ESLint prošly. Celé CI ani živý průchod nebyly pro tento úsek spuštěné.

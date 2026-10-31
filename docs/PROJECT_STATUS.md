@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-portable-cursor`; navazuje na dokončenou retenci
+`fix/account-hide-request-fence`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -89,6 +89,13 @@ kroku. Včetně změněného read fixture zachovává readTime a digest. Není t
 100 emulator-only skip, nula chyb; lint prošel. Živý UI test ratingu pod TestBusiness
 potvrdil sbalený negativní Shout první v Nejblíž a druhý v Top. Oba explicitní
 DEV fixtures jsou soft-deleted a úklid ověřený v DB i UI; dosah vrácený na 5 km.
+Přenositelný kurzor `bf71d778abfee12c5c755eeee55ec9febc530f13` prošel CI
+`41219176408`; nešlo o rollout. Následující malý lokální úsek zpevňuje account
+hiding helper: obnovená žádost ukončí starý běh podle createTime; změna metadat
+téže pending žádosti běh nezastaví. Není to nasazený worker ani změna klienta.
+Ověření: 7/7 cílených testů ve Firestore emulátoru, nula skip/chyb; cílený lint
+prošel. Tento úsek je lokální, bez push/nového CI a bez externích změn. Další
+krok zůstává napojení účtového toku a dalších zapisovacích cest, nikoli aktivace indexu.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

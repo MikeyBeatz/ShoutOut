@@ -11,7 +11,8 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
     const marker = request.data();
     if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new Error('account-deletion-request-not-pending');
   };
-  assertPending(await requestRef.get());
+  const initialRequest = await requestRef.get();
+  assertPending(initialRequest);
   const page = await db.collection('shouts').where('authorId', '==', userId)
     .where('status', '==', 'active').limit(pageSize).get();
   const result = { examined: page.size, hidden: 0, skipped: 0, needsAnotherPage: page.size === pageSize };
@@ -20,6 +21,8 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
     const hidden = await db.runTransaction(async transaction => {
       const [request, shout] = await transaction.getAll(requestRef, candidate.ref);
       assertPending(request);
+      // A restarted request belongs to a new worker run, even for the same UID.
+      if (!request.createTime.isEqual(initialRequest.createTime)) throw new Error('account-deletion-request-replaced');
       if (!shout.exists || shout.data().authorId !== userId || shout.data().status !== 'active') return false;
       const before = shout.data();
       // Different request/source incarnations must not reuse an old archive ID.
