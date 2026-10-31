@@ -291,3 +291,5 @@ Po změně uvést zvlášť připravený kód, úspěšné kontroly a skutečné
 Při novém release aktualizovat výše uvedený commit/verzi a odkaz na důkazy.
 Do tohoto přehledu nepřidávat dlouhou chronologii; původní podrobnosti zůstaly
 v nezměněném archivu a nové technické záznamy patří do příslušných dokumentů.
+
+Další úsek k rozhodnutí: [A2a – lokální geografický adaptér a konzistence](FEED_A2_PROPOSAL.md).

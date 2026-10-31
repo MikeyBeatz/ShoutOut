@@ -87,3 +87,5 @@ Složka `local/` je ignorovaná Gitem. Obsahuje neveřejné pracovní dokumenty 
 dočasné údaje pro vývojový projekt, například přehled testovacích účtů nebo
 interní marketingový plán. Testovací účty se před vytvořením produkčního
 prostředí odstraní a lokální přístupové údaje se nesmějí převzít do produkce.
+
+Další úsek k rozhodnutí: [A2a – lokální geografický adaptér a konzistence](FEED_A2_PROPOSAL.md).
