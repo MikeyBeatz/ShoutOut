@@ -167,6 +167,14 @@ protokolu by rostly bez omezení, takže tato verze není připravená k živém
 Staré bloky zároveň potřebují otevřené relace. Samotné TTL podle data vytvoření
 by mohlo odstranit dosud používaný aktuální blok a není zvoleným řešením.
 
+Expirace se nyní pouze filtruje při výběru/hydrataci. Pokud kanonický dokument
+stále má `status: active`, metadata zůstávají v aktuálním stromu. Úklid historických
+verzí tedy sám nestačí: je nutné navrhnout i vyřazování expirovaných metadat.
+To nesmí svévolně smazat kanonický Shout, změnit jeho dosavadní retenci ani
+znemožnit dnes podporované interakce z Expirovaných. Chybějící expirovaný indexový
+záznam musí být při dalších obsahových operacích rozlišený od neúplného indexu.
+Tento membership/úklidový protokol v lokálním modelu zatím není implementovaný.
+
 Návrh k dalšímu ověření: uchovat při změně také předchozí kořen s časem vyřazení,
 potom mazat pouze bloky nedosažitelné z aktuálních a ještě potřebných historických
 kořenů. Sweep musí mít cutoff a precondition na updateTime, aby nesmazal blok,
@@ -191,7 +199,7 @@ obsahu nově zpřístupněného moderací se tímto nerozhoduje.
 
 ## Konkrétní návaznost před živým napojením
 
-1. Uzavřít protokol historie a GC, délku platnosti relace, rozpočet na úklid a
+1. Uzavřít protokol historie a GC včetně expirovaných metadat, délku platnosti relace, rozpočet na úklid a
    kapacitní chování. Ověřit v emulátoru i znovupoužití starého hashe při GC.
 2. Vyjmenovat a zapojit všechny změny indexovaných polí do stejných transakcí:
    createShout, reakce Shoutu, vlastní/moderátorské odstranění, dostupnost,
