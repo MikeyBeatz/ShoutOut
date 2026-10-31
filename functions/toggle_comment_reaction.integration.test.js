@@ -23,6 +23,7 @@ async function actor() {
 }
 async function fixture() {
   const uid = await actor(), owner = randomUUID(), shoutOwner = randomUUID();
+  await db.doc(`users/${owner}`).set({ nickname: 'Comment owner' });
   const shoutRef = db.doc(`shouts/${randomUUID()}`), commentRef = shoutRef.collection('comments').doc(randomUUID());
   const shoutData = { authorId: shoutOwner, title: 'Parent Shout', status: 'active',
     likesCount: 7, dislikesCount: 8, commentsCount: 1, savesCount: 9 };
@@ -35,6 +36,18 @@ async function fixture() {
   return { uid, owner, shoutOwner, shoutRef, commentRef, shoutData, commentData, request };
 }
 const rate = uid => db.doc(`rateLimits/${uid}/actions/interaction`);
+
+test('comment reactions do not recreate an inbox after account deletion', { skip: !enabled }, async () => {
+  for (const mode of ['deleting', 'purged']) {
+    const f = await fixture(), target = db.doc(`users/${f.owner}`);
+    if (mode === 'purged') await target.delete();
+    else await db.doc(`accountDeletionRequests/${f.owner}`).set({ status: 'pending' });
+    await target.collection('settings').doc('notifications').set({ reactions: 'invalid-stale-preference' });
+    const result = await toggle(f.request, db, at());
+    assert.equal(result.likes, 3); assert.equal((await rate(f.uid).get()).data().count, 1);
+    assert.equal((await db.doc(`users/${f.owner}/notifications/commentReaction_like_${f.shoutRef.id}_${f.commentRef.id}`).get()).exists, false);
+  }
+});
 const change = (request, idempotencyKey, button) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey), button } });
 const notice = (f, type) => db.doc(`users/${f.owner}/notifications/commentReaction_${type}_${f.shoutRef.id}_${f.commentRef.id}`);
 const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleCommentReaction\n${timedKey(key)}`).digest('hex')}`);

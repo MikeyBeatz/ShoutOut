@@ -20,6 +20,8 @@ async function fixture() {
   const parentAuthor = randomUUID();
   const shoutId = randomUUID();
   await db.doc(`users/${uid}`).set({ nickname: 'Serverový autor' });
+  await db.doc(`users/${owner}`).set({ nickname: 'Shout owner' });
+  await db.doc(`users/${parentAuthor}`).set({ nickname: 'Parent author' });
   await db.doc(`users/${uid}/legal/acceptance_2026_07_25`).set({});
   const shoutRef = db.doc(`shouts/${shoutId}`);
   await shoutRef.set({ authorId: owner, title: 'Serverový nadpis', status: 'active', commentsCount: 0,
@@ -29,6 +31,33 @@ async function fixture() {
   return { uid, owner, parentAuthor, shoutRef, request };
 }
 const notification = (uid, kind, shoutId) => db.doc(`users/${uid}/notifications/${kind}_${shoutId}`);
+
+test('public replies skip deleting or purged recipients while notifying the other participant', { skip: !enabled }, async () => {
+  for (const mode of ['deleting-owner', 'purged-owner', 'deleting-parent']) {
+    const f = await fixture(), target = mode === 'deleting-parent' ? f.parentAuthor : f.owner;
+    if (mode === 'purged-owner') await db.doc(`users/${target}`).delete();
+    else await db.doc(`accountDeletionRequests/${target}`).set({ userId: target, status: 'pending' });
+    await db.doc(`users/${target}/settings/notifications`).set({ replies: 'invalid-stale-preference' });
+    await f.shoutRef.collection('comments').doc('parent').set({ authorId: f.parentAuthor, authorNickname: 'Parent' });
+    f.request.data.replyToCommentId = 'parent';
+    await createCommentOperation(f.request, db, clock);
+    assert.equal((await f.shoutRef.get()).data().commentsCount, 1);
+    assert.equal((await notification(f.owner, 'comment', f.shoutRef.id).get()).exists, target !== f.owner);
+    assert.equal((await notification(f.parentAuthor, 'reply', f.shoutRef.id).get()).exists, target !== f.parentAuthor);
+  }
+});
+
+test('concurrent deletion marker cannot be followed by a new notification commit', { skip: !enabled }, async () => {
+  const f = await fixture(), deletion = db.doc(`accountDeletionRequests/${f.owner}`);
+  await Promise.all([
+    createCommentOperation(f.request, db, clock),
+    deletion.create({ userId: f.owner, status: 'pending' }),
+  ]);
+  const [notice, marker] = await db.getAll(notification(f.owner, 'comment', f.shoutRef.id), deletion);
+  if (notice.exists) assert(notice.updateTime.seconds < marker.createTime.seconds ||
+    notice.updateTime.seconds === marker.createTime.seconds && notice.updateTime.nanoseconds <= marker.createTime.nanoseconds);
+  assert.equal((await f.shoutRef.get()).data().commentsCount, 1);
+});
 
 test('concurrent comment retries charge one limit, counter and notification event', { skip: !enabled }, async () => {
   const { uid, owner, shoutRef, request } = await fixture();

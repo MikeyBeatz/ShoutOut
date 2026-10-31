@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -109,12 +110,11 @@ export async function createPrivateReplyOperation(request, db, clock = () => new
     }
     if (!identifier(recipientId)) fail('failed-precondition', 'Invalid recipient profile.');
     if (recipientId === uid) fail('invalid-argument', 'A private reply requires another participant.');
-    const [recipient, settings] = await transaction.getAll(db.doc(`users/${recipientId}`),
-      db.doc(`users/${recipientId}/settings/notifications`));
-    if (!recipient.exists) fail('failed-precondition', 'The recipient is no longer available.');
+    const target = (await readNotificationRecipients(transaction, db, [recipientId])).get(recipientId);
+    if (!target.available) fail('failed-precondition', 'The recipient is no longer available.');
     const authorNickname = nickname(actor.profile.nickname);
-    const recipientNickname = nickname(recipient.data().nickname);
-    const enabled = settings.data()?.privateReplies;
+    const recipientNickname = nickname(target.profile.data().nickname);
+    const enabled = target.settings.data()?.privateReplies;
     if (enabled !== undefined && typeof enabled !== 'boolean') {
       fail('failed-precondition', 'Invalid notification preference.');
     }

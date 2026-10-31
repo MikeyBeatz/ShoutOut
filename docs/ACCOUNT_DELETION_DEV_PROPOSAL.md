@@ -157,3 +157,4 @@ account-deletion-live-proof.json, account-deletion-cleanup-proof.json a
 account-deletion-original-functions-proof.json; všechny s prefixem build/.
 Následuje zbývající účtový proces (soukromá data, přezdívka, bezpečnostní
 retence a konečný úklid), teprve pak odstranění staré klientské cesty a regrese.
+[Rozhodnutí vlastníka a konkrétní návazné fáze](ACCOUNT_DELETION_REMAINING_PLAN.md).

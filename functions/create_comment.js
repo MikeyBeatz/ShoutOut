@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -101,9 +102,7 @@ export async function createCommentOperation(request, db, clock = () => new Date
     if (replyRecipientId && replyRecipientId !== uid && replyRecipientId !== shout.authorId) {
       recipients.push({ uid: replyRecipientId, kind: 'reply' });
     }
-    const settings = recipients.length === 0 ? [] : await transaction.getAll(
-      ...recipients.map((recipient) => db.doc(`users/${recipient.uid}/settings/notifications`)),
-    );
+    const notificationRecipients = await readNotificationRecipients(transaction, db, recipients.map(recipient => recipient.uid));
     const rateData = nextCommentRate(rate.data(), now, key);
     transaction.create(commentRef, { authorId: uid, authorNickname, text: input.text,
       createdAt: now, likesCount: 0, dislikesCount: 0, ...reply });
@@ -111,9 +110,11 @@ export async function createCommentOperation(request, db, clock = () => new Date
     transaction.set(rateRef, rateData);
     transaction.create(receiptRef, { ...retention, userId: uid, action: 'createComment', fingerprint,
       shoutId: input.shoutId, commentId: key, createdAt: now });
-    for (const [index, recipient] of recipients.entries()) {
+    for (const recipient of recipients) {
+      const target = notificationRecipients.get(recipient.uid);
+      if (!target.available) continue;
       // The current client uses the 'replies' preference for both public kinds.
-      const enabled = settings[index].data()?.replies;
+      const enabled = target.settings.data()?.replies;
       if (enabled !== undefined && typeof enabled !== 'boolean') {
         fail('failed-precondition', 'Invalid notification preference.');
       }

@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -101,12 +102,12 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
       if (!identifier(data.authorId) || typeof data.title !== 'string') {
         fail('failed-precondition', 'Invalid stored Shout author.');
       }
-      const settings = await transaction.get(db.doc(`users/${data.authorId}/settings/notifications`));
-      const enabled = settings.data()?.reactions;
-      if (enabled !== undefined && typeof enabled !== 'boolean') {
+      const target = (await readNotificationRecipients(transaction, db, [data.authorId])).get(data.authorId);
+      const enabled = target.settings.data()?.reactions;
+      if (target.available && enabled !== undefined && typeof enabled !== 'boolean') {
         fail('failed-precondition', 'Invalid notification preference.');
       }
-      if (enabled !== false) {
+      if (target.available && enabled !== false) {
         publicProfile = await transaction.get(db.doc(`publicProfiles/${uid}`));
         if (publicProfile.exists && typeof publicProfile.data().nickname !== 'string') {
           fail('failed-precondition', 'Invalid public author profile.');

@@ -28,6 +28,17 @@ async function fixture() {
   return { uid, owner, commenter, shoutRef, request };
 }
 const noticeRef = (recipient, shoutId) => db.doc(`users/${recipient}/notifications/privateReply_${shoutId}`);
+
+test('private delivery to a deleting recipient fails atomically even while its profile remains', { skip: !enabled }, async () => {
+  for (const marker of [{ status: 'pending' }, {}]) {
+    const f = await fixture();
+    await db.doc(`accountDeletionRequests/${f.owner}`).set(marker);
+    await assert.rejects(createPrivateReplyOperation(f.request, db, clock), error => error.code === 'failed-precondition');
+    await assertNoWrite(f);
+    assert.equal((await noticeRef(f.owner, f.shoutRef.id).get()).exists, false);
+    assert.equal((await db.collection('serverOperations').where('userId', '==', f.uid).get()).empty, true);
+  }
+});
 async function assertNoWrite({ uid, shoutRef }) {
   assert.equal((await shoutRef.collection('privateReplies').get()).size, 0);
   assert.equal((await db.doc(`rateLimits/${uid}/actions/privateReply`).get()).exists, false);

@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/account-deletion-job-progress`; navazuje na dokončenou retenci
+`fix/deleting-account-recipients`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -124,6 +124,13 @@ ostatní pole nezměněná, replay beze změny a anonymní čtení jobu 403. Tes
 Auth/obsah/žádost/job/checkpoint uklizené, původní pending žádost zachovaná.
 Původních 10 Functions beze změny. První Eventarc inicializace vyžadovala propagaci;
 detail a důkazy jsou v návrhu pilotu. Klient a celá 60denní retence stále nejsou hotové.
+[Navazující účtový plán](ACCOUNT_DELETION_REMAINING_PLAN.md): vlastník schválil
+rezervaci přezdívky po 60 dní a skrytí soukromých zpráv oběma. Připravené jsou
+transakční kontroly příjemce pro čtyři obsahové Functions a emulátorový úklid
+vlastních privátních podkolekcí; lab odmítá živé projekty a není v artefaktech.
+53 cílených případů prošlo, následné 3 kontroly projekce/bezpečnosti také;
+lint čistý. Zdrojová ochrana příjemců čeká na CI a DEV rollout, soukromý úklid
+se živě nezapíná. Archiv zpráv, přezdívka a konečné retenční dočištění zbývají.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

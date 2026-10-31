@@ -8,15 +8,17 @@ import { encodeGeohash } from './geohash.js';
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
 import { accountDeletionJobRef, runAccountDeletionCreatedEvent as run, runAccountShoutHidingJob } from './account_deletion_job.js';
 import { scanDueAccountDeletionJobs as scan } from './account_deletion_job_scan.js';
+import { cleanupAccountPrivatePageLab as cleanPrivate } from './account_private_cleanup_lab.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'account-job-tests') : null;
-const db = app ? getFirestore(app) : null, namespaces = [], refs = [];
+const db = app ? getFirestore(app) : null, namespaces = [], refs = [], privateRoots = [];
 const missingAuth = { getUser() { throw Object.assign(new Error('not-found'), { code: 'auth/user-not-found' }); } };
 after(async () => {
   if (!app) return;
   for (const namespace of namespaces) await db.recursiveDelete(db.collection('feedIndexLab').doc(namespace));
   for (const ref of refs) await ref.delete();
+  for (const ref of privateRoots) await db.recursiveDelete(ref);
   await db.terminate(); await deleteApp(app);
 });
 
@@ -35,6 +37,7 @@ async function fixture(own = 3) {
     doc: path => path.startsWith('accountDeletionJobs/') ? lab.base.collection('jobs').doc(path.split('/')[1])
       : path === 'maintenanceState/accountDeletionShoutJobs' ? lab.base.collection('maintenance').doc('scan') : db.doc(path),
     runTransaction: db.runTransaction.bind(db),
+    getAll: db.getAll.bind(db),
     collection: name => name === 'shouts' ? lab.base.collection('source')
       : name === 'accountDeletionJobs' ? lab.base.collection('jobs') : db.collection(name) };
   const jobRef = accountDeletionJobRef(scoped, accountDeletionEventIdentity(event, scoped)); refs.push(jobRef);
@@ -209,6 +212,74 @@ test('empty idle scan performs no maintenance writes', { skip: !enabled }, async
 test('scan rejects invalid work configuration before reading the database', async () => {
   for (const options of [{}, { maxJobs: 1, clock: () => new Date() }]) {
     await assert.rejects(scan({}, {}, options), /invalid-account-deletion-job-scan-options/);
+  }
+});
+
+async function privateFixture() {
+  const f = await fixture();
+  await run(f.event, f.db, missingAuth, { ...f.options, pageSize: 50 });
+  const user = db.doc(`users/${f.uid}`); privateRoots.push(user);
+  await user.set({ nickname: 'Retained nickname', email: 'retained@example.test' });
+  await user.collection('legal').doc('acceptance').set({ retained: true });
+  await user.collection('notifications').doc('n1').set({ targetTitle: 'Private inbox' });
+  await user.collection('notifications').doc('n2').set({ targetTitle: 'Private inbox 2' });
+  await user.collection('following').doc('other').set({ targetUserId: 'other' });
+  await user.collection('blocked').doc('other').set({ createdAt: Timestamp.now() });
+  const identity = accountDeletionEventIdentity(f.event, f.db);
+  return { ...f, user, identity };
+}
+
+test('private leaf cleanup drains bounded pages and preserves profile, legal data and job progress', { skip: !enabled }, async () => {
+  const f = await privateFixture(), before = (await f.jobRef.get()).data();
+  const first = await cleanPrivate(f.identity, f.db, missingAuth, { pageSize: 2 });
+  assert.equal(first.deleted, 2); assert.equal(first.needsAnotherPage, true);
+  const next = await cleanPrivate(f.identity, f.db, missingAuth, { pageSize: 2 });
+  assert.equal(next.deleted, 2);
+  const last = await cleanPrivate(f.identity, f.db, missingAuth);
+  assert.equal(last.state, 'private-leaves-cleaned'); assert.equal(last.deleted, 0); assert.equal(last.settingsChanged, false);
+  assert.deepEqual((await f.user.get()).data(), { nickname: 'Retained nickname', email: 'retained@example.test' });
+  assert.equal((await f.user.collection('legal').doc('acceptance').get()).exists, true);
+  assert(Object.values((await f.user.collection('settings').doc('notifications').get()).data()).every(value => value === false));
+  assert.deepEqual((await f.jobRef.get()).data(), before);
+});
+
+test('private cleanup requires missing Auth and the same completed hiding request', { skip: !enabled }, async () => {
+  const f = await privateFixture();
+  const waiting = await cleanPrivate(f.identity, f.db, { getUser: async uid => ({ uid }) });
+  assert.equal(waiting.state, 'waiting-for-auth-deletion');
+  assert.equal((await f.user.collection('settings').doc('notifications').get()).exists, false);
+  await f.requestRef.delete(); await f.requestRef.set({ userId: f.uid, status: 'pending' });
+  await assert.rejects(cleanPrivate(f.identity, f.db, missingAuth), /account-deletion-request-replaced/);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+});
+
+test('private cleanup uses updateTime guards and retries a changed page without partial deletes', { skip: !enabled }, async () => {
+  const f = await privateFixture();
+  const conflict = await cleanPrivate(f.identity, f.db, missingAuth, { async beforeCommit(refs) { await refs[0].update({ concurrentlyUpdated: true }); } });
+  assert.equal(conflict.conflict, true); assert.equal(conflict.deleted, 0);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+  assert.equal((await cleanPrivate(f.identity, f.db, missingAuth)).deleted, 4);
+});
+
+test('unexpected nested private data is preserved for review', { skip: !enabled }, async () => {
+  const f = await privateFixture(), parent = f.user.collection('notifications').doc('n1');
+  await parent.collection('unexpected').doc('child').set({ keep: true });
+  await assert.rejects(cleanPrivate(f.identity, f.db, missingAuth), /unexpected-private-subcollections/);
+  assert.equal((await parent.get()).exists, true);
+  assert.equal((await parent.collection('unexpected').doc('child').get()).exists, true);
+});
+
+test('unknown private notification settings stop cleanup without dropping their contents', { skip: !enabled }, async () => {
+  const f = await privateFixture(), settings = f.user.collection('settings').doc('notifications');
+  await settings.set({ constructor: 'preserve-unknown-data' });
+  await assert.rejects(cleanPrivate(f.identity, f.db, missingAuth), /unknown-notification-settings/);
+  assert.deepEqual((await settings.get()).data(), { constructor: 'preserve-unknown-data' });
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+});
+
+test('private cleanup prototype refuses live databases', async () => {
+  for (const projectId of ['shoutout-dev-46c81', 'shoutout-production-a1b34']) {
+    await assert.rejects(cleanPrivate({}, { projectId }, {}), /account-private-cleanup-emulator-required/);
   }
 });
 

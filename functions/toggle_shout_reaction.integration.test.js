@@ -22,6 +22,7 @@ async function actor() {
 }
 async function fixture() {
   const uid = await actor(), owner = randomUUID();
+  await db.doc(`users/${owner}`).set({ nickname: 'Shout owner' });
   const shoutRef = db.doc(`shouts/${randomUUID()}`);
   await shoutRef.set({ authorId: owner, title: 'Target', status: 'active',
     likesCount: 2, dislikesCount: 3, commentsCount: 4, savesCount: 5 });
@@ -32,6 +33,22 @@ async function fixture() {
 const change = (request, key, button) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(key), button } });
 const notice = (uid, type, shoutId) => db.doc(`users/${uid}/notifications/reaction_${type}_${shoutId}`);
 const rate = (uid) => db.doc(`rateLimits/${uid}/actions/interaction`);
+
+test('reactions remain valid without creating or updating a deleting recipients inbox', { skip: !enabled }, async () => {
+  for (const mode of ['deleting', 'purged', 'existing-notice']) {
+    const f = await fixture(), target = db.doc(`users/${f.owner}`), notification = notice(f.owner, 'like', f.shoutRef.id);
+    if (mode === 'purged') await target.delete();
+    else await db.doc(`accountDeletionRequests/${f.owner}`).set({ status: 'pending' });
+    await target.collection('settings').doc('notifications').set({ reactions: 'invalid-stale-preference' });
+    if (mode === 'existing-notice') await notification.set({ eventCount: 7, marker: 'unchanged' });
+    const result = await toggleShoutReactionOperation(f.request, db, at());
+    assert.equal(result.likes, 3); assert.equal((await rate(f.uid).get()).data().count, 1);
+    const saved = await notification.get();
+    if (mode === 'existing-notice') assert.deepEqual(saved.data(), { eventCount: 7, marker: 'unchanged' });
+    else assert.equal(saved.exists, false);
+    assert.deepEqual(await toggleShoutReactionOperation(f.request, db, at()), result);
+  }
+});
 
 test('add, switch and remove atomically update counters while only additions notify', { skip: !enabled }, async () => {
   const { uid, owner, shoutRef, request } = await fixture();
