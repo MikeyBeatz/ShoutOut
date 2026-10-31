@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/account-hide-auth-gate`; navazuje na dokončenou retenci
+`fix/account-hide-resume-identity`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -99,8 +99,11 @@ krok zůstává napojení účtového toku a dalších zapisovacích cest, nikol
 Navazující lokální `hideDeletedAuthAccountShoutsPage` před jednou stránkou ověří
 Auth: existující účet znamená čekání, pouze auth/user-not-found dovolí pokračovat.
 Ostatní chyby se propagují bez skrytí. Nahrazení/odvolání žádosti během ověření
-se odmítne před zápisem; žádost ani Auth účet tato funkce nemění. Ověření: 11/11
-cílených testů, Firestore emulátor + simulovaný Auth, cílený lint čistý.
+se odmítne před zápisem; žádost ani Auth účet tato funkce nemění. Návazná oprava
+zachovává expectedRequestCreateTime dodané důvěryhodným workerem i mezi stránkami;
+stará žádost se odmítne ještě před kontrolou Auth. Souběh dvou běhů nevytváří
+duplicitní indexovou historii. Ověření: 13/13 cílených testů, Firestore emulátor
+a simulovaný Auth, cílený lint čistý.
 Bez nového CI/push/nasazení. Další malý krok: návrh převzetí žádosti a opakování
 zpracování, poté skutečné napojení; celý worker, 60denní úklid a klient zůstávají otevřené.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého

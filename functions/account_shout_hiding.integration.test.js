@@ -151,3 +151,37 @@ test('Auth gate rejects missing requests and invalid input before calling Auth',
   await assert.rejects(hideAfterAuth(f.db, auth, f.uid, f.options), /account-deletion-request-not-pending/);
   await assert.rejects(hideAfterAuth({}, auth, '../victim'), /invalid-account-hide-page/);
 });
+
+test('continuation keeps the original request identity across page calls', { skip: !enabled }, async () => {
+  const f = await fixture(), expectedRequestCreateTime = (await f.requestRef.get()).createTime;
+  const options = { ...f.options, pageSize: 1, expectedRequestCreateTime };
+  const first = await hideAfterAuth(f.db, { getUser: authNotFound }, f.uid, options);
+  assert.equal(first.hidden, 1);
+  const second = await hideAfterAuth(f.db, { getUser: authNotFound }, f.uid, options);
+  assert.equal(second.hidden, 1);
+  await f.requestRef.delete();
+  await f.requestRef.set({ userId: f.uid, status: 'pending' });
+  await assert.rejects(hideAfterAuth(f.db, { getUser() { assert.fail('stale worker must stop before Auth'); } },
+    f.uid, options), /account-deletion-request-replaced/);
+  assert.equal((await f.lab.audit()).activeMetadata, 3);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 2);
+  assert.equal((await hideAfterAuth(f.db, { getUser: authNotFound }, f.uid, f.options)).hidden, 1);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+});
+
+test('concurrent page workers hide each source once and can drain the remaining page', { skip: !enabled }, async () => {
+  const f = await fixture(), expectedRequestCreateTime = (await f.requestRef.get()).createTime;
+  const options = { ...f.options, pageSize: 2, expectedRequestCreateTime }, auth = { getUser: authNotFound };
+  const results = await Promise.all([
+    hideAfterAuth(f.db, auth, f.uid, options), hideAfterAuth(f.db, auth, f.uid, options),
+  ]);
+  const hidden = results.reduce((sum, result) => sum + result.hidden, 0);
+  assert(hidden >= 2 && hidden <= 3);
+  assert.equal((await f.lab.audit()).activeMetadata, 5 - hidden);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, hidden);
+  const remainder = await hideAfterAuth(f.db, auth, f.uid, { ...f.options, expectedRequestCreateTime });
+  assert.equal(hidden + remainder.hidden, 3);
+  assert.equal(remainder.state, 'shouts-hidden');
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});

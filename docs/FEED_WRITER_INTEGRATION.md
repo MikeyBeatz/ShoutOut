@@ -119,3 +119,11 @@ Ověření: 11/11 cílených testů bez přeskočení, Firestore emulátor a sim
 Auth (existující/chybějící účet, výpadek, změna žádosti během kontroly, pokračování
 a replay); cílený ESLint čistý. Skutečný Auth, klientské napojení, převzetí žádosti,
 automatické opakování a 60denní úklid tím nejsou dokončené. Bez push, CI a nasazení.
+
+Navazující oprava: důvěryhodně dodané expectedRequestCreateTime se respektuje
+už před Auth kontrolou, ne jen uvnitř stránky. Worker tak může zachovat identitu
+žádosti při dalších stránkách/opakování; nesmí ji při pokračování načítat znovu
+jako novou práci. Dva další emulátorové testy ověřily pokračování stejné žádosti,
+odmítnutí staré po nahrazení a souběh dvou běhů bez dvojího skrytí/archivace.
+Celkem 13/13 cílených testů a cílený ESLint prošly, bez nového CI a nasazení.
+Zpracování události, trvalý stav průběhu a plánování opakování stále zbývají.

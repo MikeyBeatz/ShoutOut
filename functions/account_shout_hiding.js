@@ -9,13 +9,19 @@ function assertPending(request, userId) {
   const marker = request.data();
   if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new Error('account-deletion-request-not-pending');
 }
+function assertSameRequest(request, expectedCreateTime) {
+  if (expectedCreateTime && !request.createTime.isEqual(expectedCreateTime)) throw new Error('account-deletion-request-replaced');
+}
 
 // Internal orchestration only. Does not delete Auth users or write request state.
 export async function hideDeletedAuthAccountShoutsPage(db, auth, userId, options = {}) {
-  const { pageSize = 50 } = options;
+  const { pageSize = 50, expectedRequestCreateTime = null } = options;
   validatePage(userId, pageSize);
   const request = await db.doc(`accountDeletionRequests/${userId}`).get();
   assertPending(request, userId);
+  // A trusted worker/event carries this fence across page calls and retries.
+  // Do not silently replace it with the current request's identity.
+  assertSameRequest(request, expectedRequestCreateTime);
   try {
     await auth.getUser(userId);
     return { state: 'waiting-for-auth-deletion' };
@@ -35,7 +41,7 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
   const requestRef = db.doc(`accountDeletionRequests/${userId}`);
   const initialRequest = await requestRef.get();
   assertPending(initialRequest, userId);
-  if (expectedRequestCreateTime && !initialRequest.createTime.isEqual(expectedRequestCreateTime)) throw new Error('account-deletion-request-replaced');
+  assertSameRequest(initialRequest, expectedRequestCreateTime);
   const page = await db.collection('shouts').where('authorId', '==', userId)
     .where('status', '==', 'active').limit(pageSize).get();
   const result = { examined: page.size, hidden: 0, skipped: 0, needsAnotherPage: page.size === pageSize };
@@ -45,7 +51,7 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
       const [request, shout] = await transaction.getAll(requestRef, candidate.ref);
       assertPending(request, userId);
       // A restarted request belongs to a new worker run, even for the same UID.
-      if (!request.createTime.isEqual(initialRequest.createTime)) throw new Error('account-deletion-request-replaced');
+      assertSameRequest(request, initialRequest.createTime);
       if (!shout.exists || shout.data().authorId !== userId || shout.data().status !== 'active') return false;
       const before = shout.data();
       // Different request/source incarnations must not reuse an old archive ID.
