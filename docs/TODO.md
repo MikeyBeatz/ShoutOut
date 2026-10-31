@@ -75,6 +75,8 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
    Malý lokální úsek: account hiding rozlišuje původní a znovu vytvořenou žádost;
    celý účtový worker a jeho napojení stále zbývají.
+   Lokální zpracování stránky už ověřuje neexistenci účtu v Auth; 11 cílených
+   testů prošlo, napojení klienta/workeru a živé ověření stále zbývají.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení

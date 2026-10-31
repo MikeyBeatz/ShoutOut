@@ -101,3 +101,21 @@ a další běh práci dokončí. Jde stále pouze o interní lokální helper, n
 exportovaný worker, nasazení nebo změnu stávajícího klientského mazání účtu.
 Ověření tohoto úseku: 7/7 cílených testů ve Firestore emulátoru bez přeskočení
 a cílený ESLint prošly. Celé CI ani živý průchod nebyly pro tento úsek spuštěné.
+
+## Navazující malý úsek – ověření odstraněného Auth účtu
+
+Interní `hideDeletedAuthAccountShoutsPage` zachytí identitu pending žádosti,
+ověří uživatele přes dodaný Admin Auth a teprve při auth/user-not-found spustí
+jednu omezenou stránku. Existující uživatel vrací waiting-for-auth-deletion;
+ostatní chyby Auth se propagují a nezapisuje se nic. Tento postup Auth účet
+nesmaže, nemění žádost, nepřidává uložené statusy ani retenční pravidla.
+
+Identita žádosti se kontroluje i po síťovém ověření: odvolání nebo nové vytvoření
+žádosti nepovolí starému běhu skrývat obsah. Výsledky hiding/shouts-hidden
+popisují pouze tuto stránkovanou fázi, nikoli dokončení celého smazání účtu.
+Interní nízkoúrovňový helper sám Auth neověřuje; veřejný endpoint zatím neexistuje.
+
+Ověření: 11/11 cílených testů bez přeskočení, Firestore emulátor a simulovaný
+Auth (existující/chybějící účet, výpadek, změna žádosti během kontroly, pokračování
+a replay); cílený ESLint čistý. Skutečný Auth, klientské napojení, převzetí žádosti,
+automatické opakování a 60denní úklid tím nejsou dokončené. Bez push, CI a nasazení.

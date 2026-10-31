@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`fix/account-hide-request-fence`; navazuje na dokončenou retenci
+`feature/account-hide-auth-gate`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -96,6 +96,13 @@ téže pending žádosti běh nezastaví. Není to nasazený worker ani změna k
 Ověření: 7/7 cílených testů ve Firestore emulátoru, nula skip/chyb; cílený lint
 prošel. Tento úsek je lokální, bez push/nového CI a bez externích změn. Další
 krok zůstává napojení účtového toku a dalších zapisovacích cest, nikoli aktivace indexu.
+Navazující lokální `hideDeletedAuthAccountShoutsPage` před jednou stránkou ověří
+Auth: existující účet znamená čekání, pouze auth/user-not-found dovolí pokračovat.
+Ostatní chyby se propagují bez skrytí. Nahrazení/odvolání žádosti během ověření
+se odmítne před zápisem; žádost ani Auth účet tato funkce nemění. Ověření: 11/11
+cílených testů, Firestore emulátor + simulovaný Auth, cílený lint čistý.
+Bez nového CI/push/nasazení. Další malý krok: návrh převzetí žádosti a opakování
+zpracování, poté skutečné napojení; celý worker, 60denní úklid a klient zůstávají otevřené.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

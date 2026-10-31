@@ -1,18 +1,41 @@
 // Internal worker building block only: no callable or scheduled export.
 import { createHash } from 'node:crypto';
 
-export async function hideRequestedAccountShoutsPage(db, userId, {
-  pageSize = 50, indexWriter = null, beforeTransaction = null,
-} = {}) {
+function validatePage(userId, pageSize) {
   if (typeof userId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(userId) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('invalid-account-hide-page');
+}
+function assertPending(request, userId) {
+  const marker = request.data();
+  if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new Error('account-deletion-request-not-pending');
+}
+
+// Internal orchestration only. Does not delete Auth users or write request state.
+export async function hideDeletedAuthAccountShoutsPage(db, auth, userId, options = {}) {
+  const { pageSize = 50 } = options;
+  validatePage(userId, pageSize);
+  const request = await db.doc(`accountDeletionRequests/${userId}`).get();
+  assertPending(request, userId);
+  try {
+    await auth.getUser(userId);
+    return { state: 'waiting-for-auth-deletion' };
+  } catch (error) {
+    // An outage or denied Admin permission must never count as account deletion.
+    if (error?.code !== 'auth/user-not-found') throw error;
+  }
+  const result = await hideRequestedAccountShoutsPage(db, userId,
+    { ...options, expectedRequestCreateTime: request.createTime });
+  return { ...result, state: result.needsAnotherPage ? 'hiding' : 'shouts-hidden' };
+}
+
+export async function hideRequestedAccountShoutsPage(db, userId, {
+  pageSize = 50, indexWriter = null, beforeTransaction = null, expectedRequestCreateTime = null,
+} = {}) {
+  validatePage(userId, pageSize);
   const requestRef = db.doc(`accountDeletionRequests/${userId}`);
-  const assertPending = request => {
-    const marker = request.data();
-    if (!request.exists || marker.userId !== userId || marker.status !== 'pending') throw new Error('account-deletion-request-not-pending');
-  };
   const initialRequest = await requestRef.get();
-  assertPending(initialRequest);
+  assertPending(initialRequest, userId);
+  if (expectedRequestCreateTime && !initialRequest.createTime.isEqual(expectedRequestCreateTime)) throw new Error('account-deletion-request-replaced');
   const page = await db.collection('shouts').where('authorId', '==', userId)
     .where('status', '==', 'active').limit(pageSize).get();
   const result = { examined: page.size, hidden: 0, skipped: 0, needsAnotherPage: page.size === pageSize };
@@ -20,7 +43,7 @@ export async function hideRequestedAccountShoutsPage(db, userId, {
     if (beforeTransaction) await beforeTransaction(candidate.id);
     const hidden = await db.runTransaction(async transaction => {
       const [request, shout] = await transaction.getAll(requestRef, candidate.ref);
-      assertPending(request);
+      assertPending(request, userId);
       // A restarted request belongs to a new worker run, even for the same UID.
       if (!request.createTime.isEqual(initialRequest.createTime)) throw new Error('account-deletion-request-replaced');
       if (!shout.exists || shout.data().authorId !== userId || shout.data().status !== 'active') return false;

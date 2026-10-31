@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { hideRequestedAccountShoutsPage as hide } from './account_shout_hiding.js';
+import { hideRequestedAccountShoutsPage as hide, hideDeletedAuthAccountShoutsPage as hideAfterAuth } from './account_shout_hiding.js';
 import { createLabBlockIndex } from './feed_block_index_lab.js';
 import { encodeGeohash } from './create_shout.js';
 
@@ -103,4 +103,51 @@ test('index apply failure rolls back its source and history while keeping prior 
   assert.equal((await hide(f.db, f.uid, f.options)).hidden, 2);
   assert.equal((await f.lab.audit()).activeMetadata, 2);
   assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});
+
+const authNotFound = () => { throw Object.assign(new Error('no-such-auth-user'), { code: 'auth/user-not-found' }); };
+
+test('Auth gate waits for an existing user and propagates verification failures without hiding', { skip: !enabled }, async () => {
+  const f = await fixture();
+  assert.deepEqual(await hideAfterAuth(f.db, { getUser: async uid => ({ uid }) }, f.uid, f.options),
+    { state: 'waiting-for-auth-deletion' });
+  const failure = Object.assign(new Error('Auth unavailable'), { code: 'auth/internal-error' });
+  await assert.rejects(hideAfterAuth(f.db, { getUser: async () => { throw failure; } }, f.uid, f.options), error => error === failure);
+  assert.equal((await f.lab.audit()).activeMetadata, 5);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 0);
+});
+
+test('confirmed missing Auth user allows bounded hiding and replay after completion', { skip: !enabled }, async () => {
+  const f = await fixture(), auth = { getUser: authNotFound };
+  const first = await hideAfterAuth(f.db, auth, f.uid, { ...f.options, pageSize: 2 });
+  assert.equal(first.state, 'hiding'); assert.equal(first.hidden, 2);
+  const last = await hideAfterAuth(f.db, auth, f.uid, { ...f.options, pageSize: 2 });
+  assert.equal(last.state, 'shouts-hidden'); assert.equal(last.hidden, 1);
+  const replay = await hideAfterAuth(f.db, auth, f.uid, f.options);
+  assert.equal(replay.state, 'shouts-hidden'); assert.equal(replay.hidden, 0);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+  assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 3);
+});
+
+test('request cancellation or recreation while Auth is checked prevents hiding', { skip: !enabled }, async () => {
+  for (const replace of [false, true]) {
+    const f = await fixture();
+    const auth = { async getUser(uid) {
+      assert.equal(uid, f.uid);
+      await f.requestRef.delete();
+      if (replace) await f.requestRef.set({ userId: uid, status: 'pending' });
+      authNotFound();
+    } };
+    await assert.rejects(hideAfterAuth(f.db, auth, f.uid, f.options),
+      replace ? /account-deletion-request-replaced/ : /account-deletion-request-not-pending/);
+    assert.equal((await f.lab.audit()).activeMetadata, 5);
+    assert.equal((await f.lab.base.collection('retiredRoots').get()).size, 0);
+  }
+});
+
+test('Auth gate rejects missing requests and invalid input before calling Auth', { skip: !enabled }, async () => {
+  const f = await fixture(), auth = { getUser() { assert.fail('Auth must not be called'); } };
+  await f.requestRef.delete();
+  await assert.rejects(hideAfterAuth(f.db, auth, f.uid, f.options), /account-deletion-request-not-pending/);
+  await assert.rejects(hideAfterAuth({}, auth, '../victim'), /invalid-account-hide-page/);
 });
