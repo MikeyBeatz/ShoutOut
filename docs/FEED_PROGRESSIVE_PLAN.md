@@ -101,6 +101,10 @@ v živém feedu jako hotové rychlé a levné řešení.
 
 ## Další architektonické rozhodnutí
 
+**Následný stav:** vlastník schválil lokální návrh a ověření nové vrstvy.
+[Konkrétní model a naměřené výsledky](FEED_BLOCK_INDEX_PLAN.md) jsou připravené.
+Původní úvaha níže zůstává kontextem; živé kolekce/migrace nejsou schválené.
+
 Doporučený návrh je **sdílený prostorový index malých metadat v existujícím
 Firestore**, oddělený od celých Shout dokumentů. Jeden indexový blok by obsahoval
 více ID, souřadnic, časů a údajů nutných pro dostupnost/řazení. Vyhodnocení read
@@ -115,7 +119,7 @@ Samotné předběžné napočítání bodů nevynutí levnější celkový provo
 poměr čtení/zápisů. Dosavadní Rules dovolující některé přímé zápisy jsou také
 součástí konzistence, nelze je ignorovat a index prohlásit za úplný.
 
-Před touto podstatnou změnou předložit konkrétní schéma bloků, jejich atomickou
+Před živým zapojením předložit konkrétní schéma bloků, jejich atomickou
 aktualizaci a počet zápisů na každou obsahovou operaci, kapacitní chování,
 retenci/soukromí, migraci historických dat a nový nákladový model. Nejprve
 lokální implementace a emulátor, bez vytvoření živých kolekcí nebo backfillu.

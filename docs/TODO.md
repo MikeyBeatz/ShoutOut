@@ -59,8 +59,10 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    deset testů a 24 měření. [Kontrakt, výsledky a meze](FEED_A1_RESULTS.md).
    Progresivní směr následně schválený; serverové jádro a klientský koordinátor
    připravené a lokálně ověřené. [Stav a nákladový problém](FEED_PROGRESSIVE_PLAN.md).
-   Další krok: sdílený prostorový index metadat, počty aktualizačních zápisů,
-   konzistence a schválení nové datové vrstvy před napojením. Živý feed je původní.
+   Sdílený index byl následně schválený pro lokální návrh a ověření; hotovo:
+   [model, měření a hranice](FEED_BLOCK_INDEX_PLAN.md). Další krok před napojením:
+   historie/GC, délka relace, pokrytí všech zapisovacích cest a migrační dry-run.
+   Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
    a Business výjimky; žádné tiché omezení celého okolí na 50.

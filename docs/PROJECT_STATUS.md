@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/progressive-spatial-feed`; navazuje na dokončenou retenci
+`feature/shared-spatial-index`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -22,13 +22,19 @@ A1 je dokončený, CI `41189770135` pro `8b8ec33` prošlo. Následně vlastník
 schválil progresivní výběr první stránky, jednu stránku dopředu a inkrementální
 novinky. Připravené jsou serverový geografický modul, pinned repository a
 klientský koordinátor; nejsou exportované/napojené na živý feed.
-212 Flutter testů, 12 nových serverových unit testů a jedna izolovaná zkouška
-konzistence v emulátoru prošly; analyzátor bez nálezu. CI této změny se ověřuje
-samostatně. Živý web zůstává A0 `b56fbbe`, Functions/Rules/data se nemění.
-[Výsledky a nový další krok](FEED_PROGRESSIVE_PLAN.md): samotné rozšiřování
-geohashových dotazů neprokázalo úsporu v hustém okolí. Před napojením připravit
-rozhodnutí o sdíleném prostorovém indexu metadat a jeho aktualizačních zápisech.
-Nevydávat tento dílčí geografický modul za hotový rychlý feed. R2/R3 rozhodnuté.
+Progresivní základ `90c93ee` má úspěšné CI `41194526738` (212 Flutter testů).
+Následně vlastník schválil lokální návrh a ověření sdíleného prostorového indexu.
+[Schéma, důkazy, náklady a migrační návrh](FEED_BLOCK_INDEX_PLAN.md) jsou připravené:
+10 nových unit testů a 9 emulátorových testů prošlo, celkem 66 Functions unit
+bez chyb a lint čistý. CI přesného commitu se ověřuje přes [běhy větve](https://github.com/MikeyBeatz/ShoutOut/actions?query=branch%3Afeature%2Fshared-spatial-index). Prototyp odmítá
+projekty jiné než lokální `shoutout-rules-test`. Živý web zůstává A0 `b56fbbe`.
+Vzorek 300: 18 metadata čtení za studena / 2 teplá proti 285 u přímého geo
+postupu, plus 50 source čtení pro karty. Test pracuje se syntetickými metadaty,
+ne skutečnými těly karet nebo cloudovou fakturou. Současné Functions/Rules se nemění.
+Další krok před napojením: protokol historie/GC a délka relace, atomické zapojení
+všech indexovaných zápisů a migrační dry-run. Historické bloky se zatím neuklízejí;
+bez toho nelze index aktivovat. Query API ani klientské napojení nejsou hotové.
+Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill. R2/R3 rozhodnuté.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

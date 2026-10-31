@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-31",
+  "runtime": "Node 22.23.4",
+  "target": "Firestore emulator / shoutout-rules-test",
+  "scope": "Synthetic metadata fixtures, not live ShoutOut data or cloud billing",
+  "cache": {
+    "maxSerializedBytes": 4194304,
+    "maxEntries": 1024
+  },
+  "benchmarks": [
+    {
+      "scenario": "grid300",
+      "rows": 300,
+      "seeded": {
+        "sourceWrites": 300,
+        "nodeWrites": 16,
+        "directoryWrites": 2,
+        "guardWrites": 1
+      },
+      "baseline": {
+        "queries": 25,
+        "emptyQueries": 14,
+        "candidates": 270,
+        "emitted": 50,
+        "snapshotReads": 1,
+        "metadataDocumentReads": 285
+      },
+      "cold": {
+        "rootQueries": 1,
+        "rootDocuments": 2,
+        "emptyRootQueries": 0,
+        "nodeReads": 16,
+        "nodeFetchRequests": 7,
+        "nodeBytes": 90848,
+        "cacheHits": 20,
+        "metadataExamined": 141
+      },
+      "warm": {
+        "rootQueries": 1,
+        "rootDocuments": 2,
+        "emptyRootQueries": 0,
+        "nodeReads": 0,
+        "nodeFetchRequests": 0,
+        "nodeBytes": 0,
+        "cacheHits": 11,
+        "metadataExamined": 141
+      },
+      "sourceReads": 50,
+      "storage": {
+        "roots": 2,
+        "retainedNodes": 16,
+        "maxNodeBytes": 17807,
+        "retainedBytes": 90848
+      }
+    },
+    {
+      "scenario": "allRead75",
+      "rows": 75,
+      "seeded": {
+        "sourceWrites": 75,
+        "nodeWrites": 3,
+        "directoryWrites": 1,
+        "guardWrites": 1
+      },
+      "baseline": {
+        "queries": 40,
+        "emptyQueries": 38,
+        "candidates": 75,
+        "emitted": 50,
+        "snapshotReads": 1,
+        "metadataDocumentReads": 114
+      },
+      "cold": {
+        "rootQueries": 1,
+        "rootDocuments": 1,
+        "emptyRootQueries": 0,
+        "nodeReads": 3,
+        "nodeFetchRequests": 2,
+        "nodeBytes": 21356,
+        "cacheHits": 1,
+        "metadataExamined": 75
+      },
+      "warm": {
+        "rootQueries": 1,
+        "rootDocuments": 1,
+        "emptyRootQueries": 0,
+        "nodeReads": 0,
+        "nodeFetchRequests": 0,
+        "nodeBytes": 0,
+        "cacheHits": 3,
+        "metadataExamined": 75
+      },
+      "sourceReads": 50,
+      "storage": {
+        "roots": 1,
+        "retainedNodes": 3,
+        "maxNodeBytes": 12058,
+        "retainedBytes": 21356
+      }
+    }
+  ],
+  "mutations": {
+    "reaction": {
+      "sourceWrites": 1,
+      "nodeWrites": 2,
+      "directoryWrites": 1,
+      "reads": 5,
+      "attempts": 1
+    },
+    "noop": {
+      "sourceWrites": 0,
+      "nodeWrites": 0,
+      "directoryWrites": 0,
+      "reads": 2,
+      "attempts": 1
+    },
+    "deleted": {
+      "sourceWrites": 1,
+      "nodeWrites": 2,
+      "directoryWrites": 1,
+      "reads": 5,
+      "attempts": 1
+    },
+    "created": {
+      "sourceWrites": 1,
+      "nodeWrites": 2,
+      "directoryWrites": 1,
+      "reads": 5,
+      "attempts": 1
+    },
+    "move": {
+      "sourceWrites": 1,
+      "nodeWrites": 3,
+      "directoryWrites": 2,
+      "reads": 6,
+      "attempts": 1
+    },
+    "retainedAfterUpdates": {
+      "roots": 2,
+      "retainedNodes": 12,
+      "maxNodeBytes": 12870,
+      "retainedBytes": 70054
+    }
+  },
+  "delta": {
+    "reaction": {
+      "sourceWrites": 1,
+      "nodeWrites": 3,
+      "directoryWrites": 1,
+      "reads": 6,
+      "attempts": 1
+    },
+    "reactionDelta": {
+      "nodeReads": 6,
+      "nodeFetchRequests": 6,
+      "nodeBytes": 21746,
+      "cacheHits": 2,
+      "metadataExamined": 68
+    },
+    "publicationDelta": {
+      "nodeReads": 4,
+      "nodeFetchRequests": 4,
+      "nodeBytes": 28080,
+      "cacheHits": 4,
+      "metadataExamined": 97
+    }
+  },
+  "memoryOnlyCapacity": {
+    "records": 10000,
+    "nodes": 497,
+    "serializedBytes": 2955200,
+    "secondPassMisses": 0
+  }
+}

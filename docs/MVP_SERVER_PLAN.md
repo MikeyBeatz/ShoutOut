@@ -133,6 +133,9 @@ seřazení jedné stránky ani globální čítač novinek nezaručují splněn�
 Aktuálně schválený výběr stránek a jeho neuzavřené náklady jsou v
 [progresivním plánu](FEED_PROGRESSIVE_PLAN.md); úplná příprava regionu před
 první stránkou není zvolená. Připravené moduly ještě nejsou živým query API.
+Lokálně ověřený [sdílený index](FEED_BLOCK_INDEX_PLAN.md) rozpracovává tyto
+požadavky; před aktivací ještě zbývá historie/GC, integrace všech zápisů,
+migrace, zabezpečené query API a klientské napojení. Neuzavírá tuto bránu.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

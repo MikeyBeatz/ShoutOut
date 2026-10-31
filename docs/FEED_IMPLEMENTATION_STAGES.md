@@ -159,6 +159,7 @@ stále vyžaduje celé MVP. Tento plán sám neprovádí žádnou externí změn
 
 A0: lokálně 204 Flutter testů a čistý analyzátor; commit `b56fbbe`.
 A1: [výsledky, kontrakt a hranice měření](FEED_A1_RESULTS.md); deset testů
-a 24 syntetických měření prošlo. Cloudová implementace A2 nezačala.
+a 24 syntetických měření prošlo. Serverové stavební bloky A2 a [sdílený index](FEED_BLOCK_INDEX_PLAN.md) jsou
+lokálně ověřené; živé query API dosud není zapojené.
 
 Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).

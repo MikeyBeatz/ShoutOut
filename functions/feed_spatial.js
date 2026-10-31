@@ -28,7 +28,7 @@ export function geohashBounds(prefix) {
   return { latitude, longitude };
 }
 
-class Heap {
+export class FeedMinHeap {
   constructor(compare) { this.items = []; this.compare = compare; }
   peek() { return this.items[0]; }
   push(value) {
@@ -123,7 +123,7 @@ export function spatialSession({ readRange, snapshot, uid, project, point, radiu
   const reads = new Set(readIds), seen = new Set();
   const frontier = [];
   let covered = [], certifiedRadius = -1, targetRadius = 0;
-  const groups = [new Heap(rank), new Heap(rank)];
+  const groups = [new FeedMinHeap(rank), new FeedMinHeap(rank)];
   const metrics = { queries: 0, emptyQueries: 0, candidates: 0, emitted: 0 };
   const pages = new WeakMap();
   const issue = () => { const key = Object.freeze({}); pages.set(key, { pending: [], result: null, flight: null }); return key; };

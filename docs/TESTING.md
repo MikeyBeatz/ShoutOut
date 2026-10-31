@@ -758,3 +758,23 @@ ověřují widget testy, nikoli tato kontrola přenosu artefaktů.
 Samotné rozšiřování rozsahů může stále načíst celé husté okolí; není doložená
 univerzální úspora ani hotový MVP milník. Před živým napojením vyřešit další
 indexovou vrstvu a její aktualizační náklady.
+
+## Sdílený prostorový index – pouze lokální experiment (31. října 2026)
+
+- Node 22.23.4: deset nových unit testů prošlo; celá Functions sada 66 unit
+  testů bez chyb, 74 emulator-only testů při tomto běhu přeskočeno. Lint čistý.
+- Devět nových integračních testů v izolovaném Firestore emulátoru prošlo:
+  výběr a všechny stránky ve čtyřech režimech, cold/warm cache a reálné počty
+  SDK operací, rollback, souběh, staré kořeny, dostupnost/expirace, změna oblastí
+  jako technický test, změněné bloky/reakce vs publikace a poškozený payload.
+- Paměťový test 10 000 malých metadat: 497 bloků / 2 955 200 B, druhý průchod
+  bez missů. Tento test nevytvořil 10 000 Firestore příspěvků.
+- Testy jsou zahrnuté v běžném CI (`functions` a `tools test:rules`). Flutter
+  soubory se neměnily; jejich kontrola proběhne standardní sadou CI tohoto commitu.
+- Žádné živé kolekce, backfill, pravidla/indexy, Functions exporty ani Hosting.
+  Adaptér vyžaduje přesný testovací projekt a emulator host; fixture namespaces
+  se po zkouškách uklidily. Skutečné index entries, cloudová latence a finální
+  poplatky nejsou ověřené, protokol historie/GC není implementovaný.
+
+[Úplný model a migrační předpoklady](FEED_BLOCK_INDEX_PLAN.md),
+[naměřená data](benchmarks/FEED_BLOCK_INDEX_2026-10-31.json).
