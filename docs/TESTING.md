@@ -719,3 +719,21 @@ písma 1× a 2×, konec textu, scrollování a callbacky reakcí/soukromé odpov
 Existující test zachovává omezení náhledu ve feedu na 2/3 řádky.
 Nejde o živý test přihlášení, serverových komentářů ani App Check.
 Nasazení je podmíněné CI přesného commitu; produkce se nemění.
+
+## A1 – lokální prototyp feedu (31. října 2026)
+
+Node 22.23.4: deset testů `tools/feed_prototype.test.mjs` prošlo.
+[Úplné výsledky a neověřené oblasti](FEED_A1_RESULTS.md). Prototyp je součástí
+`test:tools`, neběží v aplikaci ani ve Functions a nepřistupuje k Firebase.
+
+### A0 – doložený vývojový rollout
+
+Čistý commit `b56fbbe17c98da489f5cadbcc387f52d10205017`, CI
+[41189106879](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41189106879) success.
+Release build prošel kontrolou prostředí. Pouze DEV Hosting `shoutout-dev-46c81`:
+verze `8a42571a4073ed7f`, release `1793439504594000`, čas 2026-10-31T09:38:24.594Z.
+Veřejné index.html, main.dart.js a app-config.json mají shodné SHA-256 s manifestem.
+Functions, Rules a produkce se neměnily. Bezpečný návrat: předchozí timed klient
+`079d053`, Hosting `02cdb989d4f18ee2`; nevracet legacy klíče po cutoveru.
+Živý ruční průchod dlouhým Shoutem nebyl proveden; plný obsah a dostupnost ovládání
+ověřují widget testy, nikoli tato kontrola přenosu artefaktů.

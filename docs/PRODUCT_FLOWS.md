@@ -172,7 +172,8 @@ Detail používá stejné údaje a ovládání jako karta ve feedu. Uživatel m�
 A0, lokální kód 31. října 2026: detail zapíná `showFullContent` sdílené
 ShoutCard, takže nadpis ani text nemají řádkové omezení. Feed zachovává náhled
 2/3 řádky. Mobilní šířka a zvětšené písmo jsou ověřené widget testy;
-živé nasazení této změny zatím není ověřené. Osobní přečtení není implementované.
+A0 je nasazená ve vývoji z `b56fbbe` po CI; otisky release jsou ověřené.
+Živý ruční průchod dlouhým Shoutem není doložený. Osobní přečtení není implementované.
 
 Komentář a aktualizace `commentsCount` jsou jedna atomická operace. Totéž platí
 pro reakce, saves a jejich souhrnné čítače. Soukromá odpověď je čitelná pouze

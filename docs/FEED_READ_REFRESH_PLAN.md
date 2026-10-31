@@ -2,7 +2,7 @@
 
 Zapsáno 31. října 2026. Stav: požadavek zařazený do plánu, předběžná technická
 analýza; vlastník následně rozhodl o celém rozsahu před MVP a unread-first
-pouze v Nejblíž. R2 o poloze odložil před A2. [Etapy a rozhodnutí](FEED_IMPLEMENTATION_STAGES.md).
+pouze v Nejblíž. R2 následně schválil: poslední bod v otevřené aplikaci s upozorněním, jinak výzva k poloze. [Etapy a rozhodnutí](FEED_IMPLEMENTATION_STAGES.md).
 Původní doporučení odložit personalizaci po MVP neplatí. Dílčí technické volby
 zůstávají otevřené a uzavírají se před implementací dotčené etapy.
 Úplné zadání je zachované [beze změny zde](requests/FEED_READ_REFRESH_2026-10-31.md).

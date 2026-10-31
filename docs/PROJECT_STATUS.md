@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`fix/shout-full-detail`; navazuje na dokončenou retenci
+`feature/feed-contract-prototype`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -11,12 +11,16 @@ včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání kome
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Sedmidenní retence potvrzení je nyní ve vývoji dokončená;
 vlastník zvolil celý nový feed před MVP, unread-first pouze v Nejblíž.
-R2 o poloze se rozhodne před A2. [Etapy a brány](FEED_IMPLEMENTATION_STAGES.md).
+R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze. [Etapy a brány](FEED_IMPLEMENTATION_STAGES.md).
 A0 je lokálně hotová: plný detail a zachovaný krátký náhled feedu.
-204 Flutter testů a analyzátor prošly. Commit/CI a DEV nasazení se ověřují
-samostatně; aktuálně doložený živý web zůstává `079d053`.
-Další krok A1: lokální syntetický prototyp a kontrakt stránek; před serverovým
-A2 předložit variantu, měření, limity a indexy. [Analýza](FEED_READ_REFRESH_PLAN.md).
+204 Flutter testů a analyzátor prošly. A0 commit `b56fbbe` má úspěšné CI
+`41189106879` a je nasazený na DEV Hosting. Verze `8a42571a4073ed7f`, release
+`1793439504594000`, 31. října 09:38:24.594 UTC; veřejné HTML/JS/konfigurace
+mají shodné SHA-256 s čistým release buildem. Functions/Rules se neměnily.
+Návratový timed klient `079d053` / Hosting `02cdb989d4f18ee2` zachová retenci.
+A1 je lokálně dokončený: deset testů a 24 syntetických měření prošlo.
+[Výsledky a meze](FEED_A1_RESULTS.md). Další krok: konkrétní A2 návrh před
+serverovým kódem: konzistence relace, nákladové limity a indexy. R2 rozhodnuto.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
@@ -222,7 +226,8 @@ závěrečné uzavření přímých zápisů v Rules.
 **Aktualizace 31. října:** vlastník dodal nový read/refresh požadavek.
 Po následné diskusi byl připravený [etapový návrh R1–R3](FEED_IMPLEMENTATION_STAGES.md).
 Vlastník v R1 vybral A0–A3 i B1–B4 celé před MVP, v R3 unread-first pouze
-v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 odložil před A2.
+v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 následně schválil
+pro poslední známý bod otevřené aplikace s upozorněním, jinak výzvu k poloze.
 A0 lokálně dokončená; A1 může pokračovat bez cloudových změn. Po výsledku A1
 předložit serverové dotazy, indexy a limity. Expozice, retence, synchronizace,
 polling a nízké hodnocení mají brány před příslušnou etapou B.

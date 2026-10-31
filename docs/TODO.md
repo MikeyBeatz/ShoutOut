@@ -52,12 +52,12 @@ deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
 1. **R1/R3 rozhodnuto:** celé A0–A3 i B1–B4 před MVP; nepřečtené první jen
-   v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 (poloha) před A2.
+   v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze.
    [Etapy a kontrolní brány](FEED_IMPLEMENTATION_STAGES.md).
 2. A0 lokálně dokončená: celý detail, 204 Flutter testů a analyzátor prošly.
-   Nasazení je samostatný krok po CI přesného commitu. Navázat A1: kontrakt
-   stabilní relace/kurzorů a syntetické porovnání prostorových strategií včetně
-   globálního unread-first. Bez cloudových zápisů, migrací a pollingu.
+   Nasazení je samostatný krok po CI přesného commitu. A1 lokálně dokončený:
+   deset testů a 24 měření. [Kontrakt, výsledky a meze](FEED_A1_RESULTS.md).
+   Další krok je konkrétní návrh A2 a rozhodnutí na jeho kontrolní bráně.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
    a Business výjimky; žádné tiché omezení celého okolí na 50.

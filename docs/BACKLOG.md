@@ -63,7 +63,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - [Etapový návrh a schvalovací brány](FEED_IMPLEMENTATION_STAGES.md).
     [Analýza, otevřené volby a akceptace cílového rozšíření](FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-  - A0 lokálně hotová, celý úkol zůstává otevřený. R2 a limity před A2. Nezaměňovat
+  - A0/A1 lokálně hotové ([měření](FEED_A1_RESULTS.md)); celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace); technické limity před A2. Nezaměňovat
     osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**

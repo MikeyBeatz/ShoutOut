@@ -127,7 +127,7 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
 Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](FEED_READ_REFRESH_PLAN.md).
 Vlastník vybral celé A0–A3 i B1–B4 před MVP; viz
 [etapy](FEED_IMPLEMENTATION_STAGES.md). Unread-first pouze v Nejblíž;
-Top/Končící/Sledované zachovají vlastní řazení. Poloha (R2), serverová varianta,
+Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze. Serverová varianta,
 indexy a nákladové limity mají bránu před A2 po výsledku A1. Samotné
 seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná

@@ -49,7 +49,8 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
   zadání z 31. října 2026, návrh návazností na prostorové stránkování,
   nákladové varianty a rozhodnutí před implementací; obsahuje odkaz na úplné zadání.
 - [Implementační etapy feedu](FEED_IMPLEMENTATION_STAGES.md) – všechny etapy před MVP.
-  R3 schválené jen v Nejblíž; R2 a technická brána před A2. A0 lokálně hotová.
+  R3 jen v Nejblíž; R2 poslední bod otevřené aplikace. Technická brána před A2. A0 ve vývoji.
+- [Výsledky lokálního prototypu A1](FEED_A1_RESULTS.md) – kontrakt, měření, ověření a meze před A2.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
   `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána

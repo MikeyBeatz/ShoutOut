@@ -4,7 +4,8 @@
 [analýzu současného kódu a celého cílového chování](FEED_READ_REFRESH_PLAN.md)
 a [původní nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
 V odpovědích R1–R3 vlastník zvolil celé nové chování před MVP, rozhodnutí
-o poloze odložil před A2 a schválil unread-first pouze v Nejblíž.
+o poloze nejprve odložil před A2; následně schválil poslední bod otevřené aplikace
+s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ## Platný rozsah po rozhodnutí R1
 
@@ -68,8 +69,7 @@ Pro velký hustý feed může být nutný dražší index; není předem rozhodn
 - Bez dostupné aktuální polohy nabídnout poslední známý bod dané relace,
   pokud existuje, s jasným upozorněním. Jinak výzvu k získání polohy a opakování;
   ostatní sekce aplikace zůstanou použitelné. Nepředstírat všem Shoutům 0 km.
-  Toto mění dosavadní fallback a vyžaduje produktové schválení. Ruční výběr
-  města je možná samostatná alternativa, nikoli již schválená funkce.
+  Vlastník tento fallback schválil v R2. Ruční výběr města není součástí změny.
 - Po restartu A vytvoří novou relaci; návrat z detailu/přepnutí karty v otevřené
   aplikaci zachová rozpracovanou relaci a scroll. Trvalé obnovení celého seznamu
   ani přesné polohy mezi restarty se do MVP tímto nepřidává.
@@ -134,7 +134,7 @@ dočasný kompromis vyžaduje výslovný souhlas.
 | Návrh | Rozhodnutí vlastníka | Další krok |
 |---|---|---|
 | R1: rozsah vydání | „Chci celé nové chování před MVP“ | A0–A3 i B1–B4 před MVP. Začít samostatnou A0, pokračovat A1; konkrétní serverová varianta, limity a indexy mají bránu před A2. |
-| R2: poloha pro MVP | „Rozhodnout až před A2“ | Dosavadní návrh fallbacku není schválený; před A2 znovu předložit konkrétní varianty. A0/A1 mohou pokračovat. |
+| R2: poloha pro MVP | Původně odloženo, následně schválen poslední známý bod v otevřené aplikaci | Bod s upozorněním; bez bodu výzva k získání polohy, ostatní sekce použitelné. Žádné trvalé ukládání polohy ani ruční výběr města tím není schválený. |
 | R3: řazení | „Nepřečtené první jen v Nejblíž“ | Platný směr pro B3; Top/Končící/Sledované ponechat. Neřeší automaticky nízké hodnocení, Spotlight ani numerické parametry. |
 
 Před vlastní implementací B stále uzavřít definici expozice, úložiště/retenci,
@@ -154,3 +154,9 @@ až po regresi. Soubory etapy B jsou vyjmenované v původní technické analýz
 Každý krok ověřit přiměřenými testy a CI. Externí rollout do přesně uvedeného
 DEV cíle podléhá trvalému souhlasu a pravidlům vydání; první veřejné vydání
 stále vyžaduje celé MVP. Tento plán sám neprovádí žádnou externí změnu.
+
+## Doložený postup
+
+A0: lokálně 204 Flutter testů a čistý analyzátor; commit `b56fbbe`.
+A1: [výsledky, kontrakt a hranice měření](FEED_A1_RESULTS.md); deset testů
+a 24 syntetických měření prošlo. Cloudová implementace A2 nezačala.
