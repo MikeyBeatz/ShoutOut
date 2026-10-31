@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-migration-readiness`; navazuje na dokončenou retenci
+`feature/feed-reading-policy`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -63,11 +63,18 @@ opravný plán 3 emulátorovými scénáři; celá Functions sada 75 pass / 98 s
 emulátoru a lint čistý. Žádný helper není živě exportovaný. Původní klientské
 mazání účtu zůstává; před jeho pokrytím se Rules nesmějí uzavřít.
 Read-only DEV preflight všech 35 dokumentů našel 17 starých expirovaných
-chybných geohashů. Připravená přesná oprava čeká na souhlas a CI, nic živě
-neopravovala. B1: schválena 1 s na každou část, mimo Top rating nemění pořadí, pouze sbalení.
+chybných geohashů. Vlastník schválil přesný plán, CI `41213628558` pro
+`a5480a737aa621c9090494c688de3e2520e373c8` prošlo. Z čisté kopie je opravených
+17 geohashů; SHA porovnání všech ostatních polí souhlasí. Následný preflight
+35/35 valid, nula chyb. Původní hodnoty/výsledek jsou v docs/local/migrations/. B1: schválena 1 s na každou část, mimo Top rating nemění pořadí, pouze sbalení.
 +Další data/provozní volby mají vlastní brány.
 [Migrační důkazy, lokální plán a další kroky](FEED_MIGRATION_READINESS.md).
 
+[Čtení a rating](FEED_READING_POLICY.md): připravená změna pořadí mimo Top,
+lokální jádro jednosekundové expozice a hodinová hranice klientského koordinátoru.
+21 cílených Flutter a 23 emulátorových případů prošlo. Expozice ani koordinátor
+nejsou v živém Home napojené, nic neukládá read historii. Pro API potvrzený
+read-only historický snapshot v DEV starý 2 269 s, bez nových zápisů.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

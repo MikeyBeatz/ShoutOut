@@ -6,6 +6,44 @@ class FeedFilters {
   FeedOrder order = FeedOrder.nearest;
 }
 
+/// Apply at a new feed snapshot, not when personal read state changes mid-scroll.
+List<Shout> orderedFeedShouts(
+  Iterable<Shout> input,
+  FeedOrder order, {
+  Set<String> followedUserIds = const {},
+  Set<String> readIds = const {},
+}) {
+  final result = input.toList();
+  result.sort((a, b) {
+    if (order == FeedOrder.popular) {
+      final ratingGroup = (a.isLowRated ? 1 : 0).compareTo(
+        b.isLowRated ? 1 : 0,
+      );
+      if (ratingGroup != 0) return ratingGroup;
+    }
+    if (order == FeedOrder.nearest) {
+      final readGroup = (readIds.contains(a.id) ? 1 : 0).compareTo(
+        readIds.contains(b.id) ? 1 : 0,
+      );
+      if (readGroup != 0) return readGroup;
+    }
+    final primary = switch (order) {
+      FeedOrder.nearest => a.distanceKm.compareTo(b.distanceKm),
+      FeedOrder.popular => b.likes.compareTo(a.likes),
+      FeedOrder.endingSoon => a.expiresAt.compareTo(b.expiresAt),
+      FeedOrder.followed => () {
+        final followed = (followedUserIds.contains(b.authorId) ? 1 : 0)
+            .compareTo(followedUserIds.contains(a.authorId) ? 1 : 0);
+        return followed != 0 ? followed : a.distanceKm.compareTo(b.distanceKm);
+      }(),
+    };
+    if (primary != 0) return primary;
+    final created = b.createdAt.compareTo(a.createdAt);
+    return created != 0 ? created : a.id.compareTo(b.id);
+  });
+  return result;
+}
+
 class FeedPage extends StatefulWidget {
   const FeedPage({
     super.key,
@@ -123,38 +161,22 @@ class _FeedPageState extends State<FeedPage> {
       fontSize: 10,
       color: colors.onSurfaceVariant,
     );
-    final filteredShouts =
-        widget.shouts.where((shout) {
-          return shout.distanceKm <= widget.filters.radius &&
-              (widget.filters.selectedCategory == null ||
-                  shout.categories.contains(widget.filters.selectedCategory));
-        }).toList()..sort((a, b) {
-          return switch (widget.filters.order) {
-            FeedOrder.nearest => a.distanceKm.compareTo(b.distanceKm),
-            FeedOrder.popular => b.likes.compareTo(a.likes),
-            FeedOrder.endingSoon => a.expiresAt.compareTo(b.expiresAt),
-            FeedOrder.followed => () {
-              final followedOrder =
-                  (widget.followedUserIds.contains(b.authorId) ? 1 : 0)
-                      .compareTo(
-                        widget.followedUserIds.contains(a.authorId) ? 1 : 0,
-                      );
-              return followedOrder != 0
-                  ? followedOrder
-                  : a.distanceKm.compareTo(b.distanceKm);
-            }(),
-          };
-        });
+    final filteredShouts = orderedFeedShouts(
+      widget.shouts.where((shout) {
+        return shout.distanceKm <= widget.filters.radius &&
+            (widget.filters.selectedCategory == null ||
+                shout.categories.contains(widget.filters.selectedCategory));
+      }),
+      widget.filters.order,
+      followedUserIds: widget.followedUserIds,
+    );
     final spotlightShouts = widget.shouts
         .where((shout) => shout.isActiveSpotlightWithinRange)
         .toList();
     final visibleFeedShouts = filteredShouts
         .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
         .toList();
-    final shouts = [
-      ...visibleFeedShouts.where((shout) => !shout.isLowRated),
-      ...visibleFeedShouts.where((shout) => shout.isLowRated),
-    ];
+    final shouts = visibleFeedShouts;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value:

@@ -101,6 +101,9 @@ function minimumDistance(point, box) {
 function context(input) {
   const c = { order: 'nearest', unreadFirst: false, lowRatedLast: true,
     readIds: [], blocked: [], followed: [], category: null, ...input };
+  // Product decision: rating changes position only in Top; other modes retain
+  // geographic/time/followed order and use a collapsed card for negative content.
+  c.lowRatedLast = c.order === 'popular';
   if (!c.point || !Number.isFinite(c.point.latitude) || Math.abs(c.point.latitude) > 90 ||
     !Number.isFinite(c.point.longitude) || Math.abs(c.point.longitude) > 180 ||
     !Number.isFinite(c.radiusKm) || c.radiusKm <= 0 || !Number.isSafeInteger(c.now) ||

@@ -1,5 +1,9 @@
 import 'dart:async';
 
+class FeedSessionExpired implements Exception {
+  const FeedSessionExpired();
+}
+
 /// An ordered page from one immutable server view. A null cursor means end.
 class FeedBatch<T> {
   FeedBatch({
@@ -35,7 +39,16 @@ class FeedSessionController<T, C extends Object> {
     required this.idOf,
     this.loadNews,
     this.onChanged,
-  });
+    Duration Function()? elapsedClock,
+  }) : _elapsed = elapsedClock ?? _monotonicClock();
+
+  static Duration Function() _monotonicClock() {
+    final clock = Stopwatch()..start();
+    return () => clock.elapsed;
+  }
+
+  static const lifetime = Duration(hours: 1);
+  final Duration Function() _elapsed;
 
   final Future<FeedBatch<T>> Function(C context, Object? cursor) load;
   final String Function(T item) idOf;
@@ -57,12 +70,16 @@ class FeedSessionController<T, C extends Object> {
   int _generation = 0;
   bool _active = true;
   bool _disposed = false;
+  bool _expired = false;
+  Duration? _deadline;
 
   List<T> get items => List.unmodifiable(_items);
   C? get context => _context;
-  bool get hasMore => _context != null && _next != null;
+  bool get needsRefresh =>
+      _expired || (_deadline != null && _elapsed() >= _deadline!);
+  bool get hasMore => _context != null && _next != null && !needsRefresh;
   bool get isRefreshing => _refreshFlight != null;
-  bool get hasPreparedPage => _prepared != null;
+  bool get hasPreparedPage => _prepared != null && !needsRefresh;
   int get newsCount => _news.length;
   String get newsLabel => newsCount > 99 ? '99+' : '$newsCount';
   String? get checkpoint => _checkpoint;
@@ -80,6 +97,7 @@ class FeedSessionController<T, C extends Object> {
       return _refreshFlight!;
     }
     final generation = ++_generation;
+    final deadline = _elapsed() + lifetime;
     _refreshContext = requested;
     _prefetchFlight = null;
     _appendFlight = null;
@@ -88,6 +106,7 @@ class FeedSessionController<T, C extends Object> {
     flight = Future.sync(() => load(requested, null))
         .then((batch) {
           if (_disposed || generation != _generation) return;
+          if (_elapsed() >= deadline) throw const FeedSessionExpired();
           if (batch.baseline.isEmpty) throw StateError('Missing feed baseline');
           _context = requested;
           _items = _unique(batch.items);
@@ -95,6 +114,8 @@ class FeedSessionController<T, C extends Object> {
           _checkpoint = batch.baseline;
           _baseline = batch.baseline;
           _prepared = null;
+          _deadline = deadline;
+          _expired = false;
           _news.clear();
           onChanged?.call();
         })
@@ -109,11 +130,11 @@ class FeedSessionController<T, C extends Object> {
   }
 
   Future<void> prefetch() {
-    if (_disposed ||
-        !_active ||
-        isRefreshing ||
-        !hasMore ||
-        _prepared != null) {
+    if (_disposed || !_active || isRefreshing) return Future.value();
+    if (needsRefresh) {
+      return Future.error(const FeedSessionExpired());
+    }
+    if (!hasMore || _prepared != null) {
       return Future.value();
     }
     if (_prefetchFlight != null) return _prefetchFlight!;
@@ -123,6 +144,7 @@ class FeedSessionController<T, C extends Object> {
     flight = Future.sync(() => load(_context!, cursor))
         .then((batch) {
           if (_disposed || generation != _generation) return;
+          if (needsRefresh) throw const FeedSessionExpired();
           if (batch.baseline != _baseline) {
             throw StateError('Feed page belongs to another snapshot');
           }
@@ -130,6 +152,10 @@ class FeedSessionController<T, C extends Object> {
             throw StateError('Feed cursor did not advance');
           }
           _prepared = batch;
+        })
+        .catchError((Object error) {
+          _handleExpiry(error, generation);
+          throw error;
         })
         .whenComplete(() {
           if (identical(_prefetchFlight, flight)) _prefetchFlight = null;
@@ -139,7 +165,11 @@ class FeedSessionController<T, C extends Object> {
   }
 
   Future<void> loadMore() {
-    if (_disposed || !_active || isRefreshing || !hasMore) {
+    if (_disposed || !_active || isRefreshing) return Future.value();
+    if (needsRefresh) {
+      return Future.error(const FeedSessionExpired());
+    }
+    if (!hasMore) {
       return Future.value();
     }
     if (_appendFlight != null) return _appendFlight!;
@@ -150,6 +180,7 @@ class FeedSessionController<T, C extends Object> {
           if (_disposed || generation != _generation || _prepared == null) {
             return;
           }
+          if (needsRefresh) throw const FeedSessionExpired();
           final batch = _prepared!;
           _items = _unique([..._items, ...batch.items]);
           _next = batch.next;
@@ -165,12 +196,11 @@ class FeedSessionController<T, C extends Object> {
 
   /// Caller supplies lifecycle/timing. No unapproved polling interval is set.
   Future<void> checkNews() {
-    if (_disposed ||
-        !_active ||
-        isRefreshing ||
-        _context == null ||
-        loadNews == null ||
-        _checkpoint == null) {
+    if (_disposed || !_active || isRefreshing) return Future.value();
+    if (needsRefresh) {
+      return Future.error(const FeedSessionExpired());
+    }
+    if (_context == null || loadNews == null || _checkpoint == null) {
       return Future.value();
     }
     if (_newsFlight != null) return _newsFlight!;
@@ -179,6 +209,7 @@ class FeedSessionController<T, C extends Object> {
     flight = Future.sync(() => loadNews!(_context!, _checkpoint!))
         .then((delta) {
           if (_disposed || generation != _generation) return;
+          if (needsRefresh) throw const FeedSessionExpired();
           if (delta.checkpoint.isEmpty) {
             throw StateError('Missing news checkpoint');
           }
@@ -187,11 +218,25 @@ class FeedSessionController<T, C extends Object> {
           _checkpoint = delta.checkpoint;
           onChanged?.call();
         })
+        .catchError((Object error) {
+          _handleExpiry(error, generation);
+          throw error;
+        })
         .whenComplete(() {
           if (identical(_newsFlight, flight)) _newsFlight = null;
         });
     _newsFlight = flight;
     return flight;
+  }
+
+  void _handleExpiry(Object error, int generation) {
+    if (error is FeedSessionExpired &&
+        !_disposed &&
+        generation == _generation) {
+      _expired = true;
+      _prepared = null;
+      onChanged?.call();
+    }
   }
 
   void dispose() {
@@ -203,6 +248,8 @@ class FeedSessionController<T, C extends Object> {
     _prepared = null;
     _checkpoint = null;
     _baseline = null;
+    _deadline = null;
+    _expired = false;
     _news.clear();
   }
 }

@@ -57,7 +57,7 @@ function oracle(rows, c = {}) {
     !blocked.has(row.authorId) && (!options.category || row.categories.includes(options.category)) &&
     (!row.businessSpotlight || row.businessHighlighted) && distanceKm(options.point, row.location) <= options.radiusKm);
   return filtered.sort((a, b) => {
-    const low = options.lowRatedLast ? Number(lowRated(a)) - Number(lowRated(b)) : 0;
+    const low = options.order === 'popular' ? Number(lowRated(a)) - Number(lowRated(b)) : 0;
     const read = options.order === 'nearest' && options.unreadFirst ? Number(reads.has(a.id)) - Number(reads.has(b.id)) : 0;
     const follow = options.order === 'followed' ? Number(!followed.has(a.authorId)) - Number(!followed.has(b.authorId)) : 0;
     const primary = options.order === 'popular' ? b.likesCount - a.likesCount : options.order === 'endingSoon' ? a.expiresAt - b.expiresAt :
@@ -120,6 +120,23 @@ test('300-row grid: cold/warm metadata reads, all modes and pages match complete
   const persisted = await lab.base.collection('nodes').get();
   assert(!JSON.stringify(persisted.docs.map(doc => doc.data())).includes('reader-secret'));
   assert(!JSON.stringify(persisted.docs.map(doc => doc.data())).includes('readIds'));
+});
+
+test('negative unread content retains spatial/time position and only Top demotes ratings', { skip: !enabled }, async () => {
+  const negative = fixture(1, point, { likesCount: 1, dislikesCount: 99, expiresAt: 10000, authorId: 'followed-author' });
+  const positive = fixture(2, { latitude: point.latitude + .005, longitude: point.longitude }, { likesCount: 30, expiresAt: 11000 });
+  const read = fixture(3, point, { likesCount: 20, expiresAt: 9000 });
+  const { lab } = await index([negative, positive, read]);
+  for (const [order, expected] of [
+    ['nearest', [negative.id, positive.id, read.id]],
+    ['endingSoon', [read.id, negative.id, positive.id]],
+    ['followed', [negative.id, read.id, positive.id]],
+    ['popular', [positive.id, read.id, negative.id]],
+  ]) {
+    const view = await lab.open({ point, radiusKm: 20, now, order, unreadFirst: true,
+      readIds: [read.id], followed: ['followed-author'] });
+    assert.deepEqual(ids(await all(view)), expected, order);
+  }
 });
 
 test('same-point all-read hotspot pays block reads rather than one metadata read per Shout', { skip: !enabled }, async t => {

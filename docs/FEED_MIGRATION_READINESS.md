@@ -68,7 +68,7 @@ starším geografickým nástrojem. Současné Admin seed/backfill nástroje je�
 neaktualizují index: před aktivací generace je nutné je zapojit či provozně
 zablokovat, dokumentované upozornění není automatické vynucení.
 
-## Konkrétní návrh opravy čekající na schválení
+## Schválená a provedená oprava geohashů
 
 - Cíl pouze `shoutout-dev-46c81`, sedmnáct existujících Shoutů.
 - Změnit pouze kořenové pole geohash na sedmimístný hash již uložené polohy.
@@ -88,14 +88,17 @@ zablokovat, dokumentované upozornění není automatické vynucení.
 - Tři emulátorové testy ověřily změnu jediného pole, odmítnutí zastaralého plánu,
   rollback celého batche při konfliktu, chybějící schválení i produkční cíl.
 
-Tato jednorázová změna dat není rutinním rolloutem. Před provedením vyžádat
-výslovné schválení a úspěšné CI přesného kódu; potom znovu ověřit preflight a
-zachování ostatních polí. Zatím je oprava pouze navržená, **neprovedená**.
+Vlastník výslovně schválil opravu tohoto plánu. CI `41213628558` pro
+`a5480a737aa621c9090494c688de3e2520e373c8` prošlo. Z čistého worktree byly
+atomicky změněné všechny 17 geohashů; hash porovnání všech ostatních polí
+souhlasí. Následný read-only preflight všech 35 zdrojů je valid, nula chyb.
+Původní plán i výsledek jsou v docs/local/migrations/, výsledek má příponu -result.json.
+Žádná indexová generace nebo kolekce nevznikla a indexový backfill neběžel.
 
 ## Co ještě brání dokončení celého feedu
 
 1. Business mazání je živě ověřené; další role zůstávají v regresní matici.
-   Výše uvedená oprava dat má vlastní souhlas.
+   Schválená oprava geohashů je dokončená; příprava živého indexu má vlastní brány.
 2. Dokončit skutečné serverové zapojení účtového a moderátorského toku; uzavření
    přímých Rules až po pokrytí všech platforem a schváleném ověření.
 3. Předložit konkrétní živé schéma/generaci, migrační zápisy za souběhu, provozní
