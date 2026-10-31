@@ -115,6 +115,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       if (mounted) setState(() {});
     },
     openOnTap: false,
+    showFullContent: true,
     onPrivateReply:
         widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid
         ? () => _replyPrivately(

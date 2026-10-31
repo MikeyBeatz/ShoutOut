@@ -48,9 +48,8 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 - [Nová logika feedu, přečtení a refresh](FEED_READ_REFRESH_PLAN.md) – analýza
   zadání z 31. října 2026, návrh návazností na prostorové stránkování,
   nákladové varianty a rozhodnutí před implementací; obsahuje odkaz na úplné zadání.
-- [Implementační etapy feedu](FEED_IMPLEMENTATION_STAGES.md) – návrh A0–A3
-  před MVP a B1–B4 po MVP, konkrétní výstupy, kontrolní brána po A1 a návrhy R1–R3
-  ke schválení. Implementace zatím nezačala.
+- [Implementační etapy feedu](FEED_IMPLEMENTATION_STAGES.md) – všechny etapy před MVP.
+  R3 schválené jen v Nejblíž; R2 a technická brána před A2. A0 lokálně hotová.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
   `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
 - [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána

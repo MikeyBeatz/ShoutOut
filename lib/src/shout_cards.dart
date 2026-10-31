@@ -59,6 +59,7 @@ class ShoutCard extends StatelessWidget {
     this.showDeleteButton = false,
     this.onDelete,
     this.openOnTap = true,
+    this.showFullContent = false,
     this.onPrivateReply,
   });
 
@@ -69,6 +70,7 @@ class ShoutCard extends StatelessWidget {
   final bool showDeleteButton;
   final Future<void> Function()? onDelete;
   final bool openOnTap;
+  final bool showFullContent;
   final VoidCallback? onPrivateReply;
 
   @override
@@ -240,8 +242,10 @@ class ShoutCard extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 shout.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                maxLines: showFullContent ? null : 2,
+                overflow: showFullContent
+                    ? TextOverflow.clip
+                    : TextOverflow.ellipsis,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -250,8 +254,10 @@ class ShoutCard extends StatelessWidget {
               Text(
                 shout.text,
                 key: const Key('shout-card-body'),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+                maxLines: showFullContent ? null : 3,
+                overflow: showFullContent
+                    ? TextOverflow.clip
+                    : TextOverflow.ellipsis,
                 style: theme.textTheme.bodyLarge,
               ),
               const SizedBox(height: 12),

@@ -1,11 +1,10 @@
 # Feed: přečtení, stabilní stránky a ruční obnovení
 
 Zapsáno 31. října 2026. Stav: požadavek zařazený do plánu, předběžná technická
-analýza; implementace ani konečné produktové volby nejsou schválené.
-Po následné diskusi je připravený [etapový plán a tři návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md):
-doporučení je prostorový základ a plný detail před MVP, personalizace přečtením
-a číslovaný indikátor po MVP. Tato analýza zachovává celé cílové chování;
-jeho úplná akceptace neblokuje MVP, pokud vlastník schválí etapový odklad.
+analýza; vlastník následně rozhodl o celém rozsahu před MVP a unread-first
+pouze v Nejblíž. R2 o poloze odložil před A2. [Etapy a rozhodnutí](FEED_IMPLEMENTATION_STAGES.md).
+Původní doporučení odložit personalizaci po MVP neplatí. Dílčí technické volby
+zůstávají otevřené a uzavírají se před implementací dotčené etapy.
 Úplné zadání je zachované [beze změny zde](requests/FEED_READ_REFRESH_2026-10-31.md).
 [TODO](TODO.md), [checkboxová evidence](BACKLOG.md#feed-read-refresh) a
 [serverová brána](MVP_SERVER_PLAN.md#gateway) na tento dokument odkazují.
@@ -14,9 +13,9 @@ jeho úplná akceptace neblokuje MVP, pokud vlastník schválí etapový odklad.
 
 Kontrakt relace, pořadí a kurzorů navrhnout před prostorovým stránkováním,
 aby měl připravené rozhraní pro osobní metadata. Doporučené rozdělení po diskusi:
-etapy A0–A3 před MVP, B1–B4 po MVP, viz etapový plán. Finální rozsah i konkrétní
-implementace čekají na schválení; tento zápis neopravňuje k implementaci,
-migraci ani nasazení. Příprava nezaručuje nulové budoucí změny backendu.
+vlastník vybral A0–A3 i B1–B4 před MVP, viz etapový plán. Konkrétní serverová
+varianta má bránu po A1; datové migrace ani nové provozní volby nejsou tímto
+paušálně schválené. Příprava nezaručuje nulové následné změny backendu.
 
 Přibývá jeden otevřený backlogový úkol, nikoli nový milník MVP. Návrh nemění
 hotovou retenci potvrzení operací ani 60denní požadavky mazání účtu. Osobní
@@ -209,14 +208,15 @@ počtu aktivních uživatelů a frekvence použití; bez těchto vstupů nelze o
 
 Pořadí vydání a schvalovací brány určuje [etapový plán](FEED_IMPLEMENTATION_STAGES.md).
 Nejdřív schválit R1 a dokončit A0/A1, podle výsledků zvolit konkrétní A2,
-potom A3 a navázat ostatními milníky MVP. Celé přečtení/synchronizace/počítadlo
-se při schváleném rozdělení implementují až v B1–B4 po MVP.
+potom A3 a B1–B4. Celé přečtení/synchronizace/počítadlo musí podle R1 vzniknout
+ještě před veřejným MVP; A3 bez počítadla je jen mezikrok.
 Rozhodnutí o viditelnosti a polling čerstvosti nejsou důvod blokovat A0/A1,
 ale před jejich vlastní implementací zůstávají povinná. Původní požadavky na
 regresi, nákladové měření a kontrolované rollouty platí pro každou etapu.
 
 Akceptace celého cílového rozšíření B vychází ze všech deseti bodů původního zadání;
-nejde o automatické podmínky vydání omezené etapy A. Testovat navíc globální
+celé cílové rozšíření je nyní požadavkem vydání MVP, s upřesněním R3 jen pro Nejblíž.
+Samotná dílčí etapa A0 neznamená dokončení tohoto požadavku. Testovat navíc globální
 unread/read pořadí přes více stránek (nejen uvnitř jedné), shodné vzdálenosti,
 překryvy buněk, starší místní Shout za více než 50 vzdálenými, mnoho nepřečtených,
 novinku mezi dvěma načtenými vzdálenostmi, změnu polohy/filtrů, expiraci a smazání,

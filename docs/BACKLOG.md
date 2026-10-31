@@ -44,10 +44,10 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 <a id="feed-read-refresh"></a>
 
 - [ ] **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
-  **Navržené Po MVP (B1–B4); příprava kontraktu a plného detailu před MVP (A0–A3). Rozdělení čeká na schválení.**
+  **MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.**
   - Nový požadavek vlastníka z 31. října 2026; rozšiřuje původní rozsah, nejde
     o přepsání historického dokončení základního feedu ani o další milník MVP.
-  - Nepřečtené před přečtenými, obě skupiny podle vzdálenosti se stabilními
+  - V Nejblíž nepřečtené před přečtenými, obě skupiny podle vzdálenosti se stabilními
     shodami; jeden souvislý seznam, neměnné pořadí během relace a připojované stránky.
   - Označení až po skutečném zobrazení celého relevantního obsahu včetně
     dlouhých/rozbalovaných Shoutů; ihned uložit osobní stav bez přesunu karty.
@@ -55,7 +55,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     dostupné položky platných filtrů od baseline, nikoli všechny nepřečtené.
   - Po úspěšném refreshi přepočítat skupiny, vrátit scroll nahoru a posunout
     baseline; zachovat přečtení po restartu, navrhnout dávkovou synchronizaci zařízení.
-  - Před implementací příslušné etapy schválit vztah k Top/Končící/Sledované,
+  - Top/Končící/Sledované zachovají vlastní řazení. Před dalšími etapami vyřešit vztah k
     nízkému hodnocení a Spotlightu, podmínku expozice, změny polohy a čerstvost
     počítadla. Volby budoucího B nesmějí zbytečně blokovat samostatné A0/A1.
   - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
@@ -63,7 +63,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - [Etapový návrh a schvalovací brány](FEED_IMPLEMENTATION_STAGES.md).
     [Analýza, otevřené volby a akceptace cílového rozšíření](FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-  - Implementace, migrace ani nasazení zatím nejsou schválené. Nezaměňovat
+  - A0 lokálně hotová, celý úkol zůstává otevřený. R2 a limity před A2. Nezaměňovat
     osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**

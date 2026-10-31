@@ -710,3 +710,12 @@ projektem `shoutout-dev-46c81` a mají pojistku proti produkci. Jejich návod je
 Konkrétní ruční účty a hesla patří výhradně do ignorované složky `docs/local/`.
 Nejsou součástí přenositelné dokumentace ani historie Gitu a před produkcí se
 odstraní.
+
+## A0 – plný obsah Shoutu v detailu (31. října 2026)
+
+Lokálně prošlo všech 204 Flutter testů a `flutter analyze` bez nálezu.
+Dva nové widget testy ověřují dlouhý nadpis/text na šířce 360 při měřítku
+písma 1× a 2×, konec textu, scrollování a callbacky reakcí/soukromé odpovědi.
+Existující test zachovává omezení náhledu ve feedu na 2/3 řádky.
+Nejde o živý test přihlášení, serverových komentářů ani App Check.
+Nasazení je podmíněné CI přesného commitu; produkce se nemění.

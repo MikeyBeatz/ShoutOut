@@ -2,7 +2,7 @@
 
 Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
 Aktualizace 31. října: přidaný požadavek na novou logiku feedu a návrh etap
-před/po MVP, viz nejbližší práce. Implementace čeká na schválení rozsahu.
+před/po MVP. Vlastník následně vybral celé nové chování před MVP.
 
 ## Postup
 
@@ -51,25 +51,27 @@ Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný
 deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
-1. **Schválit etapový návrh R1:** A0–A3 před MVP, osobní přečtení a číslované
-   novinky B1–B4 až po MVP. [Etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md).
-   **Implementace zatím není schválená.** R2 (fallback polohy) a R3 (budoucí
-   unread-first jen v Nejblíž) lze rozhodnout samostatně; neblokují A0/A1.
-2. Po souhlasu opravit plný obsah detailu (A0), připravit kontrakt stabilní
-   relace/kurzorů a porovnat prostorové strategie na lokálních syntetických
-   datech (A1). Nevytvářet předem cloudovou historii přečtení ani polling.
+1. **R1/R3 rozhodnuto:** celé A0–A3 i B1–B4 před MVP; nepřečtené první jen
+   v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 (poloha) před A2.
+   [Etapy a kontrolní brány](FEED_IMPLEMENTATION_STAGES.md).
+2. A0 lokálně dokončená: celý detail, 204 Flutter testů a analyzátor prošly.
+   Nasazení je samostatný krok po CI přesného commitu. Navázat A1: kontrakt
+   stabilní relace/kurzorů a syntetické porovnání prostorových strategií včetně
+   globálního unread-first. Bez cloudových zápisů, migrací a pollingu.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
-   obnovu bez čísla a regresi (A3). Zachovat současné filtry, živé interakce,
-   čtyři řazení a Business výjimky; žádné tiché omezení celého okolí na 50.
-4. Po ověření všech toků uzavřít přímé klientské obsahové zápisy v Rules.
-   Na budoucí B nečekat; osobní metadata pak dostanou vlastní soukromá oprávnění.
+   obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
+   a Business výjimky; žádné tiché omezení celého okolí na 50.
+4. Dokončit B1–B4 před veřejným MVP: přečtení, synchronizaci, osobní pořadí
+   a číslovaný indikátor. Expozice, retence a nákladové limity mají vlastní brány.
+5. Po ověření dotčených toků uzavřít přímé klientské obsahové zápisy v Rules.
+   Osobní metadata potřebují soukromá oprávnění; veřejné MVP čeká na celé B.
 
 Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
 obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
 prošly. Celý milník serverové brány zůstává otevřený do dokončení bodů výše.
 
 Serverové podkroky rozpracovávají existující milník. Read/refresh UX je nový
-požadavek z 31. října, jehož navržený odklad personalizace po MVP čeká na schválení;
+požadavek z 31. října, který vlastník celý zařadil před MVP;
 nesmí být považovaný za již implementované chování.
 [Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).
 Vývojové i produkční rollouty mají od 30. října trvalý souhlas po úspěšném CI
@@ -155,9 +157,8 @@ interaktivní tutorial, telefonní ověření, FCM push a fan-out sledujícím a
 obecné žebříčky či gamifikace. Tyto plány se neruší; zůstávají v detailním
 backlogu v [BACKLOG.md](BACKLOG.md) se štítkem **Po MVP**.
 
-Nově je navržené po MVP také osobní přečtení, synchronizace zařízení,
-unread-first a číslovaný indikátor novinek (B1–B4). Původní zadání zůstává
-zachované; toto rozdělení čeká na schválení R1 v etapovém plánu.
+Osobní přečtení, synchronizace zařízení, unread-first v Nejblíž a číslovaný
+indikátor novinek (B1–B4) sem nepatří: vlastník je vybral před MVP.
 
 Navazující mobilní etapa zachovává fyzické testování Androidu, Play Integrity,
 podpis a Google Play, stejně jako sestavení iOS na Macu, App Attest, fyzický

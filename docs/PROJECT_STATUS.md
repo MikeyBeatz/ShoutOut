@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-read-refresh-plan`; navazuje na dokončenou retenci
+`fix/shout-full-detail`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -10,11 +10,13 @@ prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazen�
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
 je lokálně otestované, nasazené a živě ověřené moderátorem, Business i běžným
 účtem včetně úklidu. Sedmidenní retence potvrzení je nyní ve vývoji dokončená;
-další krok je schválit [etapy feedu a rozsah A0/A1](FEED_IMPLEMENTATION_STAGES.md).
-Doporučení: prostorový základ/plný detail/stabilní relace/ruční obnova před MVP,
-přečtení a číslované novinky po MVP. Implementace zatím není schválená.
-[Zadání, analýza a otevřené volby](FEED_READ_REFRESH_PLAN.md).
-V této plánovací změně se upravuje pouze dokumentace, ne chování aplikace.
+vlastník zvolil celý nový feed před MVP, unread-first pouze v Nejblíž.
+R2 o poloze se rozhodne před A2. [Etapy a brány](FEED_IMPLEMENTATION_STAGES.md).
+A0 je lokálně hotová: plný detail a zachovaný krátký náhled feedu.
+204 Flutter testů a analyzátor prošly. Commit/CI a DEV nasazení se ověřují
+samostatně; aktuálně doložený živý web zůstává `079d053`.
+Další krok A1: lokální syntetický prototyp a kontrakt stránek; před serverovým
+A2 předložit variantu, měření, limity a indexy. [Analýza](FEED_READ_REFRESH_PLAN.md).
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
@@ -219,12 +221,11 @@ závěrečné uzavření přímých zápisů v Rules.
 
 **Aktualizace 31. října:** vlastník dodal nový read/refresh požadavek.
 Po následné diskusi byl připravený [etapový návrh R1–R3](FEED_IMPLEMENTATION_STAGES.md).
-Navržené A0–A3 před MVP zachová všechna dnešní řazení a výjimky; osobní přečtení,
-sync a číslované novinky B1–B4 jsou navržené po MVP. R1 ještě není schválený.
-Případný souhlas s R1 opravňuje začít A0/A1, po výsledku A1 následuje konkrétní
-volba dotazů/limitů před A2. R2 o poloze a R3 o budoucím unread-first jsou
-samostatné produktové volby; jejich neuzavření neblokuje A0/A1. Níže uvedený
-technický postup se řídí tímto rozdělením; volby B neřešit jako podmínku MVP.
+Vlastník v R1 vybral A0–A3 i B1–B4 celé před MVP, v R3 unread-first pouze
+v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 odložil před A2.
+A0 lokálně dokončená; A1 může pokračovat bez cloudových změn. Po výsledku A1
+předložit serverové dotazy, indexy a limity. Expozice, retence, synchronizace,
+polling a nízké hodnocení mají brány před příslušnou etapou B.
 Požadavek je zaevidovaný jako jeden nový otevřený backlogový úkol (107/156);
 24 milníků MVP se nemění. Původní zadání je zachované a prolinkované.
 

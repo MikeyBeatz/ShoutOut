@@ -1,24 +1,26 @@
 # Feed – implementační etapy a návrhy ke schválení
 
-31. října 2026. **Návrh, nikoli souhlas s implementací.** Navazuje na
+31. října 2026. **Rozsah rozhodnutý vlastníkem; dílčí technické brány zůstávají.** Navazuje na
 [analýzu současného kódu a celého cílového chování](FEED_READ_REFRESH_PLAN.md)
 a [původní nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-Uživatel požádal o rozdělení práce s ohledem na dokončení stabilního MVP.
+V odpovědích R1–R3 vlastník zvolil celé nové chování před MVP, rozhodnutí
+o poloze odložil před A2 a schválil unread-first pouze v Nejblíž.
 
-## Doporučený rozsah
+## Platný rozsah po rozhodnutí R1
 
-Před MVP dokončit prostorový feed a připravit hranice pro jeho budoucí rozšíření.
-Po MVP dodat personalizaci přečtením a číslovaný indikátor novinek. Odklad
-nesmí zneplatnit původní zadání: jeho požadavky zůstávají akceptací etapy B,
-nejsou vydávané za již splněné vlastnosti etapy A.
+Před MVP dokončit všechny etapy A0–A3 i B1–B4: prostorový feed, plný obsah,
+osobní přečtení a synchronizaci, unread-first v Nejblíž i indikátor novinek.
+Původní doporučení odložit B po MVP vlastník nevybral. Písmena A/B nadále
+označují technické části práce, nikoli dvě různá vydání. A samotné nestačí
+ke splnění nové akceptace feedu pro veřejné MVP.
 
-Příprava znamená oddělený zdroj stránek, relaci, řadicí pravidla a rozhraní pro
-budoucí osobní metadata. Neznamená předem zapisovat přečtení, budovat cloudovou
-historii, spouštět polling ani vytvářet nevyužité kolekce/indexy. Pozdější
+Nejdřív oddělit zdroj stránek, relaci, řadicí pravidla a rozhraní pro
+osobní metadata. V A0/A1 se ještě nezapisují přečtení, nebuduje cloudová
+historie ani nespouští polling či nevytvářejí nevyužité kolekce/indexy. Následné
 unread-first bude nadále vyžadovat backendové rozšíření; úplnou absenci budoucích
 změn ani jejich nulovou cenu neslibujeme.
 
-## A – před MVP
+## A – základ, všechny etapy před MVP
 
 | Etapa | Konkrétní výstup | Podmínka dokončení |
 |---|---|---|
@@ -26,6 +28,10 @@ změn ani jejich nulovou cenu neslibujeme.
 | A1: smlouva stránek a omezený lokální prototyp | Popsané typy relace/stránky/kurzoru, porovnání prostorových strategií a měření na syntetických datech. | Správné výsledky proti úplnému referenčnímu seřazení, popsané náklady a limity pro všechny čtyři dnešní režimy. Žádné Firebase migrace nebo placená nová služba. |
 | A2: prostorové načítání | Serverové stránky podle polohy/filtrů s ověřením Auth a App Check, napojení přes DEV přepínač, stabilní seznam. | Místní Shout nezmizí kvůli 50 novějším vzdáleným; stránky nemají duplicity ani falešný konec při vyčerpání pracovního rozpočtu; dodržený schválený nákladový limit. |
 | A3: obnova a regrese | Ruční tlačítko „Obnovit“ bez čísla; bezpečná výměna relace a návrat nahoru po úspěchu. | Chyba ponechá starý feed/scroll, opakované kliknutí sdílí jednu obnovu; CI a živá DEV regrese běžného i Business účtu projdou. |
+
+A3 bez čísla je mezikrok. Před veřejným MVP musí B4 doplnit požadovaný indikátor.
+A1 už musí prověřit i budoucí globální unread/read pořadí v Nejblíž na smíšených
+stavech přečtení, aby se návrh A2 neopíral pouze o nepersonalizované výsledky.
 
 **Kontrolní brána po A1:** před A2 předložit výsledky, zvolený způsob dotazování,
 potřebné indexy a konkrétní limity skenování/relace. Novou službu, trvalé
@@ -89,10 +95,11 @@ Připočíst indexy, opakování, živé aktualizace, případné zápisy a úkl
 Po A1 teprve vybrat konkrétní meze a kapacitní předpoklady vůči celkovému
 rozpočtu vlastníka 5 000 Kč/měsíc; nepovažovat jej za automatický finanční strop.
 
-Po A3 navázat stávajícím plánem uzavření přímých obsahových zápisů v Rules,
-dalšími otevřenými milníky a veřejným MVP. Na celou etapu B kvůli tomu nečekat.
+Po A3 dokončit B1–B4 a závěrečnou společnou regresi. Uzavření přímých obsahových
+zápisů v Rules může následovat po ověření dotčených obsahových toků; nové osobní
+read metadata musí mít vlastní soukromá oprávnění. Veřejné MVP na dokončení B čeká.
 
-## B – po MVP, samostatná rozšíření
+## B – personalizace a novinky, rovněž před MVP
 
 | Etapa | Obsah | Podmínka zahájení |
 |---|---|---|
@@ -106,11 +113,11 @@ celé původní zadání. B3 nesmí používat pouze částečnou lokální hist
 garantovanou konzistenci mezi zařízeními. Pokud se pořadí B2/B3 změní, tento
 dočasný kompromis vyžaduje výslovný souhlas.
 
-### Doporučené budoucí produktové volby
+### Schválený směr a zbývající produktové volby
 
-- Unread-first použít pro režim Nejblíž; Top/Končící/Sledované zachovat jako
-  samostatné režimy. Je to navržené upřesnění původního zadání, ne tiché schválení
-  toho, že se unread-first má automaticky týkat všech režimů.
+- R3 schválené: unread-first pouze v Nejblíž, obě skupiny podle vzdálenosti.
+  Top/Končící/Sledované zachovají své řazení. Tato volba upravuje původní zadání
+  výslovným rozhodnutím vlastníka, ne předpokladem implementátora.
 - U nového Nejblíž skrytou nízko hodnocenou kartu ponechat na jejím místě,
   ale neoznačit ji přečtenou před rozbalením celého obsahu. Spotlight dál
   odděleně; jeho přečtení nevydávat za veřejné započítané zobrazení reklamy.
@@ -122,16 +129,17 @@ dočasný kompromis vyžaduje výslovný souhlas.
 - Počet novinek nebude počet všech nepřečtených. Před B4 rozhodnout zvlášť,
   zda počítat i starší příspěvky nově zpřístupněné moderací či změnou dostupnosti.
 
-## Co schválit nyní
+## Výsledek rozhodnutí R1–R3
 
-| Návrh | Doporučení | Co znamená souhlas |
+| Návrh | Rozhodnutí vlastníka | Další krok |
 |---|---|---|
-| R1: rozsah vydání | A0–A3 před MVP, B1–B4 po MVP | Začít A0 a lokální A1. Po A1 znovu předložit konkrétní serverovou variantu, limity a indexy před A2; nejde o souhlas s libovolnou cenou nebo migrací. |
-| R2: poloha pro MVP | Poslední známý bod s upozorněním, jinak výzva k získání polohy | Schválení popsané změny fallbacku v A2. Alternativa: navrhnout ruční výběr města, který zvětší rozsah. |
-| R3: budoucí řazení | Unread-first jen v Nejblíž, ostatní režimy zachovat | Produktový směr pro B3. Není to souhlas s dnešní implementací přečtení ani celou cloudovou synchronizací. |
+| R1: rozsah vydání | „Chci celé nové chování před MVP“ | A0–A3 i B1–B4 před MVP. Začít samostatnou A0, pokračovat A1; konkrétní serverová varianta, limity a indexy mají bránu před A2. |
+| R2: poloha pro MVP | „Rozhodnout až před A2“ | Dosavadní návrh fallbacku není schválený; před A2 znovu předložit konkrétní varianty. A0/A1 mohou pokračovat. |
+| R3: řazení | „Nepřečtené první jen v Nejblíž“ | Platný směr pro B3; Top/Končící/Sledované ponechat. Neřeší automaticky nízké hodnocení, Spotlight ani numerické parametry. |
 
-R2/R3 lze rozhodnout později; jejich neuzavření neblokuje oddělenou opravu A0
-a lokální porovnání A1. Před dotčenou implementací se nesmějí považovat za schválené.
+Před vlastní implementací B stále uzavřít definici expozice, úložiště/retenci,
+synchronizační a polling strategii a vztah nízkého hodnocení/Spotlightu k pořadí.
+Volba R1 není souhlas s libovolnou cenou, migrací ani neomezeným skenováním.
 
 ## Předpokládané změny souborů
 

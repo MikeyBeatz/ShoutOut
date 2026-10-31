@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -283,6 +284,77 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('full Shout content remains readable at text scale $scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final now = DateTime.now();
+      final shout = Shout(
+        id: 'full-content',
+        author: 'Soused',
+        title: List.filled(5, 'Dlouhý nadpis bez ztraceného konce').join(' '),
+        text:
+            '${List.filled(18, 'Celý dlouhý obsah Shoutu.').join(' ')} KONEC.',
+        categories: const ['Událost'],
+        distanceKm: 1,
+        createdAt: now,
+        expiresAt: now.add(const Duration(hours: 2)),
+      );
+      var reactions = 0;
+      var privateReplies = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('cs'),
+          home: MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+            child: Scaffold(
+              body: SingleChildScrollView(
+                child: ShoutCard(
+                  shout: shout,
+                  showFullContent: true,
+                  openOnTap: false,
+                  onSave: () {},
+                  onReaction: (_) async => reactions++,
+                  onPrivateReply: () => privateReplies++,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final title = tester.renderObject<RenderParagraph>(
+        find.text(shout.title),
+      );
+      final body = tester.renderObject<RenderParagraph>(
+        find.byKey(const Key('shout-card-body')),
+      );
+      expect(title.didExceedMaxLines, isFalse);
+      expect(body.didExceedMaxLines, isFalse);
+      final tail = body.getBoxesForSelection(
+        TextSelection(
+          baseOffset: shout.text.length - 6,
+          extentOffset: shout.text.length,
+        ),
+      );
+      expect(tail, isNotEmpty);
+      await tester.scrollUntilVisible(
+        find.byIcon(Icons.thumb_up_outlined),
+        300,
+        scrollable: find.byType(Scrollable),
+      );
+      await tester.tap(find.byIcon(Icons.thumb_up_outlined));
+      await tester.tap(find.byIcon(Icons.lock_outline));
+      await tester.pump();
+      expect(reactions, 1);
+      expect(privateReplies, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('Business promo carousel can move back and forward', (
     WidgetTester tester,
