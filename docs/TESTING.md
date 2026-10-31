@@ -737,3 +737,24 @@ Functions, Rules a produkce se neměnily. Bezpečný návrat: předchozí timed 
 `079d053`, Hosting `02cdb989d4f18ee2`; nevracet legacy klíče po cutoveru.
 Živý ruční průchod dlouhým Shoutem nebyl proveden; plný obsah a dostupnost ovládání
 ověřují widget testy, nikoli tato kontrola přenosu artefaktů.
+
+## Progresivní feed – lokální stavební bloky (31. října 2026)
+
+- Flutter: 212 testů prošlo; osm nových testů `test/feed_session_test.dart`
+  ověřuje jednu připravenou stránku, deduplikaci, retry, atomickou obnovu,
+  staré odpovědi, checkpoint novinek, lifecycle a vymazání dat při dispose.
+- `flutter analyze`: bez nálezu. Formátování nových Dart souborů prošlo.
+- Dvanáct nových serverových unit testů: geometrie a stránky proti referenci,
+  unread-first, dateline/póly, omezené dávky, retry a pevný snapshot v adaptéru.
+- Izolovaný Firestore emulátor `shoutout-rules-test`: test
+  `functions/feed_spatial.integration.test.js` prošel. Mezi dotazy se změnil
+  createdAt původního záznamu a přibyl další; pinned read vrátil původní stav.
+  Test je přidaný do standardního `tools` skriptu `test:rules` a následného CI.
+- Žádný nový query callable, živé kolekce, Rules, backfill ani Hosting rollout.
+  Neověřeno: zapojení Home/FeedPage a scrollu, živá Auth/App Check regrese,
+  osobní synchronizace, polling, serverová retence relací, náklady a latence cloudu.
+
+[Doložená práce a zbývající nákladový problém](FEED_PROGRESSIVE_PLAN.md).
+Samotné rozšiřování rozsahů může stále načíst celé husté okolí; není doložená
+univerzální úspora ani hotový MVP milník. Před živým napojením vyřešit další
+indexovou vrstvu a její aktualizační náklady.

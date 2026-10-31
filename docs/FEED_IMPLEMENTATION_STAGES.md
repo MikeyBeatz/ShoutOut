@@ -161,4 +161,4 @@ A0: lokálně 204 Flutter testů a čistý analyzátor; commit `b56fbbe`.
 A1: [výsledky, kontrakt a hranice měření](FEED_A1_RESULTS.md); deset testů
 a 24 syntetických měření prošlo. Cloudová implementace A2 nezačala.
 
-Další úsek k rozhodnutí: [A2a – lokální geografický adaptér a konzistence](FEED_A2_PROPOSAL.md).
+Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).

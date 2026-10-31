@@ -130,6 +130,9 @@ Vlastník vybral celé A0–A3 i B1–B4 před MVP; viz
 Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze. Serverová varianta,
 indexy a nákladové limity mají bránu před A2 po výsledku A1. Samotné
 seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
+Aktuálně schválený výběr stránek a jeho neuzavřené náklady jsou v
+[progresivním plánu](FEED_PROGRESSIVE_PLAN.md); úplná příprava regionu před
+první stránkou není zvolená. Připravené moduly ještě nejsou živým query API.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

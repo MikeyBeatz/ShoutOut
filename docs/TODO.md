@@ -57,7 +57,10 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
 2. A0 lokálně dokončená: celý detail, 204 Flutter testů a analyzátor prošly.
    A0 nasazená na DEV z `b56fbbe` po CI `41189106879`. A1 lokálně dokončený:
    deset testů a 24 měření. [Kontrakt, výsledky a meze](FEED_A1_RESULTS.md).
-   Další krok: schválit [konkrétní úsek A2a](FEED_A2_PROPOSAL.md) na kontrolní bráně.
+   Progresivní směr následně schválený; serverové jádro a klientský koordinátor
+   připravené a lokálně ověřené. [Stav a nákladový problém](FEED_PROGRESSIVE_PLAN.md).
+   Další krok: sdílený prostorový index metadat, počty aktualizačních zápisů,
+   konzistence a schválení nové datové vrstvy před napojením. Živý feed je původní.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
    a Business výjimky; žádné tiché omezení celého okolí na 50.

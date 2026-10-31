@@ -88,4 +88,4 @@ dočasné údaje pro vývojový projekt, například přehled testovacích účt
 interní marketingový plán. Testovací účty se před vytvořením produkčního
 prostředí odstraní a lokální přístupové údaje se nesmějí převzít do produkce.
 
-Další úsek k rozhodnutí: [A2a – lokální geografický adaptér a konzistence](FEED_A2_PROPOSAL.md).
+Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).

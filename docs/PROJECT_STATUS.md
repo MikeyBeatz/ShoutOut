@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-contract-prototype`; navazuje na dokončenou retenci
+`feature/progressive-spatial-feed`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -18,9 +18,17 @@ A0 je lokálně hotová: plný detail a zachovaný krátký náhled feedu.
 `1793439504594000`, 31. října 09:38:24.594 UTC; veřejné HTML/JS/konfigurace
 mají shodné SHA-256 s čistým release buildem. Functions/Rules se neměnily.
 Návratový timed klient `079d053` / Hosting `02cdb989d4f18ee2` zachová retenci.
-A1 je lokálně dokončený: deset testů a 24 syntetických měření prošlo.
-[Výsledky a meze](FEED_A1_RESULTS.md). Další krok: konkrétní A2 návrh před
-serverovým kódem: konzistence relace, nákladové limity a indexy. R2 rozhodnuto.
+A1 je dokončený, CI `41189770135` pro `8b8ec33` prošlo. Následně vlastník
+schválil progresivní výběr první stránky, jednu stránku dopředu a inkrementální
+novinky. Připravené jsou serverový geografický modul, pinned repository a
+klientský koordinátor; nejsou exportované/napojené na živý feed.
+212 Flutter testů, 12 nových serverových unit testů a jedna izolovaná zkouška
+konzistence v emulátoru prošly; analyzátor bez nálezu. CI této změny se ověřuje
+samostatně. Živý web zůstává A0 `b56fbbe`, Functions/Rules/data se nemění.
+[Výsledky a nový další krok](FEED_PROGRESSIVE_PLAN.md): samotné rozšiřování
+geohashových dotazů neprokázalo úsporu v hustém okolí. Před napojením připravit
+rozhodnutí o sdíleném prostorovém indexu metadat a jeho aktualizačních zápisech.
+Nevydávat tento dílčí geografický modul za hotový rychlý feed. R2/R3 rozhodnuté.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní
@@ -292,4 +300,4 @@ Při novém release aktualizovat výše uvedený commit/verzi a odkaz na důkazy
 Do tohoto přehledu nepřidávat dlouhou chronologii; původní podrobnosti zůstaly
 v nezměněném archivu a nové technické záznamy patří do příslušných dokumentů.
 
-Další úsek k rozhodnutí: [A2a – lokální geografický adaptér a konzistence](FEED_A2_PROPOSAL.md).
+Aktuální směr a neuzavřené náklady: [progresivní feed](FEED_PROGRESSIVE_PLAN.md).

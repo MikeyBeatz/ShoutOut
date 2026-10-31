@@ -1,5 +1,9 @@
 # A1 – lokální kontrakt feedu a výsledky prototypu
 
+**Následné rozhodnutí vlastníka:** první stránka se nesmí připravovat úplným
+průchodem okolí. Platí [progresivní směr a nové výsledky](FEED_PROGRESSIVE_PLAN.md).
+Původní srovnání níže zůstává referencí, ne zvoleným živým algoritmem.
+
 31. října 2026. Navazuje na [etapy](FEED_IMPLEMENTATION_STAGES.md).
 **Lokální experiment A1 dokončený; nejde o serverovou implementaci A2 ani o celý milník MVP.**
 Runtime ověření: Node 22.23.4, deset testů. Modul není importovaný aplikací ani Functions.

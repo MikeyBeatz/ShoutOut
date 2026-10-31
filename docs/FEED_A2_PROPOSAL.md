@@ -1,6 +1,11 @@
 # A2 – návrh dalšího ověřovacího úseku
 
-31. října 2026. **Návrh ke schválení; serverová implementace nezačala.**
+31. října 2026. **Historický návrh, nahrazený následným rozhodnutím vlastníka.**
+Aktuální směr: [progresivní feed](FEED_PROGRESSIVE_PLAN.md). Vlastník odmítl
+úplný průchod okolí před první stránkou a schválil rozšiřování podle potřeby.
+Níže uvedené pracovní limity nejsou schválenými provozními limity. Nové jádro
+je lokálně připravené, ale není napojené na živou aplikaci. Původní text zůstává
+pro zachování historie; jeho staré stavy nejsou aktuálními pokyny.
 Vychází z [výsledků A1](FEED_A1_RESULTS.md) a platných [etap](FEED_IMPLEMENTATION_STAGES.md).
 
 ## Doporučení A2a

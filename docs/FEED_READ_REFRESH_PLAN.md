@@ -1,5 +1,9 @@
 # Feed: přečtení, stabilní stránky a ruční obnovení
 
+**Následné rozhodnutí vlastníka:** první stránka se nesmí připravovat úplným
+průchodem okolí. Platí [progresivní směr a nové výsledky](FEED_PROGRESSIVE_PLAN.md).
+Původní srovnání níže zůstává referencí, ne zvoleným živým algoritmem.
+
 Zapsáno 31. října 2026. Stav: požadavek zařazený do plánu, předběžná technická
 analýza; vlastník následně rozhodl o celém rozsahu před MVP a unread-first
 pouze v Nejblíž. R2 následně schválil: poslední bod v otevřené aplikaci s upozorněním, jinak výzva k poloze. [Etapy a rozhodnutí](FEED_IMPLEMENTATION_STAGES.md).
