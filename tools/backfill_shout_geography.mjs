@@ -1,3 +1,4 @@
+import { encodeGeohash as geohash } from '../functions/geohash.js';
 import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
@@ -15,32 +16,6 @@ if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
   throw new Error('This development tool only supports shoutout-dev-46c81.');
 }
 initializeApp({ credential: cert(serviceAccount) });
-
-const alphabet = '0123456789bcdefghjkmnpqrstuvwxyz';
-function geohash(latitude, longitude, precision = 7) {
-  let lat = [-90, 90];
-  let lng = [-180, 180];
-  let even = true;
-  let bit = 0;
-  let character = 0;
-  let result = '';
-  while (result.length < precision) {
-    const range = even ? lng : lat;
-    const value = even ? longitude : latitude;
-    const midpoint = (range[0] + range[1]) / 2;
-    character = (character << 1) | (value >= midpoint ? 1 : 0);
-    if (value >= midpoint) range[0] = midpoint;
-    else range[1] = midpoint;
-    even = !even;
-    bit += 1;
-    if (bit === 5) {
-      result += alphabet[character];
-      bit = 0;
-      character = 0;
-    }
-  }
-  return result;
-}
 
 function component(components, type) {
   return components.find((item) => item.types?.includes(type));

@@ -4,7 +4,7 @@
 Vlastník zvolil „Schvaluji lokální návrh a ověření indexu“. Navazuje na
 [progresivní feed](FEED_PROGRESSIVE_PLAN.md), jehož přímé geohashové dotazy
 v hustém okolí stále načítaly mnoho Shoutů. Nejde o dokončení celého feedu ani
-milníku serverové brány. Živý web zůstává A0 `b56fbbe`.
+milníku serverové brány. Aktuální DEV rollout a zápisové cesty jsou v [migrační připravenosti](FEED_MIGRATION_READINESS.md).
 
 ## Konkrétní schéma prototypu
 

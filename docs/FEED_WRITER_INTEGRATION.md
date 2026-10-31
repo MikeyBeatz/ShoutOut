@@ -10,7 +10,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 |---|---|---|
 | Publikace Shoutu | Serverová `createShout` | Index ve stejné transakci jako dokument a receipt. |
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
-| Mazání autorem/moderátorem | Nová `deleteShout` nasazená ve vývoji, aktivace webu čeká na CI/Hosting | Nejprve DEV rollout a regrese, následně atomické vyřazení z indexu. |
+| Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | `hideActiveShoutsBeforeAccountDeletion` stále stránkuje a mění statusy z klienta | Serverový dávkový postup a index; neuzavírat přímé Rules dříve. |
 | Expirace | Lokální indexový prune; současná dostupnost zohledňuje expiresAt | Provozní worker a budget jsou před aktivací nové kolekce samostatnou bránou. |
@@ -82,3 +82,7 @@ konzistence prošla, není to důkaz přijatelné cloudové latence pod zátěž
 Dávkové mazání účtu a migrace nejsou ještě zapojené. Více změn jedné oblasti
 se nesmí slepě plánovat nezávisle nad týmž původním kořenem: přepsaly by se navzájem.
 Je potřeba sdílený plán dávky, nebo omezené samostatné transakce s opakováním.
+
+Aktuální DEV Hosting, stav ručního testu a návazná kontrola historických dat:
+[migrační připravenost](FEED_MIGRATION_READINESS.md). Výše uvedené čekání na CI/Hosting
+popisuje přípravu prvního rolloutu; aktuální aktivace `3b159f2` již nasazená je.

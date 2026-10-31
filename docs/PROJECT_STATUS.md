@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-content-writers`; navazuje na dokončenou retenci
+`feature/feed-migration-readiness`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -27,7 +27,7 @@ Následně vlastník schválil lokální návrh a ověření sdíleného prostor
 [Schéma, důkazy, náklady a migrační návrh](FEED_BLOCK_INDEX_PLAN.md) jsou připravené:
 10 nových unit testů a 9 emulátorových testů prošlo, celkem 66 Functions unit
 bez chyb a lint čistý. CI `41200644473` pro `86fc171` prošlo. Prototyp odmítá
-projekty jiné než lokální `shoutout-rules-test`. Živý web zůstává A0 `b56fbbe`.
+projekty jiné než lokální `shoutout-rules-test`. A0 je základ současného webu; novější Hosting je uvedený níže.
 Vzorek 300: 18 metadata čtení za studena / 2 teplá proti 285 u přímého geo
 postupu, plus 50 source čtení pro karty. Test pracuje se syntetickými metadaty,
 ne skutečnými těly karet nebo cloudovou fakturou. Současné Functions/Rules se nemění.
@@ -35,25 +35,39 @@ R4 schválené: pevná hodina od otevření/obnovy, načtené karty zůstávají
 přečtení a uložené Shouty neexpirují. Lokální archivace kořenů, GC a vyřazování
 expirovaných metadat jsou lokálně ověřené (69 Functions unit, lint, 19/19
 cílených emulátorových případů); [ověření a meze](FEED_INDEX_RETENTION.md).
-Původní index `86fc171` má úspěšné CI `41200644473`. CI nového úseku sleduj v [bězích větve](https://github.com/MikeyBeatz/ShoutOut/actions?query=branch%3Afeature%2Ffeed-index-retention); živý web zůstává A0. Další krok: pokrytí všech zapisovacích cest,
-migrační dry-run a provozní rozpočet workeru před zapojením zabezpečeného API/UI.
-Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill.
-Retenční krok `415631e` má úspěšné CI `41208467738`. Vlastník následně schválil
-pokračování podle plánu. Připravená je serverová `deleteShout` a společné klientské
-napojení feed/detail/moderace. Aktivace přepínače je připravená do dalšího webu. Lokálně: 71 Functions unit,
-lint/analyze, 24 cílených Flutter testů a 6 nových emulátorových případů prošlo.
-[Přehled zápisových cest a přesný rozsah](FEED_WRITER_INTEGRATION.md).
-CI `41210929174` pro `868bc8904f04798f227a78384dbdb4eec4c0361c` prošlo.
-Z čistého worktree je do DEV nasazená pouze `deleteShout` a aktualizovaný
-`cleanupOperationReceipts`, obě ACTIVE; artifact hash
-`4c1e36b0740665598d6dc5fcc4a18c013ab616fa`. Node 22, europe-west3,
-256 MiB, max 1/concurrency 1; timeout 15 s a původních 60 s pro cleanup.
-Anonymní endpointy vrací 401/403. Aktivace webu čeká na další CI a Hosting,
-živé role/retry ještě nejsou ověřené. Index není připojený k živým
-zápisům. Lokálně už reálné operace createShout/toggleShoutReaction/deleteShout
-umějí složit indexový plán do vlastní transakce; 22 cílených emulátorových testů
-včetně rollbacku a zachování plných těl prošlo. Wrappery indexWriter nezapínají.
-Účetní dávkové mazání zůstává klientské; Rules se nesmí předčasně uzavřít.
+Původní index `86fc171` má úspěšné CI `41200644473`, retence `415631e`
+CI `41208467738`. Následuje pokrytí všech zápisů, migrace a provozní budget
+před bezpečným query API/UI; živé indexové kolekce/backfill zatím nejsou povolené.
+
+Serverové mazání Shoutů `868bc8904f04798f227a78384dbdb4eec4c0361c` prošlo
+CI `41210929174`; `deleteShout` a aktualizovaný `cleanupOperationReceipts`
+jsou v DEV ACTIVE, artifact hash `4c1e36b0740665598d6dc5fcc4a18c013ab616fa`.
+Node 22, europe-west3, 256 MiB, max 1/concurrency 1, timeout 15/60 s; anonymní
+endpointy vrací 401/403. Aktivace `3b159f2d9acbe28effcfd7f9357034d882d963fb`
+prošla CI `41211805774` a je na DEV Hosting `9eda171e25a3cedd`, release
+`1793458416396000`, 14:53:36.396 UTC. HTML/JS/config SHA-256 odpovídají čistému buildu.
+[Zápisové cesty a rozsah](FEED_WRITER_INTEGRATION.md).
+
+Živý Business průchod po ruční obnově stránky prošel. DB kontrola potvrdila
+soft-deleted testovací zdroj bez dalších změn a právě jeden sedmidenní op1 receipt.
+Automatická relace předtím měla App Check chybu; ochrany nebyly oslabené.
+Běžný/moderátorský nový živý průchod ještě provedený není, lokální matice prošla.
+Předchozí lokální mazání: 71 Functions unit, analyzátor,
+24 cílených Flutter testů a 6 emulátorových případů prošlo. Skutečné operace
+createShout/toggleShoutReaction/deleteShout mají lokálně ověřené skládání indexu
+v jejich transakci (22 cílených emulátorových testů včetně rollbacku a plných těl).
+Wrappery indexWriter nezapínají; produkce, main a Rules se neměnily.
+
+Nový interní account hiding helper prošel 4 testy, preflight 3 unit a geohash
+opravný plán 3 emulátorovými scénáři; celá Functions sada 75 pass / 98 skip bez
+emulátoru a lint čistý. Žádný helper není živě exportovaný. Původní klientské
+mazání účtu zůstává; před jeho pokrytím se Rules nesmějí uzavřít.
+Read-only DEV preflight všech 35 dokumentů našel 17 starých expirovaných
+chybných geohashů. Připravená přesná oprava čeká na souhlas a CI, nic živě
+neopravovala. B1: schválena 1 s na každou část, mimo Top rating nemění pořadí, pouze sbalení.
++Další data/provozní volby mají vlastní brány.
+[Migrační důkazy, lokální plán a další kroky](FEED_MIGRATION_READINESS.md).
+
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

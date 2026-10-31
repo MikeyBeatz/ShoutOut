@@ -124,11 +124,11 @@ dočasný kompromis vyžaduje výslovný souhlas.
 - U nového Nejblíž skrytou nízko hodnocenou kartu ponechat na jejím místě,
   ale neoznačit ji přečtenou před rozbalením celého obsahu. Spotlight dál
   odděleně; jeho přečtení nevydávat za veřejné započítané zobrazení reklamy.
-  Rušení dnešního odsouvání špatně hodnocených Shoutů je až volba etapy B.
+  Vlastník 31. října schválil odstranění odsouvání mimo Top; hodnocení tam mění jen sbalení.
 - Relevantní obsah: vlastní plný nadpis/text Shoutu, nikoli komentáře či
   soukromé odpovědi. Pro případné další přílohy stanovit vlastní pravidlo.
-- Doba expozice, interval synchronizace, polling a retence zůstanou samostatnými
-  návrhy B1/B2/B4 založenými na měření; nejsou podmínkou zahájení A0/A1.
+- Doba expozice je schválená: 1 s na každou část. Interval synchronizace, polling
+  a retence zůstávají samostatnými návrhy B2/B4 založenými na měření.
 - Počet novinek nebude počet všech nepřečtených. Před B4 rozhodnout zvlášť,
   zda počítat i starší příspěvky nově zpřístupněné moderací či změnou dostupnosti.
 
@@ -140,7 +140,7 @@ dočasný kompromis vyžaduje výslovný souhlas.
 | R2: poloha pro MVP | Původně odloženo, následně schválen poslední známý bod v otevřené aplikaci | Bod s upozorněním; bez bodu výzva k získání polohy, ostatní sekce použitelné. Žádné trvalé ukládání polohy ani ruční výběr města tím není schválený. |
 | R3: řazení | „Nepřečtené první jen v Nejblíž“ | Platný směr pro B3; Top/Končící/Sledované ponechat. Neřeší automaticky nízké hodnocení, Spotlight ani numerické parametry. |
 
-Před vlastní implementací B stále uzavřít definici expozice, úložiště/retenci,
+Expozice je schválená; před dokončením B stále uzavřít úložiště/retenci,
 synchronizační a polling strategii a vztah nízkého hodnocení/Spotlightu k pořadí.
 Volba R1 není souhlas s libovolnou cenou, migrací ani neomezeným skenováním.
 
@@ -166,3 +166,16 @@ a 24 syntetických měření prošlo. Serverové stavební bloky A2 a [sdílený
 lokálně ověřené; živé query API dosud není zapojené.
 
 Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).
+
+## Doplnění rozhodnutí 31. října 2026 – expozice a hodnocení
+
+Vlastník schválil **1 souvislou sekundu na každou část** celého nadpisu/textu
+v aktivní aplikaci. U dlouhého Shoutu se musí postupně pokrýt všechny části;
+rychlé přejetí nebo sbalený relevantní obsah nestačí. Samotný vstup do detailu
+není přečtení. Read značka nepřesouvá kartu v aktuální relaci.
+
+Negativně hodnocený Shout zůstává na správném místě podle polohy/času a může
+být mezi novinkami i nepřečtenými. Hodnocení mění sbalení s vysvětlením, nikoli
+pořadí v Nejblíž/Končící/Sledované. Top nadále používá dosavadní hodnocení.
+Navržený text: „Shout je komunitou hodnocen negativně. Pro zobrazení klikněte.“
+Dosavadní číselné prahy ratingu se tímto nerozhodují znovu.

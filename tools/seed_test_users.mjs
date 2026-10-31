@@ -1,3 +1,4 @@
+import { encodeGeohash } from '../functions/geohash.js';
 import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -167,6 +168,7 @@ async function seedUstiData() {
       text: shoutTexts[index][1],
       categories: [categories[index]],
       location: new GeoPoint(latitude, longitude),
+      geohash: encodeGeohash(latitude, longitude),
       createdAt: Timestamp.fromMillis(now - (index + 1) * 5 * 60 * 1000),
       expiresAt: Timestamp.fromMillis(now + 24 * 60 * 60 * 1000),
       status: 'active',
@@ -236,6 +238,7 @@ async function seedDemoData() {
       text,
       categories: categories[index],
       location: new GeoPoint(latitude, longitude),
+      geohash: encodeGeohash(latitude, longitude),
       createdAt: Timestamp.fromMillis(now - (index + 1) * 17 * 60 * 1000),
       expiresAt: Timestamp.fromMillis(now + (index + 2) * 2 * 60 * 60 * 1000),
       status: 'active',

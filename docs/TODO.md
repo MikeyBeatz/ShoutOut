@@ -63,8 +63,11 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    [model, měření a hranice](FEED_BLOCK_INDEX_PLAN.md). Další krok před napojením:
    R4 a lokální historie/GC jsou doplněné ([ověření](FEED_INDEX_RETENTION.md)).
    Následuje pokrytí všech zapisovacích cest, provozní rozpočet a migrační dry-run.
-   Serverové mazání Shoutů má nasazenou DEV Function; aktivace webu a živá regrese
-   ještě zbývají. Tři serverové cesty mají lokálně ověřené skládání s indexem;
+   Serverové mazání Shoutů má nasazenou DEV Function i aktivaci webu; živý
+   Business průchod po ruční obnově prošel, ostatní role ještě živě ne. Tři serverové cesty mají lokálně
+   ověřené skládání s indexem.
+   [Migrace a zbývající brány](FEED_MIGRATION_READINESS.md): read-only preflight
+   našel 17 chybných geohashů; oprava existujících dat čeká na samostatný souhlas.
    [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční

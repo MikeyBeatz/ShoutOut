@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const target = resolve(root, 'build/functions-content');
 mkdirSync(target, { recursive: true });
-for (const file of ['content.js', 'create_shout.js', 'create_comment.js', 'create_private_reply.js', 'toggle_shout_reaction.js', 'toggle_comment_reaction.js', 'toggle_shout_save.js', 'create_content_report.js', 'delete_comment.js', 'delete_shout.js', 'callable_security.js', 'operation_retention.js', 'cleanup_operation_receipts.js', 'receipt_cleanup_schedule.js', 'package-lock.json']) {
+for (const file of ['content.js', 'create_shout.js', 'geohash.js', 'create_comment.js', 'create_private_reply.js', 'toggle_shout_reaction.js', 'toggle_comment_reaction.js', 'toggle_shout_save.js', 'create_content_report.js', 'delete_comment.js', 'delete_shout.js', 'callable_security.js', 'operation_retention.js', 'cleanup_operation_receipts.js', 'receipt_cleanup_schedule.js', 'package-lock.json']) {
   copyFileSync(resolve(root, 'functions', file), resolve(target, file));
 }
 const manifest = JSON.parse(readFileSync(resolve(root, 'functions/package.json'), 'utf8'));
