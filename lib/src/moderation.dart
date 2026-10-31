@@ -513,7 +513,7 @@ class _ReportList extends StatelessWidget {
     final authorId = targetSnapshot.data()?['authorId'] as String?;
     if (action == 'remove') {
       if (collection == 'reports') {
-        await target.update({'status': 'deleted'});
+        await _deleteShoutContent(target.id);
       } else {
         await _deleteCommentWithCounter(target);
       }

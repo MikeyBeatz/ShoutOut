@@ -363,9 +363,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   }
 
   Future<void> _deleteShout(Shout shout) async {
-    await FirebaseFirestore.instance.collection('shouts').doc(shout.id).update({
-      'status': 'deleted',
-    });
+    try {
+      await _deleteShoutContent(shout.id);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_serverWriteFailureText(context, error))),
+        );
+      }
+    }
     // The active feed listener removes this document without another query.
   }
 

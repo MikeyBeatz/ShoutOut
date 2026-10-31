@@ -9,6 +9,18 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('Shout deletion defaults off and independently requires a boolean and App Check', () => {
+  const config = { ...dev }; delete config.serverShoutDeletion;
+  assert.doesNotThrow(() => validateConfig(config, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...config, serverShoutDeletion: true }, 'dev'));
+  for (const invalid of [null, 'true', 1, {}]) assert.throws(() => validateConfig({ ...config, serverShoutDeletion: invalid }, 'dev'));
+  const disabled = { ...config };
+  for (const field of Object.keys(disabled).filter(key => key.startsWith('server'))) disabled[field] = false;
+  delete disabled.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(disabled, 'dev'));
+  assert.throws(() => validateConfig({ ...disabled, serverShoutDeletion: true }, 'dev'));
+});
+
 test('comment deletion defaults off and independently requires a boolean and App Check', () => {
   const config = { ...dev };
   delete config.serverCommentDeletion;

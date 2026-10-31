@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverShoutDeletion !== undefined && typeof config.serverShoutDeletion !== 'boolean') {
+    throw new Error('serverShoutDeletion must be a boolean.');
+  }
+  if (config.serverShoutDeletion === true && !config.appCheckSiteKey) {
+    throw new Error('Server Shout deletion requires web App Check.');
+  }
   if (config.serverCommentDeletion !== undefined && typeof config.serverCommentDeletion !== 'boolean') {
     throw new Error('serverCommentDeletion must be a boolean.');
   }

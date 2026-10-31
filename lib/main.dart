@@ -46,6 +46,7 @@ import 'reaction_gateway.dart';
 import 'save_gateway.dart';
 import 'report_gateway.dart';
 import 'comment_deletion_gateway.dart';
+import 'shout_deletion_gateway.dart';
 import 'timed_operation_gateway.dart';
 import 'live_shout_state.dart';
 

@@ -51,6 +51,7 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 - [Implementační etapy feedu](FEED_IMPLEMENTATION_STAGES.md) – všechny etapy před MVP.
   R3 jen v Nejblíž; R2 poslední bod otevřené aplikace. Technická brána před A2. A0 ve vývoji.
 - [Výsledky lokálního prototypu A1](FEED_A1_RESULTS.md) – kontrakt, měření, ověření a meze před A2.
+- [Zápisové cesty prostorového indexu](FEED_WRITER_INTEGRATION.md) – serverové mazání a postup atomického zapojení změn obsahu.
 - [Sdílený prostorový index](FEED_BLOCK_INDEX_PLAN.md) – lokálně ověřené schéma,
   čtení/zápisy, cache, konzistence a podmínky před migrací/nasazením.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na

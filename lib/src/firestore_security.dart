@@ -160,6 +160,30 @@ final _commentDeletionGateway = CommentDeletionGateway(
   },
 );
 
+final _shoutDeletionGateway = ShoutDeletionGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) async {
+    await _serverContentOperations.call(
+      userId: request.userId,
+      operation: 'deleteShout',
+      payload: request.toPayload(),
+    );
+  },
+);
+
+Future<void> _deleteShoutContent(String shoutId) async {
+  if (kIsWeb && WebEnvironment.current.serverShoutDeletion) {
+    await _shoutDeletionGateway.delete(
+      userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+      shoutId: shoutId,
+    );
+    return;
+  }
+  await FirebaseFirestore.instance.collection('shouts').doc(shoutId).update({
+    'status': 'deleted',
+  });
+}
+
 Future<int?> _deleteCommentWithCounter(
   DocumentReference<Map<String, dynamic>> commentReference,
 ) async {

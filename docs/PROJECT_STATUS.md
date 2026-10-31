@@ -1,7 +1,7 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
-`feature/feed-index-retention`; navazuje na dokončenou retenci
+`feature/feed-content-writers`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
@@ -38,6 +38,13 @@ cílených emulátorových případů); [ověření a meze](FEED_INDEX_RETENTION
 Původní index `86fc171` má úspěšné CI `41200644473`. CI nového úseku sleduj v [bězích větve](https://github.com/MikeyBeatz/ShoutOut/actions?query=branch%3Afeature%2Ffeed-index-retention); živý web zůstává A0. Další krok: pokrytí všech zapisovacích cest,
 migrační dry-run a provozní rozpočet workeru před zapojením zabezpečeného API/UI.
 Schválení pokrývá pouze lokální úsek, ne živé kolekce/backfill.
+Retenční krok `415631e` má úspěšné CI `41208467738`. Vlastník následně schválil
+pokračování podle plánu. Připravená je serverová `deleteShout` a společné klientské
+napojení feed/detail/moderace; přepínač zůstává vypnutý. Lokálně: 71 Functions unit,
+lint/analyze, 24 cílených Flutter testů a 6 nových emulátorových případů prošlo.
+[Přehled zápisových cest a přesný rozsah](FEED_WRITER_INTEGRATION.md).
+CI této větve, rollout a živá regrese ještě zbývají. Index není připojený k živým
+zápisům a účetní dávkové mazání zůstává klientské; Rules se nesmí předčasně uzavřít.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

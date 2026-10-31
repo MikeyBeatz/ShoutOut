@@ -692,10 +692,16 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _deleteShout() async {
-    await FirebaseFirestore.instance
-        .collection('shouts')
-        .doc(widget.shout.id)
-        .update({'status': 'deleted'});
+    try {
+      await _deleteShoutContent(widget.shout.id);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_serverWriteFailureText(context, error))),
+        );
+      }
+      return;
+    }
     widget.shout.status = ShoutStatus.deleted;
     if (mounted) Navigator.pop(context, true);
   }
