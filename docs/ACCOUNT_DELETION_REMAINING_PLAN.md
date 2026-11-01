@@ -23,7 +23,7 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 |---|---|---|
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
-| Vlastní nepotřebné soukromé podkolekce | Emulátorový prototyp, nelze spustit živě | Rozšířit stavový automat jobu, ověřit všechny příchozí zapisovače a samostatně schválit datový test. |
+| Vlastní nepotřebné soukromé podkolekce | Verze 2 jobu lokálně dokončená a testovaná, DEV aktivace vypnutá | CI a samostatně schválený datový pilot níže. Staré joby se nemigrují. |
 | Soukromé zprávy a veřejné komentáře účtu | Rozhodnutý směr, implementace zbývá | Bezpečný interní archiv/skrytí, přesné počty, hlášení a test obou účastníků. |
 | Identita, rezervace přezdívky a zbývající osobní data | Částečně rozhodnuto, implementace zbývá | Minimální retenční údaje, správné odkazy/fallbacky, uvolnění pouze vlastní rezervace po lhůtě. |
 | Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí a Storage, vypořádání hlášení/holdů, audit a test přesné hranice. |
@@ -61,12 +61,15 @@ Staré přímé klientské zápisy/Rules tím nejsou uzavřené. Před úplným 
 je nutné pokrýt i tyto zapisovače; samotný nový serverový helper není důkazem
 neexistence všech možných příchozích zápisů.
 
-## Emulátorový soukromý úklid
+## Soukromý úklid a verzovaná fáze jobu
 
-`functions/account_private_cleanup_lab.js` vyžaduje shoutout-rules-test a přesný
-lokální emulator host. DEV/produkci odmítá. Není součástí žádného deploy artefaktu.
-Před zahájením vyžaduje shodnou pending žádost, dokončenou fázi shouts-hidden
-a skutečně chybějící Auth (v emulátorovém testu simulovaný Admin Auth).
+`functions/account_private_cleanup.js` je interní lease-fenced jádro bez
+callable/trigger exportu. Verzovaný job je volá pouze po potvrzeném skrytí Shoutů,
+se shodnou pending žádostí a chybějícím Auth. Každý zápis má ve stejné transakci
+kontrolu zámku a původního requestCreateTime. Admin Auth je v testech simulovaný.
+`account_private_cleanup_lab.js` zůstává adaptérem původního prototypu pro
+emulátor a stále odmítá živé projekty; není v deploy artefaktu. Nové jádro
+je v připravovaném account-deletion balíku, aktivace ve wrapperu je false.
 
 | Data | Připravený postup |
 |---|---|
@@ -82,12 +85,72 @@ vrátí conflict bez částečného smazání. Opakování se znovu dotáže zb�
 dokumentů. Před smazáním odmítne neočekávané podkolekce; neznámé klíče nastavení
 také zachová a předá ke kontrole. Svévolné souběžné Admin zápisy do starého UID
 musí být při živém zapojení mimo tento protokol zablokované/provozně vyloučené.
-Helper ještě nemá vlastní trvalý stav fáze a neprohlašuje celé smazání za hotové.
+Job verze 2 ukládá workStage (shouts/private), shoutsHiddenAt,
+privateDeletedCount a privatePreferencesDisabled. Odstranění stránky a zvýšení
+počtu proběhnou atomicky; ztracená odpověď nezpůsobí nové započítání. Settings
+guard je také svázaný se zámkem. Samostatný běh zpracuje buď stránku Shoutů,
+nebo nejvýše 50 privátních dokumentů, nikdy obě plné stránky najednou.
+Neznámá nastavení či vnořená data přejdou hned do needs-review a zachovají se.
+Prázdná potvrzovací stránka ukončí tuto část jako private-leaves-cleaned;
+nejde o dokončené smazání celého účtu ani o provedený 60denní úklid.
+
+Nové joby dostanou schemaVersion 2 pouze při privateCleanupEnabled=true.
+Dosavadní joby verze 1 zůstanou verzí 1, včetně dokončených shouts-hidden;
+nezmění se jim identita, průběh ani deadline. Jejich pozdější převod bude mít
+vlastní kontrolovaný plán. Vypnutí flagu v kódu, který už verzi 2 zná, ji
+bez zápisů pozastaví jako private-disabled; verze 1 pokračuje původním tokem.
+Vrátit po vzniku v2 záznamů starší nekompatibilní worker není bezpečný rollback.
+
+Lokální ověření: 35 job/private případů a 68 Rules případů, celkem 103 pass
+bez skipů. Nových 12 job případů pokrývá stránkování, replay, ztracené potvrzení
+již potvrzené transakce, aktivní a převzatý zámek, konflikt updateTime, výměnu
+žádosti, Auth existenci/výpadek, terminální review, zachování v1, vypnutí flagu,
+vadný v2 stav a limit stránky. Rules testy doložily, že deleting účet ani jiný
+klient neobnoví jeho seznamy či preference. All-false guard odmítne starý
+notifikační zápis, ale tatáž platná reakce bez oznámení projde. Všech pět
+starých typů oznámení používá tento preference guard; serverové příchozí cesty
+už blokují deletion marker podle předchozího rolloutového ověření.
+Vzorek 55 privátních položek se rozdělil na 50 + 5, vlastní zpracování dvou
+stránek v emulátoru 460 ms; nejde o cloudovou latenci nebo cenu.
+
+<a id="private-job-dev"></a>
+
+## Konkrétní návrh rozšířeného DEV pilotu – čeká na schválení
+
+- Cíl jen shoutout-dev-46c81, codebase account-deletion, dvě stávající Functions.
+  Po úspěšném CI připraveného kódu navazující otestovaný commit zapne
+  privateCleanupEnabled. Vytváření nových žádostí pak používá v2; žádná migrace
+  dosavadních žádostí/jobů. Hosting, Rules, produkce a main se nemění.
+- Stejný minutový Scheduler UTC, maxJobs 1, pageSize 50, lease 120 s,
+  retryDelay 60 s a stávající chybové okno 24 h. Každý endpoint max 1 instance,
+  concurrency 1, 256 MiB, 60 s, europe-west3. Žádný nový plánovač nebo služba.
+- Pouze jeden nově vytvořený zablokovaný testovací Auth účet; jeho testovací
+  profil, právní fixture, 3 Shouty a 4 vlastní privátní dokumenty (2 oznámení,
+  1 sledování, 1 blokace). Nejprve ověřit čekání bez mazání při existujícím Auth,
+  pak odstranit pouze tento Auth účet a ověřit 3 skryté Shouty, 4 odstraněné
+  privátní položky, minimální all-false preference a zachovaný profil/právní fixture.
+  Replay nezmění počty, deadline zůstane createTime + 60 dní.
+- Po ověření uklidit jen přesně evidované dokumenty a job tohoto testu.
+  Žádné mazání existujících uživatelských účtů či jejich dat, archiv zpráv,
+  indexový backfill, uvolnění přezdívky nebo plošný 60denní úklid.
+- Nejvýše 50 deletů v privátní stránce, 4 malé job zápisy (po instalaci guardu
+  obvykle 3), nejvýše 1 settings zápis při instalaci. Dotazují se jen tři vlastní
+  podkolekce a maximálně 50 referencí potomků pro kontrolu neznámé struktury;
+  nejsou tu globální uživatelské skeny. Transakční opakování přidá práci.
+  Při prázdných dotazech a pravidelných kontrolách existují čtení i bez deletů;
+  nastavení není finanční hard cap. Žádná nová sazba Scheduleru.
+- Zastavení rozšíření: nový ověřený commit se stejným v2-aware kódem a flagem
+  false; rozpracované v2 záznamy zůstanou zachované a pozastavené. Jejich
+  logovaný počet privateDisabled upozorní na nedokončenou práci.
+
+Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovacímu Auth
+účtu. Trvalý rolloutový souhlas tuto datovou změnu sám nepokrývá.
 
 ## Další větší úsek
 
-1. Zapojit privátní fázi do verzovaného jobu se zachováním dosavadních živých
-   shouts-hidden záznamů a původního requestCreateTime/retainUntil.
+1. Privátní fáze je lokálně zapojená; po CI schválit výše uvedený DEV datový
+   pilot a ověřit živý výsledek. Dosavadní v1 shouts-hidden záznamy zachovat;
+   případnou migraci připravit odděleně.
 2. Připravit interní archiv a atomické odstranění původních soukromých zpráv,
    kde je účet jedním z účastníků; zachovat podklady reportů pouze interně.
    Nezahrnout svévolně konverzace dvou jiných lidí jen podle vlastníka Shoutu.

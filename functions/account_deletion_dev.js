@@ -12,6 +12,7 @@ import { scanDueAccountDeletionJobs } from './account_deletion_job_scan.js';
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
+  privateCleanupEnabled: false, // Enable only after the separate private-data rollout approval.
   leaseMillis: 120000, retryDelayMillis: 60000, authWaitMillis: 86400000, pageSize: 50, maxJobs: 1,
 });
 
@@ -33,7 +34,7 @@ export const accountDeletionRequestCreatedDev = onDocumentCreated({
 }, async event => {
   try {
     const result = await runAccountDeletionCreatedEvent(event, database(), getAuth(), accountDeletionDevProposal);
-    const summary = { phase: result.state, hidden: result.hidden ?? 0 };
+    const summary = { phase: result.state, hidden: result.hidden ?? 0, privateDeleted: result.deleted ?? 0 };
     (result.state === 'needs-review' ? logger.warn : logger.info)('account-deletion-shout-job', summary);
   } catch {
     logger.error('account-deletion-shout-job', { stage: 'creation', code: 'processing-failed' });
@@ -48,7 +49,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
     const result = await scanDueAccountDeletionJobs(database(), getAuth(), {
       ...accountDeletionDevProposal, clock: () => new Date(),
     });
-    const log = result.failed || result.needsReview || result.checkpointConflict ? logger.warn : logger.info;
+    const log = result.failed || result.needsReview || result.privateDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);
   } catch {
     logger.error('account-deletion-job-recovery', { code: 'scan-failed' });

@@ -58,7 +58,9 @@ needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyz�
 prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
 emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
 Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
-Následuje verzovaná soukromá fáze account jobu podle stávajícího plánu.
+Verzovaná soukromá fáze account jobu je nyní lokálně hotová, aktivace false;
+103 cílených testů a 90 serverových unit prošlo. Další krok: CI a konkrétní
+[DEV datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev), pak archiv zpráv.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 
@@ -96,8 +98,9 @@ Metriky ani rozsah MVP se tím nemění.
    a klientské napojení; celý účtový milník se tím ještě neuzavírá.
    [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
    a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
-   1. listopadu. Vlastní privátní seznamy jsou záměrně jen v emulátoru.
-   Další krok: jejich verzovaná fáze v jobu, pak archiv zpráv a konečné dočištění.
+   1. listopadu. Vlastní privátní seznamy mají lokálně ověřenou v2 fázi jobu,
+   aktivace je false. Další krok: CI a schválený DEV pilot, pak archiv zpráv
+   a konečné dočištění. Staré v1 joby zůstávají beze změny.
    Konečné smazání účtu stále není dokončené.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční

@@ -8,6 +8,7 @@ import { encodeGeohash } from './geohash.js';
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
 import { accountDeletionJobRef, runAccountDeletionCreatedEvent as run, runAccountShoutHidingJob } from './account_deletion_job.js';
 import { scanDueAccountDeletionJobs as scan } from './account_deletion_job_scan.js';
+import { cleanupAccountPrivatePage } from './account_private_cleanup.js';
 import { cleanupAccountPrivatePageLab as cleanPrivate } from './account_private_cleanup_lab.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
@@ -320,3 +321,169 @@ test('private cleanup prototype refuses live databases', async () => {
   }
 });
 
+
+async function privateJobFixture() {
+  const f = await fixture(), user = db.doc(`users/${f.uid}`); privateRoots.push(user);
+  await user.set({ nickname: 'Retain', email: 'retained@example.test' });
+  await user.collection('legal').doc('acceptance').set({ retained: true });
+  for (const id of ['n1', 'n2']) await user.collection('notifications').doc(id).set({ text: 'private inbox' });
+  await user.collection('following').doc('other').set({ targetUserId: 'other' });
+  await user.collection('blocked').doc('other').set({ retainedElsewhere: true });
+  const options = { ...f.options, pageSize: 50, privateCleanupEnabled: true };
+  const first = await run(f.event, f.db, missingAuth, options);
+  assert.equal(first.state, 'cleaning-private');
+  const afterShouts = (await f.jobRef.get()).data();
+  assert.equal(afterShouts.schemaVersion, 2); assert.equal(afterShouts.workStage, 'private');
+  assert.equal(afterShouts.hiddenCount, 3); assert.equal(afterShouts.privateDeletedCount, 0);
+  assert.equal((await user.collection('notifications').get()).size, 2);
+  f.tick(options.retryDelayMillis);
+  return { ...f, user, options, afterShouts };
+}
+
+test('v2 resumes private pages, counts deletes atomically and preserves identity, legal data and retention', { skip: !enabled }, async () => {
+  const f = await privateJobFixture();
+  const request = (await f.requestRef.get()).data();
+  const options = { ...f.options, pageSize: 2 };
+  const first = await scan(f.db, missingAuth, { ...options, maxJobs: 1 });
+  assert.equal(first.privateDeleted, 2); assert.equal(first.privateCleaned, 0);
+  assert.equal((await f.jobRef.get()).data().privateDeletedCount, 2);
+  f.tick(options.retryDelayMillis);
+  const second = await run(f.event, f.db, missingAuth, options);
+  assert.equal(second.state, 'cleaning-private'); assert.equal(second.privateDeletedCount, 4);
+  f.tick(options.retryDelayMillis);
+  const last = await scan(f.db, missingAuth, { ...options, maxJobs: 1 });
+  assert.equal(last.privateCleaned, 1); assert.equal(last.privateDeleted, 0);
+  const job = (await f.jobRef.get()).data();
+  assert.equal(job.phase, 'private-leaves-cleaned'); assert.equal(job.nextAttemptAt, null);
+  assert.equal(job.hiddenCount, 3); assert.equal(job.privateDeletedCount, 4); assert.equal(job.privatePreferencesDisabled, true);
+  assert(job.requestCreateTime.isEqual(f.afterShouts.requestCreateTime)); assert(job.retainUntil.isEqual(f.afterShouts.retainUntil));
+  assert(job.shoutsHiddenAt.isEqual(f.afterShouts.shoutsHiddenAt));
+  assert.deepEqual((await f.requestRef.get()).data(), request);
+  assert.deepEqual((await f.user.get()).data(), { nickname: 'Retain', email: 'retained@example.test' });
+  assert.equal((await f.user.collection('legal').doc('acceptance').get()).exists, true);
+  assert(Object.values((await f.user.collection('settings').doc('notifications').get()).data()).every(v => v === false));
+  const replay = await run(f.event, f.db, { getUser() { assert.fail('terminal replay'); } }, f.options);
+  assert.equal(replay.privateDeletedCount, 4); assert.deepEqual((await f.jobRef.get()).data(), job);
+  assert.equal((await f.lab.audit()).activeMetadata, 2);
+});
+
+test('enabling v2 never migrates completed or in-progress v1 jobs', { skip: !enabled }, async () => {
+  const f = await fixture();
+  await run(f.event, f.db, missingAuth, f.options);
+  f.tick(f.options.retryDelayMillis);
+  assert.equal((await run(f.event, f.db, missingAuth, { ...f.options, privateCleanupEnabled: true })).state, 'shouts-hidden');
+  const before = (await f.jobRef.get()).data(); assert.equal(before.schemaVersion, 1);
+  const user = db.doc(`users/${f.uid}`); privateRoots.push(user);
+  await user.collection('notifications').doc('untouched').set({ keep: true });
+  await run(f.event, f.db, { getUser() { assert.fail('v1 terminal'); } }, { ...f.options, privateCleanupEnabled: true });
+  assert.deepEqual((await f.jobRef.get()).data(), before);
+  assert.equal((await user.collection('notifications').get()).size, 1);
+});
+
+test('the feature gate pauses v2 safely without changing its stored progress', { skip: !enabled }, async () => {
+  const f = await privateJobFixture(), before = (await f.jobRef.get()).data();
+  const paused = await scan(f.db, { getUser() { assert.fail('paused'); } }, { ...f.options, privateCleanupEnabled: false, maxJobs: 1 });
+  assert.equal(paused.privateDisabled, 1); assert.deepEqual((await f.jobRef.get()).data(), before);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+  assert.equal((await run(f.event, f.db, missingAuth, f.options)).state, 'private-leaves-cleaned');
+});
+
+test('lost acknowledgement after the private delete commit preserves exact progress for the retry', { skip: !enabled }, async () => {
+  const f = await privateJobFixture(); let commits = 0;
+  const lostAck = { ...f.db, async runTransaction(...args) {
+    const result = await f.db.runTransaction(...args);
+    if (++commits === 3) throw new Error('lost private commit acknowledgement');
+    return result;
+  } };
+  await assert.rejects(run(f.event, lostAck, missingAuth, { ...f.options, pageSize: 2 }), /lost private commit/);
+  const partial = (await f.jobRef.get()).data();
+  assert.equal(partial.phase, 'retry'); assert.equal(partial.privateDeletedCount, 2); assert.equal(partial.workStage, 'private');
+  assert.equal((await f.user.collection('notifications').get()).size, 0);
+  f.tick(f.options.retryDelayMillis);
+  const resumed = await run(f.event, f.db, missingAuth, f.options);
+  assert.equal(resumed.state, 'private-leaves-cleaned'); assert.equal(resumed.privateDeletedCount, 4);
+});
+
+test('private workers are mutually exclusive and a lease takeover fences every stale delete', { skip: !enabled }, async () => {
+  const f = await privateJobFixture(), entered = Promise.withResolvers(), release = Promise.withResolvers();
+  const worker = run(f.event, f.db, missingAuth, { ...f.options, async beforePrivateCommit() { entered.resolve(); await release.promise; } });
+  await entered.promise; let completed;
+  try {
+    assert.equal((await run(f.event, f.db, { getUser() { assert.fail('busy'); } }, f.options)).state, 'busy');
+    f.tick(f.options.leaseMillis + 1);
+    const successor = await run(f.event, f.db, missingAuth, f.options);
+    assert.equal(successor.state, 'private-leaves-cleaned'); assert.equal(successor.privateDeletedCount, 4);
+    completed = (await f.jobRef.get()).data();
+  } finally { release.resolve(); }
+  assert.equal((await worker).state, 'lease-lost');
+  assert.deepEqual((await f.jobRef.get()).data(), completed);
+});
+
+test('a changed private candidate rolls back all deletes and the progress increment', { skip: !enabled }, async () => {
+  const f = await privateJobFixture();
+  const conflict = await run(f.event, f.db, missingAuth, { ...f.options,
+    async beforePrivateCommit(refs) { await refs[0].update({ changedConcurrently: true }); } });
+  assert.equal(conflict.conflict, true); assert.equal(conflict.privateDeletedCount, 0);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+  assert.equal((await f.user.collection('following').get()).size, 1);
+  f.tick(f.options.retryDelayMillis);
+  assert.equal((await run(f.event, f.db, missingAuth, f.options)).privateDeletedCount, 4);
+});
+
+test('a replaced request makes private work obsolete without deleting any candidates', { skip: !enabled }, async () => {
+  const f = await privateJobFixture();
+  const result = await run(f.event, f.db, missingAuth, { ...f.options, async beforePrivateCommit() {
+    await f.requestRef.delete(); await f.requestRef.set({ userId: f.uid, status: 'pending' });
+  } });
+  assert.equal(result.state, 'obsolete'); assert.equal(result.privateDeletedCount, 0);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+  assert.equal((await f.jobRef.get()).data().nextAttemptAt, null);
+});
+
+test('Auth existence and outages never authorize private deletion', { skip: !enabled }, async () => {
+  const f = await privateJobFixture(), present = { getUser: async uid => ({ uid }) };
+  assert.equal((await run(f.event, f.db, present, f.options)).state, 'waiting-auth');
+  assert.equal((await f.user.collection('settings').doc('notifications').get()).exists, false);
+  f.tick(f.options.retryDelayMillis);
+  await assert.rejects(run(f.event, f.db, { getUser() { throw new Error('Auth unavailable'); } }, f.options), /Auth unavailable/);
+  assert.equal((await f.jobRef.get()).data().workStage, 'private');
+  f.tick(f.options.authWaitMillis);
+  assert.equal((await run(f.event, f.db, present, f.options)).state, 'needs-review');
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+});
+
+test('unknown settings or private descendants stop v2 immediately for review with no leaf deletions', { skip: !enabled }, async () => {
+  for (const nested of [false, true]) {
+    const f = await privateJobFixture();
+    if (nested) await f.user.collection('notifications').doc('n1').collection('unexpected').doc('child').set({ keep: true });
+    else await f.user.collection('settings').doc('notifications').set({ unknown: 'keep' });
+    const result = await run(f.event, f.db, missingAuth, f.options);
+    assert.equal(result.state, 'needs-review'); assert.equal(result.privateDeletedCount, 0);
+    assert.equal((await f.user.collection('notifications').get()).size, 2);
+    assert.equal((await f.jobRef.get()).data().nextAttemptAt, null);
+    if (!nested) assert.deepEqual((await f.user.collection('settings').doc('notifications').get()).data(), { unknown: 'keep' });
+  }
+});
+
+test('private cleanup requires a lease guard before any database access', async () => {
+  await assert.rejects(cleanupAccountPrivatePage({}, {}, {}), /invalid-private-cleanup-options/);
+});
+
+test('v2 refuses corrupt private-stage progress instead of skipping Shout hiding', { skip: !enabled }, async () => {
+  const f = await privateJobFixture(); await f.jobRef.update({ shoutsHiddenAt: null });
+  await assert.rejects(run(f.event, f.db, { getUser() { assert.fail('corrupt'); } }, f.options), /invalid-account-deletion-job-state/);
+  assert.equal((await f.user.collection('notifications').get()).size, 2);
+});
+
+test('one private run deletes at most 50 leaves and the next run drains the remainder', { skip: !enabled }, async t => {
+  const f = await privateJobFixture();
+  const batch = db.batch();
+  for (let i = 0; i < 51; i++) batch.set(f.user.collection('notifications').doc(`bulk-${i}`), { title: 'test' });
+  await batch.commit();
+  const start = Date.now(), first = await run(f.event, f.db, missingAuth, f.options);
+  assert.equal(first.deleted, 50); assert.equal(first.state, 'cleaning-private'); assert.equal(first.privateDeletedCount, 50);
+  f.tick(f.options.retryDelayMillis);
+  const last = await run(f.event, f.db, missingAuth, f.options);
+  assert.equal(last.deleted, 5); assert.equal(last.privateDeletedCount, 55); assert.equal(last.state, 'private-leaves-cleaned');
+  t.diagnostic(JSON.stringify({ privateLeaves: 55, elapsedMillis: Date.now() - start }));
+});

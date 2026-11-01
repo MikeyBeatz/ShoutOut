@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const target = resolve(root, 'build/functions-account-deletion');
 mkdirSync(target, { recursive: true });
 for (const file of ['account_deletion_dev.js', 'account_deletion_job.js', 'account_deletion_job_scan.js',
-  'account_deletion_event.js', 'account_shout_hiding.js', 'package-lock.json']) {
+  'account_deletion_event.js', 'account_shout_hiding.js', 'account_private_cleanup.js', 'package-lock.json']) {
   copyFileSync(resolve(root, 'functions', file), resolve(target, file));
 }
 const manifest = JSON.parse(readFileSync(resolve(root, 'functions/package.json'), 'utf8'));

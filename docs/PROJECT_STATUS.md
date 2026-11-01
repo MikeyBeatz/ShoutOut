@@ -1,10 +1,23 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`fix/audit-operation-lifecycle`; navazuje na dokončenou retenci
+`feature/account-private-job-phase`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
+
+## Aktuální úsek – privátní fáze účtového jobu
+
+Verzovaná fáze je lokálně implementovaná: po skrytí Shoutů v2 job po dávkách
+odstraňuje vlastní notifications/following/blocked, ponechá minimální false
+preference a zachová profil/legal. Průběh a delety mají společnou transakci
+a kontrolu původní žádosti/zámku. Existující v1 joby se nepřevádějí ani nemění.
+Aktivace je v DEV wrapperu výslovně false; živé Functions stále běží z 6acca72.
+Prošlo 103 cílených job/Rules testů, 90 serverových unit (149 emulator-only skip),
+15 web-tools testů a ESLint. Flutter klient se nemění. CI a schválení nového
+datového pilotu ještě čekají. [Přesný rozsah a rollback](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
+Nejde ještě o hotový účtový milník: zbývají zprávy/komentáře, minimalizace
+identity/přezdívka, konečná retence a klientský cutover. Metriky se nemění.
 
 ## Opravy zpětného auditu 1. listopadu
 
@@ -33,7 +46,7 @@ má po nasazení doložený HTTP 200, anonymní POST 403. Dalších deset Functi
 je podle celého API výpisu beze změny. Nové přihlášené klientské průchody
 nebyly provedené; funkční matice je ověřená testy/CI. Produkce, main a Rules
 beze změny. Důkazy: build/audit-fixes-live-proof.json a audit-fixes-artifact-proof.json.
-Nálezy uzavřené; další práce je verzovaná soukromá fáze account jobu.
+Nálezy uzavřené; navazující privátní fáze je připravená výše.
 [Kontrakt a ověření](TESTING.md#audit-lifecycle-fixes).
 
 ## Ověřené nasazení 1. listopadu
@@ -43,7 +56,7 @@ Nálezy uzavřené; další práce je verzovaná soukromá fáze account jobu.
 | DEV web | Hosting 2e9a063495041b40, commit 6acca72; HTML/JS/config byte-for-byte ověřené. Klient obsahuje opravu paměti požadavků. |
 | DEV účtový pilot | Dvě Functions z 6acca72 ACTIVE, plán každou minutu ENABLED; source hash 9c3983a938f2c2b3ed6cb08e481b03e218ed52f9. Nová revize HTTP 200 z plánovače / anonymní POST 403. |
 | DEV ochrana příjemců | Dříve nedokončený rollout b777992 je nyní hotový: createComment/createPrivateReply/toggleShoutReaction/toggleCommentReaction ACTIVE, source hash 287c988e2f8515fbc233b58bdd0a1cf43bc74f9e. |
-| Soukromý úklid | Záměrně jen emulátorový prototyp, odmítá živé projekty a není v artefaktech. |
+| Soukromý úklid | V2 job lokálně připravený, aktivace false. Původní lab adaptér zůstává emulator-only. Nový kód zatím není živě nasazený. |
 | Nový prostorový feed/read sync | Lokální příprava, nikoli aktivní klient/query API/indexový backfill. |
 | Produkční aplikace | Site shoutout-go-a1b34 existuje, live kanál nemá release/version. Veřejné MVP ještě není vydané. |
 
@@ -179,8 +192,8 @@ Při původním pilotu zůstalo tehdejších 10 Functions beze změny. První Ev
 detail a důkazy jsou v návrhu pilotu. Klient a celá 60denní retence stále nejsou hotové.
 [Navazující účtový plán](ACCOUNT_DELETION_REMAINING_PLAN.md): vlastník schválil
 rezervaci přezdívky po 60 dní a skrytí soukromých zpráv oběma. Připravené jsou
-transakční kontroly příjemce pro čtyři obsahové Functions a emulátorový úklid
-vlastních privátních podkolekcí; lab odmítá živé projekty a není v artefaktech.
+transakční kontroly příjemce pro čtyři obsahové Functions a nově lokální v2 fáze
+vlastních privátních podkolekcí. Původní lab odmítá živé projekty a není v artefaktech.
 53 cílených případů prošlo, následné 3 kontroly projekce/bezpečnosti také;
 lint čistý. CI a DEV rollout ochrany příjemců jsou dokončené podle přehledu výše;
 soukromý úklid se živě nezapíná. Archiv zpráv, přezdívka a konečné retenční dočištění zbývají.

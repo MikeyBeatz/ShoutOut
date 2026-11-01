@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assertAccountDeletionDevTarget } from './account_deletion_dev.js';
+import { accountDeletionDevProposal, assertAccountDeletionDevTarget } from './account_deletion_dev.js';
 
 test('proposed account worker rejects production and arbitrary projects before database operations', () => {
   assert.doesNotThrow(() => assertAccountDeletionDevTarget('shoutout-dev-46c81'));
@@ -21,4 +21,9 @@ test('rules project requires the exact local emulator endpoint', () => {
     if (previous === undefined) delete process.env.FIRESTORE_EMULATOR_HOST;
     else process.env.FIRESTORE_EMULATOR_HOST = previous;
   }
+});
+
+
+test('private cleanup stays disabled until its separate data rollout approval', () => {
+  assert.equal(accountDeletionDevProposal.privateCleanupEnabled, false);
 });

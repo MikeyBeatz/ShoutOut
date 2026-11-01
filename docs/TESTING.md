@@ -124,6 +124,28 @@ job, ale zachovat striktní kontrolu klíčů v každé operaci a vracet jen tim
 po cutoveru bezpečná samostatná návratová verze. Obnovení legacy příjmu by vyžadovalo
 samostatný návrh obnovy původních potvrzení a schválení; není rutinní rollback.
 
+## Privátní fáze účtového jobu – lokální ověření 1. listopadu
+
+`functions/account_deletion_job.integration.test.js` nyní má 35 případů.
+Společně s 68 Rules testy prošlo 103/103 bez skipů. Nová v2 fáze pokrývá
+ztracené potvrzení po potvrzeném delete commitu, obnovení z databázového
+průběhu, souběh a převzetí lease, atomický rollback při změně kandidáta,
+nahrazenou žádost, Auth existenci/výpadek, neznámá privátní data pro review,
+zachování dokončených i rozpracovaných v1 jobů, pozastavení v2 flagem a
+odmítnutí vadných metadat. Vzorek 55 položek: dvě dávky 50 + 5 za 460 ms
+v emulátoru, nikoli měření cloudové latence nebo faktury.
+
+Rules testy navíc doložily, že all-false preference zabrání starému klientu
+znovu vytvořit schránku, zatímco stejná reakce bez oznámení projde; mazající
+se uživatel ani jiný účet neobnoví vlastní seznamy či preference. Rules se
+neměnily. Serverové příchozí cesty mají dosavadní deletion-marker testy.
+Celá serverová sada 90 unit pass / 149 emulator-only skip, ESLint čistý,
+15 web environment tools testů pass. Klient Flutter se nemění.
+Logy: build/account-private-rules-emulator.log, account-private-functions-unit.log,
+account-private-eslint.log a account-private-tools.log.
+Živý flag zůstává vypnutý; [konkrétní datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev)
+vyžaduje vlastní souhlas. CI a případné nasazení eviduje PROJECT_STATUS.
+
 <a id="audit-lifecycle-fixes"></a>
 
 ## Opravy životního cyklu po auditu 1. listopadu 2026

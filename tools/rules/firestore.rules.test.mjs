@@ -1111,6 +1111,51 @@ describe('bounded reads', () => {
 });
 
 describe('notifications and preferences', () => {
+  test('the private-cleanup preference guard blocks legacy inbox recreation without blocking the reaction', async () => {
+    await seedEligibleUser('reader', 'SafeReader');
+    await seedEligibleUser('author', 'ShoutAuthor');
+    await seedShout({ authorId: 'author', authorNickname: 'ShoutAuthor' });
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), 'accountDeletionRequests', 'author'), { userId: 'author', status: 'pending' });
+      await setDoc(doc(context.firestore(), 'users', 'author', 'settings', 'notifications'), {
+        replies: false, reactions: false, privateReplies: false, followedProfiles: false, nearbyShouts: false,
+      });
+    });
+    const db = authenticatedDb('reader');
+    const title = (await getDoc(doc(db, 'shouts', 'shout-1'))).data().title;
+    const settings = await assertSucceeds(getDoc(doc(db, 'users', 'author', 'settings', 'notifications')));
+    assert.equal(settings.data().reactions, false);
+    const reaction = withNotice => {
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'rateLimits', 'reader', 'actions', 'interaction'), rateData('shoutReaction_shout-1'));
+      batch.set(doc(db, 'shouts', 'shout-1', 'reactions', 'reader'), { type: 'like', updatedAt: serverTimestamp() });
+      batch.update(doc(db, 'shouts', 'shout-1'), { likesCount: 1 });
+      if (withNotice) batch.set(doc(db, 'users', 'author', 'notifications', 'reaction_like_shout-1'), {
+        kind: 'reaction', actorId: 'reader', actorNickname: 'SafeReader', targetShoutId: 'shout-1',
+        targetTitle: title, reactionType: 'like', eventCount: 1, createdAt: serverTimestamp(), readAt: null,
+      });
+      return batch;
+    };
+    await assertFails(reaction(true).commit());
+    await assertSucceeds(reaction(false).commit());
+  });
+
+  test('a deleting account and other clients cannot recreate private lists or re-enable its notifications', async () => {
+    await seedEligibleUser('deleting', 'SafeDeleting');
+    await seedEligibleUser('other', 'SafeOther');
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), 'accountDeletionRequests', 'deleting'), { userId: 'deleting', status: 'pending' });
+    });
+    for (const uid of ['deleting', 'other']) {
+      const db = authenticatedDb(uid);
+      await assertFails(setDoc(doc(db, 'users', 'deleting', 'settings', 'notifications'), {
+        replies: true, reactions: true, privateReplies: true, followedProfiles: true, nearbyShouts: true,
+      }));
+      await assertFails(setDoc(doc(db, 'users', 'deleting', 'following', 'other'), { targetUserId: 'other', createdAt: serverTimestamp() }));
+      await assertFails(setDoc(doc(db, 'users', 'deleting', 'blocked', 'other'), { createdAt: serverTimestamp() }));
+    }
+  });
+
   test('notification preferences include every supported category', async () => {
     await seedEligibleUser('reader', 'SafeReader');
     const reference = doc(
