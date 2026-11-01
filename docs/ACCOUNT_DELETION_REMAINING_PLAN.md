@@ -1,6 +1,7 @@
 # Dokončení mazání účtu – rozhodnutí, ochrany a pořadí
 
-31. října 2026. Navazuje na [živě ověřený DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md)
+Rozhodnutí 31. října, aktualizováno 1. listopadu 2026.
+Navazuje na [živě ověřený DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md)
 a [kritéria účtového milníku](MVP_SERVER_PLAN.md#account-deletion).
 Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 „Uložení a doba uchování“: skrytí veřejného obsahu a potřebné bezpečnostní údaje
@@ -21,7 +22,7 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 | Úsek | Stav | Kritérium uzavření |
 |---|---|---|
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
-| Zastavení nových serverových oznámení/zpráv pro mazající se účet | Připravené v tomto úseku | Čtyři Functions, transakční kontrola příjemce, CI a cílený DEV rollout. |
+| Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
 | Vlastní nepotřebné soukromé podkolekce | Emulátorový prototyp, nelze spustit živě | Rozšířit stavový automat jobu, ověřit všechny příchozí zapisovače a samostatně schválit datový test. |
 | Soukromé zprávy a veřejné komentáře účtu | Rozhodnutý směr, implementace zbývá | Bezpečný interní archiv/skrytí, přesné počty, hlášení a test obou účastníků. |
 | Identita, rezervace přezdívky a zbývající osobní data | Částečně rozhodnuto, implementace zbývá | Minimální retenční údaje, správné odkazy/fallbacky, uvolnění pouze vlastní rezervace po lhůtě. |
@@ -48,6 +49,13 @@ nezbytná dokumentová čtení pro veřejná oznámení, jedno pro soukromou odp
 nepřidává se Auth API volání ani plošné hledání uživatelů. Jediné getAll používá
 fieldMask pro nickname a tři relevantní preference; e-mail ani celý profil se
 kvůli těmto kontrolám nenačítá.
+
+Rollout b777992e7e7a4e02cb94a7c08184e22977a1b0e4 prošel CI 41245446077.
+Čistý artefakt má SHA-256 cc4c3b5eed5a6f2383f6222e236ce4ff9f236dc5a371123b338545b6633ff4c2;
+nasazený firebase-functions-hash čtyř endpointů je 287c988e2f8515fbc233b58bdd0a1cf43bc74f9e.
+Ostatních osm Functions, Hosting, Rules a produkce se neměnily. Rollback kódu:
+ef49f2573f488df9b9e6f782bb493df9b4eae71b (CI 41236718912), opět jen stejné čtyři
+obsahové Functions. Soukromý úklid tímto rolloutem není aktivovaný.
 
 Staré přímé klientské zápisy/Rules tím nejsou uzavřené. Před úplným dočištěním
 je nutné pokrýt i tyto zapisovače; samotný nový serverový helper není důkazem

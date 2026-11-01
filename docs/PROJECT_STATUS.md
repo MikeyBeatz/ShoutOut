@@ -1,10 +1,33 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Aktualizováno 31. října 2026. Aktuální plánovací práce je ve větvi
+Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
 `fix/deleting-account-recipients`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
+
+## Ověřené nasazení 1. listopadu
+
+| Oblast | Skutečný stav |
+|---|---|
+| DEV web | Hosting 42d86a762a74a2dd, commit ca67ebd; HTML/JS/config znovu byte-for-byte ověřené. Nový klient se v posledních účtových úsecích nenasazoval. |
+| DEV účtový pilot | Dvě Functions z ef49f25 ACTIVE, plán každou minutu ENABLED; source hash 32de6cf5e387959db32687b6d9a8e594f03e8c80, HTTP plánovače bez Auth 403. |
+| DEV ochrana příjemců | Dříve nedokončený rollout b777992 je nyní hotový: createComment/createPrivateReply/toggleShoutReaction/toggleCommentReaction ACTIVE, source hash 287c988e2f8515fbc233b58bdd0a1cf43bc74f9e. |
+| Soukromý úklid | Záměrně jen emulátorový prototyp, odmítá živé projekty a není v artefaktech. |
+| Nový prostorový feed/read sync | Lokální příprava, nikoli aktivní klient/query API/indexový backfill. |
+| Produkční aplikace | Site shoutout-go-a1b34 existuje, live kanál nemá release/version. Veřejné MVP ještě není vydané. |
+
+Přesný nasazený commit ochrany příjemců: b777992e7e7a4e02cb94a7c08184e22977a1b0e4,
+CI 41245446077 success. Nasazeno z čistého worktree, artefakt SHA-256
+cc4c3b5eed5a6f2383f6222e236ce4ff9f236dc5a371123b338545b6633ff4c2.
+Čtyři endpointy Node 22/europe-west3/max 1/concurrency 1/256 MiB/15 s ověřené přes API;
+anonymní callable požadavky 401, zbývajících osm Functions podle úplného výpisu beze změny.
+Nové přihlášené případy příjemců jsou ověřené emulátorem/CI, nikoli novým živým Auth testem.
+Lokální důkazy: build/deleting-recipient-live-proof.json, feed-reading-web-proof.json,
+account-deletion-infra-proof.json a shoutout-production-hosting-proof.json.
+
+## Podklady a dosavadní kroky
+
 Hosting i Function ukládání byly po souhlasu nasazené 29. října a živé testy
 prošly oběma rolemi včetně úklidu. Obsahová hlášení jsou také nasazená a ověřená
 včetně duplicity, cooldownu, moderační fronty a úklidu. Nové mazání komentářů
@@ -122,15 +145,15 @@ Nový plánovač ENABLED každou minutu UTC; anonymní HTTP vstup 403. Živě ov
 waiting-auth 0 → odstranění nového disabled Auth fixture → shouts-hidden 3/3,
 ostatní pole nezměněná, replay beze změny a anonymní čtení jobu 403. Testovací
 Auth/obsah/žádost/job/checkpoint uklizené, původní pending žádost zachovaná.
-Původních 10 Functions beze změny. První Eventarc inicializace vyžadovala propagaci;
+Při původním pilotu zůstalo tehdejších 10 Functions beze změny. První Eventarc inicializace vyžadovala propagaci;
 detail a důkazy jsou v návrhu pilotu. Klient a celá 60denní retence stále nejsou hotové.
 [Navazující účtový plán](ACCOUNT_DELETION_REMAINING_PLAN.md): vlastník schválil
 rezervaci přezdívky po 60 dní a skrytí soukromých zpráv oběma. Připravené jsou
 transakční kontroly příjemce pro čtyři obsahové Functions a emulátorový úklid
 vlastních privátních podkolekcí; lab odmítá živé projekty a není v artefaktech.
 53 cílených případů prošlo, následné 3 kontroly projekce/bezpečnosti také;
-lint čistý. Zdrojová ochrana příjemců čeká na CI a DEV rollout, soukromý úklid
-se živě nezapíná. Archiv zpráv, přezdívka a konečné retenční dočištění zbývají.
+lint čistý. CI a DEV rollout ochrany příjemců jsou dokončené podle přehledu výše;
+soukromý úklid se živě nezapíná. Archiv zpráv, přezdívka a konečné retenční dočištění zbývají.
 Kompatibilní serverová vrstva i klientské časové klíče jsou nasazené z čistého
 `079d053d24fe04705d13baad7f8307bd25848094` po úspěšném CI `41136744088`.
 Nejdřív všech osm Functions, potom Hosting; všechny ACTIVE, původní provozní

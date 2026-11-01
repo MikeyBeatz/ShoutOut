@@ -84,8 +84,10 @@ Celý milník serverové brány ještě hotový není; metriky se tímto podkrok
    replay, soukromost a úklid. Zbývají soukromá data, přezdívka, konečná retence
    a klientské napojení; celý účtový milník se tím ještě neuzavírá.
    [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
-   a skrytí zpráv oběma; ochrana příjemců připravená k CI/rolloutu, vlastní privátní
-   seznamy otestované jen v emulátoru. Konečné smazání účtu stále není dokončené.
+   a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
+   1. listopadu. Vlastní privátní seznamy jsou záměrně jen v emulátoru.
+   Další krok: jejich verzovaná fáze v jobu, pak archiv zpráv a konečné dočištění.
+   Konečné smazání účtu stále není dokončené.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
    obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
