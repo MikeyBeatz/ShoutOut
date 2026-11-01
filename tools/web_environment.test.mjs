@@ -270,3 +270,13 @@ test('auth action uses supplied project and rejects missing config or cross-envi
     else assert.equal(getElement('#title').textContent, 'Invalid request');
   }
 });
+
+
+test('archived report lookup is gated by a strict boolean and App Check', () => {
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverArchivedReportLookup: true }, 'dev'));
+  for (const invalid of [null, 'true', 1]) assert.throws(() => validateConfig({ ...dev, serverArchivedReportLookup: invalid }, 'dev'));
+  const disabled = { ...dev };
+  for (const key of Object.keys(disabled).filter(key => key.startsWith('server'))) disabled[key] = false;
+  delete disabled.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...disabled, serverArchivedReportLookup: true }, 'dev'));
+});

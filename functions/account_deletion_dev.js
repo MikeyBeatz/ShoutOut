@@ -12,6 +12,7 @@ import { scanDueAccountDeletionJobs } from './account_deletion_job_scan.js';
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
+  contentArchiveEnabled: false, // Local v3 preparation; no archive rollout approved.
   privateCleanupEnabled: true, // Approved DEV private-data pilot, 1 November 2026.
   leaseMillis: 120000, retryDelayMillis: 60000, authWaitMillis: 86400000, pageSize: 50, maxJobs: 1,
 });
@@ -49,7 +50,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
     const result = await scanDueAccountDeletionJobs(database(), getAuth(), {
       ...accountDeletionDevProposal, clock: () => new Date(),
     });
-    const log = result.failed || result.needsReview || result.privateDisabled || result.checkpointConflict ? logger.warn : logger.info;
+    const log = result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);
   } catch {
     logger.error('account-deletion-job-recovery', { code: 'scan-failed' });

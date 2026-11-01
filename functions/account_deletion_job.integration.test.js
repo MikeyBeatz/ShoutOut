@@ -14,10 +14,13 @@ import { cleanupAccountPrivatePageLab as cleanPrivate } from './account_private_
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'account-job-tests') : null;
-const db = app ? getFirestore(app) : null, namespaces = [], refs = [], privateRoots = [];
+const db = app ? getFirestore(app) : null, namespaces = [], refs = [], privateRoots = [], archiveOwners = [];
 const missingAuth = { getUser() { throw Object.assign(new Error('not-found'), { code: 'auth/user-not-found' }); } };
 after(async () => {
   if (!app) return;
+  for (const uid of archiveOwners) {
+    for (const row of (await db.collection('accountContentArchive').where('retentionOwnerId', '==', uid).get()).docs) await db.recursiveDelete(row.ref);
+  }
   for (const namespace of namespaces) await db.recursiveDelete(db.collection('feedIndexLab').doc(namespace));
   for (const ref of refs) await ref.delete();
   for (const ref of privateRoots) await db.recursiveDelete(ref);
@@ -40,6 +43,7 @@ async function fixture(own = 3) {
       : path === 'maintenanceState/accountDeletionShoutJobs' ? lab.base.collection('maintenance').doc('scan') : db.doc(path),
     runTransaction: db.runTransaction.bind(db),
     getAll: db.getAll.bind(db),
+    collectionGroup: db.collectionGroup.bind(db),
     collection: name => name === 'shouts' ? lab.base.collection('source')
       : name === 'accountDeletionJobs' ? lab.base.collection('jobs') : db.collection(name) };
   const jobRef = accountDeletionJobRef(scoped, accountDeletionEventIdentity(event, scoped)); refs.push(jobRef);
@@ -487,4 +491,86 @@ test('one private run deletes at most 50 leaves and the next run drains the rema
   const last = await run(f.event, f.db, missingAuth, f.options);
   assert.equal(last.deleted, 5); assert.equal(last.privateDeletedCount, 55); assert.equal(last.state, 'private-leaves-cleaned');
   t.diagnostic(JSON.stringify({ privateLeaves: 55, elapsedMillis: Date.now() - start }));
+});
+
+async function contentJobFixture() {
+  const f = await fixture(); archiveOwners.push(f.uid);
+  const user = db.doc(`users/${f.uid}`), root = db.doc(`shouts/content_${randomUUID()}`);
+  privateRoots.push(user, root);
+  await user.set({ nickname: 'Keep until later phase' });
+  await root.set({ authorId: 'unrelated', title: 'Context', commentsCount: 2 });
+  const incoming = root.collection('privateReplies').doc('incoming'), outgoing = root.collection('privateReplies').doc('outgoing');
+  for (const [ref, authorId, recipientId] of [[incoming, 'other', f.uid], [outgoing, f.uid, 'other']]) {
+    await ref.set({ authorId, recipientId, participants: [authorId, recipientId], text: 'Unreported message', createdAt: Timestamp.now() });
+  }
+  const foreign = root.collection('privateReplies').doc('foreign');
+  await foreign.set({ authorId: 'alice', recipientId: 'bob', participants: ['alice', 'bob'], text: 'Keep foreign', createdAt: Timestamp.now() });
+  const ownComment = root.collection('comments').doc('own'), foreignComment = root.collection('comments').doc('foreign');
+  for (const [ref, authorId] of [[ownComment, f.uid], [foreignComment, 'alice']]) {
+    await ref.set({ authorId, text: 'Public comment', createdAt: Timestamp.now(), likesCount: 3, dislikesCount: 0 });
+  }
+  for (const uid of ['alice', 'bob', 'charlie']) await ownComment.collection('reactions').doc(uid).set({ type: 'like', updatedAt: Timestamp.now() });
+  const options = { ...f.options, pageSize: 50, privateCleanupEnabled: true, contentArchiveEnabled: true };
+  assert.equal((await run(f.event, f.db, missingAuth, options)).state, 'cleaning-private');
+  f.tick(options.retryDelayMillis);
+  assert.equal((await run(f.event, f.db, missingAuth, options)).state, 'archiving-content');
+  f.tick(options.retryDelayMillis);
+  return { ...f, options, user, root, incoming, outgoing, foreign, ownComment, foreignComment };
+}
+
+test('v3 archives all text and reactions with a shared per-invocation work budget and one Auth lookup', { skip: !enabled }, async () => {
+  const f = await contentJobFixture(), before = (await f.jobRef.get()).data(); let finished = false;
+  const options = { ...f.options, pageSize: 1 };
+  for (let i = 0; i < 12; i++) {
+    let reads = 0;
+    const result = await run(f.event, f.db, { getUser() { reads++; return missingAuth.getUser(); } }, options);
+    assert(reads <= 1); assert((result.archivedMessages ?? 0) + (result.archivedComments ?? 0) + (result.archivedReactions ?? 0) <= 1);
+    if (result.state === 'content-archived') { finished = true; break; }
+    f.tick(options.retryDelayMillis);
+  }
+  assert(finished);
+  const job = (await f.jobRef.get()).data();
+  assert.equal(job.schemaVersion, 3); assert.equal(job.hiddenCount, 3);
+  assert.equal(job.archivedMessageCount, 2); assert.equal(job.archivedCommentCount, 1); assert.equal(job.archivedReactionCount, 3);
+  assert.equal(job.pendingArchiveId, null); assert.equal(job.nextAttemptAt, null);
+  assert(job.retainUntil.isEqual(before.retainUntil)); assert(job.requestCreateTime.isEqual(before.requestCreateTime));
+  assert.equal((await f.root.get()).data().commentsCount, 1);
+  assert((await f.foreign.get()).exists); assert((await f.foreignComment.get()).exists);
+  assert(!(await f.ownComment.get()).exists); assert.equal((await f.ownComment.collection('reactions').get()).size, 0);
+  assert.equal((await db.collection('accountContentArchive').where('retentionOwnerId', '==', f.uid).get()).size, 3);
+  const replay = await run(f.event, f.db, { getUser() { assert.fail('terminal replay'); } }, options);
+  assert.equal(replay.state, 'content-archived'); assert.equal(replay.archivedCommentCount, 1);
+  assert.deepEqual((await f.jobRef.get()).data(), job);
+});
+
+test('v3 recovers an acknowledged-lost comment archive from its stored pending reaction phase', { skip: !enabled }, async () => {
+  const f = await contentJobFixture(); let failed = false;
+  const proxy = { ...f.db, async runTransaction(...args) {
+    const result = await f.db.runTransaction(...args), job = (await f.jobRef.get()).data();
+    if (!failed && job.pendingArchiveId && job.leaseToken) { failed = true; throw new Error('lost root acknowledgement'); }
+    return result;
+  } };
+  await assert.rejects(run(f.event, proxy, missingAuth, f.options), /lost root acknowledgement/);
+  const partial = (await f.jobRef.get()).data();
+  assert.equal(partial.workStage, 'reactions'); assert.equal(partial.phase, 'retry'); assert.equal(partial.archivedCommentCount, 1);
+  assert.equal((await f.root.get()).data().commentsCount, 1);
+  f.tick(f.options.retryDelayMillis);
+  const result = await run(f.event, f.db, missingAuth, f.options);
+  assert.equal(result.state, 'content-archived'); assert.equal(result.archivedCommentCount, 1); assert.equal(result.archivedReactionCount, 3);
+  assert.equal((await f.root.get()).data().commentsCount, 1);
+});
+
+test('disabling v3 pauses existing progress without Auth calls or data changes', { skip: !enabled }, async () => {
+  const f = await contentJobFixture(), before = (await f.jobRef.get()).data();
+  const result = await scan(f.db, { getUser() { assert.fail('paused v3'); } }, { ...f.options, contentArchiveEnabled: false, maxJobs: 1 });
+  assert.equal(result.contentDisabled, 1); assert.deepEqual((await f.jobRef.get()).data(), before);
+  assert((await f.incoming.get()).exists); assert((await f.ownComment.get()).exists);
+});
+
+test('enabling content archival never upgrades a completed v2 job', { skip: !enabled }, async () => {
+  const f = await privateJobFixture();
+  await run(f.event, f.db, missingAuth, f.options);
+  const before = (await f.jobRef.get()).data(); assert.equal(before.schemaVersion, 2);
+  const result = await run(f.event, f.db, { getUser() { assert.fail('v2 replay'); } }, { ...f.options, contentArchiveEnabled: true });
+  assert.equal(result.state, 'private-leaves-cleaned'); assert.deepEqual((await f.jobRef.get()).data(), before);
 });

@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverArchivedReportLookup !== undefined && typeof config.serverArchivedReportLookup !== 'boolean') {
+    throw new Error('serverArchivedReportLookup must be a boolean.');
+  }
+  if (config.serverArchivedReportLookup === true && !config.appCheckSiteKey) {
+    throw new Error('Archived report lookup requires web App Check.');
+  }
   if (config.serverShoutDeletion !== undefined && typeof config.serverShoutDeletion !== 'boolean') {
     throw new Error('serverShoutDeletion must be a boolean.');
   }

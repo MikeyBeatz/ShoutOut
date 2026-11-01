@@ -1,5 +1,12 @@
 # ShoutOut development seed users
 
+Archive index changes have a separate read-only planner:
+[`archive_index_plan.mjs`](archive_index_plan.mjs), verified by
+[`archive_index_plan.test.mjs`](archive_index_plan.test.mjs).
+The [archive rollout plan](../docs/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) describes
+the exact DEV-only delta. Do not deploy the full index/TTL configuration for
+that rollout: existing collection indexes must remain and TTL stays unchanged.
+
 This tool creates ten **development-only** Firebase Authentication users with
 non-deliverable `@shoutout.test` e-mails. Each user is marked as verified and
 has an `isTest: true` profile field.

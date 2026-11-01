@@ -20,6 +20,15 @@ class WebEnvironment {
     final commentReactionsGateway = json['serverCommentReactions'];
     final savesGateway = json['serverShoutSaves'];
     final reportsGateway = json['serverContentReports'];
+    final archivedReports = json['serverArchivedReportLookup'];
+    if (json.containsKey('serverArchivedReportLookup') &&
+        archivedReports is! bool) {
+      throw StateError('serverArchivedReportLookup must be a boolean.');
+    }
+    serverArchivedReportLookup = archivedReports == true;
+    if (serverArchivedReportLookup && key == null) {
+      throw StateError('Archived report lookup requires web App Check.');
+    }
     if (key != null &&
         (key is! String || !RegExp(r'^[A-Za-z0-9_-]{20,200}$').hasMatch(key))) {
       throw StateError('Invalid reCAPTCHA Enterprise site key.');
@@ -182,6 +191,7 @@ class WebEnvironment {
   late final bool serverCommentReactions;
   late final bool serverShoutSaves;
   late final bool serverContentReports;
+  late final bool serverArchivedReportLookup;
   late final bool serverCommentDeletion;
   late final bool serverShoutDeletion;
 

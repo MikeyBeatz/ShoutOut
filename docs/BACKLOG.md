@@ -4,7 +4,8 @@ Aktuální priority a milníky: [TODO](TODO.md). Poslední ověřený stav: [PRO
 
 Tento soubor je kanonická checkboxová evidence. Původních 155 úkolů
 (107 hotových, 48 otevřených) zůstává zachovaných. Dne 31. října 2026 přibyl
-nový požadavek na feed; aktuálně je zde 156 úkolů: 107 hotových a 49 otevřených.
+nový požadavek na feed a 1. listopadu přístup k retenčnímu archivu v administraci;
+aktuálně je zde 157 úkolů: 107 hotových a 50 otevřených.
 Při reorganizaci se žádný checkbox ani jeho stav nezměnil. Hotové bloky jsou zkrácené na názvy;
 jejich úplné požadavky, rozhodnutí a ověření jsou v odkazovaném nezměněném archivu.
 Bloky s otevřeným podúkolem zůstávají celé, včetně kontextu a již hotových podúkolů.
@@ -164,11 +165,11 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
 
-Počet zachován při reorganizaci 29. října 2026.
+Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 
-`███████████████████████████░░░░░░░░░░░░░` **69 %** — pokročilá fáze
+`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
 
-Hotovo je 107 ze 155 evidovaných úkolů. Procento počítá každý řádek s checkboxem
+Hotovo je 107 ze 157 evidovaných úkolů. Procento počítá každý řádek s checkboxem
 `[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
 Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
 
@@ -603,6 +604,17 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
 
 - [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#business-účty-a-webová-správa).
+
+<a id="archive-administration"></a>
+
+- [ ] **Později, termín k rozhodnutí** — Navrhnout a implementovat správu
+  neveřejného 60denního archivu zpráv/komentářů smazaných účtů.
+  - Požadavek vlastníka 1. listopadu: přístup k celému uchovanému obsahu a
+    případná práce s daty v administrátorském rozhraní.
+  - Před implementací konkrétních akcí schválit role a oprávnění, prohlížení,
+    případný export/změny, audit a vztah ke konci retence. Neudělit automaticky
+    celé moderační roli přímé klientské čtení všech soukromých zpráv.
+  - [Rozsah uchování a návaznosti](ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 - [ ] **MVP** — Ověřit produkční web pro běžné i Business účty včetně přístupu
   běžného uživatele k feedu a publikování. Moderátorské trasy `/admin` dál

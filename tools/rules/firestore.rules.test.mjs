@@ -1732,6 +1732,57 @@ describe('comments, reactions, saves and reports', () => {
     await assertFails(getDocs(query(collection(outsider, 'shouts', 'shout-1', 'privateReplies'), limit(50))));
   });
 
+  test('a moderator can idempotently remove an already archived private reply without reading its text', async () => {
+    await seedEligibleUser('archive-mod', 'ArchiveMod');
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), 'accountRoles', 'archive-mod'), { role: 'moderator', level: 3, assignedBy: 'fixture', createdAt: now() });
+    });
+    await assertSucceeds(deleteDoc(doc(authenticatedDb('archive-mod'), 'shouts', 'missing', 'privateReplies', 'already-archived')));
+  });
+
+  test('retained content is unavailable to every client role including owner', async () => {
+    const roles = ['user', 'business', 'moderator', 'seniorModerator', 'administrator', 'owner'];
+    for (let i = 0; i < roles.length; i++) {
+      const uid = `archive-role-${i + 1}`; await seedEligibleUser(uid, `ArchiveRole${i + 1}`);
+      await testEnvironment.withSecurityRulesDisabled(async context => {
+        await setDoc(doc(context.firestore(), 'accountRoles', uid), { role: roles[i], level: i + 1, assignedBy: 'fixture', createdAt: now() });
+      });
+    }
+    const path = 'accountContentArchive/' + 'a'.repeat(64), nested = path + '/reactions/voter';
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), path), { schemaVersion: 1, retentionOwnerId: 'archive-role-1',
+        sourcePath: 'shouts/old/comments/removed', content: { text: 'Retained private fixture' }, retainUntil: future(60000) });
+      await setDoc(doc(context.firestore(), nested), { content: { type: 'like' } });
+    });
+    const clients = roles.map((_, i) => authenticatedDb(`archive-role-${i + 1}`));
+    clients.push(testEnvironment.unauthenticatedContext().firestore());
+    for (const db of clients) {
+      for (const target of [path, nested]) {
+        await assertFails(getDoc(doc(db, target)));
+        await assertFails(setDoc(doc(db, target), { content: { text: 'overwrite' } }));
+        await assertFails(updateDoc(doc(db, target), { retainUntil: future(120000) }));
+        await assertFails(deleteDoc(doc(db, target)));
+      }
+      await assertFails(getDocs(query(collection(db, 'accountContentArchive'), limit(50))));
+    }
+  });
+
+  test('legacy clients cannot create, change or delete orphan comment reactions', async () => {
+    await seedEligibleUser('writer', 'SafeWriter'); await seedShout();
+    for (const action of ['create', 'update', 'delete']) {
+      const commentId = `archived-${action}`, db = authenticatedDb('writer');
+      const path = `shouts/shout-1/comments/${commentId}/reactions/writer`;
+      if (action !== 'create') await testEnvironment.withSecurityRulesDisabled(async context => {
+        await setDoc(doc(context.firestore(), path), { type: 'like', updatedAt: now() });
+      });
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'rateLimits', 'writer', 'actions', 'interaction'), rateData(`commentReaction_shout-1_${commentId}`));
+      if (action === 'delete') batch.delete(doc(db, path));
+      else batch.set(doc(db, path), { type: 'dislike', updatedAt: serverTimestamp() });
+      await assertFails(batch.commit());
+    }
+  });
+
   test('account deletion jobs and recovery checkpoints remain server-only', async () => {
     await seedEligibleUser('job-owner', 'JobOwner');
     const paths = ['accountDeletionJobs/' + 'a'.repeat(64), 'maintenanceState/accountDeletionShoutJobs'];

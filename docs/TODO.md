@@ -14,7 +14,7 @@ Počítají se celé vydávací milníky níže.
 
 ### Postup celého backlogu
 
-`███████████████████████████░░░░░░░░░░░░░` **69 %** — 107 ze 156 úkolů
+`███████████████████████████░░░░░░░░░░░░░` **68 %** — 107 ze 157 úkolů
 
 Kanonické checkboxy jsou pouze v [BACKLOG.md](BACKLOG.md).
 
@@ -22,6 +22,8 @@ Kanonické checkboxy jsou pouze v [BACKLOG.md](BACKLOG.md).
 - Reorganizace nepřidává nové úkoly ani nemění žádný checkbox.
 - Nové zadání feedu z 31. října přidává jeden otevřený úkol nad původních 155;
   počet hotových úkolů ani 24 milníků se tím nemění.
+- Požadavek z 1. listopadu přidal samostatnou budoucí správu retenčního archivu
+  v administraci. Je otevřený, proto je celkový backlog 157; MVP zůstává 9/24.
 
 ## Jak navázat
 
@@ -62,7 +64,11 @@ Verzovaná soukromá fáze account jobu je hotová v DEV: aktivace 6a4606e, CI
 41300216738 success (89 unit, 224 Rules/server testů), obě Functions ACTIVE,
 živě 3/3 skryté Shouty a 4/4 odstraněné privátní položky, replay i úklid prošly.
 [Důkazy DEV pilotu](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
-Další krok: rozhodnutí o rozsahu 60denního uchování textů, pak archiv zpráv.
+Rozhodnutí 1. listopadu: neveřejně uchovat všechny zahrnuté zprávy/komentáře
+60 dní, bez ohledu na nahlášení. V3 job a auditovaný fallback pro nahlášený
+komentář jsou nyní lokálně připravené, nové flagy false. Prošlo 235 Flutter,
+249 Rules/server a 92 unit testů. Další krok: CI a schválený
+[archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md), poté konečná retence.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

@@ -10,6 +10,7 @@ import { toggleCommentReactionOperation } from './toggle_comment_reaction.js';
 import { toggleShoutSaveOperation } from './toggle_shout_save.js';
 import { createContentReportOperation } from './create_content_report.js';
 import { deleteCommentOperation } from './delete_comment.js';
+import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 
 if (getApps().length === 0) initializeApp();
@@ -96,3 +97,9 @@ export const createContentReport = onCall({
   memory: '256MiB',
   timeoutSeconds: 15,
 }, (request) => createContentReportOperation(request, getFirestore()));
+
+
+export const getArchivedCommentReportTarget = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => getArchivedCommentReportTargetOperation(request, getFirestore()));

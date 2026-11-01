@@ -2128,19 +2128,34 @@ service cloud.firestore {
             );
 
         match /reactions/{userId} {
+          // Comment reactions: {type: like|dislike, updatedAt: request.time}.
+          // The parent must survive the atomic write so an archived comment
+          // cannot acquire new orphan reaction data after its bounded drain.
+          function commentParentSurvives() {
+            return existsAfter(
+              /databases/$(database)/documents/shouts/$(shoutId)/comments/$(commentId)
+            );
+          }
+
+          function validCommentReactionData() {
+            return request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
+              request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
+              request.resource.data.type in ['like', 'dislike'] &&
+              request.resource.data.updatedAt == request.time;
+          }
+
           allow get: if eligibleUser() && userId == request.auth.uid;
           allow create, update: if eligibleUser() &&
             userId == request.auth.uid &&
+            commentParentSurvives() &&
             consumedRate(
               'interaction',
               'commentReaction_' + shoutId + '_' + commentId
             ) &&
-            request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
-            request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
-            request.resource.data.type in ['like', 'dislike'] &&
-            request.resource.data.updatedAt == request.time;
+            validCommentReactionData();
           allow delete: if eligibleUser() &&
             userId == request.auth.uid &&
+            commentParentSurvives() &&
             consumedRate(
               'interaction',
               'commentReaction_' + shoutId + '_' + commentId

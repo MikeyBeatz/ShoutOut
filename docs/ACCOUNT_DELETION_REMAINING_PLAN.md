@@ -17,6 +17,23 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
   Potřebné podklady hlášení mají být pouze v interní retenční části.
   Samotné schválení ještě neznamená, že jsou staré zprávy přemístěné či skryté.
 
+## Doplnění vlastníka 1. listopadu – rozsah textů
+
+- Uchovat v neveřejné retenční části **všechny soukromé zprávy zahrnuté do
+  smazání účtu a všechny jeho veřejné komentáře**, nikoli jen nahlášené texty.
+  U zpráv jde o skutečné účastníky podle authorId/recipientId; vlastnictví
+  nadřazeného Shoutu nezahrnuje konverzace dvou jiných lidí.
+- Platí stávající serverová lhůta createTime žádosti + 60 dní. Nahlášení
+  nerozhoduje o zařazení do archivu. Texty nejsou veřejné a samotné toto
+  rozhodnutí nezavádí klientské právo na jejich čtení či změny.
+- Vlastník požaduje později přístup a případnou práci s archivem v administraci.
+  Je to samostatný otevřený [backlogový úkol](BACKLOG.md#archive-administration).
+  Konkrétní role, povolené akce, audit a termín se schválí při jeho návrhu;
+  běžná moderátorská role tím automaticky nedostává celý neveřejný archiv.
+- Jde o produktové rozhodnutí o rozsahu uchování. Právní texty a posouzení
+  před veřejným vydáním musí odpovídat skutečné implementaci. Rozhodnutí samo
+  neurčuje proces předávání dat institucím ani případné prodloužení právním holdem.
+
 ## Stav a návaznosti
 
 | Úsek | Stav | Kritérium uzavření |
@@ -24,7 +41,7 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
 | Vlastní nepotřebné soukromé podkolekce | DEV dokončeno z 6a4606e po CI 41300216738 | Živě waiting-auth 0/0 → 3 skryté Shouty → 4 odstraněné vlastní položky, zachovaný profil/legal, replay a úklid. Staré joby se nemigrují. |
-| Soukromé zprávy a veřejné komentáře účtu | Rozhodnutý směr, implementace zbývá | Bezpečný interní archiv/skrytí, přesné počty, hlášení a test obou účastníků. |
+| Soukromé zprávy a veřejné komentáře účtu | V3 lokálně implementovaná, nové flagy false | CI, cílený indexový rozdíl a samostatný schválený archivní pilot; [schéma a postup](ACCOUNT_CONTENT_ARCHIVE_PLAN.md). |
 | Identita, rezervace přezdívky a zbývající osobní data | Částečně rozhodnuto, implementace zbývá | Minimální retenční údaje, správné odkazy/fallbacky, uvolnění pouze vlastní rezervace po lhůtě. |
 | Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí a Storage, vypořádání hlášení/holdů, audit a test přesné hranice. |
 | Klient a uzavření přímých zápisů | Zbývá | Nový tok od začátku do konce, ověření přerušené sítě, teprve pak Rules cutover. |
@@ -196,19 +213,17 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
   vyžaduje existující Shout i pro soukromé hlášení se snapshotem. Samotné
   uchování textu tedy nezaručuje dostupnost důkazu po odstranění Shoutu;
   moderační fallback patří do téhož následujícího úseku.
-- Před archivací je třeba konkretizovat „potřebný obsah“ ze schválené
-  60denní bezpečnostní retence: zda uchovat všechny zprávy, nebo jen
-  nahlášené/potřebné podklady. Směr minimalizace favorizuje jen potřebné
-  podklady, ale toto není nové schválené retenční pravidlo. Samostatně zůstává
-  rozhodnutí o existujícím otevřeném hlášení/hold po uplynutí lhůty.
-  V této etapě nevzniká nový archiv, nový index ani změna retenční lhůty.
+- Rozsah textů je rozhodnutý: uchovat všechny podle doplnění výše.
+  Samostatně zůstává rozhodnutí o existujícím otevřeném hlášení/hold po
+  uplynutí lhůty. Místní příprava archivu nemění živou retenci ani indexy.
 
 ## Další větší úsek
 
 1. Privátní fáze je hotová ve vývoji včetně CI, živého testu a úklidu.
    Dosavadní v1 shouts-hidden záznamy zachovat;
    případnou migraci připravit odděleně.
-2. Připravit interní archiv a atomické odstranění původních soukromých zpráv,
+2. Dokončit CI a schválit [připravený archivní pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
+   Lokální kód už provádí interní archiv a atomické odstranění původních soukromých zpráv,
    kde je účet jedním z účastníků; zachovat podklady reportů pouze interně.
    Nezahrnout svévolně konverzace dvou jiných lidí jen podle vlastníka Shoutu.
 3. Obdobně skrýt vlastní veřejné komentáře a přesně jednou upravit commentsCount;

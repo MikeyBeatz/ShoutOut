@@ -511,7 +511,7 @@ class _ReportList extends StatelessWidget {
         : shoutRef.collection('comments').doc(data['commentId'] as String);
     final targetSnapshot = await target.get();
     final authorId = targetSnapshot.data()?['authorId'] as String?;
-    if (action == 'remove') {
+    if (action == 'remove' && targetSnapshot.exists) {
       if (collection == 'reports') {
         await _deleteShoutContent(target.id);
       } else {
@@ -700,7 +700,7 @@ class _ReportTargetDetails {
     this.focusCommentCreatedAt,
   });
 
-  final Shout shout;
+  final Shout? shout;
   final Map<String, dynamic>? targetData;
   final String? focusCommentId;
   final Timestamp? focusCommentCreatedAt;
@@ -739,7 +739,7 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
         .collection('shouts')
         .doc(data['shoutId'] as String)
         .get();
-    if (!shoutDocument.exists) {
+    if (!shoutDocument.exists && widget.collection == 'reports') {
       throw StateError('shout-not-found');
     }
     Map<String, dynamic>? targetData = shoutDocument.data();
@@ -751,8 +751,18 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
           .doc(data['commentId'] as String)
           .get();
       targetData = commentDocument.data();
-      focusCommentId = commentDocument.id;
-      focusCommentCreatedAt = targetData?['createdAt'] as Timestamp?;
+      if (targetData == null &&
+          kIsWeb &&
+          WebEnvironment.current.serverArchivedReportLookup) {
+        final response =
+            await FirebaseFunctions.instanceFor(region: 'europe-west3')
+                .httpsCallable('getArchivedCommentReportTarget')
+                .call({'reportId': widget.report.id});
+        targetData = decodeArchivedCommentTarget(response.data);
+      } else {
+        focusCommentId = commentDocument.id;
+        focusCommentCreatedAt = targetData?['createdAt'] as Timestamp?;
+      }
     } else if (widget.collection == 'privateReplyReports') {
       // Private replies are not readable by unrelated moderators. The report
       // contains the immutable text and author snapshot needed for review.
@@ -768,7 +778,7 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
       }
     }
     return _ReportTargetDetails(
-      shout: Shout.fromDocument(shoutDocument),
+      shout: shoutDocument.exists ? Shout.fromDocument(shoutDocument) : null,
       targetData: targetData,
       focusCommentId: focusCommentId,
       focusCommentCreatedAt: focusCommentCreatedAt,
@@ -840,9 +850,11 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
                       ),
                       _ReportDetailRow(
                         label: 'Region',
-                        value: details.shout.geography.regionLabel.isEmpty
+                        value:
+                            (details.shout?.geography.regionLabel.isEmpty ??
+                                true)
                             ? 'Region není doplněný'
-                            : details.shout.geography.regionLabel,
+                            : details.shout!.geography.regionLabel,
                       ),
                     ],
                   ),
@@ -865,9 +877,9 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
       FutureBuilder<_ReportTargetDetails>(
         future: _data,
         builder: (context, snapshot) => FilledButton.icon(
-          onPressed: snapshot.hasData
+          onPressed: snapshot.data?.shout != null
               ? () {
-                  final shout = snapshot.data!.shout;
+                  final shout = snapshot.data!.shout!;
                   Navigator.pop(context);
                   Navigator.push(
                     context,
@@ -886,7 +898,8 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
               : null,
           icon: const Icon(Icons.open_in_new),
           label: Text(
-            widget.collection == 'commentReports'
+            widget.collection == 'commentReports' &&
+                    snapshot.data?.focusCommentId != null
                 ? 'Otevřít u komentáře'
                 : widget.collection == 'privateReplyReports'
                 ? 'Otevřít související místo'

@@ -1,12 +1,34 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-private-job-phase`; navazuje na dokončenou retenci
+`feature/account-content-archive`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – privátní fáze účtového jobu
+## Aktuální úsek – archiv všech zpráv a komentářů
+
+Rozhodnutí vlastníka 1. listopadu: uchovat neveřejně všechny existující zahrnuté
+zprávy a vlastní komentáře 60 dní, bez ohledu na nahlášení. Budoucí administrační
+přístup má vlastní otevřený úkol, bez dnešního udělení nových klientských práv.
+[Schéma, provozní meze a nový DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
+
+V3 job, archivace textů/reakcí, obnova po přerušení a omezený auditovaný lookup
+nahlášeného komentáře jsou lokálně implementované. Oba nové flagy jsou vypnuté;
+žádný archivní obsah, nové indexy, Rules, Function ani web se v této etapě
+živě nenasazovaly. Poslední úplný Flutter běh z přerušeného úseku měl chybu
+sestavení; ta je opravená a nový úplný běh má 235 pass. Lokálně prošlo všech
+249 Rules/server scénářů bez skipů, 92 unit (171 emulator-only skip), analyzátor
+a lint. Následuje commit/CI a samostatně schválený archivní DEV pilot.
+
+Read-only preflight: všech 97 existujících komentářů validních pro archivaci,
+0 soukromých zpráv, 0 archivů/jobů a 1 původní žádost. Comments.authorId CG je
+READY. Připravený indexový rozdíl má 4 změny, zachová běžné privátní indexy,
+nic nemaže a nesahá na TTL. Celý firestore.indexes.json se pro tento úsek
+nesmí nasadit kvůli jeho nesouvisejícím, dosud neschváleným TTL nastavením.
+MVP je stále 9/24; archivace ještě není fyzický 60denní purge ani celý účtový milník.
+
+## Dokončený předchozí úsek – privátní fáze účtového jobu
 
 Verzovaná fáze je dokončená v DEV: po skrytí Shoutů v2 job po dávkách
 odstraňuje vlastní notifications/following/blocked, ponechá minimální false
@@ -32,8 +54,8 @@ Testovací profil/legal/settings, 3 Shouty, žádost/job a vzniklý checkpoint
 jsou uklizené. Původní 1 pending žádost má shodný digest, žádné jiné joby/data
 se nečistily. Důkazy: build/account-private-{activation-artifact,infra,wait,live,cleanup}-proof.json.
 [Přesný rozsah a rollback](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
-Další krok: rozhodnout rozsah textů uchovávaných v interní 60denní retenci
-(otázka předložená vlastníkovi), pak archivace zpráv/komentářů. Dále zbývají
+Rozsah textů vlastník následně schválil: všechny zahrnuté zprávy a komentáře.
+Navazující archivace je lokálně připravená výše. Dále zbývají
 minimalizace identity/přezdívka, konečná retence a klientský cutover.
 Účtový milník ještě není celý hotový, metriky se nemění.
 

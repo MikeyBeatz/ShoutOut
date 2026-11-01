@@ -124,6 +124,43 @@ job, ale zachovat striktní kontrolu klíčů v každé operaci a vracet jen tim
 po cutoveru bezpečná samostatná návratová verze. Obnovení legacy příjmu by vyžadovalo
 samostatný návrh obnovy původních potvrzení a schválení; není rutinní rollback.
 
+## Archiv textů a v3 job – lokální ověření, zatím bez rolloutů
+
+Nové rozhodnutí vlastníka uchovává všechny zahrnuté zprávy a komentáře 60 dní.
+Lokálně připravený archiv, omezený auditovaný lookup nahlášeného komentáře,
+nové indexy a Rules jsou popsané v [archivním plánu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
+contentArchiveEnabled i klientský serverArchivedReportLookup zůstávají false.
+
+Po přerušení práce byl poslední úplný Flutter log neúspěšný kvůli chybnému
+odkazu targetSnapshot v jiném handleru moderace. Odkaz je opravený, analyzátor
+čistý a nový úplný běh má 235/235 pass. Serverová unit sada 92 pass a
+171 emulator-only skip; celá Rules/server sada 249/249 pass bez skipů.
+Samostatně 52 job/archive scénářů, 5 report lookup scénářů a 3 klientské
+protokol/config testy. Planner indexů má 3 testy; soubor web/planner 19 pass.
+
+Ověřeno: nenahlášené příchozí/odchozí zprávy včetně původních polí, cizí
+konverzace zachovaná, přesný komentářový čítač, bounded přesun reakcí,
+ztracené potvrzení již provedené transakce, výměna žádosti/lease, pevný
+deadline, dvojí mazání účastníků bez duplicit, nemigrované v1/v2 a pozastavení
+v3. Lookup vyžaduje existující kanonické hlášení, způsobilou moderační roli a
+App Check; úspěch má audit bez textu a na deadline už nic nevrací.
+Přímé čtení/zápisy archivu odmítnuté pro role 1–6 i anonymně. Běžné reakce
+procházejí, osiřelé create/update/delete se odmítají. Soukromé hlášení lze
+idempotentně uzavřít i po odstranění zdroje, bez rozšíření práva číst jeho text.
+
+Read-only cloud preflight našel 97/97 validních komentářů, 0 soukromých zpráv,
+archivů/jobů a 1 původní žádost. Comments.authorId CG READY. Indexový plán
+obsahuje pouze 4 cílené operace; zachová dnešní collection indexy a nesahá na
+TTL ani nemaže indexy. Nenasazovat celý indexes soubor kvůli starým TTL položkám.
+
+Logy: build/account-archive-flutter-final.log, account-archive-rules-final.log,
+account-archive-functions-unit.log, account-archive-analyze.log,
+archived-comment-report-emulator.log, archive-index-tools-test.log.
+Připravený kód ještě není důkaz nasazení. Před živým archivem je nutné jeho
+CI, odsouhlasený datový/indexový pilot a skutečné ověření App Check/moderačního
+detailu. Nová Rules jsou cílený lokální návrh; před veřejným vydáním dál patří
+do celkové bezpečnostní kontroly podle MVP_SERVER_PLAN.
+
 ## Privátní fáze účtového jobu – DEV dokončeno 1. listopadu
 
 `functions/account_deletion_job.integration.test.js` nyní má 35 případů.
