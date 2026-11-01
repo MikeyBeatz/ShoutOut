@@ -37,4 +37,8 @@ test('an already applied delta plans no repeated changes', () => {
     else state['accountContentArchive/indexes'].data.indexes.push({ ...action.body, name: `${base}/accountContentArchive/indexes/new` });
   }
   assert.equal(plan(project, state).actions.length, 0);
+  delete state['accountContentArchive/fields/content'].data.indexConfig.indexes;
+  assert.equal(plan(project, state).actions.length, 0, 'REST omits an empty repeated indexes field');
+  state['accountContentArchive/fields/content'].data.indexConfig.usesAncestorConfig = true;
+  assert.throws(() => plan(project, state), /invalid-index-snapshot/);
 });

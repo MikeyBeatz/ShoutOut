@@ -16,10 +16,15 @@ const spec = index => {
 };
 function fieldSnapshot(snapshots, path) {
   const row = snapshots[path];
-  if (row?.status !== 200 || row.data?.name !== `${base}/${path}` || !Array.isArray(row.data.indexConfig?.indexes)) {
+  // REST protobuf JSON omits repeated indexes for an explicit empty exemption.
+  const emptyExemption = path === 'accountContentArchive/fields/content' &&
+    row?.data?.indexConfig && row.data.indexConfig.indexes === undefined &&
+    row.data.indexConfig.usesAncestorConfig !== true;
+  if (row?.status !== 200 || row.data?.name !== `${base}/${path}` ||
+      !(Array.isArray(row.data.indexConfig?.indexes) || emptyExemption)) {
     throw new Error('invalid-index-snapshot');
   }
-  return row.data;
+  return emptyExemption ? { ...row.data, indexConfig: { ...row.data.indexConfig, indexes: [] } } : row.data;
 }
 
 export function planArchiveIndexes(projectId, snapshots) {
