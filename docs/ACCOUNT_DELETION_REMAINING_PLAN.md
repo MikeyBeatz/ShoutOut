@@ -69,7 +69,8 @@ se shodnou pending žádostí a chybějícím Auth. Každý zápis má ve stejn�
 kontrolu zámku a původního requestCreateTime. Admin Auth je v testech simulovaný.
 `account_private_cleanup_lab.js` zůstává adaptérem původního prototypu pro
 emulátor a stále odmítá živé projekty; není v deploy artefaktu. Nové jádro
-je v připravovaném account-deletion balíku, aktivace ve wrapperu je false.
+je v připravovaném account-deletion balíku. V původním 22bcf73 je aktivace
+false; schválený aktivační commit ji mění na true, živý rollout čeká na jeho CI.
 
 | Data | Připravený postup |
 |---|---|
@@ -115,7 +116,11 @@ stránek v emulátoru 460 ms; nejde o cloudovou latenci nebo cenu.
 
 <a id="private-job-dev"></a>
 
-## Konkrétní návrh rozšířeného DEV pilotu – čeká na schválení
+## Rozšířený DEV pilot – schválený 1. listopadu
+
+Vlastník výslovně schválil uvedené rozšíření i nový jednorázový datový test.
+Aktivační commit zapíná privátní fázi pro nové DEV joby; nasazení proběhne
+až po jeho vlastním úspěšném CI. Dokončení nasazení/testu eviduje PROJECT_STATUS.
 
 Připravený commit 22bcf7316908d04e12ce5aed80599a460c0c1591 má úspěšné CI
 41299376137 včetně 224 Rules/server případů, celé Flutter sady a web buildu.

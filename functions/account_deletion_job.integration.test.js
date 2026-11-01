@@ -5,6 +5,7 @@ import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { createLabBlockIndex } from './feed_block_index_lab.js';
 import { encodeGeohash } from './geohash.js';
+import { accountDeletionDevProposal } from './account_deletion_dev.js';
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
 import { accountDeletionJobRef, runAccountDeletionCreatedEvent as run, runAccountShoutHidingJob } from './account_deletion_job.js';
 import { scanDueAccountDeletionJobs as scan } from './account_deletion_job_scan.js';
@@ -329,7 +330,7 @@ async function privateJobFixture() {
   for (const id of ['n1', 'n2']) await user.collection('notifications').doc(id).set({ text: 'private inbox' });
   await user.collection('following').doc('other').set({ targetUserId: 'other' });
   await user.collection('blocked').doc('other').set({ retainedElsewhere: true });
-  const options = { ...f.options, pageSize: 50, privateCleanupEnabled: true };
+  const options = { ...f.options, ...accountDeletionDevProposal };
   const first = await run(f.event, f.db, missingAuth, options);
   assert.equal(first.state, 'cleaning-private');
   const afterShouts = (await f.jobRef.get()).data();

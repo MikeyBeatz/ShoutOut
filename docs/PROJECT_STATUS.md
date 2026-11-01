@@ -12,15 +12,18 @@ Verzovaná fáze je lokálně implementovaná: po skrytí Shoutů v2 job po dáv
 odstraňuje vlastní notifications/following/blocked, ponechá minimální false
 preference a zachová profil/legal. Průběh a delety mají společnou transakci
 a kontrolu původní žádosti/zámku. Existující v1 joby se nepřevádějí ani nemění.
-Aktivace je v DEV wrapperu výslovně false; živé Functions stále běží z 6acca72.
+Vlastník 1. listopadu výslovně schválil nový DEV datový pilot. Aktivace je
+v připravovaném commitu true; živé Functions stále běží z 6acca72.
+Všech 35 job testů prošlo znovu s reálnými schválenými DEV parametry
+z accountDeletionDevProposal, včetně zapnuté privátní fáze.
 Prošlo 103 cílených job/Rules testů, 90 serverových unit (149 emulator-only skip),
 15 web-tools testů a ESLint. Flutter klient se nemění. Commit
 `22bcf7316908d04e12ce5aed80599a460c0c1591` má úspěšné CI `41299376137`,
 včetně všech 224 Rules/server emulátorových testů, celého Flutter ověření a buildu.
 Čistý instalační balík má šest JS modulů shodných s Git blobem. Read-only
 preflight našel 0 v1 jobů, 0 v2 jobů a 1 dřívější pending žádost; pilot ji nemění.
-Čeká jen požadované samostatné schválení nového datového pilotu, žádné nové
-nasazení ani změna živých dat v tomto úseku neproběhly.
+Čeká CI aktivačního commitu, pak rollout a schválený test/úklid. Žádné nové
+nasazení ani změna živých dat zatím v tomto úseku neproběhly.
 [Přesný rozsah a rollback](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
 Nejde ještě o hotový účtový milník: zbývají zprávy/komentáře, minimalizace
 identity/přezdívka, konečná retence a klientský cutover. Metriky se nemění.

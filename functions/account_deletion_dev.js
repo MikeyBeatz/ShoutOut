@@ -12,7 +12,7 @@ import { scanDueAccountDeletionJobs } from './account_deletion_job_scan.js';
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
-  privateCleanupEnabled: false, // Enable only after the separate private-data rollout approval.
+  privateCleanupEnabled: true, // Approved DEV private-data pilot, 1 November 2026.
   leaseMillis: 120000, retryDelayMillis: 60000, authWaitMillis: 86400000, pageSize: 50, maxJobs: 1,
 });
 

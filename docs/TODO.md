@@ -58,9 +58,9 @@ needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyz�
 prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
 emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
 Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
-Verzovaná soukromá fáze account jobu je nyní lokálně hotová, aktivace false;
+Verzovaná soukromá fáze account jobu je nyní lokálně hotová, DEV pilot schválený;
 103 cílených testů a 90 serverových unit prošlo. CI 41299376137 pro 22bcf73
-je success, včetně 224 Rules/server testů. Další krok: schválení a konkrétní
+je success, včetně 224 Rules/server testů. Další krok: CI aktivace a konkrétní
 [DEV datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev), pak archiv zpráv.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
