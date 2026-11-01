@@ -27,7 +27,12 @@ důkaz zneplatnění skutečného cloudového URL ani cloudového CAS**.
 Žádné nasazení, fyzický purge, živá data, job nebo nová cloudová služba.
 Logy: build/logo-revocation-unit.log, build/logo-revocation-emulator.log a
 build/logo-revocation-storage-final.log a build/logo-revocation-functions.log.
-Přesný commit a CI následují.
+Zdroj c62e7b5d82b04218fa857e034b6e2ecd59aa6b3a je commitnutý a pushnutý;
+[CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582)
+ověřilo 241 Flutter, 37 tools, 105 serverových unit (188 emulator-only skip),
+284 Rules/server a 14 Storage případů, analýzu/lint a web build.
+Metadata a log: build/logo-revocation-ci-proof.json a build/logo-revocation-ci-success.log.
+Lokální příprava je uzavřená; cloudová a integrační brána zůstávají otevřené.
 
 ## Tři Admin SDK zapisovače – lokální ochrana 1. listopadu
 

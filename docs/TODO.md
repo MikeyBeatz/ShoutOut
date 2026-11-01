@@ -83,7 +83,9 @@ backfill, role a Business aktivace kontrolují žádost/marker v transakci;
 a0a9117, [CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
 včetně 284 Rules/server testů a web buildu;
 živé nástroje ani joby se nespouštěly/neměnily.
-Navazující lokální prototyp revokace URL loga má připravené jádro a testy.
+Navazující lokální prototyp revokace URL loga je uzavřený: c62e7b5,
+[CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582),
+105 unit, 284 Rules/server, 14 Storage, Flutter/tools, analýza/lint a web build.
 Emulátor zachovává tokeny a ignoruje verzovací podmínky; krok to rozpozná
 a nepotvrdí dokončení. Cloudové ověření a potvrzený stav mazání jsou stále brány
 před worker integrací. [Podrobnosti](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).

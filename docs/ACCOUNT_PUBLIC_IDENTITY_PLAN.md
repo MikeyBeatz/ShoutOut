@@ -224,6 +224,11 @@ a ignoruje podmínky verze. Test proto očekává odmítnutí potvrzení a stál
 dostupný starý URL; simulační unit test není cloudové potvrzení CAS/revokace.
 Původních 8 Storage regresí zůstává v téže sekvenční CI sadě.
 
+Schválená lokální příprava je uzavřená: c62e7b5d82b04218fa857e034b6e2ecd59aa6b3a,
+commitnutý a pushnutý; [CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582)
+včetně 105 unit, 284 Rules/server a 14 Storage případů, Flutter/tools,
+analýzy/lintu a web buildu. [Úplná evidence](TESTING.md).
+
 Před živou integrací zbývá odděleně schválený malý DEV Storage test, který
 ověří tokenovou revokaci a skutečné 412 u obou kolizí. Zde se neprováděl.
 Živé nastavení verzování bucketu, přístup přes IAM/ACL a historické generations

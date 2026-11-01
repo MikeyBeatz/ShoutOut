@@ -20,7 +20,11 @@ Jádro ani lab adaptér nejsou v entry pointech/přípravě deploy balíků.
 a lint prošly. Emulátor výslovně potvrdil mezeru: metadata patch
 tokeny zachová a ignoruje verzovací podmínky. Krok proto odmítá potvrdit úspěch;
 nejde o důkaz funkční revokace v cloudu. Společná Storage sada má 14/14 pass
-bez skipů (8 původních a 6 nových); přesný commit a CI ještě následují.
+bez skipů (8 původních a 6 nových). Zdroj c62e7b5d82b04218fa857e034b6e2ecd59aa6b3a
+je commitnutý a pushnutý; [CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582)
+ověřilo 241 Flutter, 37 tools, 105 serverových unit (188 emulator-only skip),
+284 Rules/server a 14 Storage případů, analýzu/lint i web build.
+Schválená lokální příprava je uzavřená; cloudová revokace ani worker nejsou ověřené.
 [Rozsah, výsledky a zbývající brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).
 DEV zůstává na 1dab78c; živé prostředí, joby a MVP metriky se nemění.
 
