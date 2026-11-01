@@ -230,7 +230,20 @@ včetně 105 unit, 284 Rules/server a 14 Storage případů, Flutter/tools,
 analýzy/lintu a web buildu. [Úplná evidence](TESTING.md).
 
 Před živou integrací zbývá odděleně schválený malý DEV Storage test, který
-ověří tokenovou revokaci a skutečné 412 u obou kolizí. Zde se neprováděl.
+ověří tokenovou revokaci a skutečné 412 u obou kolizí. Vlastník následně
+povolil pokračovat v práci a nasadit vhodně ověřené změny. Připravený
+functions/account_logo_revocation_dev_probe.js cíleně ověří skutečný DEV
+bucket na 4 nových objektech v náhodném vlastním prefixu: platný token →
+revokace → odmítnutí starého tokenu, replay bez zápisu, zachování bytes/metadat,
+412 při oddělené změně generation/metageneration a nezměněný kontrolní objekt.
+Vytváří je s ifGenerationMatch 0, uklízí jen vlastní označené objekty s
+podmínkou shody generation a kontrolou nepřítomnosti. Cizí bucket, endpoint
+nebo chybějící source SHA odmítne. Při zapnutém versioningu se zastaví před
+vytvořením objektů; neplánuje tím odstranění starších generací.
+Žádné živé Firestore zápisy ani nové Auth účty: transakce request/marker jsou
+v paměti, skutečný Auth pouze ověří neexistující náhodné UID. Jde o izolovaný
+Storage test stejného helperu, nikoli end-to-end potvrzení workeru. Živý výsledek
+zatím není; postup se nemá považovat za provedený pouze podle této dokumentace.
 Živé nastavení verzování bucketu, přístup přes IAM/ACL a historické generations
 nebyly ověřené; soupis běžných objektů nedokládá revokaci historických verzí.
 Zůstává také brána nezrušitelného potvrzeného stavu: Firestore transakce

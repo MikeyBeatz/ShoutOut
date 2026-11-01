@@ -1,12 +1,23 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-logo-url-revocation`; navazuje na dokončenou retenci
+`feature/account-logo-dev-proof`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – zneplatnění odkazů na loga, pouze lokálně
+## Aktuální úsek – izolované ověření na DEV Storage
+
+Vlastník po vysvětlení zbývajících bran povolil pokračovat a nasadit vhodně
+ověřené změny. Připravený Storage probe vytvoří pouze 4 nové malé objekty
+v náhodném businessLogos/mvp_logo_probe_UID/ prefixu projektu shoutout-dev-46c81,
+ověří skutečnou revokaci a obě 412 kolize a podmíněně je uklidí.
+Žádné živé Firestore zápisy, žádný nový Auth účet, žádná žádost/job ani změna
+bucket politiky. Použije stejné revokační jádro; request/marker transakce jsou
+pro tento izolovaný test v paměti, Auth user-not-found a Storage jsou skutečné.
+Není to end-to-end test mazání účtu. Příprava testu/CI běží; živý výsledek dosud není.
+
+## Dokončený předchozí úsek – zneplatnění odkazů na loga, pouze lokálně
 
 Vlastník schválil lokální serverový prototyp a emulátorové ověření bez mazání
 log, worker integrace, nasazení, živých dat nebo nových Auth účtů.
