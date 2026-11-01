@@ -1,3 +1,4 @@
+import 'timed_operation_gateway.dart';
 import 'dart:convert';
 import 'dart:math';
 
@@ -6,7 +7,7 @@ import 'reaction_gateway.dart';
 class ReportAccountChanged implements Exception {}
 
 class ContentReportRequest {
-  const ContentReportRequest({
+  ContentReportRequest({
     required this.userId,
     required this.shoutId,
     required this.targetType,
@@ -21,6 +22,7 @@ class ContentReportRequest {
   final String? targetId;
   final String reason;
   final String idempotencyKey;
+  final timedAttempt = TimedOperationAttempt();
 
   Map<String, dynamic> toPayload() => {
     'expectedUserId': userId,

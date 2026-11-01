@@ -51,6 +51,14 @@ Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný
 deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
+Zpětný audit 37 commitů (30. října–1. listopadu) našel dva opravitelné
+nedostatky. Opravy jsou lokálně připravené: odstranění globální historie
+payloadů klienta a ukončení trvalých/opakovaných chyb account workeru do
+needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyzátor
+prošly; před návratem k dalším účetním fázím zbývá CI a DEV rollout.
+[Podrobnosti](TESTING.md#audit-lifecycle-fixes).
+Metriky ani rozsah MVP se tím nemění.
+
 1. **R1/R3 rozhodnuto:** celé A0–A3 i B1–B4 před MVP; nepřečtené první jen
    v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze.
    [Etapy a kontrolní brány](FEED_IMPLEMENTATION_STAGES.md).

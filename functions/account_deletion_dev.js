@@ -1,5 +1,5 @@
-// Proposed DEV-only entry point, intentionally absent from index.js/content.js.
-// Preparing this module does not deploy or approve its operational settings.
+// DEV-only entry point deployed as the separate account-deletion codebase.
+// Deliberately absent from index.js/content.js; preparation alone never deploys it.
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';

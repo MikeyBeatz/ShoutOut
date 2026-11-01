@@ -34,6 +34,7 @@ class _CommentTileState extends State<CommentTile> {
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
       await _serverContentOperations.call(
+        attempt: request.timedAttempt,
         userId: request.userId,
         operation: 'toggleCommentReaction',
         payload: request.toPayload(),

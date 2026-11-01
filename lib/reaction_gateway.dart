@@ -1,3 +1,4 @@
+import 'timed_operation_gateway.dart';
 import 'dart:math';
 
 import 'package:cloud_functions/cloud_functions.dart';
@@ -19,7 +20,7 @@ class ReactionAccountChanged implements Exception {}
 
 /// An immutable toggle: retries must never become a second toggle.
 class ReactionRequest {
-  const ReactionRequest({
+  ReactionRequest({
     required this.userId,
     required this.shoutId,
     required this.button,
@@ -31,6 +32,7 @@ class ReactionRequest {
   final String shoutId;
   final String button;
   final String idempotencyKey;
+  final timedAttempt = TimedOperationAttempt();
   final String? commentId;
 
   Map<String, dynamic> toPayload() => {

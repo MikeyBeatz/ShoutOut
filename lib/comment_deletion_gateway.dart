@@ -1,3 +1,4 @@
+import 'timed_operation_gateway.dart';
 import 'dart:math';
 
 import 'package:cloud_functions/cloud_functions.dart';
@@ -5,7 +6,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'reaction_gateway.dart';
 
 class CommentDeletionRequest {
-  const CommentDeletionRequest({
+  CommentDeletionRequest({
     required this.userId,
     required this.shoutId,
     required this.commentId,
@@ -16,6 +17,7 @@ class CommentDeletionRequest {
   final String shoutId;
   final String commentId;
   final String idempotencyKey;
+  final timedAttempt = TimedOperationAttempt();
 
   Map<String, dynamic> toPayload() => {
     'expectedUserId': userId,

@@ -22,6 +22,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
       await _serverContentOperations.call(
+        attempt: request.timedAttempt,
         userId: request.userId,
         operation: 'toggleShoutSave',
         payload: request.toPayload(),
@@ -32,6 +33,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
       await _serverContentOperations.call(
+        attempt: request.timedAttempt,
         userId: request.userId,
         operation: 'toggleShoutReaction',
         payload: request.toPayload(),
@@ -54,6 +56,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   int _tab = 0;
   Map<String, dynamic>? _pendingServerShout;
+  TimedOperationAttempt? _pendingServerShoutAttempt;
   late final Timer _expiryTimer;
 
   @override
@@ -253,6 +256,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
           },
       };
       _pendingServerShout = payload;
+      _pendingServerShoutAttempt = TimedOperationAttempt();
       await _publishServerShout(payload);
       return;
     }
@@ -378,11 +382,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   Future<void> _publishServerShout(Map<String, dynamic> payload) async {
     try {
       await _serverContentOperations.call(
+        attempt: _pendingServerShoutAttempt!,
         userId: payload['expectedUserId'] as String,
         operation: 'createShout',
         payload: payload,
       );
       _pendingServerShout = null;
+      _pendingServerShoutAttempt = null;
     } on FirebaseFunctionsException catch (error) {
       if (error.code == 'resource-exhausted' &&
           [

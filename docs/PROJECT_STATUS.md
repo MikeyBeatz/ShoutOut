@@ -1,10 +1,28 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`fix/deleting-account-recipients`; navazuje na dokončenou retenci
+`fix/audit-operation-lifecycle`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
+
+## Opravy zpětného auditu 1. listopadu
+
+Lokálně opravený životní cyklus timed klienta: místo globální historie drží
+malou vazbu přímo rozpracovaný požadavek; obsahuje SHA-256 otisk, identitu
+a původní timed klíč, nikoli celý text. Po uvolnění požadavku ji nedrží žádná
+globální kolekce. Retry při ztracené odpovědi i po potvrzení a odmítnutí
+změněného payloadu zůstávají zachované. `crypto` 3.0.7 již byl v lockfile,
+nově je přímou závislostí bez změny verze.
+
+Worker předává trvalé chyby oprávnění/vstupu k ruční kontrole; u ostatních
+chyb platí stávající 24hodinové okno od žádosti, pak také needs-review.
+Frekvence plánovače, prostředky Functions ani mazání Auth se nemění.
+Zastaralé komentáře o čistě lokálním jobu opravené. Cíleně prošlo 46 Flutter
+a 23 account/job emulátorových testů, analyzátor a ESLint bez chyb.
+Celá Flutter sada 232/232 a Functions unit 88 pass / 138 emulator-only skip
+bez chyb. CI a DEV rollout těchto oprav ještě čekají; níže uvedené nasazení
+se tímto lokálním krokem nemění. [Kontrakt a ověření](TESTING.md#audit-lifecycle-fixes).
 
 ## Ověřené nasazení 1. listopadu
 

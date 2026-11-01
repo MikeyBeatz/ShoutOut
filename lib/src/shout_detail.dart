@@ -25,6 +25,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
     send: (request) async {
       await _serverContentOperations.call(
+        attempt: request.timedAttempt,
         userId: request.userId,
         operation: 'createContentReport',
         payload: request.toPayload(),
@@ -464,6 +465,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           _parentPrivateReplyId,
         ]);
         await _serverContentOperations.call(
+          attempt: _commentAttempt.timedAttempt,
           userId: user.uid,
           operation: 'createPrivateReply',
           payload: {
@@ -544,6 +546,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           _replyToCommentId,
         ]);
         await _serverContentOperations.call(
+          attempt: _commentAttempt.timedAttempt,
           userId: user.uid,
           operation: 'createComment',
           payload: {

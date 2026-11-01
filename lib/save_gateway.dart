@@ -1,3 +1,4 @@
+import 'timed_operation_gateway.dart';
 import 'dart:math';
 
 import 'reaction_gateway.dart';
@@ -5,7 +6,7 @@ import 'reaction_gateway.dart';
 class SaveAccountChanged implements Exception {}
 
 class SaveRequest {
-  const SaveRequest({
+  SaveRequest({
     required this.userId,
     required this.shoutId,
     required this.idempotencyKey,
@@ -14,6 +15,7 @@ class SaveRequest {
   final String userId;
   final String shoutId;
   final String idempotencyKey;
+  final timedAttempt = TimedOperationAttempt();
 
   Map<String, dynamic> toPayload() => {
     'expectedUserId': userId,

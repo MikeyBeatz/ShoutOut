@@ -153,6 +153,7 @@ final _commentDeletionGateway = CommentDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {
     await _serverContentOperations.call(
+      attempt: request.timedAttempt,
       userId: request.userId,
       operation: 'deleteComment',
       payload: request.toPayload(),
@@ -164,6 +165,7 @@ final _shoutDeletionGateway = ShoutDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {
     await _serverContentOperations.call(
+      attempt: request.timedAttempt,
       userId: request.userId,
       operation: 'deleteShout',
       payload: request.toPayload(),

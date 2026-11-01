@@ -1,4 +1,4 @@
-// Local job prototype. No deployed trigger, scheduler, client input or Auth deletion.
+// Durable job core, used by the DEV pilot. Never deletes Auth accounts.
 import { createHash, randomUUID } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
@@ -42,7 +42,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   leaseMillis, retryDelayMillis, authWaitMillis, clock = () => new Date(),
   pageSize = 50, indexWriter = null, beforeTransaction = null,
 } = {}) {
-  // Timings are required lab configuration; no live runtime policy is selected.
+  // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function') {
     throw new Error('invalid-account-deletion-job-options');
@@ -114,7 +114,11 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     if (error instanceof LeaseLost) return { state: 'lease-lost' };
     try {
       if (error instanceof AccountDeletionRequestUnavailable) return await finish('obsolete');
-      await finish('retry', 'processing-failed');
+      const permanent = ['auth/insufficient-permission', 'auth/invalid-credential',
+        'permission-denied', 'invalid-argument', 'failed-precondition', 3, 7, 9].includes(error?.code);
+      const expired = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis;
+      const result = await finish(permanent || expired ? 'needs-review' : 'retry', 'processing-failed');
+      if (result.state === 'needs-review' || result.state === 'obsolete') return result;
     } catch (finishError) {
       if (!(finishError instanceof LeaseLost)) throw finishError;
       if (error instanceof AccountDeletionRequestUnavailable) return { state: 'lease-lost' };

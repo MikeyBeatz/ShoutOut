@@ -15,7 +15,14 @@ nenahrazuje rozhodnutí o novém plánovači, pracovních datech a tomto pilotu.
 - Každá transakce ověřuje vlastníka zámku. Starý běh po převzetí nezmění
   obsah ani nepřepíše novější dokončení. Zastavení žádosti práci ukončí.
 - Existující Auth účet se nemaže. Pouze auth/user-not-found dovolí skrývání;
-  výpadky se evidují obecným kódem a propagují bez osobních detailů.
+  výpadky se evidují obecným kódem bez osobních detailů. Dočasné chyby se
+  opakují pouze ve stávajícím 24hodinovém okně od žádosti; potom needs-review.
+  Trvalé chyby oprávnění, neplatné přihlašovací konfigurace a neplatného
+  vstupu/podmínky (Auth insufficient-permission/invalid-credential,
+  permission-denied/invalid-argument/failed-precondition a gRPC 7/3/9)
+  přejdou do needs-review hned. Stav nemá nextAttemptAt, Scheduler jej vynechá
+  a opakovaná událost jej znovu neprovádí. Neznámá chyba před uplynutím okna
+  zůstává retry; nedokončené stránky bez chyby se tímto pravidlem nezastavují.
 - Omezená kontrola splatných prací pokračuje i po přerušení původní události.
   Rotující kurzor brání trvalému zablokování další práce vadným záznamem.
   Prázdná kontrola bez kurzoru nemá žádné databázové zápisy.
@@ -54,6 +61,7 @@ pilotní testy zahrnuly jejich úklid. Kompletní 60denní proces zůstává ote
 | Oba endpointy | europe-west3, min 0 / max 1 instance **každý**, concurrency 1, 256 MiB, 60 s |
 | Zámek práce | 120 s; dočasné chyby/další stránka nejdříve za 60 s |
 | Auth stále existuje | Čekat nejvýše 24 h od žádosti; poté needs-review bez dalšího automatického zkoušení a bez odstranění Auth |
+| Chyba zpracování | Trvalá chyba ihned needs-review; ostatní nejvýše ve stejném 24h okně od žádosti. Uchovat dosavadní atomický průběh, bez dalšího automatického zkoušení po needs-review. |
 | Obnova plánovače | retryCount 0; další minutu rozhodne trvalý stav práce |
 | Index | Nezapínat indexWriter, nové indexové kolekce ani backfill |
 

@@ -112,6 +112,43 @@ test('index failure preserves earlier atomic progress and persists only a saniti
   assert.equal((await f.lab.audit()).activeMetadata, 2);
 });
 
+test('permanent permission failures stop automatic retries and preserve all source data', { skip: !enabled }, async () => {
+  for (const code of ['auth/insufficient-permission', 'auth/invalid-credential', 'permission-denied', 7]) {
+    const f = await fixture();
+    const auth = { getUser() { throw Object.assign(new Error('private provider detail'), { code }); } };
+    const result = await run(f.event, f.db, auth, f.options);
+    assert.equal(result.state, 'needs-review'); assert.equal(result.hiddenCount, 0);
+    const before = (await f.jobRef.get()).data();
+    assert.equal(before.nextAttemptAt, null); assert.equal(before.leaseToken, null);
+    assert.equal(before.lastErrorCode, 'processing-failed');
+    assert(!JSON.stringify(before).includes('private provider detail'));
+    f.tick(25000);
+    assert.equal((await run(f.event, f.db, { getUser() { assert.fail('terminal job'); } }, f.options)).state, 'needs-review');
+    assert.deepEqual((await f.jobRef.get()).data(), before);
+    assert.equal((await scan(f.db, missingAuth, { ...f.options, maxJobs: 1 })).scanned, 0);
+    assert.equal((await f.lab.audit()).activeMetadata, 5);
+  }
+});
+
+test('temporary or unknown processing failures retry only within the existing Auth wait window', { skip: !enabled }, async () => {
+  for (const code of ['auth/internal-error', 'unavailable', 14, undefined]) {
+    const f = await fixture();
+    const auth = { getUser() { throw Object.assign(new Error('temporary provider failure'), { code }); } };
+    await assert.rejects(run(f.event, f.db, auth, f.options), /temporary provider failure/);
+    assert.equal((await f.jobRef.get()).data().phase, 'retry');
+    f.tick(f.options.retryDelayMillis);
+    const retry = await scan(f.db, auth, { ...f.options, maxJobs: 1 });
+    assert.equal(retry.failed, 1);
+    assert.equal((await f.jobRef.get()).data().phase, 'retry');
+    f.tick(f.options.authWaitMillis);
+    const review = await scan(f.db, auth, { ...f.options, maxJobs: 1 });
+    assert.equal(review.needsReview, 1); assert.equal(review.failed, 0);
+    const job = (await f.jobRef.get()).data();
+    assert.equal(job.phase, 'needs-review'); assert.equal(job.nextAttemptAt, null);
+    assert.equal(job.hiddenCount, 0); assert.equal((await f.lab.audit()).activeMetadata, 5);
+  }
+});
+
 test('waiting for Auth is bounded by explicit lab policy and never deletes an existing Auth account', { skip: !enabled }, async () => {
   const f = await fixture(), present = { async getUser(uid) { return { uid }; } };
   assert.equal((await run(f.event, f.db, present, f.options)).state, 'waiting-auth');

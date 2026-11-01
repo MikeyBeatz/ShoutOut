@@ -4,6 +4,16 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:crypto/crypto.dart';
+
+/// Caller-owned retry binding. Keep this object while an action can be retried;
+/// release it with the pending request. It never retains the request body.
+class TimedOperationAttempt {
+  (String, String, String)? _scope;
+  String? _fingerprint;
+  String? _timedKey;
+  Future<void>? _running;
+}
 
 /// Binds a caller's existing logical request ID to one immutable timed request.
 /// The timestamp provider must use server-issued Auth metadata, never the
@@ -21,8 +31,6 @@ class TimedOperationGateway {
   final Future<void> Function(String operation, Map<String, dynamic> payload)
   send;
   final String Function() newNonce;
-  final _attempts = <(String, String, String), _TimedAttempt>{};
-  final _running = <(String, String, String), Future<void>>{};
 
   static String _randomNonce() {
     final random = Random.secure();
@@ -45,6 +53,7 @@ class TimedOperationGateway {
   }
 
   Future<void> call({
+    required TimedOperationAttempt attempt,
     required String userId,
     required String operation,
     required Map<String, dynamic> payload,
@@ -65,11 +74,9 @@ class TimedOperationGateway {
     }
     final scope = (userId, operation, logicalKey);
     final signature = jsonEncode(_canonical(payload));
-    final attempt = _attempts.putIfAbsent(
-      scope,
-      () => _TimedAttempt(signature),
-    );
-    if (attempt.signature != signature) {
+    final fingerprint = sha256.convert(utf8.encode(signature)).toString();
+    if ((attempt._scope != null && attempt._scope != scope) ||
+        (attempt._fingerprint != null && attempt._fingerprint != fingerprint)) {
       return Future.error(
         FirebaseFunctionsException(
           code: 'already-exists',
@@ -77,19 +84,22 @@ class TimedOperationGateway {
         ),
       );
     }
-    final running = _running[scope];
+    attempt._scope ??= scope;
+    attempt._fingerprint ??= fingerprint;
+    final running = attempt._running;
     if (running != null) return running;
-    final future = _send(userId, operation, attempt);
-    _running[scope] = future;
-    return future.whenComplete(() => _running.remove(scope));
+    final future = _send(userId, operation, attempt, signature);
+    attempt._running = future;
+    return future.whenComplete(() => attempt._running = null);
   }
 
   Future<void> _send(
     String userId,
     String operation,
-    _TimedAttempt attempt,
+    TimedOperationAttempt attempt,
+    String frozenPayload,
   ) async {
-    if (attempt.request == null) {
+    if (attempt._timedKey == null) {
       final serverTime = await issuedAt(userId);
       if (currentUserId() != userId) throw _accountChanged();
       final seconds = serverTime.toUtc().millisecondsSinceEpoch ~/ 1000;
@@ -100,14 +110,14 @@ class TimedOperationGateway {
           message: 'operation-clock-unavailable',
         );
       }
-      final request = jsonDecode(attempt.signature) as Map<String, dynamic>;
-      request['idempotencyKey'] = 'op1_${seconds}_$nonce';
-      request['expectedUserId'] = userId;
-      attempt.request = jsonEncode(request);
+      attempt._timedKey = 'op1_${seconds}_$nonce';
     }
     if (currentUserId() != userId) throw _accountChanged();
-    await send(operation, jsonDecode(attempt.request!) as Map<String, dynamic>);
-    // Keep the binding for the lifetime of this session, including after an
+    final request = jsonDecode(frozenPayload) as Map<String, dynamic>;
+    request['idempotencyKey'] = attempt._timedKey;
+    request['expectedUserId'] = userId;
+    await send(operation, request);
+    // The caller retains only the fingerprint/key binding, including after an
     // acknowledgement. A caller retry after a later UI failure must still be
     // the original request. Expiry never silently mints a replacement key.
   }
@@ -117,11 +127,4 @@ class TimedOperationGateway {
         code: 'unauthenticated',
         message: 'The signed-in account changed.',
       );
-}
-
-class _TimedAttempt {
-  _TimedAttempt(this.signature);
-
-  final String signature;
-  String? request;
 }

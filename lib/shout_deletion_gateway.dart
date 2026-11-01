@@ -1,3 +1,4 @@
+import 'timed_operation_gateway.dart';
 import 'dart:math';
 
 import 'package:cloud_functions/cloud_functions.dart';
@@ -5,7 +6,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'reaction_gateway.dart';
 
 class ShoutDeletionRequest {
-  const ShoutDeletionRequest({
+  ShoutDeletionRequest({
     required this.userId,
     required this.shoutId,
     required this.idempotencyKey,
@@ -14,6 +15,7 @@ class ShoutDeletionRequest {
   final String userId;
   final String shoutId;
   final String idempotencyKey;
+  final timedAttempt = TimedOperationAttempt();
 
   Map<String, dynamic> toPayload() => {
     'expectedUserId': userId,

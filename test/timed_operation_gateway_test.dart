@@ -15,6 +15,7 @@ void main() {
   test(
     'lost response and Auth refresh retain the same immutable timed payload',
     () async {
+      final attempt = TimedOperationAttempt();
       var clockReads = 0;
       final sent = <Map<String, dynamic>>[];
       final gateway = TimedOperationGateway(
@@ -32,6 +33,7 @@ void main() {
         },
       );
       Future<void> call() => gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: payload(),
@@ -53,6 +55,7 @@ void main() {
   test(
     'concurrent calls share clock acquisition and one outbound operation',
     () async {
+      final attempt = TimedOperationAttempt();
       final clock = Completer<DateTime>();
       var reads = 0, sends = 0;
       final gateway = TimedOperationGateway(
@@ -66,11 +69,13 @@ void main() {
         },
       );
       final first = gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: payload(),
       );
       final second = gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: payload(),
@@ -85,6 +90,7 @@ void main() {
   test(
     'account switch during clock acquisition never sends under the new account',
     () async {
+      final attempt = TimedOperationAttempt();
       String? user = 'author';
       final clock = Completer<DateTime>();
       var sends = 0;
@@ -96,6 +102,7 @@ void main() {
         },
       );
       final first = gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: payload(),
@@ -116,6 +123,7 @@ void main() {
       user = null;
       await expectLater(
         gateway.call(
+          attempt: attempt,
           userId: 'author',
           operation: 'createShout',
           payload: payload(),
@@ -129,6 +137,7 @@ void main() {
   test(
     'changing a payload under a pending key is rejected and caller mutation cannot alter the frozen request',
     () async {
+      final attempt = TimedOperationAttempt();
       final clock = Completer<DateTime>();
       final sent = <Map<String, dynamic>>[];
       final original = payload();
@@ -140,6 +149,7 @@ void main() {
         },
       );
       final first = gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: original,
@@ -147,6 +157,7 @@ void main() {
       (original['location'] as Map)['latitude'] = 0;
       await expectLater(
         gateway.call(
+          attempt: attempt,
           userId: 'author',
           operation: 'createShout',
           payload: original,
@@ -164,6 +175,7 @@ void main() {
       expect((sent.single['location'] as Map)['latitude'], 50);
       // Equivalent map insertion order must not look like a changed request.
       await gateway.call(
+        attempt: attempt,
         userId: 'author',
         operation: 'createShout',
         payload: {
@@ -179,6 +191,7 @@ void main() {
   test(
     'an expired uncertain attempt never fetches a new time or replaces its key',
     () async {
+      final attempt = TimedOperationAttempt();
       var clockReads = 0;
       final sent = <Map<String, dynamic>>[];
       final gateway = TimedOperationGateway(
@@ -195,9 +208,10 @@ void main() {
           );
         },
       );
-      for (var attempt = 0; attempt < 2; attempt++) {
+      for (var retry = 0; retry < 2; retry++) {
         await expectLater(
           gateway.call(
+            attempt: attempt,
             userId: 'author',
             operation: 'toggleShoutSave',
             payload: payload(),
@@ -223,17 +237,20 @@ void main() {
         },
       );
       await gateway.call(
+        attempt: TimedOperationAttempt(),
         userId: 'author',
         operation: 'toggleShoutSave',
         payload: payload(),
       );
       await gateway.call(
+        attempt: TimedOperationAttempt(),
         userId: 'author',
         operation: 'toggleShoutReaction',
         payload: payload(),
       );
       user = 'business';
       await gateway.call(
+        attempt: TimedOperationAttempt(),
         userId: 'business',
         operation: 'toggleShoutSave',
         payload: payload(),
@@ -241,6 +258,7 @@ void main() {
       expect(sent.map((data) => data['idempotencyKey']).toSet().length, 3);
       await expectLater(
         gateway.call(
+          attempt: TimedOperationAttempt(),
           userId: 'business',
           operation: 'createShout',
           payload: {...payload(), 'expectedUserId': 'author'},
@@ -248,6 +266,47 @@ void main() {
         throwsA(isA<FirebaseFunctionsException>()),
       );
       expect(sent.length, 3);
+    },
+  );
+  test(
+    'a retry binding cannot be rebound to a different operation or logical key',
+    () async {
+      var sends = 0;
+      final attempt = TimedOperationAttempt();
+      final gateway = TimedOperationGateway(
+        currentUserId: () => 'author',
+        issuedAt: (_) async => serverTime,
+        send: (_, _) async {
+          sends++;
+        },
+      );
+      await gateway.call(
+        attempt: attempt,
+        userId: 'author',
+        operation: 'createShout',
+        payload: payload(),
+      );
+      for (final (operation, key) in [
+        ('createComment', 'logical-key'),
+        ('createShout', 'other-key'),
+      ]) {
+        await expectLater(
+          gateway.call(
+            attempt: attempt,
+            userId: 'author',
+            operation: operation,
+            payload: {...payload(), 'idempotencyKey': key},
+          ),
+          throwsA(
+            isA<FirebaseFunctionsException>().having(
+              (e) => e.code,
+              'code',
+              'already-exists',
+            ),
+          ),
+        );
+      }
+      expect(sends, 1);
     },
   );
 }

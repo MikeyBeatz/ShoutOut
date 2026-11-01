@@ -3,6 +3,19 @@ import 'package:shoutout/publication_attempt.dart';
 
 void main() {
   test(
+    'retry binding follows the draft and is released when the draft changes',
+    () {
+      final publication = PublicationAttempt();
+      publication.keyFor(['original']);
+      final binding = publication.timedAttempt;
+      publication.keyFor(['original']);
+      expect(identical(publication.timedAttempt, binding), isTrue);
+      publication.keyFor(['edited']);
+      expect(identical(publication.timedAttempt, binding), isFalse);
+    },
+  );
+
+  test(
     'retry reuses one key while changed content starts another operation',
     () {
       final attempt = PublicationAttempt(clock: () => DateTime(2026));

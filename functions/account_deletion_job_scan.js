@@ -1,4 +1,4 @@
-// Bounded local recovery scan. No live schedule; bounds/timings are caller supplied.
+// Bounded recovery scan used by the DEV scheduler; bounds/timings are caller supplied.
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { accountDeletionJobRef, runAccountShoutHidingJob } from './account_deletion_job.js';
 

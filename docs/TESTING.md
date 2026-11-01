@@ -124,6 +124,40 @@ job, ale zachovat striktní kontrolu klíčů v každé operaci a vracet jen tim
 po cutoveru bezpečná samostatná návratová verze. Obnovení legacy příjmu by vyžadovalo
 samostatný návrh obnovy původních potvrzení a schválení; není rutinní rollback.
 
+<a id="audit-lifecycle-fixes"></a>
+
+## Opravy životního cyklu po auditu 1. listopadu 2026
+
+Schválené opravy nálezů zpětné kontroly 37 commitů z 30. října–1. listopadu:
+
+- TimedOperationGateway nemá globální mapy pokusů ani uložené celé payloady.
+  Každý požadavek nese vlastní TimedOperationAttempt s SHA-256 otiskem,
+  scope a timed klíčem. JSON se zmrazí jen na dobu probíhajícího volání.
+  Gateways ponechávají stejný request pro nejasný výsledek; návrh publikace
+  mění vazbu pouze se změnou draftu. Potvrzená operace dál bezpečně přijme
+  opakování s týmž objektem, ale nedrží globálně text ani historii všech akcí.
+  Při zániku requestu zanikne i vazba; nové requesty dostávají vlastní vazby.
+  UID se ověřuje před získáním času i před odesláním. Změna scope/payloadu
+  pod jednou vazbou se odmítne před sítí. Sedmidenní serverový kontrakt se nemění.
+- Account worker ukládá pouze sanitizovaný processing-failed. Jednoznačně
+  trvalé chyby předává do needs-review hned, ostatní po stávajícím authWaitMillis
+  od serverového vytvoření žádosti (DEV 24 h). Dočasná chyba před tímto časem
+  drží retry a dosavadní zámky i atomické počty. Needs-review nemá další pokus,
+  Scheduler ji vynechá a replay události nevolá Auth. Úspěšné stránky nejsou
+  omezené tímto chybovým oknem. Ruční kontrola nadále vyžaduje provozní řešení;
+  nevznikl nový upozorňovací kanál ani automatické obnovení.
+- Komentáře u nasazeného DEV jobu už neoznačují práci jako čistě lokální.
+
+Cílené ověření: 46 Flutter testů gatewayů/publikací, 23 account/job testů
+v emulátoru bez skipů, Flutter analyze a ESLint čisté. Testy pokrývají
+ztracenou odpověď, retry po potvrzení, souběh, změnu účtu i payloadu, správný
+životní cyklus draftu, trvalé chyby oprávnění, dočasné/neurčené chyby před
+hranicí a po ní, vyloučení terminálních jobů ze scanu a zachování zdrojů.
+Závislost crypto 3.0.7 pouze převedena z tranzitivní na přímou, bez nové verze.
+Logy lokálně: build/audit-fixes-flutter-targeted.log,
+build/audit-fixes-account-emulator.log, build/audit-fixes-analyze.log.
+Širší ověření a skutečné nasazení jsou zvlášť v PROJECT_STATUS.
+
 ## První kompatibilní serverová vrstva retence 30. října 2026
 
 Navazující klient `timed_operation_gateway_test.dart` pokrývá ztracenou odpověď
