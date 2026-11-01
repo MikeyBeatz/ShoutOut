@@ -334,7 +334,8 @@ async function privateJobFixture() {
   for (const id of ['n1', 'n2']) await user.collection('notifications').doc(id).set({ text: 'private inbox' });
   await user.collection('following').doc('other').set({ targetUserId: 'other' });
   await user.collection('blocked').doc('other').set({ retainedElsewhere: true });
-  const options = { ...f.options, ...accountDeletionDevProposal };
+  // A historical v2 fixture must stay v2 after the DEV v3 feature is enabled.
+  const options = { ...f.options, ...accountDeletionDevProposal, contentArchiveEnabled: false };
   const first = await run(f.event, f.db, missingAuth, options);
   assert.equal(first.state, 'cleaning-private');
   const afterShouts = (await f.jobRef.get()).data();
