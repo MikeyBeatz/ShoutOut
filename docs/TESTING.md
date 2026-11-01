@@ -124,7 +124,7 @@ job, ale zachovat striktní kontrolu klíčů v každé operaci a vracet jen tim
 po cutoveru bezpečná samostatná návratová verze. Obnovení legacy příjmu by vyžadovalo
 samostatný návrh obnovy původních potvrzení a schválení; není rutinní rollback.
 
-## Privátní fáze účtového jobu – lokální ověření 1. listopadu
+## Privátní fáze účtového jobu – DEV dokončeno 1. listopadu
 
 `functions/account_deletion_job.integration.test.js` nyní má 35 případů.
 Společně s 68 Rules testy prošlo 103/103 bez skipů. Nová v2 fáze pokrývá
@@ -143,12 +143,36 @@ Celá serverová sada 90 unit pass / 149 emulator-only skip, ESLint čistý,
 15 web environment tools testů pass. Klient Flutter se nemění.
 Logy: build/account-private-rules-emulator.log, account-private-functions-unit.log,
 account-private-eslint.log a account-private-tools.log.
-Živý flag zůstává vypnutý; [konkrétní datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev)
-vyžaduje vlastní souhlas. CI 41299376137 pro
-22bcf7316908d04e12ce5aed80599a460c0c1591 je success: 224 Rules/server případů
-bez skipů, Flutter kontroly a build prošly. Všechny moduly čistého instalačního
-balíku odpovídají commitu. Živé nasazení ani datový test se zatím neprovedly;
-stav a read-only preflight jsou v PROJECT_STATUS.
+Původní CI 41299376137 pro 22bcf7316908d04e12ce5aed80599a460c0c1591 je success.
+Vlastník schválil [konkrétní datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
+Aktivace 6a4606e7713e66affd1ad6d98339f6837bf2c17c prošla vlastním CI
+41300216738: 89 unit / 149 emulator-only skip, 224 Rules/server případů bez
+skipů, 31 tools a Flutter kontroly/build. Všech 35 job testů navíc znovu lokálně
+prošlo s reálnými schválenými DEV parametry. Čistý instalační balík má šest
+JS modulů, package/lockfile shodné s Git; aggregate artifact SHA-256
+56d1690443095cae7cd4ad7527c104d8e8d87a6bbe7389c30d5380c8ba2bf3b1.
+
+Obě účetní Functions jsou ACTIVE, source hash 3c5bb3d252677158aee75a54571a26c43e6af03a,
+Node 22/europe-west3/min 0/max 1/concurrency 1/256 MiB/60 s. Scheduler má
+stejné URI, OIDC identitu, minutu UTC a retryCount 0. Anonymní HTTP 403,
+ostatních 10 Functions i Hosting beze změny. Runtime revize:
+accountdeletionrequestcreateddev-00003-jis a resumeaccountdeletionjobsdev-00003-cis.
+
+Živý test vytvořil právě jeden nový disabled Auth účet, 3 Shouty a 4 privátní
+položky. Při existujícím Auth waiting-auth/0/0, všechny položky a preference
+zachované. Po odstranění pouze tohoto Auth skutečný plánovač dokončil 3 skryté
+Shouty a 4 odstraněné položky. Profil/legal zachované, všechny preference
+false, ostatní pole Shoutů nezměněná, terminální replay nemění ani updateTime.
+Job bez textů/e-mailu/polohy, anonymní Firestore čtení 403. RetainUntil je přesně
+createTime + 60 dní; konečný retenční proces stále není implementovaný.
+
+Testovací Auth je nepřítomný, všechny jeho evidované dokumenty/žádost/job a
+vzniklý checkpoint jsou uklizené. Digest celé původní pending žádosti a původních
+jobů zůstal stejný. Původní uživatelská data, Rules, main a produkce beze změny.
+Důkazy: build/account-private-{activation-artifact,infra,wait,live,cleanup}-proof.json,
+account-private-activation-ci.log a account-private-functions-deploy.log.
+Bezpečný rollback musí zachovat v2-aware jádro a vypnout flag; starší v1-only
+worker nezvládne případné již vytvořené v2 joby.
 
 <a id="audit-lifecycle-fixes"></a>
 

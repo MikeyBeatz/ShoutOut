@@ -193,6 +193,13 @@ registrovat. Serverová automatizace musí:
 Hotovo, když integrační test pokryje běžnou žádost, opakované spuštění,
 částečné selhání a dokončení 60denní retence.
 
+Dílčí stav 1. listopadu: DEV v2 job má živě ověřené skrytí Shoutů a odstranění
+vlastních notifications/following/blocked, zachování profilu/legal a minimalizaci
+notification preferencí na false. Aktivace 6a4606e po CI 41300216738, replay a
+úklid testu prošly. Celý milník zůstává otevřený kvůli textům/komentářům,
+identitě/přezdívce, konečnému 60dennímu úklidu a klientskému cutoveru.
+[Důkazy a navazující rozhodnutí](ACCOUNT_DELETION_REMAINING_PLAN.md).
+
 <a id="lifecycle"></a>
 
 ## 7. Exspirace a mazání Shoutů — MVP

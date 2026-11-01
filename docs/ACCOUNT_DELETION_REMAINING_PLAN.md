@@ -23,7 +23,7 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 |---|---|---|
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
-| Vlastní nepotřebné soukromé podkolekce | Verze 2 jobu lokálně dokončená a testovaná, DEV aktivace vypnutá | CI a samostatně schválený datový pilot níže. Staré joby se nemigrují. |
+| Vlastní nepotřebné soukromé podkolekce | DEV dokončeno z 6a4606e po CI 41300216738 | Živě waiting-auth 0/0 → 3 skryté Shouty → 4 odstraněné vlastní položky, zachovaný profil/legal, replay a úklid. Staré joby se nemigrují. |
 | Soukromé zprávy a veřejné komentáře účtu | Rozhodnutý směr, implementace zbývá | Bezpečný interní archiv/skrytí, přesné počty, hlášení a test obou účastníků. |
 | Identita, rezervace přezdívky a zbývající osobní data | Částečně rozhodnuto, implementace zbývá | Minimální retenční údaje, správné odkazy/fallbacky, uvolnění pouze vlastní rezervace po lhůtě. |
 | Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí a Storage, vypořádání hlášení/holdů, audit a test přesné hranice. |
@@ -70,7 +70,8 @@ kontrolu zámku a původního requestCreateTime. Admin Auth je v testech simulov
 `account_private_cleanup_lab.js` zůstává adaptérem původního prototypu pro
 emulátor a stále odmítá živé projekty; není v deploy artefaktu. Nové jádro
 je v připravovaném account-deletion balíku. V původním 22bcf73 je aktivace
-false; schválený aktivační commit ji mění na true, živý rollout čeká na jeho CI.
+false; schválený aktivační commit 6a4606e ji mění na true a po úspěšném CI
+41300216738 je nasazený a živě ověřený v DEV.
 
 | Data | Připravený postup |
 |---|---|
@@ -116,11 +117,27 @@ stránek v emulátoru 460 ms; nejde o cloudovou latenci nebo cenu.
 
 <a id="private-job-dev"></a>
 
-## Rozšířený DEV pilot – schválený 1. listopadu
+## Rozšířený DEV pilot – dokončený 1. listopadu
 
 Vlastník výslovně schválil uvedené rozšíření i nový jednorázový datový test.
-Aktivační commit zapíná privátní fázi pro nové DEV joby; nasazení proběhne
-až po jeho vlastním úspěšném CI. Dokončení nasazení/testu eviduje PROJECT_STATUS.
+Aktivační commit zapíná privátní fázi pro nové DEV joby. 6a4606e7713e66affd1ad6d98339f6837bf2c17c
+má úspěšné CI 41300216738, obě Functions ACTIVE a shodný source hash
+3c5bb3d252677158aee75a54571a26c43e6af03a. Ostatních 10 Functions, Hosting,
+nastavení Scheduleru i prostředky beze změny; anonymní HTTP 403.
+
+Nový disabled Auth fixture byl skutečně ověřený jako existující: waiting-auth,
+0 skrytých Shoutů, 0 odstraněných položek, 4 privátní položky a true preference
+beze změny. Po odstranění pouze tohoto Auth účet automaticky dokončil 3 skryté
+Shouty a 4 odstraněné privátní položky během 3 převzetí jobu. Profil a právní
+fixture zůstaly stejné, preference byly false, ostatní pole Shoutů se nezměnila.
+Replay nezměnil job ani jeho updateTime, anonymní čtení jobu 403, retenční údaj
+je přesně 5 184 000 000 ms. Není to provedení konečného 60denního úklidu.
+
+Všechna data nového testu, jeho žádost/job a vzniklý checkpoint jsou uklizená;
+Auth nepřítomný, původní pending žádost má shodný digest a žádné jiné joby
+nebyly odstraněné. Důkazy v build/account-private-infra-proof.json,
+account-private-wait-proof.json, account-private-live-proof.json a
+account-private-cleanup-proof.json. Přesné runtime revize jsou v infra důkazu.
 
 Připravený commit 22bcf7316908d04e12ce5aed80599a460c0c1591 má úspěšné CI
 41299376137 včetně 224 Rules/server případů, celé Flutter sady a web buildu.
@@ -188,8 +205,8 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
 
 ## Další větší úsek
 
-1. Privátní fáze je lokálně zapojená a CI prošlo; schválit výše uvedený DEV datový
-   pilot a ověřit živý výsledek. Dosavadní v1 shouts-hidden záznamy zachovat;
+1. Privátní fáze je hotová ve vývoji včetně CI, živého testu a úklidu.
+   Dosavadní v1 shouts-hidden záznamy zachovat;
    případnou migraci připravit odděleně.
 2. Připravit interní archiv a atomické odstranění původních soukromých zpráv,
    kde je účet jedním z účastníků; zachovat podklady reportů pouze interně.

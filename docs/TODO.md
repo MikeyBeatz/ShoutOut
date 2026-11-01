@@ -52,16 +52,17 @@ deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING
 Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
 
 Zpětný audit 37 commitů (30. října–1. listopadu) našel dva opravitelné
-nedostatky. Opravy jsou lokálně připravené: odstranění globální historie
+nedostatky. Opravy jsou nasazené v DEV: odstranění globální historie
 payloadů klienta a ukončení trvalých/opakovaných chyb account workeru do
 needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyzátor
 prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
 emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
 Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
-Verzovaná soukromá fáze account jobu je nyní lokálně hotová, DEV pilot schválený;
-103 cílených testů a 90 serverových unit prošlo. CI 41299376137 pro 22bcf73
-je success, včetně 224 Rules/server testů. Další krok: CI aktivace a konkrétní
-[DEV datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev), pak archiv zpráv.
+Verzovaná soukromá fáze account jobu je hotová v DEV: aktivace 6a4606e, CI
+41300216738 success (89 unit, 224 Rules/server testů), obě Functions ACTIVE,
+živě 3/3 skryté Shouty a 4/4 odstraněné privátní položky, replay i úklid prošly.
+[Důkazy DEV pilotu](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
+Další krok: rozhodnutí o rozsahu 60denního uchování textů, pak archiv zpráv.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 
@@ -99,9 +100,10 @@ Metriky ani rozsah MVP se tím nemění.
    a klientské napojení; celý účtový milník se tím ještě neuzavírá.
    [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
    a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
-   1. listopadu. Vlastní privátní seznamy mají lokálně ověřenou v2 fázi jobu,
-   aktivace je false, CI 41299376137 prošlo. Další krok: schválený DEV pilot, pak archiv zpráv
-   a konečné dočištění. Staré v1 joby zůstávají beze změny.
+   1. listopadu. Vlastní privátní seznamy mají dokončenou DEV v2 fázi jobu
+   z 6a4606e po CI 41300216738, včetně živého testu a úklidu. Další krok:
+   rozsah retence textů a archiv zpráv, pak konečné dočištění.
+   Staré v1 joby zůstávají beze změny.
    Konečné smazání účtu stále není dokončené.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
 3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
