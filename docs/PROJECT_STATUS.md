@@ -17,7 +17,11 @@ lhůty, prostředky a DEV-only cílení zůstávají stejné.
 
 Lokálně prošlo 22 emulátorových scénářů a 37 tools testů, včetně souběhu,
 odmítnutí jiného projektu před SDK inicializací a rollbacku bez dílčích dat.
-CLI skripty mají ověřenou syntaxi. Konečný commit/CI ještě následuje.
+CLI skripty mají ověřenou syntaxi. Zdroj a0a9117b8e53cc349f1248fd0bb264f787afbf85
+je commitnutý a pushnutý; [CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
+ověřilo 241 Flutter, 37 tools, 94 serverových unit (182 emulator-only skip),
+284 Rules/server a 8 Storage testů, analýzu/lint a web build. Tento lokální úsek
+je uzavřený; důkazy jsou v TESTING.md.
 Žádný z nástrojů nebyl spuštěný proti živým datům; žádný rollout, Auth účty,
 nový job ani změna existujících jobů. [Rozsah a náklady](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
 

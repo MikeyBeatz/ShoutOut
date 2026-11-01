@@ -79,7 +79,9 @@ Není zapojený do workeru ani nasazený;
 před integrací vyřešit tokenové URL loga a potvrzený stav mazání.
 Tři důvěryhodné zapisovače mají navazující schválenou lokální ochranu:
 backfill, role a Business aktivace kontrolují žádost/marker v transakci;
-22 emulátorových a 37 tools testů prošlo. Konečný commit/CI ještě následuje,
+22 emulátorových a 37 tools testů prošlo. Lokální úsek je uzavřený:
+a0a9117, [CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
+včetně 284 Rules/server testů a web buildu;
 živé nástroje ani joby se nespouštěly/neměnily.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.

@@ -23,8 +23,12 @@ Testy používají přímo operace volané třemi CLI, ne kopii jejich zápisov�
 DB namespace je pouze shoutout-rules-test a FIRESTORE_EMULATOR_HOST 127.0.0.1:8080.
 Auth je reprezentované syntetickým dříve načteným objektem; nevytváří se Auth účet.
 CLI proti živé databázi spuštěné nebyly, žádné nasazení či změna jobů.
-CI plná test:rules sada obsahuje i tyto integrační případy; konečný výsledek
-bude zaznamenaný pro přesný commit. Logy build/identity-admin-writes-tools-final.log
+Zdroj a0a9117b8e53cc349f1248fd0bb264f787afbf85 je commitnutý a pushnutý.
+[CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
+ověřilo 241 Flutter, 37 tools, 94 serverových unit (182 emulator-only skip),
+284 Rules/server a 8 Storage testů bez chyb, analýzu/lint a web build.
+Metadata a úplný log: build/identity-admin-writes-ci-proof.json a
+build/identity-admin-writes-ci-success.log. Lokální logy: build/identity-admin-writes-tools-final.log
 a build/identity-admin-writes-emulator-final.log. Flutter/Functions/Rules ani
 živé recipient scénáře se tímto lokálním testem znovu nedokládají.
 

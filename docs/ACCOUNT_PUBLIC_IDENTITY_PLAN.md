@@ -172,6 +172,10 @@ před kontrolními čteními transakce. Kontrola zahrnuje data i updateTime a ro
 včetně dev-only guardů skutečných CLI s neplatnými syntetickými credentials.
 Všechny fixture jsou pouze emulátorové; žádný Auth SDK účet nevzniká.
 Testy jsou zapojené do test:tools a plné test:rules sady v CI.
+Lokální úsek je uzavřený ve zdroji a0a9117b8e53cc349f1248fd0bb264f787afbf85,
+commitnutý a pushnutý. [CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
+ověřilo celou sadu včetně 284 Rules/server případů a web buildu;
+úplné výsledky a důkazy jsou v [TESTING](TESTING.md).
 
 Zbývají revokace starých URL loga, nezrušitelný potvrzený stav mazání,
 integrace jobu a ostatní osobní/Business data, role, fyzický purge a klientský
