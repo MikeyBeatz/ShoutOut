@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
+Aktualizováno 2. listopadu 2026. Aktuální práce je ve větvi
 `feature/account-public-identity-worker`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
@@ -8,7 +8,7 @@ Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
 
 ## Aktuální úsek – v4 identita a loga ve workeru
 
-Navazující pokračování vlastníka připravuje nové v4 joby: konfirmace Auth →
+Nasazený DEV worker vytváří nové v4 joby: konfirmace Auth →
 minimální veřejný marker/klíč vlastní přezdívky → stránkovaná revokace vlastních
 log → dosavadní Shout/private/archive fáze. Staré v1/v2/v3 se nemigrují.
 Samotná nicknames rezervace/updateTime se nemění; deadline je původní +60 dní.
@@ -20,11 +20,31 @@ lease i prostředky zůstávají stejné.
 11 nových v4 emulátorových případů prošlo se skutečným Firestore a simulačním
 Storage adaptérem. Předchozí společný běh měl 51/51 včetně 42 starých worker
 regresí. Testuje se i 51 log, ztracený mask/page/token/checkpoint ack, převzetí
-lease, cizí data, nulová loga a staré verze. Lint prošel. Přesný commit/CI a
-živý v4 pilot následují; zatím není nasazeno, DEV worker nadále e4dd199.
-Před aktivací budou nasazené Storage Rules a web s anonymním zobrazením,
-poté dvě stávající účtové Functions. Produkce, Firestore Rules, indexy/TTL
-a nastavení Scheduleru se nemění. [Kontrakt a pilot](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
+lease, cizí data, nulová loga a staré verze. Zdroj b685ac40733126272baeafb7d634d60e9dd3f271
+má [CI 41359149804 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41359149804):
+241 Flutter, 37 tools, 107 unit (202 emulator-only skip), 306 Rules/server,
+14 Storage, analýza/lint a web build. Z čisté kopie vznikl ověřený release build.
+Do shoutout-dev-46c81 byly v pořadí nasazené Storage Rules, web a obě účtové
+Functions. Web verze 6147a1b814165dad, release 1793573903111000; live HTML/JS/config
+hashes odpovídají artefaktu. Storage ruleset ea1bc382-2e11-47b5-a696-0f8fd21e4145
+má shodu zdroje. Obě Functions ACTIVE, hash 477ecb9a9163733362b8bf3ed6a0446ee22aa667,
+revize accountdeletionrequestcreateddev-00006-loh a resumeaccountdeletionjobsdev-00006-duc.
+Ostatních 11 Functions, IAM, Scheduler a Firestore Rules jsou ověřené beze změny;
+limity Node 22/max 1/concurrency 1/256 MiB/60 s zachované. Indexy/TTL a produkce se nemění.
+Živý v4 pilot automaticky došel přes marker/loga/shouts/private do
+content-archived. Minimální marker, obě stará URL 403, count 2, stejná
+rezervace/updateTime/private profil/role/Business profil, bytes/metadatové
+tagy log i kontrolní objekt jsou ověřené; původní deadline zůstal stejný.
+Všechna testovací data včetně 3 objektů jsou uklizená (loga před markerem),
+původní žádost a inventura requests/jobs/archive mají nezměněné digests.
+Žádný nový Auth účet. Veřejná identita/loga jsou tímto uzavřené v DEV.
+Důkazy: build/identity-worker-{ci-proof,artifact-proof,baseline,deployed-proof,live-proof,cleanup-proof}.json.
+[Kontrakt a pilot](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
+
+Další krok: soukromé/Business profilové údaje a odebrání skutečných rolí;
+ověřit konkrétní potřebnou 60denní retenci podle existujících rozhodnutí.
+Potom zbývá fyzický purge (včetně vlastněné přezdívky), politika markeru po
+purge a klientský cutover. Celý účtový milník a MVP metriky zůstávají otevřené.
 
 ## Dokončený úsek – nezrušitelná serverová konfirmace Auth mazání
 
@@ -58,8 +78,7 @@ build/confirmation-cleanup-proof.json a další nasazovací/CI důkazy v TESTING
 Hosting, Storage Rules, indexy/TTL a produkce se nemění.
 [Rozsah a zbývající riziko klientského rollbacku](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 
-Další krok: společná worker fáze pro veřejný marker, vlastní rezervaci
-přezdívky a revokaci loga. Tyto helpery ještě nejsou v živém jobu. Potom
+Na tento původně dokončený úsek již navazuje v4 výše. Po jeho uzavření
 zbývají ostatní osobní/Business data, role, konečný 60denní purge a klientský cutover.
 
 ## Dokončený úsek – izolované ověření na DEV Storage
@@ -78,7 +97,7 @@ kontrolní objekt. Všechny 4 vytvořené objekty jsou ověřeně odstraněné.
 Bucket metadata potvrdila vypnuté versioning; žádná politika nebyla měněná.
 Důkazy: build/logo-dev-preflight-proof.json, build/logo-dev-probe-ci-proof.json,
 build/logo-dev-live-proof.json. Tato Storage brána je uzavřená; worker integrace
-identity/loga zůstává další samostatný úsek.
+identity/loga je v navazujícím v4 oddílu výše.
 
 ## Dokončený předchozí úsek – zneplatnění odkazů na loga, pouze lokálně
 
@@ -88,7 +107,8 @@ Připravené jsou stránkovaný soupis přesného businessLogos/UID/ prefixu a k
 pro jeden soubor: Auth user-not-found, původní pending žádost, minimální deleted
 marker, původní +60 dní a transakční kontrola caller lease; odstraní jen
 download tokeny s podmínkou generation i metageneration a ověří výsledek.
-Jádro ani lab adaptér nejsou v entry pointech/přípravě deploy balíků.
+V tomto původním lokálním úseku nebyla jádra ani lab v deploy balíku.
+V4 nově zahrnuje jádra do účtového balíku; lab zůstává jen lokální.
 
 11 nových unit testů, celá serverová sada (105 pass / 188 emulator-only skip)
 a lint prošly. Emulátor výslovně potvrdil mezeru: metadata patch
@@ -128,10 +148,10 @@ Vlastník schválil lokální serverové jádro, marker smazané veřejné ident
 anonymní zobrazení bez role/loga a nového sledování/soukromé odpovědi,
 zachování vlastní přezdívky do původního serverového deadline +60 dní a
 ochranu SDK čtení loga. [Přesný rozsah, schéma a brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
-Jádro a lab adaptér nejsou v žádném deploy balíku ani entry pointu.
-Žádný worker/job, živá data, Auth účty, Hosting ani Rules se v této etapě nemění.
-DEV Hosting nadále běží na archivní verzi 1dab78c; účtový worker má navazující
-konfirmaci z e4dd199 podle aktuálního oddílu výše.
+V původním lokálním prototypu nebyly jádro a lab v deploy balíku a neproběhl
+živý rollout. Aktuálně jsou jádra i klient zapojené ve v4 výše; lab se nenasazuje.
+Historické archivní nasazení 1dab78c a konfirmace e4dd199 jsou zachované níže;
+aktuální Hosting a worker určuje v4 oddíl výše.
 
 Lokálně implementované: minimální publicProfiles marker, transakční caller fence,
 ochrana cizí rezervace, replay a původní deadline; klientská anonymizace a

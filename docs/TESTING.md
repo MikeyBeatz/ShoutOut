@@ -20,7 +20,27 @@ mask/page/token/checkpoint ack, lease takeover, nulová/zmizelá loga, 403,
 vadný profil/rezervaci/cestu, versioning a zachování v1/v2/v3 bez migrace.
 Logy build/identity-worker-emulator-final.log a build/identity-worker-emulator-final-v4.log.
 Storage emulátor nadále nedokládá cloudovou revokaci; simulační adaptér ji
-nezastírá. Společný skutečný DEV v4 pilot a finální CI následují.
+nezastírá. Zdroj b685ac40733126272baeafb7d634d60e9dd3f271 má
+[CI 41359149804 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41359149804):
+241 Flutter, 37 tools, 107 unit (202 emulator-only skip), 306 Rules/server,
+14 Storage, analýza/lint a build. Z čisté kopie ověřený release build webu.
+DEV nasazení Storage Rules → web → dvě Functions má ověřené live HTML/JS/config
+hashe a zdroj Rules, obě ACTIVE revize, zachované limity, ostatních 11 Functions,
+IAM, Scheduler a Firestore Rules. Produkce/indexy/TTL beze změny.
+
+Společný skutečný DEV v4 pilot bez nového Auth účtu automaticky došel do
+content-archived. Marker přesně schemaVersion/accountStatus, dvě loga včetně
+osiřelého po revokaci vracejí 403, count 2, bytes a metadata zachované.
+Rezervace/updateTime, privátní/Business profil a role i kontrolní soubor
+nezměněné. Deadline stejný. Tři testovací objekty odstraněné před markerem,
+testovací FS kořeny/podkolekce uklizené a původní žádost/inventura zachované.
+Pilot neměl textový obsah (samostatný předchozí v3 důkaz + v4 emulátorový tok);
+nesbíral nový přihlášený UI průchod či živý starý Auth token. Klientské chování
+má widget/Flutter regresi a shodu live release souborů; SDK zamítnutí po markeru
+má skutečný Rules emulátorový test. Úsek je uzavřený v DEV.
+Důkazy: build/identity-worker-{ci-proof,artifact-proof,baseline,deployed-proof,live-proof,cleanup-proof}.json,
+build/identity-worker-{storage,hosting,functions}-deploy.log a
+build/identity-worker-web-release.log. Kód i příprava balíku jsou commitnuté/pushnuté.
 
 ## Skutečný DEV Storage probe a potvrzení Auth mazání – 1. listopadu
 

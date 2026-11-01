@@ -247,8 +247,14 @@ serverový authDeletionConfirmedAt do původní žádosti ve stejné transakci j
 kontrolu lease. Rules po potvrzení nepovolí klientský rollback; před ním zůstává
 původní desetiminutové okno. Status, createTime a původní retenční termín se
 nemění. Dokončené joby se znovu neotevírají.
-Stará klientská cesta ještě existuje; integrace veřejné identity/loga, zbývající
-osobní data a fyzické 60denní dokončení jsou otevřené.
+Od b685ac4 nové v4 joby před Shouty vytvoří minimální veřejný marker a zachytí
+klíč vlastní přezdívky, potom stránkují vlastní businessLogos prefix a odvolají
+download tokeny. Cursor/fronta a potvrzení každého objektu jsou trvalé, hlídané
+stejnou žádostí, konfirmací a lease. Rezervace se nepřepisuje ani neuvolňuje;
+deadline zůstává původní. Staré v1/v2/v3 joby se nemigrují. Storage Rules blokují
+SDK čtení/zápisy loga po markeru a klient zobrazuje neutrální smazanou identitu.
+Stará klientská cesta ještě existuje; ostatní osobní/Business data, role a
+fyzické 60denní dokončení jsou otevřené.
 [Aktuální rozsah a provoz](ACCOUNT_DELETION_REMAINING_PLAN.md),
 [konfirmace a její hranice](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 

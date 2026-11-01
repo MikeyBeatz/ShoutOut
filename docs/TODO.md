@@ -75,8 +75,8 @@ Další krok: identita/přezdívka, konečná retence a klientský cutover.
 Veřejná část identity má schválený [lokální prototyp](ACCOUNT_PUBLIC_IDENTITY_PLAN.md):
 marker, rezervace a anonymní klient. Lokální úsek je uzavřený: da26499,
 CI 41328636468 success (241 Flutter, 262 Rules/server, 8 Storage).
-Není zapojený do workeru ani nasazený;
-před integrací vyřešit tokenové URL loga a potvrzený stav mazání.
+Tehdy byl jen lokální; navazující konfirmace, cloudový důkaz revokace a
+v4 nasazení jsou uzavřené níže.
 Tři důvěryhodné zapisovače mají navazující schválenou lokální ochranu:
 backfill, role a Business aktivace kontrolují žádost/marker v transakci;
 22 emulátorových a 37 tools testů prošlo. Lokální úsek je uzavřený:
@@ -95,9 +95,13 @@ nasazené do DEV (Rules a dvě stávající Functions); 295 Rules/server přípa
 a ostatní CI kontroly prošly. Živě automatické potvrzení → soukromý úklid →
 content-archived, stabilní timestamp/deadline a úklid testu; původní žádost
 i výchozí inventura nezměněné. Tato DEV ochrana je uzavřená.
-Integrace identity/loga má připravenou novou v4 fázi a 11 nových emulátorových
-testů. Staré joby se nemigrují; následuje CI a koordinovaný DEV rollout
-Storage Rules/webu/workeru. [Kontrakt a stav](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
+Integrace identity/loga je z b685ac4 po CI 41359149804 nasazená v DEV:
+Storage Rules, web a obě účtové Functions. Staré joby se nemigrují.
+Živý pilot došel do content-archived, má minimální marker, dvě stará URL 403,
+zachovanou rezervaci/updateTime a původní deadline. Testovací data uklizená,
+původní inventura nezměněná; veřejná identita/loga jsou uzavřené v DEV.
+Zbývají privátní/Business data a skutečné role, fyzický purge a klientský cutover.
+[Kontrakt a stav](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

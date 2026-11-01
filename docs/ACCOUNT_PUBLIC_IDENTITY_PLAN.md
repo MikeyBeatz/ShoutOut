@@ -1,9 +1,10 @@
-# Veřejná identita smazaného účtu – lokální úsek
+# Veřejná identita a loga smazaného účtu
 
 1. listopadu 2026. Navazuje na [dokončený DEV archiv](ACCOUNT_CONTENT_ARCHIVE_PLAN.md)
-a [zbývající účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md).
+a [zbývající účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md). Aktualizace
+2. listopadu: aktuální nasazení a průběh pilotu jsou v [části v4](#identity-worker-v4).
 
-## Rozsah schválený vlastníkem
+## Původní lokální rozsah schválený vlastníkem
 
 Lokálně připravit serverové jádro, anonymní zobrazení a ochranu SDK čtení
 Business loga. Bez zapojení do živého workeru, nových Auth účtů, datové migrace,
@@ -386,6 +387,24 @@ Lokálně prošlo 11 nových v4 případů: skutečný Firestore a simulační S
 adaptér kvůli doloženému omezení CLI emulátoru. Zahrnují 51 log přes více
 dávek, private/archive tok, cizí data, ztracená potvrzení, lease takeover,
 vadná data, 403 a nemigrování starých verzí. Skutečná DEV Storage revokace má
-předchozí důkaz; finální CI a společný živý v4 pilot zatím nejsou.
+předchozí důkaz. Zdroj b685ac40733126272baeafb7d634d60e9dd3f271 má
+[CI 41359149804 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41359149804):
+241 Flutter, 37 tools, 107 unit (202 emulator-only skip), 306 Rules/server,
+14 Storage, analýza/lint a build. Storage Rules/web/obě Functions jsou nasazené
+do DEV v daném pořadí. Obě ACTIVE, hash 477ecb9a9163733362b8bf3ed6a0446ee22aa667;
+Hosting verze 6147a1b814165dad a Storage ruleset ea1bc382-2e11-47b5-a696-0f8fd21e4145
+mají ověřenou shodu zdroje/artefaktu. IAM, Scheduler, Firestore Rules a ostatních
+11 Functions beze změny. Živý v4 pilot automaticky došel přes nové fáze i
+shouts/private/archive do content-archived. Ověřil minimální marker, původní
+rezervaci i updateTime, obě stará URL 403 a count 2, stejné bytes/metadatové
+tagy, privátní/Business profil a skutečnou roli i nezávislý kontrolní objekt.
+Původní deadline se neměnil. Po odstranění 3 vlastních objektů se uklidily
+testovací FS kořeny/podkolekce; původní žádost i inventura mají původní digests.
+Žádný nový Auth účet, zásah do existujících dat ani backfill. Tento pilot měl
+prázdnou obsahovou fázi; skutečné texty mají předchozí v3 DEV důkaz a nynější
+v4 integrační regresi. Přihlášený UI průchod nebyl součástí nového pilotu:
+klient má Flutter/widget testy a ověřené live hashe release artefaktu.
+Důkazy build/identity-worker-{ci-proof,artifact-proof,baseline,deployed-proof,live-proof,cleanup-proof}.json.
+Veřejná identita/loga jsou uzavřené v DEV; nejde o hotové mazání celého účtu.
 Ostatní osobní/Business data, role, fyzický 60denní purge, politika markeru
 po purge a klientský cutover zůstávají otevřené; účtový milník není uzavřený.
