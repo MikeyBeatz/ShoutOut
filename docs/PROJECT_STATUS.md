@@ -1,12 +1,40 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-content-archive`; navazuje na dokončenou retenci
+`feature/account-public-identity`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – archiv všech zpráv a komentářů
+## Aktuální úsek – veřejná identita, pouze lokální příprava
+
+Vlastník schválil lokální serverové jádro, marker smazané veřejné identity,
+anonymní zobrazení bez role/loga a nového sledování/soukromé odpovědi,
+zachování vlastní přezdívky do původního serverového deadline +60 dní a
+ochranu SDK čtení loga. [Přesný rozsah, schéma a brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
+Jádro a lab adaptér nejsou v žádném deploy balíku ani entry pointu.
+Žádný worker/job, živá data, Auth účty, Hosting ani Rules se v této etapě nemění.
+DEV nadále běží na archivní verzi 1dab78c podle následujícího oddílu.
+
+Lokálně implementované: minimální publicProfiles marker, transakční caller fence,
+ochrana cizí rezervace, replay a původní deadline; klientská anonymizace a
+ochrana před návratem staré identity při chybě streamu. Odebrání dřívějšího
+sledování a blokování/nahlášení zůstávají dostupné. Firestore/Storage Rules
+jsou lokální prototyp. Osm Storage a sedm cílených profilových testů prošlo,
+240 úplných Flutter testů, 94 serverových unit (182 emulator-only skip),
+35 tools a analyzátor/lint prošly. Plná emulátorová sada měla 261/261 pass;
+po dodatečném zpevnění neměnnosti markeru prošla celá Rules sada 73/73.
+CI se ověří pro výsledný commit. Důkazy v TESTING.md.
+
+Před živým napojením chybí revokace dříve vydaných tokenových URL loga
+(emulátor doložil, že samotná Rules nestačí), ochrana důvěryhodných Admin SDK
+zapisovačů proti obnovení profilu a návrh integrace jobu včetně potvrzeného
+stavu mazání odolného vůči starému Auth tokenu/odstranění pending žádosti.
+Soukromá/Business
+identita, role, fyzický 60denní purge a klientský cutover zůstávají otevřené.
+Celý účtový milník ani MVP metriky se lokálním prototypem neuzavírají.
+
+## Dokončený předchozí úsek – archiv všech zpráv a komentářů
 
 Rozhodnutí vlastníka 1. listopadu: uchovat neveřejně všechny existující zahrnuté
 zprávy a vlastní komentáře 60 dní, bez ohledu na nahlášení. Budoucí administrační

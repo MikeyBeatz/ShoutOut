@@ -1,5 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Smazaný účet': 'Odstránený účet',
+  'Přestat sledovat': 'Prestať sledovať',
   'Sledované': 'Sledované',
   'Profily': 'Profily',
   'Sledovat': 'Sledovať',

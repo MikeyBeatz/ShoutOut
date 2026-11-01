@@ -1444,6 +1444,33 @@ describe('technical error log access', () => {
 });
 
 describe('following profiles', () => {
+  test('an eligible client cannot forge or restore a public identity marker even without a pending request', async () => {
+    await seedEligibleUser('deleted-identity', 'Original');
+    const db = authenticatedDb('deleted-identity');
+    const profile = doc(db, 'publicProfiles/deleted-identity');
+    const original = (await assertSucceeds(getDoc(profile))).data();
+    const marker = { schemaVersion: 1, accountStatus: 'deleted' };
+    await assertFails(setDoc(profile, marker));
+    await testEnvironment.withSecurityRulesDisabled(context => setDoc(
+      doc(context.firestore(), 'publicProfiles/deleted-identity'), marker,
+    ));
+    await assertFails(setDoc(profile, original));
+    await assertFails(deleteDoc(profile));
+    assert.deepEqual((await assertSucceeds(getDoc(profile))).data(), marker);
+  });
+  test('a public deletion marker prevents a new follow but keeps removal of an existing relation available', async () => {
+    await seedEligibleUser('follower', 'Follower');
+    await seedEligibleUser('followed', 'Followed');
+    const follow = doc(authenticatedDb('follower'), 'users/follower/following/followed');
+    await assertSucceeds(setDoc(follow, { targetUserId: 'followed', createdAt: serverTimestamp() }));
+    await testEnvironment.withSecurityRulesDisabled(context => setDoc(
+      doc(context.firestore(), 'publicProfiles/followed'), { schemaVersion: 1, accountStatus: 'deleted' },
+    ));
+    await assertSucceeds(getDoc(doc(authenticatedDb('follower'), 'publicProfiles/followed')));
+    await assertSucceeds(deleteDoc(follow));
+    await assertFails(setDoc(follow, { targetUserId: 'followed', createdAt: serverTimestamp() }));
+    await assertFails(deleteDoc(doc(authenticatedDb('followed'), 'users/follower/following/followed')));
+  });
   test('user can follow a public profile but not self or blocked profile', async () => {
     await seedEligibleUser('follower', 'Follower');
     await seedEligibleUser('followed', 'Followed');

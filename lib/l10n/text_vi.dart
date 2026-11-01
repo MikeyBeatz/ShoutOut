@@ -1,5 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
+  'Smazaný účet': 'Tài khoản đã xóa',
+  'Přestat sledovat': 'Bỏ theo dõi',
   'Sledované': 'Đang theo dõi',
   'Profily': 'Hồ sơ',
   'Sledovat': 'Theo dõi',

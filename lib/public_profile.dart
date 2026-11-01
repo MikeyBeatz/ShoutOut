@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'avatar_style.dart';
+import 'l10n/text.dart';
 
 class PublicIdentity {
   const PublicIdentity({
@@ -14,6 +15,7 @@ class PublicIdentity {
     this.publicRole,
     this.businessLogoPath,
     this.businessLogoVersion,
+    this.isDeleted = false,
   });
 
   final String nickname;
@@ -21,50 +23,136 @@ class PublicIdentity {
   final String? publicRole;
   final String? businessLogoPath;
   final int? businessLogoVersion;
+  final bool isDeleted;
+
+  static PublicIdentity fromProfile(
+    Map<String, dynamic>? data, {
+    required String fallbackNickname,
+    required AvatarStyle fallbackAvatarStyle,
+    required String deletedNickname,
+  }) {
+    if (data?['accountStatus'] == 'deleted') {
+      return PublicIdentity(
+        nickname: deletedNickname,
+        avatarStyle: AvatarStyle.fallback,
+        isDeleted: true,
+      );
+    }
+    if (data == null) {
+      return PublicIdentity(
+        nickname: fallbackNickname,
+        avatarStyle: fallbackAvatarStyle,
+      );
+    }
+    return PublicIdentity(
+      nickname: data['nickname'] as String? ?? fallbackNickname,
+      avatarStyle: AvatarStyle.fromProfile(data),
+      publicRole: data['publicRole'] as String?,
+      businessLogoPath: data['businessLogoPath'] as String?,
+      businessLogoVersion: data['businessLogoVersion'] as int?,
+    );
+  }
 }
 
-class PublicIdentityBuilder extends StatelessWidget {
+class PublicIdentityBuilder extends StatefulWidget {
   const PublicIdentityBuilder({
     super.key,
     required this.userId,
     required this.fallbackNickname,
     required this.fallbackAvatarStyle,
     required this.builder,
+    this.profileData,
   });
 
   final String userId;
   final String fallbackNickname;
   final AvatarStyle fallbackAvatarStyle;
   final Widget Function(BuildContext context, PublicIdentity identity) builder;
+  final Stream<Map<String, dynamic>?>? profileData;
+
+  @override
+  State<PublicIdentityBuilder> createState() => _PublicIdentityBuilderState();
+}
+
+class _PublicIdentityBuilderState extends State<PublicIdentityBuilder> {
+  bool _knownDeleted = false;
+  late Stream<Map<String, dynamic>?> _profiles;
+
+  Stream<Map<String, dynamic>?> _source() {
+    if (widget.profileData != null) return widget.profileData!;
+    if (widget.userId.isEmpty) return const Stream.empty();
+    return FirebaseFirestore.instance
+        .collection('publicProfiles')
+        .doc(widget.userId)
+        .liveSnapshots()
+        .map((snapshot) => snapshot.data());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _profiles = _source();
+  }
+
+  @override
+  void didUpdateWidget(covariant PublicIdentityBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) _knownDeleted = false;
+    if (oldWidget.userId != widget.userId ||
+        oldWidget.profileData != widget.profileData) {
+      _profiles = _source();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final fallback = PublicIdentity(
-      nickname: fallbackNickname,
-      avatarStyle: fallbackAvatarStyle,
+      nickname: widget.fallbackNickname,
+      avatarStyle: widget.fallbackAvatarStyle,
     );
-    if (userId.isEmpty) return builder(context, fallback);
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('publicProfiles')
-          .doc(userId)
-          .liveSnapshots(),
+    if (widget.userId.isEmpty) return widget.builder(context, fallback);
+    return StreamBuilder<Map<String, dynamic>?>(
+      key: ValueKey(widget.userId),
+      stream: _profiles,
       builder: (context, snapshot) {
-        final data = snapshot.data?.data();
-        if (data == null) return builder(context, fallback);
-        return builder(
-          context,
-          PublicIdentity(
-            nickname: data['nickname'] as String? ?? fallbackNickname,
-            avatarStyle: AvatarStyle.fromProfile(data),
-            publicRole: data['publicRole'] as String?,
-            businessLogoPath: data['businessLogoPath'] as String?,
-            businessLogoVersion: data['businessLogoVersion'] as int?,
-          ),
+        final data = snapshot.data;
+        if (data?['accountStatus'] == 'deleted') _knownDeleted = true;
+        final identity = PublicIdentity.fromProfile(
+          _knownDeleted ? const {'accountStatus': 'deleted'} : data,
+          fallbackNickname: widget.fallbackNickname,
+          fallbackAvatarStyle: widget.fallbackAvatarStyle,
+          deletedNickname: tr(context, 'Smazaný účet'),
         );
+        if (identity.isDeleted) {
+          PublicIdentityAvatar.forgetUserLogo(widget.userId);
+        }
+        return widget.builder(context, identity);
       },
     );
   }
+}
+
+/// Shares the same live document as the author header; no second SDK query.
+class AvailableAccountAction extends StatelessWidget {
+  const AvailableAccountAction({
+    super.key,
+    required this.userId,
+    required this.child,
+    this.profileData,
+  });
+  final String userId;
+  final Widget child;
+  final Stream<Map<String, dynamic>?>? profileData;
+
+  @override
+  Widget build(BuildContext context) => PublicIdentityBuilder(
+    userId: userId,
+    profileData: profileData,
+    fallbackNickname: '',
+    fallbackAvatarStyle: AvatarStyle.fallback,
+    builder: (context, identity) =>
+        identity.isDeleted ? const SizedBox.shrink() : child,
+  );
 }
 
 class PublicIdentityAvatar extends StatelessWidget {
@@ -79,8 +167,20 @@ class PublicIdentityAvatar extends StatelessWidget {
 
   static final Map<String, Future<Uint8List?>> _logoBytes = {};
 
+  static void forgetUserLogo(String userId) {
+    _logoBytes.removeWhere(
+      (key, _) => key.startsWith('businessLogos/$userId/'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (identity.isDeleted) {
+      return CircleAvatar(
+        radius: radius,
+        child: Icon(Icons.person_outline, size: radius),
+      );
+    }
     final path = identity.businessLogoPath;
     final version = identity.businessLogoVersion;
     final fallback = AvatarImage(

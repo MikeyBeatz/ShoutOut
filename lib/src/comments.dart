@@ -158,25 +158,33 @@ class _CommentTileState extends State<CommentTile> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            tooltip: tr(context, 'Odpovědět'),
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => widget.onReply(
-                              widget.comment.id,
-                              data['authorNickname'] as String,
+                          PublicIdentityBuilder(
+                            userId: data['authorId'] as String,
+                            fallbackNickname: data['authorNickname'] as String,
+                            fallbackAvatarStyle: AvatarStyle.fallback,
+                            builder: (context, identity) => IconButton(
+                              tooltip: tr(context, 'Odpovědět'),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => widget.onReply(
+                                widget.comment.id,
+                                identity.nickname,
+                              ),
+                              icon: const Icon(Icons.reply_outlined, size: 20),
                             ),
-                            icon: const Icon(Icons.reply_outlined, size: 20),
                           ),
                           if (!ownComment)
-                            IconButton(
-                              tooltip: tr(context, 'Soukromě'),
-                              visualDensity: VisualDensity.compact,
-                              onPressed: () => widget.onPrivateReply(
-                                data['authorId'] as String,
-                                data['authorNickname'] as String,
-                                widget.comment.id,
+                            AvailableAccountAction(
+                              userId: data['authorId'] as String,
+                              child: IconButton(
+                                tooltip: tr(context, 'Soukromě'),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => widget.onPrivateReply(
+                                  data['authorId'] as String,
+                                  data['authorNickname'] as String,
+                                  widget.comment.id,
+                                ),
+                                icon: const Icon(Icons.lock_outline, size: 20),
                               ),
-                              icon: const Icon(Icons.lock_outline, size: 20),
                             ),
                           if (!ownComment)
                             IconButton(

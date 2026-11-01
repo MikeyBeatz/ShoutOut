@@ -1,5 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
+  'Smazaný účet': 'Видалений обліковий запис',
+  'Přestat sledovat': 'Відписатися',
   'Sledované': 'Відстежувані',
   'Profily': 'Профілі',
   'Sledovat': 'Стежити',

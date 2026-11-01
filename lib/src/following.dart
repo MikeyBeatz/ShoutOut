@@ -66,6 +66,20 @@ class _PublicProfileSheet extends StatefulWidget {
 class _PublicProfileSheetState extends State<_PublicProfileSheet> {
   late Stream<List<Shout>> _shoutsStream;
 
+  Widget _profileMenu(BuildContext context) => PopupMenuButton<String>(
+    onSelected: (action) async {
+      if (action == 'block') {
+        await _blockProfile(context, widget.userId);
+      } else {
+        await _reportProfile(context, widget.userId);
+      }
+    },
+    itemBuilder: (context) => [
+      PopupMenuItem(value: 'block', child: Text(tr(context, 'Blokovat'))),
+      PopupMenuItem(value: 'report', child: Text(tr(context, 'Nahlásit účet'))),
+    ],
+  );
+
   @override
   void initState() {
     super.initState();
@@ -87,127 +101,120 @@ class _PublicProfileSheetState extends State<_PublicProfileSheet> {
       userId: widget.userId,
       fallbackNickname: widget.fallbackNickname,
       fallbackAvatarStyle: widget.fallbackAvatarStyle,
-      builder: (context, identity) => Column(
-        children: [
-          const SizedBox(height: 8),
-          Container(
-            width: 42,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
-            child: PublicProfileCard(
-              identity: identity,
-              avatarRadius: 32,
-              trailing: ownProfile
-                  ? null
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                          stream: _followingReference(
-                            widget.userId,
-                          ).liveSnapshots(),
-                          builder: (context, snapshot) {
-                            final followed = snapshot.data?.exists == true;
-                            return FilledButton.tonalIcon(
-                              onPressed: () =>
-                                  _setFollowing(widget.userId, !followed),
-                              icon: Icon(
-                                followed
-                                    ? Icons.check
-                                    : Icons.person_add_outlined,
-                              ),
-                              label: Text(
-                                tr(
-                                  context,
-                                  followed ? 'Sledováno' : 'Sledovat',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        PopupMenuButton<String>(
-                          onSelected: (action) async {
-                            if (action == 'block') {
-                              await _blockProfile(context, widget.userId);
-                            } else {
-                              await _reportProfile(context, widget.userId);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'block',
-                              child: Text(tr(context, 'Blokovat')),
-                            ),
-                            PopupMenuItem(
-                              value: 'report',
-                              child: Text(tr(context, 'Nahlásit účet')),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                tr(context, 'Aktivní Shouty'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+      builder: (context, identity) => identity.isDeleted
+          ? Padding(
+              padding: const EdgeInsets.all(24),
+              child: PublicProfileCard(
+                identity: identity,
+                trailing: ownProfile ? null : _profileMenu(context),
               ),
-            ),
-          ),
-          Expanded(
-            child: StreamBuilder<List<Shout>>(
-              stream: _shoutsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return EmptyState(
-                    icon: Icons.cloud_off_outlined,
-                    title: tr(context, 'Shouty se nepodařilo načíst.'),
-                  );
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final shouts = snapshot.data!;
-                if (shouts.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.campaign_outlined,
-                    title: tr(
-                      context,
-                      'Tento účet nyní nemá žádné aktivní Shouty.',
+            )
+          : Column(
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+                  child: PublicProfileCard(
+                    identity: identity,
+                    avatarRadius: 32,
+                    trailing: ownProfile
+                        ? null
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              StreamBuilder<
+                                DocumentSnapshot<Map<String, dynamic>>
+                              >(
+                                stream: _followingReference(
+                                  widget.userId,
+                                ).liveSnapshots(),
+                                builder: (context, snapshot) {
+                                  final followed =
+                                      snapshot.data?.exists == true;
+                                  return FilledButton.tonalIcon(
+                                    onPressed: () =>
+                                        _setFollowing(widget.userId, !followed),
+                                    icon: Icon(
+                                      followed
+                                          ? Icons.check
+                                          : Icons.person_add_outlined,
+                                    ),
+                                    label: Text(
+                                      tr(
+                                        context,
+                                        followed ? 'Sledováno' : 'Sledovat',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              _profileMenu(context),
+                            ],
+                          ),
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      tr(context, 'Aktivní Shouty'),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  );
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                  itemCount: shouts.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) => ShoutCard(
-                    shout: shouts[index],
-                    onSave: () => widget.onSave(shouts[index]),
-                    onReaction: (like) async {
-                      await widget.onReaction(shouts[index], like: like);
-                      if (mounted) setState(() {});
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder<List<Shout>>(
+                    stream: _shoutsStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return EmptyState(
+                          icon: Icons.cloud_off_outlined,
+                          title: tr(context, 'Shouty se nepodařilo načíst.'),
+                        );
+                      }
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final shouts = snapshot.data!;
+                      if (shouts.isEmpty) {
+                        return EmptyState(
+                          icon: Icons.campaign_outlined,
+                          title: tr(
+                            context,
+                            'Tento účet nyní nemá žádné aktivní Shouty.',
+                          ),
+                        );
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                        itemCount: shouts.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) => ShoutCard(
+                          shout: shouts[index],
+                          onSave: () => widget.onSave(shouts[index]),
+                          onReaction: (like) async {
+                            await widget.onReaction(shouts[index], like: like);
+                            if (mounted) setState(() {});
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -291,7 +298,13 @@ class FollowedProfilesList extends StatelessWidget {
           identity: identity,
           subtitle: tr(context, 'Sledováno'),
           avatarRadius: 22,
-          trailing: const Icon(Icons.chevron_right),
+          trailing: identity.isDeleted
+              ? IconButton(
+                  tooltip: tr(context, 'Přestat sledovat'),
+                  onPressed: () => _setFollowing(ids[index], false),
+                  icon: const Icon(Icons.person_remove_outlined),
+                )
+              : const Icon(Icons.chevron_right),
           onTap: () => showPublicProfileSheet(
             context,
             userId: ids[index],

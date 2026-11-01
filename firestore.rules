@@ -1090,6 +1090,7 @@ service cloud.firestore {
         );
       allow update: if eligibleUser() &&
         request.auth.uid == userId &&
+        resource.data.get('accountStatus', 'active') != 'deleted' &&
         validPublicProfile(userId, request.resource.data) &&
         request.resource.data.get('publicRole', '') ==
           resource.data.get('publicRole', '');
@@ -1253,6 +1254,10 @@ service cloud.firestore {
           exists(
             /databases/$(database)/documents/publicProfiles/$(targetUserId)
           ) &&
+          // Public deletion marker: no new relation; owner may still remove an old one.
+          get(
+            /databases/$(database)/documents/publicProfiles/$(targetUserId)
+          ).data.get('accountStatus', 'active') != 'deleted' &&
           !exists(
             /databases/$(database)/documents/users/$(userId)/blocked/$(targetUserId)
           ) &&

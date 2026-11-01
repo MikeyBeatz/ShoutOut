@@ -199,6 +199,14 @@ než `shoutout-dev-46c81`.
 
 ## Web environment workflow
 
+Lokální identita smazaného účtu: `npm run test:storage` spustí Firestore
+127.0.0.1:8080 a Storage 127.0.0.1:9199 pod shoutout-rules-test. Osm případů
+ověřuje SDK logo read, marker, podvržení, starší URL a bug screenshot regresi.
+Používá firebase.storage-test.json; nezapíná živé služby ani nevytváří Auth účty.
+Nové serverové jádro je v `test:rules`, ale není v deploy balících.
+[Schéma, omezení a návaznosti](../docs/ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
+
+
 The build and Hosting preview workflow is documented in
 [`docs/WEB_ENVIRONMENTS.md`](../docs/WEB_ENVIRONMENTS.md). Run
 `node tools/web_environment.mjs build dev` from the repository root. The

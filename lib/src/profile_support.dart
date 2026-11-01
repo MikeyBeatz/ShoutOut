@@ -236,9 +236,28 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = document.data();
+    final fallback = data['actorNickname'] as String? ?? tr(context, 'Někdo');
+    final actorId = data['actorId'] as String? ?? '';
+    if (actorId.isNotEmpty &&
+        ((data['eventCount'] as int? ?? 1) <= 1 ||
+            data['kind'] == 'followedShout')) {
+      return PublicIdentityBuilder(
+        userId: actorId,
+        fallbackNickname: fallback,
+        fallbackAvatarStyle: AvatarStyle.fallback,
+        builder: (context, identity) => _buildWithActor(
+          context,
+          identity.isDeleted ? identity.nickname : fallback,
+        ),
+      );
+    }
+    return _buildWithActor(context, fallback);
+  }
+
+  Widget _buildWithActor(BuildContext context, String actor) {
+    final data = document.data();
     final kind = data['kind'] as String? ?? '';
     final reactionType = data['reactionType'] as String?;
-    final actor = data['actorNickname'] as String? ?? tr(context, 'Někdo');
     final count = data['eventCount'] as int? ?? 1;
     final rawTitle = data['targetTitle'] as String? ?? '';
     final title = rawTitle.length > 30

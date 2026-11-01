@@ -167,10 +167,13 @@ class PrivateReplyTile extends StatelessWidget {
               spacing: 8,
               children: [
                 if (!own)
-                  TextButton.icon(
-                    onPressed: onReply,
-                    icon: const Icon(Icons.lock_outline, size: 17),
-                    label: Text(tr(context, 'Odpovědět soukromě')),
+                  AvailableAccountAction(
+                    userId: data['authorId'] as String,
+                    child: TextButton.icon(
+                      onPressed: onReply,
+                      icon: const Icon(Icons.lock_outline, size: 17),
+                      label: Text(tr(context, 'Odpovědět soukromě')),
+                    ),
                   ),
                 if (recipient)
                   TextButton.icon(
@@ -194,25 +197,30 @@ class PrivateReplyTile extends StatelessWidget {
         parentCommentId == null) {
       return Text(text, style: const TextStyle(color: _shoutText));
     }
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        InkWell(
-          onTap: () => onJumpToComment(parentCommentId),
-          borderRadius: BorderRadius.circular(4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-            child: Text(
-              '@$nickname',
-              style: const TextStyle(
-                color: _shoutPrimary,
-                fontWeight: FontWeight.w800,
+    return PublicIdentityBuilder(
+      userId: data['recipientId'] as String? ?? '',
+      fallbackNickname: nickname,
+      fallbackAvatarStyle: AvatarStyle.fallback,
+      builder: (context, identity) => Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          InkWell(
+            onTap: () => onJumpToComment(parentCommentId),
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+              child: Text(
+                '@${identity.nickname}',
+                style: const TextStyle(
+                  color: _shoutPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
-        ),
-        if (text.isNotEmpty) Text(' $text'),
-      ],
+          if (text.isNotEmpty) Text(' $text'),
+        ],
+      ),
     );
   }
 }

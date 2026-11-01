@@ -13,16 +13,23 @@ service firebase.storage {
         firestore.get(/databases/(default)/documents/accountRoles/$(request.auth.uid)).data.level >= 5;
     }
 
+    // Local identity prototype. One distinct Firestore document for a logo read.
+    function visibleLogoOwner(userId) {
+      return !firestore.exists(/databases/(default)/documents/publicProfiles/$(userId)) ||
+        firestore.get(/databases/(default)/documents/publicProfiles/$(userId)).data.get('accountStatus', 'active') != 'deleted';
+    }
+
     function businessOwner(userId) {
       return signedIn() &&
         request.auth.uid == userId &&
+        visibleLogoOwner(userId) &&
         firestore.exists(/databases/(default)/documents/accountRoles/$(userId)) &&
         firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.role == 'business' &&
         firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.level == 2;
     }
 
     match /businessLogos/{userId}/{fileName} {
-      allow read: if signedIn();
+      allow read: if signedIn() && visibleLogoOwner(userId);
       allow create, update: if businessOwner(userId) &&
         fileName.matches('logo-[0-9]+\\.png') &&
         request.resource.size > 0 &&

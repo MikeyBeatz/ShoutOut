@@ -34,12 +34,12 @@ jobs:
             tools/package-lock.json
             functions/package-lock.json
 
-      - name: Cache Firestore Emulator
+      - name: Cache Firestore and Storage Emulators
         timeout-minutes: 3
         uses: actions/cache@v6
         with:
           path: ~/.cache/firebase/emulators
-          key: ${{ runner.os }}-firestore-${{ hashFiles('tools/package-lock.json') }}
+          key: ${{ runner.os }}-firestore-storage-v1-${{ hashFiles('tools/package-lock.json') }}
 
       - name: Set up Flutter
         timeout-minutes: 5
@@ -105,6 +105,11 @@ jobs:
           DEBUG: 'true'
         run: npm run test:rules
 
+      - name: Test Storage Rules and cross-service identity access
+        timeout-minutes: 4
+        working-directory: tools
+        run: npm run test:storage
+
       - name: Build web
         timeout-minutes: 5
         run: node tools/web_environment.mjs build dev --debug
@@ -120,5 +125,7 @@ jobs:
             firestore-debug.log
             tools/firebase-debug.log
             tools/firestore-debug.log
+            storage-debug.log
+            tools/storage-debug.log
           if-no-files-found: ignore
           retention-days: 7

@@ -316,11 +316,14 @@ class ShoutCard extends StatelessWidget {
                     ),
                   ),
                   if (onPrivateReply != null)
-                    IconButton(
-                      onPressed: onPrivateReply,
-                      tooltip: tr(context, 'Soukromě odpovědět'),
-                      icon: const Icon(Icons.lock_outline, size: 18),
-                      visualDensity: VisualDensity.compact,
+                    AvailableAccountAction(
+                      userId: shout.authorId,
+                      child: IconButton(
+                        onPressed: onPrivateReply,
+                        tooltip: tr(context, 'Soukromě odpovědět'),
+                        icon: const Icon(Icons.lock_outline, size: 18),
+                        visualDensity: VisualDensity.compact,
+                      ),
                     ),
                   if (showSaveCount)
                     Text(

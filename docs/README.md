@@ -58,6 +58,7 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 - [Průběh mazání účtu a DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md) – nasazené pracovní záznamy, obnova, ověření a provozní meze.
 - [Dokončení mazání účtu](ACCOUNT_DELETION_REMAINING_PLAN.md) – dokončený DEV privátní úklid, rozhodnutí o textech/přezdívce a zbývající retenční fáze.
 - [Archiv zpráv a komentářů](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) – v3 job ověřený v DEV, pevná 60denní lhůta, ochrana reportů, důkazy pilotu a bezpečný rollback; konečný purge zbývá.
+- [Veřejná identita smazaného účtu](ACCOUNT_PUBLIC_IDENTITY_PLAN.md) – schválený lokální marker, rezervace přezdívky, anonymní klient, SDK ochrana loga a otevřené brány před integrací.
 - [Sdílený prostorový index](FEED_BLOCK_INDEX_PLAN.md) – lokálně ověřené schéma,
   čtení/zápisy, cache, konzistence a podmínky před migrací/nasazením.
 - [Prezentační web](PRESENTATION_SITE.md) – statická stránka na

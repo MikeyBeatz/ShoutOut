@@ -22,6 +22,8 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Smazaný účet': 'Deleted account',
+  'Přestat sledovat': 'Unfollow',
   'Sledované': 'Following',
   'Profily': 'Profiles',
   'Sledovat': 'Follow',
@@ -361,6 +363,8 @@ const _english = <String, String>{
 };
 
 const _german = <String, String>{
+  'Smazaný účet': 'Gelöschtes Konto',
+  'Přestat sledovat': 'Nicht mehr folgen',
   'Sledované': 'Gefolgt',
   'Profily': 'Profile',
   'Sledovat': 'Folgen',
@@ -711,6 +715,8 @@ const _german = <String, String>{
 };
 
 const _polish = <String, String>{
+  'Smazaný účet': 'Usunięte konto',
+  'Přestat sledovat': 'Przestań obserwować',
   'Sledované': 'Obserwowane',
   'Profily': 'Profile',
   'Sledovat': 'Obserwuj',

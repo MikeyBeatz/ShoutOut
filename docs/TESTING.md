@@ -9,6 +9,34 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Veřejná identita smazaného účtu – lokální příprava 1. listopadu
+
+[Rozsah, schéma a zbývající brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
+Nové jádro ani lab adaptér nejsou součástí Functions artefaktů či živého jobu.
+Tato etapa nemá živý rollout ani nové testovací Auth účty.
+
+- Úplná Flutter sada: 240 pass. Sedm profilových testů zahrnuje model,
+  neutrální avatar, aktivní → smazaný stav, chybu streamu, skrytí privátní
+  akce a změnu UID bez přenosu staré identity. Analyzátor a formát čisté.
+- Functions: 94 unit pass, 182 emulator-only skip, lint čistý; tools 35 pass.
+- Plná Firestore Rules/server sada 261/261 pass bez skipů; jádro má 11
+  nových integračních případů pro vlastnictví, Auth, původní deadline,
+  replay, lease/rollback a ztracené potvrzení transakce.
+- Po doplnění ochrany markeru i bez pending žádosti prošla samostatná úplná
+  Rules sada 73/73; konečný CI výsledek bude evidovaný pro přesný commit.
+- Osm Storage případů v izolovaném Firestore+Storage emulátoru prošlo:
+  aktivní/legacy čtení zachované, marker blokuje SDK čtení i starý owner token
+  pro přepis/mazání či metadata s novým tokenem, všechny role 1–6 bez výjimky,
+  klient marker nepodvrhne a bug screenshot workflow zachovaný.
+- Test starého tokenového URL výslovně očekává stále dostupný soubor po
+  samotném markeru: dokládá zbývající potřebu serverové revokace při integraci.
+
+Logy build/public-identity-{flutter-final,widget-final,analyze-final,functions-unit,
+lint,tools,rules-full,firestore-rules-final,storage-final}.log; inventář dotazů
+build/public-identity-query-inventory.txt. Měření nejsou cloudová latence,
+účtované čtení ani důkaz živého nasazení. Rules jsou cílený lokální prototyp,
+před veřejným vydáním patří do celkové bezpečnostní kontroly.
+
 <a id="ci-reliability"></a>
 
 ## Spolehlivost CI – 30. října 2026
