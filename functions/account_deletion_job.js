@@ -5,6 +5,7 @@ import { AccountArchiveNeedsReview, archiveAccountContentPage, drainArchivedComm
 import { AccountPrivateCleanupNeedsReview, cleanupAccountPrivatePage } from './account_private_cleanup.js';
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
 import { AccountDeletionRequestUnavailable, hideDeletedAuthAccountShoutsPage } from './account_shout_hiding.js';
+import { AccountDeletionConfirmationNeedsReview, confirmAccountAuthDeletion } from './account_deletion_confirmation.js';
 
 const retentionMillis = 60 * 24 * 60 * 60 * 1000;
 const phases = new Set(['waiting-auth', 'hiding-shouts', 'retry', 'shouts-hidden', 'cleaning-private',
@@ -71,11 +72,12 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   pageSize = 50, indexWriter = null, beforeTransaction = null,
   privateCleanupEnabled = false, beforePrivateCommit = null,
   contentArchiveEnabled = false, beforeContentTransaction = null,
+  confirmAuthDeletionEnabled = false,
 } = {}) {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
-      typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' ||
+      typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
       (contentArchiveEnabled && !privateCleanupEnabled)) {
     throw new Error('invalid-account-deletion-job-options');
   }
@@ -129,6 +131,9 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   });
   if (claim.state !== 'claimed') return claim;
 
+  let observedAuth;
+  const invocationAuth = { getUser(uid) { return observedAuth ??= Promise.resolve().then(() => auth.getUser(uid)); } };
+
   const assertOwner = (snapshot, time) => {
     if (!snapshot.exists) throw new LeaseLost();
     const job = snapshot.data(); validateJob(job, identity);
@@ -170,7 +175,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     let remaining = pageSize, stage = claim.workStage, pendingId = claim.pendingArchiveId, authRead;
     const counts = { archivedMessages: 0, archivedComments: 0, archivedReactions: 0 };
     // One Auth observation for this bounded invocation, never a process cache.
-    const sliceAuth = { getUser(uid) { return authRead ??= Promise.resolve().then(() => auth.getUser(uid)); } };
+    const sliceAuth = { getUser(uid) { return authRead ??= Promise.resolve().then(() => invocationAuth.getUser(uid)); } };
     while (remaining > 0) {
       const options = { pageSize: remaining, clock, transactionGuard: archiveTransactionGuard, beforeTransaction: beforeContentTransaction };
       const result = stage === 'reactions'
@@ -219,16 +224,20 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   });
   let result;
   try {
-    result = claim.content ? await contentSlice() : claim.private ? await cleanupAccountPrivatePage(identity, db, auth, {
+    const confirmation = confirmAuthDeletionEnabled ? await confirmAccountAuthDeletion(identity, db, invocationAuth, {
+      clock, transactionGuard: async transaction => { assertOwner(await transaction.get(jobRef), now()); },
+    }) : null;
+    result = confirmation?.state === 'waiting-for-auth-deletion' ? confirmation
+      : claim.content ? await contentSlice() : claim.private ? await cleanupAccountPrivatePage(identity, db, invocationAuth, {
       pageSize, beforeCommit: beforePrivateCommit, transactionGuard: privateTransactionGuard,
-    }) : await hideDeletedAuthAccountShoutsPage(db, auth, identity.userId, {
+    }) : await hideDeletedAuthAccountShoutsPage(db, invocationAuth, identity.userId, {
       pageSize, indexWriter, beforeTransaction, transactionGuard, expectedRequestCreateTime: identity.requestCreateTime,
     });
   } catch (error) {
     if (error instanceof LeaseLost) return { state: 'lease-lost' };
     try {
       if (error instanceof AccountDeletionRequestUnavailable) return await finish('obsolete');
-      const permanent = error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
+      const permanent = error instanceof AccountDeletionConfirmationNeedsReview || error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
         'permission-denied', 'invalid-argument', 'failed-precondition', 3, 7, 9].includes(error?.code);
       const expired = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis;
       const result = await finish(permanent || expired ? 'needs-review' : 'retry', 'processing-failed');

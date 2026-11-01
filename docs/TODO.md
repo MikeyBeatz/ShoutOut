@@ -87,8 +87,13 @@ Navazující lokální prototyp revokace URL loga je uzavřený: c62e7b5,
 [CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582),
 105 unit, 284 Rules/server, 14 Storage, Flutter/tools, analýza/lint a web build.
 Emulátor zachovává tokeny a ignoruje verzovací podmínky; krok to rozpozná
-a nepotvrdí dokončení. Cloudové ověření a potvrzený stav mazání jsou stále brány
-před worker integrací. [Podrobnosti](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).
+a nepotvrdí dokončení. Následný skutečný DEV Storage test z 8c915db po
+CI 41355437130 success ověřil revokaci 200 → 403, obě kolize 412, replay,
+zachování bytes/metadat i úklid 4/4 objektů; tato cloudová brána je uzavřená.
+Serverové potvrzení Auth mazání má připravené jádro/DEV aktivaci a Rules,
+50 cílených emulátorových scénářů i lint prošly; přesný CI a rollout následují.
+Identita/loga ještě nejsou zapojené do workeru.
+[Podrobnosti](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

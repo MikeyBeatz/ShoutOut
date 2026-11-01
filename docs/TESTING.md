@@ -9,6 +9,33 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Skutečný DEV Storage probe a potvrzení Auth mazání – 1. listopadu
+
+Izolovaný Storage probe 8c915db9d9e77eb5ed934be83eb3911bd89a38fb má
+[CI 41355437130 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41355437130).
+Skutečný test stejného helperu: URL 200 → 403, obě verzovací kolize 412,
+bytes/ostatní metadata zachované, replay bez zápisu a nezměněný kontrolní
+objekt. Čtyři vytvořené objekty jsou ověřeně uklizené. Request/marker jsou pro
+tento Storage-only test v paměti; Auth lookup a Storage skutečné. Žádný nový
+Auth účet ani živý Firestore zápis/job. Nejde o celý průchod mazáním účtu.
+Metadata bucketu: versioning vypnuté; bez tokenu fixture vrací anonymní 403.
+IAM/ACL starých objektů se neskenovaly, již uložené cache se neodvolají.
+Důkazy: build/logo-dev-preflight-proof.json, build/logo-dev-probe-ci-proof.json
+a build/logo-dev-live-proof.json; tokeny se do nich neukládají.
+
+[Serverová konfirmace a plán rolloutů](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation):
+50 cílených emulátorových případů a lint prošly, z toho 8 přes skutečné Rules
+a 42 worker regresí. Pokrývají rollback před potvrzením, odmítnutí po něm,
+podvržení/odstranění serverového pole, cizí/anon přístup a list, UID/status,
+oba souběhy, invalidní retenci/lease, potvrzení před první změnou, v3 celý tok,
+jediné Auth pozorování na dávku a stabilní timestamp/deadline při replay.
+Test ztraceného potvrzení privátního delete nově cílí na konkrétní uložený
+progress, nikoli pořadové číslo transakce. Jeho očekávání dat/počtů se nemění.
+Logy build/account-confirmation-emulator-final.log a
+build/account-confirmation-rules-final.log; přehled dotazů/cest v
+build/account-confirmation-rules-inventory.txt. CI a rollout ještě následují.
+Celková bezpečnostní kontrola Rules zůstává samostatnou MVP bránou.
+
 ## Tokenová URL Business loga – lokální prototyp 1. listopadu
 
 [Schválený rozsah, omezení a cloudová brána](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).

@@ -242,10 +242,18 @@ nebo chybějící source SHA odmítne. Při zapnutém versioningu se zastaví p�
 vytvořením objektů; neplánuje tím odstranění starších generací.
 Žádné živé Firestore zápisy ani nové Auth účty: transakce request/marker jsou
 v paměti, skutečný Auth pouze ověří neexistující náhodné UID. Jde o izolovaný
-Storage test stejného helperu, nikoli end-to-end potvrzení workeru. Živý výsledek
-zatím není; postup se nemá považovat za provedený pouze podle této dokumentace.
+Storage test stejného helperu, nikoli end-to-end potvrzení workeru.
+Zdroj 8c915db9d9e77eb5ed934be83eb3911bd89a38fb prošel
+[CI 41355437130](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41355437130).
+Živý DEV test následně prošel: původní URL 200, po revokaci 403; obě kolize 412,
+stejné bytes/ostatní metadata, replay bez zápisu a kontrolní objekt beze změn.
+Všechny 4 objekty jsou ověřeně odstraněné. Žádné Firestore zápisy či Auth účty.
+Důkazy: build/logo-dev-preflight-proof.json, build/logo-dev-probe-ci-proof.json,
+build/logo-dev-live-proof.json. Brána skutečné Storage revokace je uzavřená.
 Živé nastavení verzování bucketu, přístup přes IAM/ACL a historické generations
-nebyly ověřené; soupis běžných objektů nedokládá revokaci historických verzí.
+byly pro testovací bucket/objekty ověřené jen v uvedeném rozsahu: versioning je
+vypnuté, anonymní přístup k fixture bez tokenu 403. IAM/ACL existujících starých
+objektů se neskenovaly; soupis běžných objektů nedokládá revokaci historických verzí.
 Zůstává také brána nezrušitelného potvrzeného stavu: Firestore transakce
 a Storage patch netvoří jednu atomickou operaci. Změnu mezi kontrolou a patchem
 lze zjistit při potvrzení, nelze tím vrátit již odstraněný token; právě proto
@@ -258,3 +266,54 @@ Tento úsek nemění cache politiku ani netvrdí zpětné odstranění všech ko
 Při budoucí integraci musí zůstat pořadí: blokace klientských zápisů →
 revokace a ověření → pozdější fyzický purge loga → teprve rozhodnutí o markeru.
 Účtový milník a MVP metriky zůstávají otevřené.
+
+<a id="auth-deletion-confirmation"></a>
+
+## Serverové potvrzení odstranění Auth – navazující DEV ochrana
+
+Vlastník po vysvětlení obou bran povolil pokračování i vhodné nasazení po
+ověření. functions/account_deletion_confirmation.js zapisuje do původní
+accountDeletionRequests/UID serverový Timestamp authDeletionConfirmedAt,
+teprve když Auth vrátí přesně auth/user-not-found. Existující Auth, provider
+chyba nebo neplatná/vyměněná žádost změnu neopravňují. Žádost musí zůstat
+pending a mít shodné původní createTime; čas musí být uvnitř původních 60 dní.
+Caller lease se čte ve stejné transakci před zápisem. Již platný timestamp se
+nemění, neplatný vede do review. Žádná lhůta se neobnovuje.
+
+Firestore Rules odmítnou klientský delete, pokud potvrzovací pole existuje,
+i kdyby mělo vadný typ. Původní create whitelist pole nepovoluje a update
+zůstává zakázaný; klient jej nemůže podvrhnout/odstranit ani obnovit žádost
+jako nepotvrzenou. Vlastní rollback do 10 minut zůstává pouze před potvrzením.
+Čtení, role, retence a ostatní žádosti se tím nerozšiřují. Model a invazní
+query inventura jsou v build/account-confirmation-rules-inventory.txt.
+
+DEV worker zapíná confirmAuthDeletionEnabled a tuto kontrolu provede před
+každou novou destruktivní dávkou. Potvrzení a dosavadní helpery sdílejí jen
+jedno pozorování Auth v jednom běhu. Mezi běhy žádná Auth cache není.
+Neprovádí se migrace jobů: schemaVersion 1/2/3, fáze, počty, requestCreateTime,
+retenční deadline a limity zůstávají. Terminální job končí před Auth čtením;
+dokončená historická práce se neotevírá a nedoplňuje se jí potvrzení zpětně.
+V core je default přepínače false pro původní explicitní volající; DEV má true.
+
+50 cílených emulátorových případů prošlo (8 Rules/confirmation, 42 worker),
+včetně potvrzení před změnou zdroje, rollbacku před potvrzením, odmítnutí po
+něm, podvržení timestampu, cizího/anon čtení a delete/list, změny UID/statusu,
+souběhu v obou pořadích, vadných dat/lease/retence, celého v3 průchodu,
+jednoho Auth lookupu na dávku a replay beze změny request updateTime.
+Prototyp Rules vyžaduje před širokým veřejným spuštěním i celkovou kontrolu
+podle MVP_SERVER_PLAN; cílené testy nejsou audit celé aplikace.
+
+Rollout po přesném úspěšném CI: nejprve firestore:rules pouze do
+shoutout-dev-46c81 (včetně dříve ověřené neměnnosti markeru a odmítnutí nového
+follow smazanému profilu), potom obě stávající účtové Functions s novým
+helperem. Žádné indexes/TTL, Hosting, Storage Rules, produkce ani main.
+Dosavadní europe-west3, max 1, concurrency 1, 256 MiB, 60 s a cron každou minutu
+zůstávají. Následuje nový syntetický DEV request/profil bez nového Auth účtu,
+ověření automatického potvrzení a dokončení v3 a úklid pouze jeho dat.
+Původní žádosti/job a cizí data mají být porovnané proti výchozím digestům.
+
+Zbývá klientský cutover: při ztracené odpovědi Auth a rollbacku dříve, než
+server potvrdí odstranění, se může původní žádost ještě zrušit. Tato ochrana
+řeší stav po potvrzení, nikoli nový serverem řízený tok od začátku.
+Integrace veřejné identity/loga, ostatní osobní/Business data a fyzický purge
+zůstávají otevřené. Samotné přidání konfirmace účtový milník neuzavírá.

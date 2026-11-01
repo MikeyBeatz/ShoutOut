@@ -71,6 +71,27 @@ test('job records atomic progress, defers retries, completes and replays without
   assert.deepEqual((await f.requestRef.get()).data(), requestBefore);
 });
 
+test('enabled confirmation is committed before source changes, uses one Auth read and does not rewrite on replay', { skip: !enabled }, async () => {
+  const f = await fixture(); let authReads = 0, observedConfirmed = 0;
+  const options = { ...f.options, confirmAuthDeletionEnabled: true, beforeTransaction: async () => {
+    assert.ok((await f.requestRef.get()).data().authDeletionConfirmedAt instanceof Timestamp); observedConfirmed++;
+  } };
+  const auth = { getUser() { authReads++; return missingAuth.getUser(); } };
+  assert.equal((await run(f.event, f.db, auth, options)).hiddenCount, 2);
+  const confirmed = await f.requestRef.get(); assert.equal(authReads, 1); assert.equal(observedConfirmed, 2);
+  f.tick(1000); assert.equal((await run(f.event, f.db, auth, options)).hiddenCount, 3);
+  assert.ok((await f.requestRef.get()).updateTime.isEqual(confirmed.updateTime)); assert.equal(authReads, 2);
+});
+
+test('enabled confirmation leaves an existing Auth account cancellable and records no marker on provider error', { skip: !enabled }, async () => {
+  const f = await fixture(), options = { ...f.options, confirmAuthDeletionEnabled: true };
+  assert.equal((await run(f.event, f.db, { getUser: async () => ({ uid: f.uid }) }, options)).state, 'waiting-auth');
+  assert.equal((await f.requestRef.get()).data().authDeletionConfirmedAt, undefined);
+  f.tick(1000);
+  await assert.rejects(run(f.event, f.db, { getUser: async () => { throw new Error('outage'); } }, options));
+  assert.equal((await f.requestRef.get()).data().authDeletionConfirmedAt, undefined);
+});
+
 test('active lease prevents duplicate workers from entering Auth', { skip: !enabled }, async () => {
   const f = await fixture(), entered = Promise.withResolvers(), release = Promise.withResolvers();
   const worker = run(f.event, f.db, { async getUser() { entered.resolve(); await release.promise; return missingAuth.getUser(); } }, f.options);
@@ -395,10 +416,13 @@ test('the feature gate pauses v2 safely without changing its stored progress', {
 });
 
 test('lost acknowledgement after the private delete commit preserves exact progress for the retry', { skip: !enabled }, async () => {
-  const f = await privateJobFixture(); let commits = 0;
+  const f = await privateJobFixture(); let failed = false;
   const lostAck = { ...f.db, async runTransaction(...args) {
     const result = await f.db.runTransaction(...args);
-    if (++commits === 3) throw new Error('lost private commit acknowledgement');
+    const job = (await f.jobRef.get()).data();
+    if (!failed && job.privateDeletedCount === 2 && job.leaseToken) {
+      failed = true; throw new Error('lost private commit acknowledgement');
+    }
     return result;
   } };
   await assert.rejects(run(f.event, lostAck, missingAuth, { ...f.options, pageSize: 2 }), /lost private commit/);
@@ -494,7 +518,7 @@ test('one private run deletes at most 50 leaves and the next run drains the rema
   t.diagnostic(JSON.stringify({ privateLeaves: 55, elapsedMillis: Date.now() - start }));
 });
 
-async function contentJobFixture() {
+async function contentJobFixture({ confirmAuthDeletionEnabled = false } = {}) {
   const f = await fixture(); archiveOwners.push(f.uid);
   const user = db.doc(`users/${f.uid}`), root = db.doc(`shouts/content_${randomUUID()}`);
   privateRoots.push(user, root);
@@ -511,7 +535,7 @@ async function contentJobFixture() {
     await ref.set({ authorId, text: 'Public comment', createdAt: Timestamp.now(), likesCount: 3, dislikesCount: 0 });
   }
   for (const uid of ['alice', 'bob', 'charlie']) await ownComment.collection('reactions').doc(uid).set({ type: 'like', updatedAt: Timestamp.now() });
-  const options = { ...f.options, pageSize: 50, privateCleanupEnabled: true, contentArchiveEnabled: true };
+  const options = { ...f.options, pageSize: 50, privateCleanupEnabled: true, contentArchiveEnabled: true, confirmAuthDeletionEnabled };
   assert.equal((await run(f.event, f.db, missingAuth, options)).state, 'cleaning-private');
   f.tick(options.retryDelayMillis);
   assert.equal((await run(f.event, f.db, missingAuth, options)).state, 'archiving-content');
@@ -542,6 +566,19 @@ test('v3 archives all text and reactions with a shared per-invocation work budge
   const replay = await run(f.event, f.db, { getUser() { assert.fail('terminal replay'); } }, options);
   assert.equal(replay.state, 'content-archived'); assert.equal(replay.archivedCommentCount, 1);
   assert.deepEqual((await f.jobRef.get()).data(), job);
+});
+
+test('confirmed v3 finishes private cleanup and the entire archive with one Auth lookup per slice and stable request deadline', { skip: !enabled }, async () => {
+  const f = await contentJobFixture({ confirmAuthDeletionEnabled: true }), confirmed = await f.requestRef.get();
+  assert.ok(confirmed.data().authDeletionConfirmedAt instanceof Timestamp);
+  let reads = 0;
+  const result = await run(f.event, f.db, { getUser() { reads++; return missingAuth.getUser(); } }, f.options);
+  assert.equal(result.state, 'content-archived'); assert.equal(reads, 1);
+  assert.equal(result.archivedMessageCount, 2); assert.equal(result.archivedCommentCount, 1); assert.equal(result.archivedReactionCount, 3);
+  assert.ok((await f.requestRef.get()).updateTime.isEqual(confirmed.updateTime));
+  const requestBeforeReplay = await f.requestRef.get();
+  assert.equal((await run(f.event, f.db, { getUser() { assert.fail('terminal confirmation replay'); } }, f.options)).state, 'content-archived');
+  assert.ok((await f.requestRef.get()).updateTime.isEqual(requestBeforeReplay.updateTime));
 });
 
 test('v3 recovers an acknowledged-lost comment archive from its stored pending reaction phase', { skip: !enabled }, async () => {

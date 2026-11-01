@@ -1,12 +1,29 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-logo-dev-proof`; navazuje na dokončenou retenci
+`feature/account-deletion-confirmation`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – izolované ověření na DEV Storage
+## Aktuální úsek – nezrušitelná serverová konfirmace Auth mazání
+
+Připravený worker za DEV přepínačem confirmAuthDeletionEnabled před první
+destruktivní operací transakčně ověří původní žádost i lease a po skutečném
+Auth user-not-found přidá serverový Timestamp authDeletionConfirmedAt.
+Původní status pending, createTime, retenční deadline i verze jobů zůstávají.
+Rules zablokují klientské odstranění potvrzené žádosti; create/update klient
+potvrzení vytvořit ani smazat nesmí. Před konfirmací zůstává původní rollback.
+Jeden Auth lookup na skutečně zpracovávanou dávku, žádná cache mezi běhy.
+Dokončené joby se znovu neotvírají; žádné nové prostředky či časování.
+
+50 cílených emulátorových testů a lint prošly, včetně obou pořadí souběhu,
+v1/v2/v3 regresí, celého v3 průchodu a zachování původního deadline.
+Připravuje se přesný commit/CI a cílený DEV rollout Rules a dvou účtových
+Functions; zatím není provedený. Hosting, Storage Rules a produkce se nemění.
+[Rozsah a zbývající riziko klientského rollbacku](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
+
+## Dokončený úsek – izolované ověření na DEV Storage
 
 Vlastník po vysvětlení zbývajících bran povolil pokračovat a nasadit vhodně
 ověřené změny. Připravený Storage probe vytvoří pouze 4 nové malé objekty
@@ -15,7 +32,14 @@ ověří skutečnou revokaci a obě 412 kolize a podmíněně je uklidí.
 Žádné živé Firestore zápisy, žádný nový Auth účet, žádná žádost/job ani změna
 bucket politiky. Použije stejné revokační jádro; request/marker transakce jsou
 pro tento izolovaný test v paměti, Auth user-not-found a Storage jsou skutečné.
-Není to end-to-end test mazání účtu. Příprava testu/CI běží; živý výsledek dosud není.
+Není to end-to-end test mazání účtu. Zdroj 8c915db9d9e77eb5ed934be83eb3911bd89a38fb
+má CI 41355437130 success. Skutečný DEV test: původní URL 200 → po revokaci 403,
+obě kolize 412, stejné bytes/ostatní metadata, replay bez zápisu a nezměněný
+kontrolní objekt. Všechny 4 vytvořené objekty jsou ověřeně odstraněné.
+Bucket metadata potvrdila vypnuté versioning; žádná politika nebyla měněná.
+Důkazy: build/logo-dev-preflight-proof.json, build/logo-dev-probe-ci-proof.json,
+build/logo-dev-live-proof.json. Tato Storage brána je uzavřená; worker integrace
+identity/loga zůstává další samostatný úsek.
 
 ## Dokončený předchozí úsek – zneplatnění odkazů na loga, pouze lokálně
 
