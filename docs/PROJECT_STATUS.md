@@ -1,12 +1,27 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-public-identity`; navazuje na dokončenou retenci
+`feature/identity-admin-write-guards`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – veřejná identita, pouze lokální příprava
+## Aktuální úsek – ochrana tří Admin SDK zapisovačů, pouze lokálně
+
+Vlastník výslovně schválil lokální ochranu backfillu veřejných profilů,
+přidělování rolí a vývojové Business aktivace. Společná kontrola žádosti
+o mazání a veřejného markeru je nyní ve stejné transakci jako změna dat.
+Backfill čte aktuální users/role a přeskočí mazající se účet; oba další
+nástroje odmítnou celou změnu. Názvy/úrovně rolí, rozsahy, Business podmínky,
+lhůty, prostředky a DEV-only cílení zůstávají stejné.
+
+Lokálně prošlo 22 emulátorových scénářů a 37 tools testů, včetně souběhu,
+odmítnutí jiného projektu před SDK inicializací a rollbacku bez dílčích dat.
+CLI skripty mají ověřenou syntaxi. Konečný commit/CI ještě následuje.
+Žádný z nástrojů nebyl spuštěný proti živým datům; žádný rollout, Auth účty,
+nový job ani změna existujících jobů. [Rozsah a náklady](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
+
+## Dokončený předchozí úsek – veřejná identita, pouze lokální příprava
 
 Vlastník schválil lokální serverové jádro, marker smazané veřejné identity,
 anonymní zobrazení bez role/loga a nového sledování/soukromé odpovědi,
@@ -32,8 +47,7 @@ analyzátoru/lintu a web buildu. Lokální úsek je uzavřený, commitnutý a pu
 a build/public-identity-ci-success.log; podrobnosti v TESTING.md.
 
 Před živým napojením chybí revokace dříve vydaných tokenových URL loga
-(emulátor doložil, že samotná Rules nestačí), ochrana důvěryhodných Admin SDK
-zapisovačů proti obnovení profilu a návrh integrace jobu včetně potvrzeného
+(emulátor doložil, že samotná Rules nestačí) a návrh integrace jobu včetně potvrzeného
 stavu mazání odolného vůči starému Auth tokenu/odstranění pending žádosti.
 Soukromá/Business identita, role, fyzický 60denní purge a klientský cutover
 zůstávají otevřené.

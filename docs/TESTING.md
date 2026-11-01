@@ -9,6 +9,25 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Tři Admin SDK zapisovače – lokální ochrana 1. listopadu
+
+[Schválený rozsah a provozní rozdíly](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
+37 tools testů prošlo včetně skutečných CLI odmítajících syntetické ne-DEV
+credentials před SDK inicializací. Syntaxe všech tří vstupních CLI ověřená.
+22 integračních scénářů v izolovaném emulátoru prošlo bez skipů: běžný
+backfill, role 1–6, Business aktivace před vytvořením běžného profilu,
+zachování existující role/Business dat, request/marker, šest souběhů,
+rollback a žádná změna druhého účtu. Kontrolují data i updateTime.
+
+Testy používají přímo operace volané třemi CLI, ne kopii jejich zápisové logiky.
+DB namespace je pouze shoutout-rules-test a FIRESTORE_EMULATOR_HOST 127.0.0.1:8080.
+Auth je reprezentované syntetickým dříve načteným objektem; nevytváří se Auth účet.
+CLI proti živé databázi spuštěné nebyly, žádné nasazení či změna jobů.
+CI plná test:rules sada obsahuje i tyto integrační případy; konečný výsledek
+bude zaznamenaný pro přesný commit. Logy build/identity-admin-writes-tools-final.log
+a build/identity-admin-writes-emulator-final.log. Flutter/Functions/Rules ani
+živé recipient scénáře se tímto lokálním testem znovu nedokládají.
+
 ## Veřejná identita smazaného účtu – lokální příprava 1. listopadu
 
 [Rozsah, schéma a zbývající brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md).

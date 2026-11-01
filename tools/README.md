@@ -197,6 +197,24 @@ npm run backfill:geography
 Nástroj zapisuje `geohash` a `geography`, klíč nevypisuje a odmítne jiný projekt
 než `shoutout-dev-46c81`.
 
+## Ochrana Admin SDK zapisovačů identity
+
+Backfill veřejných profilů, `set_role.mjs` a vývojová Business aktivace používají
+`identity_write_fence.mjs`. Jakákoli accountDeletionRequests žádost nebo veřejný
+marker smazání cílového UID blokuje stejnou transakci, která mění data.
+Backfill účet přeskočí, ostatní dvě operace odmítnou celou změnu.
+Role, jejich rozsahy a aktivační podmínky zůstávají stejné. Nástroje stále
+odmítají ne-DEV credentials před inicializací SDK; testovací helpery navíc
+podporují pouze explicitní emulátor. Živý backfill nebo změna dat vyžaduje
+konkrétní souhlas, nikoli jen obecný souhlas s rollouty.
+
+Backfill nově běží po účtech v transakcích a čte aktuální profil/roli; už
+nepoužívá hromadný snapshot pro zápis. To přidává kontrolní čtení, není to
+slib nižší ceny či rychlosti údržby. Před živým použitím přečtěte
+[rozsah a náklady](../docs/ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
+37 unit/tools a 22 integračních případů jsou v test:tools/test:rules.
+Tato změna neprovádí backfill ani nasazení sama.
+
 ## Web environment workflow
 
 Lokální identita smazaného účtu: `npm run test:storage` spustí Firestore

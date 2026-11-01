@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { backfillPublicProfileForUser } from './account_identity_writes.mjs';
 
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!serviceAccountPath) {
@@ -14,28 +15,13 @@ if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
 initializeApp({ credential: cert(serviceAccount) });
 
 const db = getFirestore();
-const [users, roles] = await Promise.all([
-  db.collection('users').get(),
-  db.collection('accountRoles').get(),
-]);
-const rolesByUser = new Map(roles.docs.map((role) => [role.id, role.data().role]));
+const users = await db.collection('users').select().get();
 let written = 0;
-for (let offset = 0; offset < users.docs.length; offset += 400) {
-  const batch = db.batch();
-  for (const user of users.docs.slice(offset, offset + 400)) {
-    const data = user.data();
-    if (!data.nickname || !data.avatarId) continue;
-    const publicRole = rolesByUser.get(user.id);
-    batch.set(db.collection('publicProfiles').doc(user.id), {
-      nickname: data.nickname,
-      avatarId: data.avatarId,
-      avatarBackgroundStart: data.avatarBackgroundStart,
-      avatarBackgroundEnd: data.avatarBackgroundEnd,
-      avatarGradientDirection: data.avatarGradientDirection,
-      ...(publicRole && publicRole !== 'user' ? { publicRole } : {}),
-    }, { merge: true });
-    written += 1;
-  }
-  await batch.commit();
+let skippedDeleting = 0;
+for (const user of users.docs) {
+  const result = await backfillPublicProfileForUser(db, user.id);
+  if (result.written) written++;
+  if (result.reason === 'account-deleting') skippedDeleting++;
 }
 console.log(`Public profiles written: ${written}`);
+console.log(`Deleting accounts skipped: ${skippedDeleting}`);

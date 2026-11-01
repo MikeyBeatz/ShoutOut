@@ -1,3 +1,5 @@
+import { runActiveIdentityTransaction } from './identity_write_fence.mjs';
+
 const requiredApplicationStrings = [
   'countryCode',
   'registrationNumber',
@@ -88,4 +90,31 @@ export function buildBusinessActivationWrites({ uid, authUser, application }) {
 
 function normalizeEmail(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+export async function activateBusinessAccount(db, authUser, serverTimestamp) {
+  if (typeof serverTimestamp !== 'function') throw new Error('server-timestamp-factory-required');
+  const uid = authUser?.uid;
+  return runActiveIdentityTransaction(db, uid, async transaction => {
+    const application = db.doc(`businessApplications/${uid}`);
+    const role = db.doc(`accountRoles/${uid}`);
+    const profile = db.doc(`businessProfiles/${uid}`);
+    const location = profile.collection('locations').doc('initial');
+    const [currentApplication, currentRole, currentProfile, currentLocation] = await transaction.getAll(
+      application, role, profile, location,
+    );
+    if (!currentApplication.exists) throw new Error('Business application disappeared.');
+    const writes = buildBusinessActivationWrites({ uid, authUser, application: currentApplication.data() });
+    if (currentRole.exists && (currentRole.data().role !== 'business' || currentRole.data().level !== 2)) {
+      throw new Error('Account already has a different privileged role.');
+    }
+    if (currentProfile.exists || currentLocation.exists) {
+      throw new Error('Business profile or initial location already exists; refusing to overwrite it.');
+    }
+    const timestamp = serverTimestamp();
+    if (!currentRole.exists) transaction.create(role, { ...writes.role, createdAt: timestamp });
+    transaction.create(profile, { ...writes.profile, emailVerifiedAt: timestamp, createdAt: timestamp, updatedAt: timestamp });
+    transaction.create(location, { ...writes.location, createdAt: timestamp, updatedAt: timestamp });
+    transaction.update(application, { ...writes.applicationUpdate, activatedAt: timestamp });
+  });
 }

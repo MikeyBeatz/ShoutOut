@@ -3,6 +3,7 @@ import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { writeAccountRoleForUser } from './account_identity_writes.mjs';
 
 const [email, role, ...options] = process.argv.slice(2);
 const roles = new Map([
@@ -28,14 +29,9 @@ if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
 
 initializeApp({ credential: cert(serviceAccount) });
 const user = await getAuth().getUserByEmail(email);
-const roleDocument = getFirestore().collection('accountRoles').doc(user.uid);
-const publicProfileDocument = getFirestore().collection('publicProfiles').doc(user.uid);
 
 if (role === 'user') {
-  const batch = getFirestore().batch();
-  batch.delete(roleDocument);
-  batch.update(publicProfileDocument, { publicRole: FieldValue.delete() });
-  await batch.commit();
+  await writeAccountRoleForUser(getFirestore(), user.uid, null);
 } else {
   const option = (name) => options
     .find((item) => item.startsWith(`--${name}=`))
@@ -43,8 +39,7 @@ if (role === 'user') {
     .split(',')
     .map((item) => item.trim().toUpperCase())
     .filter(Boolean) ?? [];
-  const batch = getFirestore().batch();
-  batch.set(roleDocument, {
+  await writeAccountRoleForUser(getFirestore(), user.uid, {
     role,
     level: roles.get(role),
     assignedBy: 'set_role.mjs',
@@ -55,8 +50,6 @@ if (role === 'user') {
       subdivisions: option('subdivisions'),
     },
   });
-  batch.update(publicProfileDocument, { publicRole: role });
-  await batch.commit();
 }
 
 console.log(`Role ${role} (level ${roles.get(role)}) set for ${user.uid}`);

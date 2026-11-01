@@ -76,7 +76,11 @@ Veřejná část identity má schválený [lokální prototyp](ACCOUNT_PUBLIC_ID
 marker, rezervace a anonymní klient. Lokální úsek je uzavřený: da26499,
 CI 41328636468 success (241 Flutter, 262 Rules/server, 8 Storage).
 Není zapojený do workeru ani nasazený;
-před integrací vyřešit tokenové URL loga a důvěryhodné zapisovače profilů.
+před integrací vyřešit tokenové URL loga a potvrzený stav mazání.
+Tři důvěryhodné zapisovače mají navazující schválenou lokální ochranu:
+backfill, role a Business aktivace kontrolují žádost/marker v transakci;
+22 emulátorových a 37 tools testů prošlo. Konečný commit/CI ještě následuje,
+živé nástroje ani joby se nespouštěly/neměnily.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

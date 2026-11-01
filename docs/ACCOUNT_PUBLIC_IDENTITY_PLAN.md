@@ -105,12 +105,9 @@ Firebase popisuje [dlouhodobý odvolatelný odkaz](https://firebase.google.com/d
 Před živým napojením je nutný serverový krok pro odvolání dříve vydaných URL
 a bezpečné pořadí pozdějšího fyzického smazání loga před odstraněním markeru.
 
-Před živým zapojením dále prověřit důvěryhodné Admin SDK zapisovače veřejných
-profilů/rolí (backfill, aktivace Business, role nástroje), aby neobnovily stará
-pole přes marker. Ověřený backfill_public_profiles.mjs dnes do veřejného
-profilu slučuje data users bez kontroly mazání. set_role.mjs a
-activate_business_application.mjs ověřují Auth před zápisem, ale je třeba
-uzavřít souběh s mazáním ve zapisující transakci. Tyto nástroje se zatím nemění.
+Tři prověřené Admin SDK zapisovače veřejné/Business identity a rolí mají
+novou schválenou [lokální ochranu](#admin-write-guards). Nástroje nad živými
+daty spuštěné nebyly a nejde o ochranu libovolného jiného Admin SDK kódu.
 Integrace také musí vyřešit starý Auth token a odvolání pending žádosti po
 potvrzeném odstranění Auth; samotný veřejný marker není obecná serverová
 eligibility kontrola všech soukromých a obsahových zápisů.
@@ -129,3 +126,53 @@ da264992945f694fd68ed95f83a5fb757044b443 má
 včetně 241 Flutter, 262 Rules/server a 8 Storage případů, unit/tools a buildu.
 Živě není zapojený ani nasazený; uvedené integrační brány zůstávají otevřené.
 [Aktuální stav](PROJECT_STATUS.md), [testovací evidence](TESTING.md).
+
+<a id="admin-write-guards"></a>
+
+## Ochrana tří důvěryhodných zapisovačů – lokální doplnění
+
+Vlastník 1. listopadu výslovně schválil opravu tří nástrojů bez živého
+spuštění, nasazení, nových Auth účtů nebo změn existujících jobů. Žádná role,
+oprávnění, Business podmínka, retenční lhůta ani prostředek se nemění.
+
+`tools/identity_write_fence.mjs` čte accountDeletionRequests a publicProfiles
+pro cílové UID uvnitř téže Firestore transakce jako zápis. Jakákoli žádost
+(i jiný stav než pending) nebo accountStatus deleted změnu odmítne.
+Dokumenty jsou součástí read setu; souběžná změna podléhá transakčnímu pořadí
+Firestore, nikoli pouze starému výsledku Auth lookupu. Povoluje jen stávající
+DEV projekt nebo explicitně zapnutý emulátor shoutout-rules-test.
+
+- Backfill nově enumeruje ID users a pro každý účet čte aktuální users/role
+  a guard. Původní hromadný snapshot profilu/rolí se pro zápis nepoužije.
+  Mazané účty se počítají jako přeskočené; ostatní chyby se neskrývají.
+  Zachovává se merge běžných avatarových/jmenných polí, veřejná role a logo.
+- Role helper zapisuje roli účtu i veřejný štítek atomicky; původní CLI
+  nadále sestavuje stejné role/úrovně/rozsahy a timestampy. Downgrade user
+  odstraňuje pouze roli a veřejný štítek, jako dosud.
+- Business helper používá původní validační builder a nezměněné podmínky
+  aktivace. Profil, initial location, role a změna žádosti jsou společná
+  transakce s guardem. Zachovává chybějící běžný profil při počáteční aktivaci,
+  nepoškozuje existující privilegovanou roli a neobnovuje existující Business data.
+  Původní dry run i potvrzovací CLI přepínače zůstávají zachované.
+
+Změna je úmyslně konzistentnější, nikoli prokázaně levnější údržba: enumerace
+users ID má dokumentová čtení, kandidát backfillu typicky další čtyři
+(žádost, veřejný profil, users a role) a jeden zápis. Zablokovaný účet má
+jen dvě kontrolní čtení. Odpadl scan celé kolekce rolí. Zpracování je po účtech
+sekvenční; transakční retry může přidat práci. Role/Business operace přidávají
+dvě kontrolní čtení. Jde o ruční nástroje, ne běžný feed ani nový plánovač;
+nejsou to cenové stropy ani ověřené cloudové náklady. Živý backfill vyžaduje
+vlastní konkrétní datový souhlas a posouzení rozsahu před spuštěním.
+
+Lokálně 22 integračních případů ověřuje běžný backfill, všechny původní role,
+Business aktivaci před vznikem běžného profilu, zachování existujících dat,
+pending/historickou žádost i marker a šest souběhů zahájená práce → mazání
+před kontrolními čteními transakce. Kontrola zahrnuje data i updateTime a rollback
+částečné role/Business změny; jiný účet se nemění. Celá tools sada má 37 pass
+včetně dev-only guardů skutečných CLI s neplatnými syntetickými credentials.
+Všechny fixture jsou pouze emulátorové; žádný Auth SDK účet nevzniká.
+Testy jsou zapojené do test:tools a plné test:rules sady v CI.
+
+Zbývají revokace starých URL loga, nezrušitelný potvrzený stav mazání,
+integrace jobu a ostatní osobní/Business data, role, fyzický purge a klientský
+cutover. Ochrana těchto tří nástrojů sama účtový milník neuzavírá.

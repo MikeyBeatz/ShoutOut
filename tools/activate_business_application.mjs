@@ -4,7 +4,7 @@ import { cert, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
-import { buildBusinessActivationWrites } from './business_activation.mjs';
+import { buildBusinessActivationWrites, activateBusinessAccount } from './business_activation.mjs';
 
 const expectedProjectId = 'shoutout-dev-46c81';
 const [email, ...options] = process.argv.slice(2);
@@ -87,47 +87,6 @@ if (!confirmedLocation) {
   throw new Error('Inspect the first branch address and pass --confirm-location.');
 }
 
-await db.runTransaction(async (transaction) => {
-  const currentApplication = await transaction.get(applicationReference);
-  const currentRole = await transaction.get(roleReference);
-  const currentProfile = await transaction.get(profileReference);
-  const currentLocation = await transaction.get(locationReference);
-  if (!currentApplication.exists) throw new Error('Business application disappeared.');
-
-  const currentWrites = buildBusinessActivationWrites({
-    uid: user.uid,
-    authUser: user,
-    application: currentApplication.data(),
-  });
-  if (currentRole.exists) {
-    const role = currentRole.data();
-    if (role.role !== 'business' || role.level !== 2) {
-      throw new Error('Account already has a different privileged role.');
-    }
-  }
-  if (currentProfile.exists || currentLocation.exists) {
-    throw new Error('Business profile or initial location already exists; refusing to overwrite it.');
-  }
-
-  const timestamp = FieldValue.serverTimestamp();
-  if (!currentRole.exists) {
-    transaction.create(roleReference, { ...currentWrites.role, createdAt: timestamp });
-  }
-  transaction.create(profileReference, {
-    ...currentWrites.profile,
-    emailVerifiedAt: timestamp,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  });
-  transaction.create(locationReference, {
-    ...currentWrites.location,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  });
-  transaction.update(applicationReference, {
-    ...currentWrites.applicationUpdate,
-    activatedAt: timestamp,
-  });
-});
+await activateBusinessAccount(db, user, FieldValue.serverTimestamp);
 
 console.log(`Business application activated for ${user.uid}.`);
