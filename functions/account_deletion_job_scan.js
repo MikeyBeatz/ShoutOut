@@ -20,7 +20,7 @@ export async function scanDueAccountDeletionJobs(db, auth, { maxJobs, ...options
     ? base.startAfter(cursor.nextAttemptAt, cursor.id) : base;
   const page = await query.limit(maxJobs).get();
   const result = { scanned: page.size, processed: 0, failed: 0, hidden: 0, examined: 0,
-    archivedMessages: 0, archivedComments: 0, archivedReactions: 0, contentArchived: 0, contentDisabled: 0,
+    archivedMessages: 0, archivedComments: 0, archivedReactions: 0, contentArchived: 0, contentDisabled: 0, identityDisabled: 0,
     privateDeleted: 0, privateCleaned: 0, privateDisabled: 0, shoutsHidden: 0, needsReview: 0, ignored: 0, busy: 0, deferred: 0, leaseLost: 0,
     reachedLimit: page.size === maxJobs, checkpointConflict: false };
   for (const snapshot of page.docs) {
@@ -33,7 +33,7 @@ export async function scanDueAccountDeletionJobs(db, auth, { maxJobs, ...options
       result.privateDeleted += item.deleted ?? 0;
       for (const field of ['archivedMessages', 'archivedComments', 'archivedReactions']) result[field] += item[field] ?? 0;
       result.hidden += item.hidden ?? 0; result.examined += item.examined ?? 0;
-      const counter = { 'content-archived': 'contentArchived', 'content-disabled': 'contentDisabled', 'private-leaves-cleaned': 'privateCleaned', 'private-disabled': 'privateDisabled', 'shouts-hidden': 'shoutsHidden', 'needs-review': 'needsReview',
+      const counter = { 'identity-disabled': 'identityDisabled', 'content-archived': 'contentArchived', 'content-disabled': 'contentDisabled', 'private-leaves-cleaned': 'privateCleaned', 'private-disabled': 'privateDisabled', 'shouts-hidden': 'shoutsHidden', 'needs-review': 'needsReview',
         ignored: 'ignored', busy: 'busy', deferred: 'deferred', 'lease-lost': 'leaseLost' }[item.state];
       if (counter) result[counter]++;
     } catch {

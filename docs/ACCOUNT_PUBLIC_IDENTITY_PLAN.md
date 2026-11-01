@@ -12,8 +12,8 @@ Soukromý/Business profil, role a konečný purge jsou navazující úsek.
 
 ## Serverové jádro a rezervace
 
-`functions/account_public_identity.js` není exportované z žádného Functions
-entry pointu ani kopírované přípravnými skripty do deploy balíků. Lab adaptér
+`functions/account_public_identity.js` nemá samostatný Function export.
+Navazující v4 jej nově zahrnuje do přípravy účtového balíku (viz níže). Lab adaptér
 navíc vyžaduje přesně shoutout-rules-test a 127.0.0.1:8080; oba živé projekty odmítne.
 
 Vstup obsahuje UID, projectId a původní Firestore createTime žádosti. Před prací
@@ -189,7 +189,8 @@ cutover. Ochrana těchto tří nástrojů sama účtový milník neuzavírá.
 Vlastník schválil přípravu a emulátorové ověření bez fyzického mazání log,
 zapojení do workeru, nasazení, živých dat nebo nových Auth účtů. Retence,
 oprávnění a prostředky se nemění. Kód functions/account_logo_revocation.js
-není v entry pointech ani přípravných deploy seznamech; lab adaptér odmítne
+nemá samostatný Function export; v4 jej nově zahrnuje do účtového balíku.
+Lab adaptér odmítne
 živé projekty, nesprávné emulator hosty i skutečný Storage endpoint mimo lokál.
 
 Soupis používá pouze businessLogos/UID/ a explicitně předanou velikost stránky,
@@ -332,3 +333,59 @@ server potvrdí odstranění, se může původní žádost ještě zrušit. Tato
 řeší stav po potvrzení, nikoli nový serverem řízený tok od začátku.
 Integrace veřejné identity/loga, ostatní osobní/Business data a fyzický purge
 zůstávají otevřené. Samotné přidání konfirmace účtový milník neuzavírá.
+
+<a id="identity-worker-v4"></a>
+
+## V4 worker – propojení identity, rezervace a log
+
+Navazující pokračování vlastníka povoluje integraci těchto helperů.
+publicIdentityEnabled v DEV wrapperu předává skutečný bucket
+shoutout-dev-46c81.firebasestorage.app a vytváří nové v4 joby; core default
+je false. Konfirmace Auth/private/archive musí být zapnuté. Staré v1/v2/v3
+se neupgradují. Vypnutí přepínače zastaví v4 jako identity-disabled beze změny.
+
+Před Shouty přibývají workStage identity a logos (phase masking-identity a
+revoking-logos). Marker helper atomicky spolu s markerem uloží do jobu
+publicIdentityMaskedAt a reservationKey; samotná nicknames rezervace ani její
+updateTime se nemění. retainUntil zůstává původní createTime žádosti +60 dní.
+Veřejný marker zůstává minimální, bez jména, avataru, loga a role.
+
+Job dále ukládá logoCursor, logoNextCursor, logoPageLoaded, pendingLogoPaths
+a logoProcessedCount. Prefix je jen businessLogos/UID/, autoPaginate false,
+stránka i sdílený rozpočet nejvýše dosavadních 50 kandidátů. Cursor a čekající
+cesty přežijí přerušení. Každý ověřený/už chybějící soubor se odebere z hlavy
+fronty a započítá jednou v transakci ověřující původní konfirmovanou žádost,
+lease a očekávanou hlavu. Duplicitní/příliš velká stránka, vadný cursor,
+neznámá cesta, vadná rezervace/profil nebo versioning znamenají review.
+
+Po ztraceném mask/page/token/checkpoint ack se znovu ověří uložený stav.
+Storage patch může po ztrátě lease ještě doběhnout; starý worker však nesmí
+posunout progress. Nástupce ověří nepřítomnost tokenu a potvrdí cestu právě
+jednou. Firestore a Storage nejsou jedna atomická operace. HTTP 403 vede do
+review, nikoli nekonečného retry. Auth se čte jednou na běh.
+Po vyčerpání se uloží logosRevokedAt a přejde do shouts, dále původní v3 tok.
+Časový limit 60 s, lease 120 s, retry 60 s a cron každou minutu se nemění;
+i po ukončení běhu se pokračuje od posledního potvrzeného objektu.
+Žádný download token/URL se do jobu ani souhrnů neukládá.
+
+Po přesném CI se nasazuje v pořadí Storage Rules blokující SDK čtení/zápisy
+po markeru → web s anonymním zobrazením a evikcí URL cache → dvě účtové
+Functions s v4. Firestore Rules, indexy/TTL, prostředky, role, retence,
+Scheduler konfigurace, produkce a main se nemění. Loga se fyzicky nemažou;
+cache/stažené kopie a IAM/ACL zásahy mimo dosavadní upload protokol se tím
+neodvolají. Versioning se nepodporuje mlčky. Fyzický purge zbývá.
+
+Pilot vytvoří syntetické UID bez Auth účtu, vlastní users/legal/public profil,
+nicknames rezervaci, dvě malá loga včetně neodkazovaného starého souboru a
+nezávislý kontrolní objekt. Ověří konfirmaci, marker/rezervaci, 403 obou starých
+URL, terminální v3 pokračování, stabilní deadline a kontrolní objekt.
+Uklidí jen vlastní testovací data a porovná původní žádost/joby/archiv,
+ostatní Functions a Scheduler. Nejde o backfill ani změnu starých žádostí.
+
+Lokálně prošlo 11 nových v4 případů: skutečný Firestore a simulační Storage
+adaptér kvůli doloženému omezení CLI emulátoru. Zahrnují 51 log přes více
+dávek, private/archive tok, cizí data, ztracená potvrzení, lease takeover,
+vadná data, 403 a nemigrování starých verzí. Skutečná DEV Storage revokace má
+předchozí důkaz; finální CI a společný živý v4 pilot zatím nejsou.
+Ostatní osobní/Business data, role, fyzický 60denní purge, politika markeru
+po purge a klientský cutover zůstávají otevřené; účtový milník není uzavřený.

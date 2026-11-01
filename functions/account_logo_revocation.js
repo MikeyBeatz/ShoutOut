@@ -1,4 +1,4 @@
-// Local prototype only. No Function export, worker integration or deploy preparation.
+// Internal Storage phase helper; no standalone Function export or object deletion.
 import { Timestamp } from 'firebase-admin/firestore';
 
 export class AccountLogoRevocationNeedsReview extends Error {}
@@ -56,6 +56,10 @@ export async function listDeletedAccountLogos(identity, db, auth, bucket, option
   await confirm(identity, db, auth, opts);
   const [files, next] = await bucket.getFiles({ prefix: `businessLogos/${identity.userId}/`,
     maxResults: opts.pageSize, autoPaginate: false, ...(opts.pageToken ? { pageToken: opts.pageToken } : {}) });
+  if (files.length > opts.pageSize || new Set(files.map(file => file.name)).size !== files.length ||
+      (next?.pageToken !== undefined && next?.pageToken !== null && (typeof next.pageToken !== 'string' || !next.pageToken))) {
+    throw new AccountLogoRevocationNeedsReview('unexpected-logo-page');
+  }
   if (files.some(file => !validPath(identity.userId, file.name))) {
     throw new AccountLogoRevocationNeedsReview('unexpected-logo-path');
   }

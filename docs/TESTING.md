@@ -9,6 +9,19 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## V4 identity/logo worker – příprava integrace
+
+[Kontrakt a pilot](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
+11 nových případů se skutečným Firestore a simulačním Storage adaptérem prošlo;
+předchozí společný běh měl 51/51 s 42 existujícími worker regresemi.
+Pokrývají maskování před obsahem, rezervaci/updateTime/deadline, 51 log přes
+více dávek, cizí prefix/obsah, celý private/archive tok, replay, ztracený
+mask/page/token/checkpoint ack, lease takeover, nulová/zmizelá loga, 403,
+vadný profil/rezervaci/cestu, versioning a zachování v1/v2/v3 bez migrace.
+Logy build/identity-worker-emulator-final.log a build/identity-worker-emulator-final-v4.log.
+Storage emulátor nadále nedokládá cloudovou revokaci; simulační adaptér ji
+nezastírá. Společný skutečný DEV v4 pilot a finální CI následují.
+
 ## Skutečný DEV Storage probe a potvrzení Auth mazání – 1. listopadu
 
 Izolovaný Storage probe 8c915db9d9e77eb5ed934be83eb3911bd89a38fb má

@@ -1,12 +1,32 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/account-deletion-confirmation`; navazuje na dokončenou retenci
+`feature/account-public-identity-worker`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – nezrušitelná serverová konfirmace Auth mazání
+## Aktuální úsek – v4 identita a loga ve workeru
+
+Navazující pokračování vlastníka připravuje nové v4 joby: konfirmace Auth →
+minimální veřejný marker/klíč vlastní přezdívky → stránkovaná revokace vlastních
+log → dosavadní Shout/private/archive fáze. Staré v1/v2/v3 se nemigrují.
+Samotná nicknames rezervace/updateTime se nemění; deadline je původní +60 dní.
+Cursor i čekající cesty jsou trvalé; každý ověřený objekt se odškrtne v
+transakci s kontrolou konfirmace/žádosti/lease. Storage a Firestore nejsou
+atomické; replay po odstranění tokenu je no-op. PageSize (max. 50), cron,
+lease i prostředky zůstávají stejné.
+
+11 nových v4 emulátorových případů prošlo se skutečným Firestore a simulačním
+Storage adaptérem. Předchozí společný běh měl 51/51 včetně 42 starých worker
+regresí. Testuje se i 51 log, ztracený mask/page/token/checkpoint ack, převzetí
+lease, cizí data, nulová loga a staré verze. Lint prošel. Přesný commit/CI a
+živý v4 pilot následují; zatím není nasazeno, DEV worker nadále e4dd199.
+Před aktivací budou nasazené Storage Rules a web s anonymním zobrazením,
+poté dvě stávající účtové Functions. Produkce, Firestore Rules, indexy/TTL
+a nastavení Scheduleru se nemění. [Kontrakt a pilot](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
+
+## Dokončený úsek – nezrušitelná serverová konfirmace Auth mazání
 
 DEV worker za přepínačem confirmAuthDeletionEnabled před první
 destruktivní operací transakčně ověří původní žádost i lease a po skutečném

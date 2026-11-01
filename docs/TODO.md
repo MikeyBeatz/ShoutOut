@@ -95,8 +95,9 @@ nasazené do DEV (Rules a dvě stávající Functions); 295 Rules/server přípa
 a ostatní CI kontroly prošly. Živě automatické potvrzení → soukromý úklid →
 content-archived, stabilní timestamp/deadline a úklid testu; původní žádost
 i výchozí inventura nezměněné. Tato DEV ochrana je uzavřená.
-Identita/loga ještě nejsou zapojené do workeru.
-[Podrobnosti](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
+Integrace identity/loga má připravenou novou v4 fázi a 11 nových emulátorových
+testů. Staré joby se nemigrují; následuje CI a koordinovaný DEV rollout
+Storage Rules/webu/workeru. [Kontrakt a stav](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

@@ -6,10 +6,13 @@ import { AccountPrivateCleanupNeedsReview, cleanupAccountPrivatePage } from './a
 import { accountDeletionEventIdentity } from './account_deletion_event.js';
 import { AccountDeletionRequestUnavailable, hideDeletedAuthAccountShoutsPage } from './account_shout_hiding.js';
 import { AccountDeletionConfirmationNeedsReview, confirmAccountAuthDeletion } from './account_deletion_confirmation.js';
+import { AccountPublicIdentityNeedsReview } from './account_public_identity.js';
+import { AccountLogoRevocationNeedsReview } from './account_logo_revocation.js';
+import { AccountIdentityJobNeedsReview, AccountIdentityJobLeaseLost, identityJobFields, validateIdentityJob, runAccountIdentitySlice } from './account_identity_job.js';
 
 const retentionMillis = 60 * 24 * 60 * 60 * 1000;
 const phases = new Set(['waiting-auth', 'hiding-shouts', 'retry', 'shouts-hidden', 'cleaning-private',
-  'private-leaves-cleaned', 'archiving-content', 'content-archived', 'obsolete', 'needs-review']);
+  'private-leaves-cleaned', 'archiving-content', 'content-archived', 'obsolete', 'needs-review', 'masking-identity', 'revoking-logos']);
 const terminalPhase = (phase, version) => ['obsolete', 'needs-review'].includes(phase) ||
   (version === 1 ? phase === 'shouts-hidden' : version === 2 ? phase === 'private-leaves-cleaned' : phase === 'content-archived');
 class LeaseLost extends Error {}
@@ -29,7 +32,7 @@ export function accountDeletionJobRef(db, identity) {
 
 function validateJob(job, identity) {
   const invalid = () => { throw new Error('invalid-account-deletion-job-state'); };
-  if (![1, 2, 3].includes(job.schemaVersion) || job.userId !== identity.userId || !same(job.requestCreateTime, identity.requestCreateTime) ||
+  if (![1, 2, 3, 4].includes(job.schemaVersion) || job.userId !== identity.userId || !same(job.requestCreateTime, identity.requestCreateTime) ||
       !phases.has(job.phase) || !Number.isSafeInteger(job.attempts) || job.attempts < 1 ||
       !Number.isSafeInteger(job.hiddenCount) || job.hiddenCount < 0 ||
       !(job.createdAt instanceof Timestamp) || !(job.updatedAt instanceof Timestamp) ||
@@ -38,12 +41,14 @@ function validateJob(job, identity) {
       !(job.leaseUntil === null || job.leaseUntil instanceof Timestamp) ||
       (job.leaseToken === null) !== (job.leaseUntil === null) ||
       !(job.nextAttemptAt === null || job.nextAttemptAt instanceof Timestamp)) invalid();
+  if (job.schemaVersion === 4 && validateIdentityJob(job)) return;
+  if (job.schemaVersion !== 4 && ['masking-identity', 'revoking-logos'].includes(job.phase)) invalid();
   if (job.schemaVersion === 1) {
     if (['cleaning-private', 'private-leaves-cleaned', 'archiving-content', 'content-archived'].includes(job.phase)) invalid();
     return;
   }
   const contentStage = ['messages', 'comments', 'reactions'].includes(job.workStage);
-  if (!['shouts', 'private', ...(job.schemaVersion === 3 ? ['messages', 'comments', 'reactions'] : [])].includes(job.workStage) ||
+  if (!['shouts', 'private', ...(job.schemaVersion >= 3 ? ['messages', 'comments', 'reactions'] : [])].includes(job.workStage) ||
       !Number.isSafeInteger(job.privateDeletedCount) || job.privateDeletedCount < 0 ||
       typeof job.privatePreferencesDisabled !== 'boolean' || job.phase === 'shouts-hidden' ||
       (job.workStage === 'shouts' && (job.shoutsHiddenAt !== null || job.privateDeletedCount !== 0 ||
@@ -73,11 +78,14 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   privateCleanupEnabled = false, beforePrivateCommit = null,
   contentArchiveEnabled = false, beforeContentTransaction = null,
   confirmAuthDeletionEnabled = false,
+  publicIdentityEnabled = false, logoBucket = null,
 } = {}) {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
       typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
+      typeof publicIdentityEnabled !== 'boolean' ||
+      (publicIdentityEnabled && (!confirmAuthDeletionEnabled || !contentArchiveEnabled || !logoBucket)) ||
       (contentArchiveEnabled && !privateCleanupEnabled)) {
     throw new Error('invalid-account-deletion-job-options');
   }
@@ -93,7 +101,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     const [request, snapshot] = await transaction.getAll(requestRef, jobRef);
     const time = now(), job = snapshot.exists ? snapshot.data() : null;
     if (job) validateJob(job, identity);
-    if (job?.schemaVersion === 3 && (!privateCleanupEnabled || !contentArchiveEnabled)) return { state: 'content-disabled' };
+    if (job?.schemaVersion === 4 && !publicIdentityEnabled) return { state: 'identity-disabled' };
+    if (job?.schemaVersion >= 3 && (!privateCleanupEnabled || !contentArchiveEnabled)) return { state: 'content-disabled' };
     if (job?.schemaVersion === 2 && !privateCleanupEnabled) return { state: 'private-disabled' };
     if (!pending(request, identity)) {
       if (job && !terminalPhase(job.phase, job.schemaVersion)) transaction.update(jobRef, {
@@ -105,21 +114,21 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     if (job) {
       if (terminalPhase(job.phase, job.schemaVersion)) return { state: job.phase, hiddenCount: job.hiddenCount,
         ...(job.schemaVersion >= 2 ? { privateDeletedCount: job.privateDeletedCount } : {}),
-        ...(job.schemaVersion === 3 ? { archivedMessageCount: job.archivedMessageCount, archivedCommentCount: job.archivedCommentCount,
+        ...(job.schemaVersion >= 3 ? { archivedMessageCount: job.archivedMessageCount, archivedCommentCount: job.archivedCommentCount,
           archivedReactionCount: job.archivedReactionCount } : {}) };
       if (job.leaseUntil?.toMillis() > time.toMillis()) return { state: 'busy' };
       if (job.nextAttemptAt?.toMillis() > time.toMillis()) return { state: 'deferred' };
     }
-    const schemaVersion = job?.schemaVersion ?? (contentArchiveEnabled ? 3 : privateCleanupEnabled ? 2 : 1);
-    const privateData = schemaVersion >= 2 ? { workStage: job?.workStage ?? 'shouts',
+    const schemaVersion = job?.schemaVersion ?? (publicIdentityEnabled ? 4 : contentArchiveEnabled ? 3 : privateCleanupEnabled ? 2 : 1);
+    const privateData = schemaVersion >= 2 ? { workStage: job?.workStage ?? (schemaVersion === 4 ? 'identity' : 'shouts'),
       privateDeletedCount: job?.privateDeletedCount ?? 0,
       privatePreferencesDisabled: job?.privatePreferencesDisabled ?? false,
       shoutsHiddenAt: job?.shoutsHiddenAt ?? null } : {};
-    const contentData = schemaVersion === 3 ? { privateLeavesCleanedAt: job?.privateLeavesCleanedAt ?? null,
+    const contentData = schemaVersion >= 3 ? { privateLeavesCleanedAt: job?.privateLeavesCleanedAt ?? null,
       archivedMessageCount: job?.archivedMessageCount ?? 0, archivedCommentCount: job?.archivedCommentCount ?? 0,
       archivedReactionCount: job?.archivedReactionCount ?? 0, pendingArchiveId: job?.pendingArchiveId ?? null } : {};
     transaction.set(jobRef, {
-      ...contentData, ...privateData, schemaVersion, userId: identity.userId, requestCreateTime: identity.requestCreateTime,
+      ...contentData, ...privateData, ...(schemaVersion === 4 ? identityJobFields(job) : {}), schemaVersion, userId: identity.userId, requestCreateTime: identity.requestCreateTime,
       phase: job?.phase ?? 'waiting-auth', attempts: (job?.attempts ?? 0) + 1,
       hiddenCount: job?.hiddenCount ?? 0, createdAt: job?.createdAt ?? time, updatedAt: time,
       retainUntil: later(identity.requestCreateTime, retentionMillis),
@@ -127,6 +136,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
       lastErrorCode: null,
     });
     return { state: 'claimed', schemaVersion, private: privateData.workStage === 'private', workStage: privateData.workStage,
+      identity: schemaVersion === 4 && ['identity', 'logos'].includes(privateData.workStage),
       pendingArchiveId: contentData.pendingArchiveId, content: ['messages', 'comments', 'reactions'].includes(privateData.workStage) };
   });
   if (claim.state !== 'claimed') return claim;
@@ -155,7 +165,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   };
   const archiveTransactionGuard = async (transaction, change) => {
     const snapshot = await transaction.get(jobRef), time = now(), job = assertOwner(snapshot, time);
-    if (job.schemaVersion !== 3 || !['messages', 'comments', 'reactions'].includes(job.workStage)) throw new LeaseLost();
+    if (job.schemaVersion < 3 || !['messages', 'comments', 'reactions'].includes(job.workStage)) throw new LeaseLost();
     if (change.kind === 'check') return () => {};
     const updates = { phase: 'archiving-content', updatedAt: time };
     if (change.kind === 'archive-root') {
@@ -211,7 +221,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     transaction.update(jobRef, {
       ...(job.schemaVersion >= 2 && !claim.private && phase === 'cleaning-private'
         ? { workStage: 'private', shoutsHiddenAt: time } : {}),
-      ...(job.schemaVersion === 3 && claim.private && phase === 'archiving-content'
+      ...(job.schemaVersion >= 3 && claim.private && phase === 'archiving-content'
         ? { workStage: 'messages', privateLeavesCleanedAt: time } : {}),
       phase, updatedAt: time, leaseToken: null, leaseUntil: null, lastErrorCode,
       nextAttemptAt: terminalPhase(phase, job.schemaVersion) ? null : later(time, retryDelayMillis),
@@ -219,7 +229,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     });
     return { state: phase, hiddenCount: job.hiddenCount,
       ...(job.schemaVersion >= 2 ? { privateDeletedCount: job.privateDeletedCount } : {}),
-        ...(job.schemaVersion === 3 ? { archivedMessageCount: job.archivedMessageCount, archivedCommentCount: job.archivedCommentCount,
+        ...(job.schemaVersion >= 3 ? { archivedMessageCount: job.archivedMessageCount, archivedCommentCount: job.archivedCommentCount,
           archivedReactionCount: job.archivedReactionCount } : {}) };
   });
   let result;
@@ -228,17 +238,18 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
       clock, transactionGuard: async transaction => { assertOwner(await transaction.get(jobRef), now()); },
     }) : null;
     result = confirmation?.state === 'waiting-for-auth-deletion' ? confirmation
+      : claim.identity ? await runAccountIdentitySlice(identity, db, invocationAuth, { jobRef, bucket: logoBucket, clock, pageSize, assertOwner })
       : claim.content ? await contentSlice() : claim.private ? await cleanupAccountPrivatePage(identity, db, invocationAuth, {
       pageSize, beforeCommit: beforePrivateCommit, transactionGuard: privateTransactionGuard,
     }) : await hideDeletedAuthAccountShoutsPage(db, invocationAuth, identity.userId, {
       pageSize, indexWriter, beforeTransaction, transactionGuard, expectedRequestCreateTime: identity.requestCreateTime,
     });
   } catch (error) {
-    if (error instanceof LeaseLost) return { state: 'lease-lost' };
+    if (error instanceof LeaseLost || error instanceof AccountIdentityJobLeaseLost) return { state: 'lease-lost' };
     try {
       if (error instanceof AccountDeletionRequestUnavailable) return await finish('obsolete');
-      const permanent = error instanceof AccountDeletionConfirmationNeedsReview || error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
-        'permission-denied', 'invalid-argument', 'failed-precondition', 3, 7, 9].includes(error?.code);
+      const permanent = error instanceof AccountIdentityJobNeedsReview || error instanceof AccountPublicIdentityNeedsReview || error instanceof AccountLogoRevocationNeedsReview || error instanceof AccountDeletionConfirmationNeedsReview || error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
+        'permission-denied', 'invalid-argument', 'failed-precondition', 3, 7, 9, 403].includes(error?.code);
       const expired = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis;
       const result = await finish(permanent || expired ? 'needs-review' : 'retry', 'processing-failed');
       if (result.state === 'needs-review' || result.state === 'obsolete') return result;
@@ -248,8 +259,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     }
     throw error;
   }
-  let phase = claim.content ? result.state
-    : claim.private ? result.state === 'private-leaves-cleaned' ? claim.schemaVersion === 3 ? 'archiving-content' : 'private-leaves-cleaned' : 'cleaning-private'
+  let phase = claim.identity ? result.state === 'logos-revoked' ? 'hiding-shouts' : 'revoking-logos' : claim.content ? result.state
+    : claim.private ? result.state === 'private-leaves-cleaned' ? claim.schemaVersion >= 3 ? 'archiving-content' : 'private-leaves-cleaned' : 'cleaning-private'
     : result.state === 'shouts-hidden' ? claim.schemaVersion >= 2 ? 'cleaning-private' : 'shouts-hidden' : 'hiding-shouts';
   if (result.state === 'waiting-for-auth-deletion') {
     phase = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis ? 'needs-review' : 'waiting-auth';

@@ -105,3 +105,12 @@ test('inventory uses only the exact owner prefix, explicit page and cursor; unex
   f.bucket.getFiles = async () => [[{ name: 'businessLogos/another/logo-1.png' }]];
   await assert.rejects(listDeletedAccountLogos(f.identity, f.db, f.auth, f.bucket, options), /unexpected-logo-path/);
 });
+test('inventory rejects duplicate/oversized pages and malformed cursors before checkpointing', async () => {
+  const f = fixture(), list = options => listDeletedAccountLogos(f.identity, f.db, f.auth, f.bucket, { ...f.options, ...options });
+  f.bucket.getFiles = async () => [[{ name: f.path }, { name: f.path }]];
+  await assert.rejects(list({ pageSize: 50 }), /unexpected-logo-page/);
+  f.bucket.getFiles = async () => [[{ name: f.path }, { name: 'businessLogos/owner/logo-2.png' }]];
+  await assert.rejects(list({ pageSize: 1 }), /unexpected-logo-page/);
+  f.bucket.getFiles = async () => [[{ name: f.path }], { pageToken: 123 }];
+  await assert.rejects(list({ pageSize: 50 }), /unexpected-logo-page/);
+});

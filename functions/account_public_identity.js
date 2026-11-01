@@ -1,4 +1,4 @@
-// Local preparation only: no Function export and no account-job integration.
+// Internal identity phase helper; no standalone Function export.
 import { Timestamp } from 'firebase-admin/firestore';
 import { AccountDeletionRequestUnavailable } from './account_shout_hiding.js';
 
