@@ -24,17 +24,19 @@ jsou lokální prototyp. Osm Storage a osm cílených profilových testů prošl
 241 úplných Flutter testů, 94 serverových unit (182 emulator-only skip),
 35 tools a analyzátor/lint prošly. Plná emulátorová sada měla 261/261 pass;
 po dodatečném zpevnění neměnnosti markeru prošla celá Rules sada 73/73.
-CI a5280f1 (41327636336) i 58e2ffd (41328069561) prošla včetně 262 Rules/server
-a 8 Storage případů. Poslední klientské zpevnění zachycuje marker i s chybou
-streamu před následujícím snímkem; jeho konečné CI se ověří pro výsledný commit.
-Důkazy v TESTING.md.
+Konečný zdroj da264992945f694fd68ed95f83a5fb757044b443 má
+[CI 41328636468 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41328636468),
+včetně 241 Flutter, 262 Rules/server a 8 Storage případů, unit/tools,
+analyzátoru/lintu a web buildu. Lokální úsek je uzavřený, commitnutý a pushnutý;
+žádný živý rollout neproběhl. Důkaz: build/public-identity-ci-final-proof.json
+a build/public-identity-ci-success.log; podrobnosti v TESTING.md.
 
 Před živým napojením chybí revokace dříve vydaných tokenových URL loga
 (emulátor doložil, že samotná Rules nestačí), ochrana důvěryhodných Admin SDK
 zapisovačů proti obnovení profilu a návrh integrace jobu včetně potvrzeného
 stavu mazání odolného vůči starému Auth tokenu/odstranění pending žádosti.
-Soukromá/Business
-identita, role, fyzický 60denní purge a klientský cutover zůstávají otevřené.
+Soukromá/Business identita, role, fyzický 60denní purge a klientský cutover
+zůstávají otevřené.
 Celý účtový milník ani MVP metriky se lokálním prototypem neuzavírají.
 
 ## Dokončený předchozí úsek – archiv všech zpráv a komentářů

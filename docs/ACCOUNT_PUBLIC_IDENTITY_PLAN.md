@@ -123,5 +123,9 @@ bezpečnostní kontrolu podle MVP_SERVER_PLAN.
 Lokální výsledky: 241 Flutter, 94 serverových unit (182 emulator-only skip),
 35 tools, osm Storage případů a analyzátor/lint bez chyby. Plná Rules/server
 sada 261/261 prošla; po doplnění nezměnitelnosti markeru prošla znovu celá
-Rules sada 73/73. Konečný CI výsledek bude evidovaný pro přesný commit v
-[aktuálním stavu](PROJECT_STATUS.md) a [testovací evidenci](TESTING.md).
+Rules sada 73/73. Lokální úsek je dokončený, zdroj
+da264992945f694fd68ed95f83a5fb757044b443 má
+[CI 41328636468 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41328636468)
+včetně 241 Flutter, 262 Rules/server a 8 Storage případů, unit/tools a buildu.
+Živě není zapojený ani nasazený; uvedené integrační brány zůstávají otevřené.
+[Aktuální stav](PROJECT_STATUS.md), [testovací evidence](TESTING.md).

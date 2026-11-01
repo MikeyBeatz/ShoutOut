@@ -24,9 +24,9 @@ Tato etapa nemá živý rollout ani nové testovací Auth účty.
   nových integračních případů pro vlastnictví, Auth, původní deadline,
   replay, lease/rollback a ztracené potvrzení transakce.
 - Po doplnění ochrany markeru i bez pending žádosti prošla samostatná úplná
-  Rules sada 73/73. CI a5280f1 (41327636336) a 58e2ffd (41328069561) mají
-  úspěch včetně 262 Rules/server a 8 Storage případů; poslední klientské
-  zpevnění čeká na konečné CI svého přesného commitu.
+  Rules sada 73/73. Konečný commit da264992945f694fd68ed95f83a5fb757044b443
+  má [CI 41328636468 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41328636468):
+  241 Flutter, 262 Rules/server, 8 Storage, unit/tools, analyzátor/lint i build.
 - Osm Storage případů v izolovaném Firestore+Storage emulátoru prošlo:
   aktivní/legacy čtení zachované, marker blokuje SDK čtení i starý owner token
   pro přepis/mazání či metadata s novým tokenem, všechny role 1–6 bez výjimky,
@@ -37,6 +37,8 @@ Tato etapa nemá živý rollout ani nové testovací Auth účty.
 Logy build/public-identity-{flutter-final,widget-final,analyze-final,functions-unit,
 lint,tools,rules-full,firestore-rules-final,storage-final}.log; inventář dotazů
 build/public-identity-query-inventory.txt. Měření nejsou cloudová latence,
+Finální CI metadata a log: build/public-identity-ci-final-proof.json,
+build/public-identity-ci-success.log.
 účtované čtení ani důkaz živého nasazení. Rules jsou cílený lokální prototyp,
 před veřejným vydáním patří do celkové bezpečnostní kontroly.
 

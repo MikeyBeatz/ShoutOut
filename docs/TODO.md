@@ -73,7 +73,9 @@ a audit. Testovací data uklizená, původní žádost nezměněná.
 [Archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) je uzavřený.
 Další krok: identita/přezdívka, konečná retence a klientský cutover.
 Veřejná část identity má schválený [lokální prototyp](ACCOUNT_PUBLIC_IDENTITY_PLAN.md):
-marker, rezervace a anonymní klient. Není zapojený do workeru ani nasazený;
+marker, rezervace a anonymní klient. Lokální úsek je uzavřený: da26499,
+CI 41328636468 success (241 Flutter, 262 Rules/server, 8 Storage).
+Není zapojený do workeru ani nasazený;
 před integrací vyřešit tokenové URL loga a důvěryhodné zapisovače profilů.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
