@@ -108,8 +108,8 @@ a bezpečné pořadí pozdějšího fyzického smazání loga před odstranění
 Tři prověřené Admin SDK zapisovače veřejné/Business identity a rolí mají
 novou schválenou [lokální ochranu](#admin-write-guards). Nástroje nad živými
 daty spuštěné nebyly a nejde o ochranu libovolného jiného Admin SDK kódu.
-Integrace také musí vyřešit starý Auth token a odvolání pending žádosti po
-potvrzeném odstranění Auth; samotný veřejný marker není obecná serverová
+Navazující serverová konfirmace (viz níže) chrání pending žádost před
+odvoláním starým Auth tokenem po potvrzení. Samotný veřejný marker není obecná serverová
 eligibility kontrola všech soukromých a obsahových zápisů.
 Rozšíření jobu, migrace jeho starých verzí, nový datový/Auth
 pilot a politika veřejného markeru po dočištění nejsou tímto schválené.
@@ -177,8 +177,9 @@ commitnutý a pushnutý. [CI 41347854953 success](https://github.com/MikeyBeatz/
 ověřilo celou sadu včetně 284 Rules/server případů a web buildu;
 úplné výsledky a důkazy jsou v [TESTING](TESTING.md).
 
-Zbývají cloudové ověření [lokální revokace URL loga](#logo-url-revocation), nezrušitelný potvrzený stav mazání,
-integrace jobu a ostatní osobní/Business data, role, fyzický purge a klientský
+Cloudové ověření [revokace URL loga](#logo-url-revocation) a serverová konfirmace
+jsou popsané v navazujících oddílech. Zbývají integrace identity/loga do jobu,
+ostatní osobní/Business data, role, fyzický purge a klientský
 cutover. Ochrana těchto tří nástrojů sama účtový milník neuzavírá.
 
 <a id="logo-url-revocation"></a>
@@ -254,10 +255,11 @@ build/logo-dev-live-proof.json. Brána skutečné Storage revokace je uzavřená
 byly pro testovací bucket/objekty ověřené jen v uvedeném rozsahu: versioning je
 vypnuté, anonymní přístup k fixture bez tokenu 403. IAM/ACL existujících starých
 objektů se neskenovaly; soupis běžných objektů nedokládá revokaci historických verzí.
-Zůstává také brána nezrušitelného potvrzeného stavu: Firestore transakce
-a Storage patch netvoří jednu atomickou operaci. Změnu mezi kontrolou a patchem
-lze zjistit při potvrzení, nelze tím vrátit již odstraněný token; právě proto
-prototyp ještě nesmí řídit živý worker ani uzavírat account job.
+Serverový potvrzený stav je doplněný v následující etapě. Firestore transakce
+a Storage patch nadále netvoří jednu atomickou operaci: integrace musí spojit
+revokaci s konfirmací původní žádosti, lease a trvalým průběhem jobu. Změnu
+mezi kontrolou a patchem lze zjistit, nelze tím vrátit již odstraněný token.
+Samostatný lab adaptér proto ještě neřídí živý worker ani neuzavírá account job.
 
 Existující upload používá public,max-age=31536000,immutable. Odvolání tokenu
 nevymaže dříve staženou kopii ani již uloženou prohlížečovou/proxy cache.
@@ -303,14 +305,27 @@ jednoho Auth lookupu na dávku a replay beze změny request updateTime.
 Prototyp Rules vyžaduje před širokým veřejným spuštěním i celkovou kontrolu
 podle MVP_SERVER_PLAN; cílené testy nejsou audit celé aplikace.
 
-Rollout po přesném úspěšném CI: nejprve firestore:rules pouze do
+Provedený rollout po přesném úspěšném CI e4dd199ede6345501c9fe3512007c3f1b852a910
+([41356429637 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41356429637)):
+nejprve firestore:rules pouze do
 shoutout-dev-46c81 (včetně dříve ověřené neměnnosti markeru a odmítnutí nového
 follow smazanému profilu), potom obě stávající účtové Functions s novým
-helperem. Žádné indexes/TTL, Hosting, Storage Rules, produkce ani main.
+helperem. Obě ACTIVE, hash 090f03a9ddc0e8e269bf1f36b704eefb964192e9;
+Ruleset 64eb5312-5774-4238-9908-c467a1e58e76 má ověřenou shodu zdroje.
+Ostatních 11 Functions v regionu, Hosting a konfigurace Scheduleru jsou proti
+výchozímu stavu beze změny. Žádné indexes/TTL, Hosting, Storage Rules, produkce ani main.
 Dosavadní europe-west3, max 1, concurrency 1, 256 MiB, 60 s a cron každou minutu
-zůstávají. Následuje nový syntetický DEV request/profil bez nového Auth účtu,
-ověření automatického potvrzení a dokončení v3 a úklid pouze jeho dat.
-Původní žádosti/job a cizí data mají být porovnané proti výchozím digestům.
+zůstávají. Nový syntetický DEV request/profil bez nového Auth účtu automaticky
+prošel potvrzením → cleaning-private → archiving-content → content-archived
+přes nezměněný minutový plánovač. Timestamp ani původní retenční deadline se
+neměnily. Testovací request/job/profil/podkolekce jsou uklizené; původní žádost
+a inventura requests/jobs/archive mají původní digests. Nejde o nový test
+obsahové archivace s texty; ta má předchozí vlastní DEV důkaz i nynější v3 regresi.
+Důkazy: build/confirmation-{baseline,deployed-proof,live-proof,cleanup-proof}.json,
+build/confirmation-artifact-proof.json, build/account-confirmation-ci-proof.json.
+DEV konfirmace je uzavřená. Ochrana starého tokenu je prokázaná skutečnými
+emulátorovými Rules scénáři a shodou nasazených Rules; živý test nepřihlašoval
+smazaný účet ani nevytvářel další Auth účet.
 
 Zbývá klientský cutover: při ztracené odpovědi Auth a rollbacku dříve, než
 server potvrdí odstranění, se může původní žádost ještě zrušit. Tato ochrana

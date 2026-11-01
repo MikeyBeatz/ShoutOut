@@ -240,9 +240,17 @@ do dokončení ostatních obsahových operací a koordinovaného přepnutí klie
 V DEV je od 31. října aktivní oddělená codebase account-deletion: Firestore
 událost založí soukromý pracovní průběh, plánovač po minutě obnovuje nejvýše
 jednu žádost/50 Shoutů. Auth účet musí být odstraněný; zámek a průběh se ověřují
-při každé zdrojové transakci. Živý pilot čekání → skrytí 3/3 → replay a úklid
-prošel. Stará klientská cesta ještě existuje; soukromá data a 60denní dokončení
-zůstávají otevřené. [Aktuální rozsah a provoz](ACCOUNT_DELETION_DEV_PROPOSAL.md).
+při každé zdrojové transakci. V3 zahrnuje vlastní nepotřebné soukromé položky
+a neveřejný 60denní archiv všech zahrnutých zpráv/komentářů a jejich reakcí.
+Od e4dd199 worker před novou destruktivní dávkou ukládá po Auth user-not-found
+serverový authDeletionConfirmedAt do původní žádosti ve stejné transakci jako
+kontrolu lease. Rules po potvrzení nepovolí klientský rollback; před ním zůstává
+původní desetiminutové okno. Status, createTime a původní retenční termín se
+nemění. Dokončené joby se znovu neotevírají.
+Stará klientská cesta ještě existuje; integrace veřejné identity/loga, zbývající
+osobní data a fyzické 60denní dokončení jsou otevřené.
+[Aktuální rozsah a provoz](ACCOUNT_DELETION_REMAINING_PLAN.md),
+[konfirmace a její hranice](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 
 Klient je považován za nedůvěryhodný. Základní pravidla:
 

@@ -90,8 +90,11 @@ Emulátor zachovává tokeny a ignoruje verzovací podmínky; krok to rozpozná
 a nepotvrdí dokončení. Následný skutečný DEV Storage test z 8c915db po
 CI 41355437130 success ověřil revokaci 200 → 403, obě kolize 412, replay,
 zachování bytes/metadat i úklid 4/4 objektů; tato cloudová brána je uzavřená.
-Serverové potvrzení Auth mazání má připravené jádro/DEV aktivaci a Rules,
-50 cílených emulátorových scénářů i lint prošly; přesný CI a rollout následují.
+Serverové potvrzení Auth mazání je z e4dd199 po CI 41356429637 success
+nasazené do DEV (Rules a dvě stávající Functions); 295 Rules/server případů
+a ostatní CI kontroly prošly. Živě automatické potvrzení → soukromý úklid →
+content-archived, stabilní timestamp/deadline a úklid testu; původní žádost
+i výchozí inventura nezměněné. Tato DEV ochrana je uzavřená.
 Identita/loga ještě nejsou zapojené do workeru.
 [Podrobnosti](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).

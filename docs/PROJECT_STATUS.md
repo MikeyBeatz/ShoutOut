@@ -8,7 +8,7 @@ Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
 
 ## Aktuální úsek – nezrušitelná serverová konfirmace Auth mazání
 
-Připravený worker za DEV přepínačem confirmAuthDeletionEnabled před první
+DEV worker za přepínačem confirmAuthDeletionEnabled před první
 destruktivní operací transakčně ověří původní žádost i lease a po skutečném
 Auth user-not-found přidá serverový Timestamp authDeletionConfirmedAt.
 Původní status pending, createTime, retenční deadline i verze jobů zůstávají.
@@ -19,9 +19,28 @@ Dokončené joby se znovu neotvírají; žádné nové prostředky či časován
 
 50 cílených emulátorových testů a lint prošly, včetně obou pořadí souběhu,
 v1/v2/v3 regresí, celého v3 průchodu a zachování původního deadline.
-Připravuje se přesný commit/CI a cílený DEV rollout Rules a dvou účtových
-Functions; zatím není provedený. Hosting, Storage Rules a produkce se nemění.
+Zdroj e4dd199ede6345501c9fe3512007c3f1b852a910 má
+[CI 41356429637 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41356429637):
+241 Flutter, 37 tools, 106 serverových unit (191 emulator-only skip),
+295 Rules/server, 14 Storage, analýza/lint a web build.
+Rules i obě účtové Functions jsou nasazené pouze v shoutout-dev-46c81.
+Obě ACTIVE, source hash 090f03a9ddc0e8e269bf1f36b704eefb964192e9,
+revize accountdeletionrequestcreateddev-00005-jol a resumeaccountdeletionjobsdev-00005-bib.
+Ruleset 64eb5312-5774-4238-9908-c467a1e58e76 má ověřenou shodu zdroje.
+Ostatních 11 regionálních Functions, Hosting a Scheduler konfigurace jsou
+porovnané beze změny; max 1/concurrency 1/256 MiB/60 s/Node 22 zachované.
+Živá syntetická žádost bez nového Auth účtu automaticky prošla potvrzením,
+cleaning-private → archiving-content → content-archived přes původní cron.
+Timestamp a původní retenční termín stabilní; testovací data uklizená,
+původní žádost a inventura requests/jobs/archive mají nezměněné digests.
+Úsek je uzavřený v DEV. Důkazy: build/confirmation-live-proof.json,
+build/confirmation-cleanup-proof.json a další nasazovací/CI důkazy v TESTING.md.
+Hosting, Storage Rules, indexy/TTL a produkce se nemění.
 [Rozsah a zbývající riziko klientského rollbacku](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
+
+Další krok: společná worker fáze pro veřejný marker, vlastní rezervaci
+přezdívky a revokaci loga. Tyto helpery ještě nejsou v živém jobu. Potom
+zbývají ostatní osobní/Business data, role, konečný 60denní purge a klientský cutover.
 
 ## Dokončený úsek – izolované ověření na DEV Storage
 
@@ -59,9 +78,10 @@ bez skipů (8 původních a 6 nových). Zdroj c62e7b5d82b04218fa857e034b6e2ecd59
 je commitnutý a pushnutý; [CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582)
 ověřilo 241 Flutter, 37 tools, 105 serverových unit (188 emulator-only skip),
 284 Rules/server a 14 Storage případů, analýzu/lint i web build.
-Schválená lokální příprava je uzavřená; cloudová revokace ani worker nejsou ověřené.
+Schválená lokální příprava je uzavřená; navazující skutečný DEV důkaz je výše.
 [Rozsah, výsledky a zbývající brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).
-DEV zůstává na 1dab78c; živé prostředí, joby a MVP metriky se nemění.
+Samotný lokální úsek živé prostředí nezměnil; aktuální nasazení je uvedené výše.
+MVP metriky se podkroky nemění.
 
 ## Dokončený předchozí úsek – ochrana tří Admin SDK zapisovačů, pouze lokálně
 
@@ -90,7 +110,8 @@ zachování vlastní přezdívky do původního serverového deadline +60 dní a
 ochranu SDK čtení loga. [Přesný rozsah, schéma a brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
 Jádro a lab adaptér nejsou v žádném deploy balíku ani entry pointu.
 Žádný worker/job, živá data, Auth účty, Hosting ani Rules se v této etapě nemění.
-DEV nadále běží na archivní verzi 1dab78c podle následujícího oddílu.
+DEV Hosting nadále běží na archivní verzi 1dab78c; účtový worker má navazující
+konfirmaci z e4dd199 podle aktuálního oddílu výše.
 
 Lokálně implementované: minimální publicProfiles marker, transakční caller fence,
 ochrana cizí rezervace, replay a původní deadline; klientská anonymizace a

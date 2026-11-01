@@ -33,7 +33,24 @@ Test ztraceného potvrzení privátního delete nově cílí na konkrétní ulo�
 progress, nikoli pořadové číslo transakce. Jeho očekávání dat/počtů se nemění.
 Logy build/account-confirmation-emulator-final.log a
 build/account-confirmation-rules-final.log; přehled dotazů/cest v
-build/account-confirmation-rules-inventory.txt. CI a rollout ještě následují.
+build/account-confirmation-rules-inventory.txt.
+Zdroj e4dd199ede6345501c9fe3512007c3f1b852a910 má
+[CI 41356429637 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41356429637):
+241 Flutter, 37 tools, 106 unit (191 emulator-only skip), 295 Rules/server,
+14 Storage, analýza/lint a web build. Metadata/log:
+build/account-confirmation-ci-proof.json, build/account-confirmation-ci-success.log.
+Nasazené DEV Rules i dvě Functions mají ověřenou shodu zdroje/nové ACTIVE
+revize a zachované limity; ostatních 11 regionálních Functions, Hosting a
+Scheduler konfigurace beze změny. Důkazy: build/confirmation-baseline.json,
+build/confirmation-deployed-proof.json, build/confirmation-artifact-proof.json.
+Živá syntetická žádost bez nového Auth účtu automaticky prošla uložením
+potvrzení a cronem cleaning-private → archiving-content → content-archived.
+Timestamp i deadline stabilní, testovací data uklizená a původní žádost i
+inventura requests/jobs/archive mají nezměněné digests. Další důkazy:
+build/confirmation-live-proof.json a build/confirmation-cleanup-proof.json.
+Nejde o další živý test textové archivace či přihlášení starým smazaným
+Auth tokenem; starý token pokrývají skutečné Rules emulátorové testy a ověření
+shody nasazeného zdroje. Úsek je uzavřený v DEV.
 Celková bezpečnostní kontrola Rules zůstává samostatnou MVP bránou.
 
 ## Tokenová URL Business loga – lokální prototyp 1. listopadu
