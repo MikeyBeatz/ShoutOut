@@ -66,10 +66,12 @@ Verzovaná soukromá fáze account jobu je hotová v DEV: aktivace 6a4606e, CI
 [Důkazy DEV pilotu](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
 Rozhodnutí 1. listopadu: neveřejně uchovat všechny zahrnuté zprávy/komentáře
 60 dní, bez ohledu na nahlášení. V3 job a auditovaný fallback pro nahlášený
-komentář jsou nyní lokálně připravené, nové flagy false. Prošlo 235 Flutter,
-249 Rules/server a 92 unit testů. Commit f0625b5 má CI 41320353170 success,
-čisté Functions artefakty a DEV web build jsou ověřené. Další krok: schválený
-[archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md), poté konečná retence.
+komentář jsou dokončené v DEV: aktivace 1dab78c, CI 41322524612 success,
+235 Flutter, 249 Rules/server a 92 unit testů. Živě ověřeno 2 zprávy,
+1 komentář, 3 reakce, zachování cizího obsahu, čítač, replay, moderační detail
+a audit. Testovací data uklizená, původní žádost nezměněná.
+[Archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) je uzavřený.
+Další krok: identita/přezdívka, konečná retence a klientský cutover.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 
@@ -103,13 +105,14 @@ Metriky ani rozsah MVP se tím nemění.
    jsou lokálně ověřené (99 cílených account/job/Rules případů).
    [DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md) schválený a dokončený: obě Functions
    ACTIVE, plán každou minutu, živě ověřené čekání na Auth a následné skrytí 3/3,
-   replay, soukromost a úklid. Zbývají soukromá data, přezdívka, konečná retence
+   replay, soukromost a úklid. Zbývají identita, přezdívka, konečná retence
    a klientské napojení; celý účtový milník se tím ještě neuzavírá.
    [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
    a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
    1. listopadu. Vlastní privátní seznamy mají dokončenou DEV v2 fázi jobu
-   z 6a4606e po CI 41300216738, včetně živého testu a úklidu. Další krok:
-   rozsah retence textů a archiv zpráv, pak konečné dočištění.
+   z 6a4606e po CI 41300216738. Archiv zpráv, komentářů a reakcí má dokončenou
+   DEV v3 fázi z 1dab78c po CI 41322524612, včetně živého testu, moderace a úklidu.
+   Další krok: identita/rezervace přezdívky, konečné dočištění a klientský cutover.
    Staré v1 joby zůstávají beze změny.
    Konečné smazání účtu stále není dokončené.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.

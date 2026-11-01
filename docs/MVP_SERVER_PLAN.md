@@ -196,8 +196,11 @@ Hotovo, když integrační test pokryje běžnou žádost, opakované spuštěn�
 Dílčí stav 1. listopadu: DEV v2 job má živě ověřené skrytí Shoutů a odstranění
 vlastních notifications/following/blocked, zachování profilu/legal a minimalizaci
 notification preferencí na false. Aktivace 6a4606e po CI 41300216738, replay a
-úklid testu prošly. Celý milník zůstává otevřený kvůli textům/komentářům,
-identitě/přezdívce, konečnému 60dennímu úklidu a klientskému cutoveru.
+úklid testu prošly. Navazující DEV v3 archiv je také hotový: aktivace 1dab78c
+po CI 41322524612, živě 2 zprávy, 1 komentář a 3 reakce, přesný commentsCount,
+cizí obsah zachovaný, moderační zobrazení/audit i úklid fixture ověřené.
+Celý milník zůstává otevřený kvůli identitě/přezdívce, konečnému 60dennímu
+úklidu a klientskému cutoveru. Staré joby se nepřeváděly.
 [Důkazy a navazující rozhodnutí](ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

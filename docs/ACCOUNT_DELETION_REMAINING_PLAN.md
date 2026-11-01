@@ -41,7 +41,7 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
 | Vlastní nepotřebné soukromé podkolekce | DEV dokončeno z 6a4606e po CI 41300216738 | Živě waiting-auth 0/0 → 3 skryté Shouty → 4 odstraněné vlastní položky, zachovaný profil/legal, replay a úklid. Staré joby se nemigrují. |
-| Soukromé zprávy a veřejné komentáře účtu | V3 lokálně implementovaná, nové flagy false | CI, cílený indexový rozdíl a samostatný schválený archivní pilot; [schéma a postup](ACCOUNT_CONTENT_ARCHIVE_PLAN.md). |
+| Soukromé zprávy a veřejné komentáře účtu | DEV dokončeno, v3 aktivní z 1dab78c po CI 41322524612 | Živě 2 zprávy, 1 komentář a 3 reakce, cizí obsah zachovaný, čítač/replay/moderační audit a úklid; [důkazy a postup](ACCOUNT_CONTENT_ARCHIVE_PLAN.md). |
 | Identita, rezervace přezdívky a zbývající osobní data | Částečně rozhodnuto, implementace zbývá | Minimální retenční údaje, správné odkazy/fallbacky, uvolnění pouze vlastní rezervace po lhůtě. |
 | Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí a Storage, vypořádání hlášení/holdů, audit a test přesné hranice. |
 | Klient a uzavření přímých zápisů | Zbývá | Nový tok od začátku do konce, ověření přerušené sítě, teprve pak Rules cutover. |
@@ -113,7 +113,9 @@ Neznámá nastavení či vnořená data přejdou hned do needs-review a zachovaj
 Prázdná potvrzovací stránka ukončí tuto část jako private-leaves-cleaned;
 nejde o dokončené smazání celého účtu ani o provedený 60denní úklid.
 
-Nové joby dostanou schemaVersion 2 pouze při privateCleanupEnabled=true.
+V původní privátní fázi nové joby dostávaly schemaVersion 2 při privateCleanupEnabled=true.
+Aktuální DEV má navíc contentArchiveEnabled=true a vytváří v3 podle
+[archivního protokolu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md); existující v2 se nepřevádějí.
 Dosavadní joby verze 1 zůstanou verzí 1, včetně dokončených shouts-hidden;
 nezmění se jim identita, průběh ani deadline. Jejich pozdější převod bude mít
 vlastní kontrolovaný plán. Vypnutí flagu v kódu, který už verzi 2 zná, ji
@@ -199,38 +201,34 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
   skutečnými dvěma účastníky, nikoli každou zprávu pod jeho Shoutem. Současné
   participant Rules dovolí druhému účastníkovi číst existující zdroj i po
   vzniku cizí deletion žádosti; vyčištění vlastní schránky toto neřeší.
-- firestore.indexes.json zatím nemá collection-group index pro privateReplies.
-  Globální hledání zpráv podle účastníka vyžaduje předem ověřit index/náklady
-  a historickou validitu dat; nepředpokládat, že vlastní index kolekce postačí.
-  Komentáře už mají collection-group authorId index v repozitáři, živý stav
-  je nutné samostatně ověřit před použitím.
+- Cílené collection-group authorId/recipientId indexy privateReplies jsou
+  po schváleném pilotu READY v DEV, comments.authorId CG také READY.
+  Všech 97 původních komentářů prošlo read-only kontrolou schématu, původních
+  soukromých zpráv bylo 0. Nebyl plošný backfill ani změna TTL.
 - createContentReport už kopíruje text a authorId soukromé zprávy do
   privateReplyReports. U veřejného komentáře commentReports ukládá jen ID,
   důvod a stav: fyzické smazání zdroje by bez doplnění podkladu ztratilo text.
-  Stávající deleteComment také neodstraňuje reakční podkolekce. Budoucí fáze
-  musí vyřešit oba případy, atomický commentsCount i idempotentní přenos.
-- Moderační _ReportDetailDialogState._load v lib/src/moderation.dart nejprve
-  vyžaduje existující Shout i pro soukromé hlášení se snapshotem. Samotné
-  uchování textu tedy nezaručuje dostupnost důkazu po odstranění Shoutu;
-  moderační fallback patří do téhož následujícího úseku.
+  Samostatné deleteComment stále není průběžný archiv všech smazání aktivního
+  účtu. Účtový v3 worker už kopíruje existující komentář/reakce s atomickým
+  commentsCount a má auditovaný serverový fallback pro nahlášený komentář.
+- _ReportDetailDialogState._load už dovoluje nahlášený komentář ze serverového
+  archivu i soukromé hlášení se snapshotem bez nadřazeného Shoutu.
+  Komentářový fallback byl živě ověřený účtem TestModerator, vznikl 1 audit.
 - Rozsah textů je rozhodnutý: uchovat všechny podle doplnění výše.
   Samostatně zůstává rozhodnutí o existujícím otevřeném hlášení/hold po
-  uplynutí lhůty. Místní příprava archivu nemění živou retenci ani indexy.
+  uplynutí lhůty. DEV archiv už je živě ověřený; konečný fyzický purge zbývá.
 
 ## Další větší úsek
 
 1. Privátní fáze je hotová ve vývoji včetně CI, živého testu a úklidu.
    Dosavadní v1 shouts-hidden záznamy zachovat;
    případnou migraci připravit odděleně.
-2. Dokončit CI a schválit [připravený archivní pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
-   Lokální kód už provádí interní archiv a atomické odstranění původních soukromých zpráv,
-   kde je účet jedním z účastníků; zachovat podklady reportů pouze interně.
-   Nezahrnout svévolně konverzace dvou jiných lidí jen podle vlastníka Shoutu.
-3. Obdobně skrýt vlastní veřejné komentáře a přesně jednou upravit commentsCount;
-   samotný filtr v UI není přístupová ochrana ani odstranění podkolekcí.
-4. Vyřešit veřejný profil, historické kopie jména, Business profil/logo, role a
+2. [Archivní pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) je dokončený v DEV včetně
+   CI, příchozích/odchozích zpráv, vlastních komentářů/reakcí, přesného čítače,
+   moderačního lookupu/auditu, zachování cizích konverzací a úklidu fixture.
+3. Vyřešit veřejný profil, historické kopie jména, Business profil/logo, role a
    sociální odkazy. Nepovažovat smazání rodiče ve Firestore za smazání jeho potomků.
-5. Dopsat přesný rozsah nezbytných retenčních záznamů a konečné odstranění po
+4. Dopsat přesný rozsah nezbytných retenčních záznamů a konečné odstranění po
    60 dnech včetně vlastnické kontroly přezdívky. Vztah k reportům a případným
    právním holdům musí být rozhodnutý, ne nahrazený novou neomezenou retencí.
 

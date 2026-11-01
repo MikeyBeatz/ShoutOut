@@ -129,7 +129,8 @@ samostatný návrh obnovy původních potvrzení a schválení; není rutinní r
 Nové rozhodnutí vlastníka uchovává všechny zahrnuté zprávy a komentáře 60 dní.
 Lokálně připravený archiv, omezený auditovaný lookup nahlášeného komentáře,
 nové indexy a Rules jsou popsané v [archivním plánu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
-contentArchiveEnabled i klientský serverArchivedReportLookup zůstávají false.
+V DEV jsou po schváleném pilotu contentArchiveEnabled i klientský
+serverArchivedReportLookup true; produkce se neměnila.
 
 Po přerušení práce byl poslední úplný Flutter log neúspěšný kvůli chybnému
 odkazu targetSnapshot v jiném handleru moderace. Odkaz je opravený, analyzátor
@@ -160,12 +161,35 @@ Commit f0625b527ed2660ffa538d26497fc827d427b69f má úspěšné
 [CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170).
 Čistý detached worktree stejného SHA: DEV web build prošel, account/content
 balíky obsahují 7/19 JS modulů, shodují se s Git zdroji a jejich importy se
-načetly. Nové flagy jsou stále false. Důkaz a SHA-256 balíků:
-build/account-content-artifact-proof.json. Žádný archivní rollout neproběhl.
-Připravený kód ještě není důkaz nasazení. Před živým archivem je nutný
-odsouhlasený datový/indexový pilot a skutečné ověření App Check/moderačního
-detailu. Nová Rules jsou cílený lokální návrh; před veřejným vydáním dál patří
-do celkové bezpečnostní kontroly podle MVP_SERVER_PLAN.
+načetly. V tomto přípravném commitu byly oba nové flagy false. Důkaz:
+build/account-content-artifact-proof.json.
+
+Aktivace 1dab78cce583899648f8e17d6814a0ecbfc6aad8 má
+[CI 41322524612 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41322524612):
+235 Flutter, 35 tools, 92 unit (171 emulator-only skip), 249/249 Rules/server,
+analyzátor, lint a web build. Při aktivaci opravené historické v2 fixture a
+izolované App Check konfigurace mají navíc úplnou Flutter sadu, tools/unit a
+39 job scénářů lokálně. Prázdná index exemption z REST odpovědi je ověřená plannerem.
+
+Schválený živý DEV pilot prošel: waiting-auth bez změn, po odstranění jen
+fixture Auth plánovač skryl 3 Shouty, odstranil 4 privátní položky, archivoval
+2 zprávy, 1 komentář a 3 reakce; cizí obsah zachovaný, commentsCount 2 → 1,
+deadline původní žádost + 60 dní a replay beze změny. TestModerator zobrazil
+archivovaný text v aplikaci, vznikl jeden audit bez textu; bez postihu/rozhodnutí.
+Po prázdné obrazovce při automatickém reloadu pomohlo ruční zavření/otevření;
+diagnóza tohoto načítání není součástí úspěšného archivního testu.
+Anonymní archiv 403/callable 401. Úklid odstranil 18 zbylých fixture dokumentů
+a checkpoint, Auth chybí, archivy/joby 0, původní žádost nezměněná.
+
+Workery/lookup ACTIVE, limity a Scheduler zachované; ostatních 10 Functions
+beze změny. Živá Rules mají shodný zdroj, 4 indexové změny READY a ostatní
+indexy/TTL beze změny. Hosting 11888ad4b6a3ffb3: HTML/JS/config shodné.
+Důkazy: build/account-archive-{infra,wait,live,audit,cleanup}-proof.json,
+build/archive-{hosting,index-applied,rules-after}-proof.json,
+build/account-content-activation-artifact-proof.json a archive-activation-ci-success.log.
+Před veřejným vydáním patří Rules dál do celkové kontroly podle MVP_SERVER_PLAN.
+Konečný fyzický 60denní purge, identita/přezdívka a klientský cutover nejsou
+tímto pilotem ověřené ani dokončené.
 
 ## Privátní fáze účtového jobu – DEV dokončeno 1. listopadu
 

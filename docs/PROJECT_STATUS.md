@@ -13,29 +13,47 @@ zprávy a vlastní komentáře 60 dní, bez ohledu na nahlášení. Budoucí adm
 přístup má vlastní otevřený úkol, bez dnešního udělení nových klientských práv.
 [Schéma, provozní meze a nový DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
 
-V3 job, archivace textů/reakcí, obnova po přerušení a omezený auditovaný lookup
-nahlášeného komentáře jsou implementované. Vlastník schválil konkrétní archivní
-DEV pilot včetně indexů, Rules, nové callable, dvou workerů, aktivace webu,
-jednoho nového disabled Auth účtu a úklidu vymezených dat. Aktivační změna
-zapíná oba nové flagy; její CI a skutečné nasazení se musí ověřit samostatně.
-žádný archivní obsah, nové indexy, Rules, Function ani web se v této etapě
-živě nenasazovaly. Poslední úplný Flutter běh z přerušeného úseku měl chybu
-sestavení; ta je opravená a nový úplný běh má 235 pass. Lokálně prošlo všech
-249 Rules/server scénářů bez skipů, 92 unit (171 emulator-only skip), analyzátor
-a lint. Implementace je commitnutá a pushnutá jako
-`f0625b527ed2660ffa538d26497fc827d427b69f`; přesné
-[CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170)
-skončilo success. Čistý oddělený worktree má ověřený DEV web build a oba
-Functions balíky (7 a 19 JS modulů), shodu se zdroji i načtení importů.
-Důkaz: build/account-content-artifact-proof.json. Lokální příprava je uzavřená;
-následuje CI aktivačního commitu a schválený živý pilot pouze v shoutout-dev-46c81.
+Archivní DEV pilot je dokončený včetně konkrétního souhlasu vlastníka a úklidu.
+Oba workery a web jsou nasazené z čistého
+`1dab78cce583899648f8e17d6814a0ecbfc6aad8`, oba archivní flagy true.
+[CI 41322524612](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41322524612)
+success: 235 Flutter, 35 tools, 92 unit (171 emulator-only skip), všech
+249 Rules/server případů bez skipů, analyzátor/lint a web build. Historické
+v2 a App Check testovací konfigurace jsou nezávislé na aktivaci DEV flagů.
+Čisté Functions balíky mají 7/19 JS modulů; zdroje/importy i web build ověřené.
+Hosting verze 11888ad4b6a3ffb3, release 1793548167143000: HTML/JS/config shodné.
+
+Čtyři cílené indexové změny READY, ostatní indexy a TTL beze změny. Nová
+getArchivedCommentReportTarget a cílená Rules změna jsou z f0625b5 po CI
+41320353170 success; živá Rules přesně shodná. Všechny tři cíle ACTIVE:
+account source hash 84333fd4e60f6ff1f3088b90a8c2bceec3bd8037,
+lookup hash f4df3c8589c72a779c7ecfeb9190ca31bbab0d06. Limity, minutový
+Scheduler i ostatních 10 Functions zachované, žádný nový Scheduler.
+
+Živý test: při existujícím disabled Auth waiting-auth bez změn; po odstranění
+pouze tohoto nového Auth plánovač automaticky skryl 3 Shouty, odstranil 4
+privátní položky a archivoval 2 zprávy, 1 komentář a 3 reakce. Cizí konverzace
+i komentář zachované, commentsCount 2 → 1, profil/legal zachované, deadline
+původní žádost + 60 dní. Terminální replay beze změny, anonymní archiv 403
+a callable 401. TestModerator v nové fungující kartě viděl původní text;
+vznikl 1 audit bez textu, žádné moderační rozhodnutí/postih. Automatické
+obnovení původní karty zůstalo na bílé obrazovce; ruční zavření/otevření pomohlo,
+příčina samotného načítání tím není diagnostikovaná ani opravená.
+Všech 18 zbývajících testovacích dokumentů a checkpoint uklizené, Auth chybí,
+archivy/job kolekce zpět na 0 a původní žádost má shodný digest.
+Důkazy: build/account-archive-{infra,wait,live,audit,cleanup}-proof.json,
+build/archive-{hosting,index-applied,rules-after}-proof.json a
+build/account-content-activation-artifact-proof.json.
 
 Read-only preflight: všech 97 existujících komentářů validních pro archivaci,
 0 soukromých zpráv, 0 archivů/jobů a 1 původní žádost. Comments.authorId CG je
-READY. Připravený indexový rozdíl má 4 změny, zachová běžné privátní indexy,
-nic nemaže a nesahá na TTL. Celý firestore.indexes.json se pro tento úsek
+READY. Provedený indexový rozdíl má 4 změny, zachoval běžné privátní indexy,
+nic nemazal a nesahal na TTL. Celý firestore.indexes.json se pro tento úsek
 nesmí nasadit kvůli jeho nesouvisejícím, dosud neschváleným TTL nastavením.
-MVP je stále 9/24; archivace ještě není fyzický 60denní purge ani celý účtový milník.
+Další krok: identita/veřejný a Business profil, rezervace přezdívky, konečný
+60denní purge a klientský cutover podle ACCOUNT_DELETION_REMAINING_PLAN.md.
+MVP je stále 9/24; archivace není fyzický 60denní purge ani celý účtový milník.
+Produkce, main, staré joby a původní pending žádost se neměnily.
 
 ## Dokončený předchozí úsek – privátní fáze účtového jobu
 
@@ -64,7 +82,7 @@ jsou uklizené. Původní 1 pending žádost má shodný digest, žádné jiné 
 se nečistily. Důkazy: build/account-private-{activation-artifact,infra,wait,live,cleanup}-proof.json.
 [Přesný rozsah a rollback](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
 Rozsah textů vlastník následně schválil: všechny zahrnuté zprávy a komentáře.
-Navazující archivace je lokálně připravená výše. Dále zbývají
+Navazující archivace je dokončená v DEV podle aktuálního přehledu výše. Dále zbývají
 minimalizace identity/přezdívka, konečná retence a klientský cutover.
 Účtový milník ještě není celý hotový, metriky se nemění.
 

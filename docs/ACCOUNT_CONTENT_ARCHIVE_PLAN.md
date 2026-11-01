@@ -1,10 +1,12 @@
 # Archiv zpráv a komentářů smazaného účtu
 
 1. listopadu 2026. [Rozhodnutí vlastníka a návaznosti](ACCOUNT_DELETION_REMAINING_PLAN.md).
-Lokální implementace, zatím bez živého archivu, migrace či změny konfigurace.
+DEV pilot je dokončený včetně živého testu a úklidu; produkce se neměnila.
 Zdroj f0625b527ed2660ffa538d26497fc827d427b69f má úspěšné
 [CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170).
-Čisté Functions balíky a DEV web build jsou ověřené; nové flagy zůstávají false.
+Aktivace workerů/webu 1dab78cce583899648f8e17d6814a0ecbfc6aad8 má
+[CI 41322524612 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41322524612).
+Čisté Functions balíky a DEV web build jsou ověřené; oba DEV flagy jsou true.
 
 ## Schválený rozsah
 
@@ -53,7 +55,7 @@ reakce a accessAudits před kořenem; smazání rodiče samo nestačí.
 ## Verze jobu
 
 Nové joby mohou mít schemaVersion 3 jen při současně zapnuté privátní fázi
-a contentArchiveEnabled. Živý wrapper má tento nový flag **false**.
+a contentArchiveEnabled. Živý DEV wrapper má tento nový flag **true**.
 Verze 1/2 se nepřevádějí ani při zapnutí flagu; migrace vyžaduje vlastní plán.
 
 Po Shoutech a privátních seznamech následují stages messages → comments ↔
@@ -88,7 +90,7 @@ Uzavření již odstraněného komentáře nezopakuje mazání ani úpravu počt
 ## Indexy a provozní rozsah před živým pilotem
 
 Target je existující Standard Firestore `(default)` v shoutout-dev-46c81,
-europe-west3. Lokálně připravené indexy (zatím nenasazené):
+europe-west3. Následující cílené indexy jsou v DEV ověřené jako READY:
 
 - collection-group privateReplies.authorId a privateReplies.recipientId;
 - accountContentArchive podle sourcePath + sourceCreateTime descending;
@@ -131,7 +133,7 @@ Dosavadní souhlas s pilotem privátních seznamů tento nový archiv nezahrnuje
 Produkce a main se nemění. Konečný 60denní purge a případné právní holdy jsou
 samostatné otevřené kroky před celým MVP.
 
-## Připravený DEV pilot – vyžaduje samostatný souhlas
+## Schválený rozsah DEV pilotu – dokončený 1. listopadu
 
 Pouze shoutout-dev-46c81. Po CI přesného commitu nejprve výše uvedený indexový
 rozdíl a ověření READY, lokální Rules změna pouze k osiřelým reakcím, nová
@@ -165,4 +167,29 @@ purge skutečných uživatelských důkazů.
 Rollback musí zachovat v3-aware kód a vypnout contentArchiveEnabled i webový
 lookup flag, případné rozpracované v3 bezpečně ponechat pozastavené. Úspěšné
 CI není souhlas s novou archivní datovou vrstvou, tímto datovým testem nebo
-aktivací neprošlých indexů. Konkrétní souhlas vlastníka se vyžádá po přípravě.
+aktivací neprošlých indexů. Vlastník tento konkrétní pilot výslovně schválil.
+
+## Výsledek živého ověření
+
+- Po existujícím disabled Auth waiting-auth 0 změn; po odstranění jen nového
+  testovacího Auth automatický Scheduler dokončil v3 ve čtyřech pokusech.
+  Skryl 3 Shouty, odstranil 4 privátní položky, archivoval 2 zprávy,
+  1 komentář a 3 reakce. Cizí konverzace a komentář zachované; commentsCount 2 → 1.
+- Profil/legal zachované, deadline původní žádost + 60 dní, terminální replay
+  nezměnil job ani data. Anonymní archiv 403, nová callable 401.
+- TestModerator v aplikaci zobrazil původní archivovaný text, autorství i čas;
+  server zapsal 1 accessAudit bez textu. Žádný postih či rozhodnutí se neukládaly.
+  Po bílé obrazovce při automatickém reloadu pomohlo ruční zavření/otevření karty;
+  samotná příčina načítání nebyla tímto testem určena.
+- Úklid odstranil pouze 18 zbývajících fixture dokumentů a checkpoint.
+  Testovací Auth chybí, archivů/jobů je opět 0; původní žádost má stejný digest.
+- Oba účtové endpointy ACTIVE, source hash 84333fd4e60f6ff1f3088b90a8c2bceec3bd8037;
+  nový lookup ACTIVE, hash f4df3c8589c72a779c7ecfeb9190ca31bbab0d06.
+  Scheduler a ostatních 10 Functions se nezměnily. Hosting verze
+  11888ad4b6a3ffb3, release 1793548167143000, tři hlavní soubory shodné s buildem.
+
+Důkazy: build/account-archive-{infra,wait,live,audit,cleanup}-proof.json,
+build/archive-{hosting,index-applied,rules-after}-proof.json,
+build/account-content-activation-artifact-proof.json a CI 41322524612.
+V1/v2 nebyly migrované, produkce ani main se neměnily. Konečný 60denní purge,
+minimalizace identity a klientské napojení zbývají; celý účtový milník není uzavřený.
