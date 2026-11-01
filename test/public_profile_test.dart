@@ -7,6 +7,33 @@ import 'package:shoutout/avatar_style.dart';
 
 void main() {
   testWidgets(
+    'a deletion immediately followed by an error cannot be lost before the next frame',
+    (tester) async {
+      final data = StreamController<Map<String, dynamic>?>.broadcast();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PublicIdentityBuilder(
+            userId: 'target',
+            profileData: data.stream,
+            fallbackNickname: 'Old snapshot',
+            fallbackAvatarStyle: AvatarStyle.fallback,
+            builder: (_, identity) => Text(identity.nickname),
+          ),
+        ),
+      );
+      data.add({'nickname': 'Active'});
+      await tester.pumpAndSettle();
+      expect(find.text('Active'), findsOneWidget);
+      data.add({'accountStatus': 'deleted'});
+      data.addError(StateError('error before a rendered frame'));
+      await tester.pumpAndSettle();
+      expect(find.text('Deleted account'), findsOneWidget);
+      expect(find.text('Old snapshot'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await data.close();
+    },
+  );
+  testWidgets(
     'a confirmed deleted identity stays anonymous through stream errors and resets for another UID',
     (tester) async {
       final first = StreamController<Map<String, dynamic>?>.broadcast();

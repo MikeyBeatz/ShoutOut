@@ -49,7 +49,8 @@ přebytečnými starými poli. Cache log daného UID se zahodí. Chybějící pr
 markeru se nepovažuje automaticky za smazaný; zachová se kompatibilní fallback.
 
 PublicIdentityBuilder drží potvrzené smazání pro konkrétní UID přes chyby
-streamu. Při změně UID se stav i snapshot oddělí, aby se nepřenesla identita
+streamu. Marker se zachytí už při datové události, i když před dalším snímkem
+přijde chyba. Při změně UID se stav i snapshot oddělí, aby se nepřenesla identita
 mezi řádky. Mapovaný stream je stabilní přes běžné parent rebuildy.
 Volitelný stream dat umožňuje izolované widget testy bez mockování sealed SDK tříd.
 
@@ -106,13 +107,20 @@ a bezpečné pořadí pozdějšího fyzického smazání loga před odstranění
 
 Před živým zapojením dále prověřit důvěryhodné Admin SDK zapisovače veřejných
 profilů/rolí (backfill, aktivace Business, role nástroje), aby neobnovily stará
-pole přes marker. Rozšíření jobu, migrace jeho starých verzí, nový datový/Auth
+pole přes marker. Ověřený backfill_public_profiles.mjs dnes do veřejného
+profilu slučuje data users bez kontroly mazání. set_role.mjs a
+activate_business_application.mjs ověřují Auth před zápisem, ale je třeba
+uzavřít souběh s mazáním ve zapisující transakci. Tyto nástroje se zatím nemění.
+Integrace také musí vyřešit starý Auth token a odvolání pending žádosti po
+potvrzeném odstranění Auth; samotný veřejný marker není obecná serverová
+eligibility kontrola všech soukromých a obsahových zápisů.
+Rozšíření jobu, migrace jeho starých verzí, nový datový/Auth
 pilot a politika veřejného markeru po dočištění nejsou tímto schválené.
 Nejde o hotovou minimalizaci všech osobních dat ani dokončený účtový milník.
 Rules jsou cílený lokální prototyp; před veřejným vydáním vyžadují celkovou
 bezpečnostní kontrolu podle MVP_SERVER_PLAN.
 
-Lokální výsledky: 240 Flutter, 94 serverových unit (182 emulator-only skip),
+Lokální výsledky: 241 Flutter, 94 serverových unit (182 emulator-only skip),
 35 tools, osm Storage případů a analyzátor/lint bez chyby. Plná Rules/server
 sada 261/261 prošla; po doplnění nezměnitelnosti markeru prošla znovu celá
 Rules sada 73/73. Konečný CI výsledek bude evidovaný pro přesný commit v

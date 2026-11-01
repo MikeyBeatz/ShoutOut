@@ -15,15 +15,18 @@ automatickými vrstvami i hlavními ručními scénáři níže.
 Nové jádro ani lab adaptér nejsou součástí Functions artefaktů či živého jobu.
 Tato etapa nemá živý rollout ani nové testovací Auth účty.
 
-- Úplná Flutter sada: 240 pass. Sedm profilových testů zahrnuje model,
+- Úplná Flutter sada: 241 pass. Osm profilových testů zahrnuje model,
   neutrální avatar, aktivní → smazaný stav, chybu streamu, skrytí privátní
-  akce a změnu UID bez přenosu staré identity. Analyzátor a formát čisté.
+  akce a změnu UID bez přenosu staré identity. Marker následovaný chybou ještě
+  před dalším snímkem se také neztratí. Analyzátor a formát čisté.
 - Functions: 94 unit pass, 182 emulator-only skip, lint čistý; tools 35 pass.
 - Plná Firestore Rules/server sada 261/261 pass bez skipů; jádro má 11
   nových integračních případů pro vlastnictví, Auth, původní deadline,
   replay, lease/rollback a ztracené potvrzení transakce.
 - Po doplnění ochrany markeru i bez pending žádosti prošla samostatná úplná
-  Rules sada 73/73; konečný CI výsledek bude evidovaný pro přesný commit.
+  Rules sada 73/73. CI a5280f1 (41327636336) a 58e2ffd (41328069561) mají
+  úspěch včetně 262 Rules/server a 8 Storage případů; poslední klientské
+  zpevnění čeká na konečné CI svého přesného commitu.
 - Osm Storage případů v izolovaném Firestore+Storage emulátoru prošlo:
   aktivní/legacy čtení zachované, marker blokuje SDK čtení i starý owner token
   pro přepis/mazání či metadata s novým tokenem, všechny role 1–6 bez výjimky,

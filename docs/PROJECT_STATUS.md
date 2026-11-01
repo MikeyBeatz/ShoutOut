@@ -20,11 +20,14 @@ Lokálně implementované: minimální publicProfiles marker, transakční calle
 ochrana cizí rezervace, replay a původní deadline; klientská anonymizace a
 ochrana před návratem staré identity při chybě streamu. Odebrání dřívějšího
 sledování a blokování/nahlášení zůstávají dostupné. Firestore/Storage Rules
-jsou lokální prototyp. Osm Storage a sedm cílených profilových testů prošlo,
-240 úplných Flutter testů, 94 serverových unit (182 emulator-only skip),
+jsou lokální prototyp. Osm Storage a osm cílených profilových testů prošlo,
+241 úplných Flutter testů, 94 serverových unit (182 emulator-only skip),
 35 tools a analyzátor/lint prošly. Plná emulátorová sada měla 261/261 pass;
 po dodatečném zpevnění neměnnosti markeru prošla celá Rules sada 73/73.
-CI se ověří pro výsledný commit. Důkazy v TESTING.md.
+CI a5280f1 (41327636336) i 58e2ffd (41328069561) prošla včetně 262 Rules/server
+a 8 Storage případů. Poslední klientské zpevnění zachycuje marker i s chybou
+streamu před následujícím snímkem; jeho konečné CI se ověří pro výsledný commit.
+Důkazy v TESTING.md.
 
 Před živým napojením chybí revokace dříve vydaných tokenových URL loga
 (emulátor doložil, že samotná Rules nestačí), ochrana důvěryhodných Admin SDK

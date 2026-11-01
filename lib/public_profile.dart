@@ -79,13 +79,24 @@ class _PublicIdentityBuilderState extends State<PublicIdentityBuilder> {
   late Stream<Map<String, dynamic>?> _profiles;
 
   Stream<Map<String, dynamic>?> _source() {
-    if (widget.profileData != null) return widget.profileData!;
     if (widget.userId.isEmpty) return const Stream.empty();
-    return FirebaseFirestore.instance
-        .collection('publicProfiles')
-        .doc(widget.userId)
-        .liveSnapshots()
-        .map((snapshot) => snapshot.data());
+    final uid = widget.userId;
+    final source =
+        widget.profileData ??
+        FirebaseFirestore.instance
+            .collection('publicProfiles')
+            .doc(uid)
+            .liveSnapshots()
+            .map((snapshot) => snapshot.data());
+    return source.map((data) {
+      // Observe the event before StreamBuilder coalesces frames/errors.
+      if (mounted &&
+          widget.userId == uid &&
+          data?['accountStatus'] == 'deleted') {
+        _knownDeleted = true;
+      }
+      return data;
+    });
   }
 
   @override
