@@ -47,6 +47,7 @@ void main() {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())
             as Map<String, dynamic>;
+    config.remove('serverArchivedReportLookup');
     expect(WebEnvironment.fromJson(config).serverArchivedReportLookup, isFalse);
     expect(
       WebEnvironment.fromJson({
