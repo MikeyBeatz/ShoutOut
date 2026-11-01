@@ -277,10 +277,16 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: InputChip(
-                      label: Text(
-                        _privateRecipientNickname != null
-                            ? '${tr(context, 'Soukromá odpověď')} · @$_privateRecipientNickname'
-                            : '${tr(context, 'Odpovídáš')} @$_replyToNickname',
+                      label: PublicIdentityBuilder(
+                        userId: _privateRecipientId ?? '',
+                        fallbackNickname:
+                            _privateRecipientNickname ?? _replyToNickname ?? '',
+                        fallbackAvatarStyle: AvatarStyle.fallback,
+                        builder: (context, identity) => Text(
+                          _privateRecipientNickname != null
+                              ? '${tr(context, 'Soukromá odpověď')} · @${identity.nickname}'
+                              : '${tr(context, 'Odpovídáš')} @$_replyToNickname',
+                        ),
                       ),
                       onDeleted: _sendingComment
                           ? null
@@ -298,22 +304,25 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        enabled: !_sendingComment,
-                        controller: _commentController,
-                        focusNode: _commentFocusNode,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.send,
-                        onTap: _openCommentKeyboard,
-                        onSubmitted: (_) => _sendComment(),
-                        maxLines: 1,
-                        maxLength: 220,
-                        decoration: InputDecoration(
-                          hintText: _privateRecipientId == null
-                              ? tr(context, 'Napiš veřejný komentář')
-                              : tr(context, 'Napiš soukromou odpověď'),
-                          border: const OutlineInputBorder(),
-                          counterText: '',
+                      child: AvailableAccountAction(
+                        userId: _privateRecipientId ?? '',
+                        child: TextField(
+                          enabled: !_sendingComment,
+                          controller: _commentController,
+                          focusNode: _commentFocusNode,
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.send,
+                          onTap: _openCommentKeyboard,
+                          onSubmitted: (_) => _sendComment(),
+                          maxLines: 1,
+                          maxLength: 220,
+                          decoration: InputDecoration(
+                            hintText: _privateRecipientId == null
+                                ? tr(context, 'Napiš veřejný komentář')
+                                : tr(context, 'Napiš soukromou odpověď'),
+                            border: const OutlineInputBorder(),
+                            counterText: '',
+                          ),
                         ),
                       ),
                     ),

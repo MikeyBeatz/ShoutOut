@@ -56,6 +56,9 @@ Volitelný stream dat umožňuje izolované widget testy bez mockování sealed 
 Profil s markerem nenabídne nové sledování ani seznam aktivních Shoutů.
 Soukromé odpovědi z karet, komentářů a privátních zpráv se skryjí; serverový
 recipient guard z předchozí fáze zůstává autoritativní kontrolou doručení.
+U již otevřeného privátního konceptu se anonymizuje příjemce a po markeru zmizí
+odesílací vstup; koncept lze zavřít původním ovládáním. Běžný veřejný vstup
+kvůli tomu žádný nový profilový dotaz nevytváří.
 Odebrání dřívějšího sledování ve vlastním seznamu zůstane dostupné, stejně jako
 blokování a nahlášení profilu/obsahu. Draft veřejné odpovědi a strukturální
 zmínka příjemce používají aktuální identitu; uživatelem napsaný text se nepřepisuje.

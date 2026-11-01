@@ -180,6 +180,15 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 | `users/{uid}/legal/acceptance_2026_07_25` | `termsVersion`, `privacyVersion`, `communityRulesVersion`, `ageConfirmed`, `acceptedAt`, `acceptedLanguage` | Neměnný důkaz souhlasu. Aktuální verze všech textů je `2026-07-25`. |
 | `accountDeletionRequests/{uid}` | `userId`, `email`, `requestedAt`, `retainUntil`, `status: pending` | Archivní záznam pod původním UID na přibližně 60 dní. Authentication účet se odstraní ihned, takže e-mail lze znovu registrovat; finální serverové pročištění archivních dat zatím není implementované. |
 
+Lokální návrh [smazané veřejné identity](ACCOUNT_PUBLIC_IDENTITY_PLAN.md) přidává
+serverový tvar publicProfiles přesně `{schemaVersion: 1, accountStatus: deleted}`,
+bez původních veřejných polí. Klient jej nemůže vytvořit ani přepsat zpět.
+SDK přístup k logu i nový following vztah tento marker odmítnou; starý vztah
+lze odebrat. Jde o lokální prototyp, není zatím v živém workeru ani Rules.
+Přezdívka zůstává ve stejné nicknames rezervaci do serverového deadline žádosti
++60 dní; tento helper ji neuvolňuje a nepřidává do rezervace nová pole.
+Tokenové URL vyžadují samostatnou revokaci, samotná SDK Rules je neodvolají.
+
 Změna přezdívky musí atomicky odstranit starou rezervaci, vytvořit novou a
 aktualizovat soukromý i veřejný profil. Avatar se obdobně zapisuje do obou
 profilů, aby se bez přepisování historie změnil všude, kde se autor zobrazuje.
