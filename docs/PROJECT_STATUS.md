@@ -19,7 +19,13 @@ nahlášeného komentáře jsou lokálně implementované. Oba nové flagy jsou 
 živě nenasazovaly. Poslední úplný Flutter běh z přerušeného úseku měl chybu
 sestavení; ta je opravená a nový úplný běh má 235 pass. Lokálně prošlo všech
 249 Rules/server scénářů bez skipů, 92 unit (171 emulator-only skip), analyzátor
-a lint. Následuje commit/CI a samostatně schválený archivní DEV pilot.
+a lint. Implementace je commitnutá a pushnutá jako
+`f0625b527ed2660ffa538d26497fc827d427b69f`; přesné
+[CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170)
+skončilo success. Čistý oddělený worktree má ověřený DEV web build a oba
+Functions balíky (7 a 19 JS modulů), shodu se zdroji i načtení importů.
+Důkaz: build/account-content-artifact-proof.json. Lokální příprava je uzavřená;
+následuje konkrétní souhlas s archivním DEV pilotem, potom jeho živé provedení.
 
 Read-only preflight: všech 97 existujících komentářů validních pro archivaci,
 0 soukromých zpráv, 0 archivů/jobů a 1 původní žádost. Comments.authorId CG je

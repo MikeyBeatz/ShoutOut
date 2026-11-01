@@ -67,7 +67,8 @@ Verzovaná soukromá fáze account jobu je hotová v DEV: aktivace 6a4606e, CI
 Rozhodnutí 1. listopadu: neveřejně uchovat všechny zahrnuté zprávy/komentáře
 60 dní, bez ohledu na nahlášení. V3 job a auditovaný fallback pro nahlášený
 komentář jsou nyní lokálně připravené, nové flagy false. Prošlo 235 Flutter,
-249 Rules/server a 92 unit testů. Další krok: CI a schválený
+249 Rules/server a 92 unit testů. Commit f0625b5 má CI 41320353170 success,
+čisté Functions artefakty a DEV web build jsou ověřené. Další krok: schválený
 [archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md), poté konečná retence.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.

@@ -2,6 +2,9 @@
 
 1. listopadu 2026. [Rozhodnutí vlastníka a návaznosti](ACCOUNT_DELETION_REMAINING_PLAN.md).
 Lokální implementace, zatím bez živého archivu, migrace či změny konfigurace.
+Zdroj f0625b527ed2660ffa538d26497fc827d427b69f má úspěšné
+[CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170).
+Čisté Functions balíky a DEV web build jsou ověřené; nové flagy zůstávají false.
 
 ## Schválený rozsah
 

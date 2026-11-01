@@ -156,8 +156,14 @@ TTL ani nemaže indexy. Nenasazovat celý indexes soubor kvůli starým TTL polo
 Logy: build/account-archive-flutter-final.log, account-archive-rules-final.log,
 account-archive-functions-unit.log, account-archive-analyze.log,
 archived-comment-report-emulator.log, archive-index-tools-test.log.
-Připravený kód ještě není důkaz nasazení. Před živým archivem je nutné jeho
-CI, odsouhlasený datový/indexový pilot a skutečné ověření App Check/moderačního
+Commit f0625b527ed2660ffa538d26497fc827d427b69f má úspěšné
+[CI 41320353170](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41320353170).
+Čistý detached worktree stejného SHA: DEV web build prošel, account/content
+balíky obsahují 7/19 JS modulů, shodují se s Git zdroji a jejich importy se
+načetly. Nové flagy jsou stále false. Důkaz a SHA-256 balíků:
+build/account-content-artifact-proof.json. Žádný archivní rollout neproběhl.
+Připravený kód ještě není důkaz nasazení. Před živým archivem je nutný
+odsouhlasený datový/indexový pilot a skutečné ověření App Check/moderačního
 detailu. Nová Rules jsou cílený lokální návrh; před veřejným vydáním dál patří
 do celkové bezpečnostní kontroly podle MVP_SERVER_PLAN.
 
