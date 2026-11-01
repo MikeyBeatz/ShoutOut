@@ -42,7 +42,8 @@ void main() {
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
             ..['serverCommentDeletion'] = false
-            ..['serverShoutDeletion'] = false;
+            ..['serverShoutDeletion'] = false
+            ..['serverArchivedReportLookup'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
         isFalse,
@@ -87,7 +88,8 @@ void main() {
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
             ..['serverCommentDeletion'] = false
-            ..['serverShoutDeletion'] = false;
+            ..['serverShoutDeletion'] = false
+            ..['serverArchivedReportLookup'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
         isFalse,
