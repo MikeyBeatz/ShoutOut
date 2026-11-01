@@ -33,6 +33,12 @@ je nasazený v oddělené codebase account-deletion. Odmítá produkci i jiný �
 projekt; emulátor povolí jen pro shoutout-rules-test na 127.0.0.1:8080.
 Klientské mazání se nemění; serverová fáze skrývání je v DEV aktivní.
 
+Oprava chybového životního cyklu z 1. listopadu je v DEV nasazená z `6acca72`
+po úspěšném CI `41297163776`. Runtime, minutový plán i retry 0 zůstaly stejné.
+CLI převedlo URI/audience na přímou Cloud Run adresu stejného endpointu;
+po změně je doložený úspěšný běh nové revize HTTP 200 a anonymní POST 403.
+[Přesné testy, verze a omezení](TESTING.md#audit-lifecycle-fixes).
+
 ## Pracovní data, pouze DEV
 
 `accountDeletionJobs/{sha256(project,uid,requestCreateTime)}` obsahuje:

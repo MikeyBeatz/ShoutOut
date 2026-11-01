@@ -156,7 +156,25 @@ hranicí a po ní, vyloučení terminálních jobů ze scanu a zachování zdroj
 Závislost crypto 3.0.7 pouze převedena z tranzitivní na přímou, bez nové verze.
 Logy lokálně: build/audit-fixes-flutter-targeted.log,
 build/audit-fixes-account-emulator.log, build/audit-fixes-analyze.log.
-Širší ověření a skutečné nasazení jsou zvlášť v PROJECT_STATUS.
+Celá Flutter sada má 232 pass, Functions unit 88 pass / 138 emulator-only skip.
+CI 41297163776 pro 6acca72fa2cf860178e9411e91acd18d38507831 je success;
+210 Rules/server emulátorových a 31 tools testů prošlo bez skipů.
+Release build DEV a shoda pěti JS modulů instalačního balíku s Git blobem
+ověřené; JS artifact digest 5ad8c53edc10b703dead47f9d14223ea3ed3714605a8a0e56ecca5d40c1c3b7c.
+
+DEV rollout dokončený: Hosting 2e9a063495041b40 a obě účetní Functions ACTIVE,
+source hash 9c3983a938f2c2b3ed6cb08e481b03e218ed52f9. Byte-for-byte shoda
+veřejných HTML/JS/config, runtime Node 22, max 1/concurrency 1/256 MiB/60 s
+ověřené. Cadence, retry i identita plánovače zůstaly stejné; Firebase CLI
+převedlo URI a OIDC audience z cloudfunctions.net na kanonický Cloud Run
+endpoint téže Function. Nová revize resumeaccountdeletionjobsdev-00002-wuq
+má request log HTTP 200 v 10:30:03 UTC; anonymní POST 403. Dalších deset
+Functions podle plného API stavu beze změny. Nové přihlášené klientské
+průchody se neprováděly. Důkazy: build/audit-fixes-live-proof.json,
+audit-fixes-artifact-proof.json, audit-fixes-ci.log a deploy logy.
+Návratové verze: předchozí Hosting 42d86a762a74a2dd/ca67ebd a účetní
+Functions ef49f25; návrat by vrátil známé auditní nedostatky. Zachovat
+striktní op1 protokol. Produkce, Rules a main se neměnily.
 
 ## První kompatibilní serverová vrstva retence 30. října 2026
 

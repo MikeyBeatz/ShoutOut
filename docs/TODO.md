@@ -55,7 +55,10 @@ Zpětný audit 37 commitů (30. října–1. listopadu) našel dva opravitelné
 nedostatky. Opravy jsou lokálně připravené: odstranění globální historie
 payloadů klienta a ukončení trvalých/opakovaných chyb account workeru do
 needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyzátor
-prošly; před návratem k dalším účetním fázím zbývá CI a DEV rollout.
+prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
+emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
+Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
+Následuje verzovaná soukromá fáze account jobu podle stávajícího plánu.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
 

@@ -21,15 +21,27 @@ Frekvence plánovače, prostředky Functions ani mazání Auth se nemění.
 Zastaralé komentáře o čistě lokálním jobu opravené. Cíleně prošlo 46 Flutter
 a 23 account/job emulátorových testů, analyzátor a ESLint bez chyb.
 Celá Flutter sada 232/232 a Functions unit 88 pass / 138 emulator-only skip
-bez chyb. CI a DEV rollout těchto oprav ještě čekají; níže uvedené nasazení
-se tímto lokálním krokem nemění. [Kontrakt a ověření](TESTING.md#audit-lifecycle-fixes).
+bez chyb. Commit `6acca72fa2cf860178e9411e91acd18d38507831`, CI `41297163776`
+success včetně všech 210 Rules/server emulátorových a 31 tools testů.
+Opravy jsou nasazené v DEV: Hosting `2e9a063495041b40`, release
+`1793528967987000`; oba účetní endpointy ACTIVE, source hash
+`9c3983a938f2c2b3ed6cb08e481b03e218ed52f9`. Veřejné HTML/JS/config byte-for-byte
+odpovídají čistému release buildu. Plánovač zachoval minutu UTC, retry 0,
+identitu i prostředky; CLI pouze převedlo URI a OIDC audience na kanonickou
+Cloud Run adresu téže Function. Nová revize `resumeaccountdeletionjobsdev-00002-wuq`
+má po nasazení doložený HTTP 200, anonymní POST 403. Dalších deset Functions
+je podle celého API výpisu beze změny. Nové přihlášené klientské průchody
+nebyly provedené; funkční matice je ověřená testy/CI. Produkce, main a Rules
+beze změny. Důkazy: build/audit-fixes-live-proof.json a audit-fixes-artifact-proof.json.
+Nálezy uzavřené; další práce je verzovaná soukromá fáze account jobu.
+[Kontrakt a ověření](TESTING.md#audit-lifecycle-fixes).
 
 ## Ověřené nasazení 1. listopadu
 
 | Oblast | Skutečný stav |
 |---|---|
-| DEV web | Hosting 42d86a762a74a2dd, commit ca67ebd; HTML/JS/config znovu byte-for-byte ověřené. Nový klient se v posledních účtových úsecích nenasazoval. |
-| DEV účtový pilot | Dvě Functions z ef49f25 ACTIVE, plán každou minutu ENABLED; source hash 32de6cf5e387959db32687b6d9a8e594f03e8c80, HTTP plánovače bez Auth 403. |
+| DEV web | Hosting 2e9a063495041b40, commit 6acca72; HTML/JS/config byte-for-byte ověřené. Klient obsahuje opravu paměti požadavků. |
+| DEV účtový pilot | Dvě Functions z 6acca72 ACTIVE, plán každou minutu ENABLED; source hash 9c3983a938f2c2b3ed6cb08e481b03e218ed52f9. Nová revize HTTP 200 z plánovače / anonymní POST 403. |
 | DEV ochrana příjemců | Dříve nedokončený rollout b777992 je nyní hotový: createComment/createPrivateReply/toggleShoutReaction/toggleCommentReaction ACTIVE, source hash 287c988e2f8515fbc233b58bdd0a1cf43bc74f9e. |
 | Soukromý úklid | Záměrně jen emulátorový prototyp, odmítá živé projekty a není v artefaktech. |
 | Nový prostorový feed/read sync | Lokální příprava, nikoli aktivní klient/query API/indexový backfill. |
