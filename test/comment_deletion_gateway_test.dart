@@ -174,6 +174,7 @@ void main() {
           'serverShoutSaves',
           'serverContentReports',
           'serverShoutDeletion',
+          'serverArchivedReportLookup',
         ])
           key: false,
       }..remove('appCheckSiteKey');
