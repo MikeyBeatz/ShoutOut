@@ -36,10 +36,10 @@ Tato etapa nemá živý rollout ani nové testovací Auth účty.
 
 Logy build/public-identity-{flutter-final,widget-final,analyze-final,functions-unit,
 lint,tools,rules-full,firestore-rules-final,storage-final}.log; inventář dotazů
-build/public-identity-query-inventory.txt. Měření nejsou cloudová latence,
-Finální CI metadata a log: build/public-identity-ci-final-proof.json,
-build/public-identity-ci-success.log.
-účtované čtení ani důkaz živého nasazení. Rules jsou cílený lokální prototyp,
+build/public-identity-query-inventory.txt. Finální CI metadata a log:
+build/public-identity-ci-final-proof.json, build/public-identity-ci-success.log.
+Měření nejsou cloudová latence, účtované čtení ani důkaz živého nasazení.
+Rules jsou cílený lokální prototyp,
 před veřejným vydáním patří do celkové bezpečnostní kontroly.
 
 <a id="ci-reliability"></a>
