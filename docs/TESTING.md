@@ -9,6 +9,26 @@ Testy v tomto projektu jsou současně bezpečnostní síť a spustitelná techn
 specifikace. Nová implementace není ekvivalentní ShoutOutu, dokud neprojde
 automatickými vrstvami i hlavními ručními scénáři níže.
 
+## Tokenová URL Business loga – lokální prototyp 1. listopadu
+
+[Schválený rozsah, omezení a cloudová brána](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).
+11 nových unit testů, celá Functions sada (105 pass / 188 emulator-only skip)
+a lint prošly. Společná Storage sada má 14/14 pass bez skipů:
+8 původních Rules regresí a 6 skutečných SDK/Firestore/Storage emulátorových
+scénářů v sekvenci. Pokrývají stránkování starých log, oddělení cizího prefixu,
+Auth/marker/request/lease guardy, souběh a idempotentní no-op bez tokenů.
+Auth lookup je syntetický; žádný Auth účet nevzniká. Cílení pouze lokální.
+
+Test s reálným metadata patchem dokládá omezení CLI 15.31.0: emulátor starý
+token zachová a nesprávné generation/metageneration podmínky ignoruje.
+Helper v této situaci selže před potvrzením úspěchu. Unit simuluje správné
+cloudové podmínky včetně kolizí a replay po ztraceném potvrzení; **nejde o
+důkaz zneplatnění skutečného cloudového URL ani cloudového CAS**.
+Žádné nasazení, fyzický purge, živá data, job nebo nová cloudová služba.
+Logy: build/logo-revocation-unit.log, build/logo-revocation-emulator.log a
+build/logo-revocation-storage-final.log a build/logo-revocation-functions.log.
+Přesný commit a CI následují.
+
 ## Tři Admin SDK zapisovače – lokální ochrana 1. listopadu
 
 [Schválený rozsah a provozní rozdíly](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).

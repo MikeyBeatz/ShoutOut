@@ -177,6 +177,66 @@ commitnutý a pushnutý. [CI 41347854953 success](https://github.com/MikeyBeatz/
 ověřilo celou sadu včetně 284 Rules/server případů a web buildu;
 úplné výsledky a důkazy jsou v [TESTING](TESTING.md).
 
-Zbývají revokace starých URL loga, nezrušitelný potvrzený stav mazání,
+Zbývají cloudové ověření [lokální revokace URL loga](#logo-url-revocation), nezrušitelný potvrzený stav mazání,
 integrace jobu a ostatní osobní/Business data, role, fyzický purge a klientský
 cutover. Ochrana těchto tří nástrojů sama účtový milník neuzavírá.
+
+<a id="logo-url-revocation"></a>
+
+## Revokace tokenových URL loga – schválený lokální prototyp
+
+Vlastník schválil přípravu a emulátorové ověření bez fyzického mazání log,
+zapojení do workeru, nasazení, živých dat nebo nových Auth účtů. Retence,
+oprávnění a prostředky se nemění. Kód functions/account_logo_revocation.js
+není v entry pointech ani přípravných deploy seznamech; lab adaptér odmítne
+živé projekty, nesprávné emulator hosty i skutečný Storage endpoint mimo lokál.
+
+Soupis používá pouze businessLogos/UID/ a explicitně předanou velikost stránky,
+autoPaginate false a návratový cursor. Nečte obsah celé databáze/bucketu.
+Zahrnuje i osiřelé starší logo-N.png objekty, nejen poslední cestu z profilu;
+neznámý soubor/podadresář znamená review. Test používá stránky po jednom,
+unit případ i 50; nejde o nově schválený limit živého workeru.
+
+Před soupisem, každým metadata patchem a před potvrzením výsledku musí projít
+Auth user-not-found a transakční kontrola shodné původní pending žádosti,
+přesně minimálního deleted markeru, původního deadline +60 dní a callerem
+poskytnuté kontroly lease/progress. Auth přítomnost/výpadek, změněná žádost,
+chybějící marker nebo lease blokují práci. Cizí cesta/bucket se odmítá před
+Storage přístupem. Žádný nový persistentní potvrzený stav či job nevzniká.
+
+Krok pro jeden objekt odstraní pouze metadata.firebaseStorageDownloadTokens
+(všechny čárkou oddělené tokeny) pod podmínkami shody generation a
+metageneration. Nepřepisuje bytes ani ostatní metadata včetně Cache-Control.
+[Cloud Storage dokumentuje nutnost použít obě verze společně](https://docs.cloud.google.com/storage/docs/metadata).
+Při souběžné změně je chyba 412; nová verze se bez nového čtení nepřepisuje.
+Čerstvé ověřovací čtení musí doložit stejnou generation bez tokenů. Teprve pak
+a po opětovném potvrzení mazání vrací tokens-absent. Chybějící soubor je
+ověřený no-op; 403/výpadek se nesmí vydávat za chybějící soubor.
+Replay bez tokenů nic nezapisuje; ztracené potvrzení zápisu nevyžaduje nový token.
+Tokeny ani jejich URL se nevracejí do výsledku/auditu.
+
+11 unit scénářů ověřuje patch, zachování metadat, replay a ztracené potvrzení,
+obě verzovací kolize, ověřovací selhání, guardy a stránkování. 6 integračních
+scénářů používá skutečné Admin SDK, Firestore/Storage emulátory a syntetický
+Auth lookup bez vytváření účtů. Volají stejné helpery jako připravené jádro.
+Emulátor CLI 15.31.0 má ověřená omezení: metadata patch staré tokeny zachová
+a ignoruje podmínky verze. Test proto očekává odmítnutí potvrzení a stále
+dostupný starý URL; simulační unit test není cloudové potvrzení CAS/revokace.
+Původních 8 Storage regresí zůstává v téže sekvenční CI sadě.
+
+Před živou integrací zbývá odděleně schválený malý DEV Storage test, který
+ověří tokenovou revokaci a skutečné 412 u obou kolizí. Zde se neprováděl.
+Živé nastavení verzování bucketu, přístup přes IAM/ACL a historické generations
+nebyly ověřené; soupis běžných objektů nedokládá revokaci historických verzí.
+Zůstává také brána nezrušitelného potvrzeného stavu: Firestore transakce
+a Storage patch netvoří jednu atomickou operaci. Změnu mezi kontrolou a patchem
+lze zjistit při potvrzení, nelze tím vrátit již odstraněný token; právě proto
+prototyp ještě nesmí řídit živý worker ani uzavírat account job.
+
+Existující upload používá public,max-age=31536000,immutable. Odvolání tokenu
+nevymaže dříve staženou kopii ani již uloženou prohlížečovou/proxy cache.
+[Cloud Storage popisuje dopad Cache-Control](https://docs.cloud.google.com/storage/docs/metadata#cache-control).
+Tento úsek nemění cache politiku ani netvrdí zpětné odstranění všech kopií.
+Při budoucí integraci musí zůstat pořadí: blokace klientských zápisů →
+revokace a ověření → pozdější fyzický purge loga → teprve rozhodnutí o markeru.
+Účtový milník a MVP metriky zůstávají otevřené.

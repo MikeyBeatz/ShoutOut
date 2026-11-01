@@ -1,12 +1,30 @@
 # ShoutOut – aktuální stav pro navázání práce
 
 Aktualizováno 1. listopadu 2026. Aktuální práce je ve větvi
-`feature/identity-admin-write-guards`; navazuje na dokončenou retenci
+`feature/account-logo-url-revocation`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – ochrana tří Admin SDK zapisovačů, pouze lokálně
+## Aktuální úsek – zneplatnění odkazů na loga, pouze lokálně
+
+Vlastník schválil lokální serverový prototyp a emulátorové ověření bez mazání
+log, worker integrace, nasazení, živých dat nebo nových Auth účtů.
+Připravené jsou stránkovaný soupis přesného businessLogos/UID/ prefixu a krok
+pro jeden soubor: Auth user-not-found, původní pending žádost, minimální deleted
+marker, původní +60 dní a transakční kontrola caller lease; odstraní jen
+download tokeny s podmínkou generation i metageneration a ověří výsledek.
+Jádro ani lab adaptér nejsou v entry pointech/přípravě deploy balíků.
+
+11 nových unit testů, celá serverová sada (105 pass / 188 emulator-only skip)
+a lint prošly. Emulátor výslovně potvrdil mezeru: metadata patch
+tokeny zachová a ignoruje verzovací podmínky. Krok proto odmítá potvrdit úspěch;
+nejde o důkaz funkční revokace v cloudu. Společná Storage sada má 14/14 pass
+bez skipů (8 původních a 6 nových); přesný commit a CI ještě následují.
+[Rozsah, výsledky a zbývající brány](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#logo-url-revocation).
+DEV zůstává na 1dab78c; živé prostředí, joby a MVP metriky se nemění.
+
+## Dokončený předchozí úsek – ochrana tří Admin SDK zapisovačů, pouze lokálně
 
 Vlastník výslovně schválil lokální ochranu backfillu veřejných profilů,
 přidělování rolí a vývojové Business aktivace. Společná kontrola žádosti
