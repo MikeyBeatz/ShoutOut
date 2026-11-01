@@ -59,7 +59,8 @@ prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
 emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
 Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
 Verzovaná soukromá fáze account jobu je nyní lokálně hotová, aktivace false;
-103 cílených testů a 90 serverových unit prošlo. Další krok: CI a konkrétní
+103 cílených testů a 90 serverových unit prošlo. CI 41299376137 pro 22bcf73
+je success, včetně 224 Rules/server testů. Další krok: schválení a konkrétní
 [DEV datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev), pak archiv zpráv.
 [Podrobnosti](TESTING.md#audit-lifecycle-fixes).
 Metriky ani rozsah MVP se tím nemění.
@@ -99,7 +100,7 @@ Metriky ani rozsah MVP se tím nemění.
    [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
    a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
    1. listopadu. Vlastní privátní seznamy mají lokálně ověřenou v2 fázi jobu,
-   aktivace je false. Další krok: CI a schválený DEV pilot, pak archiv zpráv
+   aktivace je false, CI 41299376137 prošlo. Další krok: schválený DEV pilot, pak archiv zpráv
    a konečné dočištění. Staré v1 joby zůstávají beze změny.
    Konečné smazání účtu stále není dokončené.
    Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.

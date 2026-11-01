@@ -144,7 +144,11 @@ Celá serverová sada 90 unit pass / 149 emulator-only skip, ESLint čistý,
 Logy: build/account-private-rules-emulator.log, account-private-functions-unit.log,
 account-private-eslint.log a account-private-tools.log.
 Živý flag zůstává vypnutý; [konkrétní datový pilot](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev)
-vyžaduje vlastní souhlas. CI a případné nasazení eviduje PROJECT_STATUS.
+vyžaduje vlastní souhlas. CI 41299376137 pro
+22bcf7316908d04e12ce5aed80599a460c0c1591 je success: 224 Rules/server případů
+bez skipů, Flutter kontroly a build prošly. Všechny moduly čistého instalačního
+balíku odpovídají commitu. Živé nasazení ani datový test se zatím neprovedly;
+stav a read-only preflight jsou v PROJECT_STATUS.
 
 <a id="audit-lifecycle-fixes"></a>
 

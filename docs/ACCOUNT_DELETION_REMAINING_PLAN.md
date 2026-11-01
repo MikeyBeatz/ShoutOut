@@ -117,6 +117,13 @@ stránek v emulátoru 460 ms; nejde o cloudovou latenci nebo cenu.
 
 ## Konkrétní návrh rozšířeného DEV pilotu – čeká na schválení
 
+Připravený commit 22bcf7316908d04e12ce5aed80599a460c0c1591 má úspěšné CI
+41299376137 včetně 224 Rules/server případů, celé Flutter sady a web buildu.
+Čistý instalační balík obsahuje šest JS modulů, každý odpovídá Git blobu.
+Read-only DEV preflight: 0 v1 jobů, 0 v2 jobů, 1 pending žádost. Existující
+žádost zůstane beze změny, pilot má vlastní novou žádost a UID.
+Důkaz: build/account-private-preflight-proof.json, CI log account-private-ci.log.
+
 - Cíl jen shoutout-dev-46c81, codebase account-deletion, dvě stávající Functions.
   Po úspěšném CI připraveného kódu navazující otestovaný commit zapne
   privateCleanupEnabled. Vytváření nových žádostí pak používá v2; žádná migrace
@@ -146,9 +153,37 @@ stránek v emulátoru 460 ms; nejde o cloudovou latenci nebo cenu.
 Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovacímu Auth
 účtu. Trvalý rolloutový souhlas tuto datovou změnu sám nepokrývá.
 
+## Ověřené návaznosti před archivací zpráv a komentářů
+
+- Soukromé zprávy jsou v shouts/{id}/privateReplies a server ukládá authorId,
+  recipientId a participants. Mazat lze jen zprávy s mazaným účtem mezi
+  skutečnými dvěma účastníky, nikoli každou zprávu pod jeho Shoutem. Současné
+  participant Rules dovolí druhému účastníkovi číst existující zdroj i po
+  vzniku cizí deletion žádosti; vyčištění vlastní schránky toto neřeší.
+- firestore.indexes.json zatím nemá collection-group index pro privateReplies.
+  Globální hledání zpráv podle účastníka vyžaduje předem ověřit index/náklady
+  a historickou validitu dat; nepředpokládat, že vlastní index kolekce postačí.
+  Komentáře už mají collection-group authorId index v repozitáři, živý stav
+  je nutné samostatně ověřit před použitím.
+- createContentReport už kopíruje text a authorId soukromé zprávy do
+  privateReplyReports. U veřejného komentáře commentReports ukládá jen ID,
+  důvod a stav: fyzické smazání zdroje by bez doplnění podkladu ztratilo text.
+  Stávající deleteComment také neodstraňuje reakční podkolekce. Budoucí fáze
+  musí vyřešit oba případy, atomický commentsCount i idempotentní přenos.
+- Moderační _ReportDetailDialogState._load v lib/src/moderation.dart nejprve
+  vyžaduje existující Shout i pro soukromé hlášení se snapshotem. Samotné
+  uchování textu tedy nezaručuje dostupnost důkazu po odstranění Shoutu;
+  moderační fallback patří do téhož následujícího úseku.
+- Před archivací je třeba konkretizovat „potřebný obsah“ ze schválené
+  60denní bezpečnostní retence: zda uchovat všechny zprávy, nebo jen
+  nahlášené/potřebné podklady. Směr minimalizace favorizuje jen potřebné
+  podklady, ale toto není nové schválené retenční pravidlo. Samostatně zůstává
+  rozhodnutí o existujícím otevřeném hlášení/hold po uplynutí lhůty.
+  V této etapě nevzniká nový archiv, nový index ani změna retenční lhůty.
+
 ## Další větší úsek
 
-1. Privátní fáze je lokálně zapojená; po CI schválit výše uvedený DEV datový
+1. Privátní fáze je lokálně zapojená a CI prošlo; schválit výše uvedený DEV datový
    pilot a ověřit živý výsledek. Dosavadní v1 shouts-hidden záznamy zachovat;
    případnou migraci připravit odděleně.
 2. Připravit interní archiv a atomické odstranění původních soukromých zpráv,
