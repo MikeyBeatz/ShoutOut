@@ -52,7 +52,7 @@ souhlasu vlastníka zapíná, produkční nikoli.
 Lokálně připravená `toggleShoutSaveOperation` používá namespace
 `toggleShoutSave` a receipt s `userId`, `action`, `fingerprint`, `shoutId`,
 `result: {saved, count}` a `createdAt`. Nevkládá text, polohu ani přezdívky.
-Uložení zůstává v `shouts/{id}/saves/{uid}` pouze s `createdAt`; odebrání
+Uložení zůstává v `shouts/{id}/saves/{uid}` s `createdAt`; odebrání
 dokument odstraní. V jediné transakci se změní záložka, `savesCount`, sdílený
 limit `interaction` a receipt; ostatní čítače i obsah Shoutu zůstávají stejné.
 Replay vrací historický výsledek, nikoli aktuální stav záložky. Budoucí klient
@@ -251,10 +251,10 @@ hodnoty. Běžná platnost je 15 minut až 24 hodin, Business až 7 dní při po
 | Cesta pod Shoutem | Pole | Oprávnění a invarianta |
 |---|---|---|
 | `comments/{commentId}` | `authorId`, `authorNickname`, `text`, `createdAt`, `likesCount`, `dislikesCount`; volitelně `replyToCommentId`, `replyToNickname` | Vytvoření/smazání musí ve stejném batchi upravit `shouts.commentsCount`. |
-| `comments/{commentId}/reactions/{uid}` | `type: like\|dislike`, `updatedAt` | Vlastní reakce uživatele; změna musí atomicky upravit oba čítače komentáře. |
+| `comments/{commentId}/reactions/{uid}` | `type: like\|dislike`, `updatedAt`, nově `userId` | Vlastní reakce uživatele; změna musí atomicky upravit oba čítače komentáře. |
 | `privateReplies/{replyId}` | `authorId`, `authorNickname`, `recipientId`, `recipientNickname`, `participants`, `text`, `createdAt`, `targetType`; volitelně `parentCommentId` | Čtou pouze oba účastníci. `participants` je dvojice autor/příjemce, ne veřejný chat. |
-| `reactions/{uid}` | `type: like\|dislike`, `updatedAt` | Jedna reakce uživatele na Shout; atomicky mění `likesCount`/`dislikesCount`. |
-| `saves/{uid}` | `createdAt` | Vlaječka vlastněná uživatelem; atomicky mění `savesCount`. |
+| `reactions/{uid}` | `type: like\|dislike`, `updatedAt`, nově `userId` | Jedna reakce uživatele na Shout; atomicky mění `likesCount`/`dislikesCount`. |
+| `saves/{uid}` | `createdAt`, nově `userId` | Vlaječka vlastněná uživatelem; atomicky mění `savesCount`. |
 
 Čítače jsou denormalizované kvůli feedu. Nejsou autoritativní samy o sobě:
 pravidla dovolí změnu pouze při odpovídajícím vytvoření, změně nebo smazání

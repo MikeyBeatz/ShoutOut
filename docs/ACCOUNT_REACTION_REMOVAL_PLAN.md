@@ -38,6 +38,8 @@ Připravené tři stávající callables zapisují do reakcí/záložek také se
 `userId` shodné s Auth UID a ID dokumentu. Payload ani odpověď API se nemění,
 nepřidává se další dokumentový zápis. Rules vyžadují totéž pole i od přímého
 zapisovače; nesmí být vynechané, podvržené ani odstraněné přepsáním reakce.
+Stejné UID doplňují i dosavadní klientské fallbacky, pokud serverový přepínač
+není aktivovaný; tím zůstávají kompatibilní s novými Rules.
 Čtení starých položek a jejich odstranění zůstává možné. DEV má všechny tři
 serverové přepínače již zapnuté, takže aktuální klient neposílá původní tělo.
 
@@ -48,8 +50,8 @@ plošně nasadit, protože má také další neschválené TTL konfigurace.
 
 Po přesném úspěšném CI lze rutinně aktualizovat pouze toggleShoutReaction,
 toggleCommentReaction, toggleShoutSave, příslušné Rules a tyto dva indexy
-v `shoutout-dev-46c81`. Hosting, účetní Functions, Scheduler a produkce se
-tímto přípravným úsekem nemění. Před potvrzením pokrytí vyčkat dokončení
+v `shoutout-dev-46c81` a kompatibilní vývojový web. Účetní Functions, Scheduler
+a produkce se tímto přípravným úsekem nemění. Před potvrzením pokrytí vyčkat dokončení
 starých invokací a ověřit stav indexů i novou inventuru.
 
 Read-only DEV preflight našel 0 reakcí a 3 záložky bez userId, žádné neznámé
@@ -57,7 +59,12 @@ schéma. Nic nezapsal. Plán v build/lifecycle-ownership-plan.json má digest
 `beccfc90b96db71330b6c54611886476aba5d90aa35a41491c34743a031136f0`.
 Případná oprava těchto tří existujících záložek potřebuje zvlášť konkrétní
 proveditelný plán, updateTime preconditions a souhlas s opravou dat; samotný
-rollout ji neprovádí. Před nasazením workeru musí být doložená úplnost jeho
+rollout ji neprovádí. Připravený nástroj `tools/activity_ownership_repair.mjs`
+má pět emulátorových testů: dry-run bez zápisů, atomické UID-only doplnění,
+zastaralý plán, souběh v commit, lost-ack replay a odmítnutí cizích cest/projektu.
+Vyžaduje přesný digest, podporuje jen DEV a starou updateTime; nemění rodiče,
+počty, typ reakce ani původní timestampy. Zatím živě nebyl spuštěný s apply.
+Před nasazením workeru musí být doložená úplnost jeho
 konkrétního objevovacího dotazu, ne pouze přítomnost indexu.
 
 ## Ověření a další krok

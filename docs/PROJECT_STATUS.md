@@ -6,11 +6,14 @@ Větev `feature/account-reaction-removal`. Vlastník schválil po potvrzeném
 odstranění Auth odebrat jeho palce u cizího obsahu a upravit počty.
 Připravené interní transakční jádro (12 emulátorových případů), serverové
 userId ve třech stávajících writerech a ochrana vlastnictví v Rules.
-Lokálně 336 Rules/server a lint prošly. Připravený cílený indexový plán nemění
-TTL; CI a rollout této nové vrstvy ještě nejsou potvrzené.
+Lokálně 336 Rules/server, 5 dalších repair emulátorových testů, 38 tools,
+252 Flutter, analyzátor a lint prošly. První checkpoint d197d38 má success
+CI 41485581109. Navazující nástroj opravy a klientské UID fallbacky čekají na
+přesné CI. Připravený cílený indexový plán nemění TTL; rollout ještě neproběhl.
 Jádro zatím není zapojené do account workeru; automatické odebrání palců
 tedy ještě není nasazené. DEV read-only inventura: 0 reakcí, 3 starší záložky
 bez UID, žádné neznámé schéma. Stará data ani staré joby se neměnily.
+Živý dry-run připraveného opravného nástroje: wouldChange 3, changed 0.
 [Kontrakt, pořadí rolloutů a zbývající brány](ACCOUNT_REACTION_REMOVAL_PLAN.md).
 
 ## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování

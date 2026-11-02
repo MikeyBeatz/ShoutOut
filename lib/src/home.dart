@@ -437,7 +437,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             });
         } else {
           transaction
-            ..set(actualSaveRef, {'createdAt': FieldValue.serverTimestamp()})
+            ..set(actualSaveRef, {
+              'createdAt': FieldValue.serverTimestamp(),
+              'userId': uid,
+            })
             ..update(shoutRef, {'savesCount': currentSaves + 1});
         }
         transaction.set(
@@ -539,6 +542,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
           transaction.set(reactionRef, {
             'type': nextType,
             'updatedAt': FieldValue.serverTimestamp(),
+            'userId': uid,
           });
           if (shout.authorId != uid &&
               actorProfileSnapshot?.exists == true &&

@@ -317,6 +317,7 @@ class _CommentTileState extends State<CommentTile> {
           transaction.set(reference, {
             'type': type,
             'updatedAt': FieldValue.serverTimestamp(),
+            'userId': uid,
           });
         }
         transaction
