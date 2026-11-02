@@ -118,6 +118,7 @@ Vlastník 2. listopadu schválil celý existující Business profil včetně pob
 a dostupných fakturačních podkladů ve stávajících 60 dnech; lhůta je pevná
 i pro otevřená hlášení, automatický hold se nezavádí. Implementace této fáze
 naváže. Minimální trvalý marker po purge následně výslovně schválil.
-Otevřená zůstává volba odebrání palců/počtů nebo anonymních agregací u cizího
-obsahu; s ní souvisí nové vlastnické vyhledávání reakcí/záložek. Zůstává také
-fyzické odstranění potomků. Celý milník zatím není dokončený.
+Vlastník následně schválil odebrání palců i úpravu počtů u cizího obsahu.
+Vlastnická UID vrstva, Rules a CG indexy jsou v DEV nasazené; schválená oprava
+3 starých záložek je dokončená. [Navazující v5 worker a skutečné ověření](ACCOUNT_REACTION_REMOVAL_PLAN.md).
+Zůstává konečný fyzický úklid potomků. Celý milník zatím není dokončený.

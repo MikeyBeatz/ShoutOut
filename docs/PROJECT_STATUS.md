@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-## Rozpracovaný úsek – odebrání palců a vlastnické vyhledávání
+## Uzavřený DEV úsek – odebrání palců a vlastnické vyhledávání
 
 Větev `feature/account-reaction-removal`. Vlastník schválil po potvrzeném
 odstranění Auth odebrat jeho palce u cizího obsahu a upravit počty.
@@ -20,12 +20,27 @@ Samostatně schválený plán `beccfc90…136f0` byl atomicky proveden: přesně
 zůstala shodná. Nová inventura: 0 reakcí, 3/3 indexované záložky, 0 oprav
 a 0 neznámých schémat. Původní žádost/job/archive inventura má stejný digest.
 
-Navazuje připravená verzovaná fáze workeru v5: UID dotaz, trvalý kurzor,
-nejvýše 50 kandidátů za běh, atomické odečtení a bezpečný replay. Stávající
-v1–v4 joby se nemigrují. Tato fáze ještě není nasazená. Lokálně prošlo všech
-19 identity/worker scénářů včetně 7 nových v5; související job/core/expiry
-regrese a lint prošly. Navazuje přesné CI a pouze dvoufunkční DEV rollout
-se živým pilotem.
+Verzovaná fáze workeru v5 je nasazená z
+`d0e43c558428cb45976bb5326bbf476cf3ea1cc6` po success CI 41493498292:
+252 Flutter, 38 tools, 107 unit, 348 Rules/server, 15 Storage, analýza/lint/build.
+UID dotaz, trvalý kurzor, nejvýše 50 kandidátů za běh, atomické odečtení
+a bezpečný replay. Stávající v1–v4 joby se nemigrují. Obě account Functions
+jsou ACTIVE, hash `b2c8a1f7df60cf86b1937fdb1532321e9e10ba62`, revize
+accountDeletionRequestCreatedDev `00008-pay`, resumeAccountDeletionJobsDev `00008-vig`.
+Node22, min0/max1, concurrency1, 256 MiB/60 s a Scheduler zůstaly stejné;
+ostatní Functions, IAM, Rules a Hosting se tímto rolloutem nezměnily.
+
+Živý v5 pilot použil nový syntetický UID bez Auth účtu a oddělený obsah.
+Skutečný trigger/plánovač dokončil content-archived: 1 Shout palec a 1 komentářový
+palec odebrány s přesným odpočtem, 1 osiřelý hlas bez zásahu do čítačů;
+cizí hlas zachovaný, vlastní přeskočené pro jejich samostatný životní cyklus.
+Ověřeno 5 archivních rootů a kopie reakce vlastního komentáře, původní
+request/createTime/deadline, anonymní profil a návazný soukromý úklid.
+Plánovač byl při testu také ručně vyvolán až po splatnosti jobu; konfigurace
+a minimální retry prodleva se neměnily. Všechny fixture položky jsou uklizené,
+0 zbylých reakcí fixture a původní účetní inventura má stejný digest.
+Další krok je konečný 60denní purge včetně vlastních reakcí, záložek,
+soukromých/Business potomků a kopií důkazů; celý účetní milník zůstává otevřený.
 [Kontrakt, pořadí rolloutů a zbývající brány](ACCOUNT_REACTION_REMOVAL_PLAN.md).
 
 ## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování
@@ -42,7 +57,7 @@ původních Shoutů: změněný pouze status. Testovací účet má potvrzený A
 a obě odebrané role; job dokončil content-archived a je uklizený. Původní
 žádost/inventura mají stejné digests. Při backendovém rolloutu zůstaly Hosting,
 IAM, ostatní Functions a Scheduler beze změny. Produkce nedotčená.
-Aktuální větev `fix/account-deletion-retry-flow` má nasazený klientský
+Tehdejší větev `fix/account-deletion-retry-flow` má nasazený klientský
 koordinátor, Firebase adaptér a obnovu z pending obrazovky. První žádost už
 při nejasné chybě nemaže intent; UID guardy a latch chrání opakování. Společný
 password dialog opravil prokázané předčasné dispose controlleru. Zdroj
@@ -62,8 +77,8 @@ Rozhodnutí vlastníka: celý existující Business profil/pobočky/fakturační
 podklady zachovat po původních 60 dní; lhůta je pevná i pro otevřená hlášení.
 Minimální veřejný marker po purge je schválený trvale. Následně byly schválené
 i odebrání palců smazaného účtu a změna počtů; nový úsek je uvedený výše.
-Další krok: přesná inventura a levné vlastnické vyhledání reakcí/záložek,
-potom konečný 60denní purge soukromých/Business dat, potomků a kopií důkazů.
+Vlastnické vyhledání reakcí/záložek už uzavřel novější úsek výše. Navazuje
+konečný 60denní purge soukromých/Business dat, potomků a kopií důkazů.
 Business data se dnes zachovávají na původních místech, faktury mají zatím
 jen UI placeholder. Celý účtový milník a plný Rules cutover stále nejsou uzavřené.
 

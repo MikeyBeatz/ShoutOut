@@ -38,18 +38,21 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
-Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Připravená první
-[transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má lokálně
-341 Rules/server testů a úspěšné CI 41487516001. Vlastnická vrstva je nasazená
-v DEV; schválené doplnění UID u 3 záložek je provedené a ověřené. Navazuje
-testovaná fáze workeru v5, její přesné CI, rollout a živý pilot. Žádný celý
-milník se tím nezaškrtává.
+Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Dokončená
+[transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má
+úspěšné CI 41493498292 (348 Rules/server). Vlastnická vrstva i nový worker v5
+jsou nasazené v DEV; schválené doplnění UID u 3 záložek je provedené a ověřené.
+Živý pilot dokončil odebrání palců/čítače, content-archived i úklid fixture,
+původní inventura má stejný digest. Navazuje konečný 60denní purge vlastních
+reakcí, záložek, soukromých/Business potomků a kopií důkazů. Žádný celý
+milník se tím ještě nezaškrtává.
 
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
 Shoutů změnilo jen status. Účtový pilot dokončil content-archived a je uklizený.
-Klientské retry UI 23f2043 má úspěšné CI 41472129925 (252 Flutter) a je nasazené
-na DEV Hosting d2573a279275eb72. Živý průchod jedním novým dočasným účtem,
+Klientské retry UI 23f2043 má úspěšné CI 41472129925 (252 Flutter); jeho původní
+Hosting d2573a279275eb72 nahradil kompatibilní UID klient 62a51b0 / 20af65bc04ae5c35.
+Živý průchod jedním novým dočasným účtem,
 zachování žádosti/deadline, terminální worker a úklid jsou ověřené.
 Plné uzavření přímých zápisů zůstává otevřené.
 Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;

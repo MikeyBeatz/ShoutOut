@@ -144,11 +144,11 @@ nekopírují. LeaseToken je pouze neveřejný identifikátor vlastnictví práce
 `maintenanceState/accountDeletionShoutJobs` uchovává rotující scan cursor.
 Obě cesty jsou klientům zakázané; server používá Admin SDK a vlastní kontroly.
 
-Nově připravená v5 přidává fázi actor-reactions mezi shouts a private,
+V DEV nasazená v5 přidává fázi actor-reactions mezi shouts a private,
 actorReactionCursor (relativní cesta zdrojového dokumentu),
 actorReactionsRemovedAt a removedShoutReactionCount/removedCommentReactionCount/
 removedOrphanReactionCount. Vlastnické CG userId indexy jsou v DEV READY;
-v5 samotná zatím čeká na CI a rollout. Starší joby se nemigrují.
+v5 z d0e43c5 má success CI 41493498292 a dokončený živý pilot. Starší joby se nemigrují.
 Podklady jednotlivých odebraných palců jsou rooty accountContentArchive
 s kind shoutReaction/commentReaction, původní žádostí a stejným pevným
 retainUntil; žádná nová TTL se nezapíná. [Kontrakt](ACCOUNT_REACTION_REMOVAL_PLAN.md).

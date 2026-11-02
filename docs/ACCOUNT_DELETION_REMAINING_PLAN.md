@@ -62,14 +62,14 @@ a faktur je zatím prázdný placeholder; existují fakturační údaje profilu,
 nikoli hotový model skutečných faktur. Jeho budoucí integrace musí mít vlastní
 konkrétní cesty. Pouhé uchování dnes není důkazem implementovaného purge.
 
-Reakce Shoutu i komentáře mají UID v ID dokumentu, ale tělo pouze
-`type/updatedAt`; záložky `shouts/{id}/saves/{uid}` jen `createdAt`.
-Tyto skutečné zdrojové cesty nejsou současným account workerem plošně dočištěné.
-Pro levné vyhledání napříč cizím obsahem bude potřeba ověřit vlastnický index
-(např. serverový UID v těle), příslušné collection-group indexy a případnou
-samostatně schválenou opravu starých DEV dat. Celý feed se nesmí skenovat pro
-každý mazaný účet. Současně se musí zachovat souhrnné počty a skládání s budoucím
-prostorovým indexem; konkrétní změna počtů čeká na výše uvedenou volbu.
+Původní reakce Shoutu/komentáře měly UID pouze v ID dokumentu a tělo
+`type/updatedAt`; záložky jen `createdAt`. Od DEV rolloutu 62a51b0 mají také
+serverové `userId` a oba CG indexy jsou READY. Samostatně schválená atomická
+oprava doplnila UID do 3 původních záložek; nová inventura nemá chybějící UID.
+Vlastník schválil odebrání palců u cizího obsahu se změnou souhrnných počtů;
+v5 navazujícího workeru má stránkování a transakční počty. Skutečný runtime
+a pilot eviduje [aktuální stav](PROJECT_STATUS.md). Celý feed se pro účet
+neskenuje. Vlastní reakce a záložky stále potřebují konečný 60denní purge.
 Archivované reakce mají původní data v `content`, tedy nejde o stejný dotaz.
 
 Další inventura před purge musí zahrnout `rateLimits/{uid}/actions`, technická
