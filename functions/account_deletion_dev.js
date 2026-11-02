@@ -13,7 +13,7 @@ import { runAccountMaintenanceTick } from './shout_expiration.js';
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
-  retentionPurgeEnabled: false, // Activation follows exact CI, ownership/index and Storage policy checks.
+  retentionPurgeEnabled: true, // DEV activation requires exact CI plus verified indexes and Storage policy.
   retireRolePrivilegesEnabled: true, // Retire both role stores atomically with Auth confirmation.
   shoutExpirationEnabled: true, // Reuse otherwise idle maintenance ticks; never delete content here.
   reactionRemovalEnabled: true, // UID coverage/indexes verified in DEV; only new jobs use v5.

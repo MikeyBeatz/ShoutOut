@@ -9,7 +9,10 @@ samostatný durable purge, metadata archivních kopií, omezené stránkování
 včetně chybějících rodičů, Storage generation journal a příchozí Rules ochrany.
 Lokálně prošlo 15/15 purge emulátorových scénářů, 254 Flutter testů,
 107 serverových unit testů, lint a Flutter analýza; úplná Rules regrese běží.
-Runtime flag zatím false, nic z této fáze není nasazené.
+Přípravný commit f81eaf4 má flag false. Navazující aktivační commit nastavuje
+flag true, ale nasazení zůstává podmíněné jeho vlastním CI, indexy READY,
+přípravným rolloutem a ověřenou DEV Storage politikou. Nic z této fáze zatím
+není nasazené.
 Skutečný DEV zůstává níže uvedený d0e43c5/62a51b0; žádná původní data se neměnila.
 [Rozsah, inventura a provozní brány](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
