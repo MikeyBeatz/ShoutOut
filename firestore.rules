@@ -17,10 +17,11 @@ service cloud.firestore {
     function hasRoleLevel(minimumLevel) {
       let rolePath =
         /databases/$(database)/documents/accountRoles/$(request.auth.uid);
-      return signedIn() &&
+      return signedIn() && !deletionPending() &&
         (
           (
             exists(rolePath) &&
+            get(rolePath).data.get('accountStatus', 'active') != 'deleted' &&
             get(rolePath).data.level is int &&
             get(rolePath).data.level >= minimumLevel
           ) ||
@@ -28,7 +29,8 @@ service cloud.firestore {
             minimumLevel <= 3 &&
             exists(
               /databases/$(database)/documents/moderators/$(request.auth.uid)
-            )
+            ) &&
+            get(/databases/$(database)/documents/moderators/$(request.auth.uid)).data.get('accountStatus', 'active') != 'deleted'
           )
         );
     }
@@ -40,8 +42,9 @@ service cloud.firestore {
     function isBusinessAccount() {
       let rolePath =
         /databases/$(database)/documents/accountRoles/$(request.auth.uid);
-      return signedIn() &&
+      return signedIn() && !deletionPending() &&
         exists(rolePath) &&
+        get(rolePath).data.get('accountStatus', 'active') != 'deleted' &&
         get(rolePath).data.role == 'business' &&
         get(rolePath).data.level == 2;
     }

@@ -1,6 +1,17 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Aktualizováno 2. listopadu 2026. Aktuální práce je ve větvi
+## Rozpracovaný úsek 2. listopadu – role a exspirace
+
+Aktuální větev `fix/retired-privileges-and-expiration`. Připravené atomické
+zneplatnění moderních/legacy rolí při serverové konfirmaci Auth, související
+Firestore/Storage ochrany a dávkové `active → expired` ve volném ticku
+existujícího plánovače. Bez fyzického mazání či změny retence. Cíleně 22/22
+emulátorových testů a lint prošly; úplné CI a DEV rollout ještě nejsou potvrzené.
+Dosavadní živé nasazení níže zůstává v4 z b685ac4.
+[Kontrakt, meze a návaznosti](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+Otevřená rozhodnutí: rozsah Business archivu, veřejný marker po purge a hold.
+
+Předchozí uzavřený stav 2. listopadu 2026 byl ve větvi
 `feature/account-public-identity-worker`; navazuje na dokončenou retenci
 `feature/operation-retention-cleanup`, ověřené CI `079d053`, klientskou retenci
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení

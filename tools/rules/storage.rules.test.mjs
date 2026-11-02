@@ -59,3 +59,22 @@ test('the independent bug screenshot owner and support-staff access remains inta
  await assertSucceeds(uploadBytes(ref(actor('reporter').storage(),path),new Uint8Array([1,2,3]),{contentType:'image/png'}));
  await assertSucceeds(getBytes(ref(actor('reporter').storage(),path)));await assertSucceeds(getBytes(ref(actor('support').storage(),path)));await assertFails(getBytes(ref(actor('other').storage(),path)));
 });
+test('retired staff cannot read bug screenshots without spending another Firestore bridge lookup',async()=>{
+ const path='bugReports/reporter/bug/screenshot';
+ await env.withSecurityRulesDisabled(async c=>{await setDoc(doc(c.firestore(),'bugReports/bug'),{userId:'reporter',status:'open',screenshotPath:path,screenshotContentType:'image/png',screenshotSize:3});
+  await setDoc(doc(c.firestore(),'accountRoles/support'),{role:'administrator',level:5});
+  await uploadBytes(ref(c.storage(),path),new Uint8Array([1,2,3]),{contentType:'image/png'});
+ });
+ await assertSucceeds(getBytes(ref(actor('support').storage(),path)));
+ await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'accountDeletionRequests/support'),{userId:'support',status:'pending'}));
+ await assertSucceeds(getBytes(ref(actor('support').storage(),path)));
+ await env.withSecurityRulesDisabled(async c=>{
+  await setDoc(doc(c.firestore(),'accountRoles/support'),{role:'administrator',level:5,accountStatus:'deleted'});
+  await setDoc(doc(c.firestore(),'accountDeletionRequests/support'),{userId:'support',status:'pending',authDeletionConfirmedAt:new Date()});
+ });
+ await assertFails(getBytes(ref(actor('support').storage(),path)));
+ await env.withSecurityRulesDisabled(c=>deleteDoc(doc(c.firestore(),'accountDeletionRequests/support')));
+ await assertFails(getBytes(ref(actor('support').storage(),path)));
+ await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'accountRoles/support'),{role:'administrator',level:5}));
+ await assertSucceeds(getBytes(ref(actor('support').storage(),path)));
+});

@@ -38,6 +38,11 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
+Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+Lokální cílené testy prošly; CI a DEV rollout ještě nejsou potvrzené.
+Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
+rozsah Business archivu, marker po purge a případný hold čekají na rozhodnutí.
+
 Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace
 `02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.
 [Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).

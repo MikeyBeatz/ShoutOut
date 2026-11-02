@@ -78,13 +78,15 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   privateCleanupEnabled = false, beforePrivateCommit = null,
   contentArchiveEnabled = false, beforeContentTransaction = null,
   confirmAuthDeletionEnabled = false,
+  retireRolePrivilegesEnabled = false,
   publicIdentityEnabled = false, logoBucket = null,
 } = {}) {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
       typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
-      typeof publicIdentityEnabled !== 'boolean' ||
+      typeof publicIdentityEnabled !== 'boolean' || typeof retireRolePrivilegesEnabled !== 'boolean' ||
+      (retireRolePrivilegesEnabled && !confirmAuthDeletionEnabled) ||
       (publicIdentityEnabled && (!confirmAuthDeletionEnabled || !contentArchiveEnabled || !logoBucket)) ||
       (contentArchiveEnabled && !privateCleanupEnabled)) {
     throw new Error('invalid-account-deletion-job-options');
@@ -235,6 +237,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   let result;
   try {
     const confirmation = confirmAuthDeletionEnabled ? await confirmAccountAuthDeletion(identity, db, invocationAuth, {
+      retireRoles: retireRolePrivilegesEnabled,
       clock, transactionGuard: async transaction => { assertOwner(await transaction.get(jobRef), now()); },
     }) : null;
     result = confirmation?.state === 'waiting-for-auth-deletion' ? confirmation

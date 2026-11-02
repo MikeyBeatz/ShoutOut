@@ -1,5 +1,16 @@
 # Testovací strategie a regresní matice
 
+## Úsek role/exspirace – 2. listopadu 2026
+
+Lokálně prošlo 22 cílených Firestore testů (konfirmace, moderní/legacy
+autorita, exspirace), 15 Storage testů, 107 serverových unit testů
+(208 integračních přeskočeno bez emulátoru) a 37 tools testů; lint bez chyby.
+Celá Rules/server sada a následné CI/DEV ověření se dokončují.
+Testy ověřují zachování metadat/deadline, nevytváření chybějících rolí,
+ztracený lease, starý token, návrat z nepotvrzeného rollbacku, přesnou
+hranici exspirace, transakční souběh i prioritu účtové dávky před exspirací.
+Kontrakt je v [ACCOUNT_AUTHORITY_AND_EXPIRATION](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+
 `test/live_data_test.dart` ověřuje stabilní sdílení realtime zdrojů, oddělení
 účtů/databází, chyby a opětovné načtení, rušení odběrů a zachování živých
 interakcí při opakovaných aktualizacích 50 položek. Modelové počty odběrů

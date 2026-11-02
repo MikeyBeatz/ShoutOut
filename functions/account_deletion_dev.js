@@ -8,11 +8,13 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as logger from 'firebase-functions/logger';
 import { runAccountDeletionCreatedEvent } from './account_deletion_job.js';
-import { scanDueAccountDeletionJobs } from './account_deletion_job_scan.js';
+import { runAccountMaintenanceTick } from './shout_expiration.js';
 
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
+  retireRolePrivilegesEnabled: true, // Retire both role stores atomically with Auth confirmation.
+  shoutExpirationEnabled: true, // Reuse otherwise idle maintenance ticks; never delete content here.
   publicIdentityEnabled: true, // New v4 jobs only; historical v1/v2/v3 jobs retain their schema.
   confirmAuthDeletionEnabled: true, // Gate every new destructive slice before touching content.
   contentArchiveEnabled: true, // Approved DEV archive pilot, 1 November 2026.
@@ -57,7 +59,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
 }, async () => {
   try {
     const db = database();
-    const result = await scanDueAccountDeletionJobs(db, getAuth(), {
+    const result = await runAccountMaintenanceTick(db, getAuth(), {
       ...workerOptions(db), clock: () => new Date(),
     });
     const log = result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.checkpointConflict ? logger.warn : logger.info;

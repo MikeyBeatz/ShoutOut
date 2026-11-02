@@ -169,6 +169,11 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 
 ## Identita a účet
 
+Připravený navazující worker umí při potvrzení odstranění Auth atomicky přidat
+`accountStatus: deleted` existujícím moderním i legacy rolím a `rolesRetiredAt`
+původní žádosti; ostatní role metadata a deadline zachová. Skutečný stav
+nasazení a ochrany starých tokenů jsou v [kontraktu rolí a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+
 | Cesta | ID a důležitá pole | Význam a životní cyklus |
 |---|---|---|
 | `users/{uid}` | `nickname`, `nicknameLower`, `createdAt`, `emailVerified`, `language`, `themeMode`, `showOnboardingHelp`, `avatarId`, `avatarBackgroundStart`, `avatarBackgroundEnd`, `avatarGradientDirection`, volitelně `businessLogoPath`, `businessLogoVersion` | Soukromý profil a preference vlastníka. Vzniká až po ověření e-mailu a přijetí právních dokumentů. Logo smí přidat pouze aktivní Business účet. |

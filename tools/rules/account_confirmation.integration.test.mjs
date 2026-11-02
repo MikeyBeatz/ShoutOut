@@ -36,6 +36,46 @@ async function fixture() {
 test('the existing rollback remains available before server confirmation', async () => {
   const f = await fixture(); await assertSucceeds(deleteDoc(f.client)); assert.equal((await f.request.get()).exists, false);
 });
+
+test('confirmation atomically retires modern and legacy authority while preserving metadata and retention', async () => {
+  const f = await fixture(), modern = db.doc(`accountRoles/${f.uid}`), legacy = db.doc(`moderators/${f.uid}`);
+  roots.push(modern, legacy);
+  await modern.set({ role: 'administrator', level: 5, audit: 'original' });
+  await legacy.set({ grantedBy: 'original' });
+  const options = { ...f.options, retireRoles: true };
+  await confirm(f.identity, db, missing, options);
+  const request = await f.request.get(), role = await modern.get(), old = await legacy.get();
+  assert.deepEqual(role.data(), { role: 'administrator', level: 5, audit: 'original', accountStatus: 'deleted' });
+  assert.deepEqual(old.data(), { grantedBy: 'original', accountStatus: 'deleted' });
+  assert.ok(request.data().rolesRetiredAt.isEqual(request.data().authDeletionConfirmedAt));
+  assert.ok(request.createTime.isEqual(f.snapshot.createTime));
+  assert.ok(request.data().retainUntil.isEqual(f.snapshot.data().retainUntil));
+  await confirm(f.identity, db, missing, options);
+  for (const [ref, before] of [[f.request, request], [modern, role], [legacy, old]]) {
+    assert.ok((await ref.get()).updateTime.isEqual(before.updateTime));
+  }
+});
+
+test('Auth presence, provider error and lease loss cannot partially retire roles', async () => {
+  const f = await fixture(), role = db.doc(`accountRoles/${f.uid}`); roots.push(role);
+  await role.set({ role: 'business', level: 2 }); const before = await role.get();
+  const options = { ...f.options, retireRoles: true };
+  await confirm(f.identity, db, { getUser: async () => ({ uid: f.uid }) }, options);
+  await assert.rejects(confirm(f.identity, db, { getUser: async () => { throw new Error('outage'); } }, options));
+  await f.lease.update({ owner: 'another' }); await assert.rejects(confirm(f.identity, db, missing, options));
+  assert.ok((await role.get()).updateTime.isEqual(before.updateTime));
+  assert.ok((await f.request.get()).updateTime.isEqual(f.snapshot.updateTime));
+});
+
+test('missing roles stay missing and malformed retirement markers fail closed', async () => {
+  const f = await fixture(), options = { ...f.options, retireRoles: true };
+  await confirm(f.identity, db, missing, options);
+  assert.equal((await db.doc(`accountRoles/${f.uid}`).get()).exists, false);
+  assert.equal((await db.doc(`moderators/${f.uid}`).get()).exists, false);
+  await f.request.update({ rolesRetiredAt: 'invalid' }); const before = await f.request.get();
+  await assert.rejects(confirm(f.identity, db, missing, options), /invalid-role-retirement/);
+  assert.ok((await f.request.get()).updateTime.isEqual(before.updateTime));
+});
 test('server confirmation prevents deletion/erasure/replacement using an old token and replays without extending retention', async () => {
   const f = await fixture(); assert.deepEqual(await f.run(), { state: 'auth-deletion-confirmed', changed: true });
   const confirmed = await f.request.get(), expected = f.snapshot.data();

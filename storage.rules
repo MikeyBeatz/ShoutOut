@@ -10,6 +10,7 @@ service firebase.storage {
     function supportStaff() {
       return signedIn() &&
         firestore.exists(/databases/(default)/documents/accountRoles/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/accountRoles/$(request.auth.uid)).data.get('accountStatus', 'active') != 'deleted' &&
         firestore.get(/databases/(default)/documents/accountRoles/$(request.auth.uid)).data.level >= 5;
     }
 
@@ -24,6 +25,7 @@ service firebase.storage {
         request.auth.uid == userId &&
         visibleLogoOwner(userId) &&
         firestore.exists(/databases/(default)/documents/accountRoles/$(userId)) &&
+        firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.get('accountStatus', 'active') != 'deleted' &&
         firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.role == 'business' &&
         firestore.get(/databases/(default)/documents/accountRoles/$(userId)).data.level == 2;
     }

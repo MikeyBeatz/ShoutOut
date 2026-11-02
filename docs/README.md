@@ -43,6 +43,8 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 
 ## Plánované a specializované oblasti
 
+- [Oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) – atomické odebrání rolí, sdílený maintenance tick a hranice před konečným purge.
+
 - [TODO](TODO.md) – hlavní přehled priorit a milníků; podrobnosti jsou
   v [BACKLOG](BACKLOG.md) a [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
 - [Nová logika feedu, přečtení a refresh](FEED_READ_REFRESH_PLAN.md) – analýza

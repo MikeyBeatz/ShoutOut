@@ -76,6 +76,23 @@ test('v4 masks before content, keeps the original reservation, pages only owned 
   assert.equal(f.storage.writes, 5); assert.ok(f.storage.pages.every(q => q.prefix === `businessLogos/${f.uid}/` && q.maxResults <= 2 && q.autoPaginate === false));
   assert.equal((await f.run({ getUser() { assert.fail('terminal replay must not call Auth'); } })).state, 'content-archived');
 });
+
+test('enabled worker retires both role stores before masking and preserves original security metadata', { skip: !enabled }, async () => {
+  const f = await fixture(0), role = db.doc(`accountRoles/${f.uid}`), legacy = db.doc(`moderators/${f.uid}`);
+  roots.push(role, legacy);
+  await role.set({ role: 'administrator', level: 5, grantedBy: 'fixture' });
+  await legacy.set({ grantedBy: 'fixture' });
+  f.options.retireRolePrivilegesEnabled = true;
+  await f.run({ getUser: async () => ({ uid: f.uid }) });
+  assert.equal((await role.get()).data().accountStatus, undefined);
+  f.tick(); await f.run();
+  assert.deepEqual((await role.get()).data(), { role: 'administrator', level: 5, grantedBy: 'fixture', accountStatus: 'deleted' });
+  assert.deepEqual((await legacy.get()).data(), { grantedBy: 'fixture', accountStatus: 'deleted' });
+  assert.equal((await f.profile.get()).data().accountStatus, 'deleted');
+  assert.ok((await f.request.get()).data().rolesRetiredAt instanceof Timestamp);
+  const before = await role.get(); await f.finish();
+  assert.ok((await role.get()).updateTime.isEqual(before.updateTime));
+});
 test('v4 zero-logo accounts complete and an Auth-present account is never masked', { skip: !enabled }, async () => {
   const f = await fixture(0), before = await f.profile.get();
   assert.equal((await f.run({ getUser: async () => ({ uid: f.uid }) })).state, 'waiting-auth');
