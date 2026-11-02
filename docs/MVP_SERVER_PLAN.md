@@ -207,6 +207,12 @@ Celý milník zůstává otevřený kvůli identitě/přezdívce, konečnému 60
 
 ## 7. Exspirace a mazání Shoutů — MVP
 
+Dílčí DEV stav 2. listopadu: 91d8d9b po CI 41399389084 materializuje uplynulou
+platnost pomocí active → expired, nejvýše 50 kandidátů ve volném minutovém
+ticku stávajícího plánovače. Živě 26/26 původních Shoutů měnilo pouze status;
+budoucí kontrola a potomci zachovaní. Sedmidenní fyzické mazání podkolekcí
+ještě implementované není. [Kontrakt a důkazy](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+
 - pravidelně vyhledat Shouty po skončení platnosti podle serverového času,
 - změnit stav na expirovaný bez spoléhání na čas zařízení,
 - po sedmi dnech odstranit Shout i všechny podkolekce,

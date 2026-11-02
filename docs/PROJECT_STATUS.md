@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-## Aktuální úsek 2. listopadu – role/exspirace v DEV a klientské retry jádro
+## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování
 
 Nasazený zdroj `91d8d9bc16b45d1a2f6ce7ee1fecff271acd66bc` z větve
 `fix/retired-privileges-and-expiration` má úspěšné CI 41399389084:
@@ -12,18 +12,32 @@ Firestore/Storage ochrany a dávkové `active → expired` ve volném ticku
 existujícího plánovače. Bez fyzického mazání či změny retence. Živě 26/26
 původních Shoutů: změněný pouze status. Testovací účet má potvrzený Auth
 a obě odebrané role; job dokončil content-archived a je uklizený. Původní
-žádost/inventura mají stejné digests. Hosting, IAM,
-ostatní Functions a Scheduler beze změny. Produkce nedotčená.
-Aktuální větev `fix/account-deletion-retry-flow` má připravený klientský
+žádost/inventura mají stejné digests. Při backendovém rolloutu zůstaly Hosting,
+IAM, ostatní Functions a Scheduler beze změny. Produkce nedotčená.
+Aktuální větev `fix/account-deletion-retry-flow` má nasazený klientský
 koordinátor, Firebase adaptér a obnovu z pending obrazovky. První žádost už
 při nejasné chybě nemaže intent; UID guardy a latch chrání opakování. Společný
-password dialog opravil prokázané předčasné dispose controlleru. Jedenáct
-cílených testů a analyzátor prošly; CI nového UI a Hosting rollout ještě zbývají.
-Jádro dddb65c má success CI 41401111113, ale tento starší commit ještě neměl UI.
+password dialog opravil prokázané předčasné dispose controlleru. Zdroj
+`23f20438c64e8eedfcd06761d8fd9158b56e8257` má success CI 41472129925:
+252 Flutter, 37 tools, 107 unit/209 skip, 321 Rules/server, 15 Storage,
+analýza/lint/build. Čistý release build je nasazený na DEV Hosting verzi
+`d2573a279275eb72`; oba DEV originy mají shodné HTML/JS/config hashe s artefaktem.
+Backend, Scheduler, IAM a Rules mají shodu s nasazením 91d8d9b.
+Živě: jeden nový vlastní testovací Auth účet + pending žádost, ruční přihlášení
+a pokračování s heslem uživatelem vrátilo aplikaci na login. Server ověřil Auth
+user-not-found, původní žádost/createTime/deadline, konfirmaci a content-archived.
+Celý test je uklizený, původní inventura/žádost mají stejný digest. V automatizaci
+byl chybný e-mail bez mvp; varování App Check neprokázalo příčinu neúspěšného loginu.
+Koordinátor má 8 bezpečnostních testů, gate/dialog další 3 widget testy.
 [Kontrakt, meze a návaznosti](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 Rozhodnutí vlastníka: celý existující Business profil/pobočky/fakturační
 podklady zachovat po původních 60 dní; lhůta je pevná i pro otevřená hlášení.
-Zbývá rozhodnutí o veřejném markeru po purge. Implementace Business retence naváže.
+Minimální veřejný marker po purge je schválený trvale. Zbývá rozhodnutí o
+palcích smazaného účtu na cizím obsahu (odebrat/počty vs. anonymní agregace).
+Další krok: přesná inventura a levné vlastnické vyhledání reakcí/záložek,
+potom konečný 60denní purge soukromých/Business dat, potomků a kopií důkazů.
+Business data se dnes zachovávají na původních místech, faktury mají zatím
+jen UI placeholder. Celý účtový milník a plný Rules cutover stále nejsou uzavřené.
 
 Předchozí uzavřený stav 2. listopadu 2026 byl ve větvi
 `feature/account-public-identity-worker`; navazuje na dokončenou retenci
@@ -31,7 +45,7 @@ Předchozí uzavřený stav 2. listopadu 2026 byl ve větvi
 `e42ffbd`, uzavřené živé mazání (`c65338d`), obsahová hlášení
 (`c42ed60`) a obnovené metriky postupu (`dd94cc6`).
 
-## Aktuální úsek – v4 identita a loga ve workeru
+## Předchozí uzavřený úsek – v4 identita a loga ve workeru
 
 Nasazený DEV worker vytváří nové v4 joby: konfirmace Auth →
 minimální veřejný marker/klíč vlastní přezdívky → stránkovaná revokace vlastních

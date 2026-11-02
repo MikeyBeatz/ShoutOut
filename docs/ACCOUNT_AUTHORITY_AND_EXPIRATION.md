@@ -68,15 +68,25 @@ Důkazy: `build/lifecycle-{ci-proof,artifact-proof,baseline,index-proof,deployed
 
 Větev `fix/account-deletion-retry-flow` připravuje `AccountDeletionAttempt`
 a Firebase adaptér. Původní jádro `dddb65c8b5dbd86e37de0d87d3e0b27fc10a8fdb`
-má úspěšné CI 41401111113. Navazující UI je nyní připravené: první žádost už
+má úspěšné CI 41401111113. Navazující UI je nyní nasazené: první žádost už
 při nejasné chybě Auth automaticky nemaže intent a blokující obrazovka nabízí
 pokračování s heslem. Známá žádost se neztratí při chybě streamu ani chybějící
 cache/lokálním pending delete. Odemknout může až potvrzená serverová absence;
 změna UID starý latch resetuje. Serverová konfirmace skryje možnost opakování.
 Jeden dialog pro první i opakovanou žádost vlastní svůj controller až do
 skutečného unmountu, nikoli jen do dokončení pop future.
-Jedenáct cílených testů a analyzátor prošly. Celé CI nového UI a následný DEV
-Hosting rollout ještě zbývají. Nový ruční přihlášený UI průchod není ověřený.
+Jedenáct cílených testů a analyzátor prošly. Zdroj
+`23f20438c64e8eedfcd06761d8fd9158b56e8257` má success CI 41472129925
+(252 Flutter, 37 tools, 107 unit/209 skip, 321 Rules/server, 15 Storage,
+analýza/lint/build). DEV Hosting verze `d2573a279275eb72`, oba originy
+ověřené proti čistému release artefaktu; backend/Rules/Scheduler/IAM beze změny.
+Jeden nový vlastní Auth fixture s již existující žádostí uživatel ručně
+přihlásil a dokončil přes pokračování s heslem. UI se vrátilo na přihlášení;
+server potvrdil Auth nepřítomný, původní žádost/createTime/deadline,
+konfirmaci a terminální job. Fixture i jeho potomci jsou uklizené a původní
+inventura má stejný digest. Testovací heslo odstraněno ze stavu fixture.
+V automatizovaném formuláři chyběl prefix mvp; App Check warnings samy
+nedokazovaly příčinu neúspěšného přihlášení.
 
 Před každou další akcí se znovu ověřuje stejné UID. Heslo je jen vstupem
 reauthenticate, ne součástí žádosti či uloženého stavu. Transakční adaptér
@@ -85,7 +95,8 @@ Při ztraceném potvrzení žádosti se Auth naslepo nemaže. Při nejasném vý
 Auth.delete se žádost automaticky neruší. Dvojí klik sdílí jeden běžící pokus.
 Po serverové konfirmaci se další Auth.delete nevysílá.
 
-Testy koordinátoru a widgetů nenahrazují celý přihlášený UI/SDK průchod.
+Ztracené odpovědi/výpadky jsou pokryté simulovanými testy; živý průchod měl
+skutečné přihlášení/reauth/Auth.delete a Firestore transakci, bez síťové injekce.
 Dosavadní první lokální skrytí Shoutů je zachované; uzavření přímých Rules
 zápisů a celý serverový cutover tím ještě nejsou provedené. Retence se nemění.
 
@@ -106,6 +117,7 @@ aktivní rollback, nepřepsání souběhu a sdílený rozpočet maintenance tick
 Vlastník 2. listopadu schválil celý existující Business profil včetně poboček
 a dostupných fakturačních podkladů ve stávajících 60 dnech; lhůta je pevná
 i pro otevřená hlášení, automatický hold se nezavádí. Implementace této fáze
-naváže. U veřejného markeru po purge si vyžádal vysvětlení; konkrétní návrh
-minimálního trvalého markeru zatím čeká na odpověď. Zůstává také fyzické
-odstranění potomků. Celý milník zatím není dokončený.
+naváže. Minimální trvalý marker po purge následně výslovně schválil.
+Otevřená zůstává volba odebrání palců/počtů nebo anonymních agregací u cizího
+obsahu; s ní souvisí nové vlastnické vyhledávání reakcí/záložek. Zůstává také
+fyzické odstranění potomků. Celý milník zatím není dokončený.

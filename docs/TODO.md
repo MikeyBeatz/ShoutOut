@@ -41,11 +41,15 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
 Shoutů změnilo jen status. Účtový pilot dokončil content-archived a je uklizený.
-Klientské retry UI má 11 cílených testů; jeho přesné CI a Hosting rollout ještě
-zbývají. Plné uzavření přímých zápisů zůstává otevřené.
+Klientské retry UI 23f2043 má úspěšné CI 41472129925 (252 Flutter) a je nasazené
+na DEV Hosting d2573a279275eb72. Živý průchod jedním novým dočasným účtem,
+zachování žádosti/deadline, terminální worker a úklid jsou ověřené.
+Plné uzavření přímých zápisů zůstává otevřené.
 Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
 Business archiv je schválený celý včetně poboček/fakturačních podkladů a lhůta
-je pevná i pro hlášení; rozhodnutí zbývá o markeru po purge.
+je pevná i pro hlášení. Trvalý minimální marker schválený. Rozhodnutí zbývá
+o palcích mazaného účtu na cizím obsahu; další technická brána je vlastnické
+vyhledávání reakcí/záložek a úplná inventura pro 60denní purge.
 
 Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace
 `02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.

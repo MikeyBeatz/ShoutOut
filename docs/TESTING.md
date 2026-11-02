@@ -13,7 +13,18 @@ statusu. Účtový pilot dokončil content-archived a jeho úklid zachoval půvo
 inventuru. Klientské jádro má 8 testů pro lost-ack/dvojklik/původní deadline/
 změnu účtu; UI 3 widget testy pro latch, potvrzení, chybu/cache, přepnutí UID
 a zrušení dialogu. Prokázaný use-after-dispose password controlleru opravený
-vlastnictvím ve State dialogu. Analyzátor bez chyb; přesné UI CI se dokončuje.
+vlastnictvím ve State dialogu. Zdroj 23f20438c64e8eedfcd06761d8fd9158b56e8257
+má success CI 41472129925: 252 Flutter, 37 tools, 107 unit/209 skip,
+321 Rules/server, 15 Storage, analýza/lint/build. DEV Hosting d2573a279275eb72,
+oba originy ověřené proti release manifestu; backend/Rules/Scheduler/IAM beze změny.
+Jeden nový Auth fixture se přes skutečné UI po ručním přihlášení/reauth vrátil
+na login. Admin ověřil Auth nepřítomný, původní request/createTime/deadline,
+konfirmaci, terminální job i úplný úklid. Původní inventura/žádost beze změny.
+Nejasné sítě/lost-ack jsou simulované testy, nikoli nový živý výpadek sítě.
+Automatický login měl chybně zadaný e-mail bez mvp; samotné App Check warnings
+nejsou důkazem příčiny. Důkazy `build/account-retry-ui-ci-{proof.json,success.log}`,
+`build/lifecycle-{web-proof,ui-proof,ui-cleanup-proof}.json` a screenshot
+`build/account-retry-ui-completed.jpg`. Dočasné heslo odstraněno ze stavu fixture.
 Testy ověřují zachování metadat/deadline, nevytváření chybějících rolí,
 ztracený lease, starý token, návrat z nepotvrzeného rollbacku, přesnou
 hranici exspirace, transakční souběh i prioritu účtové dávky před exspirací.

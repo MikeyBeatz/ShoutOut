@@ -45,9 +45,39 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
   nevymýšlet. Archive schema a ohraničený pilot navážou na dokončené role.
 - **60denní lhůta je pevná i pro nevyřízená hlášení.** Automatický hold ani
   neomezené prodloužení se nezavádějí. Konečný purge musí pokrýt i kopie důkazů.
-- Minimální veřejný marker po purge zatím není rozhodnutý; vlastník požádal
-  o vysvětlení důsledků a dostal nový konkrétní návrh. Do odpovědi se žádný
-  marker po lhůtě fyzicky neodstraňuje ani neprohlašuje za trvale schválený.
+- **Po purge trvale ponechat minimální veřejný marker.** Vlastník po vysvětlení
+  schválil UID pouze v cestě dokumentu + schemaVersion/accountStatus, bez
+  jména, e-mailu, polohy či obsahu. Konečný purge tento marker nesmí odstranit;
+  neznamená to povolení trvale uchovat další osobní snapshoty nebo archivní texty.
+- Otevřená navazující volba: zda palce mazaného účtu na cizím obsahu po
+  potvrzení Auth odebrat včetně počtů, nebo zachovat agregované počty po
+  nevratné anonymizaci. Návrh je předložený; zatím se žádná varianta neimplementuje.
+
+### Přímá kontrola datového modelu pro konečný purge
+
+Business profil/pobočky jsou v `businessProfiles/{uid}/locations`; žádost je
+v `businessApplications/{uid}`, aktivační audit odkazuje přes `applicationId`.
+Stávající worker tyto podklady zachovává na původních místech. Sekce nákupů
+a faktur je zatím prázdný placeholder; existují fakturační údaje profilu,
+nikoli hotový model skutečných faktur. Jeho budoucí integrace musí mít vlastní
+konkrétní cesty. Pouhé uchování dnes není důkazem implementovaného purge.
+
+Reakce Shoutu i komentáře mají UID v ID dokumentu, ale tělo pouze
+`type/updatedAt`; záložky `shouts/{id}/saves/{uid}` jen `createdAt`.
+Tyto skutečné zdrojové cesty nejsou současným account workerem plošně dočištěné.
+Pro levné vyhledání napříč cizím obsahem bude potřeba ověřit vlastnický index
+(např. serverový UID v těle), příslušné collection-group indexy a případnou
+samostatně schválenou opravu starých DEV dat. Celý feed se nesmí skenovat pro
+každý mazaný účet. Současně se musí zachovat souhrnné počty a skládání s budoucím
+prostorovým indexem; konkrétní změna počtů čeká na výše uvedenou volbu.
+Archivované reakce mají původní data v `content`, tedy nejde o stejný dotaz.
+
+Další inventura před purge musí zahrnout `rateLimits/{uid}/actions`, technická
+potvrzení, kopie důkazů hlášení, aktivační/moderační audity a známé soukromé
+potomky. Neexistence rodičovského dokumentu nesmí být považována za neexistenci
+podkolekcí. Role, profil a vlastní přezdívka se odstraní až po ohraničeném
+dočištění potomků a kontrole vlastnictví; žádost/protokol až jako poslední.
+Nový job nesmí prodloužit původní deadline ani automaticky migrovat staré joby.
 
 | Úsek | Stav | Kritérium uzavření |
 |---|---|---|
@@ -55,9 +85,9 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
 | Vlastní nepotřebné soukromé podkolekce | DEV dokončeno z 6a4606e po CI 41300216738 | Živě waiting-auth 0/0 → 3 skryté Shouty → 4 odstraněné vlastní položky, zachovaný profil/legal, replay a úklid. Staré joby se nemigrují. |
 | Soukromé zprávy a veřejné komentáře účtu | DEV dokončeno, v3 aktivní z 1dab78c po CI 41322524612 | Živě 2 zprávy, 1 komentář a 3 reakce, cizí obsah zachovaný, čítač/replay/moderační audit a úklid; [důkazy a postup](ACCOUNT_CONTENT_ARCHIVE_PLAN.md). |
-| Identita, rezervace přezdívky a zbývající osobní data | Veřejná identita/loga dokončené v DEV; privátní část otevřená | [V4 b685ac4](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4) po CI 41359149804 má nasazené Storage Rules/web/worker. Živě marker → obě URL 403 → terminální v3 pokračování, stabilní rezervace/updateTime/deadline a úklid prošly; původní data zachovaná. Skutečné role a privátní/Business data jsou zatím zachované; jejich vypořádání a uvolnění vlastní rezervace při purge zbývají. |
-| Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí a Storage, vypořádání hlášení/holdů, audit a test přesné hranice. |
-| Klient a uzavření přímých zápisů | Zbývá | Nový tok od začátku do konce, ověření přerušené sítě, teprve pak Rules cutover. |
+| Identita, rezervace přezdívky a zbývající osobní data | Veřejná identita/loga i odebrání pravomocí dokončené v DEV; konečný purge otevřený | [V4 b685ac4](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4) a navazující [91d8d9b](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) mají CI a živé důkazy. Moderní/legacy role mají accountStatus deleted, původní bezpečnostní metadata i Business podklady zachované; jejich purge a uvolnění vlastní rezervace ještě zbývají. |
+| Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí/Storage/kopií důkazů, pevná lhůta i pro hlášení bez automatického holdu, vlastnická kontrola aliasu, trvalý minimální marker a test přesné hranice. |
+| Klient a uzavření přímých zápisů | Retry UI dokončené v DEV, plný cutover zbývá | 23f2043 po CI 41472129925 je nasazený, ruční login/reauth/Auth.delete + zachování intentu a úklid ověřené. Lost-ack/UID/latch/dialog mají 11 testů. První klientské skrytí Shoutů a uzavření přímých Rules zápisů ještě zbývají. |
 
 ## Ochrana příjemce
 

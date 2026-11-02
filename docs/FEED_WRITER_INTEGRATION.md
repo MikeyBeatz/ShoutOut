@@ -1,5 +1,11 @@
 # Zápisové cesty před připojením prostorového indexu
 
+Aktuální DEV exspirace z 91d8d9b běží bez aktivního prostorového indexu.
+`expireDueShouts` má lokálně ověřený atomický indexWriter adaptér; samotný
+maintenance wrapper jej zatím nepředává. Před aktivací živého indexu musí být
+writer zapojený i do této volací cesty a ověřený přes celý maintenance tick,
+nikoli jen přímé volání helperu. [Stav exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+
 31. října 2026. Vlastník schválil pokračování plánu až k dokončení; nová produktová,
 datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 [model indexu](FEED_BLOCK_INDEX_PLAN.md) a [retenci](FEED_INDEX_RETENTION.md).
