@@ -22,6 +22,17 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Pokračovat ve smazání účtu': 'Continue deleting the account',
+  'Přihlášení bylo odstraněno': 'Sign-in has been deleted',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'The server is finishing your request. You can sign out.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Your request was received. If deleting your sign-in was interrupted, verify your password to continue.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Deletion could not be completed. Try again.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Deletion has not been confirmed yet. Try continuing again.',
+  'Zpracovávám…': 'Processing…',
   'Smazaný účet': 'Deleted account',
   'Přestat sledovat': 'Unfollow',
   'Sledované': 'Following',
@@ -363,6 +374,17 @@ const _english = <String, String>{
 };
 
 const _german = <String, String>{
+  'Pokračovat ve smazání účtu': 'Kontolöschung fortsetzen',
+  'Přihlášení bylo odstraněno': 'Die Anmeldung wurde gelöscht',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'Der Server schließt deine Anfrage ab. Du kannst dich abmelden.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Deine Anfrage wurde empfangen. Falls das Löschen deiner Anmeldung unterbrochen wurde, bestätige dein Passwort, um fortzufahren.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Das Löschen konnte nicht abgeschlossen werden. Versuche es erneut.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Das Löschen wurde noch nicht bestätigt. Versuche erneut fortzufahren.',
+  'Zpracovávám…': 'Wird verarbeitet…',
   'Smazaný účet': 'Gelöschtes Konto',
   'Přestat sledovat': 'Nicht mehr folgen',
   'Sledované': 'Gefolgt',
@@ -715,6 +737,17 @@ const _german = <String, String>{
 };
 
 const _polish = <String, String>{
+  'Pokračovat ve smazání účtu': 'Kontynuuj usuwanie konta',
+  'Přihlášení bylo odstraněno': 'Dane logowania zostały usunięte',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'Serwer kończy przetwarzanie żądania. Możesz się wylogować.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Żądanie zostało przyjęte. Jeśli usuwanie danych logowania zostało przerwane, potwierdź hasło, aby kontynuować.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Nie udało się dokończyć usuwania. Spróbuj ponownie.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Usunięcie nie zostało jeszcze potwierdzone. Spróbuj kontynuować ponownie.',
+  'Zpracovávám…': 'Przetwarzanie…',
   'Smazaný účet': 'Usunięte konto',
   'Přestat sledovat': 'Przestań obserwować',
   'Sledované': 'Obserwowane',

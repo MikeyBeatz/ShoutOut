@@ -40,10 +40,12 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
-Shoutů změnilo jen status. Dokončení účtového pilotu/úklid se ještě ověřují.
-Neaktivní klientské retry jádro má 8 cílených testů; UI cutover zůstává otevřený.
+Shoutů změnilo jen status. Účtový pilot dokončil content-archived a je uklizený.
+Klientské retry UI má 11 cílených testů; jeho přesné CI a Hosting rollout ještě
+zbývají. Plné uzavření přímých zápisů zůstává otevřené.
 Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
-rozsah Business archivu, marker po purge a případný hold čekají na rozhodnutí.
+Business archiv je schválený celý včetně poboček/fakturačních podkladů a lhůta
+je pevná i pro hlášení; rozhodnutí zbývá o markeru po purge.
 
 Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace
 `02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.

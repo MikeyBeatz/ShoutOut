@@ -11,13 +11,19 @@ zneplatnění moderních/legacy rolí při serverové konfirmaci Auth, souvisej�
 Firestore/Storage ochrany a dávkové `active → expired` ve volném ticku
 existujícího plánovače. Bez fyzického mazání či změny retence. Živě 26/26
 původních Shoutů: změněný pouze status. Testovací účet má potvrzený Auth
-a obě odebrané role; dokončení jobu a úklid ještě dobíhají. Hosting, IAM,
+a obě odebrané role; job dokončil content-archived a je uklizený. Původní
+žádost/inventura mají stejné digests. Hosting, IAM,
 ostatní Functions a Scheduler beze změny. Produkce nedotčená.
-Aktuální větev `fix/account-deletion-retry-flow` přidává neaktivní klientský
-koordinátor a Firebase adaptér (8 cílených testů + analyzátor prošly).
-UI jej zatím nevolá; stará mezera automatického rollbacku ještě není uzavřená.
+Aktuální větev `fix/account-deletion-retry-flow` má připravený klientský
+koordinátor, Firebase adaptér a obnovu z pending obrazovky. První žádost už
+při nejasné chybě nemaže intent; UID guardy a latch chrání opakování. Společný
+password dialog opravil prokázané předčasné dispose controlleru. Jedenáct
+cílených testů a analyzátor prošly; CI nového UI a Hosting rollout ještě zbývají.
+Jádro dddb65c má success CI 41401111113, ale tento starší commit ještě neměl UI.
 [Kontrakt, meze a návaznosti](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
-Otevřená rozhodnutí: rozsah Business archivu, veřejný marker po purge a hold.
+Rozhodnutí vlastníka: celý existující Business profil/pobočky/fakturační
+podklady zachovat po původních 60 dní; lhůta je pevná i pro otevřená hlášení.
+Zbývá rozhodnutí o veřejném markeru po purge. Implementace Business retence naváže.
 
 Předchozí uzavřený stav 2. listopadu 2026 byl ve větvi
 `feature/account-public-identity-worker`; navazuje na dokončenou retenci

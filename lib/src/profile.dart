@@ -984,56 +984,24 @@ Future<void> _showNicknameChange(
 }
 
 Future<void> _requestAccountDeletion(BuildContext context) async {
-  final password = TextEditingController();
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(tr(dialogContext, 'Smazat účet?')),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            tr(
-              dialogContext,
-              'Přihlášení bude odstraněno ihned a tento e-mail půjde znovu použít. Archivní a bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: password,
-            obscureText: true,
-            autofillHints: const [AutofillHints.password],
-            decoration: InputDecoration(
-              labelText: tr(dialogContext, 'Potvrď heslo'),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: Text(tr(dialogContext, 'Zrušit')),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(dialogContext, true),
-          child: Text(tr(dialogContext, 'Požádat o smazání')),
-        ),
-      ],
-    ),
-  );
-  if (confirmed != true || !context.mounted) {
-    password.dispose();
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+  final password = await confirmAccountDeletionPassword(context);
+  if (password == null ||
+      !context.mounted ||
+      FirebaseAuth.instance.currentUser?.uid != user.uid) {
     return;
   }
-  final user = FirebaseAuth.instance.currentUser!;
   final request = FirebaseFirestore.instance
       .collection('accountDeletionRequests')
       .doc(user.uid);
   try {
     await user.reauthenticateWithCredential(
-      EmailAuthProvider.credential(email: user.email!, password: password.text),
+      EmailAuthProvider.credential(email: user.email!, password: password),
     );
+    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
     await hideActiveShoutsBeforeAccountDeletion(user.uid);
+    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
     await request.set({
       'userId': user.uid,
       'email': user.email,
@@ -1043,17 +1011,18 @@ Future<void> _requestAccountDeletion(BuildContext context) async {
       ),
       'status': 'pending',
     });
-    try {
-      await user.delete();
-      if (context.mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      }
-    } catch (_) {
-      await request.delete();
-      rethrow;
+    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
+    // A lost reply can follow successful Auth deletion. Keep the durable
+    // request; DeletionRequestGate offers a reauthenticated continuation.
+    await user.delete();
+    if (context.mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   } on FirebaseAuthException catch (error) {
-    if (!context.mounted) return;
+    if (!context.mounted ||
+        FirebaseAuth.instance.currentUser?.uid != user.uid) {
+      return;
+    }
     final message =
         error.code == 'wrong-password' || error.code == 'invalid-credential'
         ? 'Heslo není správné.'
@@ -1061,7 +1030,15 @@ Future<void> _requestAccountDeletion(BuildContext context) async {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(tr(context, message))));
-  } finally {
-    password.dispose();
+  } catch (_) {
+    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(context, 'Smazání se nepodařilo dokončit. Zkus to znovu.'),
+          ),
+        ),
+      );
+    }
   }
 }

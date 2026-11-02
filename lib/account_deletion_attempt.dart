@@ -20,7 +20,7 @@ class AccountDeletionIdentityChanged implements Exception {}
 
 /// A failed response never proves that a destructive operation did not commit.
 /// This coordinator intentionally has no automatic request-delete operation.
-/// UI integration must provide a way to resume an existing pending request.
+/// The pending-request gate resumes this attempt after fresh authentication.
 class AccountDeletionAttempt {
   AccountDeletionAttempt(this.userId, this.transport);
   final String userId;
@@ -70,7 +70,7 @@ class AccountDeletionAttempt {
 }
 
 /// Firebase adapter. No client-side Shout hiding and no retention renewal.
-/// Not wired to the existing UI until its pending-request recovery is ready.
+/// The pending-request gate uses this adapter without renewing old requests.
 class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
   FirebaseAccountDeletionTransport({
     required this.auth,

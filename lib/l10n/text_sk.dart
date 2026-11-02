@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Pokračovat ve smazání účtu': 'Pokračovať v odstránení účtu',
+  'Přihlášení bylo odstraněno': 'Prihlásenie bolo odstránené',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'Server dokončuje spracovanie žiadosti. Môžeš sa odhlásiť.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Žiadosť bola prijatá. Ak sa odstránenie prihlásenia prerušilo, pokračuj po overení hesla.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Odstránenie sa nepodarilo dokončiť. Skús to znova.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Odstránenie zatiaľ nie je potvrdené. Skús pokračovať znova.',
+  'Zpracovávám…': 'Spracúvam…',
   'Smazaný účet': 'Odstránený účet',
   'Přestat sledovat': 'Prestať sledovať',
   'Sledované': 'Sledované',

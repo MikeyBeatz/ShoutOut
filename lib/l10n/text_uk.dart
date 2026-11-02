@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
+  'Pokračovat ve smazání účtu': 'Продовжити видалення облікового запису',
+  'Přihlášení bylo odstraněno': 'Дані для входу видалено',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'Сервер завершує обробку запиту. Можеш вийти з облікового запису.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Запит отримано. Якщо видалення даних для входу перервалося, підтвердь пароль, щоб продовжити.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Не вдалося завершити видалення. Спробуй ще раз.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Видалення ще не підтверджено. Спробуй продовжити ще раз.',
+  'Zpracovávám…': 'Обробка…',
   'Smazaný účet': 'Видалений обліковий запис',
   'Přestat sledovat': 'Відписатися',
   'Sledované': 'Відстежувані',

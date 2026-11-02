@@ -1,4 +1,130 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import 'account_deletion_attempt.dart';
+import 'l10n/text.dart';
+
+typedef AccountDeletionStatus = ({
+  String userId,
+  Map<String, dynamic>? data,
+  bool isFromCache,
+  bool hasPendingWrites,
+});
+
+Future<String?> confirmAccountDeletionPassword(
+  BuildContext context, {
+  bool resume = false,
+}) => showDialog<String>(
+  context: context,
+  builder: (_) => _AccountDeletionPasswordDialog(resume: resume),
+);
+
+class _AccountDeletionPasswordDialog extends StatefulWidget {
+  const _AccountDeletionPasswordDialog({required this.resume});
+  final bool resume;
+  @override
+  State<_AccountDeletionPasswordDialog> createState() =>
+      _AccountDeletionPasswordDialogState();
+}
+
+class _AccountDeletionPasswordDialogState
+    extends State<_AccountDeletionPasswordDialog> {
+  final _password = TextEditingController();
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(
+      tr(
+        context,
+        widget.resume ? 'Pokračovat ve smazání účtu' : 'Smazat účet?',
+      ),
+    ),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!widget.resume) ...[
+          Text(
+            tr(
+              context,
+              'Přihlášení bude odstraněno ihned a tento e-mail půjde znovu použít. Archivní a bezpečnostní záznamy zůstanou 60 dní, potom budou odstraněny nebo anonymizovány.',
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+        TextField(
+          controller: _password,
+          obscureText: true,
+          autofillHints: const [AutofillHints.password],
+          decoration: InputDecoration(labelText: tr(context, 'Potvrď heslo')),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text(tr(context, 'Zrušit')),
+      ),
+      FilledButton(
+        onPressed: () => Navigator.pop(context, _password.text),
+        child: Text(
+          tr(context, widget.resume ? 'Pokračovat' : 'Požádat o smazání'),
+        ),
+      ),
+    ],
+  );
+}
+
+Future<AccountDeletionOutcome?> resumePendingAccountDeletion(
+  BuildContext context,
+  User user,
+) async {
+  try {
+    final password = await confirmAccountDeletionPassword(
+      context,
+      resume: true,
+    );
+    if (password == null) return null;
+    final attempt = AccountDeletionAttempt(
+      user.uid,
+      FirebaseAccountDeletionTransport(
+        auth: FirebaseAuth.instance,
+        firestore: FirebaseFirestore.instance,
+        user: user,
+      ),
+    );
+    return await attempt.run(password);
+  } on FirebaseAuthException catch (error) {
+    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
+      final message =
+          error.code == 'wrong-password' || error.code == 'invalid-credential'
+          ? 'Heslo není správné.'
+          : 'Smazání se nepodařilo dokončit. Zkus to znovu.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(tr(context, message))));
+    }
+    return null;
+  } on AccountDeletionIdentityChanged {
+    return null;
+  } catch (_) {
+    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(context, 'Smazání se nepodařilo dokončit. Zkus to znovu.'),
+          ),
+        ),
+      );
+    }
+    return null;
+  }
+}
 
 Future<void> hideActiveShoutsBeforeAccountDeletion(String userId) async {
   final firestore = FirebaseFirestore.instance;

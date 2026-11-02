@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
+  'Pokračovat ve smazání účtu': 'Tiếp tục xóa tài khoản',
+  'Přihlášení bylo odstraněno': 'Thông tin đăng nhập đã được xóa',
+  'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
+      'Máy chủ đang hoàn tất yêu cầu. Bạn có thể đăng xuất.',
+  'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.':
+      'Yêu cầu đã được tiếp nhận. Nếu việc xóa thông tin đăng nhập bị gián đoạn, hãy xác nhận mật khẩu để tiếp tục.',
+  'Smazání se nepodařilo dokončit. Zkus to znovu.':
+      'Không thể hoàn tất việc xóa. Hãy thử lại.',
+  'Smazání zatím není potvrzené. Zkus pokračovat znovu.':
+      'Việc xóa chưa được xác nhận. Hãy thử tiếp tục lại.',
+  'Zpracovávám…': 'Đang xử lý…',
   'Smazaný účet': 'Tài khoản đã xóa',
   'Přestat sledovat': 'Bỏ theo dõi',
   'Sledované': 'Đang theo dõi',

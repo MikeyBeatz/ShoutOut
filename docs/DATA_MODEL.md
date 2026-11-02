@@ -169,7 +169,7 @@ typy, délky a autorizační podmínky jsou vždy závazně definované v
 
 ## Identita a účet
 
-Připravený navazující worker umí při potvrzení odstranění Auth atomicky přidat
+DEV worker z 91d8d9b umí při potvrzení odstranění Auth atomicky přidat
 `accountStatus: deleted` existujícím moderním i legacy rolím a `rolesRetiredAt`
 původní žádosti; ostatní role metadata a deadline zachová. Skutečný stav
 nasazení a ochrany starých tokenů jsou v [kontraktu rolí a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).

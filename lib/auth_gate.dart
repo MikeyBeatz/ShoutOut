@@ -1,4 +1,6 @@
 import 'live_data.dart';
+import 'account_deletion.dart';
+import 'account_deletion_attempt.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -1023,24 +1025,109 @@ String _onboardingFinish(BuildContext context) =>
     ? 'Dokončit'
     : 'Finish';
 
-class DeletionRequestGate extends StatelessWidget {
+class DeletionRequestGate extends StatefulWidget {
   const DeletionRequestGate({
     super.key,
     required this.user,
     required this.child,
+    this.requestStream,
   });
   final User user;
   final Widget child;
+  final Stream<AccountDeletionStatus>? requestStream;
   @override
-  Widget build(
-    BuildContext context,
-  ) => StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-    stream: FirebaseFirestore.instance
-        .collection('accountDeletionRequests')
-        .doc(user.uid)
-        .liveSnapshots(),
+  State<DeletionRequestGate> createState() => _DeletionRequestGateState();
+}
+
+class _DeletionRequestGateState extends State<DeletionRequestGate> {
+  Map<String, dynamic>? _pending;
+  late Stream<AccountDeletionStatus> _requests;
+  bool _busy = false;
+
+  Stream<AccountDeletionStatus> _source() {
+    final uid = widget.user.uid;
+    final source =
+        widget.requestStream ??
+        FirebaseFirestore.instance
+            .collection('accountDeletionRequests')
+            .doc(uid)
+            .liveSnapshots()
+            .map(
+              (document) => (
+                userId: document.id,
+                data: document.exists
+                    ? (document.data() ?? <String, dynamic>{})
+                    : null,
+                isFromCache: document.metadata.isFromCache,
+                hasPendingWrites: document.metadata.hasPendingWrites,
+              ),
+            );
+    return source.map((document) {
+      if (mounted && widget.user.uid == uid && document.userId == uid) {
+        if (document.data != null) {
+          _pending = document.data;
+        } else if (!document.isFromCache && !document.hasPendingWrites) {
+          _pending = null;
+        }
+      }
+      return document;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _requests = _source();
+  }
+
+  @override
+  void didUpdateWidget(covariant DeletionRequestGate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.uid != widget.user.uid) _pending = null;
+    if (oldWidget.user.uid != widget.user.uid ||
+        oldWidget.requestStream != widget.requestStream) {
+      _requests = _source();
+    }
+  }
+
+  Future<void> _resume() async {
+    if (_busy) return;
+    final user = widget.user;
+    setState(() => _busy = true);
+    try {
+      final result = await resumePendingAccountDeletion(context, user);
+      if (mounted &&
+          result == AccountDeletionOutcome.pending &&
+          FirebaseAuth.instance.currentUser?.uid == user.uid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                context,
+                'Smazání zatím není potvrzené. Zkus pokračovat znovu.',
+              ),
+            ),
+          ),
+        );
+      }
+      if ((result == AccountDeletionOutcome.completed ||
+              result == AccountDeletionOutcome.confirmedByServer) &&
+          FirebaseAuth.instance.currentUser?.uid == user.uid) {
+        await FirebaseAuth.instance.signOut();
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<AccountDeletionStatus>(
+    key: ValueKey(widget.user.uid),
+    stream: _requests,
     builder: (context, snapshot) {
-      if (snapshot.data?.exists != true) return child;
+      // A stream error must not reopen the app after a known pending request.
+      if (_pending == null) return widget.child;
+      final confirmed = _pending!['authDeletionConfirmedAt'] is Timestamp;
       return Scaffold(
         body: Center(
           child: Padding(
@@ -1051,19 +1138,38 @@ class DeletionRequestGate extends StatelessWidget {
                 const Icon(Icons.delete_forever_outlined, size: 56),
                 const SizedBox(height: 12),
                 Text(
-                  tr(context, 'Účet čeká na smazání'),
+                  tr(
+                    context,
+                    confirmed
+                        ? 'Přihlášení bylo odstraněno'
+                        : 'Účet čeká na smazání',
+                  ),
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   tr(
                     context,
-                    'Žádost byla přijata. Účet nelze používat a bude zpracován serverovou automatizací.',
+                    confirmed
+                        ? 'Server dokončuje zpracování žádosti. Můžeš se odhlásit.'
+                        : 'Žádost byla přijata. Pokud se odstranění přihlášení přerušilo, pokračuj po ověření hesla.',
                   ),
                   textAlign: TextAlign.center,
                 ),
+                if (!_pending!.containsKey('authDeletionConfirmedAt'))
+                  FilledButton(
+                    onPressed: _busy ? null : _resume,
+                    child: Text(
+                      tr(
+                        context,
+                        _busy ? 'Zpracovávám…' : 'Pokračovat ve smazání účtu',
+                      ),
+                    ),
+                  ),
                 TextButton(
-                  onPressed: FirebaseAuth.instance.signOut,
+                  onPressed: _busy
+                      ? null
+                      : () => FirebaseAuth.instance.signOut(),
                   child: Text(tr(context, 'Odhlásit se')),
                 ),
               ],

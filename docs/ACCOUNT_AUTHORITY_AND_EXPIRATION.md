@@ -57,14 +57,26 @@ Rules i obě účtové Functions jsou nasazené v DEV. Nový hash Functions je
 `b443bd2afc4a879fc846ba36bbdad196f102b1c2`. Limity, Scheduler, Hosting, IAM
 i ostatní Functions mají shodu s baseline. Živě je ověřeno 26/26 původních
 uplynulých Shoutů: kromě statusu se žádné pole nezměnilo. Izolovaná žádost
-má konfirmaci a obě role neaktivní; dokončení celého jobu/úklid ještě dobíhá.
+automaticky dokončila `content-archived`. Konfirmace, obě neaktivní role,
+původní metadata/deadline, stejné soukromé/Business kořeny, rezervace, budoucí
+kontrolní Shout a komentář pod expirovaným Shoutem jsou ověřené. Žádný Auth účet
+nevznikl. Veškeré fixture kořeny/potomci i vlastní checkpoint jsou uklizené;
+původní žádost a inventura requests/jobs/archive mají původní digests.
+Důkazy: `build/lifecycle-{ci-proof,artifact-proof,baseline,index-proof,deployed-proof,original-expiry-proof,live-proof,cleanup-proof}.json`.
 
-### Navazující lokální klientské jádro
+### Připravený klientský retry tok
 
 Větev `fix/account-deletion-retry-flow` připravuje `AccountDeletionAttempt`
-a Firebase adaptér. Jde o **neaktivní modul**, starý profil/DeletionRequestGate
-jej ještě nepoužívají a web nebyl nově nasazen. Osm testů koordinátoru a
-analyzátor prošly; Firebase adaptér nemá nový živý průchod.
+a Firebase adaptér. Původní jádro `dddb65c8b5dbd86e37de0d87d3e0b27fc10a8fdb`
+má úspěšné CI 41401111113. Navazující UI je nyní připravené: první žádost už
+při nejasné chybě Auth automaticky nemaže intent a blokující obrazovka nabízí
+pokračování s heslem. Známá žádost se neztratí při chybě streamu ani chybějící
+cache/lokálním pending delete. Odemknout může až potvrzená serverová absence;
+změna UID starý latch resetuje. Serverová konfirmace skryje možnost opakování.
+Jeden dialog pro první i opakovanou žádost vlastní svůj controller až do
+skutečného unmountu, nikoli jen do dokončení pop future.
+Jedenáct cílených testů a analyzátor prošly. Celé CI nového UI a následný DEV
+Hosting rollout ještě zbývají. Nový ruční přihlášený UI průchod není ověřený.
 
 Před každou další akcí se znovu ověřuje stejné UID. Heslo je jen vstupem
 reauthenticate, ne součástí žádosti či uloženého stavu. Transakční adaptér
@@ -73,19 +85,27 @@ Při ztraceném potvrzení žádosti se Auth naslepo nemaže. Při nejasném vý
 Auth.delete se žádost automaticky neruší. Dvojí klik sdílí jeden běžící pokus.
 Po serverové konfirmaci se další Auth.delete nevysílá.
 
-Před aktivací musí UI nabídnout obnovení rozpracované žádosti a správně rozlišit
-serverově potvrzený stav, chybu sítě a změnu účtu. Je nutné ověřit skutečný
-Firebase adaptér, UI a přerušený tok; samotné testy koordinátoru tento důkaz
-nenahrazují. Dosavadní klientský rollback v `profile.dart` tedy zatím zůstává
-známou otevřenou mezerou, nikoli prohlášenou opravou nasazené aplikace.
+Testy koordinátoru a widgetů nenahrazují celý přihlášený UI/SDK průchod.
+Dosavadní první lokální skrytí Shoutů je zachované; uzavření přímých Rules
+zápisů a celý serverový cutover tím ještě nejsou provedené. Retence se nemění.
+
+## Návrat verze
+
+Při problému s exspirací vypnout pouze její flag v role-aware zdroji a po CI
+aktualizovat stejné dvě Functions. Původní `b685ac4` je funkční návratový zdroj
+Functions; nová Firestore/Storage pravidla se přitom zachovají, aby odebrané
+role nezískaly oprávnění zpět. Už uplynulé Shouty plošně nevracet do active.
+Hosting lze vrátit na předchozí verzi 6147a1b814165dad, ale obnoví starý klientský
+rollback; není to návrat bezpečnostních pravidel, dat ani retenčních termínů.
 
 Cílený lokální běh: 22/22 testů konfirmace, rolí a exspirace prošlo v reálném
 Firestore emulátoru. Zahrnuje opakování, lease, pevný deadline, legacy roli,
 aktivní rollback, nepřepsání souběhu a sdílený rozpočet maintenance ticku.
 Úplné CI a skutečný rollout se evidují v [aktuálním stavu](PROJECT_STATUS.md).
 
-Před závěrečnou retenční fází čekají produktové odpovědi: rozsah soukromého
-Business archivu, životnost minimálního veřejného markeru po purge a vztah
-pevné 60denní lhůty k otevřeným hlášením/explicitnímu holdu. Bez odpovědí se
-retence nerozšiřuje. Zůstává také klientská obnova po ztraceném potvrzení
-Auth smazání a fyzické odstranění potomků. Celý milník zatím není dokončený.
+Vlastník 2. listopadu schválil celý existující Business profil včetně poboček
+a dostupných fakturačních podkladů ve stávajících 60 dnech; lhůta je pevná
+i pro otevřená hlášení, automatický hold se nezavádí. Implementace této fáze
+naváže. U veřejného markeru po purge si vyžádal vysvětlení; konkrétní návrh
+minimálního trvalého markeru zatím čeká na odpověď. Zůstává také fyzické
+odstranění potomků. Celý milník zatím není dokončený.

@@ -36,6 +36,19 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 
 ## Stav a návaznosti
 
+### Doplnění vlastníka 2. listopadu
+
+- V 60denní neveřejné retenci zachovat celý existující Business profil včetně
+  poboček a dostupných fakturačních podkladů („celý profil i faktury a podobně“).
+  Nejde o zavedení nové fakturace ani o prodloužení retenční lhůty. Před
+  implementací se musí dohledat skutečné kolekce/soubory; nové typy dat
+  nevymýšlet. Archive schema a ohraničený pilot navážou na dokončené role.
+- **60denní lhůta je pevná i pro nevyřízená hlášení.** Automatický hold ani
+  neomezené prodloužení se nezavádějí. Konečný purge musí pokrýt i kopie důkazů.
+- Minimální veřejný marker po purge zatím není rozhodnutý; vlastník požádal
+  o vysvětlení důsledků a dostal nový konkrétní návrh. Do odpovědi se žádný
+  marker po lhůtě fyzicky neodstraňuje ani neprohlašuje za trvale schválený.
+
 | Úsek | Stav | Kritérium uzavření |
 |---|---|---|
 | Skrytí vlastních Shoutů a trvalý průběh | DEV hotovo, pilot 3/3 | Důkazy v předchozím dokumentu. |
