@@ -5,7 +5,12 @@
 Lokálně prošlo 22 cílených Firestore testů (konfirmace, moderní/legacy
 autorita, exspirace), 15 Storage testů, 107 serverových unit testů
 (208 integračních přeskočeno bez emulátoru) a 37 tools testů; lint bez chyby.
-Celá Rules/server sada a následné CI/DEV ověření se dokončují.
+Celá lokální Rules/server sada prošla 321/321; CI 41399389084 pro
+91d8d9bc16b45d1a2f6ce7ee1fecff271acd66bc také success (241 Flutter,
+37 tools, 107 unit/209 skip, 321 Rules/server, 15 Storage, analýza/lint/build).
+DEV Rules/index/Functions nasazené; původních 26 Shoutů ověřeno se změnou pouze
+statusu. Účtový pilot/úklid ještě dobíhají. Nové neaktivní klientské jádro
+má 8 testů pro lost-ack/dvojklik/původní deadline/změnu účtu; analyzátor bez chyb.
 Testy ověřují zachování metadat/deadline, nevytváření chybějících rolí,
 ztracený lease, starý token, návrat z nepotvrzeného rollbacku, přesnou
 hranici exspirace, transakční souběh i prioritu účtové dávky před exspirací.

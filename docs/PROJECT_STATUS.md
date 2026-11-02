@@ -1,13 +1,21 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-## Rozpracovaný úsek 2. listopadu – role a exspirace
+## Aktuální úsek 2. listopadu – role/exspirace v DEV a klientské retry jádro
 
-Aktuální větev `fix/retired-privileges-and-expiration`. Připravené atomické
+Nasazený zdroj `91d8d9bc16b45d1a2f6ce7ee1fecff271acd66bc` z větve
+`fix/retired-privileges-and-expiration` má úspěšné CI 41399389084:
+241 Flutter, 37 tools, 107 unit, 321 Rules/server, 15 Storage, analýza/lint/build.
+DEV index READY, nové Firestore/Storage Rules a dvě Functions ACTIVE,
+hash `b443bd2afc4a879fc846ba36bbdad196f102b1c2`. Ověřené atomické
 zneplatnění moderních/legacy rolí při serverové konfirmaci Auth, související
 Firestore/Storage ochrany a dávkové `active → expired` ve volném ticku
-existujícího plánovače. Bez fyzického mazání či změny retence. Cíleně 22/22
-emulátorových testů a lint prošly; úplné CI a DEV rollout ještě nejsou potvrzené.
-Dosavadní živé nasazení níže zůstává v4 z b685ac4.
+existujícího plánovače. Bez fyzického mazání či změny retence. Živě 26/26
+původních Shoutů: změněný pouze status. Testovací účet má potvrzený Auth
+a obě odebrané role; dokončení jobu a úklid ještě dobíhají. Hosting, IAM,
+ostatní Functions a Scheduler beze změny. Produkce nedotčená.
+Aktuální větev `fix/account-deletion-retry-flow` přidává neaktivní klientský
+koordinátor a Firebase adaptér (8 cílených testů + analyzátor prošly).
+UI jej zatím nevolá; stará mezera automatického rollbacku ještě není uzavřená.
 [Kontrakt, meze a návaznosti](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 Otevřená rozhodnutí: rozsah Business archivu, veřejný marker po purge a hold.
 

@@ -39,7 +39,9 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 ## Nejbližší práce – serverová brána
 
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
-Lokální cílené testy prošly; CI a DEV rollout ještě nejsou potvrzené.
+CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
+Shoutů změnilo jen status. Dokončení účtového pilotu/úklid se ještě ověřují.
+Neaktivní klientské retry jádro má 8 cílených testů; UI cutover zůstává otevřený.
 Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
 rozsah Business archivu, marker po purge a případný hold čekají na rozhodnutí.
 

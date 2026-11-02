@@ -49,6 +49,36 @@ neschválené TTL konfigurace. Fyzické mazání kořenů a podkolekcí je dalš
 
 ## Ověření a otevřené návaznosti
 
+Zdroj `91d8d9bc16b45d1a2f6ce7ee1fecff271acd66bc` prošel
+[CI 41399389084](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41399389084):
+241 Flutter, 37 tools, 107 unit (209 emulator-only skip), 321 Rules/server,
+15 Storage, analýza/lint/build. Cílený index je READY; Firestore a Storage
+Rules i obě účtové Functions jsou nasazené v DEV. Nový hash Functions je
+`b443bd2afc4a879fc846ba36bbdad196f102b1c2`. Limity, Scheduler, Hosting, IAM
+i ostatní Functions mají shodu s baseline. Živě je ověřeno 26/26 původních
+uplynulých Shoutů: kromě statusu se žádné pole nezměnilo. Izolovaná žádost
+má konfirmaci a obě role neaktivní; dokončení celého jobu/úklid ještě dobíhá.
+
+### Navazující lokální klientské jádro
+
+Větev `fix/account-deletion-retry-flow` připravuje `AccountDeletionAttempt`
+a Firebase adaptér. Jde o **neaktivní modul**, starý profil/DeletionRequestGate
+jej ještě nepoužívají a web nebyl nově nasazen. Osm testů koordinátoru a
+analyzátor prošly; Firebase adaptér nemá nový živý průchod.
+
+Před každou další akcí se znovu ověřuje stejné UID. Heslo je jen vstupem
+reauthenticate, ne součástí žádosti či uloženého stavu. Transakční adaptér
+existující žádost pouze přečte; původní createTime/termín se neobnovuje.
+Při ztraceném potvrzení žádosti se Auth naslepo nemaže. Při nejasném výsledku
+Auth.delete se žádost automaticky neruší. Dvojí klik sdílí jeden běžící pokus.
+Po serverové konfirmaci se další Auth.delete nevysílá.
+
+Před aktivací musí UI nabídnout obnovení rozpracované žádosti a správně rozlišit
+serverově potvrzený stav, chybu sítě a změnu účtu. Je nutné ověřit skutečný
+Firebase adaptér, UI a přerušený tok; samotné testy koordinátoru tento důkaz
+nenahrazují. Dosavadní klientský rollback v `profile.dart` tedy zatím zůstává
+známou otevřenou mezerou, nikoli prohlášenou opravou nasazené aplikace.
+
 Cílený lokální běh: 22/22 testů konfirmace, rolí a exspirace prošlo v reálném
 Firestore emulátoru. Zahrnuje opakování, lease, pevný deadline, legacy roli,
 aktivní rollback, nepřepsání souběhu a sdílený rozpočet maintenance ticku.
