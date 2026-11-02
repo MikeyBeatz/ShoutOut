@@ -63,9 +63,36 @@ class Shout {
     DocumentSnapshot<Map<String, dynamic>> document, {
     double distanceKm = 0,
   }) {
-    final data = document.data()!;
+    return Shout.fromData(
+      document.id,
+      document.data()!,
+      distanceKm: distanceKm,
+    );
+  }
+
+  factory Shout.fromData(
+    String id,
+    Map<String, dynamic> data, {
+    double distanceKm = 0,
+  }) {
+    if (data['schemaVersion'] == 1 &&
+        data['contentPurged'] == true &&
+        data['status'] == 'deleted') {
+      final epoch = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      return Shout(
+        id: id,
+        author: '',
+        title: '',
+        text: '',
+        categories: const [],
+        distanceKm: 0,
+        createdAt: epoch,
+        expiresAt: epoch,
+        status: ShoutStatus.deleted,
+      );
+    }
     return Shout(
-      id: document.id,
+      id: id,
       authorId: data['authorId'] as String,
       author: data['authorNickname'] as String,
       title: data['title'] as String,

@@ -1,5 +1,17 @@
 # Testovací strategie a regresní matice
 
+## Konečný 60denní úklid
+
+`npm --prefix tools run test:purge` spouští samostatně emulátor a
+`account_purge.integration.test.js`: původní termín, chybějící rodiče,
+cizí konverzace/rezervace, přesné čítače, souběh, lost ack, podmíněné
+Storage mazání, kopie důkazů a pokračování po dočištění preferencí.
+CI má pro tuto sadu samostatný krok; nenavyšuje časový limit Rules sady.
+Flutter testy ověřují minimální kontext a signál odstraněného obsahu.
+Živý DEV pilot používá oddělený syntetický UID; 60denní hranici lze ověřit
+řízeným časem interního jádra, nikoli změnou createTime nebo veřejným endpointem.
+Konkrétní výsledky a omezení jsou v [PROJECT_STATUS](PROJECT_STATUS.md).
+
 ## Úsek role/exspirace – 2. listopadu 2026
 
 Lokálně prošlo 22 cílených Firestore testů (konfirmace, moderní/legacy

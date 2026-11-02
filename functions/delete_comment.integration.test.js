@@ -36,6 +36,15 @@ const rate = f => db.doc(`rateLimits/${f.uid}/actions/delete`);
 const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ndeleteComment\n${timedKey(key)}`).digest('hex')}`);
 const change = (request, key) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(key) } });
 
+test('a foreign comment remains deletable under an anonymous purged context without recreating counters', { skip: !enabled }, async () => {
+  const f = await fixture(), context = { schemaVersion: 1, status: 'deleted', contentPurged: true };
+  await f.shout.set(context); const before = await f.shout.get();
+  assert.deepEqual(await remove(f.request, db, at()), { deleted: true });
+  assert.equal((await f.comment.get()).exists, false);
+  assert.ok((await f.shout.get()).updateTime.isEqual(before.updateTime));
+  assert.deepEqual((await f.shout.get()).data(), context);
+});
+
 test('author deletion changes one parent counter and writes one rate event and private receipt atomically', { skip: !enabled }, async () => {
   const f = await fixture();
   const reaction = f.comment.collection('reactions').doc('reader');

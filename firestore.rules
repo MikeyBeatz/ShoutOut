@@ -79,6 +79,14 @@ service cloud.firestore {
         );
     }
 
+    // Shared recipient fence remains effective while final purge drains copies.
+    function availableAccountTarget(userId) {
+      return !exists(/databases/$(database)/documents/accountDeletionRequests/$(userId)) &&
+        (!exists(/databases/$(database)/documents/publicProfiles/$(userId)) ||
+          get(/databases/$(database)/documents/publicProfiles/$(userId)).data.get('accountStatus', 'active') != 'deleted');
+    }
+
+
     function eligibleUser() {
       return verifiedIdentity() &&
         hasProfile() &&
@@ -133,6 +141,7 @@ service cloud.firestore {
 
     function canSanctionUser(userId) {
       return userId != request.auth.uid &&
+        exists(/databases/$(database)/documents/users/$(userId)) &&
         targetRoleLevel(userId) < targetRoleLevel(request.auth.uid);
     }
 
@@ -142,13 +151,10 @@ service cloud.firestore {
       let shoutPath = /databases/$(database)/documents/shouts/$(shoutId);
       let role = exists(rolePath) ? get(rolePath).data : {};
       let scope = role.get('moderationScope', {});
-      let geography = exists(shoutPath)
-        ? get(shoutPath).data.get('geography', {})
-        : {};
       return role.get('level', 0) >= 5 ||
         scope.get('global', false) == true ||
-        geography.get('countryCode', '') in scope.get('countries', []) ||
-        geography.get('subdivisionCode', '') in
+        get(shoutPath).data.get('geography', {}).get('countryCode', '') in scope.get('countries', []) ||
+        get(shoutPath).data.get('geography', {}).get('subdivisionCode', '') in
           scope.get('subdivisions', []);
     }
 
@@ -164,7 +170,6 @@ service cloud.firestore {
       let sanctionPath =
         /databases/$(database)/documents/sanctions/$(sanctionId);
       return eligibleModerator() &&
-        exists(sanctionPath) &&
         canSanctionUser(get(sanctionPath).data.userId) &&
         (
           eligibleSeniorModerator() ||
@@ -431,8 +436,9 @@ service cloud.firestore {
     function consumedRate(action, eventId) {
       let ratePath =
         /databases/$(database)/documents/rateLimits/$(request.auth.uid)/actions/$(action);
-      return existsAfter(ratePath) &&
-        getAfter(ratePath).data.lastAt == request.time &&
+      // Missing getAfter data already denies the write. Avoid a redundant
+      // existsAfter access so recipient fencing fits the per-write budget.
+      return getAfter(ratePath).data.lastAt == request.time &&
         getAfter(ratePath).data.lastEventId == eventId;
     }
 
@@ -1242,8 +1248,10 @@ service cloud.firestore {
           limited(200);
         allow create: if eligibleUser() &&
           request.auth.uid == userId &&
-          request.resource.data.keys().hasOnly(['createdAt']) &&
-          request.resource.data.keys().hasAll(['createdAt']) &&
+          availableAccountTarget(blockedUserId) &&
+          request.resource.data.keys().hasOnly(['createdAt', 'targetUserId']) &&
+          request.resource.data.keys().hasAll(['createdAt', 'targetUserId']) &&
+          request.resource.data.targetUserId == blockedUserId &&
           request.resource.data.createdAt == request.time &&
           blockedUserId != userId;
         allow delete: if eligibleUser() && request.auth.uid == userId;
@@ -1794,6 +1802,7 @@ service cloud.firestore {
       allow create: if eligibleUser() &&
         reportId == request.auth.uid + '_' +
           request.resource.data.targetUserId &&
+        availableAccountTarget(request.resource.data.targetUserId) &&
         request.resource.data.keys().hasOnly([
           'reporterId', 'targetUserId', 'reason', 'status', 'createdAt'
         ]) &&
@@ -2036,6 +2045,7 @@ service cloud.firestore {
         consumedRate('shout', shoutId) &&
         validShoutCreate();
       allow update: if eligibleUser() &&
+        resource.data.get('contentPurged', false) != true &&
         (
           (
             (resource.data.authorId == request.auth.uid || isModerator()) &&

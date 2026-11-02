@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -88,7 +89,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
       return data.result;
     }
     const [shout, reaction, rate] = await transaction.getAll(shoutRef, reactionRef, rateRef);
-    if (!shout.exists) fail('not-found', 'The Shout is no longer available.');
+    if (!shout.exists || isPurgedShoutContext(shout.data())) fail('not-found', 'The Shout is no longer available.');
     const data = shout.data();
     if (!counter(data.commentsCount) || !counter(data.savesCount)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');

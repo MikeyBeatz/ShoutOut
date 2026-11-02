@@ -348,7 +348,7 @@ Future<void> _blockProfile(BuildContext context, String targetId) async {
         .doc(uid)
         .collection('blocked')
         .doc(targetId),
-    {'createdAt': FieldValue.serverTimestamp()},
+    {'createdAt': FieldValue.serverTimestamp(), 'targetUserId': targetId},
   );
   batch.delete(_followingReference(targetId));
   await batch.commit();

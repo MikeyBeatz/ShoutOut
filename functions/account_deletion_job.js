@@ -11,6 +11,7 @@ import { AccountLogoRevocationNeedsReview } from './account_logo_revocation.js';
 import { AccountIdentityJobNeedsReview, AccountIdentityJobLeaseLost, identityJobFields, validateIdentityJob, runAccountIdentitySlice } from './account_identity_job.js';
 import { actorReactionJobFields, validateActorReactionJob, runActorReactionsSlice } from './account_actor_reactions_job.js';
 import { AccountReactionRemovalNeedsReview } from './account_reaction_removal.js';
+import { accountPurgeJobRef, initialAccountPurgeJob } from './account_purge_guard.js';
 
 const retentionMillis = 60 * 24 * 60 * 60 * 1000;
 const phases = new Set(['waiting-auth', 'hiding-shouts', 'retry', 'shouts-hidden', 'cleaning-private',
@@ -45,6 +46,9 @@ function validateJob(job, identity) {
       !(job.nextAttemptAt === null || job.nextAttemptAt instanceof Timestamp)) invalid();
   if (job.schemaVersion === 5) validateActorReactionJob(job);
   else if (job.workStage === 'actor-reactions' || job.phase === 'removing-reactions') invalid();
+  if (job.retentionPurgeEnabled !== undefined && (job.schemaVersion !== 5 || job.retentionPurgeEnabled !== true) ||
+      job.retentionPurgeStartedAt !== undefined && (!(job.retentionPurgeStartedAt instanceof Timestamp) ||
+        job.retentionPurgeStartedAt.toMillis() < job.retainUntil.toMillis())) invalid();
   if (job.schemaVersion >= 4 && validateIdentityJob(job)) return;
   if (job.schemaVersion < 4 && ['masking-identity', 'revoking-logos'].includes(job.phase)) invalid();
   if (job.schemaVersion === 1) {
@@ -85,12 +89,14 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   retireRolePrivilegesEnabled = false,
   publicIdentityEnabled = false, logoBucket = null,
   reactionRemovalEnabled = false, beforeActorReactionTransaction = null,
+  retentionPurgeEnabled = false,
 } = {}) {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
       typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
       typeof publicIdentityEnabled !== 'boolean' || typeof retireRolePrivilegesEnabled !== 'boolean' || typeof reactionRemovalEnabled !== 'boolean' ||
+      typeof retentionPurgeEnabled !== 'boolean' || retentionPurgeEnabled && !reactionRemovalEnabled ||
       (reactionRemovalEnabled && (!publicIdentityEnabled || !confirmAuthDeletionEnabled)) ||
       (retireRolePrivilegesEnabled && !confirmAuthDeletionEnabled) ||
       (publicIdentityEnabled && (!confirmAuthDeletionEnabled || !contentArchiveEnabled || !logoBucket)) ||
@@ -109,6 +115,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     const [request, snapshot] = await transaction.getAll(requestRef, jobRef);
     const time = now(), job = snapshot.exists ? snapshot.data() : null;
     if (job) validateJob(job, identity);
+    if (job?.retentionPurgeStartedAt) return { state: 'retention-purge-in-progress' };
     if (job?.schemaVersion === 5 && !reactionRemovalEnabled) return { state: 'reaction-removal-disabled' };
     if (job?.schemaVersion >= 4 && !publicIdentityEnabled) return { state: 'identity-disabled' };
     if (job?.schemaVersion >= 3 && (!privateCleanupEnabled || !contentArchiveEnabled)) return { state: 'content-disabled' };
@@ -136,7 +143,12 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     const contentData = schemaVersion >= 3 ? { privateLeavesCleanedAt: job?.privateLeavesCleanedAt ?? null,
       archivedMessageCount: job?.archivedMessageCount ?? 0, archivedCommentCount: job?.archivedCommentCount ?? 0,
       archivedReactionCount: job?.archivedReactionCount ?? 0, pendingArchiveId: job?.pendingArchiveId ?? null } : {};
+    const schedulePurge = !job && retentionPurgeEnabled;
+    const purgeRef = schedulePurge ? accountPurgeJobRef(db, identity) : null;
+    if (purgeRef && (await transaction.get(purgeRef)).exists) throw new Error('unexpected-existing-account-purge-job');
+    if (purgeRef) transaction.create(purgeRef, initialAccountPurgeJob(identity, time));
     transaction.set(jobRef, {
+      ...(schedulePurge || job?.retentionPurgeEnabled === true ? { retentionPurgeEnabled: true } : {}),
       ...contentData, ...privateData, ...(schemaVersion >= 4 ? identityJobFields(job) : {}),
       ...(schemaVersion === 5 ? actorReactionJobFields(job) : {}), schemaVersion, userId: identity.userId, requestCreateTime: identity.requestCreateTime,
       phase: job?.phase ?? 'waiting-auth', attempts: (job?.attempts ?? 0) + 1,

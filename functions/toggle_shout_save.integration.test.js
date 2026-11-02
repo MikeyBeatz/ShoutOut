@@ -35,6 +35,13 @@ const saved = f => f.shoutRef.collection('saves').doc(f.uid);
 const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleShoutSave\n${timedKey(key)}`).digest('hex')}`);
 const change = (request, idempotencyKey) => ({ ...request, data: { ...request.data, idempotencyKey: timedKey(idempotencyKey) } });
 
+test('an anonymous purged Shout is unavailable for new saves and Shout reactions', { skip: !enabled }, async () => {
+  const f = await fixture(); await f.shoutRef.set({ schemaVersion: 1, status: 'deleted', contentPurged: true });
+  await assert.rejects(toggle(f.request, db, at()), error => error.code === 'not-found');
+  await assert.rejects(toggleShoutReactionOperation({ ...f.request, data: { ...f.request.data, button: 'like' } }, db, at()), error => error.code === 'not-found');
+  assert.equal((await saved(f).get()).exists, false); assert.equal((await rate(f.uid).get()).exists, false); assert.equal((await receipt(f).get()).exists, false);
+});
+
 test('save and removal atomically update one counter, rate and receipt without notifications', { skip: !enabled }, async () => {
   const f = await fixture();
   assert.deepEqual(await toggle(f.request, db, at()), { saved: true, count: 6 });

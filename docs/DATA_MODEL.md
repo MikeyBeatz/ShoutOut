@@ -364,6 +364,25 @@ Storage cesta připraveného screenshotu je
 `bugReports/{uid}/{reportId}/screenshot`. Povolené typy jsou JPEG, PNG a WebP,
 maximum 2 MiB. Aktivace a provozní omezení jsou popsané v `FIREBASE_STORAGE_SETUP.md`.
 
+## Konečný úklid smazaného účtu
+
+Soukromý `accountPurgeJobs/{hash}` váže průběh na projekt, UID a původní
+serverové createTime žádosti. Obsahuje původní 60denní termín, fázi/kurzor,
+zásobník potomků, verzi, lease a případnou cestu/generaci souboru čekajícího
+na odstranění. Vzniká atomicky jen pro nově aktivované primární joby;
+historické žádosti se nemigrují. Protokol a pořadí viz
+[ACCOUNT_RETENTION_PURGE_PLAN](ACCOUNT_RETENTION_PURGE_PLAN.md).
+
+Nové archivní kořeny mají `subjectUserIds`, `sourceShoutId` a případně
+`replyToCommentId`; archivní kopie reakcí mají `actorId` a `retentionOwnerId`.
+Blokace v `users/{uid}/blocked/{targetUid}` nově zapisují také `targetUserId`
+shodné s ID dokumentu. To umožňuje cílený úklid příchozích vazeb.
+
+Po purge zůstává veřejný profil pouze `{schemaVersion: 1, accountStatus:
+'deleted'}`. Shout s cizími potomky zachová jen `{schemaVersion: 1, status:
+'deleted', contentPurged: true}`; bez cizích potomků se odstraní i kořen.
+Dočasný `authorId` při zmrazení slouží pouze dokončení vlastnického průchodu.
+
 ## Co je zdroj pravdy
 
 Při rozporu použijte v tomto pořadí:

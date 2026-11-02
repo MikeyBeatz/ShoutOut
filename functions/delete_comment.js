@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -85,7 +86,7 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
     await authorize(authorId);
     const data = shout.data();
     const comments = data.commentsCount === undefined ? 0 : data.commentsCount;
-    if (![data.likesCount, data.dislikesCount, data.savesCount, comments].every(counter)) {
+    if (!isPurgedShoutContext(data) && ![data.likesCount, data.dislikesCount, data.savesCount, comments].every(counter)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');
     }
     const rateData = nextDeleteRate(rate.data(), now, input.commentId);
@@ -93,7 +94,7 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
     // Preserve the legacy single-document deletion. Replies, reports and reaction
     // subcollections have a separate lifecycle; no unbounded recursive operation.
     transaction.delete(commentRef);
-    transaction.update(shoutRef, { commentsCount: Math.max(0, comments - 1) });
+    if (!isPurgedShoutContext(data)) transaction.update(shoutRef, { commentsCount: Math.max(0, comments - 1) });
     transaction.set(rateRef, rateData);
     transaction.create(receiptRef, { ...retention, userId: uid, action: 'deleteComment', fingerprint,
       shoutId: input.shoutId, commentId: input.commentId, authorId, result, createdAt: now });

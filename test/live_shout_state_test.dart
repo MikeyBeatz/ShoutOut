@@ -5,6 +5,21 @@ import 'package:shoutout/live_shout_state.dart';
 
 void main() {
   test(
+    'a purge marker or confirmed disappearance clears an already open detail',
+    () async {
+      final events = await watchLiveShoutState(
+        Stream.fromIterable([
+          <String, dynamic>{'likesCount': 3},
+          {'schemaVersion': 1, 'status': 'deleted', 'contentPurged': true},
+          null,
+        ]),
+        Stream.value(null),
+      ).toList();
+      expect(events.map((event) => event.contentPurged), [false, true, true]);
+    },
+  );
+
+  test(
     'bookmark and full save count follow independent live updates and cancel all subscriptions',
     () async {
       final documents = StreamController<Map<String, dynamic>?>();

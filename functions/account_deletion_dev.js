@@ -13,6 +13,7 @@ import { runAccountMaintenanceTick } from './shout_expiration.js';
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
+  retentionPurgeEnabled: false, // Activation follows exact CI, ownership/index and Storage policy checks.
   retireRolePrivilegesEnabled: true, // Retire both role stores atomically with Auth confirmation.
   shoutExpirationEnabled: true, // Reuse otherwise idle maintenance ticks; never delete content here.
   reactionRemovalEnabled: true, // UID coverage/indexes verified in DEV; only new jobs use v5.
@@ -35,7 +36,8 @@ function database() {
 
 function workerOptions(db) {
   return { ...accountDeletionDevProposal,
-    logoBucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`) };
+    logoBucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`),
+    bucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`) };
 }
 
 const common = { region: 'europe-west3', minInstances: 0, maxInstances: 1,
@@ -63,7 +65,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
     const result = await runAccountMaintenanceTick(db, getAuth(), {
       ...workerOptions(db), clock: () => new Date(),
     });
-    const log = result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
+    const log = result.purgeFailed || result.purgeNeedsReview || result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);
   } catch {
     logger.error('account-deletion-job-recovery', { code: 'scan-failed' });

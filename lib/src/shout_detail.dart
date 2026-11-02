@@ -47,6 +47,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   bool _sendingComment = false;
   PublicationAttempt _commentAttempt = PublicationAttempt();
   Stream<LiveShoutState>? _liveShout;
+  bool _contentPurged = false;
 
   @override
   void initState() {
@@ -63,7 +64,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             .collection('shouts')
             .doc(widget.shout.id);
         _liveShout = watchLiveShoutState(
-          ref.liveSnapshots().map((shout) => shout.data()),
+          ref
+              .liveSnapshots(includeMetadataChanges: true)
+              .where((shout) => shout.exists || !shout.metadata.isFromCache)
+              .map((shout) => shout.data()),
           ref
               .collection('reactions')
               .doc(uid)
@@ -81,13 +85,31 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) => _page(context);
+
+  Widget _purgedCard() => Card(
+    child: ListTile(
+      leading: const Icon(Icons.visibility_off_outlined),
+      title: Text(tr(context, 'Tento Shout už není dostupný.')),
+    ),
+  );
+
   Widget _reactionCard() {
-    if (_liveShout == null) return _shoutCard();
+    if (_liveShout == null) {
+      return _contentPurged ? _purgedCard() : _shoutCard();
+    }
     return StreamBuilder<LiveShoutState>(
       stream: _liveShout,
       builder: (context, snapshot) {
         final value = snapshot.data;
         if (value != null) {
+          if (value.contentPurged && !_contentPurged) {
+            _contentPurged = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() {});
+            });
+          }
           widget.shout
             ..likes = value.likes
             ..dislikes = value.dislikes
@@ -100,7 +122,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
               ..isSaved = value.saved;
           }
         }
-        return _shoutCard();
+        return _contentPurged ? _purgedCard() : _shoutCard();
       },
     );
   }
@@ -135,13 +157,13 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget _page(BuildContext context) => Scaffold(
     resizeToAvoidBottomInset: true,
     appBar: AppBar(
       title: Text(tr(context, 'Shout')),
       actions: [
-        if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
+        if (!_contentPurged &&
+            widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
           StreamBuilder<AccountRole>(
             stream: _watchAccountRole(FirebaseAuth.instance.currentUser!.uid),
             builder: (context, snapshot) {
@@ -175,19 +197,22 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
               );
             },
           ),
-        if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
+        if (!_contentPurged &&
+            widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
           IconButton(
             onPressed: _blockAuthor,
             tooltip: tr(context, 'Blokovat autora'),
             icon: const Icon(Icons.person_off_outlined),
           ),
-        if (widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid)
+        if (!_contentPurged &&
+            widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid)
           IconButton(
             onPressed: _deleteShout,
             tooltip: tr(context, 'Smazat shout'),
             icon: const Icon(Icons.delete_outline),
           ),
-        if (widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
+        if (!_contentPurged &&
+            widget.shout.authorId != FirebaseAuth.instance.currentUser?.uid)
           IconButton(
             onPressed: _reportShout,
             tooltip: tr(context, 'Nahlásit'),
@@ -747,7 +772,10 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           .doc(uid)
           .collection('blocked')
           .doc(widget.shout.authorId),
-      {'createdAt': FieldValue.serverTimestamp()},
+      {
+        'createdAt': FieldValue.serverTimestamp(),
+        'targetUserId': widget.shout.authorId,
+      },
     );
     batch.delete(_followingReference(widget.shout.authorId));
     await batch.commit();

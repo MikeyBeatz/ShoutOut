@@ -1,7 +1,35 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { planArchiveIndexes as plan, planOwnedActivityIndexes } from './archive_index_plan.mjs';
+import { planArchiveIndexes as plan, planOwnedActivityIndexes, accountPurgeIndexFields, planAccountPurgeIndexes, planPurgeBucketChange } from './archive_index_plan.mjs';
 const project = 'shoutout-dev-46c81', base = `projects/${project}/databases/(default)/collectionGroups`;
+
+test('purge index delta preserves old indexes and TTL and requires a complete bounded inventory', () => {
+  const state = {};
+  for (const [group, field] of accountPurgeIndexFields) state[`${group}/fields/${field}`] = { status: 200, data: {
+    name: `${base}/${group}/fields/${field}`, ttlConfig: { state: 'DISABLED' }, indexConfig: { indexes: [
+      { queryScope: 'COLLECTION', fields: [{ fieldPath: field, order: 'DESCENDING' }] },
+    ] } } };
+  const result = planAccountPurgeIndexes(project, state); assert.equal(result.actions.length, 6);
+  for (const action of result.actions) {
+    assert.equal(action.updateMask, 'indexConfig'); assert.equal('ttlConfig' in action.body, false);
+    const old = state[action.resource.slice(base.length + 1)].data;
+    assert.deepEqual(action.body.indexConfig.indexes[0], old.indexConfig.indexes[0]); old.indexConfig = action.body.indexConfig;
+  }
+  assert.equal(planAccountPurgeIndexes(project, state).actions.length, 0);
+  assert.throws(() => planAccountPurgeIndexes('shoutout-production-a1b34', state));
+  delete state['blocked/fields/targetUserId']; assert.throws(() => planAccountPurgeIndexes(project, state));
+});
+
+test('approved soft-delete plan is DEV-only, CAS-protected and cannot change any other bucket setting', () => {
+  const bucket = { name: `${project}.firebasestorage.app`, metageneration: '17', softDeletePolicy: { retentionDurationSeconds: '604800' } };
+  const result = planPurgeBucketChange(project, bucket); assert.equal(result.actions.length, 1);
+  assert.deepEqual(result.actions[0].body, { softDeletePolicy: { retentionDurationSeconds: '0' } });
+  assert.equal(result.actions[0].ifMetagenerationMatch, '17');
+  assert.equal(planPurgeBucketChange(project, { ...bucket, softDeletePolicy: { retentionDurationSeconds: '0' } }).actions.length, 0);
+  assert.throws(() => planPurgeBucketChange('shoutout-production-a1b34', bucket));
+  assert.throws(() => planPurgeBucketChange(project, { ...bucket, versioning: { enabled: true } }));
+  assert.throws(() => planPurgeBucketChange(project, { ...bucket, softDeletePolicy: { retentionDurationSeconds: '7776000' } }));
+});
 test('owned activity indexes preserve every existing index and never include TTL writes', () => {
   const state = {};
   for (const group of ['reactions', 'saves']) {

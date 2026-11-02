@@ -94,6 +94,7 @@ export async function removeDeletedAccountReactions(identity, db, auth, {
       indexPlan?.apply();
       transaction.create(archiveRef, {
         schemaVersion: 1, kind: candidate.kind, retentionOwnerId: identity.userId,
+        subjectUserIds: [identity.userId],
         requestCreateTime: identity.requestCreateTime, retainUntil, archivedAt: Timestamp.fromDate(date),
         sourcePath: source.ref.path, sourceCreateTime: source.createTime, sourceUpdateTime: source.updateTime,
         targetPath: parentRef.path, targetCreateTime: parent.createTime ?? null, targetState,

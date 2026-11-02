@@ -79,3 +79,36 @@ export function planOwnedActivityIndexes(projectId, snapshots) {
     preservesCollectionIndexes: true, changesTTL: false, deletesIndexes: false };
   return { ...plan, digest: digest(plan) };
 }
+
+export const accountPurgeIndexFields = Object.freeze([
+  ['reactions', 'actorId'], ['accessAudits', 'actorId'], ['notifications', 'actorId'],
+  ['notifications', 'targetShoutId'], ['following', 'targetUserId'], ['blocked', 'targetUserId'],
+]);
+
+export function planAccountPurgeIndexes(projectId, snapshots) {
+  assert.equal(projectId, project, 'purge indexes are DEV-only');
+  const actions = [];
+  for (const [group, field] of accountPurgeIndexFields) {
+    const before = fieldSnapshot(snapshots, `${group}/fields/${field}`), indexes = before.indexConfig.indexes.map(spec);
+    const desired = { queryScope: 'COLLECTION_GROUP', fields: [{ fieldPath: field, order: 'ASCENDING' }] };
+    if (!indexes.some(row => same(row, desired))) actions.push({ method: 'PATCH', resource: before.name,
+      updateMask: 'indexConfig', before: before.indexConfig,
+      body: { name: before.name, indexConfig: { indexes: [...indexes, desired] } } });
+  }
+  const plan = { schemaVersion: 1, projectId, actions, preservesCollectionIndexes: true, changesTTL: false, deletesIndexes: false };
+  return { ...plan, digest: digest(plan) };
+}
+
+// The owner separately approved this bucket-wide DEV policy change.
+export function planPurgeBucketChange(projectId, metadata) {
+  assert.equal(projectId, project, 'purge bucket change is DEV-only');
+  assert.equal(metadata?.name, `${project}.firebasestorage.app`);
+  assert.match(String(metadata.metageneration), /^[1-9][0-9]*$/);
+  if (metadata.versioning?.enabled || metadata.retentionPolicy?.retentionPeriod) throw new Error('unapproved-bucket-retention-controls');
+  const retention = Number(metadata.softDeletePolicy?.retentionDurationSeconds ?? 0);
+  if (![0, 604800].includes(retention)) throw new Error('unexpected-soft-delete-policy');
+  const plan = { schemaVersion: 1, projectId, bucket: metadata.name, beforeMetageneration: String(metadata.metageneration),
+    changesIAM: false, actions: retention === 0 ? [] : [{ method: 'PATCH', resource: `https://storage.googleapis.com/storage/v1/b/${metadata.name}`,
+      ifMetagenerationMatch: String(metadata.metageneration), body: { softDeletePolicy: { retentionDurationSeconds: '0' } } }] };
+  return { ...plan, digest: digest(plan) };
+}

@@ -489,6 +489,78 @@ describe('business locations', () => {
   });
 });
 
+test('blocked relations require their indexed target UID and cannot target a pending or permanently deleted account', async () => {
+  await seedEligibleUser('blocker', 'Blocker'); await seedEligibleUser('target', 'Target');
+  const db = authenticatedDb('blocker'), ref = doc(db, 'users', 'blocker', 'blocked', 'target');
+  await assertFails(setDoc(ref, { createdAt: serverTimestamp() }));
+  await assertFails(setDoc(ref, { createdAt: serverTimestamp(), targetUserId: 'forged' }));
+  await assertSucceeds(setDoc(ref, { createdAt: serverTimestamp(), targetUserId: 'target' }));
+  await assertSucceeds(deleteDoc(ref));
+  await testEnvironment.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'accountDeletionRequests', 'target'), { userId: 'target', status: 'pending' });
+  });
+  await assertFails(setDoc(ref, { createdAt: serverTimestamp(), targetUserId: 'target' }));
+  await testEnvironment.withSecurityRulesDisabled(async context => {
+    await deleteDoc(doc(context.firestore(), 'accountDeletionRequests', 'target'));
+    await setDoc(doc(context.firestore(), 'publicProfiles', 'target'), { schemaVersion: 1, accountStatus: 'deleted' });
+  });
+  await assertFails(setDoc(ref, { createdAt: serverTimestamp(), targetUserId: 'target' }));
+});
+
+test('raw private-reply writers cannot recreate messages after the purge ingress fence', async () => {
+  for (const state of ['active', 'purging', 'deleted']) {
+    await testEnvironment.clearFirestore();
+    await seedEligibleUser('writer', 'SafeWriter'); await seedEligibleUser('recipient', 'Recipient');
+    await seedShout({ authorId: 'recipient', authorNickname: 'Recipient' });
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      if (state === 'purging') {
+        await setDoc(doc(context.firestore(), 'accountDeletionRequests', 'recipient'), { userId: 'recipient', status: 'pending' });
+        await deleteDoc(doc(context.firestore(), 'users', 'recipient'));
+      }
+      if (state === 'deleted') {
+        await setDoc(doc(context.firestore(), 'publicProfiles', 'recipient'), { schemaVersion: 1, accountStatus: 'deleted' });
+        await deleteDoc(doc(context.firestore(), 'users', 'recipient'));
+      }
+    });
+    const db = authenticatedDb('writer'), batch = writeBatch(db);
+    batch.set(doc(db, 'rateLimits', 'writer', 'actions', 'privateReply'), rateData('private-boundary'));
+    batch.set(doc(db, 'shouts', 'shout-1', 'privateReplies', 'private-boundary'), {
+      authorId: 'writer', authorNickname: 'SafeWriter', recipientId: 'recipient', recipientNickname: 'Recipient',
+      participants: ['writer', 'recipient'], text: 'Private fixture', createdAt: serverTimestamp(), targetType: 'shout',
+    });
+    if (state === 'active') await assertSucceeds(batch.commit()); else await assertFails(batch.commit());
+  }
+});
+
+test('raw notification writers respect purge preferences and the final anonymous context', async () => {
+  for (const state of ['active', 'purging', 'deleted']) {
+    await testEnvironment.clearFirestore();
+    await seedEligibleUser('writer', 'SafeWriter'); await seedEligibleUser('recipient', 'Recipient');
+    await seedShout({ authorId: 'recipient', authorNickname: 'Recipient', title: 'Retention fixture' });
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await updateDoc(doc(context.firestore(), 'shouts', 'shout-1'), { title: 'Retention fixture' });
+      if (state === 'purging') {
+        await setDoc(doc(context.firestore(), 'users', 'recipient', 'settings', 'notifications'), { replies: false, reactions: false, privateReplies: false, followedProfiles: false, nearbyShouts: false });
+        await deleteDoc(doc(context.firestore(), 'users', 'recipient'));
+      }
+      if (state === 'deleted') {
+        await setDoc(doc(context.firestore(), 'publicProfiles', 'recipient'), { schemaVersion: 1, accountStatus: 'deleted' });
+        await deleteDoc(doc(context.firestore(), 'users', 'recipient'));
+        await setDoc(doc(context.firestore(), 'shouts', 'shout-1'), { schemaVersion: 1, status: 'deleted', contentPurged: true });
+      }
+    });
+    const db = authenticatedDb('writer'), batch = writeBatch(db);
+    batch.set(doc(db, 'rateLimits', 'writer', 'actions', 'interaction'), rateData('shoutReaction_shout-1'));
+    batch.set(doc(db, 'shouts', 'shout-1', 'reactions', 'writer'), { userId: 'writer', type: 'like', updatedAt: serverTimestamp() });
+    batch.update(doc(db, 'shouts', 'shout-1'), { likesCount: 1, dislikesCount: 0 });
+    batch.set(doc(db, 'users', 'recipient', 'notifications', 'reaction_like_shout-1'), {
+      kind: 'reaction', actorId: 'writer', actorNickname: 'SafeWriter', targetShoutId: 'shout-1', targetTitle: 'Retention fixture',
+      reactionType: 'like', eventCount: 1, createdAt: serverTimestamp(), readAt: null,
+    });
+    if (state === 'active') await assertSucceeds(batch.commit()); else await assertFails(batch.commit());
+  }
+});
+
 beforeEach(async () => {
   await testEnvironment.clearFirestore();
 });
@@ -1517,7 +1589,7 @@ describe('following profiles', () => {
     ), validFollow));
     await setDoc(doc(
       authenticatedDb('follower'), 'users', 'follower', 'blocked', 'followed',
-    ), { createdAt: serverTimestamp() });
+    ), { createdAt: serverTimestamp(), targetUserId: 'followed' });
     await assertSucceeds(deleteDoc(doc(
       authenticatedDb('follower'), 'users', 'follower', 'following', 'followed',
     )));

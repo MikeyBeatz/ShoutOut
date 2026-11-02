@@ -105,6 +105,13 @@ jobs:
           DEBUG: 'true'
         run: npm run test:rules
 
+      - name: Test final account retention cleanup
+        # Keep the bounded retention suite independent of the existing Rules timeout.
+        # Each emulator is stopped by emulators:exec before the next step starts.
+        timeout-minutes: 4
+        working-directory: tools
+        run: npm run test:purge
+
       - name: Test Storage Rules and cross-service identity access
         timeout-minutes: 4
         working-directory: tools

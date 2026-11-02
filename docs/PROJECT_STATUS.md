@@ -1,5 +1,18 @@
 # ShoutOut – aktuální stav pro navázání práce
 
+## Rozpracovaný úsek – konečný 60denní purge
+
+Větev `feature/account-retention-purge`, navazuje na `40e0e96`.
+Vlastník schválil implementaci bodu 1 a dále anonymní technický kontext
+cizích konverzací i vypnutí soft delete v DEV bucketu. Lokálně připravený
+samostatný durable purge, metadata archivních kopií, omezené stránkování
+včetně chybějících rodičů, Storage generation journal a příchozí Rules ochrany.
+Lokálně prošlo 15/15 purge emulátorových scénářů, 254 Flutter testů,
+107 serverových unit testů, lint a Flutter analýza; úplná Rules regrese běží.
+Runtime flag zatím false, nic z této fáze není nasazené.
+Skutečný DEV zůstává níže uvedený d0e43c5/62a51b0; žádná původní data se neměnila.
+[Rozsah, inventura a provozní brány](ACCOUNT_RETENTION_PURGE_PLAN.md).
+
 ## Uzavřený DEV úsek – odebrání palců a vlastnické vyhledávání
 
 Větev `feature/account-reaction-removal`. Vlastník schválil po potvrzeném

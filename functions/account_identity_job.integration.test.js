@@ -169,6 +169,18 @@ test('v5 rejects a foreign cursor or forged completion instead of silently skipp
   }
 });
 
+test('purge scheduling is atomic for new opted-in jobs, keeps the original deadline and never migrates an existing v5', { skip: !enabled }, async () => {
+  const f = await fixture(0); f.options.reactionRemovalEnabled = true; f.options.retentionPurgeEnabled = true;
+  const purge = db.doc(`accountPurgeJobs/${f.jobRef.id}`); roots.push(purge);
+  await f.run({ getUser: async () => ({ uid: f.uid }) });
+  assert.equal((await f.jobRef.get()).get('retentionPurgeEnabled'), true);
+  assert.equal((await purge.get()).get('retainUntil').toMillis(), f.identity.requestCreateTime.toMillis() + 60 * 86400000);
+  assert.equal((await purge.get()).get('phase'), 'scheduled');
+  const before = await purge.get(); await f.finish(); assert.ok((await purge.get()).updateTime.isEqual(before.updateTime));
+  const old = await fixture(0); old.options.reactionRemovalEnabled = true; await old.run();
+  old.options.retentionPurgeEnabled = true; await old.finish(); assert.equal((await db.doc(`accountPurgeJobs/${old.jobRef.id}`).get()).exists, false);
+});
+
 test('v4 masks before content, keeps the original reservation, pages only owned logos and finishes the v3 content path', { skip: !enabled }, async () => {
   const f = await fixture(), nameBefore = await f.reservation.get();
   assert.equal((await f.run()).state, 'revoking-logos');

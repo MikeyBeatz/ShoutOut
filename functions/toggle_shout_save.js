@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -61,7 +62,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
       return data.result;
     }
     const [shout, save, rate] = await transaction.getAll(shoutRef, saveRef, rateRef);
-    if (!shout.exists) fail('not-found', 'The Shout is no longer available.');
+    if (!shout.exists || isPurgedShoutContext(shout.data())) fail('not-found', 'The Shout is no longer available.');
     const data = shout.data();
     if (![data.likesCount, data.dislikesCount, data.commentsCount].every(counter)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');

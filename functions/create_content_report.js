@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -77,7 +78,7 @@ export async function createContentReportOperation(request, db, clock = () => ne
     );
     const content = target.data();
     // Outsiders and senders cannot discover or copy a private message by ID.
-    if (!target.exists || (targetType === 'privateReply' &&
+    if (!target.exists || targetType === 'shout' && isPurgedShoutContext(content) || (targetType === 'privateReply' &&
         (content.recipientId !== uid || content.authorId === uid))) {
       fail('not-found', 'The report target is unavailable.');
     }

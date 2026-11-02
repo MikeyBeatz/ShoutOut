@@ -1,4 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -56,6 +57,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     }
     const [shout, comment, reaction, rate] = await transaction.getAll(shoutRef, commentRef, reactionRef, rateRef);
     if (!shout.exists || !comment.exists) fail('not-found', 'The comment or its Shout is no longer available.');
+    const shoutTitle = isPurgedShoutContext(shout.data()) ? '' : shout.data().title;
     // Retained expired/deleted Shouts remain valid reaction targets, as in Rules.
     const data = comment.data();
     const oldType = reaction.exists ? reaction.data().type : null;
@@ -72,7 +74,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
       if (target.available && enabled !== false) {
         publicProfile = await transaction.get(db.doc(`publicProfiles/${uid}`));
         if (publicProfile.exists && (typeof publicProfile.data().nickname !== 'string' ||
-            typeof shout.data().title !== 'string')) {
+            typeof shoutTitle !== 'string')) {
           fail('failed-precondition', 'Invalid public profile or Shout title.');
         }
       }
@@ -86,7 +88,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     if (publicProfile?.exists) {
       transaction.set(db.doc(`users/${data.authorId}/notifications/commentReaction_${result.type}_${input.shoutId}_${input.commentId}`), {
         kind: 'commentReaction', actorId: uid, actorNickname: publicProfile.data().nickname,
-        targetShoutId: input.shoutId, targetTitle: shout.data().title, targetCommentId: input.commentId,
+        targetShoutId: input.shoutId, targetTitle: shoutTitle, targetCommentId: input.commentId,
         reactionType: result.type, eventCount: FieldValue.increment(1), createdAt: now, readAt: null,
       }, { merge: true });
     }

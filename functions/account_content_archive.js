@@ -100,18 +100,21 @@ export async function archiveAccountContentPage(identity, db, auth, options = {}
       if (!target(source, kind, identity.userId)) { await c.record(transaction, { kind: 'check' }); return 'skipped'; }
       if (existing.exists) throw new AccountArchiveNeedsReview('archive-source-coexist');
       const count = shout.data()?.commentsCount ?? 0;
-      if (kind === 'comment' && shout.exists && (!Number.isSafeInteger(count) || count < 0)) {
+      if (kind === 'comment' && shout.exists && shout.get('contentPurged') !== true && (!Number.isSafeInteger(count) || count < 0)) {
         throw new AccountArchiveNeedsReview('invalid-parent-comment-count');
       }
       const apply = await c.record(transaction, { kind: 'archive-root', contentKind: kind, archiveId,
         pendingArchiveId: kind === 'comment' ? archiveId : null });
       transaction.create(archiveRef, { schemaVersion: 1, kind, sourcePath: source.ref.path,
+        subjectUserIds: [...new Set(kind === 'comment' ? [source.data().authorId] : [source.data().authorId, source.data().recipientId])],
+        sourceShoutId: source.ref.path.split('/')[1],
+        ...(kind === 'comment' && typeof source.data().replyToCommentId === 'string' ? { replyToCommentId: source.data().replyToCommentId } : {}),
         sourceCreateTime: source.createTime, sourceUpdateTime: source.updateTime,
         retentionOwnerId: identity.userId, requestCreateTime: identity.requestCreateTime,
         archivedAt: time, retainUntil: c.retainUntil, content: source.data(),
         reactionsComplete: kind !== 'comment', parentMissing: !shout.exists });
       transaction.delete(source.ref, { lastUpdateTime: source.updateTime });
-      if (kind === 'comment' && shout.exists) transaction.update(shoutRef, { commentsCount: Math.max(0, count - 1) });
+      if (kind === 'comment' && shout.exists && shout.get('contentPurged') !== true) transaction.update(shoutRef, { commentsCount: Math.max(0, count - 1) });
       apply(); return 'archived';
     });
     if (result === 'archived') archived++; else skipped++;
@@ -156,7 +159,8 @@ export async function drainArchivedCommentReactionsPage(identity, db, auth, opti
       const apply = await c.record(transaction, { kind: 'archive-reaction', archiveId, copied: source.exists ? 1 : 0 });
       if (!source.exists) return false;
       if (!same(source.createTime, candidate.createTime) || existing.exists) throw new AccountArchiveNeedsReview('reaction-archive-conflict');
-      transaction.create(copiedRef, { sourceCreateTime: source.createTime, sourceUpdateTime: source.updateTime,
+      transaction.create(copiedRef, { actorId: candidate.id, retentionOwnerId: identity.userId,
+        sourceCreateTime: source.createTime, sourceUpdateTime: source.updateTime,
         archivedAt: time, content: source.data() });
       transaction.delete(source.ref, { lastUpdateTime: source.updateTime }); apply(); return true;
     });

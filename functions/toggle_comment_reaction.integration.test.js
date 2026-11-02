@@ -52,6 +52,15 @@ const change = (request, idempotencyKey, button) => ({ ...request, data: { ...re
 const notice = (f, type) => db.doc(`users/${f.owner}/notifications/commentReaction_${type}_${f.shoutRef.id}_${f.commentRef.id}`);
 const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleCommentReaction\n${timedKey(key)}`).digest('hex')}`);
 
+test('foreign comment reactions work under a purged context and never recreate its title or counters', { skip: !enabled }, async () => {
+  const f = await fixture(), context = { schemaVersion: 1, status: 'deleted', contentPurged: true };
+  await f.shoutRef.set(context); const before = await f.shoutRef.get();
+  const result = await toggle(f.request, db, at()); assert.equal(result.likes, 3);
+  assert.equal((await notice(f, 'like').get()).get('targetTitle'), '');
+  assert.ok((await f.shoutRef.get()).updateTime.isEqual(before.updateTime));
+  assert.deepEqual((await f.shoutRef.get()).data(), context);
+});
+
 test('comment add, switch and removal are atomic and notify the comment author only', { skip: !enabled }, async () => {
   const f = await fixture();
   for (const [key, button, time, result] of [

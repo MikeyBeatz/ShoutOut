@@ -38,6 +38,11 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
+Vlastník zahájil [konečný 60denní úklid](ACCOUNT_RETENTION_PURGE_PLAN.md).
+Připravené jádro je zatím lokální a vypnuté v runtime. Doplňují se integrační
+regrese, pak přesné CI a DEV pilot; staré žádosti/job verze se nemigrují.
+Anonymní kontext cizích konverzací a vypnutí DEV soft delete jsou schválené.
+
 Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Dokončená
 [transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má
 úspěšné CI 41493498292 (348 Rules/server). Vlastnická vrstva i nový worker v5

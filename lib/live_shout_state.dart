@@ -10,6 +10,7 @@ class LiveShoutState {
     required this.reaction,
     required this.saves,
     required this.saved,
+    this.contentPurged = false,
   });
 
   final int likes;
@@ -18,9 +19,11 @@ class LiveShoutState {
   final String? reaction;
   final int saves;
   final bool saved;
+  final bool contentPurged;
 }
 
 Stream<LiveShoutState> watchLiveShoutState(
+  // The caller filters unconfirmed cache misses before forwarding null.
   Stream<Map<String, dynamic>?> shout,
   Stream<Map<String, dynamic>?> ownReaction, {
   Stream<bool>? ownSave,
@@ -38,5 +41,6 @@ Stream<LiveShoutState> watchLiveShoutState(
     reaction: state.$2?['type'] as String?,
     saves: (state.$1?['savesCount'] as num?)?.toInt() ?? 0,
     saved: saved,
+    contentPurged: state.$1 == null || state.$1?['contentPurged'] == true,
   ),
 );
