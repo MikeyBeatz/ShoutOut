@@ -4,16 +4,28 @@
 
 Větev `feature/account-reaction-removal`. Vlastník schválil po potvrzeném
 odstranění Auth odebrat jeho palce u cizího obsahu a upravit počty.
-Připravené interní transakční jádro (12 emulátorových případů), serverové
-userId ve třech stávajících writerech a ochrana vlastnictví v Rules.
-Lokálně 336 Rules/server, 5 dalších repair emulátorových testů, 38 tools,
-252 Flutter, analyzátor a lint prošly. První checkpoint d197d38 má success
-CI 41485581109. Navazující nástroj opravy a klientské UID fallbacky čekají na
-přesné CI. Připravený cílený indexový plán nemění TTL; rollout ještě neproběhl.
-Jádro zatím není zapojené do account workeru; automatické odebrání palců
-tedy ještě není nasazené. DEV read-only inventura: 0 reakcí, 3 starší záložky
-bez UID, žádné neznámé schéma. Stará data ani staré joby se neměnily.
-Živý dry-run připraveného opravného nástroje: wouldChange 3, changed 0.
+Vlastnická vrstva z `62a51b04b67c487023b10e387b21a4b590382150` má úspěšné
+CI 41487516001 (252 Flutter, 38 tools, 107 unit, 341 Rules/server, 15 Storage,
+analýza/lint/build). V DEV jsou ACTIVE tři UID writery toggleShoutReaction,
+toggleCommentReaction a toggleShoutSave s hashem
+`d8055e2d08e1317719fc3136ef3f13d6a52562c0`, Firestore Rules
+`59ba2602-0710-4e37-8a29-97d5c74a9ae7` a Hosting `20af65bc04ae5c35`.
+Oba collection-group userId indexy jsou READY, TTL se neměnilo.
+Živě ověřeny 3 anonymní požadavky → 401, stránkování UID dotazu a úklid
+všech 3 indexových fixture listů. Účtové Functions, IAM, Scheduler a Storage
+Rules se při tomto rolloutu nezměnily.
+
+Samostatně schválený plán `beccfc90…136f0` byl atomicky proveden: přesně
+3 původní záložky dostaly userId, všechna původní pole včetně createdAt
+zůstala shodná. Nová inventura: 0 reakcí, 3/3 indexované záložky, 0 oprav
+a 0 neznámých schémat. Původní žádost/job/archive inventura má stejný digest.
+
+Navazuje připravená verzovaná fáze workeru v5: UID dotaz, trvalý kurzor,
+nejvýše 50 kandidátů za běh, atomické odečtení a bezpečný replay. Stávající
+v1–v4 joby se nemigrují. Tato fáze ještě není nasazená. Lokálně prošlo všech
+19 identity/worker scénářů včetně 7 nových v5; související job/core/expiry
+regrese a lint prošly. Navazuje přesné CI a pouze dvoufunkční DEV rollout
+se živým pilotem.
 [Kontrakt, pořadí rolloutů a zbývající brány](ACCOUNT_REACTION_REMOVAL_PLAN.md).
 
 ## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování

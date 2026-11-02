@@ -9,10 +9,12 @@ import { AccountDeletionConfirmationNeedsReview, confirmAccountAuthDeletion } fr
 import { AccountPublicIdentityNeedsReview } from './account_public_identity.js';
 import { AccountLogoRevocationNeedsReview } from './account_logo_revocation.js';
 import { AccountIdentityJobNeedsReview, AccountIdentityJobLeaseLost, identityJobFields, validateIdentityJob, runAccountIdentitySlice } from './account_identity_job.js';
+import { actorReactionJobFields, validateActorReactionJob, runActorReactionsSlice } from './account_actor_reactions_job.js';
+import { AccountReactionRemovalNeedsReview } from './account_reaction_removal.js';
 
 const retentionMillis = 60 * 24 * 60 * 60 * 1000;
 const phases = new Set(['waiting-auth', 'hiding-shouts', 'retry', 'shouts-hidden', 'cleaning-private',
-  'private-leaves-cleaned', 'archiving-content', 'content-archived', 'obsolete', 'needs-review', 'masking-identity', 'revoking-logos']);
+  'private-leaves-cleaned', 'archiving-content', 'content-archived', 'obsolete', 'needs-review', 'masking-identity', 'revoking-logos', 'removing-reactions']);
 const terminalPhase = (phase, version) => ['obsolete', 'needs-review'].includes(phase) ||
   (version === 1 ? phase === 'shouts-hidden' : version === 2 ? phase === 'private-leaves-cleaned' : phase === 'content-archived');
 class LeaseLost extends Error {}
@@ -32,7 +34,7 @@ export function accountDeletionJobRef(db, identity) {
 
 function validateJob(job, identity) {
   const invalid = () => { throw new Error('invalid-account-deletion-job-state'); };
-  if (![1, 2, 3, 4].includes(job.schemaVersion) || job.userId !== identity.userId || !same(job.requestCreateTime, identity.requestCreateTime) ||
+  if (![1, 2, 3, 4, 5].includes(job.schemaVersion) || job.userId !== identity.userId || !same(job.requestCreateTime, identity.requestCreateTime) ||
       !phases.has(job.phase) || !Number.isSafeInteger(job.attempts) || job.attempts < 1 ||
       !Number.isSafeInteger(job.hiddenCount) || job.hiddenCount < 0 ||
       !(job.createdAt instanceof Timestamp) || !(job.updatedAt instanceof Timestamp) ||
@@ -41,14 +43,16 @@ function validateJob(job, identity) {
       !(job.leaseUntil === null || job.leaseUntil instanceof Timestamp) ||
       (job.leaseToken === null) !== (job.leaseUntil === null) ||
       !(job.nextAttemptAt === null || job.nextAttemptAt instanceof Timestamp)) invalid();
-  if (job.schemaVersion === 4 && validateIdentityJob(job)) return;
-  if (job.schemaVersion !== 4 && ['masking-identity', 'revoking-logos'].includes(job.phase)) invalid();
+  if (job.schemaVersion === 5) validateActorReactionJob(job);
+  else if (job.workStage === 'actor-reactions' || job.phase === 'removing-reactions') invalid();
+  if (job.schemaVersion >= 4 && validateIdentityJob(job)) return;
+  if (job.schemaVersion < 4 && ['masking-identity', 'revoking-logos'].includes(job.phase)) invalid();
   if (job.schemaVersion === 1) {
     if (['cleaning-private', 'private-leaves-cleaned', 'archiving-content', 'content-archived'].includes(job.phase)) invalid();
     return;
   }
   const contentStage = ['messages', 'comments', 'reactions'].includes(job.workStage);
-  if (!['shouts', 'private', ...(job.schemaVersion >= 3 ? ['messages', 'comments', 'reactions'] : [])].includes(job.workStage) ||
+  if (!['shouts', 'private', ...(job.schemaVersion === 5 ? ['actor-reactions'] : []), ...(job.schemaVersion >= 3 ? ['messages', 'comments', 'reactions'] : [])].includes(job.workStage) ||
       !Number.isSafeInteger(job.privateDeletedCount) || job.privateDeletedCount < 0 ||
       typeof job.privatePreferencesDisabled !== 'boolean' || job.phase === 'shouts-hidden' ||
       (job.workStage === 'shouts' && (job.shoutsHiddenAt !== null || job.privateDeletedCount !== 0 ||
@@ -80,12 +84,14 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   confirmAuthDeletionEnabled = false,
   retireRolePrivilegesEnabled = false,
   publicIdentityEnabled = false, logoBucket = null,
+  reactionRemovalEnabled = false, beforeActorReactionTransaction = null,
 } = {}) {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
       typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
-      typeof publicIdentityEnabled !== 'boolean' || typeof retireRolePrivilegesEnabled !== 'boolean' ||
+      typeof publicIdentityEnabled !== 'boolean' || typeof retireRolePrivilegesEnabled !== 'boolean' || typeof reactionRemovalEnabled !== 'boolean' ||
+      (reactionRemovalEnabled && (!publicIdentityEnabled || !confirmAuthDeletionEnabled)) ||
       (retireRolePrivilegesEnabled && !confirmAuthDeletionEnabled) ||
       (publicIdentityEnabled && (!confirmAuthDeletionEnabled || !contentArchiveEnabled || !logoBucket)) ||
       (contentArchiveEnabled && !privateCleanupEnabled)) {
@@ -103,7 +109,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     const [request, snapshot] = await transaction.getAll(requestRef, jobRef);
     const time = now(), job = snapshot.exists ? snapshot.data() : null;
     if (job) validateJob(job, identity);
-    if (job?.schemaVersion === 4 && !publicIdentityEnabled) return { state: 'identity-disabled' };
+    if (job?.schemaVersion === 5 && !reactionRemovalEnabled) return { state: 'reaction-removal-disabled' };
+    if (job?.schemaVersion >= 4 && !publicIdentityEnabled) return { state: 'identity-disabled' };
     if (job?.schemaVersion >= 3 && (!privateCleanupEnabled || !contentArchiveEnabled)) return { state: 'content-disabled' };
     if (job?.schemaVersion === 2 && !privateCleanupEnabled) return { state: 'private-disabled' };
     if (!pending(request, identity)) {
@@ -121,8 +128,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
       if (job.leaseUntil?.toMillis() > time.toMillis()) return { state: 'busy' };
       if (job.nextAttemptAt?.toMillis() > time.toMillis()) return { state: 'deferred' };
     }
-    const schemaVersion = job?.schemaVersion ?? (publicIdentityEnabled ? 4 : contentArchiveEnabled ? 3 : privateCleanupEnabled ? 2 : 1);
-    const privateData = schemaVersion >= 2 ? { workStage: job?.workStage ?? (schemaVersion === 4 ? 'identity' : 'shouts'),
+    const schemaVersion = job?.schemaVersion ?? (reactionRemovalEnabled ? 5 : publicIdentityEnabled ? 4 : contentArchiveEnabled ? 3 : privateCleanupEnabled ? 2 : 1);
+    const privateData = schemaVersion >= 2 ? { workStage: job?.workStage ?? (schemaVersion >= 4 ? 'identity' : 'shouts'),
       privateDeletedCount: job?.privateDeletedCount ?? 0,
       privatePreferencesDisabled: job?.privatePreferencesDisabled ?? false,
       shoutsHiddenAt: job?.shoutsHiddenAt ?? null } : {};
@@ -130,7 +137,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
       archivedMessageCount: job?.archivedMessageCount ?? 0, archivedCommentCount: job?.archivedCommentCount ?? 0,
       archivedReactionCount: job?.archivedReactionCount ?? 0, pendingArchiveId: job?.pendingArchiveId ?? null } : {};
     transaction.set(jobRef, {
-      ...contentData, ...privateData, ...(schemaVersion === 4 ? identityJobFields(job) : {}), schemaVersion, userId: identity.userId, requestCreateTime: identity.requestCreateTime,
+      ...contentData, ...privateData, ...(schemaVersion >= 4 ? identityJobFields(job) : {}),
+      ...(schemaVersion === 5 ? actorReactionJobFields(job) : {}), schemaVersion, userId: identity.userId, requestCreateTime: identity.requestCreateTime,
       phase: job?.phase ?? 'waiting-auth', attempts: (job?.attempts ?? 0) + 1,
       hiddenCount: job?.hiddenCount ?? 0, createdAt: job?.createdAt ?? time, updatedAt: time,
       retainUntil: later(identity.requestCreateTime, retentionMillis),
@@ -138,7 +146,8 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
       lastErrorCode: null,
     });
     return { state: 'claimed', schemaVersion, private: privateData.workStage === 'private', workStage: privateData.workStage,
-      identity: schemaVersion === 4 && ['identity', 'logos'].includes(privateData.workStage),
+      actor: privateData.workStage === 'actor-reactions',
+      identity: schemaVersion >= 4 && ['identity', 'logos'].includes(privateData.workStage),
       pendingArchiveId: contentData.pendingArchiveId, content: ['messages', 'comments', 'reactions'].includes(privateData.workStage) };
   });
   if (claim.state !== 'claimed') return claim;
@@ -221,8 +230,12 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     const job = assertOwner(snapshot, time);
     if (!pending(request, identity)) phase = 'obsolete';
     transaction.update(jobRef, {
-      ...(job.schemaVersion >= 2 && !claim.private && phase === 'cleaning-private'
+      ...(job.schemaVersion >= 2 && !claim.private && !claim.actor && phase === 'cleaning-private'
         ? { workStage: 'private', shoutsHiddenAt: time } : {}),
+      ...(job.schemaVersion === 5 && claim.workStage === 'shouts' && phase === 'removing-reactions'
+        ? { workStage: 'actor-reactions', shoutsHiddenAt: time } : {}),
+      ...(claim.actor && phase === 'cleaning-private'
+        ? { workStage: 'private', actorReactionsRemovedAt: time, actorReactionCursor: null } : {}),
       ...(job.schemaVersion >= 3 && claim.private && phase === 'archiving-content'
         ? { workStage: 'messages', privateLeavesCleanedAt: time } : {}),
       phase, updatedAt: time, leaseToken: null, leaseUntil: null, lastErrorCode,
@@ -242,6 +255,9 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     }) : null;
     result = confirmation?.state === 'waiting-for-auth-deletion' ? confirmation
       : claim.identity ? await runAccountIdentitySlice(identity, db, invocationAuth, { jobRef, bucket: logoBucket, clock, pageSize, assertOwner })
+      : claim.actor ? await runActorReactionsSlice(identity, db, invocationAuth, {
+        jobRef, clock, pageSize, assertOwner, indexWriter, beforeTransaction: beforeActorReactionTransaction,
+      })
       : claim.content ? await contentSlice() : claim.private ? await cleanupAccountPrivatePage(identity, db, invocationAuth, {
       pageSize, beforeCommit: beforePrivateCommit, transactionGuard: privateTransactionGuard,
     }) : await hideDeletedAuthAccountShoutsPage(db, invocationAuth, identity.userId, {
@@ -251,7 +267,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     if (error instanceof LeaseLost || error instanceof AccountIdentityJobLeaseLost) return { state: 'lease-lost' };
     try {
       if (error instanceof AccountDeletionRequestUnavailable) return await finish('obsolete');
-      const permanent = error instanceof AccountIdentityJobNeedsReview || error instanceof AccountPublicIdentityNeedsReview || error instanceof AccountLogoRevocationNeedsReview || error instanceof AccountDeletionConfirmationNeedsReview || error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
+      const permanent = error instanceof AccountReactionRemovalNeedsReview || error instanceof AccountIdentityJobNeedsReview || error instanceof AccountPublicIdentityNeedsReview || error instanceof AccountLogoRevocationNeedsReview || error instanceof AccountDeletionConfirmationNeedsReview || error instanceof AccountArchiveNeedsReview || error instanceof AccountPrivateCleanupNeedsReview || ['auth/insufficient-permission', 'auth/invalid-credential',
         'permission-denied', 'invalid-argument', 'failed-precondition', 3, 7, 9, 403].includes(error?.code);
       const expired = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis;
       const result = await finish(permanent || expired ? 'needs-review' : 'retry', 'processing-failed');
@@ -262,9 +278,10 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
     }
     throw error;
   }
-  let phase = claim.identity ? result.state === 'logos-revoked' ? 'hiding-shouts' : 'revoking-logos' : claim.content ? result.state
+  let phase = claim.identity ? result.state === 'logos-revoked' ? 'hiding-shouts' : 'revoking-logos'
+    : claim.actor ? result.state === 'actor-reactions-removed' ? 'cleaning-private' : 'removing-reactions' : claim.content ? result.state
     : claim.private ? result.state === 'private-leaves-cleaned' ? claim.schemaVersion >= 3 ? 'archiving-content' : 'private-leaves-cleaned' : 'cleaning-private'
-    : result.state === 'shouts-hidden' ? claim.schemaVersion >= 2 ? 'cleaning-private' : 'shouts-hidden' : 'hiding-shouts';
+    : result.state === 'shouts-hidden' ? claim.schemaVersion === 5 ? 'removing-reactions' : claim.schemaVersion >= 2 ? 'cleaning-private' : 'shouts-hidden' : 'hiding-shouts';
   if (result.state === 'waiting-for-auth-deletion') {
     phase = now().toMillis() >= identity.requestCreateTime.toMillis() + authWaitMillis ? 'needs-review' : 'waiting-auth';
   }

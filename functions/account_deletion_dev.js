@@ -15,7 +15,8 @@ if (getApps().length === 0) initializeApp();
 export const accountDeletionDevProposal = Object.freeze({
   retireRolePrivilegesEnabled: true, // Retire both role stores atomically with Auth confirmation.
   shoutExpirationEnabled: true, // Reuse otherwise idle maintenance ticks; never delete content here.
-  publicIdentityEnabled: true, // New v4 jobs only; historical v1/v2/v3 jobs retain their schema.
+  reactionRemovalEnabled: true, // UID coverage/indexes verified in DEV; only new jobs use v5.
+  publicIdentityEnabled: true, // Historical v1/v2/v3/v4 jobs retain their schema.
   confirmAuthDeletionEnabled: true, // Gate every new destructive slice before touching content.
   contentArchiveEnabled: true, // Approved DEV archive pilot, 1 November 2026.
   privateCleanupEnabled: true, // Approved DEV private-data pilot, 1 November 2026.
@@ -62,7 +63,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
     const result = await runAccountMaintenanceTick(db, getAuth(), {
       ...workerOptions(db), clock: () => new Date(),
     });
-    const log = result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.checkpointConflict ? logger.warn : logger.info;
+    const log = result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);
   } catch {
     logger.error('account-deletion-job-recovery', { code: 'scan-failed' });

@@ -61,6 +61,114 @@ async function fixture(logos = 5) {
   return f;
 }
 
+async function actorFixture() {
+  const f = await fixture(0); f.options.reactionRemovalEnabled = true;
+  const foreign = f.context.collection('comments').doc('foreign');
+  await f.context.update({ likesCount: 2, dislikesCount: 0 });
+  await foreign.update({ likesCount: 0, dislikesCount: 1 });
+  const thumbs = [f.context.collection('reactions').doc(f.uid), foreign.collection('reactions').doc(f.uid)];
+  await thumbs[0].set({ userId: f.uid, type: 'like', updatedAt: Timestamp.now() });
+  await thumbs[1].set({ userId: f.uid, type: 'dislike', updatedAt: Timestamp.now() });
+  await f.context.collection('reactions').doc('other').set({ userId: 'other', type: 'like', updatedAt: Timestamp.now() });
+  const own = f.shout.collection('reactions').doc(f.uid);
+  await f.shout.update({ likesCount: 1, dislikesCount: 0 });
+  await own.set({ userId: f.uid, type: 'like', updatedAt: Timestamp.now() });
+  f.foreign = foreign; f.thumbs = thumbs; f.own = own;
+  f.actorStage = async () => {
+    for (let n = 0; n < 10; n++) { f.tick(); await f.run(); if ((await f.jobRef.get()).data().workStage === 'actor-reactions') return; }
+    assert.fail('actor phase not reached');
+  };
+  return f;
+}
+
+test('v5 indexed pages remove foreign thumbs exactly once before private cleanup and preserve own/foreign votes', { skip: !enabled }, async () => {
+  const f = await actorFixture(); await f.actorStage();
+  assert.equal((await f.jobRef.get()).data().schemaVersion, 5);
+  assert.equal((await f.user.collection('notifications').get()).size, 1);
+  await f.finish(); const job = (await f.jobRef.get()).data();
+  assert.equal(job.removedShoutReactionCount, 1); assert.equal(job.removedCommentReactionCount, 1);
+  assert.equal(job.removedOrphanReactionCount, 0); assert.equal(job.actorReactionCursor, null);
+  assert.ok(job.actorReactionsRemovedAt instanceof Timestamp);
+  assert.equal((await f.context.get()).data().likesCount, 1); assert.equal((await f.foreign.get()).data().dislikesCount, 0);
+  assert.equal((await f.own.get()).exists, true);
+  for (const ref of f.thumbs) assert.equal((await ref.get()).exists, false);
+  const archives = (await db.collection('accountContentArchive').where('retentionOwnerId', '==', f.uid).get()).docs;
+  assert.equal(archives.filter(row => ['shoutReaction', 'commentReaction'].includes(row.get('kind'))).length, 2);
+  for (const row of archives) assert.equal(row.get('retainUntil').toMillis(), f.identity.requestCreateTime.toMillis() + 60 * 86400000);
+  const parent = await f.context.get(), before = await f.jobRef.get();
+  assert.equal((await f.run({ getUser() { assert.fail('terminal replay'); } })).state, 'content-archived');
+  assert.ok((await f.context.get()).updateTime.isEqual(parent.updateTime));
+  assert.ok((await f.jobRef.get()).updateTime.isEqual(before.updateTime));
+});
+
+test('v5 resumes a partially committed page without double decrement after transient failure', { skip: !enabled }, async () => {
+  const f = await actorFixture(); f.options.pageSize = 50; await f.actorStage();
+  let rows = 0; f.options.beforeActorReactionTransaction = async path => {
+    if (path !== f.own.path && ++rows === 2) throw new Error('lost page response');
+  };
+  f.tick(); await assert.rejects(f.run(), /lost page response/);
+  const job = (await f.jobRef.get()).data();
+  assert.equal(job.actorReactionCursor, null);
+  assert.equal(job.removedShoutReactionCount + job.removedCommentReactionCount, 1);
+  f.options.beforeActorReactionTransaction = null; await f.finish();
+  assert.equal((await f.context.get()).data().likesCount, 1); assert.equal((await f.foreign.get()).data().dislikesCount, 0);
+  const done = (await f.jobRef.get()).data(); assert.equal(done.removedShoutReactionCount + done.removedCommentReactionCount, 2);
+});
+
+test('v5 underflow is isolated for manual review and never deletes its source', { skip: !enabled }, async () => {
+  const f = await actorFixture(); await f.actorStage();
+  await f.context.update({ likesCount: 0 }); await f.foreign.update({ dislikesCount: 0 });
+  f.tick(); assert.equal((await f.run()).state, 'needs-review');
+  for (const ref of f.thumbs) assert.equal((await ref.get()).exists, true);
+  assert.equal((await f.user.collection('notifications').get()).size, 1);
+});
+
+test('v5 stops for a replaced request or lease loss before removing a thumb', { skip: !enabled }, async () => {
+  for (const replaceRequest of [true, false]) {
+    const f = await actorFixture(); await f.actorStage();
+    f.options.beforeActorReactionTransaction = async () => {
+      if (replaceRequest) { await f.request.delete(); await f.request.set({ userId: f.uid, status: 'pending' }); }
+      else await f.jobRef.update({ leaseToken: 'another-worker' });
+    };
+    f.tick(); assert.equal((await f.run()).state, replaceRequest ? 'obsolete' : 'lease-lost');
+    for (const ref of f.thumbs) assert.equal((await ref.get()).exists, true);
+  }
+});
+
+test('v5 pause is read only, existing Auth blocks progress, and enabling it does not migrate a v4 job', { skip: !enabled }, async () => {
+  const f = await actorFixture(); await f.actorStage(); const before = await f.jobRef.get(); f.tick();
+  assert.equal((await f.run(missing, db, { ...f.options, reactionRemovalEnabled: false })).state, 'reaction-removal-disabled');
+  assert.ok((await f.jobRef.get()).updateTime.isEqual(before.updateTime));
+  assert.equal((await f.run({ getUser: async () => ({ uid: f.uid }) })).state, 'waiting-auth');
+  for (const ref of f.thumbs) assert.equal((await ref.get()).exists, true);
+  await f.finish();
+  const old = await fixture(0); await old.run(); old.options.reactionRemovalEnabled = true; await old.finish();
+  assert.equal((await old.jobRef.get()).data().schemaVersion, 4);
+  assert.equal((await old.jobRef.get()).data().actorReactionCursor, undefined);
+});
+
+test('v5 enforces 50 candidates per invocation and drains an orphan without touching foreign counters', { skip: !enabled }, async () => {
+  const f = await actorFixture(); f.options.pageSize = 50;
+  for (let n = 0; n < 51; n++) await f.context.collection('comments').doc(`orphan-${n}`).collection('reactions').doc(f.uid)
+    .set({ userId: f.uid, type: 'like', updatedAt: Timestamp.now() });
+  await f.actorStage(); f.tick(); const first = await f.run();
+  assert.equal(first.examined, 50); assert.equal(first.state, 'removing-reactions');
+  assert.equal((await f.jobRef.get()).data().workStage, 'actor-reactions');
+  await f.finish(); assert.equal((await f.jobRef.get()).data().removedOrphanReactionCount, 51);
+  assert.equal((await f.context.get()).data().likesCount, 1);
+});
+
+test('v5 rejects a foreign cursor or forged completion instead of silently skipping reactions', { skip: !enabled }, async () => {
+  for (const patch of [{ actorReactionCursor: 'shouts/foreign/reactions/other' },
+    { actorReactionsRemovedAt: Timestamp.now() }, { privateDeletedCount: 1 }]) {
+    const f = await actorFixture(); await f.actorStage(); await f.jobRef.update(patch);
+    const before = await f.jobRef.get(); f.tick();
+    await assert.rejects(f.run(), /invalid-account-actor-reactions-job-state/);
+    assert.ok((await f.jobRef.get()).updateTime.isEqual(before.updateTime));
+    for (const ref of f.thumbs) assert.equal((await ref.get()).exists, true);
+  }
+});
+
 test('v4 masks before content, keeps the original reservation, pages only owned logos and finishes the v3 content path', { skip: !enabled }, async () => {
   const f = await fixture(), nameBefore = await f.reservation.get();
   assert.equal((await f.run()).state, 'revoking-logos');

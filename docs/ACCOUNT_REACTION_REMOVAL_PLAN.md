@@ -28,7 +28,7 @@ Shout counter změnu lze atomicky skládat se spatial indexWriter; komentářov�
 reakce nemění souhrny Shoutu. Jádro neodstraňuje historická oznámení, stejně
 jako běžné odkliknutí palce. Jejich osobní snapshoty musí řešit konečný purge.
 
-**Zatím není zapojené do živého account workeru ani jeho deploy artefaktu.**
+**V5 zapojení je připravené lokálně; v živém account workeru ještě neběží.**
 Dosavadní joby se nepřepisují. Výsledek selection-processed neznamená, že jsou
 prohledané všechny reakce účtu; pokrývá jen vybranou stránku.
 
@@ -63,7 +63,9 @@ rollout ji neprovádí. Připravený nástroj `tools/activity_ownership_repair.m
 má pět emulátorových testů: dry-run bez zápisů, atomické UID-only doplnění,
 zastaralý plán, souběh v commit, lost-ack replay a odmítnutí cizích cest/projektu.
 Vyžaduje přesný digest, podporuje jen DEV a starou updateTime; nemění rodiče,
-počty, typ reakce ani původní timestampy. Zatím živě nebyl spuštěný s apply.
+počty, typ reakce ani původní timestampy. Vlastník schválil tento přesný digest;
+živé apply atomicky doplnilo 3/3 záložky. Ověřena shoda všech původních polí,
+nová inventura má 3 indexované záložky a žádnou chybějící UID položku.
 Před nasazením workeru musí být doložená úplnost jeho
 konkrétního objevovacího dotazu, ne pouze přítomnost indexu.
 
@@ -81,3 +83,31 @@ počty a bezpečný replay, respektovat původní joby a original deadline. Tepr
 po integračních testech, CI, ověření pokrytí a živém pilotu lze prohlásit
 automatické odebrání palců za nasazené. Sedmidenní Shout purge a konečný
 60denní account purge tím nejsou implementované.
+
+## V5 worker a ověřená předchozí vrstva
+
+DEV vlastnická vrstva je nasazená z 62a51b04b67c487023b10e387b21a4b590382150
+po CI 41487516001. Tři callables ACTIVE, Rules 59ba2602-0710-4e37-8a29-97d5c74a9ae7,
+Hosting 20af65bc04ae5c35, oba indexy READY. Živý query probe ověřil přesný
+UID filtr a dokumentový kurzor; všechny 3 fixture listy jsou uklizené.
+Záznamy původní účetní inventury zůstaly shodné. TTL, Scheduler, IAM,
+Storage Rules a account Functions se tímto rolloutem nezměnily.
+
+Nový interní account_actor_reactions_job používá collectionGroup reactions
+s userId rovností, orderBy documentId a trvalým relativním dokumentovým
+kurzorem. Je za skrytím vlastních Shoutů a před soukromou/content fází;
+nejvýše 50 kandidátů za invokaci sdílí dosavadní rozpočet workeru. Přeskočené
+vlastní hlasy posunou kurzor, odstraněné listy lze použít jako kurzor. Krátká
+či prázdná stránka dokončí fázi. Každý skutečný odpočet i jeho druhový počet
+v jobu jsou ve stejné transakci; kurzor postupuje až po úspěchu celé stránky.
+Při částečném úspěchu se již odebrané zdroje znovu neodečtou.
+
+Nové joby dostanou schemaVersion 5 pouze při reactionRemovalEnabled.
+V1–v4 se nepřepisují ani znovu neotevírají; vypnutí přepínače v5 pozastaví
+bez zápisu. Podtečení či neznámá data jdou na needs-review. Potvrzení Auth,
+request createTime, původní deadline a lease platí před každým odpočtem.
+Nové fields: actorReactionCursor, actorReactionsRemovedAt a tři počty
+removedShoutReactionCount/removedCommentReactionCount/removedOrphanReactionCount.
+Před živým aktivováním vyžadujeme emulátorové regrese, přesné úspěšné CI,
+READY index, potvrzené UID pokrytí a samostatný pilot s úklidem.
+Prostředky obou account Functions a minutového plánovače se nemění.

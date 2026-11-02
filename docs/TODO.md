@@ -40,8 +40,10 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Připravená první
 [transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má lokálně
-336 Rules/server testů. CI/rollout této vrstvy a zapojení do workeru ještě
-zbývají; žádný celý milník se tím nezaškrtává.
+341 Rules/server testů a úspěšné CI 41487516001. Vlastnická vrstva je nasazená
+v DEV; schválené doplnění UID u 3 záložek je provedené a ověřené. Navazuje
+testovaná fáze workeru v5, její přesné CI, rollout a živý pilot. Žádný celý
+milník se tím nezaškrtává.
 
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
