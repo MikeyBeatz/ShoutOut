@@ -35,7 +35,8 @@ accountDeletionJobs: projekt, UID a originální request createTime. Vzniká
 atomicky s novým výslovně zapnutým primárním jobem, nikoli až po úspěchu
 archivace; částečné selhání primární fáze tedy neztrácí termín konečného úklidu.
 Staré žádosti/job verze se automaticky nepřevádějí. Flag retentionPurgeEnabled
-je při přípravě vypnutý; aktivace vyžaduje přesné CI a uvedené provozní brány.
+je při přípravě vypnutý; DEV aktivace 96b0782 proběhla po přesném CI a všech
+uvedených provozních branách. Produkce ani historické joby se tím nezapínají.
 
 Existující minutový Scheduler upřednostní splatný purge před další údržbou.
 Nejvýše 1 job / 50 pracovních kroků za invokaci, lease 120 s, retry nejdříve
@@ -111,8 +112,51 @@ moderačního případu, minutový maintenance rozpočet a zamezení opětovném
 vytvoření notifikačních preferencí při pokračování. Přesné výsledky kontrol
 a skutečné nasazení se evidují v PROJECT_STATUS; příprava sama není rollout.
 Následuje přesné CI, přípravný DEV rollout metadat/webu/Rules/indexů, samostatně
-schválená bucket policy, aktivační commit a jeho CI/rollout. Živý pilot používá
+schválená bucket policy, aktivační commit a jeho CI/rollout. Tyto brány jsou
+v DEV splněné (f81eaf4 / 96b0782, CI 41538976226 / 41539164008).
+Živý pilot používá
 jen vlastní syntetický UID a fixture, skutečný Auth/Firestore/Storage; hranici
 60 dnů ověří řízený čas interního jádra, nikoli čekání dvou měsíců nebo
 zpětné přepsání serverového createTime. Bez nové veřejné testovací Function.
 Žádné jiné UID, původní pending žádost, produkce, main ani IAM se nemění.
+
+Rules prototyp používá vlastnické kontroly, výchozí zákaz a vstupní ohradu
+pro purge; regresní sada prošla. Před prvním veřejným vydáním zůstává nutná
+závěrečná revize pravidel jako součást startovní brány MVP.
+
+## Uzavření bodu 1 v DEV – 3. listopadu 2026
+
+Příprava f81eaf4 / [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226)
+a aktivace 96b0782 / [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008)
+prošly: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge a 15 Storage,
+analýza/lint/build. Lokálně také 355/355 Rules a 15/15 purge.
+
+Skutečný DEV trigger a minutový Scheduler dokončily nový syntetický UID bez
+vytvoření Auth účtu do content-archived se 3 archivními kořeny a budoucím
+purge jobem. Původní createTime a deadline zůstaly shodné. Před termínem
+stejné jádro vrátilo deferred bez zápisu; s řízeným časem +60 dní nad reálným
+Firestore/Storage dokončilo úklid včetně chybějícího mezilehlého rodiče,
+Business/právních potomků, archivních kopií, záložky, 2 souborů, rezervace,
+žádosti a obou pracovních záznamů. Cizí komentář a konverzace zůstaly pod
+třípolovým kontextem; cizí odpověď ztratila strukturovanou vazbu a automatický
+@prefix, zachovala vlastní text. Čítače zůstaly správné, terminální replay noop.
+
+Řízený kernel běžel přes autorizovaný CLI OAuth a přesnou připravenou
+nasazenou binárku; nejde o důkaz uplynutí 60 dní na hodinách Cloud Scheduleru
+ani o veřejný testovací endpoint. Skutečný runtime trigger/Scheduler byl
+ověřen běžným časem v předcházejících fázích. Storage test ověřil politiku 0,
+nepřítomné objekty a prázdné výpisy verzí. Pokus o softDeleted listing v této
+politice vrací 400; opraven byl pouze lokální verifier, serverový purge uspěl.
+Časování jednotlivých živých dávek se při tomto průchodu nedochovalo;
+provozní limity se ověřily v konfiguraci a rozsah kroků v integračních testech.
+
+Fixture je celá uklizená; původní request/job/archive inventura je shodná.
+Metadata/Rules/web/indexy, dvě účtové a pět obsahových Functions jsou ověřené
+v DEV. Produkce, main, historické žádosti a IAM zůstaly beze změny.
+Aktuální revize/hash jsou v PROJECT_STATUS. Surové lokální důkazy (ignorované):
+`build/purge-{preparation-ci,active-ci,indexes-ready,bucket-applied,
+preparation-deployed,active-deployed,hosting-proof,primary-proof,pilot-proof,
+cleanup-proof}.json`; logy CI a lokálních sad mají stejný prefix.
+
+Celý účtový milník zůstává otevřený: navazuje klientský cutover, uzavření
+přímých Rules zápisů a společný závěrečný test. Tento podkrok nemění MVP 9/24.

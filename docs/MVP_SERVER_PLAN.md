@@ -199,8 +199,12 @@ notification preferencí na false. Aktivace 6a4606e po CI 41300216738, replay a
 úklid testu prošly. Navazující DEV v3 archiv je také hotový: aktivace 1dab78c
 po CI 41322524612, živě 2 zprávy, 1 komentář a 3 reakce, přesný commentsCount,
 cizí obsah zachovaný, moderační zobrazení/audit i úklid fixture ověřené.
-Celý milník zůstává otevřený kvůli identitě/přezdívce, konečnému 60dennímu
-úklidu a klientskému cutoveru. Staré joby se nepřeváděly.
+Aktualizace 3. listopadu: identita/role, vlastnické odebrání palců a konečný
+60denní purge jsou dokončené v DEV. Aktivace 96b0782 má success CI 41539164008
+(355 Rules/server, 15 purge); skutečný trigger/Scheduler i konečné odstranění
+nad reálným Firestore/Storage s řízeným časem, anonymní cizí kontext, replay
+a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientskému cutoveru,
+uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
 [Důkazy a navazující rozhodnutí](ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

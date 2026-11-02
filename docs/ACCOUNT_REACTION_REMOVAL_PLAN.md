@@ -82,7 +82,8 @@ se stejným společným rozpočtem 50 položek. Musí mít trvalý kurzor, atomi
 počty a bezpečný replay, respektovat původní joby a original deadline. Teprve
 po integračních testech, CI, ověření pokrytí a živém pilotu bylo automatické
 odebrání palců uzavřeno v DEV (viz níže). Sedmidenní Shout purge a konečný
-60denní account purge tím nejsou implementované.
+60denní account purge tím nebyly implementované; navazující account purge
+je od 3. listopadu dokončený v DEV v [samostatném plánu](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
 ## V5 worker a ověřená předchozí vrstva
 
@@ -139,7 +140,8 @@ Fixture včetně archivů/jobu/žádosti jsou uklizené, dotaz na jejich UID vra
 digest. Soukromé důkazy běhu jsou v ignorovaných build/actor-*-proof.json;
 schválená oprava 3 záložek má zvlášť build/lifecycle-ownership-apply-proof.json
 a zachovaný původní schválený plán. Automatický konečný 60denní purge
-vlastních reakcí/záložek a ostatních retenčních dat stále zbývá.
+vlastních reakcí/záložek a ostatních retenčních dat následně dokončil
+[96b0782 s živým DEV pilotem](ACCOUNT_RETENTION_PURGE_PLAN.md); klientský cutover zbývá.
 
 ### Návrat po aktivaci v5
 

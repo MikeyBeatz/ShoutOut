@@ -85,8 +85,8 @@ Nový job nesmí prodloužit původní deadline ani automaticky migrovat staré 
 | Zastavení nových serverových oznámení/zpráv pro mazající se účet | DEV nasazené 1. listopadu z b777992 po úspěšném CI | Čtyři Functions ACTIVE, limity a anonymní 401 ověřené. Příjemcovské scénáře mají emulátor/CI, nikoli nový živý přihlášený test. |
 | Vlastní nepotřebné soukromé podkolekce | DEV dokončeno z 6a4606e po CI 41300216738 | Živě waiting-auth 0/0 → 3 skryté Shouty → 4 odstraněné vlastní položky, zachovaný profil/legal, replay a úklid. Staré joby se nemigrují. |
 | Soukromé zprávy a veřejné komentáře účtu | DEV dokončeno, v3 aktivní z 1dab78c po CI 41322524612 | Živě 2 zprávy, 1 komentář a 3 reakce, cizí obsah zachovaný, čítač/replay/moderační audit a úklid; [důkazy a postup](ACCOUNT_CONTENT_ARCHIVE_PLAN.md). |
-| Identita, rezervace přezdívky a zbývající osobní data | Veřejná identita/loga i odebrání pravomocí dokončené v DEV; konečný purge otevřený | [V4 b685ac4](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4) a navazující [91d8d9b](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) mají CI a živé důkazy. Moderní/legacy role mají accountStatus deleted, původní bezpečnostní metadata i Business podklady zachované; jejich purge a uvolnění vlastní rezervace ještě zbývají. |
-| Konečný 60denní úklid | Zbývá | Opakovatelný běh včetně podkolekcí/Storage/kopií důkazů, pevná lhůta i pro hlášení bez automatického holdu, vlastnická kontrola aliasu, trvalý minimální marker a test přesné hranice. |
+| Identita, rezervace přezdívky a zbývající osobní data | DEV dokončeno včetně konečného purge | [V4 b685ac4](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4), [91d8d9b](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) a [96b0782](ACCOUNT_RETENTION_PURGE_PLAN.md) mají CI a živé důkazy. Pevný termín, uvolnění stále vlastní rezervace a odstranění Business/profilových potomků ověřené. |
+| Konečný 60denní úklid | DEV dokončeno 3. listopadu | 96b0782, CI 41539164008: 15 purge a 355 Rules/server testů; živý trigger/Scheduler do archivace, stejné jádro s řízeným časem nad reálným Firestore/Storage, anonymní cizí kontext, pevný termín, marker/replay/úklid. [Důkazy a hranice](ACCOUNT_RETENTION_PURGE_PLAN.md). |
 | Klient a uzavření přímých zápisů | Retry UI dokončené v DEV, plný cutover zbývá | 23f2043 po CI 41472129925 je nasazený, ruční login/reauth/Auth.delete + zachování intentu a úklid ověřené. Lost-ack/UID/latch/dialog mají 11 testů. První klientské skrytí Shoutů a uzavření přímých Rules zápisů ještě zbývají. |
 
 ## Ochrana příjemce
@@ -258,8 +258,8 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
   archivu i soukromé hlášení se snapshotem bez nadřazeného Shoutu.
   Komentářový fallback byl živě ověřený účtem TestModerator, vznikl 1 audit.
 - Rozsah textů je rozhodnutý: uchovat všechny podle doplnění výše.
-  Samostatně zůstává rozhodnutí o existujícím otevřeném hlášení/hold po
-  uplynutí lhůty. DEV archiv už je živě ověřený; konečný fyzický purge zbývá.
+  Následně vlastník rozhodl pevnou lhůtu i pro otevřená hlášení, bez holdu.
+  DEV archiv i navazující konečný purge jsou živě ověřené; viz aktuální matice.
 
 ## Další větší úsek
 
@@ -269,11 +269,11 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
 2. [Archivní pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) je dokončený v DEV včetně
    CI, příchozích/odchozích zpráv, vlastních komentářů/reakcí, přesného čítače,
    moderačního lookupu/auditu, zachování cizích konverzací a úklidu fixture.
-3. Vyřešit veřejný profil, historické kopie jména, Business profil/logo, role a
-   sociální odkazy. Nepovažovat smazání rodiče ve Firestore za smazání jeho potomků.
-4. Dopsat přesný rozsah nezbytných retenčních záznamů a konečné odstranění po
-   60 dnech včetně vlastnické kontroly přezdívky. Vztah k reportům a případným
-   právním holdům musí být rozhodnutý, ne nahrazený novou neomezenou retencí.
+3. Veřejný profil/logo, role, sociální odkazy i následný konečný úklid Business
+   profilu a osobních potomků jsou dokončené v DEV; viz matice a purge plán.
+4. Rozsah retence, pevný termín bez holdu, vlastnická kontrola přezdívky a
+   konečné odstranění jsou rozhodnuté a ověřené v DEV. Následuje klientský
+   cutover a závěrečný test celého účtového milníku, nikoli migrace starých žádostí.
 
 Nový archiv, rozšíření živého mazání dat a další testovací Auth účty se
 předkládají ke konkrétnímu schválení před živým použitím. Stávající souhlas

@@ -526,6 +526,22 @@ Před zveřejněním historie spusťte kontrolu na skutečné privátní klíče
 service-account soubory a hodnoty Geoapify. Firebase client API key sám o sobě
 není důvod k odstranění z klienta, ale musí mít správné aplikační restrikce.
 
+## Konečný účtový úklid v DEV
+
+Pro nově aktivované žádosti vytváří účtový worker soukromý `accountPurgeJobs`
+s termínem původní request createTime + 60 dní. Existující minutový Scheduler
+upřednostňuje splatný purge, nejvýše 1 job / 50 kroků; nepřidává se nový job.
+Stavy `needs-review`/`obsolete` vyžadují provozní kontrolu, nejsou právním holdem
+ani novou retenční lhůtou. Nespouštět plošnou migraci historických žádostí.
+
+Před aktivací ověřit přesné CI/artefakt, šest CG indexů včetně skutečných
+dotazů a bucket bez versioning/retention policy/soft delete. V DEV je soft
+delete schváleně vypnutý; starší již soft-deleted soubory tím nejsou zpětně
+odstraněné. Produkční bucket policy se rozhoduje samostatně. Nenasazovat celý
+`firestore.indexes.json` kvůli jiným dosud neschváleným TTL.
+Podrobnosti, datové cesty a důkazy:
+[ACCOUNT_RETENTION_PURGE_PLAN](ACCOUNT_RETENTION_PURGE_PLAN.md).
+
 ## Rekonstrukce stejné aplikace – kontrolní seznam
 
 - [ ] Flutter projekt používá stejný package name, závislosti, assety, font a

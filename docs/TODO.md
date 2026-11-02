@@ -38,19 +38,21 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
-Vlastník zahájil [konečný 60denní úklid](ACCOUNT_RETENTION_PURGE_PLAN.md).
-Připravené jádro je zatím lokální a vypnuté v runtime. Doplňují se integrační
-regrese, pak přesné CI a DEV pilot; staré žádosti/job verze se nemigrují.
-Anonymní kontext cizích konverzací a vypnutí DEV soft delete jsou schválené.
+[Konečný 60denní úklid – bod 1](ACCOUNT_RETENTION_PURGE_PLAN.md) je dokončený
+v DEV: aktivace 96b0782 po CI 41539164008, skutečný trigger/Scheduler a
+3 archivní kořeny, konečný purge s řízeným časem nad Firestore/Storage,
+anonymní cizí konverzace, replay i úklid fixture ověřené. Původní inventura
+zachovaná, staré žádosti/job verze se nemigrují. DEV soft delete je vypnuté.
+**Dále bod 2: klientský cutover a uzavření přímých zápisů, pak závěrečný test
+účtového milníku.** Dokončení samotného bodu 1 ještě nemění 9/24 milníků.
 
 Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Dokončená
 [transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má
 úspěšné CI 41493498292 (348 Rules/server). Vlastnická vrstva i nový worker v5
 jsou nasazené v DEV; schválené doplnění UID u 3 záložek je provedené a ověřené.
 Živý pilot dokončil odebrání palců/čítače, content-archived i úklid fixture,
-původní inventura má stejný digest. Navazuje konečný 60denní purge vlastních
-reakcí, záložek, soukromých/Business potomků a kopií důkazů. Žádný celý
-milník se tím ještě nezaškrtává.
+původní inventura má stejný digest. Navazující konečný 60denní purge je také
+dokončený v DEV výše. Žádný celý milník se tím ještě nezaškrtává.
 
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
@@ -60,7 +62,7 @@ Hosting d2573a279275eb72 nahradil kompatibilní UID klient 62a51b0 / 20af65bc04a
 Živý průchod jedním novým dočasným účtem,
 zachování žádosti/deadline, terminální worker a úklid jsou ověřené.
 Plné uzavření přímých zápisů zůstává otevřené.
-Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
+Samotné podkroky nemění 9/24 milníků. Fyzický purge je dokončený, navazuje klientský cutover;
 Business archiv je schválený celý včetně poboček/fakturačních podkladů a lhůta
 je pevná i pro hlášení. Trvalý minimální marker i odebrání palců jsou schválené.
 Další technická brána je vlastnické

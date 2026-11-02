@@ -11,6 +11,13 @@ Flutter testy ověřují minimální kontext a signál odstraněného obsahu.
 Živý DEV pilot používá oddělený syntetický UID; 60denní hranici lze ověřit
 řízeným časem interního jádra, nikoli změnou createTime nebo veřejným endpointem.
 Konkrétní výsledky a omezení jsou v [PROJECT_STATUS](PROJECT_STATUS.md).
+Uzavření 3. listopadu: obě CI 41538976226 / 41539164008 success,
+254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge, 15 Storage.
+Živý trigger/Scheduler dokončil archivaci 3 kořenů, konečný kernel s řízeným
+časem nad reálným Firestore/Storage ověřil potomky, anonymní cizí kontext,
+2 odstraněné soubory, uvolnění aliasu a terminální replay. Fixture uklizená,
+původní inventura shodná. SoftDeleted listing při politice 0 není dostupný;
+ověřená byla politika, nepřítomnost objektů a prázdný výpis verzí.
 
 ## Úsek role/exspirace – 2. listopadu 2026
 

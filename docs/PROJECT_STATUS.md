@@ -1,19 +1,40 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-## Rozpracovaný úsek – konečný 60denní purge
+## Uzavřený DEV úsek 3. listopadu – konečný 60denní purge
 
 Větev `feature/account-retention-purge`, navazuje na `40e0e96`.
 Vlastník schválil implementaci bodu 1 a dále anonymní technický kontext
-cizích konverzací i vypnutí soft delete v DEV bucketu. Lokálně připravený
+cizích konverzací i vypnutí soft delete v DEV bucketu. Nasazený a ověřený
 samostatný durable purge, metadata archivních kopií, omezené stránkování
 včetně chybějících rodičů, Storage generation journal a příchozí Rules ochrany.
-Lokálně prošlo 15/15 purge emulátorových scénářů, 254 Flutter testů,
-107 serverových unit testů, lint a Flutter analýza; úplná Rules regrese běží.
-Přípravný commit f81eaf4 má flag false. Navazující aktivační commit nastavuje
-flag true, ale nasazení zůstává podmíněné jeho vlastním CI, indexy READY,
-přípravným rolloutem a ověřenou DEV Storage politikou. Nic z této fáze zatím
-není nasazené.
-Skutečný DEV zůstává níže uvedený d0e43c5/62a51b0; žádná původní data se neměnila.
+Příprava `f81eaf4214aaa9e857ceb87654b2a444fab9ccba` má success CI 41538976226;
+aktivace `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc` má success CI 41539164008.
+Obě CI: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge a
+15 Storage; analýza/lint/build prošly. Lokální plná Rules sada také 355/355.
+DEV má obě account Functions ACTIVE, hash `fa459ba9128728f23b6b1a69f20111862fb72605`,
+revize `00010-nif` / `00010-hoz`; pět obsahových Functions má hash
+`e9d161330bbca061dc1532b2518ef40f74a5d988`. Limity, Scheduler, IAM,
+Storage Rules a ostatní Functions zůstaly stejné. Hosting `b9084c259258a732`
+je ověřený na obou DEV originech proti manifestu; Firestore Rules
+`44f59688-3b46-4b2b-be9c-ee88d9a22204` odpovídají zdroji.
+Všech 6 nových CG indexů je READY a živé dotazy prošly, žádná TTL změna.
+Schválené soft delete je v DEV bucketu vypnuté s metageneration podmínkou;
+ostatní bucket nastavení se nezměnilo. Původní request/job/archive inventura
+je shodná. Živý pilot bez vytvoření Auth účtu prošel skutečným triggerem a
+Schedulerem do content-archived (3 archivní kořeny), se zachovaným createTime
+a původním +60denním termínem. Před termínem byl purge beze změn odmítnut.
+Stejný nasazený kernel nad skutečným DEV Firestore/Storage s řízeným časem
+dokončil purge: profily včetně chybějícího mezilehlého rodiče, archiv, záložka,
+2 soubory, rezervace a pracovní záznamy zmizely. Cizí komentář/konverzace
+zůstaly pod třípolovým anonymním kontextem, automatický @prefix v cizí
+odpovědi byl odstraněn bez ztráty jejího textu. Terminální replay je noop.
+Vypnutá soft-delete politika, nepřítomnost souborů a prázdný výpis verzí byly
+ověřené; softDeleted listing při politice 0 vrací 400, proto se nepoužívá.
+Fixture je uklizená a původní inventura zachovaná. Bod 1 je dokončený v DEV.
+Pilot s řízeným časem běžel přes autorizovaný CLI OAuth, nikoli nový veřejný
+endpoint ani skutečné čekání 60 dní. Historické žádosti/job verze se nemigrovaly.
+Další bod: klientský cutover, uzavření přímých Rules zápisů a závěrečný test
+celého účtového milníku; ten zatím není splněný (MVP stále 9/24).
 [Rozsah, inventura a provozní brány](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
 ## Uzavřený DEV úsek – odebrání palců a vlastnické vyhledávání
@@ -55,8 +76,8 @@ request/createTime/deadline, anonymní profil a návazný soukromý úklid.
 Plánovač byl při testu také ručně vyvolán až po splatnosti jobu; konfigurace
 a minimální retry prodleva se neměnily. Všechny fixture položky jsou uklizené,
 0 zbylých reakcí fixture a původní účetní inventura má stejný digest.
-Další krok je konečný 60denní purge včetně vlastních reakcí, záložek,
-soukromých/Business potomků a kopií důkazů; celý účetní milník zůstává otevřený.
+Tehdejší další krok, konečný 60denní purge, je nyní dokončený v DEV výše;
+celý účetní milník zůstává otevřený kvůli klientskému cutoveru.
 [Kontrakt, pořadí rolloutů a zbývající brány](ACCOUNT_REACTION_REMOVAL_PLAN.md).
 
 ## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování
