@@ -43,6 +43,8 @@ staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
 
 ## Plánované a specializované oblasti
 
+- [Odebrání palců mazaného účtu](ACCOUNT_REACTION_REMOVAL_PLAN.md) – schválená změna počtů, transakční jádro, vlastnické UID/indexy a brána před zapojením do workeru.
+
 - [Oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) – atomické odebrání rolí, sdílený maintenance tick a hranice před konečným purge.
 
 - [TODO](TODO.md) – hlavní přehled priorit a milníků; podrobnosti jsou

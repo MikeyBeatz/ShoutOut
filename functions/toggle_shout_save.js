@@ -69,7 +69,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     // Current Rules permit saves on retained Shouts regardless of their status.
     const result = saveTransition(save.exists, data.savesCount === undefined ? 0 : data.savesCount);
     const rateData = nextInteractionRate(rate.data(), now, `save_${input.shoutId}`);
-    if (result.saved) transaction.create(saveRef, { createdAt: now });
+    if (result.saved) transaction.create(saveRef, { createdAt: now, userId: uid });
     else transaction.delete(saveRef);
     transaction.update(shoutRef, { savesCount: result.count });
     transaction.set(rateRef, rateData);

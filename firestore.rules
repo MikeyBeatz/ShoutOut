@@ -2139,7 +2139,7 @@ service cloud.firestore {
             );
 
         match /reactions/{userId} {
-          // Comment reactions: {type: like|dislike, updatedAt: request.time}.
+          // userId is authoritative ownership metadata, immutable by path/Auth.
           // The parent must survive the atomic write so an archived comment
           // cannot acquire new orphan reaction data after its bounded drain.
           function commentParentSurvives() {
@@ -2149,8 +2149,9 @@ service cloud.firestore {
           }
 
           function validCommentReactionData() {
-            return request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
-              request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
+            return request.resource.data.keys().hasOnly(['type', 'updatedAt', 'userId']) &&
+              request.resource.data.keys().hasAll(['type', 'updatedAt', 'userId']) &&
+              request.resource.data.userId == request.auth.uid &&
               request.resource.data.type in ['like', 'dislike'] &&
               request.resource.data.updatedAt == request.time;
           }
@@ -2242,8 +2243,9 @@ service cloud.firestore {
         allow create, update: if eligibleUser() &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'shoutReaction_' + shoutId) &&
-          request.resource.data.keys().hasOnly(['type', 'updatedAt']) &&
-          request.resource.data.keys().hasAll(['type', 'updatedAt']) &&
+          request.resource.data.keys().hasOnly(['type', 'updatedAt', 'userId']) &&
+          request.resource.data.keys().hasAll(['type', 'updatedAt', 'userId']) &&
+          request.resource.data.userId == request.auth.uid &&
           request.resource.data.type in ['like', 'dislike'] &&
           request.resource.data.updatedAt == request.time;
         allow delete: if eligibleUser() &&
@@ -2257,8 +2259,9 @@ service cloud.firestore {
         allow create: if eligibleUser() &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'save_' + shoutId) &&
-          request.resource.data.keys().hasOnly(['createdAt']) &&
-          request.resource.data.keys().hasAll(['createdAt']) &&
+          request.resource.data.keys().hasOnly(['createdAt', 'userId']) &&
+          request.resource.data.keys().hasAll(['createdAt', 'userId']) &&
+          request.resource.data.userId == request.auth.uid &&
           request.resource.data.createdAt == request.time;
         allow delete: if eligibleUser() &&
           userId == request.auth.uid &&

@@ -61,3 +61,21 @@ export function planArchiveIndexes(projectId, snapshots) {
     preservesCollectionIndexes: true, changesTTL: false, deletesIndexes: false };
   return { ...plan, digest: digest(plan) };
 }
+
+// Ownership lookup only. Never touches the archive-body exemption or TTL.
+export function planOwnedActivityIndexes(projectId, snapshots) {
+  assert.equal(projectId, project, 'owned activity indexes are DEV-only');
+  const actions = [];
+  for (const group of ['reactions', 'saves']) {
+    const before = fieldSnapshot(snapshots, `${group}/fields/userId`);
+    const indexes = before.indexConfig.indexes.map(spec);
+    const desired = { queryScope: 'COLLECTION_GROUP', fields: [{ fieldPath: 'userId', order: 'ASCENDING' }] };
+    if (!indexes.some(row => same(row, desired))) {
+      actions.push({ method: 'PATCH', resource: before.name, updateMask: 'indexConfig', before: before.indexConfig,
+        body: { name: before.name, indexConfig: { indexes: [...indexes, desired] } } });
+    }
+  }
+  const plan = { schemaVersion: 1, projectId, database: '(default)', readOnlyPlan: true, actions,
+    preservesCollectionIndexes: true, changesTTL: false, deletesIndexes: false };
+  return { ...plan, digest: digest(plan) };
+}

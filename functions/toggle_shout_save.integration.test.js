@@ -38,7 +38,7 @@ const change = (request, idempotencyKey) => ({ ...request, data: { ...request.da
 test('save and removal atomically update one counter, rate and receipt without notifications', { skip: !enabled }, async () => {
   const f = await fixture();
   assert.deepEqual(await toggle(f.request, db, at()), { saved: true, count: 6 });
-  assert.deepEqual((await saved(f).get()).data(), { createdAt: Timestamp.fromDate(now) });
+  assert.deepEqual((await saved(f).get()).data(), { createdAt: Timestamp.fromDate(now), userId: f.uid });
   const first = (await receipt(f).get()).data();
   assert.equal(first.userId, f.uid);
   assert.equal(first.action, 'toggleShoutSave');

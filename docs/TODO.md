@@ -38,6 +38,11 @@ Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026
 
 ## Nejbližší práce – serverová brána
 
+Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Připravená první
+[transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má lokálně
+336 Rules/server testů. CI/rollout této vrstvy a zapojení do workeru ještě
+zbývají; žádný celý milník se tím nezaškrtává.
+
 Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
 Shoutů změnilo jen status. Účtový pilot dokončil content-archived a je uklizený.
@@ -47,8 +52,8 @@ zachování žádosti/deadline, terminální worker a úklid jsou ověřené.
 Plné uzavření přímých zápisů zůstává otevřené.
 Samotné podkroky nemění 9/24 milníků. Navazuje fyzický purge a klientský cutover;
 Business archiv je schválený celý včetně poboček/fakturačních podkladů a lhůta
-je pevná i pro hlášení. Trvalý minimální marker schválený. Rozhodnutí zbývá
-o palcích mazaného účtu na cizím obsahu; další technická brána je vlastnické
+je pevná i pro hlášení. Trvalý minimální marker i odebrání palců jsou schválené.
+Další technická brána je vlastnické
 vyhledávání reakcí/záložek a úplná inventura pro 60denní purge.
 
 Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace

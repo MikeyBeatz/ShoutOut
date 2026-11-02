@@ -1110,6 +1110,35 @@ describe('bounded reads', () => {
   });
 });
 
+for (const kind of ['shout', 'comment', 'save']) test(`${kind} ownership metadata cannot be omitted, forged or stripped`, async () => {
+  const uid = 'indexed-writer'; await seedEligibleUser(uid, 'IndexedWriter'); await seedShout();
+  const parentPath = kind === 'comment' ? 'shouts/shout-1/comments/indexed-comment' : 'shouts/shout-1';
+  if (kind === 'comment') await testEnvironment.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), parentPath), {
+    authorId: 'foreign', text: 'Comment', likesCount: 0, dislikesCount: 0, createdAt: now(),
+  }));
+  const db = authenticatedDb(uid), source = doc(db, `${parentPath}/${kind === 'save' ? 'saves' : 'reactions'}/${uid}`);
+  const eventId = kind === 'comment' ? 'commentReaction_shout-1_indexed-comment' : kind === 'save' ? 'save_shout-1' : 'shoutReaction_shout-1';
+  const rateRef = doc(db, 'rateLimits', uid, 'actions', 'interaction');
+  const body = kind === 'save' ? { createdAt: serverTimestamp() } : { type: 'like', updatedAt: serverTimestamp() };
+  const write = ownership => {
+    const batch = writeBatch(db); batch.set(rateRef, rateData(eventId)); batch.set(source, { ...body, ...ownership });
+    batch.update(doc(db, parentPath), kind === 'save' ? { savesCount: 1 } : { likesCount: 1 }); return batch.commit();
+  };
+  await assertFails(write({})); await assertFails(write({ userId: 'forged-other-user' }));
+  await assertSucceeds(write({ userId: uid })); assert.equal((await getDoc(source)).data().userId, uid);
+  if (kind !== 'save') {
+    const oldRate = (await getDoc(rateRef)).data();
+    for (const ownership of [{}, { userId: 'forged-other-user' }]) {
+      const batch = writeBatch(db);
+      batch.set(rateRef, rateData(eventId, { count: 2, windowStartedAt: oldRate.windowStartedAt }));
+      batch.set(source, { type: 'dislike', updatedAt: serverTimestamp(), ...ownership });
+      batch.update(doc(db, parentPath), { likesCount: 0, dislikesCount: 1 });
+      await assertFails(batch.commit());
+    }
+    assert.equal((await getDoc(source)).data().type, 'like');
+  }
+});
+
 describe('notifications and preferences', () => {
   test('the private-cleanup preference guard blocks legacy inbox recreation without blocking the reaction', async () => {
     await seedEligibleUser('reader', 'SafeReader');
@@ -1128,7 +1157,7 @@ describe('notifications and preferences', () => {
     const reaction = withNotice => {
       const batch = writeBatch(db);
       batch.set(doc(db, 'rateLimits', 'reader', 'actions', 'interaction'), rateData('shoutReaction_shout-1'));
-      batch.set(doc(db, 'shouts', 'shout-1', 'reactions', 'reader'), { type: 'like', updatedAt: serverTimestamp() });
+      batch.set(doc(db, 'shouts', 'shout-1', 'reactions', 'reader'), { type: 'like', updatedAt: serverTimestamp(), userId: 'reader' });
       batch.update(doc(db, 'shouts', 'shout-1'), { likesCount: 1 });
       if (withNotice) batch.set(doc(db, 'users', 'author', 'notifications', 'reaction_like_shout-1'), {
         kind: 'reaction', actorId: 'reader', actorNickname: 'SafeReader', targetShoutId: 'shout-1',
@@ -1570,6 +1599,7 @@ describe('comments, reactions, saves and reports', () => {
       rateData(eventId),
     );
     batch.set(doc(db, 'shouts', 'shout-1', 'reactions', 'reader'), {
+      userId: 'reader',
       type: 'like',
       updatedAt: serverTimestamp(),
     });
@@ -1610,6 +1640,7 @@ describe('comments, reactions, saves and reports', () => {
       rateData(eventId),
     );
     secondBatch.set(doc(secondDb, 'shouts', 'shout-1', 'reactions', 'reader2'), {
+      userId: 'reader2',
       type: 'like', updatedAt: serverTimestamp(),
     });
     secondBatch.update(doc(secondDb, 'shouts', 'shout-1'), { likesCount: 2 });
@@ -1712,7 +1743,7 @@ describe('comments, reactions, saves and reports', () => {
     );
     reactionBatch.set(
       doc(db, 'shouts', 'shout-1', 'comments', 'parent', 'reactions', 'writer'),
-      { type: 'like', updatedAt: serverTimestamp() },
+      { type: 'like', updatedAt: serverTimestamp(), userId: 'writer' },
     );
     reactionBatch.update(
       doc(db, 'shouts', 'shout-1', 'comments', 'parent'),
@@ -1805,7 +1836,7 @@ describe('comments, reactions, saves and reports', () => {
       const batch = writeBatch(db);
       batch.set(doc(db, 'rateLimits', 'writer', 'actions', 'interaction'), rateData(`commentReaction_shout-1_${commentId}`));
       if (action === 'delete') batch.delete(doc(db, path));
-      else batch.set(doc(db, path), { type: 'dislike', updatedAt: serverTimestamp() });
+      else batch.set(doc(db, path), { type: 'dislike', updatedAt: serverTimestamp(), userId: 'writer' });
       await assertFails(batch.commit());
     }
   });

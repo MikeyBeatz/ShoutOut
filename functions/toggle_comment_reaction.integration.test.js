@@ -60,6 +60,7 @@ test('comment add, switch and removal are atomic and notify the comment author o
     ['remove', 'dislike', 2000, { type: null, likes: 2, dislikes: 3 }],
   ]) {
     assert.deepEqual(await toggle(change(f.request, key, button), db, at(time)), result);
+    if (result.type !== null) assert.equal((await f.commentRef.collection('reactions').doc(f.uid).get()).data().userId, f.uid);
     const saved = (await receipt(f, key).get()).data();
     assert.equal(saved.userId, f.uid);
     assert.equal(saved.commentId, f.commentRef.id);

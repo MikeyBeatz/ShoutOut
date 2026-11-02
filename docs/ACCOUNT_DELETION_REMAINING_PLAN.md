@@ -49,9 +49,9 @@ Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
   schválil UID pouze v cestě dokumentu + schemaVersion/accountStatus, bez
   jména, e-mailu, polohy či obsahu. Konečný purge tento marker nesmí odstranit;
   neznamená to povolení trvale uchovat další osobní snapshoty nebo archivní texty.
-- Otevřená navazující volba: zda palce mazaného účtu na cizím obsahu po
-  potvrzení Auth odebrat včetně počtů, nebo zachovat agregované počty po
-  nevratné anonymizaci. Návrh je předložený; zatím se žádná varianta neimplementuje.
+- **Palce na cizím obsahu po potvrzení Auth odebrat a upravit počty.**
+  Vlastník doporučenou variantu schválil. [Příprava a skutečný stav](ACCOUNT_REACTION_REMOVAL_PLAN.md)
+  rozlišují interní jádro, vlastnické vyhledávání a živou integraci workeru.
 
 ### Přímá kontrola datového modelu pro konečný purge
 

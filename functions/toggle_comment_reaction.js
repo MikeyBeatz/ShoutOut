@@ -78,7 +78,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
       }
     }
     if (result.type === null) transaction.delete(reactionRef);
-    else transaction.set(reactionRef, { type: result.type, updatedAt: now });
+    else transaction.set(reactionRef, { type: result.type, updatedAt: now, userId: uid });
     transaction.update(commentRef, { likesCount: result.likes, dislikesCount: result.dislikes });
     transaction.set(rateRef, rateData);
     transaction.create(receiptRef, { ...retention, userId: uid, action: 'toggleCommentReaction', fingerprint,

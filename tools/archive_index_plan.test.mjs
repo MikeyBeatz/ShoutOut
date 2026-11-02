@@ -1,7 +1,25 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { planArchiveIndexes as plan } from './archive_index_plan.mjs';
+import { planArchiveIndexes as plan, planOwnedActivityIndexes } from './archive_index_plan.mjs';
 const project = 'shoutout-dev-46c81', base = `projects/${project}/databases/(default)/collectionGroups`;
+test('owned activity indexes preserve every existing index and never include TTL writes', () => {
+  const state = {};
+  for (const group of ['reactions', 'saves']) {
+    const key = `${group}/fields/userId`;
+    state[key] = { status: 200, data: { name: `${base}/${key}`, ttlConfig: { state: 'DISABLED' }, indexConfig: { indexes: [
+      { queryScope: 'COLLECTION', fields: [{ fieldPath: 'userId', order: 'DESCENDING' }] },
+    ] } } };
+  }
+  const result = planOwnedActivityIndexes(project, state); assert.equal(result.actions.length, 2);
+  for (const action of result.actions) {
+    assert.equal(action.updateMask, 'indexConfig'); assert.equal('ttlConfig' in action.body, false);
+    assert.deepEqual(action.body.indexConfig.indexes[0], state[action.resource.slice(base.length + 1)].data.indexConfig.indexes[0]);
+    state[action.resource.slice(base.length + 1)].data.indexConfig = action.body.indexConfig;
+  }
+  assert.equal(planOwnedActivityIndexes(project, state).actions.length, 0);
+  assert.throws(() => planOwnedActivityIndexes('shoutout-production-a1b34', state));
+  delete state['saves/fields/userId']; assert.throws(() => planOwnedActivityIndexes(project, state));
+});
 function snapshots() {
   const result = {};
   for (const [group, field] of [['privateReplies', 'authorId'], ['privateReplies', 'recipientId'], ['accountContentArchive', 'content'], ['comments', 'authorId']]) {

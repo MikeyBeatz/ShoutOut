@@ -1,5 +1,18 @@
 # ShoutOut – aktuální stav pro navázání práce
 
+## Rozpracovaný úsek – odebrání palců a vlastnické vyhledávání
+
+Větev `feature/account-reaction-removal`. Vlastník schválil po potvrzeném
+odstranění Auth odebrat jeho palce u cizího obsahu a upravit počty.
+Připravené interní transakční jádro (12 emulátorových případů), serverové
+userId ve třech stávajících writerech a ochrana vlastnictví v Rules.
+Lokálně 336 Rules/server a lint prošly. Připravený cílený indexový plán nemění
+TTL; CI a rollout této nové vrstvy ještě nejsou potvrzené.
+Jádro zatím není zapojené do account workeru; automatické odebrání palců
+tedy ještě není nasazené. DEV read-only inventura: 0 reakcí, 3 starší záložky
+bez UID, žádné neznámé schéma. Stará data ani staré joby se neměnily.
+[Kontrakt, pořadí rolloutů a zbývající brány](ACCOUNT_REACTION_REMOVAL_PLAN.md).
+
 ## Uzavřený DEV úsek 2. listopadu – role, exspirace a klientské opakování
 
 Nasazený zdroj `91d8d9bc16b45d1a2f6ce7ee1fecff271acd66bc` z větve
@@ -32,8 +45,8 @@ Koordinátor má 8 bezpečnostních testů, gate/dialog další 3 widget testy.
 [Kontrakt, meze a návaznosti](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 Rozhodnutí vlastníka: celý existující Business profil/pobočky/fakturační
 podklady zachovat po původních 60 dní; lhůta je pevná i pro otevřená hlášení.
-Minimální veřejný marker po purge je schválený trvale. Zbývá rozhodnutí o
-palcích smazaného účtu na cizím obsahu (odebrat/počty vs. anonymní agregace).
+Minimální veřejný marker po purge je schválený trvale. Následně byly schválené
+i odebrání palců smazaného účtu a změna počtů; nový úsek je uvedený výše.
 Další krok: přesná inventura a levné vlastnické vyhledání reakcí/záložek,
 potom konečný 60denní purge soukromých/Business dat, potomků a kopií důkazů.
 Business data se dnes zachovávají na původních místech, faktury mají zatím
