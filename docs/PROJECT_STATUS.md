@@ -15,11 +15,13 @@ DEV používá prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/tra
 opakování dávek a společný první/resume pokus. Backend a57ae9b a aktivační web
 7976e2f mají úspěšné vlastní CI; serverAccountDeletionPreparation je v DEV true.
 Oba originy odpovídají čistému release artefaktu. Rules cutover není dokončený.
-Závěrečný živý UI test čeká na ruční průchod vlastníka: ovládání prohlížeče
-hlásí nedostupné nativní spojení i po resetu. Na základě výslovného souhlasu
-je vytvořený jeden dočasný Auth účet se dvěma vlastními Shouty a cizím kontrolním
-obsahem. Dosud není smazaný ani uklizený; nepovažovat pilot za dokončený.
-Testovací přihlašovací údaje jsou jen v ignorovaném docs/local souboru.
+První ruční test v dříve otevřené kartě použil starší kompatibilní postup:
+Auth odstraněný, vlastní Shouty skryté před žádostí, cizí obsah zachovaný,
+worker content-archived a původní +60denní termín ověřený. Fixture je uklizená
+a původní inventura shodná. Nová callable se při tomto průchodu nevolala.
+Vlastník zvlášť schválil druhý dočasný účet; ten je připravený a čeká na ruční
+průchod v novém anonymním okně. Ovládání prohlížeče nemá dostupné nativní spojení.
+Přihlašovací údaje druhého účtu jsou jen v ignorovaném docs/local souboru.
 CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
 15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
 
@@ -80,8 +82,9 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
   pro 7976e2f success. Neúspěšné CI 34250ec zachytilo dvě staré testovací konfigurace;
   oprava nemění aplikační chování a celý nový běh je zelený. Nový endpoint odmítl
   anonymní požadavek HTTP 401. Kontrola po rolloutu potvrdila shodu původní účtové
-  inventury, ostatních Functions, obou plánovačů, IAM a Rules. Teprve potom vznikla
-  výše uvedená dočasná fixture; živé ověření a úklid stále zbývají.
+  inventury, ostatních Functions, obou plánovačů, IAM a Rules. První starší klient
+  ověřil kompatibilitu a jeho fixture je uklizená; nový přihlášený callable tok
+  se tím neověřil. Čeká se na druhý schválený test v čerstvém anonymním okně.
 - Příprava f81eaf4: [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226).
   Aktivace 96b0782: [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008).
   Obě success: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge,

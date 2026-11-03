@@ -73,14 +73,22 @@ index.html, main.dart.js a app-config.json shodné s čistým release manifestem
 Původní účetní inventura, ostatní Functions, Rules, IAM a oba plánovače se při
 rolloutu nezměnily. Anonymní volání přípravy bylo odmítnuté HTTP 401.
 
-Živý test dosud není uzavřený. Ovládání prohlížeče není dostupné ani po resetu;
-vlastník dostal žádost o ruční průchod s jedním novým schváleným dočasným účtem.
-Fixture má dva vlastní aktivní Shouty, jeden cizí kontrolní Shout a cizí komentář.
-Před dokončením ověřit receipt hidden=2 před vznikem žádosti, odstranění pouze
-testovacího Auth, zachování cizího obsahu, serverový content-archived, původní
-60denní deadline a následný úklid s návratem účtové inventury k baseline.
-Lokální důkazy a stav fixture jsou v ignorovaných build/account-preparation-*;
-přihlašovací údaje pouze docs/local/account-preparation-fixture.json.
+První ruční průchod vlastník provedl v dříve otevřené kartě. Nová callable se
+nevolala a nevznikl její receipt; šlo o starší kompatibilní klient. Auth se odstranil,
+oba vlastní Shouty byly skryté před žádostí, cizí Shout a komentář zachované,
+worker dokončil content-archived s původním +60denním termínem a purge scheduled.
+Fixture je uklizená, přihlašovací soubor odstraněný a původní inventura shodná.
+Důkaz má výslovně realUIAndCallable=false / compatibilityOnly=true a je oddělený
+v ignorovaném build/account-preparation-first-test; nejde o úspěch nové callable.
+
+Vlastník následně výslovně schválil ještě jeden dočasný účet pro stejné ověření.
+Druhý účet se dvěma vlastními Shouty a cizím kontrolním Shoutem/komentářem je
+připravený; čeká na ruční průchod v novém anonymním okně. Ovládání prohlížeče
+není dostupné ani po resetu. Před uzavřením ověřit receipt hidden=2 před žádostí,
+odstranění výhradně tohoto Auth, zachování cizího obsahu, content-archived,
+původní 60denní deadline a úklid s návratem inventury k baseline. Aktuální lokální
+důkazy jsou v build/account-preparation-* a přihlašovací údaje druhého účtu jen
+v ignorovaném docs/local/account-preparation-fixture.json.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
 Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní

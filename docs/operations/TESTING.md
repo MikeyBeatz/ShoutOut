@@ -35,8 +35,11 @@ dvěma ručním seznamům vypnutých příznaků v testech gateway; po jejich op
 prošla celá sada. Release pro Hosting je z čistého 7976e2f a prošel kontrolou
 prostředí; oba DEV originy odpovídají manifestu. Nová callable + cleanup mají
 ověřené revize/limity; Rules, IAM, plánovače a ostatní Functions se nezměnily.
-Anonymní příprava vrací HTTP 401. Živý přihlášený průchod a úklid nového
-dočasného účtu zatím čekají na ruční pomoc; nativní ovládací spojení není dostupné.
+Anonymní příprava vrací HTTP 401. První ruční test použil starší otevřenou kartu:
+ověřil kompatibilní smazání, zachování cizího obsahu, content-archived a +60denní
+termín; fixture uklizená, původní inventura shodná. Nová callable bez receipt
+a bez volání v logu tím ověřená není. Druhý výslovně schválený účet je připravený
+pro nové anonymní okno; čeká na ruční pomoc, nativní ovládací spojení není dostupné.
 [Rozsah a dokončovací kontroly](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 ## Konečný 60denní úklid
