@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'account_deletion_attempt.dart';
 import 'account_deletion_preparation.dart';
+import 'account_deletion_progress.dart';
 import 'l10n/text.dart';
 import 'timed_operation_gateway.dart';
 import 'web_environment.dart';
@@ -86,6 +87,11 @@ class _AccountDeletionPasswordDialogState
     content: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        Text(
+          tr(context, 'Tento krok nenávratně smaže váš účet.'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
         if (!widget.resume) ...[
           Text(
             tr(
@@ -169,7 +175,22 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
               },
       ),
     );
-    final outcome = await attempt.run(password);
+    final outcome = await runAccountDeletionWithProgress(
+      context,
+      userId: user.uid,
+      identities: FirebaseAuth.instance.authStateChanges().map(
+        (user) => user?.uid,
+      ),
+      operation: () async {
+        final outcome = await attempt.run(password);
+        if ((outcome == AccountDeletionOutcome.completed ||
+                outcome == AccountDeletionOutcome.confirmedByServer) &&
+            FirebaseAuth.instance.currentUser?.uid == user.uid) {
+          await FirebaseAuth.instance.signOut();
+        }
+        return outcome;
+      },
+    );
     if (outcome == AccountDeletionOutcome.pending &&
         context.mounted &&
         FirebaseAuth.instance.currentUser?.uid == user.uid) {

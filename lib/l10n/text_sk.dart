@@ -1,5 +1,8 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'Tento krok nenávratne vymaže váš účet.',
+  'Probíhá mazání…': 'Prebieha mazanie…',
   'Pokračovat ve smazání účtu': 'Pokračovať v odstránení účtu',
   'Přihlášení bylo odstraněno': 'Prihlásenie bolo odstránené',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':

@@ -48,6 +48,16 @@ ještě ovládat; samotná data potvrzují úspěšné smazání. UX oprava a so
 Rules cutoverem zůstávají otevřené. Nový kód ani nasazení tento ověřovací úsek neměnil.
 [Rozsah a dokončovací kontroly](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
+## Potvrzení a průběh mazání účtu – 3. listopadu
+
+Lokálně 268/268 Flutter testů a analýza bez chyb. Nový
+account_deletion_progress_test.dart ověřuje upozornění před operací a zrušení
+bez jejího spuštění, blokaci klikání/bariéry/návratu, překrytí pending gate,
+přechod na přihlášení, uvolnění při chybě, změnu UID s pozdním výsledkem
+a zánik navigatoru. Existující testy koordinátoru a pending gate dál procházejí.
+Úprava má překlady ve všech sedmi jazycích. CI a DEV Hosting tohoto úseku
+zatím čekají; nový destruktivní Auth pilot se tímto úsekem nespouští.
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

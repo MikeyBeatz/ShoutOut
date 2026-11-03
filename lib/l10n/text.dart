@@ -22,6 +22,9 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'This step will permanently delete your account.',
+  'Probíhá mazání…': 'Deleting your account…',
   'Pokračovat ve smazání účtu': 'Continue deleting the account',
   'Přihlášení bylo odstraněno': 'Sign-in has been deleted',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
@@ -374,6 +377,9 @@ const _english = <String, String>{
 };
 
 const _german = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'Dieser Schritt löscht dein Konto unwiderruflich.',
+  'Probíhá mazání…': 'Dein Konto wird gelöscht…',
   'Pokračovat ve smazání účtu': 'Kontolöschung fortsetzen',
   'Přihlášení bylo odstraněno': 'Die Anmeldung wurde gelöscht',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':
@@ -737,6 +743,9 @@ const _german = <String, String>{
 };
 
 const _polish = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'Ten krok nieodwracalnie usunie Twoje konto.',
+  'Probíhá mazání…': 'Usuwanie konta…',
   'Pokračovat ve smazání účtu': 'Kontynuuj usuwanie konta',
   'Přihlášení bylo odstraněno': 'Dane logowania zostały usunięte',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':

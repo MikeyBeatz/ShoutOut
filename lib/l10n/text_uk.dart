@@ -1,5 +1,8 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'Цей крок безповоротно видалить ваш обліковий запис.',
+  'Probíhá mazání…': 'Видалення облікового запису…',
   'Pokračovat ve smazání účtu': 'Продовжити видалення облікового запису',
   'Přihlášení bylo odstraněno': 'Дані для входу видалено',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':

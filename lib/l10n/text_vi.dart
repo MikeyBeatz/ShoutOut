@@ -1,5 +1,8 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
+  'Tento krok nenávratně smaže váš účet.':
+      'Bước này sẽ xóa vĩnh viễn tài khoản của bạn.',
+  'Probíhá mazání…': 'Đang xóa tài khoản…',
   'Pokračovat ve smazání účtu': 'Tiếp tục xóa tài khoản',
   'Přihlášení bylo odstraněno': 'Thông tin đăng nhập đã được xóa',
   'Server dokončuje zpracování žádosti. Můžeš se odhlásit.':

@@ -21,9 +21,12 @@ Shout i komentář, content-archived a purge scheduled s původním +60denním t
 První test ve starší otevřené kartě navíc ověřil kompatibilní cestu. Obě fixture
 jsou uklizené, přihlašovací soubory odstraněné a původní inventura shodná.
 Ruční UI část provedl vlastník kvůli nedostupnému ovládání prohlížeče.
-Otevřený nález: po potvrzení se zavře dialog a příprava běží bez ukazatele průběhu;
-uživatel se může do zobrazení pending gate pohybovat v aplikaci. Není to důkaz
-selhání mazání; před klientským dokončením navrhnout srozumitelný stav průběhu.
+Schválená UX oprava je lokálně připravená na fix/account-deletion-progress:
+přesné upozornění na nevratné smazání před heslem/potvrzením, následně blokující
+„Probíhá mazání…“ přes pending gate a po úspěchu přihlášení. Chyba překryv uvolní;
+změna UID ani zánik původní obrazovky nesmějí zavřít jinou route. Zachovaná
+retence i datová příprava. Lokálně 268 Flutter testů a analyzátor bez chyb;
+nový web se nasadí až po vlastním CI. Tabulka níže stále uvádí předchozí web.
 CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
 15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
 
@@ -87,8 +90,9 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
   inventury, ostatních Functions, obou plánovačů, IAM a Rules. Nový přihlášený
   callable tok i starší kompatibilní cesta jsou živě ověřené a obě fixture
   uklizené. Po úklidu znovu ověřené oba originy a nezměněný backend/Rules/IAM.
-  Dokončený pilot nenahrazuje Rules cutover, zkoušku souběžného publikování
-  nebo chybějící ukazatel průběhu. [Důkazy a otevřený nález](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#navazující-dev-rollout-a-živý-ui-test).
+  Dokončený pilot nenahrazuje Rules cutover nebo zkoušku souběžného publikování.
+  Ukazatel průběhu je připravený zvlášť, zatím bez rolloutu.
+  [Důkazy a UX oprava](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#navazující-dev-rollout-a-živý-ui-test).
 - Příprava f81eaf4: [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226).
   Aktivace 96b0782: [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008).
   Obě success: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge,
