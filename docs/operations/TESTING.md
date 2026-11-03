@@ -50,11 +50,13 @@ Rules cutoverem zůstávají otevřené. Nový kód ani nasazení tento ověřov
 
 ## Potvrzení a průběh mazání účtu – 3. listopadu
 
-Lokálně 268/268 Flutter testů a analýza bez chyb. Nový
+Lokálně 269/269 Flutter testů a analýza bez chyb. Nový
 account_deletion_progress_test.dart ověřuje upozornění před operací a zrušení
 bez jejího spuštění, blokaci klikání/bariéry/návratu, překrytí pending gate,
 přechod na přihlášení, uvolnění při chybě, změnu UID s pozdním výsledkem
-a zánik navigatoru. Existující testy koordinátoru a pending gate dál procházejí.
+a zánik navigatoru. Český dialog při 360×640 px a klávesnici 300 px původně
+přetékal; posuvný obsah chybu odstraňuje a potvrzení/zrušení zůstávají dostupné.
+Existující testy koordinátoru a pending gate dál procházejí.
 Úprava má překlady ve všech sedmi jazycích. CI a DEV Hosting tohoto úseku
 zatím čekají; nový destruktivní Auth pilot se tímto úsekem nespouští.
 

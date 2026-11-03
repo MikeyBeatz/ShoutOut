@@ -115,14 +115,15 @@ Vlastník následně výslovně schválil pořadí: nejprve „Tento krok nenáv
 váš účet“, po potvrzení průběh a potom přihlašovací obrazovka. Lokální oprava
 na fix/account-deletion-progress doplňuje tuto větu do původního heslového
 dialogu včetně pokračování; původní vysvětlení 60denního uchování zachovává.
+Obsah dialogu je posuvný i při malé mobilní obrazovce s otevřenou klávesnicí.
 Po potvrzení se zobrazuje modální „Probíhá mazání…“, které blokuje klikání,
 zavření bariérou a návrat zpět a překrývá pending gate. Úspěch přejde přes Auth
 na přihlášení; potvrzení serverem odhlásí pouze stále stejný UID. Chyba uvolní
 překryv pro dosavadní chybovou/pending cestu. Změna UID odstraní vlastní překryv;
 pozdní výsledek nesmí zavřít novou route ani zasahovat do nového účtu.
-Oba nové texty mají překlady všech podporovaných jazyků. Čtyři widgetové scénáře
+Oba nové texty mají překlady všech podporovaných jazyků. Pět widgetových scénářů
 pokrývají zrušení/potvrzení, blokaci a pending gate, chybu, UID a zánik navigatoru.
-Lokálně všech 268 Flutter testů a analýza bez chyb; rollout čeká na CI přesného
+Lokálně všech 269 Flutter testů a analýza bez chyb; rollout čeká na CI přesného
 commitu. Nové Auth účty nebo živá data tato oprava nepotřebuje ani nevytváří.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.

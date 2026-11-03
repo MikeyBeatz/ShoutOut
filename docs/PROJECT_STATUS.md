@@ -25,7 +25,7 @@ Schválená UX oprava je lokálně připravená na fix/account-deletion-progress
 přesné upozornění na nevratné smazání před heslem/potvrzením, následně blokující
 „Probíhá mazání…“ přes pending gate a po úspěchu přihlášení. Chyba překryv uvolní;
 změna UID ani zánik původní obrazovky nesmějí zavřít jinou route. Zachovaná
-retence i datová příprava. Lokálně 268 Flutter testů a analyzátor bez chyb;
+retence i datová příprava. Lokálně 269 Flutter testů a analyzátor bez chyb;
 nový web se nasadí až po vlastním CI. Tabulka níže stále uvádí předchozí web.
 CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
 15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.

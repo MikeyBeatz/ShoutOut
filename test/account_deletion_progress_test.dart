@@ -4,8 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/account_deletion.dart';
 import 'package:shoutout/account_deletion_progress.dart';
+import 'package:shoutout/l10n/app_localizations.dart';
 
 void main() {
+  testWidgets(
+    'Czech warning and confirmation remain usable above a mobile keyboard',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.reset);
+      late BuildContext context;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('cs'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Builder(
+            builder: (value) {
+              context = value;
+              return const Scaffold();
+            },
+          ),
+        ),
+      );
+      final result = confirmAccountDeletionPassword(context);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Tento krok nenávratně smaže váš účet.'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Zrušit'));
+      await tester.pumpAndSettle();
+      expect(await result, isNull);
+    },
+  );
   testWidgets(
     'warning precedes deletion; progress blocks input and the pending gate',
     (tester) async {

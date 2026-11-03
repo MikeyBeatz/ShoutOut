@@ -78,6 +78,7 @@ class _AccountDeletionPasswordDialogState
 
   @override
   Widget build(BuildContext context) => AlertDialog(
+    scrollable: true,
     title: Text(
       tr(
         context,
