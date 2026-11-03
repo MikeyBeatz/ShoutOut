@@ -20,9 +20,11 @@ Na feature/account-deletion-finalization je schválená lokální finalizace:
 server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zakládá
 žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
 serverAccountDeletionFinalization je false. Bez nasazení, živých dat, nových Auth
-účtů či změn Rules. Lokálně 276 Flutter, 107 unit, 42 tools, 16 cílených emulátorových
-scénářů, analýza/lint a DEV debug build prošly. Celá emulátorová sada/CI tohoto
-nového zdroje zatím není dokončená. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
+účtů či změn Rules. Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
+CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
+15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
+Lokální úsek je uzavřený; další brána je kompatibilita a schválený rollout,
+potom Rules cutover. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
@@ -76,6 +78,9 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
 
 ## Poslední ověření a jeho hranice
 
+- Atomické založení žádosti: [CI 41696994668](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41696994668)
+  pro a9ff425 success, celá Rules/server sada 367/367. Nový zdroj není nasazený
+  a přepínač je false; dosavadní tabulka ověřeného nasazení zůstává platná.
 - UX potvrzení/průběhu: [CI 41688450535](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41688450535)
   pro 97d4b3f success; DEV Hosting 603bbdd9239e03d4, čtyři veřejné soubory
   (včetně bootstrapu) na obou originech shodné s čistým release manifestem.

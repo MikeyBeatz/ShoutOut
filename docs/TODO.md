@@ -32,8 +32,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    a zapnuté v DEV po úspěšném CI. Živý nový i kompatibilní průchod jsou ověřené
    a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou nasazené
    v DEV po úspěšném CI (269 Flutter testů). Atomické serverové založení žádosti
-   a klient za vypnutým přepínačem jsou připravené lokálně (276 Flutter a 16
-   cílených emulátorových scénářů). Zbývá CI, ověření kompatibility a následné
+   a klient za vypnutým přepínačem jsou lokálně dokončené po úspěšném CI
+   (276 Flutter, 367 Rules/server). Zbývá ověření kompatibility, rollout a následné
    uzavření přímých zápisů; nejde ještě o živý serverový cutover.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query

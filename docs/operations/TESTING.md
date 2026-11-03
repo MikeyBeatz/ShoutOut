@@ -76,7 +76,9 @@ Klientské testy pokrývají lost ack bez Auth.delete, převzetí již uložené
 novou přípravu, neověřený pozitivní výsledek, UID i neplatné odpovědi. Přepínač
 je false a závisí na přípravě/App Check; starší klientská větev dál prochází.
 Nový test je přidaný do CI test:rules, modul do přípravného content balíku.
-CI celého commitu ještě čeká. Žádné nasazení, úpravy Rules, živé účty či data.
+CI 41696994668 zdroje a9ff425bb6b01e2d7420f45915b6ea977895fa43 je success:
+276 Flutter, 42 tools, 107 unit, 367 Rules/server, 15 purge, 15 Storage,
+analýza/lint/build. Žádné nasazení, úpravy Rules, živé účty či data.
 [Přesný kontrakt a hranice](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 ## Konečný 60denní úklid

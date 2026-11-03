@@ -66,10 +66,13 @@ ve čtyřech bězích, obě pořadí dokončení, replay se shodným createTime/
 malformované žádosti, oprávnění a rollback. Klient pokrývá dodatečnou přípravu,
 lost ack, chybějící uloženou žádost, potvrzenou starší žádost, UID a neplatné
 odpovědi. Config testy ověřují závislosti přepínače. Lint, analýza a DEV debug
-build prošly. Celá emulátorová sada bude ověřená v CI; aktuální lokální sada ji
-nenahrazuje. Výsledky jsou v ignorovaných build/account-finalization-*.
+build prošly. Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má úspěšné
+[CI 41696994668](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41696994668):
+276 Flutter, 42 tools, 107 unit, celá Rules/server sada 367/367, 15 purge,
+15 Storage, analýza/lint/build. Lokální úsek je uzavřený bez živého nasazení.
+Výsledky jsou v ignorovaných build/account-finalization-*.
 
-Další brána po tomto lokálním úseku: ověřit přesné CI a kompatibilní rollout,
+Další brána po tomto lokálním úseku: připravit kompatibilní DEV rollout a jeho ověření,
 poté uzavřít přímé vytvoření/mazání žádosti a přímé skrývání obsahu v Rules.
 Dosavadní Rules stále dovolují zrušení pending žádosti v prvních deseti minutách;
 to není novou Function opravené. Nový serverový kontrakt nelze vydávat za
