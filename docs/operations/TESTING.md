@@ -26,6 +26,19 @@ cílené emulátorové ověření výše má 9/9 případů, nikoli celou test:r
 Regresní test původně zachytil přístup k Auth před zrušením dialogu; opravené
 první/resume UI má společný dialogový latch a zrušení bez Auth přístupu.
 
+### Následný DEV rollout přípravy
+
+CI a57ae9b (41671609764) a 7976e2f (41675834244) success. Finální aktivace ověřila
+264 Flutter, 107 Functions unit, 41 tools, 359 Rules/server, 15 purge a 15 Storage
+testů, analýzu/lint a DEV build. Předchozí aktivační CI 34250ec neprošlo kvůli
+dvěma ručním seznamům vypnutých příznaků v testech gateway; po jejich opravě
+prošla celá sada. Release pro Hosting je z čistého 7976e2f a prošel kontrolou
+prostředí; oba DEV originy odpovídají manifestu. Nová callable + cleanup mají
+ověřené revize/limity; Rules, IAM, plánovače a ostatní Functions se nezměnily.
+Anonymní příprava vrací HTTP 401. Živý přihlášený průchod a úklid nového
+dočasného účtu zatím čekají na ruční pomoc; nativní ovládací spojení není dostupné.
+[Rozsah a dokončovací kontroly](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

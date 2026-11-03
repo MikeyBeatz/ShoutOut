@@ -17,11 +17,12 @@ Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou 
 původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
 Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
-Zbývá dokončit klientský přechod a uzavření přímých zápisů. Lokální klient
-nově sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová
-příprava má vypnutý přepínač. Dosud nasazený web a výchozí kompatibilní cesta
-stále používají přímé skrytí před žádostí. Před změnou Rules ověřit rollout
-a všechny zapisovací cesty; lokální příprava není živý cutover.
+Zbývá dokončit klientský přechod a uzavření přímých zápisů. DEV web 7976e2f
+sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová příprava
+je zapnutá. Backend a57ae9b i web mají úspěšné CI a ověřené artefakty nasazení.
+Před změnou Rules dokončit živý průchod a ověřit všechny zapisovací cesty;
+nasazení kompatibilní přípravy není úplný cutover. Vypnutá přepínačová větev
+a nativní klient dál používají původní přímé skrytí.
 Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
 Schválený lokální úsek níže nemění oprávnění k novým migracím nebo živým testům.
@@ -31,6 +32,9 @@ Schválený lokální úsek níže nemění oprávnění k novým migracím nebo
 Vlastník po vysvětlení schválil serverové skrytí po dávkách nejvýše 50 vlastních
 aktivních Shoutů, sjednocení prvního pokusu/opakování a související testy.
 Tento úsek je lokální, bez nasazení, nových Auth účtů, živých dat nebo změn Rules.
+Následně vlastník schválil DEV rollout a zvlášť jeden nový dočasný Auth účet,
+jeho testovací obsah, odstranění výhradně tohoto účtu a úklid. Stav tohoto
+navazujícího ověření je níže; původní lokální rozsah tím není dokladem nasazení.
 
 - Připravený export `prepareAccountDeletion` v content codebase používá stávající
   Auth/App Check/eligibleActor kontroly, expectedUserId a timed op1 klíče.
@@ -42,8 +46,9 @@ Tento úsek je lokální, bez nasazení, nových Auth účtů, živých dat nebo
   tentýž klíč; při chybě se další dávka automaticky nespouští.
 - Receipt se zahrnuje do stávající sedmidenní údržby. Před rolloutem musí tuto
   novou akci podporovat i nasazená cleanupOperationReceipts; není to změna TTL.
-- `serverAccountDeletionPreparation` je v config/dev.json false, výchozí false
-  a při zapnutí vyžaduje App Check klíč. Produkce zůstává beze změny.
+- `serverAccountDeletionPreparation` byl při lokální přípravě v config/dev.json
+  false; po ověřeném backendu a CI 7976e2f je v DEV true. Výchozí hodnota zůstává
+  false a zapnutí vyžaduje App Check klíč. Produkce zůstává beze změny.
 - První pokus i pending gate sdílejí UI latch a koordinátor. Před novou
   přípravou se ověří serverový stav žádosti. Existující žádost se nezapisuje
   znovu; při souběhu ji závěrečná transakce převezme bez nového termínu.
@@ -58,6 +63,24 @@ původním klientu. Souběžné publikování z jiného zařízení proto musí 
 celkový cutover/regrese; tento lokální úsek jej neprohlašuje za vyřešené.
 Před živým prostorovým indexem je potřeba bezpečný dávkový indexový writer;
 nelze na stejnou buňku nezávisle aplikovat 50 jednotlivých plánů.
+
+### Navazující DEV rollout a otevřený UI test
+
+Backend a57ae9b / CI 41671609764 success: prepareAccountDeletion a aktualizovaný
+cleanupOperationReceipts jsou ACTIVE, hash bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06.
+Web 7976e2f / CI 41675834244 success: Hosting b4a1834e1c59c893; oba originy mají
+index.html, main.dart.js a app-config.json shodné s čistým release manifestem.
+Původní účetní inventura, ostatní Functions, Rules, IAM a oba plánovače se při
+rolloutu nezměnily. Anonymní volání přípravy bylo odmítnuté HTTP 401.
+
+Živý test dosud není uzavřený. Ovládání prohlížeče není dostupné ani po resetu;
+vlastník dostal žádost o ruční průchod s jedním novým schváleným dočasným účtem.
+Fixture má dva vlastní aktivní Shouty, jeden cizí kontrolní Shout a cizí komentář.
+Před dokončením ověřit receipt hidden=2 před vznikem žádosti, odstranění pouze
+testovacího Auth, zachování cizího obsahu, serverový content-archived, původní
+60denní deadline a následný úklid s návratem účtové inventury k baseline.
+Lokální důkazy a stav fixture jsou v ignorovaných build/account-preparation-*;
+přihlašovací údaje pouze docs/local/account-preparation-fixture.json.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
 Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní

@@ -11,18 +11,17 @@ jeho přímé zápisy a provést společný závěrečný test. Serverový kone�
 už je hotový v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
-Schválený lokální úsek na větvi feature/account-deletion-preparation připravil
-prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/transakce), opakování
-dávek a sjednocený první/resume pokus. Přepínač je false; žádné nasazení,
-Rules ani živá data se tímto úsekem nemění. Uživatel následně schválil pokračování:
-probíhá kompatibilní DEV rollout (nová Function + aktualizace receipt cleanupu,
-potom aktivovaný web). Aktivační commit nastavuje přepínač true, ale web se
-nasadí až po jeho vlastním CI a ověřeném backendu. Přesný výsledek bude
-zaznamenaný po kontrole; úplný klientský/Rules cutover tím není dokončený.
-Lokálně prošlo 264 Flutter, 107 unit, 41 tools a 9 cílených emulátorových
-testů, analýza/lint a DEV debug build. Celá emulátorová sada ani živý nový
-tok tím nejsou ověřené. Dokončené aplikační CI c483ece dokumentační větve
-nemůže nahradit CI nového aplikačního commitu.
+DEV používá prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/transakce),
+opakování dávek a společný první/resume pokus. Backend a57ae9b a aktivační web
+7976e2f mají úspěšné vlastní CI; serverAccountDeletionPreparation je v DEV true.
+Oba originy odpovídají čistému release artefaktu. Rules cutover není dokončený.
+Závěrečný živý UI test čeká na ruční průchod vlastníka: ovládání prohlížeče
+hlásí nedostupné nativní spojení i po resetu. Na základě výslovného souhlasu
+je vytvořený jeden dočasný Auth účet se dvěma vlastními Shouty a cizím kontrolním
+obsahem. Dosud není smazaný ani uklizený; nepovažovat pilot za dokončený.
+Testovací přihlašovací údaje jsou jen v ignorovaném docs/local souboru.
+CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
+15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
@@ -35,7 +34,8 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `f81eaf4214aaa9e857ceb87654b2a444fab9ccba` / `b9084c259258a732` |
+| Webový zdroj / Hosting verze | `7976e2fa4aad969d9f787b2c94231e22240c39e2` / `b4a1834e1c59c893` |
+| Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
 | Účtový hash artefaktu | `fa459ba9128728f23b6b1a69f20111862fb72605` |
 | Pět aktualizovaných obsahových Functions | Zdroj f81eaf4; `deleteComment`, `toggleCommentReaction`, `toggleShoutReaction`, `toggleShoutSave`, `createContentReport`; hash `e9d161330bbca061dc1532b2518ef40f74a5d988` |
@@ -44,6 +44,8 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
+Návrat webu: předchozí Hosting b9084c259258a732 (zdroj f81eaf4); backend je
+kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,
 Storage Rules a ostatní Functions se při posledním rolloutu nezměnily.
@@ -73,6 +75,13 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
 
 ## Poslední ověření a jeho hranice
 
+- Nová příprava: [CI 41671609764](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41671609764)
+  pro a57ae9b a [CI 41675834244](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41675834244)
+  pro 7976e2f success. Neúspěšné CI 34250ec zachytilo dvě staré testovací konfigurace;
+  oprava nemění aplikační chování a celý nový běh je zelený. Nový endpoint odmítl
+  anonymní požadavek HTTP 401. Kontrola po rolloutu potvrdila shodu původní účtové
+  inventury, ostatních Functions, obou plánovačů, IAM a Rules. Teprve potom vznikla
+  výše uvedená dočasná fixture; živé ověření a úklid stále zbývají.
 - Příprava f81eaf4: [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226).
   Aktivace 96b0782: [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008).
   Obě success: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge,
