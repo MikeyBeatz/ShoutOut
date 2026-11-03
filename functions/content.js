@@ -12,10 +12,17 @@ import { createContentReportOperation } from './create_content_report.js';
 import { deleteCommentOperation } from './delete_comment.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
+import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
 
 if (getApps().length === 0) initializeApp();
 
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
+
+// Prepared locally; deploying this export is a separate rollout step.
+export const prepareAccountDeletion = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => prepareAccountDeletionOperation(request, getFirestore()));
 
 export const deleteShout = onCall({
   ...secureCallableOptions,

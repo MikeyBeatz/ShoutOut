@@ -986,59 +986,8 @@ Future<void> _showNicknameChange(
 Future<void> _requestAccountDeletion(BuildContext context) async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) return;
-  final password = await confirmAccountDeletionPassword(context);
-  if (password == null ||
-      !context.mounted ||
-      FirebaseAuth.instance.currentUser?.uid != user.uid) {
-    return;
-  }
-  final request = FirebaseFirestore.instance
-      .collection('accountDeletionRequests')
-      .doc(user.uid);
-  try {
-    await user.reauthenticateWithCredential(
-      EmailAuthProvider.credential(email: user.email!, password: password),
-    );
-    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
-    await hideActiveShoutsBeforeAccountDeletion(user.uid);
-    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
-    await request.set({
-      'userId': user.uid,
-      'email': user.email,
-      'requestedAt': FieldValue.serverTimestamp(),
-      'retainUntil': Timestamp.fromDate(
-        DateTime.now().add(const Duration(days: 60)),
-      ),
-      'status': 'pending',
-    });
-    if (FirebaseAuth.instance.currentUser?.uid != user.uid) return;
-    // A lost reply can follow successful Auth deletion. Keep the durable
-    // request; DeletionRequestGate offers a reauthenticated continuation.
-    await user.delete();
-    if (context.mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    }
-  } on FirebaseAuthException catch (error) {
-    if (!context.mounted ||
-        FirebaseAuth.instance.currentUser?.uid != user.uid) {
-      return;
-    }
-    final message =
-        error.code == 'wrong-password' || error.code == 'invalid-credential'
-        ? 'Heslo není správné.'
-        : 'Účet se nepodařilo odstranit. Zkus to znovu.';
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(tr(context, message))));
-  } catch (_) {
-    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(context, 'Smazání se nepodařilo dokončit. Zkus to znovu.'),
-          ),
-        ),
-      );
-    }
+  final outcome = await requestAccountDeletion(context, user);
+  if (outcome == AccountDeletionOutcome.completed && context.mounted) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 }

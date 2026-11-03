@@ -18,6 +18,25 @@ abstract interface class AccountDeletionTransport {
 
 class AccountDeletionIdentityChanged implements Exception {}
 
+/// Read before preparing, then create conditionally. Existing intents never
+/// re-run preparation or acquire a new retention deadline.
+Future<AccountDeletionIntent> ensurePreparedAccountDeletionIntent({
+  required Future<AccountDeletionIntent?> Function() readExisting,
+  required Future<void> Function() prepare,
+  required Future<AccountDeletionIntent> Function() createIfMissing,
+  required void Function() guardIdentity,
+}) async {
+  guardIdentity();
+  final existing = await readExisting();
+  guardIdentity();
+  if (existing != null) return existing;
+  await prepare();
+  guardIdentity();
+  final created = await createIfMissing();
+  guardIdentity();
+  return created;
+}
+
 /// A failed response never proves that a destructive operation did not commit.
 /// This coordinator intentionally has no automatic request-delete operation.
 /// The pending-request gate resumes this attempt after fresh authentication.
@@ -69,17 +88,19 @@ class AccountDeletionAttempt {
   }
 }
 
-/// Firebase adapter. No client-side Shout hiding and no retention renewal.
-/// The pending-request gate uses this adapter without renewing old requests.
+/// Preparation is injected for new intents; existing requests are never
+/// re-prepared, overwritten or assigned a fresh retention deadline.
 class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
   FirebaseAccountDeletionTransport({
     required this.auth,
     required this.firestore,
     required this.user,
+    this.prepareBeforeIntent,
   });
   final FirebaseAuth auth;
   final FirebaseFirestore firestore;
   final User user;
+  final Future<void> Function()? prepareBeforeIntent;
 
   @override
   String? get currentUserId => auth.currentUser?.uid;
@@ -105,36 +126,59 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
     final reference = firestore
         .collection('accountDeletionRequests')
         .doc(user.uid);
-    return firestore.runTransaction((transaction) async {
-      _guardIdentity();
-      final existing = await transaction.get(reference);
-      _guardIdentity();
-      if (existing.exists) {
-        final data = existing.data()!;
-        if (data['userId'] != user.uid || data['status'] != 'pending') {
-          throw StateError('invalid-account-deletion-request');
-        }
-        final marker = data['authDeletionConfirmedAt'];
-        if (data.containsKey('authDeletionConfirmedAt') &&
-            marker is! Timestamp) {
-          throw StateError('invalid-account-deletion-confirmation');
-        }
-        return AccountDeletionIntent(
-          userId: user.uid,
-          confirmed: marker is Timestamp,
-        );
+    AccountDeletionIntent parse(Map<String, dynamic> data) {
+      if (data['userId'] != user.uid || data['status'] != 'pending') {
+        throw StateError('invalid-account-deletion-request');
       }
-      transaction.set(reference, {
-        'userId': user.uid,
-        'email': user.email,
-        'requestedAt': FieldValue.serverTimestamp(),
-        'retainUntil': Timestamp.fromDate(
-          DateTime.now().add(const Duration(days: 60)),
-        ),
-        'status': 'pending',
-      });
-      return AccountDeletionIntent(userId: user.uid, confirmed: false);
-    });
+      final marker = data['authDeletionConfirmedAt'];
+      if (data.containsKey('authDeletionConfirmedAt') && marker is! Timestamp) {
+        throw StateError('invalid-account-deletion-confirmation');
+      }
+      return AccountDeletionIntent(
+        userId: user.uid,
+        confirmed: marker is Timestamp,
+      );
+    }
+
+    return ensurePreparedAccountDeletionIntent(
+      guardIdentity: _guardIdentity,
+      readExisting: () async {
+        final snapshot = await reference.get(
+          const GetOptions(source: Source.server),
+        );
+        _guardIdentity();
+        if (snapshot.metadata.isFromCache ||
+            snapshot.metadata.hasPendingWrites) {
+          throw StateError('unconfirmed-account-deletion-request');
+        }
+        return snapshot.exists ? parse(snapshot.data()!) : null;
+      },
+      prepare: () async {
+        final prepare = prepareBeforeIntent;
+        if (prepare == null) {
+          throw StateError('account-deletion-preparation-required');
+        }
+        await prepare();
+      },
+      createIfMissing: () => firestore.runTransaction((transaction) async {
+        _guardIdentity();
+        final existing = await transaction.get(reference);
+        _guardIdentity();
+        if (existing.exists) {
+          return parse(existing.data()!);
+        }
+        transaction.set(reference, {
+          'userId': user.uid,
+          'email': user.email,
+          'requestedAt': FieldValue.serverTimestamp(),
+          'retainUntil': Timestamp.fromDate(
+            DateTime.now().add(const Duration(days: 60)),
+          ),
+          'status': 'pending',
+        });
+        return AccountDeletionIntent(userId: user.uid, confirmed: false);
+      }),
+    );
   }
 
   @override

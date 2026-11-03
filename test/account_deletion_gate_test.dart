@@ -37,6 +37,42 @@ Widget view(String uid, Stream<AccountDeletionStatus> events) => MaterialApp(
 
 void main() {
   testWidgets(
+    'initial deletion and resume share one cancellable dialog without accessing Auth',
+    (tester) async {
+      Future<Object?>? first, second;
+      final user = TestUser('initial-cancel');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => FilledButton(
+                onPressed: () {
+                  first = requestAccountDeletion(context, user);
+                  second = resumePendingAccountDeletion(context, user);
+                },
+                child: const Text('Start deletion'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Start deletion'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(await first, isNull);
+      expect(await second, isNull);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Start deletion'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'cancelling the password dialog releases the busy gate without accessing Auth',
     (tester) async {
       final events = StreamController<AccountDeletionStatus>.broadcast();

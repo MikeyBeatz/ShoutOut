@@ -8,6 +8,24 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+## Lokální příprava mazání účtu – 3. listopadu
+
+Nová `prepare_account_deletion.integration.test.js` je součástí test:rules.
+Cíleně s receipt cleanupem prošlo 9 emulátorových scénářů: 51 vlastních Shoutů,
+zachování cizích/neaktivních dokumentů a potomků, duplicate/replay, sedmidenní
+hranice i po úklidu receipt, Auth/App Check/UID/eligibility a atomický rollback.
+Flutter pokrývá nové a existující žádosti, lost ack, původní deadline, změnu
+účtu, dvojklik, několik dávek a validaci výsledku i přepínače. Cílené sady
+nejsou důkazem živého rolloutu; v tomto úseku se nic nenasazuje.
+
+Celé lokální Flutter testy: 264/264, Functions unit 107/107 (256 integrací
+přeskočených bez emulátoru), tools 41/41, analyzátor a Functions lint bez chyb.
+DEV debug build prošel; není to release určený k nasazení. Přípravný content
+balík obsahuje nový modul a jeho export prošel syntax kontrolou. Samostatné
+cílené emulátorové ověření výše má 9/9 případů, nikoli celou test:rules sadu.
+Regresní test původně zachytil přístup k Auth před zrušením dialogu; opravené
+první/resume UI má společný dialogový latch a zrušení bez Auth přístupu.
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

@@ -1,9 +1,47 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'account_deletion_attempt.dart';
+import 'account_deletion_preparation.dart';
 import 'l10n/text.dart';
+import 'timed_operation_gateway.dart';
+import 'web_environment.dart';
+
+final _deletionRuns = <String, Future<AccountDeletionOutcome?>>{};
+final _preparation = AccountDeletionPreparationGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) async {
+    Object? result;
+    final transport = TimedOperationGateway(
+      currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+      issuedAt: (userId) async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user?.uid != userId) throw AccountDeletionIdentityChanged();
+        final token = await user!.getIdTokenResult().timeout(
+          const Duration(seconds: 20),
+        );
+        final time = token.issuedAtTime;
+        if (time == null) throw StateError('operation-clock-unavailable');
+        return time;
+      },
+      send: (operation, payload) async {
+        result = (await FirebaseFunctions.instanceFor(
+          region: 'europe-west3',
+        ).httpsCallable(operation).call(payload)).data;
+      },
+    );
+    await transport.call(
+      attempt: request.timedAttempt,
+      userId: request.userId,
+      operation: 'prepareAccountDeletion',
+      payload: request.toPayload(),
+    );
+    return result;
+  },
+);
 
 typedef AccountDeletionStatus = ({
   String userId,
@@ -83,22 +121,67 @@ class _AccountDeletionPasswordDialogState
 Future<AccountDeletionOutcome?> resumePendingAccountDeletion(
   BuildContext context,
   User user,
-) async {
+) => requestAccountDeletion(context, user, resume: true);
+
+/// The first attempt and the pending-request gate share this flow and UI latch.
+Future<AccountDeletionOutcome?> requestAccountDeletion(
+  BuildContext context,
+  User user, {
+  bool resume = false,
+}) {
+  final running = _deletionRuns[user.uid];
+  if (running != null) return running;
+  final future = _requestAccountDeletion(context, user, resume: resume);
+  _deletionRuns[user.uid] = future;
+  return future.whenComplete(() => _deletionRuns.remove(user.uid));
+}
+
+Future<AccountDeletionOutcome?> _requestAccountDeletion(
+  BuildContext context,
+  User user, {
+  required bool resume,
+}) async {
   try {
     final password = await confirmAccountDeletionPassword(
       context,
-      resume: true,
+      resume: resume,
     );
-    if (password == null) return null;
+    if (password == null ||
+        !context.mounted ||
+        FirebaseAuth.instance.currentUser?.uid != user.uid) {
+      return null;
+    }
     final attempt = AccountDeletionAttempt(
       user.uid,
       FirebaseAccountDeletionTransport(
         auth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
         user: user,
+        prepareBeforeIntent: resume
+            ? null
+            : () async {
+                if (kIsWeb &&
+                    WebEnvironment.current.serverAccountDeletionPreparation) {
+                  await _preparation.prepare(user.uid);
+                } else {
+                  await hideActiveShoutsBeforeAccountDeletion(user.uid);
+                }
+              },
       ),
     );
-    return await attempt.run(password);
+    final outcome = await attempt.run(password);
+    if (outcome == AccountDeletionOutcome.pending &&
+        context.mounted &&
+        FirebaseAuth.instance.currentUser?.uid == user.uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(context, 'Smazání se nepodařilo dokončit. Zkus to znovu.'),
+          ),
+        ),
+      );
+    }
+    return outcome;
   } on FirebaseAuthException catch (error) {
     if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
       final message =
@@ -128,18 +211,28 @@ Future<AccountDeletionOutcome?> resumePendingAccountDeletion(
 
 Future<void> hideActiveShoutsBeforeAccountDeletion(String userId) async {
   final firestore = FirebaseFirestore.instance;
+  void guardIdentity() {
+    if (FirebaseAuth.instance.currentUser?.uid != userId) {
+      throw AccountDeletionIdentityChanged();
+    }
+  }
+
   while (true) {
+    guardIdentity();
     final page = await firestore
         .collection('shouts')
         .where('authorId', isEqualTo: userId)
         .where('status', isEqualTo: 'active')
         .limit(50)
         .get(const GetOptions(source: Source.server));
+    guardIdentity();
     if (page.docs.isEmpty) return;
     final batch = firestore.batch();
     for (final shout in page.docs) {
       batch.update(shout.reference, {'status': 'deleted'});
     }
+    guardIdentity();
     await batch.commit();
+    guardIdentity();
   }
 }

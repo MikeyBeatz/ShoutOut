@@ -17,13 +17,47 @@ Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou 
 původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
 Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
-Zbývá dokončit klientský přechod a uzavření přímých zápisů. Ověřený kód
-`lib/src/profile.dart::_requestAccountDeletion` stále před žádostí volá
-`hideActiveShoutsBeforeAccountDeletion`; tento přímý klientský tok je třeba
-sladit se serverovým postupem, ověřit kompatibilitu a poté omezit Rules.
+Zbývá dokončit klientský přechod a uzavření přímých zápisů. Lokální klient
+nově sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová
+příprava má vypnutý přepínač. Dosud nasazený web a výchozí kompatibilní cesta
+stále používají přímé skrytí před žádostí. Před změnou Rules ověřit rollout
+a všechny zapisovací cesty; lokální příprava není živý cutover.
 Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
-Tento dokument nyní neautorizuje implementační variantu ani novou migraci.
+Schválený lokální úsek níže nemění oprávnění k novým migracím nebo živým testům.
+
+## Lokální serverová příprava – schválená 3. listopadu 2026
+
+Vlastník po vysvětlení schválil serverové skrytí po dávkách nejvýše 50 vlastních
+aktivních Shoutů, sjednocení prvního pokusu/opakování a související testy.
+Tento úsek je lokální, bez nasazení, nových Auth účtů, živých dat nebo změn Rules.
+
+- Připravený export `prepareAccountDeletion` v content codebase používá stávající
+  Auth/App Check/eligibleActor kontroly, expectedUserId a timed op1 klíče.
+  Jedna transakce vybere nejvýše 50 aktivních vlastních Shoutů, změní pouze
+  status a uloží potvrzení výsledku. Cizí/neaktivní obsah a podkolekce zachová.
+- Odpověď `{hidden, hasMore}` je potvrzení konkrétní dávky. Plných 50 znamená
+  další volání; počet Shoutů celého účtu není omezený na 50. Replay stejného
+  klíče nesmí spotřebovat další stránku. Ztracená odpověď v klientu zachová
+  tentýž klíč; při chybě se další dávka automaticky nespouští.
+- Receipt se zahrnuje do stávající sedmidenní údržby. Před rolloutem musí tuto
+  novou akci podporovat i nasazená cleanupOperationReceipts; není to změna TTL.
+- `serverAccountDeletionPreparation` je v config/dev.json false, výchozí false
+  a při zapnutí vyžaduje App Check klíč. Produkce zůstává beze změny.
+- První pokus i pending gate sdílejí UI latch a koordinátor. Před novou
+  přípravou se ověří serverový stav žádosti. Existující žádost se nezapisuje
+  znovu; při souběhu ji závěrečná transakce převezme bez nového termínu.
+  Nepotvrzená/cache či lokálně necommitnutá žádost není povolení smazat Auth.
+- Žádost stále zapisuje klient až po úspěšné přípravě a Auth.delete zůstává
+  po reautentizaci v klientu. Samotná příprava žádost nezakládá/neobnovuje a
+  Auth nemaže. Vypnutá kompatibilní větev dosud používá původní batche.
+
+Omezení před uzavřením milníku: více dávek není jediná atomická operace a
+mezera mezi poslední přípravou a založením žádosti zůstává stejně jako v
+původním klientu. Souběžné publikování z jiného zařízení proto musí pokrýt
+celkový cutover/regrese; tento lokální úsek jej neprohlašuje za vyřešené.
+Před živým prostorovým indexem je potřeba bezpečný dávkový indexový writer;
+nelze na stejnou buňku nezávisle aplikovat 50 jednotlivých plánů.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
 Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní

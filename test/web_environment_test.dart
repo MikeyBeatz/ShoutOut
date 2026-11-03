@@ -6,6 +6,46 @@ import 'package:shoutout/web_environment.dart';
 
 void main() {
   test(
+    'account deletion preparation defaults off and independently requires App Check and a boolean',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(
+        WebEnvironment.fromJson(config).serverAccountDeletionPreparation,
+        isFalse,
+      );
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverAccountDeletionPreparation': true,
+        }).serverAccountDeletionPreparation,
+        isTrue,
+      );
+      for (final invalid in [null, 'true', 1]) {
+        expect(
+          () => WebEnvironment.fromJson({
+            ...config,
+            'serverAccountDeletionPreparation': invalid,
+          }),
+          throwsStateError,
+        );
+      }
+      final disabled = {...config}..remove('appCheckSiteKey');
+      for (final key
+          in disabled.keys.where((key) => key.startsWith('server')).toList()) {
+        disabled[key] = false;
+      }
+      expect(
+        () => WebEnvironment.fromJson({
+          ...disabled,
+          'serverAccountDeletionPreparation': true,
+        }),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'content reports default off and independently require a boolean and App Check',
     () {
       final config =

@@ -28,6 +28,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Serverový 60denní úklid je hotový v DEV. Zbývající přímé klientské skrytí,
    kompatibilní přechod a závěrečný test jsou v
    [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+   Serverová příprava po 50 Shoutech a společný klientský pokus jsou nyní
+   připravené lokálně s vypnutým přepínačem; nasazení a Rules cutover zbývají.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

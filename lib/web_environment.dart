@@ -43,6 +43,17 @@ class WebEnvironment {
       throw StateError('serverPrivateReplyCreation must be a boolean.');
     }
     appCheckSiteKey = key as String?;
+    final accountPreparation = json['serverAccountDeletionPreparation'];
+    if (json.containsKey('serverAccountDeletionPreparation') &&
+        accountPreparation is! bool) {
+      throw StateError('serverAccountDeletionPreparation must be a boolean.');
+    }
+    serverAccountDeletionPreparation = accountPreparation == true;
+    if (serverAccountDeletionPreparation && key == null) {
+      throw StateError(
+        'Server account deletion preparation requires web App Check.',
+      );
+    }
     final shoutDeletion = json['serverShoutDeletion'];
     if (json.containsKey('serverShoutDeletion') && shoutDeletion is! bool) {
       throw StateError('serverShoutDeletion must be a boolean.');
@@ -194,6 +205,7 @@ class WebEnvironment {
   late final bool serverArchivedReportLookup;
   late final bool serverCommentDeletion;
   late final bool serverShoutDeletion;
+  late final bool serverAccountDeletionPreparation;
 
   FirebaseOptions get firebaseOptions => FirebaseOptions(
     apiKey: firebase['apiKey'] as String,

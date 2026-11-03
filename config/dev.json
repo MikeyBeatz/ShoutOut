@@ -2,6 +2,7 @@
   "environment": "dev",
   "appCheckSiteKey": "6LfVIAAuAAAAAL4qhDiIlyWoI5Mp1Q1GJBmEJe7e",
   "serverShoutCreation": true,
+  "serverAccountDeletionPreparation": false,
   "serverCommentCreation": true,
   "serverPrivateReplyCreation": true,
   "serverShoutReactions": true,

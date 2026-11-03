@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverAccountDeletionPreparation !== undefined && typeof config.serverAccountDeletionPreparation !== 'boolean') {
+    throw new Error('serverAccountDeletionPreparation must be a boolean.');
+  }
+  if (config.serverAccountDeletionPreparation === true && !config.appCheckSiteKey) {
+    throw new Error('Server account deletion preparation requires web App Check.');
+  }
   if (config.serverArchivedReportLookup !== undefined && typeof config.serverArchivedReportLookup !== 'boolean') {
     throw new Error('serverArchivedReportLookup must be a boolean.');
   }

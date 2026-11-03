@@ -20,6 +20,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | Serverové fáze včetně konečného purge hotové v DEV; přímé klientské skrytí stále existuje. | Dokončit klientský přechod a writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; neuzavírat Rules před kompatibilní regresí. |
+| Příprava mazání účtu | Lokální prepareAccountDeletion, nejvýše 50 vlastních aktivních Shoutů/transakce; přepínač false, nic nenasazené. | Před živým indexem integrovat dávkový writer: 50 samostatně připravených změn stejné buňky se nesmí navzájem přepsat. |
 | Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |

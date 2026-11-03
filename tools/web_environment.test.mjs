@@ -9,6 +9,15 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('account deletion preparation defaults off and requires App Check and a boolean', () => {
+  assert.equal(dev.serverAccountDeletionPreparation, false);
+  for (const invalid of [null, 'true', 1, {}]) assert.throws(() => validateConfig({ ...dev, serverAccountDeletionPreparation: invalid }, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverAccountDeletionPreparation: true }, 'dev'));
+  const disabled = { ...dev }; delete disabled.appCheckSiteKey;
+  for (const key of Object.keys(disabled).filter(key => key.startsWith('server'))) disabled[key] = false;
+  assert.throws(() => validateConfig({ ...disabled, serverAccountDeletionPreparation: true }, 'dev'));
+});
+
 test('Shout deletion defaults off and independently requires a boolean and App Check', () => {
   const config = { ...dev }; delete config.serverShoutDeletion;
   assert.doesNotThrow(() => validateConfig(config, 'dev'));

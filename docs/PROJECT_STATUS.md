@@ -11,6 +11,16 @@ jeho přímé zápisy a provést společný závěrečný test. Serverový kone�
 už je hotový v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
+Schválený lokální úsek na větvi feature/account-deletion-preparation připravil
+prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/transakce), opakování
+dávek a sjednocený první/resume pokus. Přepínač je false; žádné nasazení,
+Rules ani živá data se tímto úsekem nemění. Další brána je posouzení a ověření
+kompatibilního DEV rolloutu, potom úplný klientský/Rules cutover.
+Lokálně prošlo 264 Flutter, 107 unit, 41 tools a 9 cílených emulátorových
+testů, analýza/lint a DEV debug build. Celá emulátorová sada ani živý nový
+tok tím nejsou ověřené. Dokončené aplikační CI c483ece dokumentační větve
+nemůže nahradit CI nového aplikačního commitu.
+
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
