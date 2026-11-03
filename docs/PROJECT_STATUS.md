@@ -14,8 +14,11 @@ už je hotový v DEV. Kritéria a otevřené části:
 Schválený lokální úsek na větvi feature/account-deletion-preparation připravil
 prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/transakce), opakování
 dávek a sjednocený první/resume pokus. Přepínač je false; žádné nasazení,
-Rules ani živá data se tímto úsekem nemění. Další brána je posouzení a ověření
-kompatibilního DEV rolloutu, potom úplný klientský/Rules cutover.
+Rules ani živá data se tímto úsekem nemění. Uživatel následně schválil pokračování:
+probíhá kompatibilní DEV rollout (nová Function + aktualizace receipt cleanupu,
+potom aktivovaný web). Aktivační commit nastavuje přepínač true, ale web se
+nasadí až po jeho vlastním CI a ověřeném backendu. Přesný výsledek bude
+zaznamenaný po kontrole; úplný klientský/Rules cutover tím není dokončený.
 Lokálně prošlo 264 Flutter, 107 unit, 41 tools a 9 cílených emulátorových
 testů, analýza/lint a DEV debug build. Celá emulátorová sada ani živý nový
 tok tím nejsou ověřené. Dokončené aplikační CI c483ece dokumentační větve

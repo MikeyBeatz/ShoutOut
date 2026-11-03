@@ -9,8 +9,9 @@ void main() {
     'account deletion preparation defaults off and independently requires App Check and a boolean',
     () {
       final config =
-          jsonDecode(File('config/dev.json').readAsStringSync())
-              as Map<String, dynamic>;
+          (jsonDecode(File('config/dev.json').readAsStringSync())
+                as Map<String, dynamic>)
+            ..remove('serverAccountDeletionPreparation');
       expect(
         WebEnvironment.fromJson(config).serverAccountDeletionPreparation,
         isFalse,
@@ -83,7 +84,8 @@ void main() {
             ..['serverContentReports'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
-            ..['serverArchivedReportLookup'] = false;
+            ..['serverArchivedReportLookup'] = false
+            ..['serverAccountDeletionPreparation'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
         isFalse,
@@ -129,7 +131,8 @@ void main() {
             ..['serverContentReports'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
-            ..['serverArchivedReportLookup'] = false;
+            ..['serverArchivedReportLookup'] = false
+            ..['serverAccountDeletionPreparation'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
         isFalse,
