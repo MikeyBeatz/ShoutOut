@@ -1,11 +1,33 @@
 # Dokončení mazání účtu – rozhodnutí, ochrany a pořadí
 
-Rozhodnutí 31. října, aktualizováno 1. listopadu 2026.
+Rozhodnutí od 31. října; aktuální souhrn ověřený 3. listopadu 2026.
 Navazuje na [živě ověřený DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md)
 a [kritéria účtového milníku](MVP_SERVER_PLAN.md#account-deletion).
 Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
 „Uložení a doba uchování“: skrytí veřejného obsahu a potřebné bezpečnostní údaje
 60 dní; nejde o povolení uchovat bez rozlišení všechny preference či cizí obsah.
+
+<a id="aktualni-stav"></a>
+
+## Aktuální stav a další práce
+
+Serverové účtové fáze včetně konečného 60denního úklidu jsou dokončené v DEV.
+Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou v
+[PROJECT_STATUS](PROJECT_STATUS.md#posledni-overene-nasazeni). Nové joby mají
+původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
+Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
+
+Zbývá dokončit klientský přechod a uzavření přímých zápisů. Ověřený kód
+`lib/src/profile.dart::_requestAccountDeletion` stále před žádostí volá
+`hideActiveShoutsBeforeAccountDeletion`; tento přímý klientský tok je třeba
+sladit se serverovým postupem, ověřit kompatibilitu a poté omezit Rules.
+Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
+Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
+Tento dokument nyní neautorizuje implementační variantu ani novou migraci.
+
+Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
+Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní
+zdroj všech nasazených Functions.
 
 ## Rozhodnutí vlastníka 31. října
 
@@ -69,7 +91,7 @@ oprava doplnila UID do 3 původních záložek; nová inventura nemá chybějíc
 Vlastník schválil odebrání palců u cizího obsahu se změnou souhrnných počtů;
 v5 navazujícího workeru má stránkování a transakční počty. Skutečný runtime
 a pilot eviduje [aktuální stav](PROJECT_STATUS.md). Celý feed se pro účet
-neskenuje. Vlastní reakce a záložky stále potřebují konečný 60denní purge.
+neskenuje. Vlastní reakce a záložky dočistí nyní nasazený 60denní purge.
 Archivované reakce mají původní data v `content`, tedy nejde o stejný dotaz.
 
 Další inventura před purge musí zahrnout `rateLimits/{uid}/actions`, technická
@@ -261,7 +283,7 @@ Souhlas je třeba kvůli rozšíření živého mazání dat a novému testovac�
   Následně vlastník rozhodl pevnou lhůtu i pro otevřená hlášení, bez holdu.
   DEV archiv i navazující konečný purge jsou živě ověřené; viz aktuální matice.
 
-## Další větší úsek
+## Historie dokončených úseků a návaznost
 
 1. Privátní fáze je hotová ve vývoji včetně CI, živého testu a úklidu.
    Dosavadní v1 shouts-hidden záznamy zachovat;

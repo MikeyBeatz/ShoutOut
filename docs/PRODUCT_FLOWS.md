@@ -241,7 +241,14 @@ smějí prohlížet pouze administrator a owner; každé otevření vytvoří au
 
 ## Smazání a retence
 
-Žádost o smazání přepne účet do blokujícího stavu a požaduje přibližně 60denní
-retenci. Expirovaný Shout je v klientském modelu držen sedm dní. Fyzické
-serverové dokončení obou procesů zatím není nasazené a nesmí být považováno za
-hotové pouze podle klientského stavu.
+Žádost o smazání přepne účet do blokujícího stavu. DEV server po ověření
+odstranění Auth skrývá obsah a provádí soukromý úklid, archivaci a anonymizaci.
+Konečný purge nových jobů má pevný termín původní request createTime +60 dní;
+zahrnuje profily/potomky, archiv, soubory a stále vlastní přezdívku. Trvalý
+minimální veřejný marker a anonymní technický kontext cizích konverzací zůstanou.
+Klientský přechod a uzavření přímých zápisů ještě nejsou dokončené.
+[Stav a hranice ověření](ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
+Expirovaný Shout je v klientském modelu držen sedm dní. Serverová exspirace
+statusu je v DEV, sedmidenní fyzický úklid Shoutů a jejich potomků ještě hotový
+není. Account purge tyto dva různé životní cykly nenahrazuje.

@@ -12,6 +12,11 @@ Bloky s otevřeným podúkolem zůstávají celé, včetně kontextu a již hoto
 Serverové požadavky a podmínky dokončení jsou v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
 Počet se odvozuje jen z tohoto souboru, nikoli z kopií checkboxů v archivu nebo přehledů milníků.
 
+Poslední kontrola 3. listopadu 2026 potvrzuje 107 hotových a 50 otevřených
+položek. Reorganizace nemění žádný checkbox. Souhrnná serverová/životní
+brána je stále otevřená: dokončený account purge v DEV nenahrazuje klientský
+přechod, fyzický Shout cleanup ani podmínky veřejného vydání. [Postup údržby](DOCUMENTATION_MAINTENANCE.md).
+
 ### Prezentační web před MVP
 
 Doména `shoutout-app.eu` je pořízená a slouží jako veřejný statický prezentační

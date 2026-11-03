@@ -1,6 +1,7 @@
 # Zápisové cesty před připojením prostorového indexu
 
-Aktuální DEV exspirace z 91d8d9b běží bez aktivního prostorového indexu.
+Poslední ověřená DEV účtová/exspirační vrstva je 96b0782; 91d8d9b je zdroj
+původního zavedení exspirace. Běží bez aktivního prostorového indexu.
 `expireDueShouts` má lokálně ověřený atomický indexWriter adaptér; samotný
 maintenance wrapper jej zatím nepředává. Před aktivací živého indexu musí být
 writer zapojený i do této volací cesty a ověřený přes celý maintenance tick,
@@ -18,8 +19,8 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
-| Mazání účtu | Klientská cesta stále existuje; DEV pilot navíc serverově skrývá obsah po odstranění Auth a ukládá trvalý průběh | Pilot 3/3 živě ověřený; celý účtový proces a klientské napojení zbývají, indexWriter je živě vypnutý. Neuzavírat Rules dříve. |
-| Expirace | Lokální indexový prune; současná dostupnost zohledňuje expiresAt | Provozní worker a budget jsou před aktivací nové kolekce samostatnou bránou. |
+| Mazání účtu | Serverové fáze včetně konečného purge hotové v DEV; přímé klientské skrytí stále existuje. | Dokončit klientský přechod a writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; neuzavírat Rules před kompatibilní regresí. |
+| Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
 

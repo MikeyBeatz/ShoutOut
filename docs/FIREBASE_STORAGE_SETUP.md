@@ -3,14 +3,16 @@
 Firebase Storage ve vývojovém projektu `shoutout-dev-46c81` slouží pro Business
 loga i obrázky přiložené k hlášením chyb. Textová hlášení zůstávají funkční i
 bez přílohy. Produkční webové MVP potřebuje vlastní bucket, pravidla a nákladové
-pojistky v samostatném Firebase projektu aplikace.
+pojistky v existujícím projektu `shoutout-production-a1b34`, který aplikace
+sdílí s prezentací. Samostatný je Hosting site aplikace, nikoli další projekt.
 
 ## Business loga
 
 - Aktivní Business účet může uložit vlastní logo na cestu
   `businessLogos/{uid}/logo-{version}.png`. Klient vytváří čtvercové PNG o
   rozměrech 512 × 512 px; Storage Rules přijímají soubor do 2 MiB.
-- Logo mohou číst přihlášení uživatelé. Zapsat a smazat ho může pouze vlastník
+- Logo mohou číst přihlášení uživatelé, pokud vlastník nemá veřejný marker
+  smazaného účtu. Zapsat a smazat ho může pouze vlastník
   s aktivní Business rolí; cesta a verze se ukládají do soukromého i veřejného
   profilu. Podrobnosti jsou v `DATA_MODEL.md`.
 
@@ -49,7 +51,8 @@ samostatným dokumentem `docs/COST_SAFETY.md`.
 6. Ověřit, že `_imageAttachmentsEnabled` v `lib/src/profile_support.dart` je `true`
    pro přílohy hlášení chyb, a samostatně ověřit upload Business loga.
 7. Web sestavit s konfigurací cílového projektu; produkční aplikace patří na
-   `go.shoutout-app.eu`, nikoli do projektu statické prezentace.
+   app site `shoutout-go-a1b34` pro `go.shoutout-app.eu`, nikoli na Hosting site
+   statické prezentace ve stejném produkčním projektu.
 
 ## Povinné ověření před zapnutím příloh a log
 
@@ -66,6 +69,12 @@ samostatným dokumentem `docs/COST_SAFETY.md`.
 - nastavit monitoring velikosti bucketu, počtu uploadů a nákladů.
 
 ## Produkční poznámka
+
+V DEV je od dokončení account purge schváleně vypnutý soft delete bucketu,
+aby budoucí smazání účtových souborů po 60 dnech nepřidávalo obnovitelných
+sedm dní. Produkční politika tím není rozhodnutá. Account purge je ověřený
+pro vlastní businessLogos/bugReports prefix, nikoli obecný cleanup všech
+hlášení aktivních účtů. [Protokol a důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
 Před veřejným spuštěním je vhodné přesunout mazání expirovaných souborů do
 plánované serverové úlohy. Samotná hodnota `expiresAt` soubor ze Storage nemaže.

@@ -1,0 +1,3 @@
+# Historical snapshots must retain their original bytes on every platform.
+docs/archive/TODO_2026-10-29.md -text
+docs/archive/*_2026-11-03.txt -text

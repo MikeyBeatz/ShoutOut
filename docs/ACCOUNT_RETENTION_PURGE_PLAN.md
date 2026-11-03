@@ -1,6 +1,6 @@
 # Konečný 60denní úklid účtu
 
-Rozsah schválený vlastníkem 2. listopadu 2026: dokončit bod 1 účtového
+Rozsah schválený vlastníkem 2. listopadu 2026: dokončit retenční část účtového
 milníku – profily, Business data, loga, záložky, vlastní reakce, archivní
 texty a kopie důkazů, uvolnění vlastní přezdívky. Navazuje na
 [v5 odebrání palců](ACCOUNT_REACTION_REMOVAL_PLAN.md). Implementace je na
@@ -124,7 +124,9 @@ Rules prototyp používá vlastnické kontroly, výchozí zákaz a vstupní ohra
 pro purge; regresní sada prošla. Před prvním veřejným vydáním zůstává nutná
 závěrečná revize pravidel jako součást startovní brány MVP.
 
-## Uzavření bodu 1 v DEV – 3. listopadu 2026
+<a id="uzavření-bodu-1-v-dev--3-listopadu-2026"></a>
+
+## Dokončení konečného úklidu v DEV – 3. listopadu 2026
 
 Příprava f81eaf4 / [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226)
 a aktivace 96b0782 / [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008)

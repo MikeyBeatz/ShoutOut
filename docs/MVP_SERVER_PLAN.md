@@ -1,5 +1,24 @@
 # Serverový a produkční plán webového MVP
 
+## Aktuální stav a použití plánu
+
+Souhrn k 3. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
+nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
+Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
+
+| Oblast | Doložený stav | Zbývající brána |
+|---|---|---|
+| Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
+| App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
+| Obsahová brána | Serverové DEV operace a timed idempotence nasazené. | Živý prostorový feed, indexové cesty a uzavření přímých zápisů. |
+| Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
+| Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
+| Mazání účtu | Serverové fáze včetně +60denního purge dokončené v DEV. | Klientský přechod, přímé zápisy a společný závěrečný test. |
+| Životnost Shoutů | Exspirace mění status v DEV. | Sedmidenní fyzický úklid Shoutů a potomků, indexové napojení. |
+| Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
+| Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
+| Bezpečnostní kontrola | Dílčí testy jsou doložené v TESTING. | Závěrečná předprodukční revize a odstranění/přijetí rizik. |
+
 Tento dokument zachovává podrobné požadavky a výstupní kritéria původního plánu.
 Aktuální splnění ověřujte v [PROJECT_STATUS](PROJECT_STATUS.md), priority v [TODO](TODO.md).
 Dokončené provozní kroky a starší pokusy jsou v [úplném archivu](archive/TODO_2026-10-29.md).
@@ -117,7 +136,7 @@ Attest zůstávají podmínkami pozdějších mobilních vydání.
 - zaokrouhlit polohu na serveru a odvodit důvěryhodný prostorový/geohash klíč;
   nepřijímat přesnou veřejnou polohu vypočtenou pouze klientem,
 - dotazovat feed přes prostorové buňky a stránkovací kurzory, ne globálním
-  listenerem; klientský limit 50 ponechat,
+  listenerem; zachovat nejvýše 50 výsledků na stránku, nikoli celkový limit feedu,
 - provádět čítače, rate limit a obsah v jedné transakci,
 - stanovit bezpečné chování při opakování a částečném selhání požadavku.
 
@@ -282,14 +301,15 @@ Dokončení tohoto původního kroku není potvrzené. Před případným proved
 ověřit současná data, oprávnění a vývojové prostředí. Tehdejší informace
 o chybějícím klíči zůstává pouze v archivu.
 
-## Nejbližší ruční krok ve vývojovém projektu
+### Podmínky případného budoucího srovnání
 
-- bezpečně získat omezený Admin SDK klíč pouze pro vývojový projekt,
-- nastavit `FIREBASE_SERVICE_ACCOUNT_PATH` na jeho lokální cestu,
-- spustit `cd tools && npm run reconcile:data`,
-- zkontrolovat souhrnné počty reakcí, uložení a komentářů na starých datech
-  a zaokrouhlení jejich veřejné polohy,
-- klíč po dokončení odstranit z pracovního počítače nebo uložit do schváleného
-  správce tajemství; nikdy jej necommitovat.
+Původní jednorázový návrh se zachoval v
+[úplném snímku](archive/MVP_SERVER_PLAN_2026-11-03.txt). Jeho dokončení není
+potvrzené a není to nejbližší povinný úkol. Nyní se automaticky nezískává nový
+klíč ani nespouští opravný zápis.
 
-Skript tento krok záměrně odmítne pro jiný projekt než `shoutout-dev-46c81`.
+Pokud bude srovnání potřebné, nejdřív provést read-only inventuru současných
+čítačů/poloh a ověřit aktuální nástroj `tools/reconcile_counters.mjs`, jeho
+DEV pojistku a oprávnění. Konkrétní plán změn existujících dat předložit
+vlastníkovi; teprve po souhlasu provést a ověřit. Přihlašovací údaje nikdy
+necommitovat a produkční cíl nepoužít.

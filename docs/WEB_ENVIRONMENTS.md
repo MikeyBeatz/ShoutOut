@@ -1,5 +1,11 @@
 # Vývojový a produkční web
 
+Pro poslední ověřený zdroj/revize použít [PROJECT_STATUS](PROJECT_STATUS.md#posledni-overene-nasazeni).
+Tento dokument uchovává technické postupy a datované rollouty. Staré revize,
+probes a tehdejší vypnuté přepínače níže nejsou současnou konfigurací.
+V config/dev.json jsou nyní aktivní serverové operace včetně mazání Shoutu
+a archivního lookupu; produkční přepínače tím zapnuté nejsou.
+
 Lokální příprava oddělení prostředí je implementovaná. Od 25. října 2026
 aplikace i vstupní stránka používají společný produkční Firebase projekt
 `shoutout-production-a1b34`, oddělený od vývoje. Každá má vlastní Hosting web
@@ -45,6 +51,12 @@ a HTTPS je popsaný v posledním záznamu níže. Hodnota
 připravenost Storage služby.
 
 ## Konfigurace
+
+### Historie přechodu operací 25.–31. října
+
+Následující zdroje/revize popisují jednotlivé uskutečněné fáze; aktuální web
+je f81eaf4 a účtové Functions 96b0782. Ostatní Functions mohou pocházet
+z různých kompatibilních zdrojů. Společný stav tabulky je v PROJECT_STATUS.
 
 Retence `op1` je ve vývoji nasazená z čistého `079d053d24fe04705d13baad7f8307bd25848094`
 po CI `41136744088`: nejdřív osm kompatibilních Functions, potom web. Klient

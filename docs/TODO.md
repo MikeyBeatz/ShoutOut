@@ -1,8 +1,9 @@
-# ShoutOut – aktuální TODO a pořadí práce
+# ShoutOut – priority a milníky
 
-Reorganizováno 29. října 2026; rozsah práce ani stav milníků se nezměnil.
-Aktualizace 31. října: přidaný požadavek na novou logiku feedu a návrh etap
-před/po MVP. Vlastník následně vybral celé nové chování před MVP.
+Aktualizováno 3. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
+podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
+[MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
 
 ## Postup
 
@@ -10,191 +11,34 @@ před/po MVP. Vlastník následně vybral celé nové chování před MVP.
 
 `███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
 
-Počítají se celé vydávací milníky níže.
+Počítají se celé milníky níže. Dílčí dokončení serverového úklidu nezavírá
+celý milník životního cyklu ani serverové brány.
 
 ### Postup celého backlogu
 
 `███████████████████████████░░░░░░░░░░░░░` **68 %** — 107 ze 157 úkolů
 
-Kanonické checkboxy jsou pouze v [BACKLOG.md](BACKLOG.md).
+Jedinou checkboxovou evidencí pro tuto metriku je BACKLOG. Původní základ měl
+155 položek; přibylo nové chování feedu a pozdější správa retenčního archivu.
+Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
-- Podkroky serverové brány samy nezvyšují počet dokončených milníků.
-- Reorganizace nepřidává nové úkoly ani nemění žádný checkbox.
-- Nové zadání feedu z 31. října přidává jeden otevřený úkol nad původních 155;
-  počet hotových úkolů ani 24 milníků se tím nemění.
-- Požadavek z 1. listopadu přidal samostatnou budoucí správu retenčního archivu
-  v administraci. Je otevřený, proto je celkový backlog 157; MVP zůstává 9/24.
+## Nejbližší práce
 
-## Jak navázat
-
-1. Přečíst [aktuální stav a další krok](PROJECT_STATUS.md).
-2. Vybrat úkol níže; jeho podrobnosti hledat v [checkboxové evidenci](BACKLOG.md)
-   nebo [serverovém plánu](MVP_SERVER_PLAN.md).
-3. Skutečné chování ověřit v kódu a konfiguraci; postup vydávání je v [RELEASING](RELEASING.md).
-
-Historie nasazení a staré protichůdné stavy nepatří do tohoto přehledu.
-Původních 1 425 řádků je beze změny v [úplném archivu](archive/TODO_2026-10-29.md);
-[archivní index](archive/README.md) uvádí kontrolní součet a rozdělení informací.
-
-## Nejbližší práce – serverová brána
-
-[Konečný 60denní úklid – bod 1](ACCOUNT_RETENTION_PURGE_PLAN.md) je dokončený
-v DEV: aktivace 96b0782 po CI 41539164008, skutečný trigger/Scheduler a
-3 archivní kořeny, konečný purge s řízeným časem nad Firestore/Storage,
-anonymní cizí konverzace, replay i úklid fixture ověřené. Původní inventura
-zachovaná, staré žádosti/job verze se nemigrují. DEV soft delete je vypnuté.
-**Dále bod 2: klientský cutover a uzavření přímých zápisů, pak závěrečný test
-účtového milníku.** Dokončení samotného bodu 1 ještě nemění 9/24 milníků.
-
-Vlastník schválil odebrání palců mazaného účtu a změnu počtů. Dokončená
-[transakční a vlastnická vrstva](ACCOUNT_REACTION_REMOVAL_PLAN.md) má
-úspěšné CI 41493498292 (348 Rules/server). Vlastnická vrstva i nový worker v5
-jsou nasazené v DEV; schválené doplnění UID u 3 záložek je provedené a ověřené.
-Živý pilot dokončil odebrání palců/čítače, content-archived i úklid fixture,
-původní inventura má stejný digest. Navazující konečný 60denní purge je také
-dokončený v DEV výše. Žádný celý milník se tím ještě nezaškrtává.
-
-Rozpracovaný úsek 2. listopadu: [oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
-CI 41399389084 prošlo; role/exspirace jsou nasazené v DEV, živě 26/26
-Shoutů změnilo jen status. Účtový pilot dokončil content-archived a je uklizený.
-Klientské retry UI 23f2043 má úspěšné CI 41472129925 (252 Flutter); jeho původní
-Hosting d2573a279275eb72 nahradil kompatibilní UID klient 62a51b0 / 20af65bc04ae5c35.
-Živý průchod jedním novým dočasným účtem,
-zachování žádosti/deadline, terminální worker a úklid jsou ověřené.
-Plné uzavření přímých zápisů zůstává otevřené.
-Samotné podkroky nemění 9/24 milníků. Fyzický purge je dokončený, navazuje klientský cutover;
-Business archiv je schválený celý včetně poboček/fakturačních podkladů a lhůta
-je pevná i pro hlášení. Trvalý minimální marker i odebrání palců jsou schválené.
-Další technická brána je vlastnické
-vyhledávání reakcí/záložek a úplná inventura pro 60denní purge.
-
-Ukládání Shoutů je dokončené ve vývoji: operace a klient `5fceccb`, aktivace
-`02b8b28`, obě CI i živé testy běžným/Business účtem prošly včetně úklidu.
-[Podrobný aktuální stav](PROJECT_STATUS.md#serverova-brana).
-
-Mazání komentářů je hotové ve vývoji: `34f7cad`, aktivace `fcbc23d`, obě CI,
-živé průchody třemi rolemi a úklid prošly. [Důkazy](PROJECT_STATUS.md).
-
-Retence potvrzení je ve vývoji dokončená: klient `079d053`, cutover a úklid
-`9b748d7`, obě CI a živé testy osmi cest prošly. Nové legacy klíče se odmítají;
-DEV plánovač běží denně 02:15 UTC, nejvýše 500 receipt/běh. První zkouška
-odstranila 1 prošlý testovací receipt, opakování 0; všech 14 platných zůstalo.
-Sedmidenní okno nemění ostatní 60denní požadavky mazání účtu; samotný account
-deletion worker zůstává samostatným otevřeným milníkem. [Důkazy](TESTING.md#retention-rollout).
-Celý milník serverové brány ještě hotový není; metriky se tímto podkrokem nemění.
-
-Zpětný audit 37 commitů (30. října–1. listopadu) našel dva opravitelné
-nedostatky. Opravy jsou nasazené v DEV: odstranění globální historie
-payloadů klienta a ukončení trvalých/opakovaných chyb account workeru do
-needs-review. Cílené testy, 232 Flutter testů, 88 serverových unit a analyzátor
-prošly. Commit 6acca72 má úspěšné CI 41297163776 včetně 210 Rules/server
-emulátorových testů a je nasazený na DEV Hosting i obou účetních Functions.
-Shoda webu, prostředky a úspěšný běh plánovače ověřené; oba nálezy uzavřené.
-Verzovaná soukromá fáze account jobu je hotová v DEV: aktivace 6a4606e, CI
-41300216738 success (89 unit, 224 Rules/server testů), obě Functions ACTIVE,
-živě 3/3 skryté Shouty a 4/4 odstraněné privátní položky, replay i úklid prošly.
-[Důkazy DEV pilotu](ACCOUNT_DELETION_REMAINING_PLAN.md#private-job-dev).
-Rozhodnutí 1. listopadu: neveřejně uchovat všechny zahrnuté zprávy/komentáře
-60 dní, bez ohledu na nahlášení. V3 job a auditovaný fallback pro nahlášený
-komentář jsou dokončené v DEV: aktivace 1dab78c, CI 41322524612 success,
-235 Flutter, 249 Rules/server a 92 unit testů. Živě ověřeno 2 zprávy,
-1 komentář, 3 reakce, zachování cizího obsahu, čítač, replay, moderační detail
-a audit. Testovací data uklizená, původní žádost nezměněná.
-[Archivní DEV pilot](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) je uzavřený.
-Další krok: identita/přezdívka, konečná retence a klientský cutover.
-Veřejná část identity má schválený [lokální prototyp](ACCOUNT_PUBLIC_IDENTITY_PLAN.md):
-marker, rezervace a anonymní klient. Lokální úsek je uzavřený: da26499,
-CI 41328636468 success (241 Flutter, 262 Rules/server, 8 Storage).
-Tehdy byl jen lokální; navazující konfirmace, cloudový důkaz revokace a
-v4 nasazení jsou uzavřené níže.
-Tři důvěryhodné zapisovače mají navazující schválenou lokální ochranu:
-backfill, role a Business aktivace kontrolují žádost/marker v transakci;
-22 emulátorových a 37 tools testů prošlo. Lokální úsek je uzavřený:
-a0a9117, [CI 41347854953 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41347854953)
-včetně 284 Rules/server testů a web buildu;
-živé nástroje ani joby se nespouštěly/neměnily.
-Navazující lokální prototyp revokace URL loga je uzavřený: c62e7b5,
-[CI 41354109582 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41354109582),
-105 unit, 284 Rules/server, 14 Storage, Flutter/tools, analýza/lint a web build.
-Emulátor zachovává tokeny a ignoruje verzovací podmínky; krok to rozpozná
-a nepotvrdí dokončení. Následný skutečný DEV Storage test z 8c915db po
-CI 41355437130 success ověřil revokaci 200 → 403, obě kolize 412, replay,
-zachování bytes/metadat i úklid 4/4 objektů; tato cloudová brána je uzavřená.
-Serverové potvrzení Auth mazání je z e4dd199 po CI 41356429637 success
-nasazené do DEV (Rules a dvě stávající Functions); 295 Rules/server případů
-a ostatní CI kontroly prošly. Živě automatické potvrzení → soukromý úklid →
-content-archived, stabilní timestamp/deadline a úklid testu; původní žádost
-i výchozí inventura nezměněné. Tato DEV ochrana je uzavřená.
-Integrace identity/loga je z b685ac4 po CI 41359149804 nasazená v DEV:
-Storage Rules, web a obě účtové Functions. Staré joby se nemigrují.
-Živý pilot došel do content-archived, má minimální marker, dvě stará URL 403,
-zachovanou rezervaci/updateTime a původní deadline. Testovací data uklizená,
-původní inventura nezměněná; veřejná identita/loga jsou uzavřené v DEV.
-Zbývají privátní/Business data a skutečné role, fyzický purge a klientský cutover.
-[Kontrakt a stav](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#identity-worker-v4).
-[Podrobnosti](TESTING.md#audit-lifecycle-fixes).
-Metriky ani rozsah MVP se tím nemění.
-
-1. **R1/R3 rozhodnuto:** celé A0–A3 i B1–B4 před MVP; nepřečtené první jen
-   v Nejblíž. Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze.
-   [Etapy a kontrolní brány](FEED_IMPLEMENTATION_STAGES.md).
-2. A0 lokálně dokončená: celý detail, 204 Flutter testů a analyzátor prošly.
-   A0 nasazená na DEV z `b56fbbe` po CI `41189106879`. A1 lokálně dokončený:
-   deset testů a 24 měření. [Kontrakt, výsledky a meze](FEED_A1_RESULTS.md).
-   Progresivní směr následně schválený; serverové jádro a klientský koordinátor
-   připravené a lokálně ověřené. [Stav a nákladový problém](FEED_PROGRESSIVE_PLAN.md).
-   Sdílený index byl následně schválený pro lokální návrh a ověření; hotovo:
-   [model, měření a hranice](FEED_BLOCK_INDEX_PLAN.md). Další krok před napojením:
-   R4 a lokální historie/GC jsou doplněné ([ověření](FEED_INDEX_RETENTION.md)).
-   Následuje pokrytí všech zapisovacích cest, provozní rozpočet a migrační dry-run.
-   Serverové mazání Shoutů má nasazenou DEV Function i aktivaci webu; živý
-   Business průchod po ruční obnově prošel, ostatní role ještě živě ne. Tři serverové cesty mají lokálně
-   ověřené skládání s indexem.
-   [Migrace a zbývající brány](FEED_MIGRATION_READINESS.md): read-only preflight
-   našel 17 chybných geohashů; po samostatném souhlasu a CI opraveno, 35/35 valid.
-   [Čtení a rating](FEED_READING_POLICY.md): 1 s na každou část, mimo Top bez
-   odsouvání negativních Shoutů; řazení nasazené v DEV z ca67ebd, expozice/sync ještě nenapojené.
-   [Přenositelný kurzor](FEED_PORTABLE_CURSOR.md) lokálně ověřený bez per-user
-   serverové session; Auth/API, živý klíč, generace a budget ještě zbývají.
-   [konkrétní stav zápisových cest](FEED_WRITER_INTEGRATION.md).
-   Malý lokální úsek: account hiding rozlišuje původní a znovu vytvořenou žádost;
-   celý účtový worker a jeho napojení stále zbývají.
-   Lokální zpracování stránky ověřuje neexistenci účtu v Auth a stejnou žádost
-   mezi stránkami; souběh dvou běhů ověřený. Lokální adaptér vytvoření žádosti
-   rozlišuje opakování, hotové skrytí a zastaralou událost. Trvalý průběh a obnova
-   jsou lokálně ověřené (99 cílených account/job/Rules případů).
-   [DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md) schválený a dokončený: obě Functions
-   ACTIVE, plán každou minutu, živě ověřené čekání na Auth a následné skrytí 3/3,
-   replay, soukromost a úklid. Zbývají identita, přezdívka, konečná retence
-   a klientské napojení; celý účtový milník se tím ještě neuzavírá.
-   [Další účtové fáze](ACCOUNT_DELETION_REMAINING_PLAN.md): schválené jméno na 60 dní
-   a skrytí zpráv oběma; ochrana příjemců z b777992 po CI 41245446077 nasazená v DEV
-   1. listopadu. Vlastní privátní seznamy mají dokončenou DEV v2 fázi jobu
-   z 6a4606e po CI 41300216738. Archiv zpráv, komentářů a reakcí má dokončenou
-   DEV v3 fázi z 1dab78c po CI 41322524612, včetně živého testu, moderace a úklidu.
-   Další krok: identita/rezervace přezdívky, konečné dočištění a klientský cutover.
-   Staré v1 joby zůstávají beze změny.
-   Konečné smazání účtu stále není dokončené.
-   Živý feed je původní; nové sbírky/backfill nejsou tímto schválené.
-3. Po kontrolní bráně A1 dokončit schválené prostorové načítání (A2), ruční
-   obnovu a regresi (A3). Zachovat současné filtry, živé interakce, čtyři řazení
-   a Business výjimky; žádné tiché omezení celého okolí na 50.
-4. Dokončit B1–B4 před veřejným MVP: přečtení, synchronizaci, osobní pořadí
-   a číslovaný indikátor. Expozice, retence a nákladové limity mají vlastní brány.
-5. Po ověření dotčených toků uzavřít přímé klientské obsahové zápisy v Rules.
-   Osobní metadata potřebují soukromá oprávnění; veřejné MVP čeká na celé B.
-
-Hlášení obsahu je ve vývoji hotové: operace/klient `79082d8`, aktivace `be5a88f`,
-obě CI a živé testy všech tří cílů, duplicity, cooldownu, moderační fronty i úklidu
-prošly. Celý milník serverové brány zůstává otevřený do dokončení bodů výše.
-
-Serverové podkroky rozpracovávají existující milník. Read/refresh UX je nový
-požadavek z 31. října, který vlastník celý zařadil před MVP;
-nesmí být považovaný za již implementované chování.
-[Úplná kritéria serverové brány](MVP_SERVER_PLAN.md#gateway).
-Vývojové i produkční rollouty mají od 30. října trvalý souhlas po úspěšném CI
-přesného commitu a splnění pravidel vydání; nevyžadují nový dotaz. První veřejné
-vydání nadále vyžaduje dokončené MVP. [Podmínky](RELEASING.md#trvaly-souhlas-s-rollouty).
+1. **Dokončit reorganizaci a kontrolu dokumentace.** Nejdřív hlavní přehledy
+   a plány, potom ostatní obsah a odkazy; mapa přesunů se schvaluje předem.
+   [Postup a pravidla údržby](DOCUMENTATION_MAINTENANCE.md).
+2. **Dokončit klientský tok mazání účtu a uzavření jeho přímých zápisů.**
+   Serverový 60denní úklid je hotový v DEV. Zbývající přímé klientské skrytí,
+   kompatibilní přechod a závěrečný test jsou v
+   [účtovém plánu](ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+3. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
+   zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
+   API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
+   [etap](FEED_IMPLEMENTATION_STAGES.md#aktualni-stav); lokální prototyp není
+   živý prostorový feed.
+4. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
+   úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
+   a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
 
 ## Hranice MVP
 
@@ -298,8 +142,8 @@ registry bylo naopak výslovně zrušeno; webové MVP počítá s ruční aktiva
 
 ## Údržba dokumentace
 
-TODO zachovává priority a souhrn milníků. Aktuální commit, nasazené verze,
-potvrzené výsledky a další krok aktualizovat v PROJECT_STATUS.md. Podrobné
-požadavky patří do BACKLOG.md a MVP_SERVER_PLAN.md; technické důkazy do TESTING.md
-a WEB_ENVIRONMENTS.md. Archivní snapshot nepřepisovat. Starý neúspěšný pokus
-ani připravený kód nesmějí být zaměněné za současné úspěšné nasazení.
+Dokončený podkrok vyřadit z nejbližší práce a ponechat odkaz na výsledek v
+PROJECT_STATUS nebo příslušném plánu. Nepoužívat názvy „bod 1/2“ bez kontextu.
+Nový požadavek nejdřív zařadit do BACKLOG, nikoli do historie TODO.
+Role dokumentů a kontrolní příkaz: [DOCUMENTATION_MAINTENANCE](DOCUMENTATION_MAINTENANCE.md).
+Úplný předchozí obsah je zachovaný v [archivním indexu](archive/README.md).

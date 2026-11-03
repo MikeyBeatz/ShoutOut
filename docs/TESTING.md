@@ -1,5 +1,13 @@
 # Testovací strategie a regresní matice
 
+Aktuální souhrn výsledků a jejich meze: [PROJECT_STATUS](PROJECT_STATUS.md).
+Datované části níže jsou důkazy jednotlivých etap; starší „zatím bez rolloutu“
+neznamená současný stav. Nové příkazy a kontroly se řídí aktuální konfigurací.
+
+Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost,
+metriky a registrované snímky, bez externích URL a neveřejných local souborů.
+Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

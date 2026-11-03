@@ -4,7 +4,15 @@
 [index](FEED_BLOCK_INDEX_PLAN.md) a [retenci](FEED_INDEX_RETENTION.md).
 Tento dokument nerozhoduje názvy živých indexových kolekcí ani jejich aktivaci.
 
-## Serverové mazání – skutečně nasazený stav
+## Současná brána
+
+K 3. listopadu je serverová účtová vrstva včetně konečného purge hotová v DEV;
+zůstává přímé klientské skrytí a nezapojený runtime indexWriter. Následující
+rollout/geohash záznamy jsou důkazy svých datovaných etap. Neoznačují všechny
+Functions ani web za jedinou dosud aktuální verzi. Přesné poslední ověření:
+[PROJECT_STATUS](PROJECT_STATUS.md#posledni-overene-nasazeni).
+
+## Serverové mazání – ověřené zavedení 31. října
 
 `deleteShout` a `cleanupOperationReceipts` jsou ve vývoji ACTIVE z `868bc89`,
 CI `41210929174` success. Následná aktivace a transakční skládání `3b159f2d9acbe28effcfd7f9357034d882d963fb`

@@ -9,6 +9,27 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ## Platný rozsah po rozhodnutí R1
 
+<a id="aktualni-stav"></a>
+
+### Aktuální stav a pořadí integrace
+
+A0 (plný detail) je nasazené v DEV; A1 je dokončený lokální prototyp.
+Negativní hodnocení už mimo Top nemění pořadí, ale sbalení. A2/A3 mají
+lokální moduly prostorového indexu, historické relace, kurzoru a koordinátoru;
+nejsou napojené jako živé query API ani nový Home feed. B1 má lokální jádro
+expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
+
+Nejdřív dokončit účtový klientský přechod a všechny indexové zapisovače
+(včetně moderace, exspirace a konečného purge), potom schválit konkrétní
+živé schéma/migraci, provozní limity a query API. Následuje klient A2/A3,
+osobní metadata B1–B3 a indikátor B4 se společnou regresí. Původní úplná
+příprava okolí před první stránkou není zvolená.
+[Progresivní směr](FEED_PROGRESSIVE_PLAN.md), [writeři](FEED_WRITER_INTEGRATION.md),
+[migrační brány](FEED_MIGRATION_READINESS.md), [přečtení](FEED_READING_POLICY.md).
+
+Další části zachovávají akceptaci a původní návrhy; časově omezený lokální
+souhlas nesmí být zaměněný za aktivaci celé datové vrstvy v cloudu.
+
 Před MVP dokončit všechny etapy A0–A3 i B1–B4: prostorový feed, plný obsah,
 osobní přečtení a synchronizaci, unread-first v Nejblíž i indikátor novinek.
 Původní doporučení odložit B po MVP vlastník nevybral. Písmena A/B nadále

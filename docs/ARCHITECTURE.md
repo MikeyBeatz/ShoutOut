@@ -2,7 +2,10 @@
 
 Tento dokument popisuje současnou implementaci aplikace. Je určen vývojáři,
 který projekt nezná a potřebuje pochopit jeho hranice, odpovědnosti a tok dat.
-Produktové záměry, které ještě nejsou implementované, jsou pouze v `TODO.md`.
+Priority budoucí práce jsou v [TODO](TODO.md), podrobné požadavky a plány
+jsou dohledatelné z [hlavního rozcestníku](README.md). Poslední ověřené
+nasazení je pouze v [PROJECT_STATUS](PROJECT_STATUS.md); staré zdroje níže
+dokládají zavedení konkrétní vrstvy, nikoli společnou současnou verzi všech Functions.
 
 Datové streamy klienta sdílí `lib/live_data.dart` podle uživatele, Firebase
 aplikace, databáze a dotazu. Aktivní odběratelé dostávají stejná realtime data
@@ -58,7 +61,7 @@ první produkční release.
 ```text
 main()
   └─ Firebase.initializeApp (webové prostředí / vývojová mobilní konfigurace)
-     └─ Android / iOS App Check
+     └─ App Check (DEV web reCAPTCHA Enterprise; Android/iOS podle konfigurace)
         └─ ShoutOutApp
            └─ AuthGate
               ├─ nepřihlášený → SignInPage
@@ -253,8 +256,12 @@ download tokeny. Cursor/fronta a potvrzení každého objektu jsou trvalé, hlí
 stejnou žádostí, konfirmací a lease. Rezervace se nepřepisuje ani neuvolňuje;
 deadline zůstává původní. Staré v1/v2/v3 joby se nemigrují. Storage Rules blokují
 SDK čtení/zápisy loga po markeru a klient zobrazuje neutrální smazanou identitu.
-Stará klientská cesta ještě existuje; ostatní osobní/Business data, role a
-fyzické 60denní dokončení jsou otevřené.
+Navazující v5 odebere role a vlastní palce u cizího obsahu. Nové DEV joby
+z 96b0782 mají také samostatný purge v původním termínu createTime +60 dní;
+ten odstraní osobní/Business potomky, archivní kopie, soubory a stále vlastní
+rezervaci. Minimální veřejný marker a anonymní Shout kontext pro cizí
+konverzace zůstávají. Stará klientská cesta stále existuje; klientský přechod,
+uzavření přímých zápisů a společný závěrečný test jsou otevřené.
 [Aktuální rozsah a provoz](ACCOUNT_DELETION_REMAINING_PLAN.md),
 [konfirmace a její hranice](ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 
@@ -282,9 +289,10 @@ vysvětluje záměr, nenahrazuje pravidla.
 - push notifikace a oznámení sledujícím,
 - fyzické TTL mazání; konfigurace je připravená, ale aktivace čeká na kontrolu
   objemu a nákladů,
-- serverové čištění expirovaného obsahu a dokončení smazání účtu,
-- automatický úklid screenshotů bug reportů; samotný upload přes Storage je
-  aktivní.
+- sedmidenní fyzický úklid Shoutů a potomků; samotná exspirace statusu je v DEV,
+- klientský přechod mazání účtu a produkční aktivace; konečný account purge je v DEV,
+- obecný automatický úklid screenshotů bug reportů; account purge řeší pouze
+  soubory smazaného účtu. Samotný upload přes Storage je aktivní.
 
 Tyto hranice musí při rekonstrukci zůstat zřetelně označené; jejich návrh je v
 `TODO.md`, `BUSINESS_VERIFICATION.md`, `BUSINESS_MONETIZATION.md` a

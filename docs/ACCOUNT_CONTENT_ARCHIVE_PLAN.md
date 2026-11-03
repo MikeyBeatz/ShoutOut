@@ -10,6 +10,11 @@ Aktivace workerů/webu 1dab78cce583899648f8e17d6814a0ecbfc6aad8 má
 
 ## Schválený rozsah
 
+Aktualizace 3. listopadu: v3 je zde historie zavedení archivu; účtový runtime
+už má navazující v5 a [konečný purge](ACCOUNT_RETENTION_PURGE_PLAN.md) dokončený
+v DEV. Staré joby se nepřevádějí. Aktuální otevřená práce je klientský přechod
+a společný závěrečný test, viz [účtový plán](ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
 Uchovat všechny existující zprávy zahrnuté do smazání účtu a všechny jeho
 veřejné komentáře, nejen nahlášený obsah. Soukromá zpráva se zahrne jen při
 shodě skutečného odesílatele/příjemce; vlastnictví Shoutu samo nestačí.

@@ -9,7 +9,8 @@
 Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze veřejně
 spustit webové MVP pro běžné uživatele a Business účty. Nejde o marketingový
 plán. Jednotlivé implementační úkoly a jejich technické podrobnosti zůstávají v
-`docs/TODO.md`; povinné ruční scénáře jsou v `docs/TESTING.md`.
+[BACKLOG](BACKLOG.md) a specializovaných plánech, pořadí je v [TODO](TODO.md);
+povinné ruční scénáře jsou v [TESTING](TESTING.md).
 
 Webové MVP zahrnuje všechny současné webové funkce a dokončení rozpracovaných
 toků běžného a Business účtu. Moderátorské rozhraní musí umožnit bezpečný

@@ -15,7 +15,21 @@ skutečnost ověřit v kódu, konfiguraci, testech a provozních důkazech.
 - Soubor nepřepisovat; `.gitattributes` chrání jeho bajty před převodem řádků Gitem.
   Případnou opravu aktuálního stavu zapsat do současné dokumentace.
 
-## Kde jsou informace po rozdělení
+## Úplné snímky před úklidem 3. listopadu 2026
+
+Zdroj je commit `fc4c4ba`. Následující soubory zachovávají všechny původní
+bajty, rozhodnutí, výsledky a tehdejší rozpory; nejsou aktuálním plánem:
+
+- [TODO_2026-11-03.txt](TODO_2026-11-03.txt) – priority i nahromaděná historie před zkrácením.
+- [PROJECT_STATUS_2026-11-03.txt](PROJECT_STATUS_2026-11-03.txt) – úplný stav včetně starších kapitol a důkazů.
+- [MVP_SERVER_PLAN_2026-11-03.txt](MVP_SERVER_PLAN_2026-11-03.txt) – původní serverový plán před odstraněním neaktuálních pokynů.
+- [Registr velikostí a SHA-256](snapshots.json) – kontroluje jej tools/check_docs.mjs.
+
+Jde o plaintext, aby původní relativní odkazy v přesné kopii nevytvářely
+falešnou aktuální navigaci. Význam tehdejších cest je relativní k původnímu
+souboru v docs/. Snímky chrání `.gitattributes`; jejich obsah nepřepisovat.
+
+## Aktuální umístění informací z původního TODO
 
 | Původní oblast | Aktuální umístění |
 |---|---|

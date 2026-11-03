@@ -1,109 +1,91 @@
 # Dokumentace ShoutOut
 
-Tato složka je hlavní rozcestník produktové a provozní dokumentace projektu.
-
 ## Navázání práce
 
-1. [Aktuální stav](PROJECT_STATUS.md) – kódový základ, poslední ověřené nasazení,
-   hotové části, omezení a konkrétní další krok.
-2. [TODO](TODO.md) – stručné pořadí práce a původních 24 milníků MVP.
-3. [Podrobná evidence](BACKLOG.md) nebo [serverový plán](MVP_SERVER_PLAN.md) –
-   otevřít jen podrobnosti relevantní pro vybraný úkol.
+1. [PROJECT_STATUS](PROJECT_STATUS.md) – jeden aktuální stav, poslední ověřené nasazení a další krok.
+2. [TODO](TODO.md) – priority, souhrn 24 milníků a metriky.
+3. [BACKLOG](BACKLOG.md) – jediná podrobná checkboxová evidence.
+4. [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md) – serverové podmínky dokončení;
+   [LAUNCH_READINESS](LAUNCH_READINESS.md) – samostatná povinná brána veřejného vydání.
 
-[Úplný archiv původního TODO](archive/README.md) zachovává všechna rozhodnutí,
-požadavky a historii. Jeho kontrolní součet ověřuje zachování původního souboru;
-staré provozní poznámky nejsou náhradou aktuálního stavu a kódu.
+Kód a konfigurace dokazují chování. Testy a konkrétní provozní důkazy určují,
+co bylo ověřené; samotná existence plánu není implementace ani nasazení.
+Při rozporu opravovat souhrn podle podkladů, nikoli opačně. Historické piloty
+platí pro uvedenou etapu, současné revize jsou pouze v PROJECT_STATUS.
 
-## Současná implementace
+## Údržba a uspořádání
 
-- [Architektura](ARCHITECTURE.md) – hranice systému, moduly, stav, role,
-  zabezpečení a nedokončená automatizace.
-- [Produktové toky](PRODUCT_FLOWS.md) – skutečné chování registrace, feedu,
-  Business účtu, oznámení a moderace.
-- [Obrazovky a navigace](UI_SPECIFICATION.md) – rozložení, hlavní komponenty,
-  stavy a ovládací prvky klienta.
-- [Datový model](DATA_MODEL.md) – kolekce Firestore, vazby, vlastnictví a
-  atomické invarianty.
-- [Vývojové prostředí a nasazení](SETUP_AND_OPERATIONS.md) – Firebase,
-  Geoapify, App Check, testy, Hosting, Android a rekonstrukce od nuly.
-- [Pravidla vydávání](RELEASING.md) – větve, schvalování změn, konkrétní Git
-  commit, verze a ruční kontroly před produkčním nasazením.
-- [Oddělení webových prostředí](WEB_ENVIRONMENTS.md) – konfigurace, buildy,
-  technické kontroly cíle nasazení a otevřené produkční kroky.
-- [Testovací strategie](TESTING.md) – automatické vrstvy a povinná ruční
-  regresní matice pro účty, feed, Business, oznámení a moderaci.
-- [Design archiv](../design/README.md) – logo, barvy, písmo, splash, avatary a
-  jejich mapování na runtime assety.
-- [iOS launch screen assety](../ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md)
-  – pomocný návod Flutter šablony k výměně obrázků úvodní obrazovky iOS.
-- [Promo balíček](../promo/README.md) – přenositelné marketingové podklady;
-  screenshoty jsou verzovaný vizuální snapshot, ne technický zdroj pravdy.
-- [Vývojové nástroje](../tools/README.md) – seedování, role, migrace, opravy dat
-  a Firestore Rules testy.
+- [Pravidla údržby a kontrola](DOCUMENTATION_MAINTENANCE.md) – role dokumentů, workflow a kontrolní příkaz.
+- [Mapa složek ke schválení](DOCUMENTATION_LAYOUT_PROPOSAL.md) – konkrétní přesuny; zatím neprovedené.
+- [Archivní index](archive/README.md) – neměnné úplné snímky a kontrolní součty.
+- [Původní zadání feedu](requests/FEED_READ_REFRESH_2026-10-31.md) – požadavek vlastníka, nikoli stav implementace.
 
-## Plánované a specializované oblasti
+## Účtový životní cyklus
 
-- [Konečný 60denní úklid účtu](ACCOUNT_RETENTION_PURGE_PLAN.md) – schválený rozsah, chybějící rodiče, kopie důkazů, anonymní kontext a DEV soft-delete brána.
+Serverové fáze jsou hotové v DEV; nejbližší otevřená práce je klientský přechod a společný závěrečný test. Podrobné datované piloty zůstávají důkazy svých etap.
 
-- [Odebrání palců mazaného účtu](ACCOUNT_REACTION_REMOVAL_PLAN.md) – schválená změna počtů, transakční jádro, vlastnické UID/indexy a brána před zapojením do workeru.
+- [Odebrání oprávnění a materializace exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md)
+- [Archiv zpráv a komentářů smazaného účtu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md)
+- [Mazání účtu – průběh a návrh DEV pilotu](ACCOUNT_DELETION_DEV_PROPOSAL.md)
+- [Dokončení mazání účtu – rozhodnutí, ochrany a pořadí](ACCOUNT_DELETION_REMAINING_PLAN.md)
+- [Veřejná identita a loga smazaného účtu](ACCOUNT_PUBLIC_IDENTITY_PLAN.md)
+- [Odebrání reakcí mazaného účtu](ACCOUNT_REACTION_REMOVAL_PLAN.md)
+- [Konečný 60denní úklid účtu](ACCOUNT_RETENTION_PURGE_PLAN.md)
 
-- [Oprávnění smazaného účtu a exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) – atomické odebrání rolí, sdílený maintenance tick a hranice před konečným purge.
+## Feed, přečtení a obnova
 
-- [TODO](TODO.md) – hlavní přehled priorit a milníků; podrobnosti jsou
-  v [BACKLOG](BACKLOG.md) a [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
-- [Nová logika feedu, přečtení a refresh](FEED_READ_REFRESH_PLAN.md) – analýza
-  zadání z 31. října 2026, návrh návazností na prostorové stránkování,
-  nákladové varianty a rozhodnutí před implementací; obsahuje odkaz na úplné zadání.
-- [Implementační etapy feedu](FEED_IMPLEMENTATION_STAGES.md) – všechny etapy před MVP.
-  R3 jen v Nejblíž; R2 poslední bod otevřené aplikace. Technická brána před A2. A0 ve vývoji.
-- [Výsledky lokálního prototypu A1](FEED_A1_RESULTS.md) – kontrakt, měření, ověření a meze před A2.
-- [Přenositelný kurzor feedu](FEED_PORTABLE_CURSOR.md) – podepsané pokračování, historický read stav a omezený výběr stránky.
-- [Čtení, rating a relace](FEED_READING_POLICY.md) – rozhodnutí vlastníka, jádro expozice, hodinová platnost a API návaznost.
-- [Migrační připravenost feedu](FEED_MIGRATION_READINESS.md) – skutečný DEV rollout, read-only kontrola dat a přesný návrh oprav.
-- [Zápisové cesty prostorového indexu](FEED_WRITER_INTEGRATION.md) – serverové mazání a postup atomického zapojení změn obsahu.
-- [Průběh mazání účtu a DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md) – nasazené pracovní záznamy, obnova, ověření a provozní meze.
-- [Dokončení mazání účtu](ACCOUNT_DELETION_REMAINING_PLAN.md) – dokončený DEV privátní úklid, rozhodnutí o textech/přezdívce a zbývající retenční fáze.
-- [Archiv zpráv a komentářů](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) – v3 job ověřený v DEV, pevná 60denní lhůta, ochrana reportů, důkazy pilotu a bezpečný rollback; konečný purge zbývá.
-- [Veřejná identita smazaného účtu](ACCOUNT_PUBLIC_IDENTITY_PLAN.md) – schválený lokální marker, rezervace přezdívky, anonymní klient, SDK ochrana loga a otevřené brány před integrací.
-- [Sdílený prostorový index](FEED_BLOCK_INDEX_PLAN.md) – lokálně ověřené schéma,
-  čtení/zápisy, cache, konzistence a podmínky před migrací/nasazením.
-- [Prezentační web](PRESENTATION_SITE.md) – statická stránka na
-  `shoutout-app.eu` a oddělení od webového MVP na `go.shoutout-app.eu`.
-- [Připravenost ke spuštění](LAUNCH_READINESS.md) – společná předstartovní brána
-  veřejné webové aplikace pro produkci, bezpečnost, právo, testování a provoz.
-- [Mobilní testování, distribuce a technický rozpočet](MOBILE_DISTRIBUTION_PLAN.md)
-  – navazující postup pro Google Play, cloudový Mac, TestFlight a mobilní vydání
-  včetně Firebase, domény, nákladů a požadavků na skutečná zařízení.
-- [Business monetizace](BUSINESS_MONETIZATION.md) – bezplatný základ webového
-  MVP a otevřený návrh budoucího předplatného bez Business tokenů.
-- [Ověření business účtů](BUSINESS_VERIFICATION.md) – současná ruční aktivace
-  a otevřená kritéria kontroly před veřejným webem.
-- [Interní moderace](INTERNAL_MODERATION.md) – role, pravomoci, postihy a audit.
-- [Napojení Firebase Storage](FIREBASE_STORAGE_SETUP.md) – současná pravidla pro
-  Business loga a přílohy hlášení chyb a příprava produkčního bucketu.
-- [Vyhodnocení externích událostí](EXTERNAL_EVENTS_EVALUATION.md) – výběr zdroje,
-  limity, licence a podmínky případného pilotu.
-- [Model gamifikace](GAMIFICATION_MODEL.md) – oddělení karmy, předplatného,
-  achievementů a kosmetických odměn.
-- [Plán evropské ochranné známky](EU_TRADEMARK_PLAN.md) – rešerše, třídy,
-  rozpočet a rozhodovací brána před podáním.
+Celé A0–A3/B1–B4 před MVP. Plný detail a rating jsou v DEV; index, relace, expozice a kurzor jsou převážně lokální příprava, nikoli živý prostorový feed.
 
-## Zdroj pravdy
+- [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
+- [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)
+- [Feed – implementační etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md)
+- [Retence prostorového indexu – lokální ověření R4](FEED_INDEX_RETENTION.md)
+- [Migrační připravenost feedu a zbývající brány](FEED_MIGRATION_READINESS.md)
+- [Přenositelný kurzor a omezený výběr stránky – lokální stav](FEED_PORTABLE_CURSOR.md)
+- [Progresivní feed – schválený směr a doložená implementace](FEED_PROGRESSIVE_PLAN.md)
+- [Přečtení, hodnocení a platnost klientské relace](FEED_READING_POLICY.md)
+- [Feed: přečtení, stabilní stránky a ruční obnovení](FEED_READ_REFRESH_PLAN.md)
+- [Zápisové cesty před připojením prostorového indexu](FEED_WRITER_INTEGRATION.md)
 
-Při navazování začněte PROJECT_STATUS.md a TODO.md. Při rekonstrukci začněte
-kořenovým `README.md`, pokračujte architekturou,
-produktovými toky, datovým modelem a provozním runbookem. `firestore.rules`,
-`storage.rules`, `firestore.indexes.json`, implementace v `lib/` a automatické
-testy jsou konečným zdrojem technické pravdy. Dokumentace vysvětluje jejich
-význam a požadovaný výsledek; backlog zachycuje pouze to, co ještě zbývá.
+## Navazující produktové a distribuční plány
 
-## Lokální dokumenty
+- [ShoutOut – Business monetizace](BUSINESS_MONETIZATION.md)
+- [Plán evropské ochranné známky ShoutOut](EU_TRADEMARK_PLAN.md)
+- [Vyhodnocení API událostí v okolí](EXTERNAL_EVENTS_EVALUATION.md)
+- [Karma, achievementy a kosmetické odměny](GAMIFICATION_MODEL.md)
+- [ShoutOut – plán mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md)
 
-Složka `local/` je ignorovaná Gitem. Obsahuje neveřejné pracovní dokumenty a
-dočasné údaje pro vývojový projekt, například přehled testovacích účtů nebo
-interní marketingový plán. Testovací účty se před vytvořením produkčního
-prostředí odstraní a lokální přístupové údaje se nesmějí převzít do produkce.
+## Současné chování a model systému
 
-Aktuální schválený směr a důkazy: [progresivní feed a náklady](FEED_PROGRESSIVE_PLAN.md).
+- [Architektura ShoutOut](ARCHITECTURE.md)
+- [Ověření Business účtů](BUSINESS_VERIFICATION.md)
+- [Datový model Firestore](DATA_MODEL.md)
+- [ShoutOut – interní role, oprávnění a moderace](INTERNAL_MODERATION.md)
+- [Produktové a uživatelské toky](PRODUCT_FLOWS.md)
+- [Specifikace obrazovek a navigace](UI_SPECIFICATION.md)
 
-- [Retence prostorového indexu](FEED_INDEX_RETENTION.md) – schválená hodinová relace, lokální archivace, GC a úklid expirací.
+## Provoz, testování a vydávání
+
+- [Nákladové pojistky Firebase a Google Cloud](COST_SAFETY.md)
+- [Firebase Storage – Business loga a obrázky k hlášením chyb](FIREBASE_STORAGE_SETUP.md)
+- [Prezentační web ShoutOut](PRESENTATION_SITE.md)
+- [Audit načítání a nákladů](READ_COST_AUDIT.md)
+- [Výběr změn a publikování ShoutOut](RELEASING.md)
+- [Vývojové prostředí, služby a nasazení](SETUP_AND_OPERATIONS.md)
+- [Testovací strategie a regresní matice](TESTING.md)
+- [Vývojový a produkční web](WEB_ENVIRONMENTS.md)
+
+## Nahrazené návrhy
+
+- [A2 – návrh dalšího ověřovacího úseku](FEED_A2_PROPOSAL.md)
+
+## Další rozcestníky a neveřejné podklady
+
+- [Nástroje](../tools/README.md) – Admin SDK utility a testy.
+- [Design](../design/README.md) – logo, barvy, avatary a assety.
+- [Promo](../promo/README.md) – marketingové podklady a historické screenshoty.
+- [iOS launch assety](../ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md).
+
+Ignorované docs/local/ obsahuje neveřejné pracovní podklady, účty a přesné
+lokální migrační plány. Nikdy z něj automaticky nepřenášet údaje do veřejné
+dokumentace nebo produkce; externí neversionované soubory kontrola neprochází.

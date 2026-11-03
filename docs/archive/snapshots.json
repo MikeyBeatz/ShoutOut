@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "snapshots": [
+    {
+      "path": "docs/archive/TODO_2026-11-03.txt",
+      "source": "docs/TODO.md",
+      "sourceCommit": "fc4c4ba",
+      "bytes": 20893,
+      "sha256": "e844766847490578f676d39ee130564d21a6dc28d44240f45c30e3fdee1cd02d"
+    },
+    {
+      "path": "docs/archive/PROJECT_STATUS_2026-11-03.txt",
+      "source": "docs/PROJECT_STATUS.md",
+      "sourceCommit": "fc4c4ba",
+      "bytes": 62613,
+      "sha256": "9d574a09c071eab8c83a993bca3886ea2b587ac6c82cb5d4b657b5d927e13fb3"
+    },
+    {
+      "path": "docs/archive/MVP_SERVER_PLAN_2026-11-03.txt",
+      "source": "docs/MVP_SERVER_PLAN.md",
+      "sourceCommit": "fc4c4ba",
+      "bytes": 17327,
+      "sha256": "401ac24131b732e61cc2b826e596f391e7218fa43720303303f2384b22ba2cab"
+    },
+    {
+      "path": "docs/archive/TODO_2026-10-29.md",
+      "sourceCommit": "cc62831c5fe999721b39a0ce9c1a2fe0a28ded5d",
+      "bytes": 97962,
+      "sha256": "3b0b96e495e7622f0487c907a8c37204061a6add65804dc8295319aaef0553ba"
+    }
+  ]
+}

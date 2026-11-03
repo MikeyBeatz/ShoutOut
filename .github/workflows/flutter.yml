@@ -34,6 +34,10 @@ jobs:
             tools/package-lock.json
             functions/package-lock.json
 
+      - name: Check documentation links and metrics
+        timeout-minutes: 1
+        run: node tools/check_docs.mjs
+
       - name: Cache Firestore and Storage Emulators
         timeout-minutes: 3
         uses: actions/cache@v6

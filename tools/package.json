@@ -6,6 +6,7 @@
     "node": "22.x"
   },
   "scripts": {
+    "check:docs": "node check_docs.mjs",
     "test:storage": "firebase emulators:exec --config ../firebase.storage-test.json --only firestore,storage --project shoutout-rules-test \"node --test --test-concurrency=1 rules/storage.rules.test.mjs ../functions/account_logo_revocation.integration.test.js\"",
     "firebase": "firebase",
     "reconcile:data": "node reconcile_counters.mjs",
