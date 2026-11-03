@@ -124,11 +124,36 @@ má úspěšné CI 41710073555 (280 Flutter, 42 tools, 107 unit, 367 Rules/serve
 originy včetně diagnostického markeru v release JS ověřené, backend i původní
 inventura nezměněné. První recovery pilot a jeho důkazy jsou oddělené v ignorovaném
 build/account-finalization-recovery-test. Pro opakování je vytvořený nový dočasný
-Auth účet a stejná fixture; test i úklid čekají. Údaje jen docs/local/account-finalization-fixture.json.
-Nový pokus má běžet s otevřenou konzolí a při první chybě se před resume ověří
-serverový stav. Pomocný live nástroj má lokální record-first-failure / record-first-success
+Auth účet a stejná fixture. Údaje jen docs/local/account-finalization-fixture.json.
+Opakovaný první pokus selhal s ensure-request / state/unconfirmed-account-deletion-request;
+před resume ověřeno: Auth existuje, žádost je uložená, jedna příprava před žádostí,
+cizí obsah zachovaný, callable HTTP 200 a Auth/App Check VALID, worker waiting-auth.
+Úklid této fixture zatím neproběhl. Pomocný live nástroj má lokální record-first-failure / record-first-success
 / record-resume pro přesné zachycení uživatelského výsledku; happyPathVerified
 smí být true pouze po výslovném potvrzení úspěchu prvního pokusu.
+
+### Oprava potvrzení serverového commitu
+
+Samostatný laboratorní pokus s aktivním listenerem a zpožděním jeho aktualizací
+250 ms reprodukoval 5/5 zastaralých výsledků Source.server po dokončeném externím
+zápisu: exists=false, fromCache=false, hasPendingWrites=false. Čtecí transakce
+ve všech případech vrátila skutečnou uloženou žádost. Webový FlutterFire tento get
+mapuje na getDocFromServer, který používá stav aktivního Watch targetu; samotný
+příznak fromCache proto nestačí jako potvrzení právě dokončeného callable commitu.
+Mechanismus odpovídá zachycenému živému selhání; přesný snapshot z uživatelské karty
+se neloguje. Feed permission-denied je očekávatelný následek vzniku pending žádosti
+(eligibleUser ji vylučuje), nikoli důvod rozšířit oprávnění k mazání.
+
+Oprava na fix/account-deletion-commit-read nahrazuje readExisting čtecí Firestore
+transakcí, maxAttempts=1, bez vlastních zápisů a aplikačních retry. Zachovává UID,
+validaci žádosti, metadata guard, existující žádost/retenci i pořadí před Auth.delete.
+Jde pouze o vzácný účtový tok, nikoli čtení feedu; transakce přidá síťové dokončení
+čtení, nezakládá další dokument ani Function. Změny backendu či Rules nejsou potřebné.
+Nová account_request_read.integration.test.mjs používá aktuální Rules a skutečný
+klientský SDK přes lokální TCP proxy: třikrát reprodukuje starý výsledek, potvrdí
+nový commit, nezměněné createTime/updateTime/obsah a odmítnutí cizího/anonymního
+čtení. Oba testy prošly a jsou zapojené do test:rules. Zatím lokální oprava;
+plné CI, DEV rollout a nový běžný UI průchod ještě zbývají.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

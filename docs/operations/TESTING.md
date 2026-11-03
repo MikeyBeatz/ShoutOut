@@ -99,8 +99,19 @@ CI 41710073555 pro 712da1b success: 280 Flutter, 42 tools, 107 unit,
 367 Rules/server, 15 purge, 15 Storage, analýza/lint/build. DEV Hosting
 e69064a6c3110b2a a oba originy odpovídají manifestu, marker je přítomný v release JS;
 backend/Rules/IAM/plánovače/inventura beze změny. Nová dočasná fixture je
-připravená; ruční opakování s konzolí a úklid ještě čekají. Příčina první chyby
-dosud není určená a samotná diagnostika ji neopravuje.
+připravená. Opakovaný test zachytil ensure-request / unconfirmed-account-deletion-request:
+žádost/příprava jsou na serveru, Auth stále existuje, cizí obsah zachovaný a worker
+waiting-auth. Resume ani úklid zatím neproběhly.
+
+Následný emulátorový experiment reprodukoval 5/5 zastaralých getDocFromServer
+výsledků po externím commitu při aktivním listeneru a zpoždění 250 ms. Čtecí
+transakce pokaždé našla dokument. Nová sada
+account_request_read.integration.test.mjs prošla 2/2: tři reprodukce s aktuálními
+Rules, čtecí transakce maxAttempts=1 bez změny createTime/updateTime/obsahu a
+odmítnutí cizího/anonymního čtení. TCP proxy zpožďuje pouze laboratorní provoz;
+žádná nová prodleva nebo limit aplikace. Je zapojená do test:rules. Klientská
+náhrada Source.server je lokálně připravená; 26 cílených Flutter testů, analyzátor,
+formátování a kontrola dokumentace prošly. Plné CI a DEV rollout ještě zbývají.
 
 ## Konečný 60denní úklid
 

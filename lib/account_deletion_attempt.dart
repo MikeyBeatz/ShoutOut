@@ -194,8 +194,12 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
     }
 
     Future<AccountDeletionIntent?> readExisting() async {
-      final snapshot = await reference.get(
-        const GetOptions(source: Source.server),
+      // Source.server can reuse an already-current watch target before an
+      // external (callable) write reaches that listener. A read-only transaction
+      // performs a fresh server read instead. Never write or auto-retry here.
+      final snapshot = await firestore.runTransaction(
+        (transaction) => transaction.get(reference),
+        maxAttempts: 1,
       );
       _guardIdentity();
       if (snapshot.metadata.isFromCache || snapshot.metadata.hasPendingWrites) {

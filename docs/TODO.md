@@ -35,9 +35,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    mají úspěšné CI (276 Flutter, 367 Rules/server) a jsou nasazené v DEV se
    zapnutým přepínačem. Živě prošlo obnovení z pending gate a úklid, ale první
    pokus selhal. Před Rules cutoverem zjistit klientskou příčinu a ověřit běžný
-   průchod. Konzolová diagnostika je po CI nasazená v DEV; nový dočasný účet čeká
-   na ruční test s otevřenou konzolí. Při první chybě nepokračovat do resume,
-   nejprve zachytit kód a ověřit serverový stav.
+   průchod. Diagnostika zachytila odmítnuté potvrzení existující žádosti; emulátor
+   reprodukoval zastaralé Source.server čtení při aktivním listeneru. Čtecí transakce
+   a dva regresní testy jsou připravené. Zbývá CI, DEV rollout, dokončení/úklid
+   současné fixture a úspěšný první průchod před uzavřením přímých zápisů.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

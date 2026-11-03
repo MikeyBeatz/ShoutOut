@@ -29,20 +29,28 @@ gate znovu ověřil heslo a dokončil Auth odstranění. Server potvrzuje práv�
 přípravu a jednu žádost, validní Auth/App Check a HTTP 200, cizí obsah zachovaný,
 content-archived a původní +60denní termín. Fixture je uklizená a původní inventura
 shodná. Jde o ověřené obnovení po chybě, nikoli úspěch běžného průchodu na první pokus.
-Příčina klientské chyby se ze stávajících logů určit nedá; uživatel kartu zavřel.
+Konzole tohoto prvního pokusu nebyla dostupná; příčinu zpřesnil opakovaný test níže.
 Na fix/account-deletion-diagnostics je v DEV nasazený bezpečný konzolový kód fáze/chyby,
 bez zpráv výjimek, UID/e-mailu, hesel, tokenů, payloadů či nového ukládání dat.
 CI 41710073555 zdroje 712da1b success: 280 Flutter, 42 tools, 107 unit,
 367 Rules/server, 15 purge, 15 Storage, analýza/lint/build. Diagnostický marker
 je ověřený i v release JS. Backend a původní inventura se při novém Hostingu nezměnily.
-Pro uživatelem požadované opakování je připravený jeden nový dočasný Auth účet
-se dvěma vlastními Shouty a kontrolním obsahem. Jeho test a úklid ještě čekají;
-aktuální údaje jsou pouze v ignorovaném docs/local/account-finalization-fixture.json.
+Opakovaný test zachytil ensure-request / state/unconfirmed-account-deletion-request.
+Server má platnou žádost, jednu přípravu, zachovaný cizí obsah a validní callable;
+Auth stále existuje, worker čeká. Uživatel zatím nepokračoval do resume.
+V emulátoru se podařilo reprodukovat zastaralý Source.server výsledek při aktivním
+listeneru a opožděné aktualizaci po externím zápisu (5/5); metadata přitom tvrdí
+fromCache=false. Čtení v transakci vždy našlo commit. Na fix/account-deletion-commit-read
+je připravená náhrada kontroly žádosti čtecí transakcí s maxAttempts=1, bez zápisů
+či změny oprávnění. Dva regresní emulátorové testy prošly, včetně owner-only Rules
+a nezměněného dokumentu/retence. Plné CI a rollout této opravy ještě neproběhly.
+Současná fixture čeká na dokončení Auth a úklid; údaje pouze v ignorovaném
+docs/local/account-finalization-fixture.json. Běžný průchod zůstává neověřený.
 Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek a kompatibilní nasazení jsou hotové; blokuje je nevysvětlené selhání
-prvního klientského pokusu. Nejdřív diagnostika a nový test, pak Rules cutover.
+Lokální úsek a kompatibilní nasazení jsou hotové; další brána je CI a DEV oprava
+potvrzení commitu, nový běžný průchod a až potom Rules cutover.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
