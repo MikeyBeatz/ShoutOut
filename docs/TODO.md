@@ -33,8 +33,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou nasazené
    v DEV po úspěšném CI. Atomické serverové založení žádosti i aktivační klient
    mají úspěšné CI (276 Flutter, 367 Rules/server) a jsou nasazené v DEV se
-   zapnutým přepínačem. Čeká živý průchod dočasným účtem a úklid. Přímé Rules
-   zápisy zůstávají do jeho dokončení otevřené; celý serverový cutover není hotový.
+   zapnutým přepínačem. Živě prošlo obnovení z pending gate a úklid, ale první
+   pokus selhal. Před Rules cutoverem zjistit klientskou příčinu a ověřit běžný
+   průchod; připravená konzolová diagnostika čeká na CI a DEV web.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

@@ -40,6 +40,51 @@ class Transport implements AccountDeletionTransport {
 
 void main() {
   test(
+    'diagnostics distinguish reauthentication, intent and Auth failures while preserving their outcomes',
+    () async {
+      for (final stage in ['reauthenticate', 'ensure-request', 'delete-auth']) {
+        final t = Transport();
+        final stages = <String>[];
+        Future<void> fail() async => throw StateError('injected');
+        if (stage == 'reauthenticate') t.onReauth = fail;
+        if (stage == 'ensure-request') t.onIntent = fail;
+        if (stage == 'delete-auth') t.onDelete = fail;
+        final attempt = AccountDeletionAttempt(
+          'original',
+          t,
+          onFailure: (value, _) => stages.add(value),
+        );
+        if (stage == 'reauthenticate') {
+          await expectLater(attempt.run('secret'), throwsStateError);
+          expect(t.writes, 0);
+        } else {
+          expect(await attempt.run('secret'), AccountDeletionOutcome.pending);
+          expect(t.hasIntent, isTrue);
+          expect(t.deadline, t.originalDeadline);
+        }
+        expect(stages, [stage]);
+        expect(t.deleteCalls, stage == 'delete-auth' ? 1 : 0);
+      }
+    },
+  );
+  test(
+    'a failing diagnostic observer cannot block recovery or renew the original request',
+    () async {
+      final t = Transport();
+      t.onDelete = () async => throw StateError('lost acknowledgement');
+      final attempt = AccountDeletionAttempt(
+        'original',
+        t,
+        onFailure: (_, _) => throw StateError('observer failed'),
+      );
+      expect(await attempt.run('secret'), AccountDeletionOutcome.pending);
+      t.onDelete = null;
+      expect(await attempt.run('secret'), AccountDeletionOutcome.completed);
+      expect(t.writes, 1);
+      expect(t.deadline, t.originalDeadline);
+    },
+  );
+  test(
     'an already switched account cannot start any part of an old attempt',
     () {
       final t = Transport()..currentUserId = 'another';

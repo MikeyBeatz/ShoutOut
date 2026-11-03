@@ -86,8 +86,16 @@ ACTIVE (00001-wav, hash 21288ad667885c01f4bbf46dbdfee7a5a7c3025b), anonymní 401
 Aktivace 8289dce / CI 41705303226 success má stejné počty celých sad výše a
 Hosting 96f84b4aa35ca226; čtyři veřejné soubory na obou originech shodné s čistým
 manifestem. Původní Functions/Rules/IAM/plánovače/inventura beze změny. Nový
-dočasný Auth fixture je připravený pro ruční UI průchod; ten i následný úklid
-zatím čekají, protože nativní ovládací spojení prohlížeče není dostupné.
+dočasný Auth fixture byl po prvním selhání dokončen ručním resume s novým heslem.
+Příprava/request, validní Auth/App Check/HTTP 200, cizí obsah, content-archived,
+původní +60denní termín i úklid jsou ověřené. První běžný průchod úspěšný nebyl;
+happyPathVerified=false. Další Rules cutover čeká na vysvětlení klientské chyby.
+
+Lokální diagnostika pro opakování: 280 Flutter testů prošlo. Dva nové scénáře
+ověřují rozlišení fází a nezměněné chování i při chybě observeru; dva další
+filtrují citlivé zprávy, neznámé pluginy a neplatné kódy. Diagnostika jde jen do
+konzole (ShoutOut account deletion), bez nového persistentního logování. CI a
+nasazení diagnostického webu zatím čekají; příčina původního selhání není určená.
 
 ## Konečný 60denní úklid
 

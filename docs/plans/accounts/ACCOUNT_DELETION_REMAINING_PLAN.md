@@ -98,16 +98,27 @@ s baseline. Web 8289dce0b8f16d5f962db57a7874e8bdb6bcaf2f má úspěšné CI 4170
 a Hosting 96f84b4aa35ca226; index, main.dart.js, bootstrap a config na obou originech
 odpovídají čistému artefaktu. Oba přepínače přípravy/finalizace jsou true.
 
-Závěrečný živý test zatím čeká na ruční průchod vlastníka kvůli nedostupnému
-nativnímu ovládání prohlížeče. Vytvořený je jeden nový dočasný Auth účet, jeho
-profil/legal/role a dva vlastní Shouty, cizí kontrolní Shout a cizí komentář.
-Není ještě smazaný ani uklizený. Před uzavřením musí sedět skutečný Auth/App Check
-úspěch finalizační callable, receipt přípravy před žádostí, odstranění pouze
-testovacího Auth, zachování kontrolního obsahu, content-archived, původní +60denní
-termín a návrat inventury po úklidu. Lokální důkazy jsou v ignorovaných
-build/account-finalization-rollout-baseline.json / backend-proof.json / web-proof.json
-a aktuální fixture/progress soubory se stejným prefixem. Přihlašovací údaje jen
-docs/local/account-finalization-fixture.json. Rules cutover stále neproběhl.
+Živý test provedl vlastník kvůli nedostupnému nativnímu ovládání. První pokus
+zobrazil obecnou chybu po vzniku žádosti. Následně uživatel otevřel pending gate,
+zvolil pokračování, znovu zadal heslo a odstranil testovací Auth. Server potvrzuje
+jedinou přípravu hidden=2 před jedinou žádostí, validní Auth/App Check a HTTP 200
+finalizační callable, zachování cizího Shoutu/komentáře, content-archived, minimální
+veřejný marker a purge scheduled s původním +60denním termínem. Fixture včetně
+údajů je uklizená a původní inventura shodná; běžný průchod na první pokus tím
+ověřený není. Důkaz výslovně uvádí initialAttemptFailed=true, manualResumeUsed=true
+a happyPathVerified=false. Rules cutover neproběhl a selhání prvního pokusu jej blokuje.
+Lokální důkazy jsou v ignorovaných build/account-finalization-* (baseline,
+backend/web proof, pilot/cleanup proof, diagnosis). Konzole první chyby již
+není dostupná; server ji nezaznamenal a klient ji skryl obecným pending výsledkem.
+
+Vlastník požaduje test zopakovat. Na fix/account-deletion-diagnostics se proto
+připravuje konzolová diagnostika stage/code pro reauthenticate, ensure-request,
+delete-auth a vnější UI chybu. Vypisuje jen povolené SDK/invariantní kódy, žádné
+zprávy výjimek, osobní údaje, hesla, tokeny, payloady ani nová databázová data.
+Selhání diagnostického observeru nesmí změnit operaci ani její retry. Pořadí
+běžného průchodu se nemění: varování + jediné heslo → průběh → přihlášení;
+pending gate a nové heslo slouží jen k obnově přerušeného pokusu. Dosavadní
+příčina chyby není potvrzená. Lokálně 280 Flutter testů; CI a rollout diagnostiky čekají.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

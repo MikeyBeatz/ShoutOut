@@ -76,10 +76,19 @@ Future<AccountDeletionIntent> ensurePreparedAccountDeletionIntent({
 /// This coordinator intentionally has no automatic request-delete operation.
 /// The pending-request gate resumes this attempt after fresh authentication.
 class AccountDeletionAttempt {
-  AccountDeletionAttempt(this.userId, this.transport);
+  AccountDeletionAttempt(this.userId, this.transport, {this.onFailure});
   final String userId;
   final AccountDeletionTransport transport;
+  final void Function(String stage, Object error)? onFailure;
   Future<AccountDeletionOutcome>? _running;
+
+  void _failed(String stage, Object error) {
+    try {
+      onFailure?.call(stage, error);
+    } catch (_) {
+      // Diagnostics must never alter the operation or its recovery path.
+    }
+  }
 
   void _guardIdentity() {
     if (transport.currentUserId != userId) {
@@ -93,12 +102,18 @@ class AccountDeletionAttempt {
   }
 
   Future<AccountDeletionOutcome> _run(String password) async {
-    await transport.reauthenticate(password);
+    try {
+      await transport.reauthenticate(password);
+    } catch (error) {
+      _failed('reauthenticate', error);
+      rethrow;
+    }
     _guardIdentity();
     AccountDeletionIntent intent;
     try {
       intent = await transport.ensureIntent();
-    } catch (_) {
+    } catch (error) {
+      _failed('ensure-request', error);
       _guardIdentity();
       // The request itself might have committed before acknowledgement was lost.
       return AccountDeletionOutcome.pending;
@@ -116,7 +131,8 @@ class AccountDeletionAttempt {
       return AccountDeletionOutcome.completed;
     } on AccountDeletionIdentityChanged {
       rethrow;
-    } catch (_) {
+    } catch (error) {
+      _failed('delete-auth', error);
       if (transport.currentUserId != null) _guardIdentity();
       return AccountDeletionOutcome.pending;
     }

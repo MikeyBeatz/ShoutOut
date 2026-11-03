@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'account_deletion_attempt.dart';
+import 'account_deletion_diagnostics.dart';
 import 'account_deletion_preparation.dart';
 import 'account_deletion_progress.dart';
 import 'l10n/text.dart';
@@ -12,6 +13,9 @@ import 'timed_operation_gateway.dart';
 import 'web_environment.dart';
 
 final _deletionRuns = <String, Future<AccountDeletionOutcome?>>{};
+void _logAccountDeletionFailure(String stage, Object error) => debugPrint(
+  'ShoutOut account deletion: stage=$stage code=${accountDeletionDiagnosticCode(error)}',
+);
 final _preparation = AccountDeletionPreparationGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {
@@ -183,6 +187,7 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
                 }
               },
       ),
+      onFailure: _logAccountDeletionFailure,
     );
     final outcome = await runAccountDeletionWithProgress(
       context,
@@ -213,6 +218,7 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
     }
     return outcome;
   } on FirebaseAuthException catch (error) {
+    _logAccountDeletionFailure('flow-auth', error);
     if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
       final message =
           error.code == 'wrong-password' || error.code == 'invalid-credential'
@@ -225,7 +231,8 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
     return null;
   } on AccountDeletionIdentityChanged {
     return null;
-  } catch (_) {
+  } catch (error) {
+    _logAccountDeletionFailure('flow', error);
     if (context.mounted && FirebaseAuth.instance.currentUser?.uid == user.uid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

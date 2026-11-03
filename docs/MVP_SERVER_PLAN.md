@@ -228,7 +228,8 @@ a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientském
 uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
 Následně je v DEV ověřená příprava po dávkách a potvrzení/průběh v UI. Atomické
 serverové založení žádosti i aktivační klient jsou po úspěšném CI nasazené v DEV;
-nový přihlášený živý průchod a úklid ještě čekají. Rules ani milník tím uzavřené nejsou.
+živě prošlo obnovení z pending gate a úklid. Selhání prvního klientského pokusu
+ještě není vysvětlené; Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

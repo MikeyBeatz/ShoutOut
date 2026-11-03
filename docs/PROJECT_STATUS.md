@@ -24,15 +24,21 @@ a schválil průběžný DEV rollout s kontrolami. Nová Function a9ff425 je ACT
 anonymní volání odmítá HTTP 401; web 8289dce / CI 41705303226 success je nasazený
 a oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
 plánovače i původní účtová inventura se při rolloutu nezměnily.
-Živý přihlášený průchod ještě čeká: ovládání prohlížeče nemá dostupné nativní
-spojení, vlastník dostal žádost o ruční smazání jednoho nového dočasného účtu.
-Fixture má dva vlastní Shouty a cizí kontrolní Shout/komentář; ještě není uklizená.
-Údaje jsou pouze v ignorovaném docs/local/account-finalization-fixture.json.
+Živý první pokus skončil obecnou chybou po vzniku žádosti. Vlastník poté z pending
+gate znovu ověřil heslo a dokončil Auth odstranění. Server potvrzuje právě jednu
+přípravu a jednu žádost, validní Auth/App Check a HTTP 200, cizí obsah zachovaný,
+content-archived a původní +60denní termín. Fixture je uklizená a původní inventura
+shodná. Jde o ověřené obnovení po chybě, nikoli úspěch běžného průchodu na první pokus.
+Příčina klientské chyby se ze stávajících logů určit nedá; uživatel kartu zavřel.
+Na fix/account-deletion-diagnostics je připravený bezpečný konzolový kód fáze/chyby,
+bez zpráv výjimek, UID/e-mailu, hesel, tokenů, payloadů či nového ukládání dat.
+Lokálně 280 Flutter testů prošlo; CI a nový web této diagnostiky zatím čekají.
 Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek a kompatibilní nasazení jsou hotové; zbývá živé ověření a úklid,
-potom zbývá Rules cutover. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
+Lokální úsek a kompatibilní nasazení jsou hotové; blokuje je nevysvětlené selhání
+prvního klientského pokusu. Nejdřív diagnostika a nový test, pak Rules cutover.
+[Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
