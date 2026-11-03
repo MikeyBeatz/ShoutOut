@@ -147,17 +147,7 @@ void main() {
       }
       final withoutAppCheck = {
         ...config,
-        for (final key in [
-          'serverShoutCreation',
-          'serverCommentCreation',
-          'serverPrivateReplyCreation',
-          'serverShoutReactions',
-          'serverCommentReactions',
-          'serverShoutSaves',
-          'serverContentReports',
-          'serverCommentDeletion',
-          'serverArchivedReportLookup',
-        ])
+        for (final key in config.keys.where((key) => key.startsWith('server')))
           key: false,
       }..remove('appCheckSiteKey');
       expect(
