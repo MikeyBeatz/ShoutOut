@@ -3,6 +3,7 @@
   "appCheckSiteKey": "6LfVIAAuAAAAAL4qhDiIlyWoI5Mp1Q1GJBmEJe7e",
   "serverShoutCreation": true,
   "serverAccountDeletionPreparation": true,
+  "serverAccountDeletionFinalization": false,
   "serverCommentCreation": true,
   "serverPrivateReplyCreation": true,
   "serverShoutReactions": true,

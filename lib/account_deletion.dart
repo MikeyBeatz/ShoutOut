@@ -164,6 +164,14 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         auth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
         user: user,
+        finalizeIntent:
+            kIsWeb && WebEnvironment.current.serverAccountDeletionFinalization
+            ? () async =>
+                  (await FirebaseFunctions.instanceFor(region: 'europe-west3')
+                          .httpsCallable('finalizeAccountDeletion')
+                          .call({'expectedUserId': user.uid}))
+                      .data
+            : null,
         prepareBeforeIntent: resume
             ? null
             : () async {

@@ -31,8 +31,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Serverová příprava po 50 Shoutech a společný klientský pokus jsou nasazené
    a zapnuté v DEV po úspěšném CI. Živý nový i kompatibilní průchod jsou ověřené
    a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou nasazené
-   v DEV po úspěšném CI (269 Flutter testů). Dále zbývá uzavření přímých
-   zápisů a regrese souběžného publikování mezi přípravou a založením žádosti.
+   v DEV po úspěšném CI (269 Flutter testů). Atomické serverové založení žádosti
+   a klient za vypnutým přepínačem jsou připravené lokálně (276 Flutter a 16
+   cílených emulátorových scénářů). Zbývá CI, ověření kompatibility a následné
+   uzavření přímých zápisů; nejde ještě o živý serverový cutover.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

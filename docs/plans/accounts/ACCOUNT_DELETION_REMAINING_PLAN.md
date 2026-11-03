@@ -17,7 +17,7 @@ Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou 
 původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
 Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
-Zbývá dokončit klientský přechod a uzavření přímých zápisů. DEV web 7976e2f
+Zbývá dokončit klientský přechod a uzavření přímých zápisů. Nasazený DEV web 97d4b3f
 sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová příprava
 je zapnutá. Backend a57ae9b i web mají úspěšné CI a ověřené artefakty nasazení.
 Živý nový i starší kompatibilní průchod jsou dokončené a fixture uklizené.
@@ -27,6 +27,55 @@ a nativní klient dál používají původní přímé skrytí.
 Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
 Schválený lokální úsek níže nemění oprávnění k novým migracím nebo živým testům.
+
+## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
+
+Vlastník výslovně schválil serverové dokončení přípravy a založení žádosti,
+klienta za vypnutým přepínačem a lokální/emulátorové testy. Rozsah nezahrnuje
+nasazení, živá data, nové Auth účty ani úpravu Rules.
+
+- Nová připravená callable finalizeAccountDeletion má stávající Auth/App Check
+  ověření, expectedUserId, europe-west3, min0/max1, concurrency1, 256 MiB a 15 s.
+  Novou žádost vytvoří pouze způsobilý vlastník. Klient neposílá obsah žádosti,
+  e-mail, časy ani retenční termín; ty určuje server.
+- Jedna transakce přečte vlastní žádost, ověří způsobilost a dotazem limit(1)
+  zkontroluje vlastní aktivní Shouty. Pokud nějaký existuje, vrátí ready=false
+  bez zápisu; klient provede novou přípravu po dosavadních nejvýše 50 položkách.
+  Když žádný nezůstal, ve stejné transakci založí žádost. Serverová tvorba Shoutu
+  čte tutéž žádost v transakci: publikace buď předběhne kontrolu a vynutí přípravu,
+  nebo po vzniku žádosti selže. Finalizace sama neukrývá obsah a nemaže Auth.
+- Vlastní existující platná žádost je přirozeným klíčem opakování. Function ji
+  nepřepisuje a nemění createTime, requestedAt ani retainUntil. Nezavádí další
+  serverOperations receipt či novou retenční lhůtu. Root retainUntil je serverový
+  čas +60 dní; autoritativní deadline workeru zůstává createTime žádosti +60 dní.
+  Staré žádosti a joby se nemigrují. Neplatná existující žádost se odmítne.
+- Klient po ready=true musí ještě přečíst skutečnou žádost ze serveru, bez cache
+  a pending writes. Teprve potom smí pokračovat do původního Auth.delete.
+  Ztracená odpověď či neplatný výsledek nespouští automatický retry ani přímý
+  klientský zápis; další uživatelský pokus převezme již uloženou žádost.
+  ready=false je potvrzený požadavek na další přípravu, nikoli síťová chyba.
+- serverAccountDeletionFinalization je v config/dev.json false a výchozí false.
+  Zapnutí vyžaduje přípravu i App Check. Nasazená aplikace i nativní kompatibilní
+  větev se tímto lokálním úsekem nemění. Nový modul je zahrnutý v přípravném
+  content artefaktu; nejedná se o nasazenou Function.
+
+Lokálně prošlo všech 276 Flutter testů, 107 Functions unit (264 integrací bez
+emulátoru přeskočených), 42 tools a 16 cílených emulátorových scénářů (8 nových
+finalizace + původní příprava/tvorba). Nové scénáře zahrnují paralelní publikování
+ve čtyřech bězích, obě pořadí dokončení, replay se shodným createTime/obsahem,
+malformované žádosti, oprávnění a rollback. Klient pokrývá dodatečnou přípravu,
+lost ack, chybějící uloženou žádost, potvrzenou starší žádost, UID a neplatné
+odpovědi. Config testy ověřují závislosti přepínače. Lint, analýza a DEV debug
+build prošly. Celá emulátorová sada bude ověřená v CI; aktuální lokální sada ji
+nenahrazuje. Výsledky jsou v ignorovaných build/account-finalization-*.
+
+Další brána po tomto lokálním úseku: ověřit přesné CI a kompatibilní rollout,
+poté uzavřít přímé vytvoření/mazání žádosti a přímé skrývání obsahu v Rules.
+Dosavadní Rules stále dovolují zrušení pending žádosti v prvních deseti minutách;
+to není novou Function opravené. Nový serverový kontrakt nelze vydávat za
+vynucený cutover celé aplikace, dokud existují přímé klientské cesty. Před živým
+prostorovým indexem nadále zbývá dávkový indexový writer. Milníky se tímto
+lokálním podkrokem neuzavírají.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

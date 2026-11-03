@@ -6,6 +6,60 @@ import 'package:shoutout/web_environment.dart';
 
 void main() {
   test(
+    'account finalization defaults off and requires preparation and App Check',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(
+        WebEnvironment.fromJson(config).serverAccountDeletionFinalization,
+        isFalse,
+      );
+      config.remove('serverAccountDeletionFinalization');
+      expect(
+        WebEnvironment.fromJson(config).serverAccountDeletionFinalization,
+        isFalse,
+      );
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverAccountDeletionFinalization': true,
+        }).serverAccountDeletionFinalization,
+        isTrue,
+      );
+      for (final invalid in [null, 'true', 1]) {
+        expect(
+          () => WebEnvironment.fromJson({
+            ...config,
+            'serverAccountDeletionFinalization': invalid,
+          }),
+          throwsStateError,
+        );
+      }
+      expect(
+        () => WebEnvironment.fromJson({
+          ...config,
+          'serverAccountDeletionFinalization': true,
+          'serverAccountDeletionPreparation': false,
+        }),
+        throwsStateError,
+      );
+      final disabled = {...config}..remove('appCheckSiteKey');
+      for (final key
+          in disabled.keys.where((key) => key.startsWith('server')).toList()) {
+        disabled[key] = false;
+      }
+      expect(
+        () => WebEnvironment.fromJson({
+          ...disabled,
+          'serverAccountDeletionFinalization': true,
+          'serverAccountDeletionPreparation': true,
+        }),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'account deletion preparation defaults off and independently requires App Check and a boolean',
     () {
       final config =
@@ -85,7 +139,8 @@ void main() {
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false
-            ..['serverAccountDeletionPreparation'] = false;
+            ..['serverAccountDeletionPreparation'] = false
+            ..['serverAccountDeletionFinalization'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverContentReports,
         isFalse,
@@ -132,7 +187,8 @@ void main() {
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false
-            ..['serverAccountDeletionPreparation'] = false;
+            ..['serverAccountDeletionPreparation'] = false
+            ..['serverAccountDeletionFinalization'] = false;
       expect(
         WebEnvironment.fromJson(withoutAppCheck).serverShoutSaves,
         isFalse,

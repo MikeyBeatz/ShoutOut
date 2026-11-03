@@ -64,6 +64,21 @@ index, main.dart.js, bootstrap i config shodné na obou originech. Functions,
 Rules, IAM, oba plánovače a účtová inventura shodné s baseline. Nový destruktivní
 Auth pilot se tímto úsekem nespouštěl; nejde o nový ruční UI test v prohlížeči.
 
+## Atomické založení žádosti – lokální úsek 3. listopadu
+
+276/276 Flutter, 107/107 serverových unit (264 integrací bez emulátoru přeskočeno),
+42/42 tools, analýza/lint a DEV debug build prošly. Osm nových emulátorových testů
+finalizace spolu s původní přípravou a tvorbou Shoutů prošlo jako 16/16 scénářů.
+Ověřují serverové založení, zachování cizího/neaktivního obsahu, publikaci po
+přípravě, obě pořadí finalizace/publikace, čtyři skutečné paralelní závody,
+replay bez přepisu createTime/deadline, oprávnění, neplatné žádosti a rollback.
+Klientské testy pokrývají lost ack bez Auth.delete, převzetí již uložené žádosti,
+novou přípravu, neověřený pozitivní výsledek, UID i neplatné odpovědi. Přepínač
+je false a závisí na přípravě/App Check; starší klientská větev dál prochází.
+Nový test je přidaný do CI test:rules, modul do přípravného content balíku.
+CI celého commitu ještě čeká. Žádné nasazení, úpravy Rules, živé účty či data.
+[Přesný kontrakt a hranice](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

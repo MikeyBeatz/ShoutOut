@@ -13,6 +13,12 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverAccountDeletionFinalization !== undefined && typeof config.serverAccountDeletionFinalization !== 'boolean') {
+    throw new Error('serverAccountDeletionFinalization must be a boolean.');
+  }
+  if (config.serverAccountDeletionFinalization === true && (!config.appCheckSiteKey || config.serverAccountDeletionPreparation !== true)) {
+    throw new Error('Server account deletion finalization requires preparation and App Check.');
+  }
   if (config.serverAccountDeletionPreparation !== undefined && typeof config.serverAccountDeletionPreparation !== 'boolean') {
     throw new Error('serverAccountDeletionPreparation must be a boolean.');
   }

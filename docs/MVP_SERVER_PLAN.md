@@ -224,6 +224,9 @@ Aktualizace 3. listopadu: identita/role, vlastnické odebrání palců a konečn
 nad reálným Firestore/Storage s řízeným časem, anonymní cizí kontext, replay
 a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientskému cutoveru,
 uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
+Následně je v DEV ověřená příprava po dávkách a potvrzení/průběh v UI. Atomické
+serverové založení žádosti s testy souběhu je připravené pouze lokálně za vypnutým
+přepínačem; nasazené Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

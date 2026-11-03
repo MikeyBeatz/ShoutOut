@@ -13,10 +13,17 @@ import { deleteCommentOperation } from './delete_comment.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
+import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js';
 
 if (getApps().length === 0) initializeApp();
 
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
+
+// Local preparation only: the client switch remains disabled.
+export const finalizeAccountDeletion = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => finalizeAccountDeletionOperation(request, getFirestore()));
 
 // Prepared locally; deploying this export is a separate rollout step.
 export const prepareAccountDeletion = onCall({

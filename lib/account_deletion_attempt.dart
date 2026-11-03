@@ -18,6 +18,41 @@ abstract interface class AccountDeletionTransport {
 
 class AccountDeletionIdentityChanged implements Exception {}
 
+/// A positive callable reply is not enough to delete Auth: require the actual
+/// committed request read from the server. Transport failures never auto-retry.
+Future<AccountDeletionIntent> ensureServerAccountDeletionIntent({
+  required String userId,
+  required Future<AccountDeletionIntent?> Function() readExisting,
+  required Future<void> Function() prepare,
+  required Future<Object?> Function() finalize,
+  required void Function() guardIdentity,
+}) async {
+  guardIdentity();
+  final existing = await readExisting();
+  guardIdentity();
+  if (existing != null) return existing;
+  while (true) {
+    await prepare();
+    guardIdentity();
+    final response = await finalize();
+    guardIdentity();
+    if (response is! Map ||
+        response['userId'] != userId ||
+        response['ready'] is! bool ||
+        response['confirmed'] is! bool ||
+        response['ready'] == false && response['confirmed'] == true) {
+      throw StateError('invalid-account-deletion-finalization');
+    }
+    if (response['ready'] == false) continue;
+    final committed = await readExisting();
+    guardIdentity();
+    if (committed == null || committed.userId != userId) {
+      throw StateError('unconfirmed-account-deletion-request');
+    }
+    return committed;
+  }
+}
+
 /// Read before preparing, then create conditionally. Existing intents never
 /// re-run preparation or acquire a new retention deadline.
 Future<AccountDeletionIntent> ensurePreparedAccountDeletionIntent({
@@ -96,11 +131,13 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
     required this.firestore,
     required this.user,
     this.prepareBeforeIntent,
+    this.finalizeIntent,
   });
   final FirebaseAuth auth;
   final FirebaseFirestore firestore;
   final User user;
   final Future<void> Function()? prepareBeforeIntent;
+  final Future<Object?> Function()? finalizeIntent;
 
   @override
   String? get currentUserId => auth.currentUser?.uid;
@@ -140,26 +177,39 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
       );
     }
 
+    Future<AccountDeletionIntent?> readExisting() async {
+      final snapshot = await reference.get(
+        const GetOptions(source: Source.server),
+      );
+      _guardIdentity();
+      if (snapshot.metadata.isFromCache || snapshot.metadata.hasPendingWrites) {
+        throw StateError('unconfirmed-account-deletion-request');
+      }
+      return snapshot.exists ? parse(snapshot.data()!) : null;
+    }
+
+    Future<void> prepare() async {
+      final prepare = prepareBeforeIntent;
+      if (prepare == null) {
+        throw StateError('account-deletion-preparation-required');
+      }
+      await prepare();
+    }
+
+    final finalize = finalizeIntent;
+    if (finalize != null) {
+      return ensureServerAccountDeletionIntent(
+        userId: user.uid,
+        readExisting: readExisting,
+        prepare: prepare,
+        finalize: finalize,
+        guardIdentity: _guardIdentity,
+      );
+    }
     return ensurePreparedAccountDeletionIntent(
       guardIdentity: _guardIdentity,
-      readExisting: () async {
-        final snapshot = await reference.get(
-          const GetOptions(source: Source.server),
-        );
-        _guardIdentity();
-        if (snapshot.metadata.isFromCache ||
-            snapshot.metadata.hasPendingWrites) {
-          throw StateError('unconfirmed-account-deletion-request');
-        }
-        return snapshot.exists ? parse(snapshot.data()!) : null;
-      },
-      prepare: () async {
-        final prepare = prepareBeforeIntent;
-        if (prepare == null) {
-          throw StateError('account-deletion-preparation-required');
-        }
-        await prepare();
-      },
+      readExisting: readExisting,
+      prepare: prepare,
       createIfMissing: () => firestore.runTransaction((transaction) async {
         _guardIdentity();
         final existing = await transaction.get(reference);

@@ -11,28 +11,18 @@ jeho přímé zápisy a provést společný závěrečný test. Serverový kone�
 už je hotový v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
-DEV používá prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/transakce),
-opakování dávek a společný první/resume pokus. Backend a57ae9b a aktivační web
-7976e2f mají úspěšné vlastní CI; serverAccountDeletionPreparation je v DEV true.
-Oba originy odpovídají čistému release artefaktu. Rules cutover není dokončený.
-Živý DEV průchod nové přípravy je dokončený: platný Auth/App Check, HTTP 200,
-jeden receipt hidden=2 před žádostí, odstraněný dočasný Auth, zachovaný cizí
-Shout i komentář, content-archived a purge scheduled s původním +60denním termínem.
-První test ve starší otevřené kartě navíc ověřil kompatibilní cestu. Obě fixture
-jsou uklizené, přihlašovací soubory odstraněné a původní inventura shodná.
-Ruční UI část provedl vlastník kvůli nedostupnému ovládání prohlížeče.
-Schválená UX oprava je nasazená v DEV ze zdroje 97d4b3f na fix/account-deletion-progress:
-přesné upozornění na nevratné smazání před heslem/potvrzením, následně blokující
-„Probíhá mazání…“ přes pending gate a po úspěchu přihlášení. Chyba překryv uvolní;
-změna UID ani zánik původní obrazovky nesmějí zavřít jinou route. Zachovaná
-retence i datová příprava. Dialog je posuvný i nad mobilní klávesnicí.
-CI 41688450535 success: 269 Flutter, 107 unit, 41 tools, 359 Rules/server,
-15 purge a 15 Storage testů, analýza/lint/build. Oba originy odpovídají čistému
-release artefaktu; Functions, Rules, IAM, oba plánovače a účtová inventura shodné
-s baseline. Nový destruktivní Auth pilot tato čistě UI oprava nevytvářela;
-chování dialogu/průběhu je ověřené widgetovými testy, nikoli novým ručním UI průchodem.
-CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
-15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
+DEV má zapnutou přípravu po 50 Shoutech, společný první/resume pokus a potvrzení
+s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověřené a fixture
+uklizené; nejnovější čistě UI opravu ověřují widgety a shoda nasazených artefaktů.
+Nasazené vrstvy a důkazy jsou níže; Rules cutover zůstává otevřený.
+
+Na feature/account-deletion-finalization je schválená lokální finalizace:
+server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zakládá
+žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
+serverAccountDeletionFinalization je false. Bez nasazení, živých dat, nových Auth
+účtů či změn Rules. Lokálně 276 Flutter, 107 unit, 42 tools, 16 cílených emulátorových
+scénářů, analýza/lint a DEV debug build prošly. Celá emulátorová sada/CI tohoto
+nového zdroje zatím není dokončená. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
