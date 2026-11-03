@@ -118,7 +118,17 @@ zprávy výjimek, osobní údaje, hesla, tokeny, payloady ani nová databázová
 Selhání diagnostického observeru nesmí změnit operaci ani její retry. Pořadí
 běžného průchodu se nemění: varování + jediné heslo → průběh → přihlášení;
 pending gate a nové heslo slouží jen k obnově přerušeného pokusu. Dosavadní
-příčina chyby není potvrzená. Lokálně 280 Flutter testů; CI a rollout diagnostiky čekají.
+příčina chyby není potvrzená. Diagnostika 712da1b159d85c50460b2d4a4aa6d6abd5b6f37b
+má úspěšné CI 41710073555 (280 Flutter, 42 tools, 107 unit, 367 Rules/server,
+15 purge/15 Storage, analýza/lint/build) a DEV Hosting e69064a6c3110b2a. Oba
+originy včetně diagnostického markeru v release JS ověřené, backend i původní
+inventura nezměněné. První recovery pilot a jeho důkazy jsou oddělené v ignorovaném
+build/account-finalization-recovery-test. Pro opakování je vytvořený nový dočasný
+Auth účet a stejná fixture; test i úklid čekají. Údaje jen docs/local/account-finalization-fixture.json.
+Nový pokus má běžet s otevřenou konzolí a při první chybě se před resume ověří
+serverový stav. Pomocný live nástroj má lokální record-first-failure / record-first-success
+/ record-resume pro přesné zachycení uživatelského výsledku; happyPathVerified
+smí být true pouze po výslovném potvrzení úspěchu prvního pokusu.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

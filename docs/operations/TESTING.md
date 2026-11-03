@@ -94,8 +94,13 @@ happyPathVerified=false. Další Rules cutover čeká na vysvětlení klientské
 Lokální diagnostika pro opakování: 280 Flutter testů prošlo. Dva nové scénáře
 ověřují rozlišení fází a nezměněné chování i při chybě observeru; dva další
 filtrují citlivé zprávy, neznámé pluginy a neplatné kódy. Diagnostika jde jen do
-konzole (ShoutOut account deletion), bez nového persistentního logování. CI a
-nasazení diagnostického webu zatím čekají; příčina původního selhání není určená.
+konzole (ShoutOut account deletion), bez nového persistentního logování.
+CI 41710073555 pro 712da1b success: 280 Flutter, 42 tools, 107 unit,
+367 Rules/server, 15 purge, 15 Storage, analýza/lint/build. DEV Hosting
+e69064a6c3110b2a a oba originy odpovídají manifestu, marker je přítomný v release JS;
+backend/Rules/IAM/plánovače/inventura beze změny. Nová dočasná fixture je
+připravená; ruční opakování s konzolí a úklid ještě čekají. Příčina první chyby
+dosud není určená a samotná diagnostika ji neopravuje.
 
 ## Konečný 60denní úklid
 

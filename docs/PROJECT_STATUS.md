@@ -21,8 +21,8 @@ server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zaklá
 žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
 serverAccountDeletionFinalization je true. Vlastník zrušil omezení na lokální práci
 a schválil průběžný DEV rollout s kontrolami. Nová Function a9ff425 je ACTIVE,
-anonymní volání odmítá HTTP 401; web 8289dce / CI 41705303226 success je nasazený
-a oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
+anonymní volání odmítá HTTP 401; aktivace 8289dce / CI 41705303226 success proběhla,
+nyní je nasazený diagnostický web 712da1b. Oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
 plánovače i původní účtová inventura se při rolloutu nezměnily.
 Živý první pokus skončil obecnou chybou po vzniku žádosti. Vlastník poté z pending
 gate znovu ověřil heslo a dokončil Auth odstranění. Server potvrzuje právě jednu
@@ -30,9 +30,14 @@ přípravu a jednu žádost, validní Auth/App Check a HTTP 200, cizí obsah zac
 content-archived a původní +60denní termín. Fixture je uklizená a původní inventura
 shodná. Jde o ověřené obnovení po chybě, nikoli úspěch běžného průchodu na první pokus.
 Příčina klientské chyby se ze stávajících logů určit nedá; uživatel kartu zavřel.
-Na fix/account-deletion-diagnostics je připravený bezpečný konzolový kód fáze/chyby,
+Na fix/account-deletion-diagnostics je v DEV nasazený bezpečný konzolový kód fáze/chyby,
 bez zpráv výjimek, UID/e-mailu, hesel, tokenů, payloadů či nového ukládání dat.
-Lokálně 280 Flutter testů prošlo; CI a nový web této diagnostiky zatím čekají.
+CI 41710073555 zdroje 712da1b success: 280 Flutter, 42 tools, 107 unit,
+367 Rules/server, 15 purge, 15 Storage, analýza/lint/build. Diagnostický marker
+je ověřený i v release JS. Backend a původní inventura se při novém Hostingu nezměnily.
+Pro uživatelem požadované opakování je připravený jeden nový dočasný Auth účet
+se dvěma vlastními Shouty a kontrolním obsahem. Jeho test a úklid ještě čekají;
+aktuální údaje jsou pouze v ignorovaném docs/local/account-finalization-fixture.json.
 Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
@@ -51,7 +56,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `8289dce0b8f16d5f962db57a7874e8bdb6bcaf2f` / `96f84b4aa35ca226` |
+| Webový zdroj / Hosting verze | `712da1b159d85c50460b2d4a4aa6d6abd5b6f37b` / `e69064a6c3110b2a` |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
@@ -62,7 +67,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat webu: předchozí Hosting 603bbdd9239e03d4 (zdroj 97d4b3f); backend je
+Návrat webu: předchozí Hosting 96f84b4aa35ca226 (zdroj 8289dce); backend je
 kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,
@@ -93,6 +98,10 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
 
 ## Poslední ověření a jeho hranice
 
+- Bezpečná konzolová diagnostika: [CI 41710073555](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41710073555)
+  pro 712da1b success, DEV Hosting e69064a6c3110b2a. Oba originy (index, main,
+  bootstrap, config) odpovídají čistému release; Functions/Rules/IAM/plánovače
+  a inventura zachované. Příčina první chyby dosud není určená; nový test čeká.
 - Atomické založení žádosti: [CI 41696994668](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41696994668)
   pro a9ff425 success, celá Rules/server sada 367/367. Function je nově nasazená;
   aktivace [CI 41705303226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41705303226)
