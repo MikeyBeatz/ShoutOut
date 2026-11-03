@@ -110,8 +110,13 @@ account_request_read.integration.test.mjs prošla 2/2: tři reprodukce s aktuál
 Rules, čtecí transakce maxAttempts=1 bez změny createTime/updateTime/obsahu a
 odmítnutí cizího/anonymního čtení. TCP proxy zpožďuje pouze laboratorní provoz;
 žádná nová prodleva nebo limit aplikace. Je zapojená do test:rules. Klientská
-náhrada Source.server je lokálně připravená; 26 cílených Flutter testů, analyzátor,
-formátování a kontrola dokumentace prošly. Plné CI a DEV rollout ještě zbývají.
+náhrada Source.server prošla 26 cílenými Flutter testy, analyzátorem, formátováním
+a kontrolou dokumentace. CI 41715769367 pro c2409e0 success: 280 Flutter, 42 tools,
+107 unit, 369 Rules/server, 15 purge/15 Storage, lint/analyze/build. Čistý release
+je nasazený na DEV Hosting a59b75f1d27dc90d; oba originy odpovídají artefaktu,
+backend/Rules/IAM/plánovače a původní inventura nezměněné (jen známá pending
+fixture vyloučená z původní inventury). Ruční dokončení aktuálního pokusu, úklid
+a nový úspěšný první průchod ještě zbývají.
 
 ## Konečný 60denní úklid
 

@@ -37,8 +37,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    pokus selhal. Před Rules cutoverem zjistit klientskou příčinu a ověřit běžný
    průchod. Diagnostika zachytila odmítnuté potvrzení existující žádosti; emulátor
    reprodukoval zastaralé Source.server čtení při aktivním listeneru. Čtecí transakce
-   a dva regresní testy jsou připravené. Zbývá CI, DEV rollout, dokončení/úklid
-   současné fixture a úspěšný první průchod před uzavřením přímých zápisů.
+   a dva regresní testy jsou po úspěšném CI nasazené v DEV (c2409e0); oba originy
+   a nezměněný backend ověřené. Zbývá dokončení/úklid současné pending fixture
+   a úspěšný první průchod před uzavřením přímých zápisů.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

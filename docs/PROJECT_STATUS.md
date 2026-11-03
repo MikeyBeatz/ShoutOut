@@ -22,7 +22,7 @@ server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zaklá
 serverAccountDeletionFinalization je true. Vlastník zrušil omezení na lokální práci
 a schválil průběžný DEV rollout s kontrolami. Nová Function a9ff425 je ACTIVE,
 anonymní volání odmítá HTTP 401; aktivace 8289dce / CI 41705303226 success proběhla,
-nyní je nasazený diagnostický web 712da1b. Oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
+následovala diagnostika 712da1b a nyní oprava čtení c2409e0. Oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
 plánovače i původní účtová inventura se při rolloutu nezměnily.
 Živý první pokus skončil obecnou chybou po vzniku žádosti. Vlastník poté z pending
 gate znovu ověřil heslo a dokončil Auth odstranění. Server potvrzuje právě jednu
@@ -43,14 +43,18 @@ listeneru a opožděné aktualizaci po externím zápisu (5/5); metadata přitom
 fromCache=false. Čtení v transakci vždy našlo commit. Na fix/account-deletion-commit-read
 je připravená náhrada kontroly žádosti čtecí transakcí s maxAttempts=1, bez zápisů
 či změny oprávnění. Dva regresní emulátorové testy prošly, včetně owner-only Rules
-a nezměněného dokumentu/retence. Plné CI a rollout této opravy ještě neproběhly.
+a nezměněného dokumentu/retence. Oprava c2409e0587c42bcbc34008c881395a06c294549f
+má success CI 41715769367: 280 Flutter, 42 tools, 107 unit, 369 Rules/server,
+15 purge/15 Storage, analýza/lint/build. DEV Hosting a59b75f1d27dc90d je nasazený;
+oba originy shodné s čistým release, backend/Rules/IAM/plánovače a původní inventura
+nezměněné (při porovnání vynechaná pouze známá současná fixture žádost/job).
 Současná fixture čeká na dokončení Auth a úklid; údaje pouze v ignorovaném
 docs/local/account-finalization-fixture.json. Běžný průchod zůstává neověřený.
 Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek a kompatibilní nasazení jsou hotové; další brána je CI a DEV oprava
-potvrzení commitu, nový běžný průchod a až potom Rules cutover.
+Lokální úsek a kompatibilní nasazení jsou hotové; uživatel je požádaný o dokončení
+současného pending testu v nové kartě. Pak úklid, nový běžný průchod a Rules cutover.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
@@ -64,7 +68,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `712da1b159d85c50460b2d4a4aa6d6abd5b6f37b` / `e69064a6c3110b2a` |
+| Webový zdroj / Hosting verze | `c2409e0587c42bcbc34008c881395a06c294549f` / `a59b75f1d27dc90d` |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |

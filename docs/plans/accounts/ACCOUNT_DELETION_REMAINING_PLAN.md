@@ -152,8 +152,16 @@ Jde pouze o vzácný účtový tok, nikoli čtení feedu; transakce přidá sí�
 Nová account_request_read.integration.test.mjs používá aktuální Rules a skutečný
 klientský SDK přes lokální TCP proxy: třikrát reprodukuje starý výsledek, potvrdí
 nový commit, nezměněné createTime/updateTime/obsah a odmítnutí cizího/anonymního
-čtení. Oba testy prošly a jsou zapojené do test:rules. Zatím lokální oprava;
-plné CI, DEV rollout a nový běžný UI průchod ještě zbývají.
+čtení. Oba testy prošly a jsou zapojené do test:rules.
+Zdroj c2409e0587c42bcbc34008c881395a06c294549f má úspěšné
+[CI 41715769367](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41715769367):
+280 Flutter, 42 tools, 107 unit, 369 Rules/server, 15 purge/15 Storage, analýza,
+lint a build. Je nasazený pouze DEV Hosting a59b75f1d27dc90d; oba originy byte-for-byte
+odpovídají čistému release. Functions, Rules, IAM a oba plánovače nezměněné.
+Původní inventura shodná po vyloučení pouze známé současné fixture žádosti/jobu.
+Důkazy build/account-commit-read-{ci,pre-proof,post-proof}.json a release/deploy log.
+Uživatel je požádaný o dokončení současného pending účtu v nové anonymní kartě;
+úklid a nový úspěšný první průchod ještě zbývají. Recovery test nezaměnit za happy path.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 
