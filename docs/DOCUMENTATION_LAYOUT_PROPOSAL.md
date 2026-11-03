@@ -1,7 +1,8 @@
 # Návrh rozdělení dokumentace do složek
 
-**Návrh ke schválení; přesuny zatím neprovedené.** Připraveno 3. listopadu 2026
-po inventuře a opravě hlavních přehledů. Nemění obsah požadavků ani oprávnění.
+**Mapa schválená vlastníkem a provedená 3. listopadu 2026.** Připraveno po
+inventuře a opravě hlavních přehledů. Zachovává původní a nové cesty pro
+orientaci v historii; nemění obsah požadavků ani oprávnění.
 
 ## Zásady
 
@@ -34,68 +35,68 @@ po inventuře a opravě hlavních přehledů. Nemění obsah požadavků ani opr
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [ACCOUNT_AUTHORITY_AND_EXPIRATION.md](ACCOUNT_AUTHORITY_AND_EXPIRATION.md) | `plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md` |
-| [ACCOUNT_CONTENT_ARCHIVE_PLAN.md](ACCOUNT_CONTENT_ARCHIVE_PLAN.md) | `plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md` |
-| [ACCOUNT_DELETION_DEV_PROPOSAL.md](ACCOUNT_DELETION_DEV_PROPOSAL.md) | `plans/accounts/ACCOUNT_DELETION_DEV_PROPOSAL.md` |
-| [ACCOUNT_DELETION_REMAINING_PLAN.md](ACCOUNT_DELETION_REMAINING_PLAN.md) | `plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md` |
-| [ACCOUNT_PUBLIC_IDENTITY_PLAN.md](ACCOUNT_PUBLIC_IDENTITY_PLAN.md) | `plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md` |
-| [ACCOUNT_REACTION_REMOVAL_PLAN.md](ACCOUNT_REACTION_REMOVAL_PLAN.md) | `plans/accounts/ACCOUNT_REACTION_REMOVAL_PLAN.md` |
-| [ACCOUNT_RETENTION_PURGE_PLAN.md](ACCOUNT_RETENTION_PURGE_PLAN.md) | `plans/accounts/ACCOUNT_RETENTION_PURGE_PLAN.md` |
+| [ACCOUNT_AUTHORITY_AND_EXPIRATION.md](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md) | `plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md` |
+| [ACCOUNT_CONTENT_ARCHIVE_PLAN.md](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) | `plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md` |
+| [ACCOUNT_DELETION_DEV_PROPOSAL.md](plans/accounts/ACCOUNT_DELETION_DEV_PROPOSAL.md) | `plans/accounts/ACCOUNT_DELETION_DEV_PROPOSAL.md` |
+| [ACCOUNT_DELETION_REMAINING_PLAN.md](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md) | `plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md` |
+| [ACCOUNT_PUBLIC_IDENTITY_PLAN.md](plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) | `plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md` |
+| [ACCOUNT_REACTION_REMOVAL_PLAN.md](plans/accounts/ACCOUNT_REACTION_REMOVAL_PLAN.md) | `plans/accounts/ACCOUNT_REACTION_REMOVAL_PLAN.md` |
+| [ACCOUNT_RETENTION_PURGE_PLAN.md](plans/accounts/ACCOUNT_RETENTION_PURGE_PLAN.md) | `plans/accounts/ACCOUNT_RETENTION_PURGE_PLAN.md` |
 
 ### plans/feed/
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [FEED_A1_RESULTS.md](FEED_A1_RESULTS.md) | `plans/feed/FEED_A1_RESULTS.md` |
-| [FEED_BLOCK_INDEX_PLAN.md](FEED_BLOCK_INDEX_PLAN.md) | `plans/feed/FEED_BLOCK_INDEX_PLAN.md` |
-| [FEED_IMPLEMENTATION_STAGES.md](FEED_IMPLEMENTATION_STAGES.md) | `plans/feed/FEED_IMPLEMENTATION_STAGES.md` |
-| [FEED_INDEX_RETENTION.md](FEED_INDEX_RETENTION.md) | `plans/feed/FEED_INDEX_RETENTION.md` |
-| [FEED_MIGRATION_READINESS.md](FEED_MIGRATION_READINESS.md) | `plans/feed/FEED_MIGRATION_READINESS.md` |
-| [FEED_PORTABLE_CURSOR.md](FEED_PORTABLE_CURSOR.md) | `plans/feed/FEED_PORTABLE_CURSOR.md` |
-| [FEED_PROGRESSIVE_PLAN.md](FEED_PROGRESSIVE_PLAN.md) | `plans/feed/FEED_PROGRESSIVE_PLAN.md` |
-| [FEED_READING_POLICY.md](FEED_READING_POLICY.md) | `plans/feed/FEED_READING_POLICY.md` |
-| [FEED_READ_REFRESH_PLAN.md](FEED_READ_REFRESH_PLAN.md) | `plans/feed/FEED_READ_REFRESH_PLAN.md` |
-| [FEED_WRITER_INTEGRATION.md](FEED_WRITER_INTEGRATION.md) | `plans/feed/FEED_WRITER_INTEGRATION.md` |
+| [FEED_A1_RESULTS.md](plans/feed/FEED_A1_RESULTS.md) | `plans/feed/FEED_A1_RESULTS.md` |
+| [FEED_BLOCK_INDEX_PLAN.md](plans/feed/FEED_BLOCK_INDEX_PLAN.md) | `plans/feed/FEED_BLOCK_INDEX_PLAN.md` |
+| [FEED_IMPLEMENTATION_STAGES.md](plans/feed/FEED_IMPLEMENTATION_STAGES.md) | `plans/feed/FEED_IMPLEMENTATION_STAGES.md` |
+| [FEED_INDEX_RETENTION.md](plans/feed/FEED_INDEX_RETENTION.md) | `plans/feed/FEED_INDEX_RETENTION.md` |
+| [FEED_MIGRATION_READINESS.md](plans/feed/FEED_MIGRATION_READINESS.md) | `plans/feed/FEED_MIGRATION_READINESS.md` |
+| [FEED_PORTABLE_CURSOR.md](plans/feed/FEED_PORTABLE_CURSOR.md) | `plans/feed/FEED_PORTABLE_CURSOR.md` |
+| [FEED_PROGRESSIVE_PLAN.md](plans/feed/FEED_PROGRESSIVE_PLAN.md) | `plans/feed/FEED_PROGRESSIVE_PLAN.md` |
+| [FEED_READING_POLICY.md](plans/feed/FEED_READING_POLICY.md) | `plans/feed/FEED_READING_POLICY.md` |
+| [FEED_READ_REFRESH_PLAN.md](plans/feed/FEED_READ_REFRESH_PLAN.md) | `plans/feed/FEED_READ_REFRESH_PLAN.md` |
+| [FEED_WRITER_INTEGRATION.md](plans/feed/FEED_WRITER_INTEGRATION.md) | `plans/feed/FEED_WRITER_INTEGRATION.md` |
 
 ### plans/roadmap/
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [BUSINESS_MONETIZATION.md](BUSINESS_MONETIZATION.md) | `plans/roadmap/BUSINESS_MONETIZATION.md` |
-| [EU_TRADEMARK_PLAN.md](EU_TRADEMARK_PLAN.md) | `plans/roadmap/EU_TRADEMARK_PLAN.md` |
-| [EXTERNAL_EVENTS_EVALUATION.md](EXTERNAL_EVENTS_EVALUATION.md) | `plans/roadmap/EXTERNAL_EVENTS_EVALUATION.md` |
-| [GAMIFICATION_MODEL.md](GAMIFICATION_MODEL.md) | `plans/roadmap/GAMIFICATION_MODEL.md` |
-| [MOBILE_DISTRIBUTION_PLAN.md](MOBILE_DISTRIBUTION_PLAN.md) | `plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md` |
+| [BUSINESS_MONETIZATION.md](plans/roadmap/BUSINESS_MONETIZATION.md) | `plans/roadmap/BUSINESS_MONETIZATION.md` |
+| [EU_TRADEMARK_PLAN.md](plans/roadmap/EU_TRADEMARK_PLAN.md) | `plans/roadmap/EU_TRADEMARK_PLAN.md` |
+| [EXTERNAL_EVENTS_EVALUATION.md](plans/roadmap/EXTERNAL_EVENTS_EVALUATION.md) | `plans/roadmap/EXTERNAL_EVENTS_EVALUATION.md` |
+| [GAMIFICATION_MODEL.md](plans/roadmap/GAMIFICATION_MODEL.md) | `plans/roadmap/GAMIFICATION_MODEL.md` |
+| [MOBILE_DISTRIBUTION_PLAN.md](plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md) | `plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md` |
 
 ### reference/
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | `reference/ARCHITECTURE.md` |
-| [BUSINESS_VERIFICATION.md](BUSINESS_VERIFICATION.md) | `reference/BUSINESS_VERIFICATION.md` |
-| [DATA_MODEL.md](DATA_MODEL.md) | `reference/DATA_MODEL.md` |
-| [INTERNAL_MODERATION.md](INTERNAL_MODERATION.md) | `reference/INTERNAL_MODERATION.md` |
-| [PRODUCT_FLOWS.md](PRODUCT_FLOWS.md) | `reference/PRODUCT_FLOWS.md` |
-| [UI_SPECIFICATION.md](UI_SPECIFICATION.md) | `reference/UI_SPECIFICATION.md` |
+| [ARCHITECTURE.md](reference/ARCHITECTURE.md) | `reference/ARCHITECTURE.md` |
+| [BUSINESS_VERIFICATION.md](reference/BUSINESS_VERIFICATION.md) | `reference/BUSINESS_VERIFICATION.md` |
+| [DATA_MODEL.md](reference/DATA_MODEL.md) | `reference/DATA_MODEL.md` |
+| [INTERNAL_MODERATION.md](reference/INTERNAL_MODERATION.md) | `reference/INTERNAL_MODERATION.md` |
+| [PRODUCT_FLOWS.md](reference/PRODUCT_FLOWS.md) | `reference/PRODUCT_FLOWS.md` |
+| [UI_SPECIFICATION.md](reference/UI_SPECIFICATION.md) | `reference/UI_SPECIFICATION.md` |
 
 ### operations/
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [COST_SAFETY.md](COST_SAFETY.md) | `operations/COST_SAFETY.md` |
-| [FIREBASE_STORAGE_SETUP.md](FIREBASE_STORAGE_SETUP.md) | `operations/FIREBASE_STORAGE_SETUP.md` |
-| [PRESENTATION_SITE.md](PRESENTATION_SITE.md) | `operations/PRESENTATION_SITE.md` |
-| [READ_COST_AUDIT.md](READ_COST_AUDIT.md) | `operations/READ_COST_AUDIT.md` |
-| [RELEASING.md](RELEASING.md) | `operations/RELEASING.md` |
-| [SETUP_AND_OPERATIONS.md](SETUP_AND_OPERATIONS.md) | `operations/SETUP_AND_OPERATIONS.md` |
-| [TESTING.md](TESTING.md) | `operations/TESTING.md` |
-| [WEB_ENVIRONMENTS.md](WEB_ENVIRONMENTS.md) | `operations/WEB_ENVIRONMENTS.md` |
+| [COST_SAFETY.md](operations/COST_SAFETY.md) | `operations/COST_SAFETY.md` |
+| [FIREBASE_STORAGE_SETUP.md](operations/FIREBASE_STORAGE_SETUP.md) | `operations/FIREBASE_STORAGE_SETUP.md` |
+| [PRESENTATION_SITE.md](operations/PRESENTATION_SITE.md) | `operations/PRESENTATION_SITE.md` |
+| [READ_COST_AUDIT.md](operations/READ_COST_AUDIT.md) | `operations/READ_COST_AUDIT.md` |
+| [RELEASING.md](operations/RELEASING.md) | `operations/RELEASING.md` |
+| [SETUP_AND_OPERATIONS.md](operations/SETUP_AND_OPERATIONS.md) | `operations/SETUP_AND_OPERATIONS.md` |
+| [TESTING.md](operations/TESTING.md) | `operations/TESTING.md` |
+| [WEB_ENVIRONMENTS.md](operations/WEB_ENVIRONMENTS.md) | `operations/WEB_ENVIRONMENTS.md` |
 
 ### archive/
 
 | Dnešní dokument | Nová cesta od docs/ |
 |---|---|
-| [FEED_A2_PROPOSAL.md](FEED_A2_PROPOSAL.md) | `archive/FEED_A2_PROPOSAL.md` |
+| [FEED_A2_PROPOSAL.md](archive/FEED_A2_PROPOSAL.md) | `archive/FEED_A2_PROPOSAL.md` |
 
 ## Podmínka dokončení
 

@@ -18,7 +18,7 @@
   dokončení v `docs/MVP_SERVER_PLAN.md`. Archiv v `docs/archive/` zachovává
   historii; jeho staré stavy nejsou důkaz současného chování nebo nasazení.
   Architekturu a provozní postupy ověřuj v
-  `docs/ARCHITECTURE.md` a `docs/SETUP_AND_OPERATIONS.md`.
+  `docs/reference/ARCHITECTURE.md` a `docs/operations/SETUP_AND_OPERATIONS.md`.
 - Před změnou vyhledej existující implementaci, testy a podobné vzory. Nedoplňuj
   nové role, limity, ceny, oprávnění ani produktová pravidla bez podkladu.
 
@@ -44,7 +44,7 @@
   V tomto rozsahu se na souhlas s každým rolloutem znovu neptej. Před nasazením
   ověř commit, výsledky CI, odpovídající artefakt a přesný cíl; po nasazení
   ověř skutečný výsledek. Podrobnosti a hranice jsou v
-  [RELEASING](docs/RELEASING.md#trvaly-souhlas-s-rollouty).
+  [RELEASING](docs/operations/RELEASING.md#trvaly-souhlas-s-rollouty).
   První veřejné vydání vyžaduje dokončené MVP a splněnou startovní bránu;
   produkci nadále vydávej z čistého označeného commitu v `main`.
   Souhlas s rolloutem sám nemění pravidla pro
@@ -56,8 +56,8 @@
 ## Výběr změn a publikování
 
 - Před prací s větvemi, vydáním nebo nasazením si přečti
-  [docs/RELEASING.md](docs/RELEASING.md). Technické příkazy a prostředí ověř
-  také v [docs/WEB_ENVIRONMENTS.md](docs/WEB_ENVIRONMENTS.md).
+  [docs/operations/RELEASING.md](docs/operations/RELEASING.md). Technické příkazy a prostředí ověř
+  také v [docs/operations/WEB_ENVIRONMENTS.md](docs/operations/WEB_ENVIRONMENTS.md).
 - Samostatné úkoly vyvíjej v samostatných větvích `feature/<nazev>` nebo
   `fix/<nazev>`. Do `main` patří jen otestované změny schválené uživatelem.
   Rozpracované a neschválené úkoly neslučuj do vydávané verze.

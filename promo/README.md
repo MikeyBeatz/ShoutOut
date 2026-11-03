@@ -58,4 +58,4 @@ schválené vizuální reference značky. Ostatní screenshoty jsou kompoziční
 reference staršího rozhraní, ne aktuální produktová dokumentace. Pro samostatné
 zobrazení značky používej přednostně
 `branding/shoutout-logo-transparent.png`. Aktuální funkční stav určuje
-`../docs/PRODUCT_FLOWS.md` v hlavním repozitáři.
+`../docs/reference/PRODUCT_FLOWS.md` v hlavním repozitáři.

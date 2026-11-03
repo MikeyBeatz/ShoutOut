@@ -61,9 +61,12 @@ for (const [source, original] of sources) {
     }
   }
 }
-const reachable = new Set(), visit = path => { if (reachable.has(path)) return; reachable.add(path); for (const next of edges.get(path) ?? []) visit(next); };
-for (const path of ['README.md', 'AGENTS.md', 'docs/README.md']) visit(path);
-const orphanDocs = markdown.filter(path => path.startsWith('docs/') && !reachable.has(path));
+function reachFrom(seeds) {
+  const found = new Set(), visit = path => { if (found.has(path)) return; found.add(path); for (const next of edges.get(path) ?? []) visit(next); };
+  for (const path of seeds) visit(path); return found;
+}
+const reachable = reachFrom(['README.md', 'AGENTS.md', 'docs/README.md']), indexed = reachFrom(['docs/README.md']);
+const orphanDocs = markdown.filter(path => path.startsWith('docs/') && !indexed.has(path));
 const backlog = sources.get('docs/BACKLOG.md') ?? '', todo = sources.get('docs/TODO.md') ?? '';
 const checked = [...withoutCode(backlog).matchAll(/^\s*- \[x\] /gmi)].length;
 const open = [...withoutCode(backlog).matchAll(/^\s*- \[ \] /gm)].length;

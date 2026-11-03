@@ -40,7 +40,7 @@ souboru v docs/. Snímky chrání `.gitattributes`; jejich obsah nepřepisovat.
 | Podrobnosti uzavřených bloků | Tento úplný archiv; z BACKLOG na ně vedou odkazy. |
 | Všech deset serverových/produkčních oblastí a kritéria dokončení | [MVP_SERVER_PLAN](../MVP_SERVER_PLAN.md) |
 | Dřívější rozhodnutí o rozsahu, mobilním/webovém MVP a Business modelu | Úplný archiv, sekce Historie rozhodnutí o rozsahu |
-| Dřívější pokusy App Check, rollbacky, commity, testy a dokončená práce | Úplný archiv; návazné důkazy také v [TESTING](../TESTING.md) a [WEB_ENVIRONMENTS](../WEB_ENVIRONMENTS.md) |
+| Dřívější pokusy App Check, rollbacky, commity, testy a dokončená práce | Úplný archiv; návazné důkazy také v [TESTING](../operations/TESTING.md) a [WEB_ENVIRONMENTS](../operations/WEB_ENVIRONMENTS.md) |
 | Původní jednorázový ruční krok ve vývoji | [MVP_SERVER_PLAN](../MVP_SERVER_PLAN.md#data-reconciliation), stav výslovně k potvrzení |
 
 Staré formulace „zatím vypnuté“, „nebylo nasazené“, „dnes nebyl spuštěn“ nebo
@@ -49,7 +49,13 @@ přenést na současný provoz ani jimi přepsat novější ověřené výsledky
 Relativní archivní odkaz na mobilní plán zachovává pomocný rozcestník
 [MOBILE_DISTRIBUTION_PLAN](MOBILE_DISTRIBUTION_PLAN.md).
 
-## Zachované pravidlo štítků
+## Nahrazené návrhy
+
+- [Původní návrh A2](FEED_A2_PROPOSAL.md) – výslovně nahrazený úplný průchod
+  okolí před první stránkou. Platný je [progresivní feed](../plans/feed/FEED_PROGRESSIVE_PLAN.md).
+  Původní laboratorní limity nejsou schválené provozní limity.
+
+## Význam štítků
 
 - **MVP**: otevřená položka nebo podúkol blokuje veřejné webové vydání.
 - **Po MVP**: zůstává plánovaná, ale neblokuje webové MVP.

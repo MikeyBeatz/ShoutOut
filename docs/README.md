@@ -16,68 +16,78 @@ platí pro uvedenou etapu, současné revize jsou pouze v PROJECT_STATUS.
 ## Údržba a uspořádání
 
 - [Pravidla údržby a kontrola](DOCUMENTATION_MAINTENANCE.md) – role dokumentů, workflow a kontrolní příkaz.
-- [Mapa složek ke schválení](DOCUMENTATION_LAYOUT_PROPOSAL.md) – konkrétní přesuny; zatím neprovedené.
+- [Schválená mapa složek](DOCUMENTATION_LAYOUT_PROPOSAL.md) – provedené přesuny a dohledatelné původní cesty.
 - [Archivní index](archive/README.md) – neměnné úplné snímky a kontrolní součty.
 - [Původní zadání feedu](requests/FEED_READ_REFRESH_2026-10-31.md) – požadavek vlastníka, nikoli stav implementace.
 
 ## Účtový životní cyklus
 
+[Tematické plány](plans/README.md) · [Rozcestník účtové oblasti](plans/accounts/README.md).
+
 Serverové fáze jsou hotové v DEV; nejbližší otevřená práce je klientský přechod a společný závěrečný test. Podrobné datované piloty zůstávají důkazy svých etap.
 
-- [Odebrání oprávnění a materializace exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md)
-- [Archiv zpráv a komentářů smazaného účtu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md)
-- [Mazání účtu – průběh a návrh DEV pilotu](ACCOUNT_DELETION_DEV_PROPOSAL.md)
-- [Dokončení mazání účtu – rozhodnutí, ochrany a pořadí](ACCOUNT_DELETION_REMAINING_PLAN.md)
-- [Veřejná identita a loga smazaného účtu](ACCOUNT_PUBLIC_IDENTITY_PLAN.md)
-- [Odebrání reakcí mazaného účtu](ACCOUNT_REACTION_REMOVAL_PLAN.md)
-- [Konečný 60denní úklid účtu](ACCOUNT_RETENTION_PURGE_PLAN.md)
+- [Odebrání oprávnění a materializace exspirace](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md)
+- [Archiv zpráv a komentářů smazaného účtu](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md)
+- [Mazání účtu – průběh a návrh DEV pilotu](plans/accounts/ACCOUNT_DELETION_DEV_PROPOSAL.md)
+- [Dokončení mazání účtu – rozhodnutí, ochrany a pořadí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md)
+- [Veřejná identita a loga smazaného účtu](plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md)
+- [Odebrání reakcí mazaného účtu](plans/accounts/ACCOUNT_REACTION_REMOVAL_PLAN.md)
+- [Konečný 60denní úklid účtu](plans/accounts/ACCOUNT_RETENTION_PURGE_PLAN.md)
 
 ## Feed, přečtení a obnova
 
+[Rozcestník feedu](plans/feed/README.md).
+
 Celé A0–A3/B1–B4 před MVP. Plný detail a rating jsou v DEV; index, relace, expozice a kurzor jsou převážně lokální příprava, nikoli živý prostorový feed.
 
-- [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
-- [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)
-- [Feed – implementační etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md)
-- [Retence prostorového indexu – lokální ověření R4](FEED_INDEX_RETENTION.md)
-- [Migrační připravenost feedu a zbývající brány](FEED_MIGRATION_READINESS.md)
-- [Přenositelný kurzor a omezený výběr stránky – lokální stav](FEED_PORTABLE_CURSOR.md)
-- [Progresivní feed – schválený směr a doložená implementace](FEED_PROGRESSIVE_PLAN.md)
-- [Přečtení, hodnocení a platnost klientské relace](FEED_READING_POLICY.md)
-- [Feed: přečtení, stabilní stránky a ruční obnovení](FEED_READ_REFRESH_PLAN.md)
-- [Zápisové cesty před připojením prostorového indexu](FEED_WRITER_INTEGRATION.md)
+- [A1 – lokální kontrakt feedu a výsledky prototypu](plans/feed/FEED_A1_RESULTS.md)
+- [Sdílený prostorový index – lokální návrh a ověření](plans/feed/FEED_BLOCK_INDEX_PLAN.md)
+- [Feed – implementační etapy a návrhy ke schválení](plans/feed/FEED_IMPLEMENTATION_STAGES.md)
+- [Retence prostorového indexu – lokální ověření R4](plans/feed/FEED_INDEX_RETENTION.md)
+- [Migrační připravenost feedu a zbývající brány](plans/feed/FEED_MIGRATION_READINESS.md)
+- [Přenositelný kurzor a omezený výběr stránky – lokální stav](plans/feed/FEED_PORTABLE_CURSOR.md)
+- [Progresivní feed – schválený směr a doložená implementace](plans/feed/FEED_PROGRESSIVE_PLAN.md)
+- [Přečtení, hodnocení a platnost klientské relace](plans/feed/FEED_READING_POLICY.md)
+- [Feed: přečtení, stabilní stránky a ruční obnovení](plans/feed/FEED_READ_REFRESH_PLAN.md)
+- [Zápisové cesty před připojením prostorového indexu](plans/feed/FEED_WRITER_INTEGRATION.md)
 
 ## Navazující produktové a distribuční plány
 
-- [ShoutOut – Business monetizace](BUSINESS_MONETIZATION.md)
-- [Plán evropské ochranné známky ShoutOut](EU_TRADEMARK_PLAN.md)
-- [Vyhodnocení API událostí v okolí](EXTERNAL_EVENTS_EVALUATION.md)
-- [Karma, achievementy a kosmetické odměny](GAMIFICATION_MODEL.md)
-- [ShoutOut – plán mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md)
+[Rozcestník navazujících plánů](plans/roadmap/README.md).
+
+- [ShoutOut – Business monetizace](plans/roadmap/BUSINESS_MONETIZATION.md)
+- [Plán evropské ochranné známky ShoutOut](plans/roadmap/EU_TRADEMARK_PLAN.md)
+- [Vyhodnocení API událostí v okolí](plans/roadmap/EXTERNAL_EVENTS_EVALUATION.md)
+- [Karma, achievementy a kosmetické odměny](plans/roadmap/GAMIFICATION_MODEL.md)
+- [ShoutOut – plán mobilního testování a distribuce](plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md)
 
 ## Současné chování a model systému
 
-- [Architektura ShoutOut](ARCHITECTURE.md)
-- [Ověření Business účtů](BUSINESS_VERIFICATION.md)
-- [Datový model Firestore](DATA_MODEL.md)
-- [ShoutOut – interní role, oprávnění a moderace](INTERNAL_MODERATION.md)
-- [Produktové a uživatelské toky](PRODUCT_FLOWS.md)
-- [Specifikace obrazovek a navigace](UI_SPECIFICATION.md)
+[Referenční rozcestník](reference/README.md).
+
+- [Architektura ShoutOut](reference/ARCHITECTURE.md)
+- [Ověření Business účtů](reference/BUSINESS_VERIFICATION.md)
+- [Datový model Firestore](reference/DATA_MODEL.md)
+- [ShoutOut – interní role, oprávnění a moderace](reference/INTERNAL_MODERATION.md)
+- [Produktové a uživatelské toky](reference/PRODUCT_FLOWS.md)
+- [Specifikace obrazovek a navigace](reference/UI_SPECIFICATION.md)
 
 ## Provoz, testování a vydávání
 
-- [Nákladové pojistky Firebase a Google Cloud](COST_SAFETY.md)
-- [Firebase Storage – Business loga a obrázky k hlášením chyb](FIREBASE_STORAGE_SETUP.md)
-- [Prezentační web ShoutOut](PRESENTATION_SITE.md)
-- [Audit načítání a nákladů](READ_COST_AUDIT.md)
-- [Výběr změn a publikování ShoutOut](RELEASING.md)
-- [Vývojové prostředí, služby a nasazení](SETUP_AND_OPERATIONS.md)
-- [Testovací strategie a regresní matice](TESTING.md)
-- [Vývojový a produkční web](WEB_ENVIRONMENTS.md)
+[Provozní rozcestník](operations/README.md).
+
+- [Nákladové pojistky Firebase a Google Cloud](operations/COST_SAFETY.md)
+- [Firebase Storage – Business loga a obrázky k hlášením chyb](operations/FIREBASE_STORAGE_SETUP.md)
+- [Prezentační web ShoutOut](operations/PRESENTATION_SITE.md)
+- [Audit načítání a nákladů](operations/READ_COST_AUDIT.md)
+- [Výběr změn a publikování ShoutOut](operations/RELEASING.md)
+- [Vývojové prostředí, služby a nasazení](operations/SETUP_AND_OPERATIONS.md)
+- [Testovací strategie a regresní matice](operations/TESTING.md)
+- [Vývojový a produkční web](operations/WEB_ENVIRONMENTS.md)
 
 ## Nahrazené návrhy
 
-- [A2 – návrh dalšího ověřovacího úseku](FEED_A2_PROPOSAL.md)
+- [A2 – návrh dalšího ověřovacího úseku](archive/FEED_A2_PROPOSAL.md)
 
 ## Další rozcestníky a neveřejné podklady
 

@@ -10,7 +10,7 @@ Tento dokument je hlavní kontrolní seznam pro rozhodnutí, zda lze veřejně
 spustit webové MVP pro běžné uživatele a Business účty. Nejde o marketingový
 plán. Jednotlivé implementační úkoly a jejich technické podrobnosti zůstávají v
 [BACKLOG](BACKLOG.md) a specializovaných plánech, pořadí je v [TODO](TODO.md);
-povinné ruční scénáře jsou v [TESTING](TESTING.md).
+povinné ruční scénáře jsou v [TESTING](operations/TESTING.md).
 
 Webové MVP zahrnuje všechny současné webové funkce a dokončení rozpracovaných
 toků běžného a Business účtu. Moderátorské rozhraní musí umožnit bezpečný
@@ -62,7 +62,7 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 ### Pozdější mobilní distribuce
 
 Podrobný postup a časově citlivé požadavky obchodů zůstávají v plánu
-[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md); před placením
+[mobilního testování a distribuce](plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md); před placením
 nebo uploadem je znovu ověřte u Googlu a Applu.
 
 - [ ] Dokončit podepsaný Android release a bezpečně zálohovat produkční klíč.
@@ -100,12 +100,12 @@ nebo uploadem je znovu ověřte u Googlu a Applu.
   kandidáta.
 
 Testy fyzického Androidu a iPhonu zůstávají podmínkou pozdějšího mobilního
-vydání podle `TESTING.md` a `MOBILE_DISTRIBUTION_PLAN.md`.
+vydání podle `operations/TESTING.md` a `plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md`.
 
 ## 4. Business základ pro webové MVP
 
 - [ ] Schválit kritéria ruční kontroly Business žádostí, řešení duplicit,
-  sporů a změn identifikačních údajů podle `BUSINESS_VERIFICATION.md`.
+  sporů a změn identifikačních údajů podle `reference/BUSINESS_VERIFICATION.md`.
 - [ ] Doplnit a otestovat zamítnutí žádosti a pozastavení Business účtu včetně
   odebrání oprávnění, odůvodnění a auditu; dnes funguje jen schválení.
 - [ ] Ověřit celý tok Business účtu od registrace a aktivace přes pobočky a

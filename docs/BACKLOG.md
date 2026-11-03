@@ -23,7 +23,7 @@ Doména `shoutout-app.eu` je pořízená a slouží jako veřejný statický pre
 web. Nejde o webovou verzi aplikace: neobsahuje
 přihlášení, registraci, Business ani moderátorské rozhraní a nebude odkazovat do
 obchodů s aplikacemi. Úplný záznam rozhodnutí, cílového Hostingu a pořadí
-zprovoznění je v `PRESENTATION_SITE.md`.
+zprovoznění je v `operations/PRESENTATION_SITE.md`.
 
 - [x] **Před MVP, samostatná etapa** — vytvořit oddělený produkční Firebase
   projekt pro prezentaci: `shoutout-production-a1b34`; doména není připojená k
@@ -66,10 +66,10 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     počítadla. Volby budoucího B nesmějí zbytečně blokovat samostatné A0/A1.
   - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
     nepsat každý read automaticky zvlášť ani nepředstírat, že batch snižuje počet dokumentových zápisů.
-  - [Etapový návrh a schvalovací brány](FEED_IMPLEMENTATION_STAGES.md).
-    [Analýza, otevřené volby a akceptace cílového rozšíření](FEED_READ_REFRESH_PLAN.md).
+  - [Etapový návrh a schvalovací brány](plans/feed/FEED_IMPLEMENTATION_STAGES.md).
+    [Analýza, otevřené volby a akceptace cílového rozšíření](plans/feed/FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-  - A0/A1 hotové ([měření](FEED_A1_RESULTS.md)); [progresivní jádro](FEED_PROGRESSIVE_PLAN.md) a [sdílený index](FEED_BLOCK_INDEX_PLAN.md) lokálně ověřené, nenapojené. Celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace); technické limity před A2. Nezaměňovat
+  - A0/A1 hotové ([měření](plans/feed/FEED_A1_RESULTS.md)); [progresivní jádro](plans/feed/FEED_PROGRESSIVE_PLAN.md) a [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md) lokálně ověřené, nenapojené. Celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace); technické limity před A2. Nezaměňovat
     osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**
@@ -165,7 +165,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
 Interní pravidla rolí, pravomocí a postihů jsou vedena v
-`docs/INTERNAL_MODERATION.md`. Změny moderace musí aktualizovat také tento
+`docs/reference/INTERNAL_MODERATION.md`. Změny moderace musí aktualizovat také tento
 dokument, pravidla, testy a případně veřejné právní texty.
 
 ## Stav dokončení backlogu
@@ -207,17 +207,17 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
 
 - Lokálně byly 25. října odstraněné opakované GETy interakcí, restartování
   stejných streamů a duplicitní načítání historie/detailů; viz
-  `docs/READ_COST_AUDIT.md`. Tato optimalizace není dokončením cloudových
+  `docs/operations/READ_COST_AUDIT.md`. Tato optimalizace není dokončením cloudových
   nákladových pojistek ani serverového prostorového feedu. Vývojový build byl
   25. října nasazený na Hosting `shoutout-dev-46c81` a prošel základním
   průchodem v přihlášené relaci.
 - [ ] **MVP** — Před prvním nasazením Functions nastavit a prakticky otestovat
-  nákladové pojistky podle `docs/COST_SAFETY.md`: servisní kvóty, Functions
+  nákladové pojistky podle `docs/operations/COST_SAFETY.md`: servisní kvóty, Functions
   spend cap, rozpočtová upozornění, Pub/Sub nouzovou reakci a odpovědnou osobu.
   Po splnění pokračovat oddělenými kontrolovanými kroky: nasadit
   `enrichShoutGeography`, provést dávkový geografický backfill, aktivovat po
   cenové kontrole TTL a poté implementovat serverovou expiraci Shoutů a mazání
-  účtů. Přesná výstupní kritéria jsou v `docs/COST_SAFETY.md`.
+  účtů. Přesná výstupní kritéria jsou v `docs/operations/COST_SAFETY.md`.
 - [ ] **MVP** — Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
   a nasadit Functions, pravidla a indexy.
 - [ ] **MVP** — Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
@@ -280,7 +280,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     neměnný audit otevření a 60denní hranici čtení.
   - [ ] **MVP** — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace
     pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit
-    objem a schválit účtovaná TTL mazání podle `docs/COST_SAFETY.md`. Do té doby
+    objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby
     jsou starší záznamy bezpečně nečitelné.
 - [x] **Umožnit moderátorským a vyšším rolím nastavit polohu pro náhled území.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
@@ -365,14 +365,14 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 - [ ] **Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web.** **MVP**
   - Současný postup a otevřená kritéria ruční kontroly jsou v
-    `docs/BUSINESS_VERIFICATION.md`; napojení na firemní registry bylo z plánu
+    `docs/reference/BUSINESS_VERIFICATION.md`; napojení na firemní registry bylo z plánu
     vyřazeno.
   - Přidat do profilu konkrétní adresu/polohu provozovny, veřejný náhled a postup
     při změně adresy; souřadnice odvozovat důvěryhodně a chránit proti podvržení.
   - Jeden účet může mít více poboček pod stejným registračním číslem. V první
     verzi neimplementovat správce ani pozvánky; účet má jedno přihlášení.
   - [x] Přidat pouze business účtům dlaždici Business se schválenými profilovými
-    a monetizačními sekcemi podle `docs/BUSINESS_MONETIZATION.md`.
+    a monetizačními sekcemi podle `docs/plans/roadmap/BUSINESS_MONETIZATION.md`.
   - [x] Přidat klientskou správu poboček: seznam, název, adresa, pozastavení,
     bezpečné skrytí a opětovné předání změněné adresy k serverovému geocodingu.
   - Oddělit oficiální název firmy od veřejného názvu. Při vytvoření Shoutu vybrat
@@ -462,7 +462,7 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 Následující úkoly nejsou bránou webového MVP. Bezplatné Business funkce musí
 zůstat použitelné a bezpečné; placené kroky se přidají podle
-`BUSINESS_MONETIZATION.md` bez zásadní změny Business účtů.
+`plans/roadmap/BUSINESS_MONETIZATION.md` bez zásadní změny Business účtů.
 
 - [ ] **Po MVP** — Schválit model předplatného: rozsah plánů, cenu, období,
   placená oprávnění, změnu a ukončení plánu, Founder zvýhodnění a případný
@@ -619,7 +619,7 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
   - Před implementací konkrétních akcí schválit role a oprávnění, prohlížení,
     případný export/změny, audit a vztah ke konci retence. Neudělit automaticky
     celé moderační roli přímé klientské čtení všech soukromých zpráv.
-  - [Rozsah uchování a návaznosti](ACCOUNT_DELETION_REMAINING_PLAN.md).
+  - [Rozsah uchování a návaznosti](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 - [ ] **MVP** — Ověřit produkční web pro běžné i Business účty včetně přístupu
   běžného uživatele k feedu a publikování. Moderátorské trasy `/admin` dál
@@ -631,7 +631,7 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
 
 Budoucí postup od Windows přes Google Play a cloudový Mac až k TestFlightu a
 veřejným obchodům je zapsaný v plánu
-[mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md) včetně nákladů,
+[mobilního testování a distribuce](plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md) včetně nákladů,
 podmínek testovacích účtů a požadavků na fyzická zařízení.
 
 - [x] Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
@@ -672,7 +672,7 @@ podmínek testovacích účtů a požadavků na fyzická zařízení.
 
 Mobilní klienti se po webovém MVP registrují ve stejném produkčním Firebase
 projektu aplikace; distribuční a nákladové podrobnosti zůstávají v
-`MOBILE_DISTRIBUTION_PLAN.md`.
+`plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md`.
 
 - [ ] **Po MVP** — Připravit produkční Android/iOS Firebase aplikace, bezpečné
   build varianty a mobilní konfigurace bez přístupu k vývojovým datům.

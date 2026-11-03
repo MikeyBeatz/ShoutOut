@@ -1,9 +1,19 @@
 # ShoutOut development seed users
 
+## Documentation validation
+
+From the repository root run `node tools/check_docs.mjs`, or use
+`npm --prefix tools run check:docs`. It checks local Markdown links/anchors,
+index reachability, progress summaries and registered archive hashes. It also
+runs in CI. It does not crawl ignored local credentials or external URLs.
+[Documentation conventions](../docs/DOCUMENTATION_MAINTENANCE.md).
+
+## Development utilities
+
 Archive index changes have a separate read-only planner:
 [`archive_index_plan.mjs`](archive_index_plan.mjs), verified by
 [`archive_index_plan.test.mjs`](archive_index_plan.test.mjs).
-The [archive rollout plan](../docs/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) describes
+The [archive rollout plan](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) describes
 the exact DEV-only delta. Do not deploy the full index/TTL configuration for
 that rollout: existing collection indexes must remain and TTL stays unchanged.
 
@@ -154,7 +164,7 @@ role je zachována. Skript nikdy nepovažuje klientský Geoapify výsledek za
 automaticky důvěryhodný; příznak `--confirm-location` vyjadřuje ruční kontrolu
 operátorem. Jde pouze o vývojový nástroj; postup ruční kontroly a aktivace pro
 veřejný web je potřeba dokončit podle
-[`BUSINESS_VERIFICATION.md`](../docs/BUSINESS_VERIFICATION.md).
+[BUSINESS_VERIFICATION.md](../docs/reference/BUSINESS_VERIFICATION.md).
 
 Čistou transformační logiku bez přístupu k Firebase ověří:
 
@@ -211,7 +221,7 @@ konkrétní souhlas, nikoli jen obecný souhlas s rollouty.
 Backfill nově běží po účtech v transakcích a čte aktuální profil/roli; už
 nepoužívá hromadný snapshot pro zápis. To přidává kontrolní čtení, není to
 slib nižší ceny či rychlosti údržby. Před živým použitím přečtěte
-[rozsah a náklady](../docs/ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
+[rozsah a náklady](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md#admin-write-guards).
 37 unit/tools a 22 integračních případů jsou v test:tools/test:rules.
 Tato změna neprovádí backfill ani nasazení sama.
 
@@ -221,12 +231,13 @@ Lokální identita smazaného účtu: `npm run test:storage` spustí Firestore
 127.0.0.1:8080 a Storage 127.0.0.1:9199 pod shoutout-rules-test. Osm případů
 ověřuje SDK logo read, marker, podvržení, starší URL a bug screenshot regresi.
 Používá firebase.storage-test.json; nezapíná živé služby ani nevytváří Auth účty.
-Nové serverové jádro je v `test:rules`, ale není v deploy balících.
-[Schéma, omezení a návaznosti](../docs/ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
+Serverové jádro je v `test:rules` a novějších účtových deploy balících;
+původní lokální etapa již není současným nasazením.
+[Schéma, omezení a návaznosti](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md).
 
 
 The build and Hosting preview workflow is documented in
-[`docs/WEB_ENVIRONMENTS.md`](../docs/WEB_ENVIRONMENTS.md). Run
+[`docs/operations/WEB_ENVIRONMENTS.md`](../docs/operations/WEB_ENVIRONMENTS.md). Run
 `node tools/web_environment.mjs build dev` from the repository root. The
 `deploy` command previews the verified target unless `--apply` is explicit.
 No deployment is authorized by a local configuration change.

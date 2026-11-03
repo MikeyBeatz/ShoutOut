@@ -56,7 +56,7 @@ flutter doctor
 ## První spuštění
 
 Kompletní nastavení Firebase, Geoapify, lokálních klíčů a nasazení je v
-[provozním runbooku](docs/SETUP_AND_OPERATIONS.md). Následující příkazy stačí pro
+[provozním runbooku](docs/operations/SETUP_AND_OPERATIONS.md). Následující příkazy stačí pro
 části aplikace, které nepoužívají adresní našeptávání.
 
 Nainstalujte závislosti:
@@ -79,7 +79,7 @@ flutter run
 
 Spusťte webovou variantu bez Geoapify nebo použijte příkaz s `--dart-define` z
 runbooku. Oddělení prostředí a nasazení popisuje
-[WEB_ENVIRONMENTS.md](docs/WEB_ENVIRONMENTS.md):
+[WEB_ENVIRONMENTS.md](docs/operations/WEB_ENVIRONMENTS.md):
 
 ```powershell
 node tools/web_environment.mjs prepare dev
@@ -97,25 +97,30 @@ není dostupná, feed se stále načte, pouze nemá přesný výpočet vzdáleno
 
 Geoapify v klientovi našeptává adresy a vrací přesnou polohu Business
 provozovny. Klíč se předává přes `GEOAPIFY_API_KEY` při sestavení; jeho vytvoření,
-omezení a příkazy jsou v [provozním runbooku](docs/SETUP_AND_OPERATIONS.md).
+omezení a příkazy jsou v [provozním runbooku](docs/operations/SETUP_AND_OPERATIONS.md).
 
-Nové shouty ukládají sedmimístný `geohash`. Firebase Function
-`enrichShoutGeography` následně pomocí Google Geocoding API doplní pole
+Nové shouty ukládají sedmimístný `geohash`. Připravená Firebase Function
+`enrichShoutGeography` může po samostatném nasazení pomocí Google Geocoding API doplnit pole
 `geography`: ISO 3166-1 `countryCode`, ISO 3166-2 `subdivisionCode`, název
 lokality a pomocné Google Place ID. Place ID není trvalou identitou ani základem
 oprávnění.
 
-Před nasazením povolte Geocoding API, nastavte Functions secret a nasaďte
-Functions, pravidla a indexy:
+Geografická Function nebyla v posledním ověřeném DEV soupisu nasazená.
+Před jejím nasazením je potřeba schválený konkrétní rozsah, nákladová brána,
+Geocoding API a Functions secret. Nejde o automatický krok lokální instalace.
 
 Příkazy spouštějte z kořene repozitáře a zástupné `PROJECT_ID_APLIKACE`
 nahraďte ověřeným ID cílového Firebase projektu; postup a nákladová brána jsou
-v [provozním runbooku](docs/SETUP_AND_OPERATIONS.md).
+v [provozním runbooku](docs/operations/SETUP_AND_OPERATIONS.md).
 
 ```powershell
 firebase functions:secrets:set GOOGLE_MAPS_API_KEY --project PROJECT_ID_APLIKACE
-firebase deploy --only functions,firestore:rules,firestore:indexes --project PROJECT_ID_APLIKACE
 ```
+
+Functions, Rules a indexy nasazovat pouze v ověřeném cíleném rozsahu podle
+[pravidel vydání](docs/operations/RELEASING.md). Celý firestore.indexes.json
+obsahuje i dosud neschválené TTL; příklad plošného deploye není bezpečným
+obecným postupem. Tato dokumentační reorganizace nic nenasazuje.
 
 Klíč omezte na Geocoding API a nevkládejte ho do Flutter aplikace. Starší shouty
 lze obohatit příkazem `npm run backfill:geography` ve složce `tools`.
@@ -126,6 +131,7 @@ lze obohatit příkazem `npm run backfill:geography` ve složce `tools`.
 dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
+node tools/check_docs.mjs
 Push-Location tools
 npm ci
 npm run test:rules
@@ -138,7 +144,7 @@ Stejné základní kontroly spouští také GitHub Actions.
 ## Firebase a data
 
 Význam a vazby všech kolekcí jsou popsané v
-[datovém modelu](docs/DATA_MODEL.md). Přesná validace zůstává ve
+[datovém modelu](docs/reference/DATA_MODEL.md). Přesná validace zůstává ve
 `firestore.rules`.
 
 Hlavní kolekce ve Firestore:
@@ -223,19 +229,19 @@ projektu, neposílejte jej do chatu a nikdy jej necommitujte.
 - `firestore.rules` – oprávnění a validace Firestore dat
 - [Rozcestník dokumentace](docs/README.md) – přehled všech produktových,
   provozních a specializovaných dokumentů
-- `docs/ARCHITECTURE.md` – hranice systému a odpovědnosti modulů
-- `docs/PRODUCT_FLOWS.md` – skutečné uživatelské toky současné verze
-- `docs/UI_SPECIFICATION.md` – obrazovky, navigace a globální UI pravidla
-- `docs/DATA_MODEL.md` – kolekce, vazby a atomické invarianty
-- `docs/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
-- `docs/COST_SAFETY.md` – povinné nákladové limity, kvóty a nouzový postup
-- `docs/TESTING.md` – automatická a ruční regresní matice
+- `docs/reference/ARCHITECTURE.md` – hranice systému a odpovědnosti modulů
+- `docs/reference/PRODUCT_FLOWS.md` – skutečné uživatelské toky současné verze
+- `docs/reference/UI_SPECIFICATION.md` – obrazovky, navigace a globální UI pravidla
+- `docs/reference/DATA_MODEL.md` – kolekce, vazby a atomické invarianty
+- `docs/operations/SETUP_AND_OPERATIONS.md` – vytvoření prostředí, testy a nasazení
+- `docs/operations/COST_SAFETY.md` – povinné nákladové limity, kvóty a nouzový postup
+- `docs/operations/TESTING.md` – automatická a ruční regresní matice
 - `docs/PROJECT_STATUS.md` – stručný aktuální stav a další krok pro navázání práce
 - `docs/TODO.md` – priority, hranice webového MVP a přehled milníků
 - `docs/BACKLOG.md` – úplná kanonická checkboxová evidence úkolů
 - `docs/MVP_SERVER_PLAN.md` – podrobné serverové a produkční požadavky
 - `docs/archive/README.md` – nezměněný původní TODO a rozcestník historie
-- `docs/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
+- `docs/reference/INTERNAL_MODERATION.md` – interní role, oprávnění, postihy a postupy
 
 ## Lokalizace
 

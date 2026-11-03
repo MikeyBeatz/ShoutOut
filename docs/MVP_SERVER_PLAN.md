@@ -143,16 +143,16 @@ Attest zůstávají podmínkami pozdějších mobilních vydání.
 Hotovo, když upravený klient nemůže podvrhnout autora, čas, polohu, čítač,
 limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
-Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](FEED_READ_REFRESH_PLAN.md).
+Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](plans/feed/FEED_READ_REFRESH_PLAN.md).
 Vlastník vybral celé A0–A3 i B1–B4 před MVP; viz
-[etapy](FEED_IMPLEMENTATION_STAGES.md). Unread-first pouze v Nejblíž;
+[etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md). Unread-first pouze v Nejblíž;
 Top/Končící/Sledované zachovají vlastní řazení. R2 schválené: poslední bod otevřené aplikace s upozorněním, jinak výzva k poloze. Serverová varianta,
 indexy a nákladové limity mají bránu před A2 po výsledku A1. Samotné
 seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
 Aktuálně schválený výběr stránek a jeho neuzavřené náklady jsou v
-[progresivním plánu](FEED_PROGRESSIVE_PLAN.md); úplná příprava regionu před
+[progresivním plánu](plans/feed/FEED_PROGRESSIVE_PLAN.md); úplná příprava regionu před
 první stránkou není zvolená. Připravené moduly ještě nejsou živým query API.
-Lokálně ověřený [sdílený index](FEED_BLOCK_INDEX_PLAN.md) rozpracovává tyto
+Lokálně ověřený [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md) rozpracovává tyto
 požadavky; lokální historie/GC jsou ověřené, před aktivací zbývá integrace všech zápisů,
 migrace, zabezpečené query API a klientské napojení. Neuzavírá tuto bránu.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
@@ -224,7 +224,7 @@ Aktualizace 3. listopadu: identita/role, vlastnické odebrání palců a konečn
 nad reálným Firestore/Storage s řízeným časem, anonymní cizí kontext, replay
 a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientskému cutoveru,
 uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
-[Důkazy a navazující rozhodnutí](ACCOUNT_DELETION_REMAINING_PLAN.md).
+[Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>
 
@@ -234,7 +234,7 @@ Dílčí DEV stav 2. listopadu: 91d8d9b po CI 41399389084 materializuje uplynulo
 platnost pomocí active → expired, nejvýše 50 kandidátů ve volném minutovém
 ticku stávajícího plánovače. Živě 26/26 původních Shoutů měnilo pouze status;
 budoucí kontrola a potomci zachovaní. Sedmidenní fyzické mazání podkolekcí
-ještě implementované není. [Kontrakt a důkazy](ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+ještě implementované není. [Kontrakt a důkazy](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 
 - pravidelně vyhledat Shouty po skončení platnosti podle serverového času,
 - změnit stav na expirovaný bez spoléhání na čas zařízení,

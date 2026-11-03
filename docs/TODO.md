@@ -24,19 +24,16 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit reorganizaci a kontrolu dokumentace.** Nejdřív hlavní přehledy
-   a plány, potom ostatní obsah a odkazy; mapa přesunů se schvaluje předem.
-   [Postup a pravidla údržby](DOCUMENTATION_MAINTENANCE.md).
-2. **Dokončit klientský tok mazání účtu a uzavření jeho přímých zápisů.**
+1. **Dokončit klientský tok mazání účtu a uzavření jeho přímých zápisů.**
    Serverový 60denní úklid je hotový v DEV. Zbývající přímé klientské skrytí,
    kompatibilní přechod a závěrečný test jsou v
-   [účtovém plánu](ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-3. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
+   [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
-   [etap](FEED_IMPLEMENTATION_STAGES.md#aktualni-stav); lokální prototyp není
+   [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav); lokální prototyp není
    živý prostorový feed.
-4. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
+3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
 
@@ -125,10 +122,10 @@ indikátor novinek (B1–B4) sem nepatří: vlastník je vybral před MVP.
 Navazující mobilní etapa zachovává fyzické testování Androidu, Play Integrity,
 podpis a Google Play, stejně jako sestavení iOS na Macu, App Attest, fyzický
 iPhone, TestFlight a App Store. Úplný postup je v
-`docs/MOBILE_DISTRIBUTION_PLAN.md`. Navazující Business etapa zachovává
+`docs/plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md`. Navazující Business etapa zachovává
 záměr předplatného, otevřené rozhodnutí o placeném dosahu a Founder
 zvýhodnění, platební integraci, fakturaci a důvěryhodné statistiky propagace
-podle `docs/BUSINESS_MONETIZATION.md`. Business tokeny ani jejich nákup a
+podle `docs/plans/roadmap/BUSINESS_MONETIZATION.md`. Business tokeny ani jejich nákup a
 čerpání se neplánují. Ověření firmy přes
 registry bylo naopak výslovně zrušeno; webové MVP počítá s ruční aktivací.
 

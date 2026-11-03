@@ -1,6 +1,6 @@
 # Pravidla a kontrola projektové dokumentace
 
-Schválený úklid dokumentace zahájený 3. listopadu 2026. Nemění funkce aplikace,
+Schválený úklid dokumentace dokončený 3. listopadu 2026. Nemění funkce aplikace,
 data, schválené produktové volby ani stavy milníků pouhým přeskládáním textu.
 
 ## Odpovědnosti dokumentů
@@ -18,7 +18,7 @@ Kód a konfigurace dokazují skutečné chování; test neprokazuje nasazení.
 Nasazení doložit zdrojem, CI a kontrolou výsledku. U neověřeného rozporu
 zapsat nejistotu, nevymýšlet nové rozhodnutí ani měnit checkbox.
 
-## Pořadí tohoto úklidu
+## Provedený postup úklidu
 
 Mapa je výslovně schválená vlastníkem 3. listopadu 2026:
 [přesné rozdělení](DOCUMENTATION_LAYOUT_PROPOSAL.md). Přesuny lze provést
@@ -32,6 +32,20 @@ v uvedeném rozsahu, bez dalšího dotazu na jednotlivé soubory.
    nepřesouvat existující plány a provozní/reference dokumenty.
 4. Po schválení přesunout soubory, aktualizovat všechny odkazy a rozcestníky
    včetně AGENTS/README a znovu spustit kontrolu.
+
+Všechny čtyři části jsou dokončené. Přesunuto 37 schválených dokumentů,
+vytvořeny tematické rozcestníky. TODO je zkrácené z 305 na přibližně 145 řádků,
+PROJECT_STATUS z 830 na přibližně 110; úplné původní texty jsou v archivu.
+Opravené rozpory zahrnují dokončení účtového purge, retenci receipt,
+historické „žádné Functions“, produkční sdílený projekt a staré pořadí práce.
+
+Závěrečná kontrola: 64 Markdown souborů (55 v docs), všechny dokumenty v docs
+dohledatelné z hlavního indexu a interní odkazy/kotvy bez chyb. Metriky
+107/157 a 9/24 zůstávají stejné; zachované jsou všechny checkboxové řádky
+(s přepočtenými schválenými cestami) i čtyři registrované snímky.
+Negativní zkouška potvrdila odmítnutí chybějícího souboru, kotvy a osiřelého
+dokumentu. Aplikační testy nebyly kvůli této dokumentační změně lokálně opakovány;
+nejde o nové ověření živých služeb ani cen/právních podmínek externích zdrojů.
 
 ## Jak aktualizovat stav při další práci
 

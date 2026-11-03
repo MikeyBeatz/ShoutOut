@@ -6,12 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Probíhá schválený úklid dokumentace podle
-[plánu údržby](DOCUMENTATION_MAINTENANCE.md). Nemění aplikaci ani data.
-Nejbližší vývojová práce poté: dokončit klientský tok mazání účtu, uzavřít
+Dokončit klientský tok mazání účtu, uzavřít
 jeho přímé zápisy a provést společný závěrečný test. Serverový konečný úklid
 už je hotový v DEV. Kritéria a otevřené části:
-[účtový plán](ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+[účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
+Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
+Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 <a id="posledni-overene-nasazeni"></a>
 
@@ -37,7 +38,7 @@ Storage Rules a ostatní Functions se při posledním rolloutu nezměnily.
 Produkční aplikace na `go.shoutout-app.eu` dosud nemá první release.
 Projekt `shoutout-production-a1b34` sdílí s prezentací, app site je
 `shoutout-go-a1b34`. Vývojová práce nebyla sloučená do main ani vydaná do
-produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md).
+produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIRONMENTS.md).
 
 <a id="serverova-brana"></a>
 
@@ -54,7 +55,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](WEB_ENVIRONMENTS.md)
 
 MVP zůstává 9/24 milníků (38 %), backlog 107/157 (68 %). Konečný account
 purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány.
-[Kritéria serveru](MVP_SERVER_PLAN.md), [etapy feedu](FEED_IMPLEMENTATION_STAGES.md),
+[Kritéria serveru](MVP_SERVER_PLAN.md), [etapy feedu](plans/feed/FEED_IMPLEMENTATION_STAGES.md),
 [startovní brána](LAUNCH_READINESS.md).
 
 ## Poslední ověření a jeho hranice
@@ -72,9 +73,9 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
   neměnila obsah, createdAt ani počty. Dřívější oprava 17 geohashů je také
   dokončená; nejde o prostorový indexový backfill.
 
-Podrobné důkazy: [konečný úklid](ACCOUNT_RETENTION_PURGE_PLAN.md#uzavření-bodu-1-v-dev--3-listopadu-2026),
-[palce a vlastnictví](ACCOUNT_REACTION_REMOVAL_PLAN.md),
-[testovací strategie](TESTING.md). Staré pending žádosti a historické joby
+Podrobné důkazy: [konečný úklid](plans/accounts/ACCOUNT_RETENTION_PURGE_PLAN.md#uzavření-bodu-1-v-dev--3-listopadu-2026),
+[palce a vlastnictví](plans/accounts/ACCOUNT_REACTION_REMOVAL_PLAN.md),
+[testovací strategie](operations/TESTING.md). Staré pending žádosti a historické joby
 se automaticky nemigrovaly. Lokální moduly feedu nebyly nasazeny jako query API.
 
 ## Platná rozhodnutí a omezení
@@ -89,13 +90,13 @@ se automaticky nemigrovaly. Lokální moduly feedu nebyly nasazeny jako query AP
   anonymní Shout kontext pro cizí konverzace. Správa archivu v administraci
   je samostatný otevřený backlogový úkol.
 - Rozpočet vlastníka je nejvýše 5 000 Kč měsíčně; nejde o automaticky
-  vynucený finanční strop. [Nákladové pojistky](COST_SAFETY.md).
+  vynucený finanční strop. [Nákladové pojistky](operations/COST_SAFETY.md).
 - App Check v automatické relaci může potřebovat ruční asistenci; ochranu
   kvůli testu nevypínat. Globální enforcement Auth/Firestore není uzavřený.
 - Jednorázové srovnání starších čítačů/poloh není potvrzené. Není automaticky
   dalším příkazem k provedení; [stav inventury](MVP_SERVER_PLAN.md#data-reconciliation).
 - Rutinní rollout po přesném CI má trvalý souhlas, nové produktové/provozní
-  volby a první veřejné vydání mají vlastní brány. [RELEASING](RELEASING.md).
+  volby a první veřejné vydání mají vlastní brány. [RELEASING](operations/RELEASING.md).
   Lokální účty/hesla zůstávají pouze v ignorovaném docs/local/.
 
 ## Údržba
