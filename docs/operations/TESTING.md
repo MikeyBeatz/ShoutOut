@@ -81,6 +81,14 @@ CI 41696994668 zdroje a9ff425bb6b01e2d7420f45915b6ea977895fa43 je success:
 analýza/lint/build. Žádné nasazení, úpravy Rules, živé účty či data.
 [Přesný kontrakt a hranice](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
+Následný schválený rollout: pouze nová finalizeAccountDeletion z a9ff425 je
+ACTIVE (00001-wav, hash 21288ad667885c01f4bbf46dbdfee7a5a7c3025b), anonymní 401.
+Aktivace 8289dce / CI 41705303226 success má stejné počty celých sad výše a
+Hosting 96f84b4aa35ca226; čtyři veřejné soubory na obou originech shodné s čistým
+manifestem. Původní Functions/Rules/IAM/plánovače/inventura beze změny. Nový
+dočasný Auth fixture je připravený pro ruční UI průchod; ten i následný úklid
+zatím čekají, protože nativní ovládací spojení prohlížeče není dostupné.
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

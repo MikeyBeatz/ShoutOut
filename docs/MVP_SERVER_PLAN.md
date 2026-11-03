@@ -194,9 +194,11 @@ metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají
 
 ## 6. Zpracování žádosti o smazání účtu — MVP
 
-Klient po opětovném zadání hesla zapisuje `accountDeletionRequests/{uid}` a
-ihned odstraňuje Firebase Authentication účet, aby bylo možné e-mail znovu
-registrovat. Serverová automatizace musí:
+DEV klient po opětovném zadání hesla připraví vlastní Shouty a nechá serverovou
+finalizaci atomicky založit `accountDeletionRequests/{uid}`. Po ověřeném čtení
+žádosti ze serveru odstraňuje Firebase Authentication účet, aby bylo možné e-mail
+znovu registrovat. Přímá kompatibilní větev ještě není uzavřená v Rules.
+Serverová automatizace musí:
 
 - atomicky převzít žádost a zaznamenat stav zpracování,
 - okamžitě skrýt veřejný obsah uživatele,
@@ -225,8 +227,8 @@ nad reálným Firestore/Storage s řízeným časem, anonymní cizí kontext, re
 a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientskému cutoveru,
 uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
 Následně je v DEV ověřená příprava po dávkách a potvrzení/průběh v UI. Atomické
-serverové založení žádosti s testy souběhu je připravené pouze lokálně za vypnutým
-přepínačem; nasazené Rules ani milník tím uzavřené nejsou.
+serverové založení žádosti i aktivační klient jsou po úspěšném CI nasazené v DEV;
+nový přihlášený živý průchod a úklid ještě čekají. Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

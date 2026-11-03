@@ -16,18 +16,22 @@ s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověř
 uklizené; nejnovější čistě UI opravu ověřují widgety a shoda nasazených artefaktů.
 Nasazené vrstvy a důkazy jsou níže; Rules cutover zůstává otevřený.
 
-Na feature/account-deletion-finalization je připravená finalizace:
+Na feature/account-deletion-finalization je v DEV zapnutá finalizace:
 server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zakládá
 žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
-serverAccountDeletionFinalization byl v lokálním úseku false. Vlastník následně
-zrušil omezení na lokální práci a schválil průběžný DEV rollout s kontrolami.
-Nasazuje se pouze nová Function ze zdroje a9ff425; navazující aktivační commit
-má přepínač true, ale Hosting se nasadí až po jeho vlastním CI a ověřeném backendu.
-Rules jsou zatím beze změny a živý nový tok ještě není ověřený.
+serverAccountDeletionFinalization je true. Vlastník zrušil omezení na lokální práci
+a schválil průběžný DEV rollout s kontrolami. Nová Function a9ff425 je ACTIVE,
+anonymní volání odmítá HTTP 401; web 8289dce / CI 41705303226 success je nasazený
+a oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
+plánovače i původní účtová inventura se při rolloutu nezměnily.
+Živý přihlášený průchod ještě čeká: ovládání prohlížeče nemá dostupné nativní
+spojení, vlastník dostal žádost o ruční smazání jednoho nového dočasného účtu.
+Fixture má dva vlastní Shouty a cizí kontrolní Shout/komentář; ještě není uklizená.
+Údaje jsou pouze v ignorovaném docs/local/account-finalization-fixture.json.
 Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek je uzavřený; probíhá ověření kompatibility a DEV rollout,
+Lokální úsek a kompatibilní nasazení jsou hotové; zbývá živé ověření a úklid,
 potom zbývá Rules cutover. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
@@ -41,7 +45,8 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `97d4b3f6166ec799e2101f1b8be7d373c397f9b2` / `603bbdd9239e03d4` |
+| Webový zdroj / Hosting verze | `8289dce0b8f16d5f962db57a7874e8bdb6bcaf2f` / `96f84b4aa35ca226` |
+| Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
 | Účtový hash artefaktu | `fa459ba9128728f23b6b1a69f20111862fb72605` |
@@ -51,7 +56,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat webu: předchozí Hosting b4a1834e1c59c893 (zdroj 7976e2f); backend je
+Návrat webu: předchozí Hosting 603bbdd9239e03d4 (zdroj 97d4b3f); backend je
 kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,
@@ -83,8 +88,11 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
 ## Poslední ověření a jeho hranice
 
 - Atomické založení žádosti: [CI 41696994668](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41696994668)
-  pro a9ff425 success, celá Rules/server sada 367/367. Nový zdroj není nasazený
-  a přepínač je false; dosavadní tabulka ověřeného nasazení zůstává platná.
+  pro a9ff425 success, celá Rules/server sada 367/367. Function je nově nasazená;
+  aktivace [CI 41705303226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41705303226)
+  pro 8289dce také success (276 Flutter, 42 tools, 107 unit, 367 Rules/server,
+  15 purge, 15 Storage, analýza/lint/build). Nasazení a zachování ostatních vrstev
+  jsou ověřené; přihlášený nový tok zatím není dokončený.
 - UX potvrzení/průběhu: [CI 41688450535](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41688450535)
   pro 97d4b3f success; DEV Hosting 603bbdd9239e03d4, čtyři veřejné soubory
   (včetně bootstrapu) na obou originech shodné s čistým release manifestem.

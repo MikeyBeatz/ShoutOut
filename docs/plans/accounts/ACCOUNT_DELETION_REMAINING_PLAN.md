@@ -91,6 +91,24 @@ Před uzavřením Rules musí projít přihlášený tok a následný serverový
 Oprávnění k produkčnímu prvnímu vydání, migracím a existujícím účtům se nemění.
 Aktuální přesný výsledek patří do PROJECT_STATUS; souhlas s postupem není důkaz nasazení.
 
+DEV backend a9ff425 je ověřený: finalizeAccountDeletion ACTIVE, revize 00001-wav,
+hash 21288ad667885c01f4bbf46dbdfee7a5a7c3025b, schválené limity a anonymní HTTP 401.
+Ostatní Functions, pravidla, IAM, oba plánovače a původní účtová inventura shodné
+s baseline. Web 8289dce0b8f16d5f962db57a7874e8bdb6bcaf2f má úspěšné CI 41705303226
+a Hosting 96f84b4aa35ca226; index, main.dart.js, bootstrap a config na obou originech
+odpovídají čistému artefaktu. Oba přepínače přípravy/finalizace jsou true.
+
+Závěrečný živý test zatím čeká na ruční průchod vlastníka kvůli nedostupnému
+nativnímu ovládání prohlížeče. Vytvořený je jeden nový dočasný Auth účet, jeho
+profil/legal/role a dva vlastní Shouty, cizí kontrolní Shout a cizí komentář.
+Není ještě smazaný ani uklizený. Před uzavřením musí sedět skutečný Auth/App Check
+úspěch finalizační callable, receipt přípravy před žádostí, odstranění pouze
+testovacího Auth, zachování kontrolního obsahu, content-archived, původní +60denní
+termín a návrat inventury po úklidu. Lokální důkazy jsou v ignorovaných
+build/account-finalization-rollout-baseline.json / backend-proof.json / web-proof.json
+a aktuální fixture/progress soubory se stejným prefixem. Přihlašovací údaje jen
+docs/local/account-finalization-fixture.json. Rules cutover stále neproběhl.
+
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 
 Vlastník po vysvětlení schválil serverové skrytí po dávkách nejvýše 50 vlastních
