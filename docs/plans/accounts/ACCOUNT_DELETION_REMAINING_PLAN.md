@@ -20,8 +20,9 @@ Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PL
 Zbývá dokončit klientský přechod a uzavření přímých zápisů. DEV web 7976e2f
 sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová příprava
 je zapnutá. Backend a57ae9b i web mají úspěšné CI a ověřené artefakty nasazení.
-Před změnou Rules dokončit živý průchod a ověřit všechny zapisovací cesty;
-nasazení kompatibilní přípravy není úplný cutover. Vypnutá přepínačová větev
+Živý nový i starší kompatibilní průchod jsou dokončené a fixture uklizené.
+Před změnou Rules ověřit všechny zapisovací cesty a souběh; nasazení kompatibilní
+přípravy není úplný cutover. Vypnutá přepínačová větev
 a nativní klient dál používají původní přímé skrytí.
 Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
@@ -64,7 +65,7 @@ celkový cutover/regrese; tento lokální úsek jej neprohlašuje za vyřešené
 Před živým prostorovým indexem je potřeba bezpečný dávkový indexový writer;
 nelze na stejnou buňku nezávisle aplikovat 50 jednotlivých plánů.
 
-### Navazující DEV rollout a otevřený UI test
+### Navazující DEV rollout a živý UI test
 
 Backend a57ae9b / CI 41671609764 success: prepareAccountDeletion a aktualizovaný
 cleanupOperationReceipts jsou ACTIVE, hash bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06.
@@ -81,14 +82,34 @@ Fixture je uklizená, přihlašovací soubor odstraněný a původní inventura 
 Důkaz má výslovně realUIAndCallable=false / compatibilityOnly=true a je oddělený
 v ignorovaném build/account-preparation-first-test; nejde o úspěch nové callable.
 
-Vlastník následně výslovně schválil ještě jeden dočasný účet pro stejné ověření.
-Druhý účet se dvěma vlastními Shouty a cizím kontrolním Shoutem/komentářem je
-připravený; čeká na ruční průchod v novém anonymním okně. Ovládání prohlížeče
-není dostupné ani po resetu. Před uzavřením ověřit receipt hidden=2 před žádostí,
-odstranění výhradně tohoto Auth, zachování cizího obsahu, content-archived,
-původní 60denní deadline a úklid s návratem inventury k baseline. Aktuální lokální
-důkazy jsou v build/account-preparation-* a přihlašovací údaje druhého účtu jen
-v ignorovaném docs/local/account-preparation-fixture.json.
+Vlastník následně výslovně schválil ještě jeden dočasný účet pro stejné ověření
+a provedl ruční průchod v novém anonymním okně. Ovládání prohlížeče nebylo dostupné
+ani po resetu. Druhý test je dokončený: log nové callable potvrzuje platný Auth
+i App Check a HTTP 200; právě jeden receipt má hidden=2/hasMore=false a commit
+před createTime žádosti. Auth je odstraněný, cizí kontrolní Shout i komentář
+zachované, worker content-archived, veřejný profil má jen minimální marker
+a purge scheduled používá původní createTime žádosti +60 dní. Nejde o čekání
+60 dní ani o nové ověření samotného konečného purge.
+
+Obě fixture jsou uklizené včetně svých žádostí/jobů, profilů, obsahu, receipt
+a přihlašovacích souborů; původní účetní inventura se shoduje s baseline.
+Po úklidu znovu ověřené oba originy proti čistému artefaktu a nezměněné Functions,
+Rules, IAM a účtový plánovač. Aktuální ignorované důkazy:
+build/account-preparation-pilot-proof.json (realUIAndCallable=true),
+account-preparation-cleanup-proof.json, account-preparation-diagnosis.json
+a account-preparation-web-proof.json; první kompatibilní test je oddělený výše.
+
+Otevřený UX nález z druhého průchodu: uživatel po potvrzení ještě chvíli mohl
+ovládat aplikaci a možná viděl krátký mezistav před návratem na přihlášení.
+Potvrzená příčina v lib/account_deletion.dart: dialog nejdřív vrátí heslo a zavře
+se; reautentizace, příprava a založení žádosti pak běží bez blokujícího ukazatele.
+DeletionRequestGate z lib/auth_gate.dart přepíná podle streamu žádosti a může
+před dokončením Auth krátce zobrazit pending obrazovku. Přesný probliknutý prvek
+z uživatelského popisu určit nelze. UI latch brání souběžnému opakovanému spuštění;
+databáze eviduje právě jedno potvrzení přípravy. Před dokončením klienta navrhnout
+ukazatel probíhajícího mazání a ochranu ovládání během operace, včetně chyb,
+změny UID a zániku obrazovky. Zatím jde o nález/návrh, bez změny aplikačního kódu.
+Tato UX oprava nenahradí serverové řešení mezery mezi přípravou a žádostí ani Rules cutover.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
 Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní

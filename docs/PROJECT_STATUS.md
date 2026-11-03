@@ -15,13 +15,15 @@ DEV používá prepareAccountDeletion (max. 50 vlastních aktivních Shoutů/tra
 opakování dávek a společný první/resume pokus. Backend a57ae9b a aktivační web
 7976e2f mají úspěšné vlastní CI; serverAccountDeletionPreparation je v DEV true.
 Oba originy odpovídají čistému release artefaktu. Rules cutover není dokončený.
-První ruční test v dříve otevřené kartě použil starší kompatibilní postup:
-Auth odstraněný, vlastní Shouty skryté před žádostí, cizí obsah zachovaný,
-worker content-archived a původní +60denní termín ověřený. Fixture je uklizená
-a původní inventura shodná. Nová callable se při tomto průchodu nevolala.
-Vlastník zvlášť schválil druhý dočasný účet; ten je připravený a čeká na ruční
-průchod v novém anonymním okně. Ovládání prohlížeče nemá dostupné nativní spojení.
-Přihlašovací údaje druhého účtu jsou jen v ignorovaném docs/local souboru.
+Živý DEV průchod nové přípravy je dokončený: platný Auth/App Check, HTTP 200,
+jeden receipt hidden=2 před žádostí, odstraněný dočasný Auth, zachovaný cizí
+Shout i komentář, content-archived a purge scheduled s původním +60denním termínem.
+První test ve starší otevřené kartě navíc ověřil kompatibilní cestu. Obě fixture
+jsou uklizené, přihlašovací soubory odstraněné a původní inventura shodná.
+Ruční UI část provedl vlastník kvůli nedostupnému ovládání prohlížeče.
+Otevřený nález: po potvrzení se zavře dialog a příprava běží bez ukazatele průběhu;
+uživatel se může do zobrazení pending gate pohybovat v aplikaci. Není to důkaz
+selhání mazání; před klientským dokončením navrhnout srozumitelný stav průběhu.
 CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
 15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
 
@@ -82,9 +84,11 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
   pro 7976e2f success. Neúspěšné CI 34250ec zachytilo dvě staré testovací konfigurace;
   oprava nemění aplikační chování a celý nový běh je zelený. Nový endpoint odmítl
   anonymní požadavek HTTP 401. Kontrola po rolloutu potvrdila shodu původní účtové
-  inventury, ostatních Functions, obou plánovačů, IAM a Rules. První starší klient
-  ověřil kompatibilitu a jeho fixture je uklizená; nový přihlášený callable tok
-  se tím neověřil. Čeká se na druhý schválený test v čerstvém anonymním okně.
+  inventury, ostatních Functions, obou plánovačů, IAM a Rules. Nový přihlášený
+  callable tok i starší kompatibilní cesta jsou živě ověřené a obě fixture
+  uklizené. Po úklidu znovu ověřené oba originy a nezměněný backend/Rules/IAM.
+  Dokončený pilot nenahrazuje Rules cutover, zkoušku souběžného publikování
+  nebo chybějící ukazatel průběhu. [Důkazy a otevřený nález](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#navazující-dev-rollout-a-živý-ui-test).
 - Příprava f81eaf4: [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226).
   Aktivace 96b0782: [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008).
   Obě success: 254 Flutter, 40 tools, 107 unit, 355 Rules/server, 15 purge,

@@ -37,9 +37,15 @@ prostředí; oba DEV originy odpovídají manifestu. Nová callable + cleanup ma
 ověřené revize/limity; Rules, IAM, plánovače a ostatní Functions se nezměnily.
 Anonymní příprava vrací HTTP 401. První ruční test použil starší otevřenou kartu:
 ověřil kompatibilní smazání, zachování cizího obsahu, content-archived a +60denní
-termín; fixture uklizená, původní inventura shodná. Nová callable bez receipt
-a bez volání v logu tím ověřená není. Druhý výslovně schválený účet je připravený
-pro nové anonymní okno; čeká na ruční pomoc, nativní ovládací spojení není dostupné.
+termín; fixture uklizená, původní inventura shodná. Druhý schválený test v novém
+anonymním okně ověřil novou callable: Auth/App Check VALID, HTTP 200, jeden receipt
+hidden=2/hasMore=false před žádostí, odstraněný Auth, zachovaný cizí Shout/komentář,
+content-archived, minimální veřejný marker a purge scheduled s původním +60denním
+termínem. Druhá fixture i přihlašovací soubor uklizené, původní inventura shodná;
+oba originy a backend/Rules/IAM znovu ověřené. Nejde o živé uplynutí 60 dní.
+Nález UI: po potvrzení chybí ukazatel průběhu, aplikaci lze do pending gate
+ještě ovládat; samotná data potvrzují úspěšné smazání. UX oprava a souběh před
+Rules cutoverem zůstávají otevřené. Nový kód ani nasazení tento ověřovací úsek neměnil.
 [Rozsah a dokončovací kontroly](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 ## Konečný 60denní úklid

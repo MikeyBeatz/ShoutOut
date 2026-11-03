@@ -29,8 +29,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    kompatibilní přechod a závěrečný test jsou v
    [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
    Serverová příprava po 50 Shoutech a společný klientský pokus jsou nasazené
-   a zapnuté v DEV po úspěšném CI. Zbývá ruční živý průchod dočasným účtem,
-   ověření serverového výsledku, úklid fixture a následný Rules cutover.
+   a zapnuté v DEV po úspěšném CI. Živý nový i kompatibilní průchod jsou ověřené
+   a fixture uklizené. Zbývá jasný stav průběhu po potvrzení, uzavření přímých
+   zápisů a regrese souběžného publikování mezi přípravou a založením žádosti.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
