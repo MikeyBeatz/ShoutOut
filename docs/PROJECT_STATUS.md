@@ -16,15 +16,19 @@ s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověř
 uklizené; nejnovější čistě UI opravu ověřují widgety a shoda nasazených artefaktů.
 Nasazené vrstvy a důkazy jsou níže; Rules cutover zůstává otevřený.
 
-Na feature/account-deletion-finalization je schválená lokální finalizace:
+Na feature/account-deletion-finalization je připravená finalizace:
 server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zakládá
 žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
-serverAccountDeletionFinalization je false. Bez nasazení, živých dat, nových Auth
-účtů či změn Rules. Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
+serverAccountDeletionFinalization byl v lokálním úseku false. Vlastník následně
+zrušil omezení na lokální práci a schválil průběžný DEV rollout s kontrolami.
+Nasazuje se pouze nová Function ze zdroje a9ff425; navazující aktivační commit
+má přepínač true, ale Hosting se nasadí až po jeho vlastním CI a ověřeném backendu.
+Rules jsou zatím beze změny a živý nový tok ještě není ověřený.
+Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
 CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
 15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek je uzavřený; další brána je kompatibilita a schválený rollout,
-potom Rules cutover. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
+Lokální úsek je uzavřený; probíhá ověření kompatibility a DEV rollout,
+potom zbývá Rules cutover. [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
 Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.

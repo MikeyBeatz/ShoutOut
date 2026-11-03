@@ -21,7 +21,7 @@ test('account finalization defaults off and requires preparation and App Check',
 });
 
 test('account deletion preparation defaults off and requires App Check and a boolean', () => {
-  const withoutFlag = { ...dev }; delete withoutFlag.serverAccountDeletionPreparation;
+  const withoutFlag = { ...dev, serverAccountDeletionFinalization: false }; delete withoutFlag.serverAccountDeletionPreparation;
   assert.doesNotThrow(() => validateConfig(withoutFlag, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false }, 'dev'));
   for (const invalid of [null, 'true', 1, {}]) assert.throws(() => validateConfig({ ...dev, serverAccountDeletionPreparation: invalid }, 'dev'));

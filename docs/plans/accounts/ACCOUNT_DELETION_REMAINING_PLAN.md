@@ -80,6 +80,17 @@ vynucený cutover celé aplikace, dokud existují přímé klientské cesty. Př
 prostorovým indexem nadále zbývá dávkový indexový writer. Milníky se tímto
 lokálním podkrokem neuzavírají.
 
+### Navazující souhlas s průběžným nasazením a kontrolami
+
+Vlastník po dokončení lokální finalizace výslovně zrušil předchozí omezení na
+nenasazování a schválil průběžné kontroly. Kompatibilní DEV rollout proto může
+pokračovat: nejprve pouze finalizeAccountDeletion z a9ff425 po jeho úspěšném CI,
+ověření skutečné Function/limitů a zachování ostatních vrstev, potom aktivační
+commit se serverAccountDeletionFinalization=true po vlastním CI a DEV Hosting.
+Před uzavřením Rules musí projít přihlášený tok a následný serverový postup.
+Oprávnění k produkčnímu prvnímu vydání, migracím a existujícím účtům se nemění.
+Aktuální přesný výsledek patří do PROJECT_STATUS; souhlas s postupem není důkaz nasazení.
+
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 
 Vlastník po vysvětlení schválil serverové skrytí po dávkách nejvýše 50 vlastních

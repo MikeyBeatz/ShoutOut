@@ -9,13 +9,9 @@ void main() {
     'account finalization defaults off and requires preparation and App Check',
     () {
       final config =
-          jsonDecode(File('config/dev.json').readAsStringSync())
-              as Map<String, dynamic>;
-      expect(
-        WebEnvironment.fromJson(config).serverAccountDeletionFinalization,
-        isFalse,
-      );
-      config.remove('serverAccountDeletionFinalization');
+          (jsonDecode(File('config/dev.json').readAsStringSync())
+                as Map<String, dynamic>)
+            ..remove('serverAccountDeletionFinalization');
       expect(
         WebEnvironment.fromJson(config).serverAccountDeletionFinalization,
         isFalse,
@@ -65,7 +61,8 @@ void main() {
       final config =
           (jsonDecode(File('config/dev.json').readAsStringSync())
                 as Map<String, dynamic>)
-            ..remove('serverAccountDeletionPreparation');
+            ..remove('serverAccountDeletionPreparation')
+            ..['serverAccountDeletionFinalization'] = false;
       expect(
         WebEnvironment.fromJson(config).serverAccountDeletionPreparation,
         isFalse,
