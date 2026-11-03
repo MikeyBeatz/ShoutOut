@@ -109,7 +109,7 @@ z uživatelského popisu určit nelze. UI latch brání souběžnému opakované
 databáze eviduje právě jedno potvrzení přípravy. Před dokončením klienta navrhnout
 ukazatel probíhajícího mazání a ochranu ovládání během operace, včetně chyb,
 změny UID a zániku obrazovky. Zatím jde o nález/návrh, bez změny aplikačního kódu.
-Tato UX oprava nenahradí serverové řešení mezery mezi přípravou a žádostí ani Rules cutover.
+Navazující UX oprava níže nenahrazuje serverové řešení mezery mezi přípravou a žádostí ani Rules cutover.
 
 Vlastník následně výslovně schválil pořadí: nejprve „Tento krok nenávratně smaže
 váš účet“, po potvrzení průběh a potom přihlašovací obrazovka. Lokální oprava
@@ -123,8 +123,15 @@ překryv pro dosavadní chybovou/pending cestu. Změna UID odstraní vlastní p�
 pozdní výsledek nesmí zavřít novou route ani zasahovat do nového účtu.
 Oba nové texty mají překlady všech podporovaných jazyků. Pět widgetových scénářů
 pokrývají zrušení/potvrzení, blokaci a pending gate, chybu, UID a zánik navigatoru.
-Lokálně všech 269 Flutter testů a analýza bez chyb; rollout čeká na CI přesného
-commitu. Nové Auth účty nebo živá data tato oprava nepotřebuje ani nevytváří.
+Lokálně všech 269 Flutter testů a analýza bez chyb. Dokončený DEV rollout:
+zdroj 97d4b3f6166ec799e2101f1b8be7d373c397f9b2, CI 41688450535 success,
+Hosting 603bbdd9239e03d4. Index, main.dart.js, bootstrap a app-config.json na
+obou originech odpovídají čistému release manifestu; Functions, Rules, IAM,
+oba plánovače a účtová inventura se nezměnily. Lokální důkazy jsou v ignorovaných
+build/account-progress-ci.json / account-progress-web-proof.json / baseline.
+Návrat webu: 7976e2f / b4a1834e1c59c893. Nové Auth účty ani datové zápisy
+tato oprava nevytvářela. Nový ruční destruktivní UI průchod se neopakoval;
+nové UI je doložené widgetovými testy a nasazení porovnáním artefaktů.
 
 Následující datované piloty a schémata v1–v5 dokládají postup vývoje.
 Označení „aktuální“ u původního pilotu platí pro jeho datum, ne pro dnešní

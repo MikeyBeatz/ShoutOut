@@ -43,9 +43,9 @@ hidden=2/hasMore=false před žádostí, odstraněný Auth, zachovaný cizí Sho
 content-archived, minimální veřejný marker a purge scheduled s původním +60denním
 termínem. Druhá fixture i přihlašovací soubor uklizené, původní inventura shodná;
 oba originy a backend/Rules/IAM znovu ověřené. Nejde o živé uplynutí 60 dní.
-Nález UI: po potvrzení chybí ukazatel průběhu, aplikaci lze do pending gate
-ještě ovládat; samotná data potvrzují úspěšné smazání. UX oprava a souběh před
-Rules cutoverem zůstávají otevřené. Nový kód ani nasazení tento ověřovací úsek neměnil.
+Nález při tomto pilotu: po potvrzení chyběl ukazatel průběhu, aplikaci šlo do pending
+gate ještě ovládat; samotná data potvrdila úspěšné smazání. UX opravu řeší následující
+úsek. Souběh před Rules cutoverem zůstává otevřený. Pilot sám aplikační kód neměnil.
 [Rozsah a dokončovací kontroly](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 ## Potvrzení a průběh mazání účtu – 3. listopadu
@@ -57,8 +57,12 @@ přechod na přihlášení, uvolnění při chybě, změnu UID s pozdním výsle
 a zánik navigatoru. Český dialog při 360×640 px a klávesnici 300 px původně
 přetékal; posuvný obsah chybu odstraňuje a potvrzení/zrušení zůstávají dostupné.
 Existující testy koordinátoru a pending gate dál procházejí.
-Úprava má překlady ve všech sedmi jazycích. CI a DEV Hosting tohoto úseku
-zatím čekají; nový destruktivní Auth pilot se tímto úsekem nespouští.
+Úprava má překlady ve všech sedmi jazycích. CI 41688450535 pro 97d4b3f success:
+269 Flutter, 41 tools, 107 unit, 359 Rules/server, 15 purge a 15 Storage testů,
+analýza/lint/build. DEV Hosting 603bbdd9239e03d4 ověřený proti čistému release:
+index, main.dart.js, bootstrap i config shodné na obou originech. Functions,
+Rules, IAM, oba plánovače a účtová inventura shodné s baseline. Nový destruktivní
+Auth pilot se tímto úsekem nespouštěl; nejde o nový ruční UI test v prohlížeči.
 
 ## Konečný 60denní úklid
 

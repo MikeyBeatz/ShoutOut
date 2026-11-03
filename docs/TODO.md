@@ -30,8 +30,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
    Serverová příprava po 50 Shoutech a společný klientský pokus jsou nasazené
    a zapnuté v DEV po úspěšném CI. Živý nový i kompatibilní průchod jsou ověřené
-   a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou připravené
-   lokálně (269 Flutter testů); čeká CI a DEV Hosting. Dále zbývá uzavření přímých
+   a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou nasazené
+   v DEV po úspěšném CI (269 Flutter testů). Dále zbývá uzavření přímých
    zápisů a regrese souběžného publikování mezi přípravou a založením žádosti.
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query

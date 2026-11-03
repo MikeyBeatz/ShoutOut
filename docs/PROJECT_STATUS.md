@@ -21,12 +21,16 @@ Shout i komentář, content-archived a purge scheduled s původním +60denním t
 První test ve starší otevřené kartě navíc ověřil kompatibilní cestu. Obě fixture
 jsou uklizené, přihlašovací soubory odstraněné a původní inventura shodná.
 Ruční UI část provedl vlastník kvůli nedostupnému ovládání prohlížeče.
-Schválená UX oprava je lokálně připravená na fix/account-deletion-progress:
+Schválená UX oprava je nasazená v DEV ze zdroje 97d4b3f na fix/account-deletion-progress:
 přesné upozornění na nevratné smazání před heslem/potvrzením, následně blokující
 „Probíhá mazání…“ přes pending gate a po úspěchu přihlášení. Chyba překryv uvolní;
 změna UID ani zánik původní obrazovky nesmějí zavřít jinou route. Zachovaná
-retence i datová příprava. Lokálně 269 Flutter testů a analyzátor bez chyb;
-nový web se nasadí až po vlastním CI. Tabulka níže stále uvádí předchozí web.
+retence i datová příprava. Dialog je posuvný i nad mobilní klávesnicí.
+CI 41688450535 success: 269 Flutter, 107 unit, 41 tools, 359 Rules/server,
+15 purge a 15 Storage testů, analýza/lint/build. Oba originy odpovídají čistému
+release artefaktu; Functions, Rules, IAM, oba plánovače a účtová inventura shodné
+s baseline. Nový destruktivní Auth pilot tato čistě UI oprava nevytvářela;
+chování dialogu/průběhu je ověřené widgetovými testy, nikoli novým ručním UI průchodem.
 CI 41675834244 ověřilo 264 Flutter, 107 unit, 41 tools, 359 Rules/server,
 15 purge a 15 Storage testů, analýzu/lint a DEV build. Živý úspěch toto CI nenahrazuje.
 
@@ -41,7 +45,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `7976e2fa4aad969d9f787b2c94231e22240c39e2` / `b4a1834e1c59c893` |
+| Webový zdroj / Hosting verze | `97d4b3f6166ec799e2101f1b8be7d373c397f9b2` / `603bbdd9239e03d4` |
 | Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
 | Účtový hash artefaktu | `fa459ba9128728f23b6b1a69f20111862fb72605` |
@@ -51,7 +55,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat webu: předchozí Hosting b9084c259258a732 (zdroj f81eaf4); backend je
+Návrat webu: předchozí Hosting b4a1834e1c59c893 (zdroj 7976e2f); backend je
 kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,
@@ -82,6 +86,10 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
 
 ## Poslední ověření a jeho hranice
 
+- UX potvrzení/průběhu: [CI 41688450535](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41688450535)
+  pro 97d4b3f success; DEV Hosting 603bbdd9239e03d4, čtyři veřejné soubory
+  (včetně bootstrapu) na obou originech shodné s čistým release manifestem.
+  Původní 77dad6e CI bylo záměrně zrušené po doplnění mobilní opravy; nebylo nasazené.
 - Nová příprava: [CI 41671609764](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41671609764)
   pro a57ae9b a [CI 41675834244](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41675834244)
   pro 7976e2f success. Neúspěšné CI 34250ec zachytilo dvě staré testovací konfigurace;
@@ -91,7 +99,7 @@ purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány
   callable tok i starší kompatibilní cesta jsou živě ověřené a obě fixture
   uklizené. Po úklidu znovu ověřené oba originy a nezměněný backend/Rules/IAM.
   Dokončený pilot nenahrazuje Rules cutover nebo zkoušku souběžného publikování.
-  Ukazatel průběhu je připravený zvlášť, zatím bez rolloutu.
+  Ukazatel průběhu je následně dokončený samostatným UX rolloutem výše.
   [Důkazy a UX oprava](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#navazující-dev-rollout-a-živý-ui-test).
 - Příprava f81eaf4: [CI 41538976226](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41538976226).
   Aktivace 96b0782: [CI 41539164008](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41539164008).
