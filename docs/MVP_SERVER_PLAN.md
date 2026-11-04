@@ -2,7 +2,7 @@
 
 ## Aktuální stav a použití plánu
 
-Souhrn k 3. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
+Souhrn k 4. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
 Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
 
@@ -13,7 +13,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 | Obsahová brána | Serverové DEV operace a timed idempotence nasazené. | Živý prostorový feed, indexové cesty a uzavření přímých zápisů. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
-| Mazání účtu | Serverové fáze včetně +60denního purge dokončené v DEV. | Klientský přechod, přímé zápisy a společný závěrečný test. |
+| Mazání účtu | Serverové fáze včetně +60denního purge a klientský tok ověřené v DEV. | Kompatibilita klientů, přímé zápisy v Rules a společný závěrečný test. |
 | Životnost Shoutů | Exspirace mění status v DEV. | Sedmidenní fyzický úklid Shoutů a potomků, indexové napojení. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
 | Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
@@ -232,8 +232,9 @@ serverové založení žádosti i aktivační klient jsou po úspěšném CI nas
 zastaralého Watch stavu; oprava čtecí transakcí c2409e0 má úspěšné CI i DEV rollout.
 Resume po opravě i nový první průchod, serverové dokončení a úklid jsou ověřené.
 Oprava životního cyklu odběrů 776e147 má k 4. listopadu úspěšné CI a DEV rollout;
-jeden nový schválený dočasný test čeká na logout/relogin a smazání bez Uncaught Error.
-Potom zbývá jeho úklid a kompatibilita/cutover; Rules ani milník tím uzavřené nejsou.
+živě prošly logout/relogin i smazání bez Uncaught Error, serverové dokončení a úklid
+schválené fixture. Zbývá kompatibilita/cutover a společný test; Rules ani milník
+tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

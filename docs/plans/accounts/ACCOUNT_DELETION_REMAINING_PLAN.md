@@ -17,16 +17,20 @@ Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou 
 původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
 Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
-Zbývá dokončit klientský přechod a uzavření přímých zápisů. Nasazený DEV web 97d4b3f
-sdílí první pokus a pokračování přes AccountDeletionAttempt; serverová příprava
-je zapnutá. Backend a57ae9b i web mají úspěšné CI a ověřené artefakty nasazení.
-Živý nový i starší kompatibilní průchod jsou dokončené a fixture uklizené.
-Před změnou Rules ověřit všechny zapisovací cesty a souběh; nasazení kompatibilní
-přípravy není úplný cutover. Vypnutá přepínačová větev
-a nativní klient dál používají původní přímé skrytí.
-Retry UI už je hotové. Celý účtový milník uzavře společný test žádosti,
+Klientský tok v DEV je hotový: web 776e147 sdílí první pokus i pokračování přes
+AccountDeletionAttempt, příprava a57ae9b a finalizace a9ff425 jsou zapnuté.
+První pokus, recovery, varování/průběh i oprava live odběrů mají lokální/CI testy
+a živé ověření. Logout/relogin i smazání prošly bez Uncaught Error, server dokončil
+content-archived a fixture jsou uklizené. Přesné vrstvy a důkazy níže a v PROJECT_STATUS.
+
+Zbývá kompatibilní uzavření přímých zápisů. Před změnou Rules ověřit všechny
+zapisovací cesty a souběh; vypnutá přepínačová větev a nativní klient dál používají
+původní přímé skrytí a založení žádosti. Současné Rules ještě dovolují klientské
+create/delete žádosti. Příprava a finalizace nejsou vynucený cutover celé aplikace.
+Celý účtový milník uzavře kompatibilita, uzavření těchto cest a společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
-Schválený lokální úsek níže nemění oprávnění k novým migracím nebo živým testům.
+Konkrétní souhlasy pro lokální úseky, rollouty a dočasné Auth testy jsou u etap níže;
+samotné dokončení této opravy neschvaluje nové migrace či změny Rules.
 
 ## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
 
@@ -236,8 +240,8 @@ Lokální oprava na fix/account-live-subscription-lifecycle:
 Starý stack potvrdil SDK document errorWrapper při sign-out; konkrétní widget
 neurčil. Nový guard a Auth invalidace pokrývají všechny produkční sdílené dokumenty
 včetně rolového wrapperu. Pozdní dokumentová chyba po změně UID je reprodukovaná
-ve fault testu bez consumer onError a nově neuniká do zóny. Živé odstranění všech
-tří Uncaught Error ještě musí potvrdit schválený nový test; nevydávat ho za hotový.
+ve fault testu bez consumer onError a nově neuniká do zóny. V živém testu níže
+se po opravě Uncaught Error neopakovaly při logout/relogin ani smazání účtu.
 
 9 nových regresních scénářů, 19 cílených, konečná celá Flutter sada 289/289,
 formátování a analyzátor prošly. Zdroj 776e147e46d98c8b9f8d3eb5409e87bb381d013e
@@ -253,10 +257,21 @@ Computer Use sky.list_apps vrací native pipe unavailable / os error 2 a CUA
 inventář nemá browser přístup (browser access host unavailable); žádné vstupy
 do aplikací se neprováděly. Je připravený právě jeden schválený nový dočasný Auth
 účet a profil/právní fixture, 2 vlastní aktivní Shouty a cizí kontrolní Shout/komentář;
-před testem žádost ani receipt neexistují. Údaje jen docs/local/account-finalization-fixture.json.
-Vlastník je požádaný o nové anonymní okno, logout/relogin stejného UID a následné
-smazání s kontrolou Uncaught Error a safe diagnostiky. Při chybě se má zastavit.
-Živý výsledek ani úklid této nové fixture zatím ověřené nejsou.
+před testem žádost ani receipt neexistovaly. Vlastník výslovně potvrdil logout/relogin
+i smazání bez Uncaught Error. Server ověřil Auth absent, jedinou přípravu hidden=2
+před žádostí, callable HTTP 200 a Auth/App Check VALID, zachovaný cizí Shout/komentář,
+content-archived, minimální marker a purge scheduled s původním +60denním termínem.
+Kontrolní Shout v tomto průchodu neexpiroval, jeho celý seed digest zůstal shodný.
+Jen tato fixture a přihlašovací soubor jsou uklizené; původní inventura shodná.
+Oba originy a nezměněné Functions/Rules/IAM/plánovače po úklidu znovu ověřené.
+Důkazy v ignorovaném build/account-live-lifecycle-test: pilot-proof happyPathVerified=true,
+initialAttemptFailed=false, manualResumeUsed=false; console-review potvrzuje oba UI
+průchody bez Uncaught Error a cleanup-proof potvrzuje úklid/odstranění údajů.
+První čtení Cloud Logging vrátilo dočasné API 429 (read quota); ověření dat běželo
+nezávisle a pozdější omezené opakování úspěšně ověřilo i logy. Kvóty se neměnily.
+Schválená oprava odběrů je uzavřená. Historický konkrétní třetí widget ze starého
+stacku neurčený, ale společný dokumentový guard/cancel je otestovaný a původní
+Uncaught se v novém živém scénáři neobjevily. Fontové upozornění zůstává samostatně.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

@@ -155,15 +155,24 @@ bez startu zdroje, opožděný cancel proti nové návštěvě stejného UID, se
 bez neobslouženého Future, zánik widgetu a sanitizace diagnostiky.
 S původní live_data sadou 19/19, konečná celá Flutter sada 289/289, analyzátor
 a formátování prošly. Přesný třetí starý aplikační odběratel ze stacku neurčený;
-nová ochrana pokrývá všechny sdílené dokumenty/dotazy/role a musí projít živým testem.
+nová ochrana pokrývá všechny sdílené dokumenty/dotazy/role a prošla živým scénářem níže.
 CI 41908033275 pro 776e147 success: 289 Flutter, 42 tools, 107 unit, 369 Rules/server,
 15 purge/15 Storage, analýza/lint/build. DEV Hosting b274e8c83ebd616a odpovídá čistému
 release na obou originech včetně nových diagnostických markerů. Backend, Rules,
 IAM, plánovače a původní inventura shodné. Noto upozornění se neopravovalo.
-Jeden nový schválený dočasný Auth účet je připravený: 2 vlastní active Shouty,
-cizí kontrolní Shout/komentář, před testem žádná žádost/receipt. Vlastník je požádaný
-o logout/relogin a smazání s kontrolou konzole; výsledek i úklid ještě zbývají.
-UI automatizace má native pipe i browser access host nedostupné.
+Jeden nový schválený dočasný Auth účet začínal se 2 vlastními active Shouty,
+cizím kontrolním Shoutem/komentářem, bez žádosti/receipt. Vlastník výslovně potvrdil
+logout/relogin i následné smazání bez Uncaught Error. Server ověřil Auth absent,
+jedinou přípravu před žádostí, validní Auth/App Check + HTTP 200, zachovaný cizí
+obsah (celý digest shodný), content-archived, marker a purge scheduled s původním
++60denním termínem. Fixture a údaje uklizené, původní inventura shodná; živé webové
+artefakty i nezměněný backend/Rules/IAM/plánovače po úklidu znovu ověřené.
+Důkazy v ignorovaném build/account-live-lifecycle-test zahrnují pilot/cleanup proof
+a console-review uživatele. Původní Uncaught se v tomto scénáři neobjevily; historický
+konkrétní třetí widget ze starého stacku nebyl určený. Noto zůstává samostatně.
+Cloud Logging na první pokus vrátilo API 429 read quota; pozdější omezené opakování
+uspělo a konečný pilot-proof má callableLogsVerified=true. Kvóty se neměnily.
+UI automatizace má native pipe i browser access host nedostupné, průchod provedl vlastník.
 
 ## Konečný 60denní úklid
 

@@ -6,14 +6,15 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Dokončit klientský tok mazání účtu, uzavřít
-jeho přímé zápisy a provést společný závěrečný test. Serverový konečný úklid
-už je hotový v DEV. Kritéria a otevřené části:
+Ověřit kompatibilitu klientů, připravit uzavření přímých zápisů při mazání účtu
+a provést společný závěrečný test. Klientský tok i serverové fáze už jsou
+ověřené v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
 DEV má zapnutou přípravu po 50 Shoutech, společný první/resume pokus a potvrzení
 s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověřené a fixture
-uklizené; nejnovější čistě UI opravu ověřují widgety a shoda nasazených artefaktů.
+uklizené. Potvrzení/průběh i oprava odběrů mají widgetové testy, shodu artefaktů
+a nový živý průchod bez Uncaught Error.
 Nasazené vrstvy a důkazy jsou níže; Rules cutover zůstává otevřený.
 
 DEV má zapnutou serverovou finalizaci a9ff425: atomická kontrola vlastních aktivních
@@ -45,7 +46,7 @@ content-archived, marker a purge scheduled s původním termínem. Test i údaje
 uklizené a původní inventura shodná. Důkazy build/account-finalization-first-attempt-test
 mají happyPathVerified=true pro funkční tok; neznamená to konzoli bez chyb.
 Vlastník doložil 3 Uncaught Error z Firestore Watch při reauth/sign-out a chyby
-feed interakcí permission-denied. Dva odběry blocked/following v home.dart nemají
+feed interakcí permission-denied. Dva odběry blocked/following v home.dart neměly
 onError; konkrétní odběratel třetí dokumentové chyby ze starého stacku není potvrzený.
 Noto fonty jsou samostatné upozornění.
 Vlastník 4. listopadu schválil opravu odběrů, CI/DEV web a jeden nový dočasný Auth
@@ -58,13 +59,16 @@ Zdroj 776e147e46d98c8b9f8d3eb5409e87bb381d013e má success CI 41908033275:
 289 Flutter, 42 tools, 107 unit, 369 Rules/server, 15 purge/15 Storage, lint/analyze/build.
 DEV Hosting b274e8c83ebd616a je nasazený; oba originy shodné s čistým release,
 nové diagnostické markery v JS ověřené, backend/Rules/IAM/plánovače a původní inventura
-nezměněné. Schválený nový dočasný účet je připravený (2 vlastní active Shouty,
-cizí kontrolní obsah, žádná žádost/receipt); údaje jen docs/local/account-finalization-fixture.json.
-Vlastník je požádaný o nové anonymní okno, logout/relogin a smazání se sledováním
-Uncaught Error. Výsledek a úklid této fixture ještě zbývají. Native pipe je
-nedostupná (os error 2), Browser access host také; UI test potřebuje asistenci.
-Další krok: schválený živý test a úklid; potom kompatibilita klientů,
-uzavření přímých zápisů a závěrečný test.
+nezměněné. Vlastník potvrdil logout/relogin i smazání bez Uncaught Error. Server
+potvrzuje Auth absent, jedinou přípravu před žádostí, zachovaný cizí obsah,
+Auth/App Check VALID a HTTP 200. Worker dokončil content-archived, marker a purge
+scheduled s původním +60denním termínem. Jen tato fixture včetně údajů je uklizená;
+původní inventura shodná. Oba originy a nezměněné Functions/Rules/IAM/plánovače
+jsou po úklidu znovu ověřené. Důkazy v ignorovaném build/account-live-lifecycle-test
+obsahují pilot/cleanup proof a explicitní UI console-review od vlastníka.
+Native pipe i Browser access host jsou nedostupné; UI průchod provedl vlastník.
+Oprava odběrů je uzavřená. Noto upozornění zůstává samostatně evidované. Další
+krok: kompatibilita klientů, uzavření přímých zápisů a závěrečný test.
 Historie přípravy, původní piloty, CI a meze ověření zůstávají v účtovém plánu.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 

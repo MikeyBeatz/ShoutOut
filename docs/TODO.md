@@ -24,16 +24,15 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit klientský tok mazání účtu a uzavření jeho přímých zápisů.**
+1. **Ověřit kompatibilitu klientů a uzavřít přímé zápisy při mazání účtu.**
    Serverové fáze včetně +60denního úklidu, příprava po 50 Shoutech, atomické
    založení žádosti a potvrzení/průběh v UI jsou v DEV. Oprava potvrzení commitu
    čtecí transakcí c2409e0 má úspěšné CI a ověřené nasazení na obou originech.
    Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
-   Nový první pokus, serverové dokončení a úklid jsou také ověřené. Zbývají
-   nezachycené chyby odběrů při reauth/odhlášení (2 query a 1 document). Schválená
-   oprava lifecycle/obsluhy 776e147 je po úspěšném CI nasazená v DEV; oba originy
-   a nezměněný backend ověřené. Jeden nový dočasný účet čeká na logout/relogin,
-   smazání a kontrolu konzole, pak jeho úklid. Potom kompatibilita a přímé zápisy
+   Oprava odběrů 776e147 je po úspěšném CI nasazená a živě ověřená: logout/relogin
+   i smazání bez Uncaught Error, dokončený serverový postup a úklid fixture.
+   Oba originy, nezměněný backend a původní inventura ověřené. Zbývá kompatibilita
+   současného webu se starší/vypnutou a nativní větví, uzavření klientských zápisů
    a společný závěrečný test podle
    [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
