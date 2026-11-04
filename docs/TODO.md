@@ -35,6 +35,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    současného webu se starší/vypnutou a nativní větví, uzavření klientských zápisů
    a společný závěrečný test podle
    [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+   Nový schválený lokální úsek sjednocuje DEV cesty i pro nativní kód a v emulátoru
+   uzavírá přímé žádosti/skrytí. Lokální ověření prošlo, čeká konečné CI a živá
+   brána; nasazené Rules se ještě nezměnily.
+   [Rozsah a přechod klientů](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

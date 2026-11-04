@@ -1100,7 +1100,7 @@ describe('identity and account gates', () => {
     );
   });
 
-  test('owner can hide active shouts before requesting account deletion', async () => {
+  test('legacy owner batches cannot bypass server account-deletion preparation', async () => {
     await seedEligibleUser('writer', 'SafeWriter');
     await seedShout({
       id: 'deletion-shout',
@@ -1118,9 +1118,9 @@ describe('identity and account gates', () => {
     for (const shout of active.docs) {
       batch.update(shout.ref, { status: 'deleted' });
     }
-    await assertSucceeds(batch.commit());
+    await assertFails(batch.commit());
     const hidden = await getDoc(doc(db, 'shouts', 'deletion-shout'));
-    assert.equal(hidden.data().status, 'deleted');
+    assert.equal(hidden.data().status, 'active');
   });
 
   test('content restriction blocks creating content until it expires', async () => {

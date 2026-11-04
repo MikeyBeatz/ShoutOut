@@ -1,6 +1,9 @@
 rules_version = '2';
-// accountDeletionRequests.authDeletionConfirmedAt: server-only Timestamp.
-// Client request create/update cannot supply it; presence permanently blocks client rollback.
+// accountDeletionRequests/{uid}: server-owned pending request (userId/email:
+// string, requestedAt/retainUntil: timestamp, optional server confirmation).
+// All request fields and lifecycle transitions are immutable to clients.
+// Existing shouts/{id}.status: string changed by the server; client counter
+// updates cannot change it. The existing validated create path is unchanged.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -731,30 +734,9 @@ service cloud.firestore {
     match /accountDeletionRequests/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || isModerator());
-      allow create: if verifiedIdentity() &&
-        request.auth.uid == userId &&
-        request.resource.data.keys().hasOnly([
-          'userId', 'email', 'requestedAt', 'retainUntil', 'status'
-        ]) &&
-        request.resource.data.keys().hasAll([
-          'userId', 'email', 'requestedAt', 'retainUntil', 'status'
-        ]) &&
-        request.resource.data.userId == userId &&
-        request.resource.data.email == request.auth.token.email &&
-        request.resource.data.requestedAt == request.time &&
-        request.resource.data.retainUntil >=
-          request.time + duration.value(59, 'd') &&
-        request.resource.data.retainUntil <=
-          request.time + duration.value(61, 'd') &&
-        request.resource.data.status == 'pending';
-      // Roll back a just-created request if deleting the Authentication user
-      // unexpectedly fails after successful reauthentication.
-      allow delete: if signedIn() &&
-        request.auth.uid == userId &&
-        resource.data.status == 'pending' &&
-        !('authDeletionConfirmedAt' in resource.data) &&
-        resource.data.requestedAt + duration.value(10, 'm') >= request.time;
-      allow list, update: if false;
+      // Server finalization commits the request only after checking preparation.
+      // Lost acknowledgements resume this same request; no client rollback.
+      allow create, update, delete, list: if false;
     }
 
     match /businessApplications/{userId} {
@@ -2046,15 +2028,7 @@ service cloud.firestore {
         validShoutCreate();
       allow update: if eligibleUser() &&
         resource.data.get('contentPurged', false) != true &&
-        (
-          (
-            (resource.data.authorId == request.auth.uid || isModerator()) &&
-            request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['status']) &&
-            request.resource.data.status == 'deleted'
-          ) ||
-          validShoutCounterUpdate(shoutId)
-        );
+        validShoutCounterUpdate(shoutId);
       allow delete: if false;
 
       match /comments/{commentId} {

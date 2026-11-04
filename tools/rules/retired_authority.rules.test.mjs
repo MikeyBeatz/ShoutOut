@@ -9,7 +9,7 @@ before(async()=>{env=await initializeTestEnvironment({projectId:'shoutout-rules-
  rules:readFileSync(new URL('../../firestore.rules',import.meta.url),'utf8')}});});
 after(async()=>{if(env){await env.clearFirestore();await env.cleanup();}});
 const actor=uid=>env.authenticatedContext(uid,{email:`${uid}@example.test`,email_verified:true}).firestore();
-for(const kind of ['moderator','seniorModerator','administrator','owner','legacy'])test(`${kind}: a pending or confirmed deletion cannot retain privileged reads and rollback restores the original role`,async()=>{
+for(const kind of ['moderator','seniorModerator','administrator','owner','legacy'])test(`${kind}: a pending or confirmed deletion cannot retain privileged reads or restore authority by client rollback`,async()=>{
  await env.clearFirestore();const uid='retiring',db=actor(uid),paths=['businessProfiles/target','businessApplications/target','bans/target','contentRestrictions/target'];
  const role=kind==='legacy'?null:{role:kind,level:{moderator:3,seniorModerator:4,administrator:5,owner:6}[kind]};
  await env.withSecurityRulesDisabled(async c=>{const admin=c.firestore();for(const path of paths)await setDoc(doc(admin,path),{privateFixture:'retained'});
@@ -22,8 +22,10 @@ for(const kind of ['moderator','seniorModerator','administrator','owner','legacy
  for(const path of paths)await assertFails(getDoc(doc(db,path)));
  assert.deepEqual((await getDoc(roleRef)).data(),beforeRole);
  await assertFails(updateDoc(roleRef,{level:6}));
- await assertSucceeds(deleteDoc(doc(db,`accountDeletionRequests/${uid}`)));
- for(const path of paths)await assertSucceeds(getDoc(doc(db,path)));
+ await assertFails(deleteDoc(doc(db,`accountDeletionRequests/${uid}`)));
+ for(const path of paths)await assertFails(getDoc(doc(db,path)));
+ // Only privileged fixture cleanup can remove the request. Keep testing that
+ // retirement of the role itself survives loss of the request later on.
  await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),`accountDeletionRequests/${uid}`),{userId:uid,status:'pending',requestedAt:new Date(),authDeletionConfirmedAt:new Date()}));
  for(const path of paths)await assertFails(getDoc(doc(db,path)));
  await assertFails(deleteDoc(doc(db,`accountDeletionRequests/${uid}`)));

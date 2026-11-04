@@ -47,7 +47,9 @@ async function fixture(own = 3) {
     collection: name => name === 'shouts' ? lab.base.collection('source')
       : name === 'accountDeletionJobs' ? lab.base.collection('jobs') : db.collection(name) };
   const jobRef = accountDeletionJobRef(scoped, accountDeletionEventIdentity(event, scoped)); refs.push(jobRef);
-  let millis = Date.now();
+  // The emulator's commit has sub-millisecond precision. Never place the
+  // controlled test clock before it, including when both occur in the same ms.
+  let millis = Math.max(Date.now(), Math.ceil(event.data.createTime.toMillis()));
   const options = { leaseMillis: 60000, retryDelayMillis: 1000, authWaitMillis: 10000,
     clock: () => new Date(millis), indexWriter: lab, pageSize: 2 };
   return { uid, foreignUid, event, db: scoped, lab, requestRef, jobRef, options, tick: delta => { millis += delta; } };

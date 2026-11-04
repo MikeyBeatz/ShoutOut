@@ -10,6 +10,26 @@ Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktu
 
 ## Lokální příprava mazání účtu – 3. listopadu
 
+Novější schválený úsek 4. listopadu uzavírá přímé žádosti a statusové skrytí
+Shoutu pouze lokálně/v emulátoru. `deletion_write_policy_test.dart` ověřuje
+nativní DEV bez webové konfigurace, povinnou serverovou cestu i s vypnutými
+DEV přepínači a zachování produkční konfigurace. Celkem 293 Flutter a 42 tools
+prošlo, stejně jako analyzátor, formát a DEV debug build.
+`deletion_cutover.integration.test.mjs` je v test:rules: create/update/delete
+žádosti pro osobní/Business/moderační/anon relaci, klientský rollback a transakce,
+vlastní/moderační čtení bez enumerace, status i v batchi s čítačem, dvě dávky
+51 Shoutů, lost ack/replay se stejným createTime/updateTime/retencí, cizí obsah,
+serverové autorské/moderační mazání a přímá publikace vs. finalizace (obě pořadí
+a čtyři souběhy). Původní pozitivní testy klientského rollbacku nyní čekají zákaz;
+privilegované odstranění testovací žádosti dál ověřuje ztrátu kontextu workeru.
+
+První celá sada 371/375 odhalila tři časové fixture s Date.now před jemnějším
+createTime a jeden nový test s Admin Timestamp v klientském SDK. Fixture nyní
+kotví řízený čas nejdřív na zaokrouhlený commit, klientský vstup používá Date.
+Runtime se nemění. Cílené opakování celého worker souboru a nového cutoveru je
+48/48; konečnou celou sadu potvrdí CI. Logy build/deletion-cutover-*.log zůstávají
+ignorované. Nejde o živý Auth test nebo nasazení. [Přechod a návrat](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
+
 Nová `prepare_account_deletion.integration.test.js` je součástí test:rules.
 Cíleně s receipt cleanupem prošlo 9 emulátorových scénářů: 51 vlastních Shoutů,
 zachování cizích/neaktivních dokumentů a potomků, duplicate/replay, sedmidenní

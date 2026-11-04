@@ -174,7 +174,7 @@ final _shoutDeletionGateway = ShoutDeletionGateway(
 );
 
 Future<void> _deleteShoutContent(String shoutId) async {
-  if (kIsWeb && WebEnvironment.current.serverShoutDeletion) {
+  if (DeletionWritePolicy.current.shoutDeletion) {
     await _shoutDeletionGateway.delete(
       userId: FirebaseAuth.instance.currentUser?.uid ?? '',
       shoutId: shoutId,

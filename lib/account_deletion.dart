@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'account_deletion_attempt.dart';
 import 'account_deletion_diagnostics.dart';
 import 'account_deletion_preparation.dart';
 import 'account_deletion_progress.dart';
+import 'deletion_write_policy.dart';
 import 'l10n/text.dart';
 import 'timed_operation_gateway.dart';
-import 'web_environment.dart';
 
 final _deletionRuns = <String, Future<AccountDeletionOutcome?>>{};
 void _logAccountDeletionFailure(String stage, Object error) => debugPrint(
@@ -162,14 +161,14 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         FirebaseAuth.instance.currentUser?.uid != user.uid) {
       return null;
     }
+    final policy = DeletionWritePolicy.current;
     final attempt = AccountDeletionAttempt(
       user.uid,
       FirebaseAccountDeletionTransport(
         auth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
         user: user,
-        finalizeIntent:
-            kIsWeb && WebEnvironment.current.serverAccountDeletionFinalization
+        finalizeIntent: policy.finalization
             ? () async =>
                   (await FirebaseFunctions.instanceFor(region: 'europe-west3')
                           .httpsCallable('finalizeAccountDeletion')
@@ -179,8 +178,7 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         prepareBeforeIntent: resume
             ? null
             : () async {
-                if (kIsWeb &&
-                    WebEnvironment.current.serverAccountDeletionPreparation) {
+                if (policy.preparation) {
                   await _preparation.prepare(user.uid);
                 } else {
                   await hideActiveShoutsBeforeAccountDeletion(user.uid);

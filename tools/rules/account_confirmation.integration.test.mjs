@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { before, after, test } from 'node:test';
-import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
+import { initializeTestEnvironment, assertFails } from '@firebase/rules-unit-testing';
 import { doc, deleteDoc, updateDoc, deleteField, setDoc, serverTimestamp, getDoc, getDocs, collection } from 'firebase/firestore';
 import { confirmAccountAuthDeletion as confirm } from '../../functions/account_deletion_confirmation.js';
 const sdk = createRequire(new URL('../../functions/package.json', import.meta.url));
@@ -33,8 +33,8 @@ async function fixture() {
   const client = doc(context.firestore(), request.path);
   return { uid, request, lease, identity, options, snapshot, client, run: () => confirm(identity, db, missing, options) };
 }
-test('the existing rollback remains available before server confirmation', async () => {
-  const f = await fixture(); await assertSucceeds(deleteDoc(f.client)); assert.equal((await f.request.get()).exists, false);
+test('client rollback is denied even before server confirmation', async () => {
+  const f = await fixture(); await assertFails(deleteDoc(f.client)); assert.equal((await f.request.get()).exists, true);
 });
 
 test('confirmation atomically retires modern and legacy authority while preserving metadata and retention', async () => {
@@ -97,7 +97,8 @@ test('a client cannot forge server confirmation when creating a request', async 
   const clientData = { ...f.snapshot.data(), requestedAt: serverTimestamp(), retainUntil: f.snapshot.data().retainUntil.toDate() };
   await assertFails(setDoc(f.client, { ...clientData, authDeletionConfirmedAt: new Date() }));
   assert.equal((await f.request.get()).exists, false);
-  await assertSucceeds(setDoc(f.client, clientData));
+  await assertFails(setDoc(f.client, clientData));
+  assert.equal((await f.request.get()).exists, false);
 });
 test('existing Auth and provider failures cannot create confirmation', async () => {
   const f = await fixture();
@@ -115,10 +116,10 @@ test('lost lease, invalid server marker and exact retention boundary cannot part
   await assert.rejects(confirm(f.identity, db, missing, { ...f.options,
     clock: () => new Date(f.identity.requestCreateTime.toMillis() + 60 * 86400000) }), /retention-invalid/);
 });
-test('cancellation winning during Auth lookup stops confirmation', async () => {
+test('privileged request removal during Auth lookup stops confirmation', async () => {
   const f = await fixture(), entered = Promise.withResolvers(), release = Promise.withResolvers();
   const running = confirm(f.identity, db, { async getUser() { entered.resolve(); await release.promise; return missing.getUser(); } }, f.options);
-  await entered.promise; await assertSucceeds(deleteDoc(f.client)); release.resolve();
+  await entered.promise; await assertFails(deleteDoc(f.client)); await f.request.delete(); release.resolve();
   await assert.rejects(running, /not-pending/); assert.equal((await f.request.get()).exists, false);
 });
 test('confirmation commits before a concurrent old-token delete, which must then fail', { timeout: 25000 }, async () => {

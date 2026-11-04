@@ -255,7 +255,12 @@ a neveřejný 60denní archiv všech zahrnutých zpráv/komentářů a jejich re
 Od e4dd199 worker před novou destruktivní dávkou ukládá po Auth user-not-found
 serverový authDeletionConfirmedAt do původní žádosti ve stejné transakci jako
 kontrolu lease. Rules po potvrzení nepovolí klientský rollback; před ním zůstává
-původní desetiminutové okno. Status, createTime a původní retenční termín se
+původní desetiminutové okno v posledních nasazených Rules. Lokální návrh cutoveru
+už odmítá klientské create/update/delete žádosti i přímé skrytí Shoutu; živě ještě
+není nasazený. DeletionWritePolicy vybírá v DEV server pro web i nativní kód
+nezávisle na starých přepínačích, mimo DEV přepínače zachovává. Podmínky přechodu
+a návratu jsou v [účtovém plánu](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
+Status, createTime a původní retenční termín se
 nemění. Dokončené joby se znovu neotevírají.
 Od b685ac4 nové v4 joby před Shouty vytvoří minimální veřejný marker a zachytí
 klíč vlastní přezdívky, potom stránkují vlastní businessLogos prefix a odvolají

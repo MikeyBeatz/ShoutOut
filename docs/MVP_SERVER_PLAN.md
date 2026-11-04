@@ -197,7 +197,7 @@ metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají
 DEV klient po opětovném zadání hesla připraví vlastní Shouty a nechá serverovou
 finalizaci atomicky založit `accountDeletionRequests/{uid}`. Po ověřeném čtení
 žádosti ze serveru odstraňuje Firebase Authentication účet, aby bylo možné e-mail
-znovu registrovat. Přímá kompatibilní větev ještě není uzavřená v Rules.
+znovu registrovat. Přímá kompatibilní větev ještě není uzavřená v nasazených Rules.
 Serverová automatizace musí:
 
 - atomicky převzít žádost a zaznamenat stav zpracování,

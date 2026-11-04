@@ -24,13 +24,79 @@ a živé ověření. Logout/relogin i smazání prošly bez Uncaught Error, serv
 content-archived a fixture jsou uklizené. Přesné vrstvy a důkazy níže a v PROJECT_STATUS.
 
 Zbývá kompatibilní uzavření přímých zápisů. Před změnou Rules ověřit všechny
-zapisovací cesty a souběh; vypnutá přepínačová větev a nativní klient dál používají
-původní přímé skrytí a založení žádosti. Současné Rules ještě dovolují klientské
+zapisovací cesty a souběh; starší vypnutá přepínačová větev a starý nativní klient používají
+původní přímé skrytí a založení žádosti. Nasazené Rules ještě dovolují klientské
 create/delete žádosti. Příprava a finalizace nejsou vynucený cutover celé aplikace.
 Celý účtový milník uzavře kompatibilita, uzavření těchto cest a společný test žádosti,
 Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
 Konkrétní souhlasy pro lokální úseky, rollouty a dočasné Auth testy jsou u etap níže;
 samotné dokončení této opravy neschvaluje nové migrace či změny Rules.
+
+<a id="dev-deletion-cutover"></a>
+
+## Uzavření přímých zápisů – lokální úsek 4. listopadu 2026
+
+Vlastník schválil sjednocení mazání účtu i jednotlivého Shoutu v DEV pro web
+a nativní kód, uzavření přímých zápisů v emulátoru a související testy. Nejdřív
+lokální příprava; před živým uzavřením doložit kompatibilitu a návrat. Tato etapa
+nemění produkční konfiguraci, ostatní obsahové zápisy, rozsah moderace, prostředky,
+60denní lhůtu ani existující data. Nezahrnuje nové živé Auth fixture.
+
+`DeletionWritePolicy` podle skutečného Firebase projektu v DEV vždy vybere
+serverovou přípravu, finalizaci a `deleteShout`. Platí také pro nativní kód a web
+s vypnutými historickými přepínači. Mimo DEV zůstává původní chování přepínačů;
+produkční konfigurace se nezapíná. Při selhání callable se nepoužije přímý zápis.
+Společný první/resume koordinátor, čtecí transakce před Auth.delete a řízený
+průběh zůstávají stejné. Nativní inicializace App Check už existuje v main.dart;
+tato etapa ji nemění a test směrování není důkazem registrace provideru nebo
+průchodu na fyzickém telefonu.
+
+Aktuální lokální Rules odmítají klientské create/update/delete žádosti včetně
+desetiminutového rollbacku. Vlastní čtení pro pokračování a dosavadní moderační
+čtení zůstávají. U existujícího Shoutu je odstraněná přímá změna statusu na deleted
+pro autora i moderátora; zbývá původní validátor izolovaných čítačů. Tvorba Shoutu,
+komentáře a ostatní operace se tímto úsekem neuzavírají. Nasazené DEV Rules jsou
+stále původní; lokální soubor není důkaz živého vynucení.
+
+### Kompatibilita a pořadí případného DEV rolloutu
+
+| Klient / vrstva | Po uzavření zápisů |
+|---|---|
+| Nasazený web 776e147 s aktuálním config/dev | Všechny tři cesty už používají server; kompatibilní referenční web. |
+| Nový web / nativní kód v DEV | Povinná serverová cesta i při vypnutém historickém přepínači. |
+| Starší otevřený web s přímou cestou | Novou žádost či přímé skrytí Rules odmítnou; potřebuje obnovit na aktuální web. Existující žádost nezmizí a aktuální klient ji převezme. |
+| Starý mobilní build | Vyžaduje aktualizaci; fyzický mobilní průchod a distribuce nejsou touto etapou ověřené. |
+| Produkce | Bez změny; vlastní aktivace služeb/klienta a první vydání mají samostatnou bránu. Tento soubor Rules tam nyní nenasazovat. |
+
+Před živým uzavřením: úspěšné CI přesného commitu, čistý release a ověřený
+artefakt; nasadit a ověřit kompatibilní DEV web jako první, potom pouze cílové
+Firestore Rules. Backend/IAM/Storage/plánovače a původní inventura se nesmějí
+změnit. Ověřit zamítnutí přímých zápisů a nový serverový tok, případné nové
+Auth účty či živé testovací zápisy zahrnout do konkrétně schváleného průchodu.
+Nedělat migraci starých žádostí, jobů nebo retenčních termínů.
+
+Bezpečný návrat webu je 776e147 / Hosting b274e8c83ebd616a: ponechává serverové
+cesty zapnuté a funguje se zpřísněnými Rules. Starší přímé klienty ani vypnutí
+DEV přepínačů nelze použít jako návrat. Předchozí nasazené Rules mají ruleset
+44f59688-3b46-4b2b-be9c-ee88d9a22204; jejich návrat by znovu otevřel přímé zápisy,
+proto není běžnou opravou UI. Žádost se při chybě neruší a neopakuje s novým termínem.
+
+Lokálně prošly Flutter 293/293, tools 42/42, analýza, formátování i DEV debug
+build. První celá Rules/server sada měla 371/375: tři staré fixture zamrzly před
+submilisekundovým createTime a jeden nový test posílal Admin Timestamp klientskému
+SDK. Opraven je pouze testovací čas/typ, žádný runtime workeru ani oprávnění se
+kvůli testům neuvolňovaly. Konečná cílená sada workeru + cutoveru prošla 48/48;
+celou konečnou podobu ještě musí potvrdit CI. Důkazy jsou v ignorovaných
+build/deletion-cutover-{flutter,tools,analyze,format,build,rules,targeted}.log.
+Nové testy pokrývají klientské zákazy včetně transakce/batche, čtení recovery,
+dvě dávky 51 Shoutů, replay/lost ack, zachování cizího obsahu, serverové mazání
+autorem/Business/moderátorem a závod zbývající přímé publikace s finalizací.
+Dosavadní testy rollbacku byly upravené na odmítnutí klientského zrušení.
+Kompilace a lokální kontrola nejsou fyzický mobilní průchod ani živý Rules rollout.
+Připravená pravidla jsou návrh ověřený emulátorem: zužují klientské zápisy a
+ponechávají izolované validátory čítačů. Před veřejným vydáním je stále nutná
+společná bezpečnostní a předstartovní kontrola. CI a případný rollout doplnit
+až podle skutečných důkazů.
 
 ## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
 

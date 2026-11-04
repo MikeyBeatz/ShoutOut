@@ -11,6 +11,14 @@ a provést společný závěrečný test. Klientský tok i serverové fáze už 
 ověřené v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
+Vlastník schválil další lokální úsek 4. listopadu: povinné serverové mazání
+účtu/Shoutu pro všechny DEV klienty a zákaz přímých zápisů v emulátoru. Kód
+a testy jsou připravené na fix/dev-deletion-server-cutover. Lokálně 293 Flutter,
+42 tools a konečných 48 cílených worker/cutover testů, analýza/formát/DEV debug
+build prošly; celá konečná sada ještě čeká na CI.
+Živé Rules, web, backend ani data se tím zatím nezměnily.
+[Kompatibilita, rozsah a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
+
 DEV má zapnutou přípravu po 50 Shoutech, společný první/resume pokus a potvrzení
 s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověřené a fixture
 uklizené. Potvrzení/průběh i oprava odběrů mají widgetové testy, shodu artefaktů
