@@ -143,6 +143,20 @@ Potvrzuje SDK query/document errorWrapper a odpovídající reauth/getIdToken r�
 neidentifikuje samo o sobě konkrétní třetí aplikační odběr. Důkaz v ignorovaném
 build/account-console-map-proof.json. Žádná aplikační oprava těchto chyb zatím neproběhla.
 
+## Životní cyklus live odběrů – 4. listopadu
+
+Vlastník schválil lokální opravu, CI/DEV web a jeden nový dočasný Auth test s úklidem.
+Nová live_data_lifecycle_test.dart má 9 regresních scénářů: dvě query a dokument
+po odhlášení bez consumer onError, pozastavená fronta dat/chyb přes změnu UID,
+aktivní permission-denied a recovery, reauth stejného UID bez restartu, invalidace
+jen vlastní app včetně metadata varianty, zachovaný auth odběr, stale reference
+bez startu zdroje, opožděný cancel proti nové návštěvě stejného UID, selhání cancel
+bez neobslouženého Future, zánik widgetu a sanitizace diagnostiky.
+S původní live_data sadou 19/19, konečná celá Flutter sada 289/289, analyzátor
+a formátování prošly. Přesný třetí starý aplikační odběratel ze stacku neurčený;
+nová ochrana pokrývá všechny sdílené dokumenty/dotazy/role a musí projít živým testem.
+CI, DEV rollout a nový Auth test ještě zbývají. Noto upozornění se neopravovalo.
+
 ## Konečný 60denní úklid
 
 `npm --prefix tools run test:purge` spouští samostatně emulátor a

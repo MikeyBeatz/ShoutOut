@@ -28,10 +28,13 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => StreamBuilder<User?>(
-    stream: liveStreams.watch((
-      'auth',
-      FirebaseAuth.instance,
-    ), FirebaseAuth.instance.userChanges),
+    stream: liveStreams.watch(
+      ('auth', FirebaseAuth.instance),
+      () => FirebaseAuth.instance.userChanges().map((user) {
+        liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
+        return user;
+      }),
+    ),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const _LoadingPage();

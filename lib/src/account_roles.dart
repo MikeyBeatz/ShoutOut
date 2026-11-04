@@ -1,9 +1,13 @@
 part of '../main.dart';
 
-Stream<AccountRole> _watchAccountRole(String userId) => liveStreams.watch(
-  liveDataKey(('accountRole', FirebaseFirestore.instance, userId)),
-  () => _loadAccountRole(userId),
-);
+Stream<AccountRole> _watchAccountRole(String userId) {
+  final key = liveDataKey(('accountRole', FirebaseFirestore.instance, userId));
+  return liveStreams.watch(
+    key,
+    () => _loadAccountRole(userId),
+    isCurrent: () => FirebaseAuth.instance.currentUser?.uid == key.$1,
+  );
+}
 
 Stream<AccountRole> _loadAccountRole(String userId) async* {
   await for (final snapshot

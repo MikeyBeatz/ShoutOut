@@ -46,10 +46,18 @@ uklizené a původní inventura shodná. Důkazy build/account-finalization-firs
 mají happyPathVerified=true pro funkční tok; neznamená to konzoli bez chyb.
 Vlastník doložil 3 Uncaught Error z Firestore Watch při reauth/sign-out a chyby
 feed interakcí permission-denied. Dva odběry blocked/following v home.dart nemají
-onError; konkrétní odběratel třetí dokumentové chyby není potvrzený. Noto fonty jsou
-samostatné upozornění. Aplikační oprava těchto odběrů zatím připravená ani nasazená není.
-Další krok: schválit konkrétní opravu obsluhy/ukončení odběrů a její testy,
-potom kompatibilita klientů, uzavření přímých zápisů a závěrečný test.
+onError; konkrétní odběratel třetí dokumentové chyby ze starého stacku není potvrzený.
+Noto fonty jsou samostatné upozornění.
+Vlastník 4. listopadu schválil opravu odběrů, CI/DEV web a jeden nový dočasný Auth
+test včetně smazání a úklidu. Na fix/account-live-subscription-lifecycle je lokálně
+hotová obsluha chyb blocked/following, ukončení starých UID scope při Auth změně,
+guard doručování/pozastavených událostí u dokumentů/dotazů/rolí a bezpečný teardown.
+Aktivní chyby se dál předávají UI; autentizační odběr ani jiné app scope se neruší.
+19 cílených testů, konečných 289 Flutter, formátování a analyzátor prošly.
+CI, DEV rollout a živé ověření těchto změn ještě zbývají; aktuálně je stále c2409e0.
+Native Computer Use pipe znovu nedostupná (os error 2); živý UI test vyžádá asistenci.
+Další krok: CI, pouze DEV Hosting a schválený test; potom kompatibilita klientů,
+uzavření přímých zápisů a závěrečný test.
 Historie přípravy, původní piloty, CI a meze ověření zůstávají v účtovém plánu.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 

@@ -211,6 +211,39 @@ build/account-console-map-proof.json; zdrojové mapy jsou jen v ignorovaném bui
 Jde o diagnózu, ne opravu. Před další implementací předložit konkrétní rozsah
 obsluhy/ukončení odběrů a regresních testů; Rules ani oprávnění neoslabovat.
 
+### Schválená oprava životního cyklu odběrů – 4. listopadu
+
+Vlastník výslovně schválil obsluhu a ukončování odběrů při mazání/odhlášení,
+dohledání dokumentové chyby, testy odebrání oprávnění, změny účtu a zániku obrazovky.
+Po úspěšném CI pouze DEV web shoutout-dev-46c81 a jeden nový dočasný Auth účet
+včetně jeho smazání a úklidu. Bez změn Rules, oprávnění, Functions či produkce;
+fontové upozornění zůstává samostatně evidované.
+
+Lokální oprava na fix/account-live-subscription-lifecycle:
+
+- Auth userChanges před doručením do widgetů ukončí staré UID scope stejné Firebase
+  app. Samotný auth odběr i scope jiné app zůstávají; reauth stejného UID nerestartuje
+  zdroje. Nečeká se na další frame a dispose celé obrazovky.
+- Sdílené dokumenty/dotazy i role kontrolují UID při přijetí i doručení události,
+  včetně pozastavených front. Staré soukromé hodnoty a chyby se nedoručí novému
+  uživateli; stará reference neotevře další SDK zdroj. Vyřazení ruší zdroj, čistí
+  poslední hodnotu a cache; opožděný cancel nemůže odstranit novou návštěvu.
+- Dva home odběry blocked/following mají explicitní onError s bezpečným kódem.
+  Aktivní chyby zůstávají předávané aktivním odběratelům; nejde o globální filtr
+  permission-denied nebo změnu přístupu. Selhání cancel se zachytí a výslovně
+  zaznamená kódem bez zprávy/payloadu místo neobslouženého Future při dispose.
+
+Starý stack potvrdil SDK document errorWrapper při sign-out; konkrétní widget
+neurčil. Nový guard a Auth invalidace pokrývají všechny produkční sdílené dokumenty
+včetně rolového wrapperu. Pozdní dokumentová chyba po změně UID je reprodukovaná
+ve fault testu bez consumer onError a nově neuniká do zóny. Živé odstranění všech
+tří Uncaught Error ještě musí potvrdit schválený nový test; nevydávat ho za hotový.
+
+9 nových regresních scénářů, 19 cílených, konečná celá Flutter sada 289/289,
+formátování a analyzátor prošly. CI a rollout této změny ještě neproběhly.
+Computer Use sky.list_apps znovu vrací native pipe unavailable / os error 2;
+živý UI průchod proto bude potřebovat vlastníka. Testovací účet zatím nevytvořený.
+
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 
 Vlastník po vysvětlení schválil serverové skrytí po dávkách nejvýše 50 vlastních

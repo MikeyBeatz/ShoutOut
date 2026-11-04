@@ -2,19 +2,66 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
+String liveDataFailureCode(Object error) =>
+    error is FirebaseException &&
+        RegExp(r'^[a-zA-Z0-9_-]{1,80}$').hasMatch(error.code)
+    ? error.code
+    : 'unknown';
+
+void _reportCleanupError(Object error, StackTrace stack) => debugPrint(
+  'Live data cancellation failed: code=${liveDataFailureCode(error)}',
+);
+
+typedef LiveDataKey = (String?, String, String, Object);
+
+LiveDataKey? _scopeOf(Object key) => switch (key) {
+  (String? viewer, String app, String database, Object source) => (
+    viewer,
+    app,
+    database,
+    source,
+  ),
+  (Object nested, bool _) => _scopeOf(nested),
+  _ => null,
+};
 
 /// Shares only active subscriptions. Late listeners receive the latest event;
 /// the last cancellation releases both the source and its in-memory value.
 class SharedLiveStreams {
+  SharedLiveStreams({this.onCleanupError = _reportCleanupError});
+  final void Function(Object, StackTrace) onCleanupError;
   final _entries = <Object, Object>{};
 
-  Stream<T> watch<T>(Object key, Stream<T> Function() create) {
+  /// Retire the old viewer before Auth's next widget frame. Auth itself is not
+  /// a viewer-scoped key, so its subscription remains alive for later logins.
+  void retainViewer(String appName, String? viewer) {
+    for (final entry in _entries.entries.toList()) {
+      final scope = _scopeOf(entry.key);
+      if (scope != null && scope.$2 == appName && scope.$1 != viewer) {
+        (entry.value as _SharedLiveStream).retire();
+      }
+    }
+  }
+
+  Stream<T> watch<T>(
+    Object key,
+    Stream<T> Function() create, {
+    bool Function()? isCurrent,
+  }) {
     final existing = _entries[key];
     if (existing != null) return (existing as _SharedLiveStream<T>).stream;
     late final _SharedLiveStream<T> entry;
-    entry = _SharedLiveStream<T>(create, () {
-      if (identical(_entries[key], entry)) _entries.remove(key);
-    }, () => _entries.putIfAbsent(key, () => entry) as _SharedLiveStream<T>);
+    entry = _SharedLiveStream<T>(
+      create,
+      () {
+        if (identical(_entries[key], entry)) _entries.remove(key);
+      },
+      () => _entries.putIfAbsent(key, () => entry) as _SharedLiveStream<T>,
+      isCurrent,
+      onCleanupError,
+    );
     _entries[key] = entry;
     // Creating a stream does not guarantee a widget will subscribe to it.
     scheduleMicrotask(() {
@@ -27,11 +74,19 @@ class SharedLiveStreams {
 }
 
 class _SharedLiveStream<T> {
-  _SharedLiveStream(this.create, this.release, this.resolve);
+  _SharedLiveStream(
+    this.create,
+    this.release,
+    this.resolve,
+    this.isCurrent,
+    this.onCleanupError,
+  );
 
   final Stream<T> Function() create;
   final void Function() release;
   final _SharedLiveStream<T> Function() resolve;
+  final bool Function()? isCurrent;
+  final void Function(Object, StackTrace) onCleanupError;
   final _listeners = <MultiStreamController<T>>{};
   StreamSubscription<T>? _subscription;
   Object? _lastEvent;
@@ -40,8 +95,59 @@ class _SharedLiveStream<T> {
   bool _done = false;
   int _generation = 0;
 
-  late final Stream<T> stream = Stream<T>.multi((listener) {
-    if (_done) {
+  bool get _current => isCurrent?.call() ?? true;
+
+  Future<void> _cancel(StreamSubscription<T>? subscription) async {
+    try {
+      await subscription?.cancel();
+    } catch (error, stack) {
+      // A detached source is already retired. Cancellation failures must be
+      // reported explicitly rather than escape an unawaited widget teardown.
+      onCleanupError(error, stack);
+    }
+  }
+
+  void retire() {
+    if (_done) return;
+    _done = true;
+    _generation++;
+    final subscription = _subscription;
+    _subscription = null;
+    _hasEvent = false;
+    _lastEvent = null;
+    _lastErrorStack = null;
+    release();
+    for (final target in _listeners.toList()) {
+      target.close();
+    }
+    unawaited(_cancel(subscription));
+  }
+
+  // Check at delivery too: paused/queued events must not cross a viewer change.
+  late final Stream<T> stream = isCurrent == null
+      ? _events
+      : _events.transform(
+          StreamTransformer<T, T>.fromHandlers(
+            handleData: (value, sink) {
+              if (_current) {
+                sink.add(value);
+              } else {
+                retire();
+              }
+            },
+            handleError: (error, stack, sink) {
+              if (_current) {
+                sink.addError(error, stack);
+              } else {
+                retire();
+              }
+            },
+          ),
+        );
+
+  late final Stream<T> _events = Stream<T>.multi((listener) {
+    if (_done || !_current) {
+      retire();
       listener.close();
       return;
     }
@@ -75,7 +181,7 @@ class _SharedLiveStream<T> {
       _lastEvent = null;
       _lastErrorStack = null;
       release();
-      await subscription?.cancel();
+      await _cancel(subscription);
     };
     if (_subscription != null) return;
     final generation = ++_generation;
@@ -83,6 +189,10 @@ class _SharedLiveStream<T> {
       _subscription = create().listen(
         (value) {
           if (generation != _generation) return;
+          if (!_current) {
+            retire();
+            return;
+          }
           _hasEvent = true;
           _lastEvent = value;
           _lastErrorStack = null;
@@ -92,6 +202,10 @@ class _SharedLiveStream<T> {
         },
         onError: (Object error, StackTrace stack) {
           if (generation != _generation) return;
+          if (!_current) {
+            retire();
+            return;
+          }
           _hasEvent = true;
           _lastEvent = error;
           _lastErrorStack = stack;
@@ -123,7 +237,7 @@ final liveStreams = SharedLiveStreams();
 
 // Scope explicitly: SDK reference equality can omit the database ID. The
 // viewer also prevents a new account from replaying the previous user's data.
-Object liveDataKey(Object source) {
+LiveDataKey liveDataKey(Object source) {
   final firestore = switch (source) {
     Query query => query.firestore,
     DocumentReference reference => reference.firestore,
@@ -140,15 +254,29 @@ Object liveDataKey(Object source) {
 extension LiveDocument on DocumentReference<Map<String, dynamic>> {
   Stream<DocumentSnapshot<Map<String, dynamic>>> liveSnapshots({
     bool includeMetadataChanges = false,
-  }) => liveStreams.watch(
-    includeMetadataChanges ? (liveDataKey(this), true) : liveDataKey(this),
-    () => snapshots(includeMetadataChanges: includeMetadataChanges),
-  );
+  }) {
+    final key = liveDataKey(this);
+    return liveStreams.watch(
+      includeMetadataChanges ? (key, true) : key,
+      () => snapshots(includeMetadataChanges: includeMetadataChanges),
+      isCurrent: () =>
+          FirebaseAuth.instanceFor(app: firestore.app).currentUser?.uid ==
+          key.$1,
+    );
+  }
 }
 
 extension LiveQuery on Query<Map<String, dynamic>> {
-  Stream<QuerySnapshot<Map<String, dynamic>>> liveSnapshots() =>
-      liveStreams.watch(liveDataKey(this), snapshots);
+  Stream<QuerySnapshot<Map<String, dynamic>>> liveSnapshots() {
+    final key = liveDataKey(this);
+    return liveStreams.watch(
+      key,
+      snapshots,
+      isCurrent: () =>
+          FirebaseAuth.instanceFor(app: firestore.app).currentUser?.uid ==
+          key.$1,
+    );
+  }
 }
 
 /// Keeps per-item realtime state while a query replaces its model instances.

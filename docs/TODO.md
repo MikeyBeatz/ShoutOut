@@ -30,8 +30,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    čtecí transakcí c2409e0 má úspěšné CI a ověřené nasazení na obou originech.
    Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
    Nový první pokus, serverové dokončení a úklid jsou také ověřené. Zbývají
-   nezachycené chyby odběrů při reauth/odhlášení (2 query a 1 document); navrhnout
-   konkrétní opravu obsluhy a ukončení. Potom kompatibilita, uzavření přímých zápisů
+   nezachycené chyby odběrů při reauth/odhlášení (2 query a 1 document). Schválená
+   oprava lifecycle/obsluhy je lokálně hotová (289 Flutter, analýza); zbývá CI,
+   DEV web a jeden nový dočasný test včetně úklidu. Potom kompatibilita a přímé zápisy
    a společný závěrečný test podle
    [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny

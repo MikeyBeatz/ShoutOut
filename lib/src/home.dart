@@ -113,26 +113,36 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
         .collection('blocked')
         .limit(_blockedUsersPageSize)
         .liveSnapshots()
-        .listen((snapshot) {
-          if (mounted) {
-            setState(() {
-              _blockedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
-            });
-          }
-        });
+        .listen(
+          (snapshot) {
+            if (mounted) {
+              setState(() {
+                _blockedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
+              });
+            }
+          },
+          onError: (Object error, StackTrace stack) => debugPrint(
+            'Feed blocked subscription failed: code=${liveDataFailureCode(error)}',
+          ),
+        );
     _followingSubscription = firestore
         .collection('users')
         .doc(uid)
         .collection('following')
         .limit(_followedProfilesPageSize)
         .liveSnapshots()
-        .listen((snapshot) {
-          if (mounted) {
-            setState(() {
-              _followedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
-            });
-          }
-        });
+        .listen(
+          (snapshot) {
+            if (mounted) {
+              setState(() {
+                _followedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
+              });
+            }
+          },
+          onError: (Object error, StackTrace stack) => debugPrint(
+            'Feed following subscription failed: code=${liveDataFailureCode(error)}',
+          ),
+        );
   }
 
   Future<_LocationRefreshResult> _refreshLocation({
