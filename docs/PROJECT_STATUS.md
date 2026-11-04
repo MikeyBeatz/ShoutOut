@@ -6,16 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Ověřit kompatibilitu klientů, připravit uzavření přímých zápisů při mazání účtu
-a provést společný závěrečný test. Klientský tok i serverové fáze už jsou
+Provést navazující DEV uzavření přímých zápisů při mazání účtu podle připravené
+kompatibility a návratu, potom společný závěrečný test. Klientský tok i serverové fáze už jsou
 ověřené v DEV. Kritéria a otevřené části:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
 Vlastník schválil další lokální úsek 4. listopadu: povinné serverové mazání
 účtu/Shoutu pro všechny DEV klienty a zákaz přímých zápisů v emulátoru. Kód
-a testy jsou připravené na fix/dev-deletion-server-cutover. Lokálně 293 Flutter,
-42 tools a konečných 48 cílených worker/cutover testů, analýza/formát/DEV debug
-build prošly; celá konečná sada ještě čeká na CI.
+a testy jsou dokončené na fix/dev-deletion-server-cutover, zdroj
+7ab60c88892921101215076690a73837e15b94b4. CI 41915977658 success: 293 Flutter,
+42 tools, 107 Functions, 375 Rules/server, 15 purge/15 Storage, analýza/lint/build.
+Lokálně také konečných 48 cílených worker/cutover testů a čistý DEV release build,
+ověřený manifest/cíl shoutout-dev-46c81. Pracovní i release kopie jsou čisté.
 Živé Rules, web, backend ani data se tím zatím nezměnily.
 [Kompatibilita, rozsah a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 

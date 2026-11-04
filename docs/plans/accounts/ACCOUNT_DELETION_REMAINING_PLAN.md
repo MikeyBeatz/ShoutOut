@@ -86,7 +86,7 @@ build. První celá Rules/server sada měla 371/375: tři staré fixture zamrzly
 submilisekundovým createTime a jeden nový test posílal Admin Timestamp klientskému
 SDK. Opraven je pouze testovací čas/typ, žádný runtime workeru ani oprávnění se
 kvůli testům neuvolňovaly. Konečná cílená sada workeru + cutoveru prošla 48/48;
-celou konečnou podobu ještě musí potvrdit CI. Důkazy jsou v ignorovaných
+celou konečnou podobu už potvrdilo CI níže. Důkazy jsou v ignorovaných
 build/deletion-cutover-{flutter,tools,analyze,format,build,rules,targeted}.log.
 Nové testy pokrývají klientské zákazy včetně transakce/batche, čtení recovery,
 dvě dávky 51 Shoutů, replay/lost ack, zachování cizího obsahu, serverové mazání
@@ -95,8 +95,23 @@ Dosavadní testy rollbacku byly upravené na odmítnutí klientského zrušení.
 Kompilace a lokální kontrola nejsou fyzický mobilní průchod ani živý Rules rollout.
 Připravená pravidla jsou návrh ověřený emulátorem: zužují klientské zápisy a
 ponechávají izolované validátory čítačů. Před veřejným vydáním je stále nutná
-společná bezpečnostní a předstartovní kontrola. CI a případný rollout doplnit
-až podle skutečných důkazů.
+společná bezpečnostní a předstartovní kontrola.
+
+Zdroj 7ab60c88892921101215076690a73837e15b94b4 má úspěšné
+[CI 41915977658](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41915977658):
+293 Flutter, 42 tools, 107 Functions unit, 375 Rules/server, 15 purge/15 Storage,
+analýza/lint/formát a DEV build. Čistá release kopie build/deletion-cutover-release
+na stejném commitu má také skutečný release build a ověřený manifest pro
+projekt/site shoutout-dev-46c81. Hash přesných Rules v této release kopii je
+bf23c5513740a55051bd7bbae0b49965b0477d3e5b1f5e0cafe84e9970b889a2;
+oproti pracovnímu souboru se liší jen zakončení řádků. Ignorované důkazy:
+build/deletion-cutover-ci.{json,log}, build/deletion-cutover-local-proof.json
+a build/deletion-cutover-release-build.log.
+
+Lokální úsek je uzavřený. Nic z něj nebylo nasazené a žádná živá data se neměnila.
+Následuje DEV rollout a závěrečný živý test v konkrétně schváleném rozsahu;
+kompatibilní web nasadit/ověřit před Rules. Nový Auth fixture dosavadní lokální
+souhlas nezahrnoval. Produkce, main, existující žádost a staré joby se nemění.
 
 ## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
 

@@ -27,7 +27,11 @@ První celá sada 371/375 odhalila tři časové fixture s Date.now před jemně
 createTime a jeden nový test s Admin Timestamp v klientském SDK. Fixture nyní
 kotví řízený čas nejdřív na zaokrouhlený commit, klientský vstup používá Date.
 Runtime se nemění. Cílené opakování celého worker souboru a nového cutoveru je
-48/48; konečnou celou sadu potvrdí CI. Logy build/deletion-cutover-*.log zůstávají
+48/48; konečnou celou sadu potvrdilo úspěšné CI 41915977658 pro
+7ab60c88892921101215076690a73837e15b94b4: 293 Flutter, 42 tools, 107 Functions,
+375 Rules/server, 15 purge/15 Storage, analýza/lint/formát/build. Ze stejného
+čistého commitu prošel i skutečný DEV release build s kontrolou manifestu/cíle.
+Logy build/deletion-cutover-*.log zůstávají
 ignorované. Nejde o živý Auth test nebo nasazení. [Přechod a návrat](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 
 Nová `prepare_account_deletion.integration.test.js` je součástí test:rules.

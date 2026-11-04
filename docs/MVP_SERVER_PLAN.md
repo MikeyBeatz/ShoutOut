@@ -198,6 +198,9 @@ DEV klient po opětovném zadání hesla připraví vlastní Shouty a nechá ser
 finalizaci atomicky založit `accountDeletionRequests/{uid}`. Po ověřeném čtení
 žádosti ze serveru odstraňuje Firebase Authentication účet, aby bylo možné e-mail
 znovu registrovat. Přímá kompatibilní větev ještě není uzavřená v nasazených Rules.
+Lokální cutover 7ab60c8 má success CI 41915977658 včetně 375 Rules/server testů;
+povinné DEV směrování i zákazy jsou ověřené, živá aktivace a společný test zbývají.
+[Kompatibilita a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 Serverová automatizace musí:
 
 - atomicky převzít žádost a zaznamenat stav zpracování,
