@@ -14,6 +14,13 @@ hodnotu. Feed a veřejný profil drží vlastní reakce a uložení podle ID Sho
 změna čítače nerestartuje načítání všech interakcí. Podrobnosti a zbývající
 nákladová rizika shrnuje [READ_COST_AUDIT.md](../operations/READ_COST_AUDIT.md).
 
+AuthGate při změně UID ihned vyřadí datové scope předchozího uživatele své Firebase
+app; vlastní auth odběr zůstává živý. Sdílené dokumenty, dotazy a role ověřují UID
+také při doručování včetně pozastavených front. Vyřazení zavře zdroj, vymaže
+poslední hodnotu a uvolní cache. Reauth stejného UID zdroje nerestartuje. Aktivní
+chyby se dál předávají UI; selhání rušení se výslovně hlásí bezpečným kódem.
+Oprávnění nadále vynucují serverová pravidla.
+
 ## Základní principy
 
 - Flutter klient je společný pro Android, iOS a web.

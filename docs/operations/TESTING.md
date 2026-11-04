@@ -141,7 +141,8 @@ Lokální release se source maps stejného commitu nebyl nasazený. Přímá rov
 selhala, takže mapování používá jen 12 jedinečných shodných kontextů 13 řádků.
 Potvrzuje SDK query/document errorWrapper a odpovídající reauth/getIdToken rámce;
 neidentifikuje samo o sobě konkrétní třetí aplikační odběr. Důkaz v ignorovaném
-build/account-console-map-proof.json. Žádná aplikační oprava těchto chyb zatím neproběhla.
+build/account-console-map-proof.json. V této diagnostické etapě ještě aplikační
+oprava neproběhla; navazující schválený úsek a aktuální stav jsou níže.
 
 ## Životní cyklus live odběrů – 4. listopadu
 
@@ -155,7 +156,14 @@ bez neobslouženého Future, zánik widgetu a sanitizace diagnostiky.
 S původní live_data sadou 19/19, konečná celá Flutter sada 289/289, analyzátor
 a formátování prošly. Přesný třetí starý aplikační odběratel ze stacku neurčený;
 nová ochrana pokrývá všechny sdílené dokumenty/dotazy/role a musí projít živým testem.
-CI, DEV rollout a nový Auth test ještě zbývají. Noto upozornění se neopravovalo.
+CI 41908033275 pro 776e147 success: 289 Flutter, 42 tools, 107 unit, 369 Rules/server,
+15 purge/15 Storage, analýza/lint/build. DEV Hosting b274e8c83ebd616a odpovídá čistému
+release na obou originech včetně nových diagnostických markerů. Backend, Rules,
+IAM, plánovače a původní inventura shodné. Noto upozornění se neopravovalo.
+Jeden nový schválený dočasný Auth účet je připravený: 2 vlastní active Shouty,
+cizí kontrolní Shout/komentář, před testem žádná žádost/receipt. Vlastník je požádaný
+o logout/relogin a smazání s kontrolou konzole; výsledek i úklid ještě zbývají.
+UI automatizace má native pipe i browser access host nedostupné.
 
 ## Konečný 60denní úklid
 

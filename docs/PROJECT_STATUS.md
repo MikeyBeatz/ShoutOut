@@ -54,9 +54,16 @@ hotová obsluha chyb blocked/following, ukončení starých UID scope při Auth 
 guard doručování/pozastavených událostí u dokumentů/dotazů/rolí a bezpečný teardown.
 Aktivní chyby se dál předávají UI; autentizační odběr ani jiné app scope se neruší.
 19 cílených testů, konečných 289 Flutter, formátování a analyzátor prošly.
-CI, DEV rollout a živé ověření těchto změn ještě zbývají; aktuálně je stále c2409e0.
-Native Computer Use pipe znovu nedostupná (os error 2); živý UI test vyžádá asistenci.
-Další krok: CI, pouze DEV Hosting a schválený test; potom kompatibilita klientů,
+Zdroj 776e147e46d98c8b9f8d3eb5409e87bb381d013e má success CI 41908033275:
+289 Flutter, 42 tools, 107 unit, 369 Rules/server, 15 purge/15 Storage, lint/analyze/build.
+DEV Hosting b274e8c83ebd616a je nasazený; oba originy shodné s čistým release,
+nové diagnostické markery v JS ověřené, backend/Rules/IAM/plánovače a původní inventura
+nezměněné. Schválený nový dočasný účet je připravený (2 vlastní active Shouty,
+cizí kontrolní obsah, žádná žádost/receipt); údaje jen docs/local/account-finalization-fixture.json.
+Vlastník je požádaný o nové anonymní okno, logout/relogin a smazání se sledováním
+Uncaught Error. Výsledek a úklid této fixture ještě zbývají. Native pipe je
+nedostupná (os error 2), Browser access host také; UI test potřebuje asistenci.
+Další krok: schválený živý test a úklid; potom kompatibilita klientů,
 uzavření přímých zápisů a závěrečný test.
 Historie přípravy, původní piloty, CI a meze ověření zůstávají v účtovém plánu.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
@@ -72,7 +79,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `c2409e0587c42bcbc34008c881395a06c294549f` / `a59b75f1d27dc90d` |
+| Webový zdroj / Hosting verze | `776e147e46d98c8b9f8d3eb5409e87bb381d013e` / `b274e8c83ebd616a` |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
@@ -83,7 +90,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat posledního webového rolloutu: Hosting e69064a6c3110b2a (zdroj 712da1b); backend je
+Návrat posledního webového rolloutu: Hosting a59b75f1d27dc90d (zdroj c2409e0); backend je
 kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,

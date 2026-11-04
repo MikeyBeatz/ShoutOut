@@ -231,8 +231,9 @@ serverové založení žádosti i aktivační klient jsou po úspěšném CI nas
 živě prošlo obnovení z pending gate a úklid. Selhání prvního pokusu má reprodukci
 zastaralého Watch stavu; oprava čtecí transakcí c2409e0 má úspěšné CI i DEV rollout.
 Resume po opravě i nový první průchod, serverové dokončení a úklid jsou ověřené.
-K 4. listopadu zbývá prověřit/opravit konzolové chyby aktivních odběrů při
-reauth/odhlášení a potom kompatibilitu/cutover; Rules ani milník tím uzavřené nejsou.
+Oprava životního cyklu odběrů 776e147 má k 4. listopadu úspěšné CI a DEV rollout;
+jeden nový schválený dočasný test čeká na logout/relogin a smazání bez Uncaught Error.
+Potom zbývá jeho úklid a kompatibilita/cutover; Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

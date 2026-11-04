@@ -31,8 +31,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
    Nový první pokus, serverové dokončení a úklid jsou také ověřené. Zbývají
    nezachycené chyby odběrů při reauth/odhlášení (2 query a 1 document). Schválená
-   oprava lifecycle/obsluhy je lokálně hotová (289 Flutter, analýza); zbývá CI,
-   DEV web a jeden nový dočasný test včetně úklidu. Potom kompatibilita a přímé zápisy
+   oprava lifecycle/obsluhy 776e147 je po úspěšném CI nasazená v DEV; oba originy
+   a nezměněný backend ověřené. Jeden nový dočasný účet čeká na logout/relogin,
+   smazání a kontrolu konzole, pak jeho úklid. Potom kompatibilita a přímé zápisy
    a společný závěrečný test podle
    [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny

@@ -208,8 +208,8 @@ nelze použít. Pro všech 12 vybraných rámců se ověřil jedinečný identic
 firestore.dart:571, document errorWrapper:445, addError ve stream_controller.dart,
 reauthentication a příprava/getIdToken v účtovém toku. Důkaz
 build/account-console-map-proof.json; zdrojové mapy jsou jen v ignorovaném build.
-Jde o diagnózu, ne opravu. Před další implementací předložit konkrétní rozsah
-obsluhy/ukončení odběrů a regresních testů; Rules ani oprávnění neoslabovat.
+V této etapě šlo o diagnózu bez opravy. Konkrétní navazující rozsah byl následně
+předložený a schválený níže; Rules ani oprávnění se neoslabují.
 
 ### Schválená oprava životního cyklu odběrů – 4. listopadu
 
@@ -240,9 +240,23 @@ ve fault testu bez consumer onError a nově neuniká do zóny. Živé odstraněn
 tří Uncaught Error ještě musí potvrdit schválený nový test; nevydávat ho za hotový.
 
 9 nových regresních scénářů, 19 cílených, konečná celá Flutter sada 289/289,
-formátování a analyzátor prošly. CI a rollout této změny ještě neproběhly.
-Computer Use sky.list_apps znovu vrací native pipe unavailable / os error 2;
-živý UI průchod proto bude potřebovat vlastníka. Testovací účet zatím nevytvořený.
+formátování a analyzátor prošly. Zdroj 776e147e46d98c8b9f8d3eb5409e87bb381d013e
+má úspěšné [CI 41908033275](https://github.com/MikeyBeatz/ShoutOut/actions/runs/41908033275):
+289 Flutter, 42 tools, 107 unit, 369 Rules/server, 15 purge/15 Storage, analýza/lint/build.
+Čistý release je nasazený jen na DEV Hosting b274e8c83ebd616a. Oba originy
+index/main/bootstrap/config odpovídají artefaktu; nové diagnostické markery
+jsou přítomné v release JS. Functions, Rules, IAM, oba plánovače a původní inventura
+shodné s baseline. Rollback webu je c2409e0 / a59b75f1d27dc90d.
+Důkazy build/account-live-{ci,pre-proof,post-proof}.json a release/deploy logy.
+
+Computer Use sky.list_apps vrací native pipe unavailable / os error 2 a CUA
+inventář nemá browser přístup (browser access host unavailable); žádné vstupy
+do aplikací se neprováděly. Je připravený právě jeden schválený nový dočasný Auth
+účet a profil/právní fixture, 2 vlastní aktivní Shouty a cizí kontrolní Shout/komentář;
+před testem žádost ani receipt neexistují. Údaje jen docs/local/account-finalization-fixture.json.
+Vlastník je požádaný o nové anonymní okno, logout/relogin stejného UID a následné
+smazání s kontrolou Uncaught Error a safe diagnostiky. Při chybě se má zastavit.
+Živý výsledek ani úklid této nové fixture zatím ověřené nejsou.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 
