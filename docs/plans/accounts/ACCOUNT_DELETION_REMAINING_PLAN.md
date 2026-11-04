@@ -17,18 +17,20 @@ Poslední account runtime je 96b0782 po CI 41539164008; konkrétní vrstvy jsou 
 původní serverový deadline; staré žádosti/job verze se automaticky nemigrují.
 Dokončený purge a meze řízeného času: [důkazy](ACCOUNT_RETENTION_PURGE_PLAN.md).
 
-Klientský tok v DEV je hotový: web 776e147 sdílí první pokus i pokračování přes
+Klientský tok v DEV je hotový: web 7ab60c8 sdílí první pokus i pokračování přes
 AccountDeletionAttempt, příprava a57ae9b a finalizace a9ff425 jsou zapnuté.
 První pokus, recovery, varování/průběh i oprava live odběrů mají lokální/CI testy
 a živé ověření. Logout/relogin i smazání prošly bez Uncaught Error, server dokončil
 content-archived a fixture jsou uklizené. Přesné vrstvy a důkazy níže a v PROJECT_STATUS.
 
-Zbývá kompatibilní uzavření přímých zápisů. Před změnou Rules ověřit všechny
-zapisovací cesty a souběh; starší vypnutá přepínačová větev a starý nativní klient používají
-původní přímé skrytí a založení žádosti. Nasazené Rules ještě dovolují klientské
-create/delete žádosti. Příprava a finalizace nejsou vynucený cutover celé aplikace.
-Celý účtový milník uzavře kompatibilita, uzavření těchto cest a společný test žádosti,
-Auth smazání, částečného selhání, opakování, zachování cizího obsahu a retence.
+DEV uzavření přímých žádostí a statusového skrytí je nasazené z 7ab60c8 po
+úspěšném CI. Povinné serverové směrování platí i pro nativní kód/vypnuté DEV
+přepínače; starý web potřebuje obnovu a starý mobilní build aktualizaci. Živě
+ověřené vlastní čtení 200 a přímé zápisy 403 bez změny dat/updateTime. Zbývá
+společný pozitivní UI průchod po tomto cutoveru, serverové dokončení a úklid
+jediné schválené dočasné fixture. Není to uzavření ostatních obsahových operací.
+Celý účtový milník vyžaduje také dokončený test žádosti, Auth smazání,
+částečného selhání, opakování, zachování cizího obsahu a retence.
 Konkrétní souhlasy pro lokální úseky, rollouty a dočasné Auth testy jsou u etap níže;
 samotné dokončení této opravy neschvaluje nové migrace či změny Rules.
 
@@ -55,14 +57,14 @@ Aktuální lokální Rules odmítají klientské create/update/delete žádosti 
 desetiminutového rollbacku. Vlastní čtení pro pokračování a dosavadní moderační
 čtení zůstávají. U existujícího Shoutu je odstraněná přímá změna statusu na deleted
 pro autora i moderátora; zbývá původní validátor izolovaných čítačů. Tvorba Shoutu,
-komentáře a ostatní operace se tímto úsekem neuzavírají. Nasazené DEV Rules jsou
-stále původní; lokální soubor není důkaz živého vynucení.
+komentáře a ostatní operace se tímto úsekem neuzavírají. V době uzavření lokálního
+úseku zůstávaly nasazené DEV Rules původní; navazující živý rollout je níže.
 
 ### Kompatibilita a pořadí případného DEV rolloutu
 
 | Klient / vrstva | Po uzavření zápisů |
 |---|---|
-| Nasazený web 776e147 s aktuálním config/dev | Všechny tři cesty už používají server; kompatibilní referenční web. |
+| Předchozí web 776e147 s aktuálním config/dev | Všechny tři cesty už používají server; kompatibilní návratový web. |
 | Nový web / nativní kód v DEV | Povinná serverová cesta i při vypnutém historickém přepínači. |
 | Starší otevřený web s přímou cestou | Novou žádost či přímé skrytí Rules odmítnou; potřebuje obnovit na aktuální web. Existující žádost nezmizí a aktuální klient ji převezme. |
 | Starý mobilní build | Vyžaduje aktualizaci; fyzický mobilní průchod a distribuce nejsou touto etapou ověřené. |
@@ -108,10 +110,39 @@ oproti pracovnímu souboru se liší jen zakončení řádků. Ignorované důka
 build/deletion-cutover-ci.{json,log}, build/deletion-cutover-local-proof.json
 a build/deletion-cutover-release-build.log.
 
-Lokální úsek je uzavřený. Nic z něj nebylo nasazené a žádná živá data se neměnila.
-Následuje DEV rollout a závěrečný živý test v konkrétně schváleném rozsahu;
+Lokální úsek je uzavřený. Při jeho uzavření nic nebylo nasazené a žádná živá data
+se neměnila. Navazující DEV rollout a živý test mají samostatný souhlas níže;
 kompatibilní web nasadit/ověřit před Rules. Nový Auth fixture dosavadní lokální
 souhlas nezahrnoval. Produkce, main, existující žádost a staré joby se nemění.
+
+### Navazující živý DEV rollout – schváleno 4. listopadu
+
+Vlastník výslovně schválil web a Rules z přesného 7ab60c8, jeden nový dočasný
+Auth účet se dvěma vlastními Shouty, cizím kontrolním Shoutem a cizím komentářem,
+smazání pouze tohoto účtu, ověření klientských zákazů/serverového postupu
+a úklid celého testu. Bez změn Functions, Storage Rules, produkce, main a původní
+pending žádosti. Nejde o migraci starých dat.
+
+Po novém ověření CI a čistého release byl nasazen nejprve web:
+Hosting f5c7ef14f1b5e04b. Index/main/bootstrap/config na obou DEV originech jsou
+shodné s přesným release artefaktem. Potom pouze firestore:rules do DEV:
+ruleset c70b6f10-a51e-415d-aef5-8f8b685adb3d, normalizovaný hash
+e93fee381fd8a96f3a3c02a87211c0e5a4989e7bc28502cb7a5754dd24c30dc0.
+Functions/Storage Rules/IAM/plánovače a původní účtová inventura jsou po obou
+nasazeních shodné s baseline. Výsledky: build/deletion-cutover-{pre,web,rules}-proof.json
+a oba deployment logy. Návrat zůstává 776e147 / b274e8c83ebd616a.
+
+Připravená jediná fixture. Skutečný běžný přihlášený klient má pozitivní kontrolu
+vlastního čtení HTTP 200, zatímco přímé vytvoření/smazání žádosti a skrytí vlastního
+i cizího Shoutu vracejí 403 PERMISSION_DENIED. Data i updateTime všech čtyř
+kontrolních dokumentů a neexistující žádost zůstaly stejné. Důkaz:
+build/deletion-cutover-client-before-ui-proof.json. Přihlášení proběhlo jen
+novým dočasným účtem; žádný cizí účet nebyl použitý nebo měněný.
+
+Pozitivní UI mazání, serverové dokončení a úklid zatím čekají. Browser access
+host je stále nedostupný; vlastník dostal nový anonymní průchod a údaje pouze
+v ignorovaném docs/local/account-finalization-fixture.json. Nezaměnit tento
+pending pilot za uzavřenou fixture předchozí opravy odběrů.
 
 ## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
 

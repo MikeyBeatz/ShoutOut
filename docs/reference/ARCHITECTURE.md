@@ -254,10 +254,9 @@ při každé zdrojové transakci. V3 zahrnuje vlastní nepotřebné soukromé po
 a neveřejný 60denní archiv všech zahrnutých zpráv/komentářů a jejich reakcí.
 Od e4dd199 worker před novou destruktivní dávkou ukládá po Auth user-not-found
 serverový authDeletionConfirmedAt do původní žádosti ve stejné transakci jako
-kontrolu lease. Rules po potvrzení nepovolí klientský rollback; před ním zůstává
-původní desetiminutové okno v posledních nasazených Rules. Lokální návrh cutoveru
-už odmítá klientské create/update/delete žádosti i přímé skrytí Shoutu; živě ještě
-není nasazený. DeletionWritePolicy vybírá v DEV server pro web i nativní kód
+kontrolu lease. Nasazený DEV cutover 7ab60c8 odmítá klientské create/update/delete
+žádosti i přímé skrytí Shoutu; rollback žádosti není dostupný ani před konfirmací.
+Vlastní čtení zůstává pro bezpečné pokračování. DeletionWritePolicy vybírá v DEV server pro web i nativní kód
 nezávisle na starých přepínačích, mimo DEV přepínače zachovává. Podmínky přechodu
 a návratu jsou v [účtovém plánu](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 Status, createTime a původní retenční termín se
@@ -272,8 +271,8 @@ Navazující v5 odebere role a vlastní palce u cizího obsahu. Nové DEV joby
 z 96b0782 mají také samostatný purge v původním termínu createTime +60 dní;
 ten odstraní osobní/Business potomky, archivní kopie, soubory a stále vlastní
 rezervaci. Minimální veřejný marker a anonymní Shout kontext pro cizí
-konverzace zůstávají. Stará klientská cesta stále existuje; klientský přechod,
-uzavření přímých zápisů a společný závěrečný test jsou otevřené.
+konverzace zůstávají. Staré přímé klienty DEV Rules odmítnou; web potřebuje obnovu
+a mobilní build aktualizaci. Společný pozitivní UI test po cutoveru zatím čeká.
 [Aktuální rozsah a provoz](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md),
 [konfirmace a její hranice](../plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 

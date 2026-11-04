@@ -24,22 +24,17 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Ověřit kompatibilitu klientů a uzavřít přímé zápisy při mazání účtu.**
-   Serverové fáze včetně +60denního úklidu, příprava po 50 Shoutech, atomické
-   založení žádosti a potvrzení/průběh v UI jsou v DEV. Oprava potvrzení commitu
-   čtecí transakcí c2409e0 má úspěšné CI a ověřené nasazení na obou originech.
-   Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
-   Oprava odběrů 776e147 je po úspěšném CI nasazená a živě ověřená: logout/relogin
-   i smazání bez Uncaught Error, dokončený serverový postup a úklid fixture.
-   Oba originy, nezměněný backend a původní inventura ověřené. Zbývá kompatibilita
-   současného webu se starší/vypnutou a nativní větví, uzavření klientských zápisů
-   a společný závěrečný test podle
-   [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-   Nový schválený lokální úsek sjednocuje DEV cesty i pro nativní kód a v emulátoru
-   uzavírá přímé žádosti/skrytí. Zdroj 7ab60c8 má úspěšné CI 41915977658 včetně
-   375 Rules/server testů a ověřený čistý release. Lokální úsek je hotový;
-   zbývá živá brána a společný test, nasazené Rules se ještě nezměnily.
-   [Rozsah a přechod klientů](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
+1. **Dokončit živé ověření mazání účtu po uzavření přímých zápisů.**
+   Serverové fáze, příprava po 50 Shoutech, finalizace, UI a oprava odběrů jsou
+   v DEV. Nový web i Rules z 7ab60c8 po success CI 41915977658 (375 Rules/server)
+   jsou nasazené a ověřené proti čistému release. DEV směrování je povinné;
+   starší web potřebuje obnovu, starý mobilní build aktualizaci. Živě vlastní
+   čtení 200 a čtyři přímé zápisy 403 bez změny dat/updateTime. Ostatní backend
+   i původní inventura zachované. Zbývá UI smazání jediného schváleného dočasného
+   účtu, serverové dokončení a úklid; vlastník dostal ruční postup, protože
+   prohlížeč není dostupný. Historie dílčích oprav a důkazy jsou zachované v
+   [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+   [Rozsah, přechod klientů a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

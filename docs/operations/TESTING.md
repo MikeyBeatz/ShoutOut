@@ -34,6 +34,15 @@ Runtime se nemění. Cílené opakování celého worker souboru a nového cutov
 Logy build/deletion-cutover-*.log zůstávají
 ignorované. Nejde o živý Auth test nebo nasazení. [Přechod a návrat](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 
+Následně vlastník schválil DEV web/Rules a jeden nový dočasný Auth test.
+Hosting f5c7ef14f1b5e04b a ruleset c70b6f10-a51e-415d-aef5-8f8b685adb3d jsou
+nasazené; oba originy odpovídají čistému 7ab60c8, Functions/Storage Rules/IAM/
+plánovače a původní inventura se nezměnily. Skutečné přihlášení běžným dočasným
+účtem: vlastní čtení 200, přímé create/delete žádosti a skrytí vlastního/cizího
+Shoutu 403 PERMISSION_DENIED. Data/updateTime i absence žádosti zůstaly stejné.
+build/deletion-cutover-client-before-ui-proof.json. Pozitivní UI mazání,
+serverové dokončení a úklid dosud čekají; nejde o dokončený nový pilot.
+
 Nová `prepare_account_deletion.integration.test.js` je součástí test:rules.
 Cíleně s receipt cleanupem prošlo 9 emulátorových scénářů: 51 vlastních Shoutů,
 zachování cizích/neaktivních dokumentů a potomků, duplicate/replay, sedmidenní

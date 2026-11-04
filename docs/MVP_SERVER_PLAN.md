@@ -197,9 +197,11 @@ metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají
 DEV klient po opětovném zadání hesla připraví vlastní Shouty a nechá serverovou
 finalizaci atomicky založit `accountDeletionRequests/{uid}`. Po ověřeném čtení
 žádosti ze serveru odstraňuje Firebase Authentication účet, aby bylo možné e-mail
-znovu registrovat. Přímá kompatibilní větev ještě není uzavřená v nasazených Rules.
+znovu registrovat. Přímé create/update/delete žádosti i statusové skrytí Shoutu
+jsou od cutoveru 7ab60c8 uzavřené v nasazených DEV Rules.
 Lokální cutover 7ab60c8 má success CI 41915977658 včetně 375 Rules/server testů;
-povinné DEV směrování i zákazy jsou ověřené, živá aktivace a společný test zbývají.
+povinné DEV směrování i zákazy jsou ověřené. Web/Rules jsou nasazené, přihlášený
+klient má vlastní čtení 200 a přímé zápisy 403; pozitivní UI průchod a úklid čekají.
 [Kompatibilita a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 Serverová automatizace musí:
 
