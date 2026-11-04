@@ -121,9 +121,27 @@ obsah, content-archived, marker a purge scheduled s původním +60denním termí
 Fixture i údaje uklizené; původní inventura shodná. Důkaz je v ignorovaném
 build/account-finalization-diagnostic-recovery-test a má happyPathVerified=false.
 Kontrola 4. listopadu znovu potvrdila živé artefakty/backend i původní inventuru.
-Nový dočasný účet se dvěma vlastními Shouty a cizím kontrolním obsahem čeká
-na první pokus v nové anonymní kartě; před ním žádná žádost/receipt a Auth existuje.
-Nový běžný průchod ani jeho úklid zatím ověřené nejsou.
+Nový dočasný účet začínal bez žádosti/receipt, se dvěma vlastními aktivními Shouty
+a cizím kontrolním obsahem. Vlastník dokončil první pokus s návratem na přihlášení;
+server ověřil Auth absent, jedinou přípravu před žádostí, validní callable, cizí
+komentář, content-archived, marker a purge scheduled s původním +60denním termínem.
+Fixture a údaje uklizené, původní inventura shodná. Důkaz v ignorovaném
+build/account-finalization-first-attempt-test má happyPathVerified=true pro tok,
+ale console-review zůstává otevřený: 3 Uncaught Error (2 query/1 document Watch),
+feed permission-denied a samostatný Noto font warning. Dvě home listen nemají
+onError, konkrétní odběratel dokumentové chyby ještě potvrzený není.
+
+Cizí kontrolní Shout přirozeně překročil původní hodinovou platnost. Ověřeno, že
+jediný rozdíl od neměnného seed digestu je active → expired, původní expiresAt
+uplynul a updateTime následuje po něm. Live helper tento přesný přechod zaznamená
+foreignControlExpiredNormally=true a žádné jiné rozdíly nepřipouští; nejde o změnu
+živých dat nebo obcházení neznámého rozdílu. Úklid ověřil celou původní inventuru.
+
+Lokální release se source maps stejného commitu nebyl nasazený. Přímá rovnost JS
+selhala, takže mapování používá jen 12 jedinečných shodných kontextů 13 řádků.
+Potvrzuje SDK query/document errorWrapper a odpovídající reauth/getIdToken rámce;
+neidentifikuje samo o sobě konkrétní třetí aplikační odběr. Důkaz v ignorovaném
+build/account-console-map-proof.json. Žádná aplikační oprava těchto chyb zatím neproběhla.
 
 ## Konečný 60denní úklid
 

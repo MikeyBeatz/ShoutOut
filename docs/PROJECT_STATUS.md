@@ -39,10 +39,17 @@ happyPathVerified=false, protože šlo o pokračování po předchozí chybě.
 
 Kontrola 4. listopadu znovu potvrdila oba originy proti čistému release,
 Hosting a59b75f1d27dc90d, stejné Functions/Rules/IAM/plánovače a původní inventuru.
-Je připravený nový dočasný účet: dva vlastní aktivní Shouty a cizí kontrolní obsah,
-bez žádosti či preparation receipt. Uživatel je požádaný o běžný první průchod
-v nové anonymní kartě. Údaje jen docs/local/account-finalization-fixture.json.
-Další krok: ověřit první pokus a úklid, potom kompatibilitu a Rules cutover.
+Nový první pokus vlastník dokončil s návratem na přihlášení. Server potvrdil Auth
+absent, jedinou přípravu před žádostí, validní callable, zachovaný cizí obsah,
+content-archived, marker a purge scheduled s původním termínem. Test i údaje jsou
+uklizené a původní inventura shodná. Důkazy build/account-finalization-first-attempt-test
+mají happyPathVerified=true pro funkční tok; neznamená to konzoli bez chyb.
+Vlastník doložil 3 Uncaught Error z Firestore Watch při reauth/sign-out a chyby
+feed interakcí permission-denied. Dva odběry blocked/following v home.dart nemají
+onError; konkrétní odběratel třetí dokumentové chyby není potvrzený. Noto fonty jsou
+samostatné upozornění. Aplikační oprava těchto odběrů zatím připravená ani nasazená není.
+Další krok: schválit konkrétní opravu obsluhy/ukončení odběrů a její testy,
+potom kompatibilita klientů, uzavření přímých zápisů a závěrečný test.
 Historie přípravy, původní piloty, CI a meze ověření zůstávají v účtovém plánu.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 

@@ -230,8 +230,9 @@ Následně je v DEV ověřená příprava po dávkách a potvrzení/průběh v U
 serverové založení žádosti i aktivační klient jsou po úspěšném CI nasazené v DEV;
 živě prošlo obnovení z pending gate a úklid. Selhání prvního pokusu má reprodukci
 zastaralého Watch stavu; oprava čtecí transakcí c2409e0 má úspěšné CI i DEV rollout.
-Resume po opravě, serverové dokončení a úklid jsou ověřené. K 4. listopadu nový
-dočasný účet čeká na čistý první průchod; Rules ani milník tím uzavřené nejsou.
+Resume po opravě i nový první průchod, serverové dokončení a úklid jsou ověřené.
+K 4. listopadu zbývá prověřit/opravit konzolové chyby aktivních odběrů při
+reauth/odhlášení a potom kompatibilitu/cutover; Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

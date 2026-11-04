@@ -172,8 +172,44 @@ originy odpovídají release, backend/Rules/IAM/plánovače a původní inventur
 Je připravený nový dočasný Auth účet pro první pokus na c2409e0, dva vlastní Shouty
 a cizí kontrolní Shout/komentář; před testem Auth existuje, vlastní Shouty active,
 žádost ani receipt neexistují. Údaje jen docs/local/account-finalization-fixture.json.
-Vlastník je požádaný o nové anonymní okno, varování, jediné heslo, blokující průběh
-a přihlášení. Tento nový první průchod a jeho úklid ještě zbývají.
+Vlastník provedl nový první pokus a potvrdil smazání s návratem na přihlášení.
+Server potvrdil Auth absent, jednu přípravu hidden=2/hasMore=false před žádostí,
+callable HTTP 200 + Auth/App Check VALID, cizí komentář zachovaný, content-archived,
+minimální veřejný marker a purge scheduled s původním +60denním termínem.
+Fixture včetně údajů uklizená a původní inventura shodná; oba originy i nezměněný
+backend/Rules/IAM/plánovače znovu ověřené. Důkazy jsou v ignorovaném
+build/account-finalization-first-attempt-test: initialAttemptFailed=false,
+manualResumeUsed=false, happyPathVerified=true. Toto pole potvrzuje funkční tok,
+nikoli absenci konzolových chyb, které vlastník současně doložil.
+
+Kontrolní cizí Shout během čekání překročil svou původní hodinovou platnost a
+stav přešel active → expired v souladu s expiračním workerem. Přímé porovnání celého otisku
+proto správně selhalo. Následná kontrola ověřila status=expired, původní expiresAt
+již uplynulý, updateTime až po deadline a shodný původní digest po normalizaci
+jediného pole status na active. Žádné jiné pole se nezměnilo, původní digest
+zůstal neměnný. Live helper nyní připouští právě tento úzce ověřený běžný přechod
+a zaznamenává foreignControlExpiredNormally=true; kontrolní data se neopravovala
+ani se neposouvala jejich platnost. Cizí obsah nebyl odstraněním účtu dotčený.
+
+### Otevřené konzolové chyby po úspěšném smazání
+
+Vlastník doložil 3× Uncaught Error z Firestore Watch a Feed interaction subscription
+failed / cloud_firestore permission-denied při reauth/sign-out; žádný řádek
+ShoutOut account deletion stage failure v poskytnutém výpisu není. Dva query
+odběry blocked/following v lib/src/home.dart mají listen bez onError. Dokumentová
+chyba má zatím potvrzený původ v SDK, konkrétní aplikační odběratel není určený.
+Noto font warning se týká chybějících znaků, je samostatný a jeho dotčený znak
+zatím není identifikovaný. Neprohlašovat všechny tyto chyby za neškodné.
+
+Lokální symbolizované sestavení stejného c2409e0 nebylo nasazené. Celý JS není
+byte-for-byte shodný (zdrojové mapy mění rozložení), proto přímé původní řádky
+nelze použít. Pro všech 12 vybraných rámců se ověřil jedinečný identický kontext
+13 generovaných řádků a teprve pak posun do mapy: query errorWrapper v interop
+firestore.dart:571, document errorWrapper:445, addError ve stream_controller.dart,
+reauthentication a příprava/getIdToken v účtovém toku. Důkaz
+build/account-console-map-proof.json; zdrojové mapy jsou jen v ignorovaném build.
+Jde o diagnózu, ne opravu. Před další implementací předložit konkrétní rozsah
+obsluhy/ukončení odběrů a regresních testů; Rules ani oprávnění neoslabovat.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

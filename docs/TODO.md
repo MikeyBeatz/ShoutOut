@@ -29,8 +29,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    založení žádosti a potvrzení/průběh v UI jsou v DEV. Oprava potvrzení commitu
    čtecí transakcí c2409e0 má úspěšné CI a ověřené nasazení na obou originech.
    Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
-   Nový dočasný účet čeká na první průchod v nové anonymní kartě. Potom jeho úklid,
-   ověření kompatibility, uzavření přímých zápisů a společný závěrečný test podle
+   Nový první pokus, serverové dokončení a úklid jsou také ověřené. Zbývají
+   nezachycené chyby odběrů při reauth/odhlášení (2 query a 1 document); navrhnout
+   konkrétní opravu obsluhy a ukončení. Potom kompatibilita, uzavření přímých zápisů
+   a společný závěrečný test podle
    [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
