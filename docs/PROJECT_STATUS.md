@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 3. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 4. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -16,45 +16,34 @@ s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověř
 uklizené; nejnovější čistě UI opravu ověřují widgety a shoda nasazených artefaktů.
 Nasazené vrstvy a důkazy jsou níže; Rules cutover zůstává otevřený.
 
-Na feature/account-deletion-finalization je v DEV zapnutá finalizace:
-server atomicky kontroluje nepřítomnost vlastních aktivních Shoutů a zakládá
-žádost; klient ověřuje její serverový commit před Auth.delete. Přepínač
-serverAccountDeletionFinalization je true. Vlastník zrušil omezení na lokální práci
-a schválil průběžný DEV rollout s kontrolami. Nová Function a9ff425 je ACTIVE,
-anonymní volání odmítá HTTP 401; aktivace 8289dce / CI 41705303226 success proběhla,
-následovala diagnostika 712da1b a nyní oprava čtení c2409e0. Oba originy odpovídají čistému release. Ostatní Functions, Rules, IAM, oba
-plánovače i původní účtová inventura se při rolloutu nezměnily.
-Živý první pokus skončil obecnou chybou po vzniku žádosti. Vlastník poté z pending
-gate znovu ověřil heslo a dokončil Auth odstranění. Server potvrzuje právě jednu
-přípravu a jednu žádost, validní Auth/App Check a HTTP 200, cizí obsah zachovaný,
-content-archived a původní +60denní termín. Fixture je uklizená a původní inventura
-shodná. Jde o ověřené obnovení po chybě, nikoli úspěch běžného průchodu na první pokus.
-Konzole tohoto prvního pokusu nebyla dostupná; příčinu zpřesnil opakovaný test níže.
-Na fix/account-deletion-diagnostics je v DEV nasazený bezpečný konzolový kód fáze/chyby,
-bez zpráv výjimek, UID/e-mailu, hesel, tokenů, payloadů či nového ukládání dat.
-CI 41710073555 zdroje 712da1b success: 280 Flutter, 42 tools, 107 unit,
-367 Rules/server, 15 purge, 15 Storage, analýza/lint/build. Diagnostický marker
-je ověřený i v release JS. Backend a původní inventura se při novém Hostingu nezměnily.
-Opakovaný test zachytil ensure-request / state/unconfirmed-account-deletion-request.
-Server má platnou žádost, jednu přípravu, zachovaný cizí obsah a validní callable;
-Auth stále existuje, worker čeká. Uživatel zatím nepokračoval do resume.
-V emulátoru se podařilo reprodukovat zastaralý Source.server výsledek při aktivním
-listeneru a opožděné aktualizaci po externím zápisu (5/5); metadata přitom tvrdí
-fromCache=false. Čtení v transakci vždy našlo commit. Na fix/account-deletion-commit-read
-je připravená náhrada kontroly žádosti čtecí transakcí s maxAttempts=1, bez zápisů
-či změny oprávnění. Dva regresní emulátorové testy prošly, včetně owner-only Rules
-a nezměněného dokumentu/retence. Oprava c2409e0587c42bcbc34008c881395a06c294549f
-má success CI 41715769367: 280 Flutter, 42 tools, 107 unit, 369 Rules/server,
-15 purge/15 Storage, analýza/lint/build. DEV Hosting a59b75f1d27dc90d je nasazený;
-oba originy shodné s čistým release, backend/Rules/IAM/plánovače a původní inventura
-nezměněné (při porovnání vynechaná pouze známá současná fixture žádost/job).
-Současná fixture čeká na dokončení Auth a úklid; údaje pouze v ignorovaném
-docs/local/account-finalization-fixture.json. Běžný průchod zůstává neověřený.
-Zdroj a9ff425bb6b01e2d7420f45915b6ea977895fa43 má success
-CI 41696994668: 276 Flutter, 107 unit, 42 tools, 367 Rules/server, 15 purge,
-15 Storage, analýza/lint/build. Lokálně navíc 16 cílených emulátorových scénářů.
-Lokální úsek a kompatibilní nasazení jsou hotové; uživatel je požádaný o dokončení
-současného pending testu v nové kartě. Pak úklid, nový běžný průchod a Rules cutover.
+DEV má zapnutou serverovou finalizaci a9ff425: atomická kontrola vlastních aktivních
+Shoutů a založení žádosti, potom klientské potvrzení commitu před Auth.delete.
+Oba přepínače přípravy/finalizace jsou true. Function je ACTIVE a anonymní volání
+odmítá HTTP 401. Vlastník zrušil omezení na lokální práci a schválil průběžné DEV
+rollouty s kontrolami. Žádné přímé zápisy se zatím v Rules neuzavíraly.
+
+Web c2409e0587c42bcbc34008c881395a06c294549f nahrazuje zastaralé Source.server čtení
+žádosti čtecí transakcí s maxAttempts=1, bez zápisů či změny oprávnění. Selhání
+ensure-request / unconfirmed-account-deletion-request se podařilo vysvětlit
+reprodukcí opožděného Watch stavu v emulátoru (5/5); dva nové regresní testy prošly.
+CI 41715769367 success: 280 Flutter, 42 tools, 107 unit, 369 Rules/server,
+15 purge/15 Storage, analýza/lint/build. Bezpečné konzolové stage/code zůstávají,
+bez zpráv výjimek, osobních údajů, tokenů či nového ukládání dat.
+
+Po této opravě vlastník potvrdil průběh a přihlášení při resume. Server ověřil
+odstraněný Auth, právě jednu přípravu a žádost, validní Auth/App Check + HTTP 200,
+zachovaný cizí obsah, content-archived, minimální veřejný marker a purge scheduled
+s původním +60denním termínem. Fixture včetně údajů je uklizená, původní inventura
+shodná. Důkazy jsou v ignorovaném build/account-finalization-diagnostic-recovery-test;
+happyPathVerified=false, protože šlo o pokračování po předchozí chybě.
+
+Kontrola 4. listopadu znovu potvrdila oba originy proti čistému release,
+Hosting a59b75f1d27dc90d, stejné Functions/Rules/IAM/plánovače a původní inventuru.
+Je připravený nový dočasný účet: dva vlastní aktivní Shouty a cizí kontrolní obsah,
+bez žádosti či preparation receipt. Uživatel je požádaný o běžný první průchod
+v nové anonymní kartě. Údaje jen docs/local/account-finalization-fixture.json.
+Další krok: ověřit první pokus a úklid, potom kompatibilitu a Rules cutover.
+Historie přípravy, původní piloty, CI a meze ověření zůstávají v účtovém plánu.
 [Kontrakt, meze a další brána](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#lokální-atomické-založení-žádosti--schváleno-3-listopadu-2026).
 
 Reorganizace dokumentace je dokončená; [pravidla a kontrola](DOCUMENTATION_MAINTENANCE.md).
@@ -79,7 +68,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat webu: předchozí Hosting 96f84b4aa35ca226 (zdroj 8289dce); backend je
+Návrat posledního webového rolloutu: Hosting e69064a6c3110b2a (zdroj 712da1b); backend je
 kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
 256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,

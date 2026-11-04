@@ -1,6 +1,6 @@
 # Dokončení mazání účtu – rozhodnutí, ochrany a pořadí
 
-Rozhodnutí od 31. října; aktuální souhrn ověřený 3. listopadu 2026.
+Rozhodnutí od 31. října; aktuální souhrn ověřený 4. listopadu 2026.
 Navazuje na [živě ověřený DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md)
 a [kritéria účtového milníku](../../MVP_SERVER_PLAN.md#account-deletion).
 Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
@@ -118,7 +118,7 @@ zprávy výjimek, osobní údaje, hesla, tokeny, payloady ani nová databázová
 Selhání diagnostického observeru nesmí změnit operaci ani její retry. Pořadí
 běžného průchodu se nemění: varování + jediné heslo → průběh → přihlášení;
 pending gate a nové heslo slouží jen k obnově přerušeného pokusu. Dosavadní
-příčina chyby není potvrzená. Diagnostika 712da1b159d85c50460b2d4a4aa6d6abd5b6f37b
+příčina při přípravě diagnostiky nebyla potvrzená. Diagnostika 712da1b159d85c50460b2d4a4aa6d6abd5b6f37b
 má úspěšné CI 41710073555 (280 Flutter, 42 tools, 107 unit, 367 Rules/server,
 15 purge/15 Storage, analýza/lint/build) a DEV Hosting e69064a6c3110b2a. Oba
 originy včetně diagnostického markeru v release JS ověřené, backend i původní
@@ -128,7 +128,7 @@ Auth účet a stejná fixture. Údaje jen docs/local/account-finalization-fixtur
 Opakovaný první pokus selhal s ensure-request / state/unconfirmed-account-deletion-request;
 před resume ověřeno: Auth existuje, žádost je uložená, jedna příprava před žádostí,
 cizí obsah zachovaný, callable HTTP 200 a Auth/App Check VALID, worker waiting-auth.
-Úklid této fixture zatím neproběhl. Pomocný live nástroj má lokální record-first-failure / record-first-success
+Následné dokončení a úklid po opravě jsou zaznamenané níže. Pomocný live nástroj má lokální record-first-failure / record-first-success
 / record-resume pro přesné zachycení uživatelského výsledku; happyPathVerified
 smí být true pouze po výslovném potvrzení úspěchu prvního pokusu.
 
@@ -160,8 +160,20 @@ lint a build. Je nasazený pouze DEV Hosting a59b75f1d27dc90d; oba originy byte-
 odpovídají čistému release. Functions, Rules, IAM a oba plánovače nezměněné.
 Původní inventura shodná po vyloučení pouze známé současné fixture žádosti/jobu.
 Důkazy build/account-commit-read-{ci,pre-proof,post-proof}.json a release/deploy log.
-Uživatel je požádaný o dokončení současného pending účtu v nové anonymní kartě;
-úklid a nový úspěšný první průchod ještě zbývají. Recovery test nezaměnit za happy path.
+Vlastník potvrdil resume po opravě: průběh a pak přihlášení. Server ověřil odstraněný
+Auth, jedinou přípravu/žádost, zachovaný cizí obsah, content-archived, veřejný marker
+a purge scheduled s původním +60denním termínem. Jen tato fixture a přihlašovací
+soubor jsou uklizené, původní inventura shodná. Důkazy v ignorovaném
+build/account-finalization-diagnostic-recovery-test: initialAttemptFailed=true,
+manualResumeUsed=true, happyPathVerified=false. Recovery test nezaměnit za happy path.
+
+Po přerušení limitem 4. listopadu znovu ověřeno: přesný CI commit success, oba
+originy odpovídají release, backend/Rules/IAM/plánovače a původní inventura shodné.
+Je připravený nový dočasný Auth účet pro první pokus na c2409e0, dva vlastní Shouty
+a cizí kontrolní Shout/komentář; před testem Auth existuje, vlastní Shouty active,
+žádost ani receipt neexistují. Údaje jen docs/local/account-finalization-fixture.json.
+Vlastník je požádaný o nové anonymní okno, varování, jediné heslo, blokující průběh
+a přihlášení. Tento nový první průchod a jeho úklid ještě zbývají.
 
 ## Lokální serverová příprava – schválená 3. listopadu 2026
 

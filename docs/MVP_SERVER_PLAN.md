@@ -228,8 +228,10 @@ a úklid fixture prošly. Celý milník zůstává otevřený kvůli klientském
 uzavření přímých zápisů a závěrečnému testu. Staré joby se nepřeváděly.
 Následně je v DEV ověřená příprava po dávkách a potvrzení/průběh v UI. Atomické
 serverové založení žádosti i aktivační klient jsou po úspěšném CI nasazené v DEV;
-živě prošlo obnovení z pending gate a úklid. Selhání prvního klientského pokusu
-ještě není vysvětlené; Rules ani milník tím uzavřené nejsou.
+živě prošlo obnovení z pending gate a úklid. Selhání prvního pokusu má reprodukci
+zastaralého Watch stavu; oprava čtecí transakcí c2409e0 má úspěšné CI i DEV rollout.
+Resume po opravě, serverové dokončení a úklid jsou ověřené. K 4. listopadu nový
+dočasný účet čeká na čistý první průchod; Rules ani milník tím uzavřené nejsou.
 [Důkazy a navazující rozhodnutí](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
 <a id="lifecycle"></a>

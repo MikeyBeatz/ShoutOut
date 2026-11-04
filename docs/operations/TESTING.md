@@ -100,8 +100,8 @@ CI 41710073555 pro 712da1b success: 280 Flutter, 42 tools, 107 unit,
 e69064a6c3110b2a a oba originy odpovídají manifestu, marker je přítomný v release JS;
 backend/Rules/IAM/plánovače/inventura beze změny. Nová dočasná fixture je
 připravená. Opakovaný test zachytil ensure-request / unconfirmed-account-deletion-request:
-žádost/příprava jsou na serveru, Auth stále existuje, cizí obsah zachovaný a worker
-waiting-auth. Resume ani úklid zatím neproběhly.
+v okamžiku chyby byly žádost/příprava na serveru, Auth existoval, cizí obsah byl
+zachovaný a worker waiting-auth. Následné resume po opravě je ověřené níže.
 
 Následný emulátorový experiment reprodukoval 5/5 zastaralých getDocFromServer
 výsledků po externím commitu při aktivním listeneru a zpoždění 250 ms. Čtecí
@@ -115,8 +115,15 @@ a kontrolou dokumentace. CI 41715769367 pro c2409e0 success: 280 Flutter, 42 too
 107 unit, 369 Rules/server, 15 purge/15 Storage, lint/analyze/build. Čistý release
 je nasazený na DEV Hosting a59b75f1d27dc90d; oba originy odpovídají artefaktu,
 backend/Rules/IAM/plánovače a původní inventura nezměněné (jen známá pending
-fixture vyloučená z původní inventury). Ruční dokončení aktuálního pokusu, úklid
-a nový úspěšný první průchod ještě zbývají.
+fixture vyloučená z původní inventury). Ruční resume po opravě prošlo s průběhem
+a přihlášením; server potvrdil Auth absent, jednu přípravu/žádost, zachovaný cizí
+obsah, content-archived, marker a purge scheduled s původním +60denním termínem.
+Fixture i údaje uklizené; původní inventura shodná. Důkaz je v ignorovaném
+build/account-finalization-diagnostic-recovery-test a má happyPathVerified=false.
+Kontrola 4. listopadu znovu potvrdila živé artefakty/backend i původní inventuru.
+Nový dočasný účet se dvěma vlastními Shouty a cizím kontrolním obsahem čeká
+na první pokus v nové anonymní kartě; před ním žádná žádost/receipt a Auth existuje.
+Nový běžný průchod ani jeho úklid zatím ověřené nejsou.
 
 ## Konečný 60denní úklid
 

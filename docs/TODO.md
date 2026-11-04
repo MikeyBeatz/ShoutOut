@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 3. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 4. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -25,21 +25,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 ## Nejbližší práce
 
 1. **Dokončit klientský tok mazání účtu a uzavření jeho přímých zápisů.**
-   Serverový 60denní úklid je hotový v DEV. Zbývající přímé klientské skrytí,
-   kompatibilní přechod a závěrečný test jsou v
-   [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-   Serverová příprava po 50 Shoutech a společný klientský pokus jsou nasazené
-   a zapnuté v DEV po úspěšném CI. Živý nový i kompatibilní průchod jsou ověřené
-   a fixture uklizené. Potvrzení nevratnosti a blokující průběh jsou nasazené
-   v DEV po úspěšném CI. Atomické serverové založení žádosti i aktivační klient
-   mají úspěšné CI (276 Flutter, 367 Rules/server) a jsou nasazené v DEV se
-   zapnutým přepínačem. Živě prošlo obnovení z pending gate a úklid, ale první
-   pokus selhal. Před Rules cutoverem zjistit klientskou příčinu a ověřit běžný
-   průchod. Diagnostika zachytila odmítnuté potvrzení existující žádosti; emulátor
-   reprodukoval zastaralé Source.server čtení při aktivním listeneru. Čtecí transakce
-   a dva regresní testy jsou po úspěšném CI nasazené v DEV (c2409e0); oba originy
-   a nezměněný backend ověřené. Zbývá dokončení/úklid současné pending fixture
-   a úspěšný první průchod před uzavřením přímých zápisů.
+   Serverové fáze včetně +60denního úklidu, příprava po 50 Shoutech, atomické
+   založení žádosti a potvrzení/průběh v UI jsou v DEV. Oprava potvrzení commitu
+   čtecí transakcí c2409e0 má úspěšné CI a ověřené nasazení na obou originech.
+   Resume po opravě, serverové dokončení a úklid prošly; původní inventura shodná.
+   Nový dočasný účet čeká na první průchod v nové anonymní kartě. Potom jeho úklid,
+   ověření kompatibility, uzavření přímých zápisů a společný závěrečný test podle
+   [účtového plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
