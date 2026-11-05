@@ -15,7 +15,10 @@ a kořenové Shout cesty v emulátoru. Je součástí `npm --prefix tools run te
 odděleně od časového limitu Rules sady. Konečných 45/45 případů (10 nových,
 15 původních purge, 14 dávkových writerů a 6 expirace), 107 unit (emulátorové
 testy v unit průchodu přeskočené), celý ESLint a kontrola dokumentace prošly.
-Celé CI zatím není uzavřené.
+Zdroj c410ce3f46403c35f87d04befee4d8358acf396d má úspěšné
+[CI 42063945148](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42063945148):
+293 Flutter, 42 tools, 107 unit, 389 Rules/server, 25 purge/15 Storage,
+analýza/lint/formát/build. Lokální úsek je uzavřený bez nasazení.
 
 Pokrývá celý maintenance tick, expiraci zdroje/indexu, prioritu a rozpočet purge,
 anonymní kontext s cizími komentáři, odpočty reakcí bez zbytečných indexových
@@ -26,6 +29,7 @@ osobních metadat ze všech starých indexových bloků do pevného deadline je 
 otevřená aktivační brána, nikoli prokázaný výsledek této sady.
 [Kontrakt a meze](../plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
 Lokální logy: build/feed-maintenance-{targeted,regression,unit,lint}.log.
+Konečné důkazy: build/feed-maintenance-ci.{json,log}, build/feed-maintenance-local-proof.json.
 
 ## Dávkový indexový writer – lokální úsek 5. listopadu
 

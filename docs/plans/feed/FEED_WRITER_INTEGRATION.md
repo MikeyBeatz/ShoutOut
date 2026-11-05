@@ -187,6 +187,10 @@ rozpoznávají anonymní kontext; starý indexový řádek audit stále odmítne
 Živý projekt ani namespace tím nevzniká. Nová sada
 `functions/feed_maintenance.integration.test.js` je zařazená do `test:purge`.
 Ověření a přesné výsledky jsou v [TESTING](../../operations/TESTING.md).
+Zdroj c410ce3f46403c35f87d04befee4d8358acf396d má success
+[CI 42063945148](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42063945148)
+včetně 389 Rules/server a 25 purge testů; lokálně prošlo 45/45 cílených případů.
+Lokální propojení je uzavřené, živý wrapper zůstává beze změny.
 
 **Zbývající povinná brána před živým indexem:** dosavadní GC chrání archivní
 kořeny hodinu od jejich vyřazení. To samo nezaručuje odstranění UID/polohy
@@ -195,6 +199,8 @@ ještě aktivní vlastní projekci, běžná archivace kořene by vytvořila nov
 právě u tohoto termínu. Také starší bloky potřebují skutečně zapojený úklid.
 Neprodlužovat retenci; navrhnout a ověřit cílené odstranění těchto metadat,
 včetně souběhu se snapshoty/GC a nedokončené primární účtové fáze.
+Před aktivací rovněž ověřit konzistenci rozpracovaných jobů: samotný minimální
+kontext není důkazem odstranění všech starších indexových kopií.
 Tento lokální úsek to neřeší ani nepovoluje živou aktivaci. Pozitivní purge test
 vychází z vlastních Shoutů již vyřazených z indexu v dřívější účtové fázi;
 historii cizího Shoutu zachovává a neobsahuje UID mazaného hlasujícího.

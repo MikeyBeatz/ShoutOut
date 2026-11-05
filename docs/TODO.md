@@ -32,7 +32,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Lokální dávkový plán a volitelné zapojení přípravy jsou hotové: zdroj 1ba2b4a
    má success CI 42053726540 včetně 389 Rules/server testů. Writer v živém wrapperu
    není zapnutý. Navazující lokální maintenance/purge předává writer přes celý
-   tick a ošetřuje anonymní kontext; 45/45 cílených testů prošlo, CI ještě čeká.
+   tick a ošetřuje anonymní kontext; úsek c410ce3 je uzavřený: 45/45 cílených
+   testů a success CI 42063945148 včetně 25 purge testů. Nic se nenasazovalo.
    Před živou aktivací dořešit odstranění UID/polohy ze starých bloků do původního
    +60denního deadline, včetně selhání primární účtové fáze.
    [Kontrakt a zbývající brána](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).

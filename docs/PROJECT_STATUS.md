@@ -13,14 +13,17 @@ schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
 uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
-Na feature/feed-maintenance-index-writer je připravené předání writeru přes celý
+Na feature/feed-maintenance-index-writer je dokončené předání writeru přes celý
 tick, ošetření již anonymizovaného Shoutu v konečném purge a indexové odpočty
-bez zbytečných změn při odebrání záložky. Konečných 45/45 emulátorových testů
-(10 nových), 107 Functions unit, lint a kontrola dokumentace prošly; CI ještě čeká.
+bez zbytečných změn při odebrání záložky. Zdroj c410ce3f46403c35f87d04befee4d8358acf396d
+má CI 42063945148 success: 293 Flutter, 42 tools, 107 unit, 389 Rules/server,
+25 purge/15 Storage, analýza/lint/formát/build. Lokálně prošlo 45/45 cílených
+emulátorových testů (10 nových) a kontrola dokumentace; lokální úsek je uzavřený.
 Zahrnuje rollback, lost ack a zachování cizího obsahu. Živý wrapper index
 nepředává, žádné nasazení ani živá data. Hodinová historie sama negarantuje
 pevnou účtovou retenci; to zůstává povinná brána, nikoli změna schválené lhůty.
 [Kontrakt a meze](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
+Důkazy: build/feed-maintenance-ci.{json,log}, build/feed-maintenance-local-proof.json.
 
 Na feature/feed-batch-index-writer je dokončený schválený lokální prepareBatch
 a volitelné zapojení do prepareAccountDeletion, zdroj
