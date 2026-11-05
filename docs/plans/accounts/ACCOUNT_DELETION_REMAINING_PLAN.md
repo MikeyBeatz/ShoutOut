@@ -1,6 +1,6 @@
 # Dokončení mazání účtu – rozhodnutí, ochrany a pořadí
 
-Rozhodnutí od 31. října; aktuální souhrn ověřený 4. listopadu 2026.
+Rozhodnutí od 31. října; aktuální souhrn ověřený 5. listopadu 2026.
 Navazuje na [živě ověřený DEV pilot](ACCOUNT_DELETION_DEV_PROPOSAL.md)
 a [kritéria účtového milníku](../../MVP_SERVER_PLAN.md#account-deletion).
 Zdrojem deklarované retence je také `lib/legal.dart`, česká sekce
@@ -26,11 +26,13 @@ content-archived a fixture jsou uklizené. Přesné vrstvy a důkazy níže a v 
 DEV uzavření přímých žádostí a statusového skrytí je nasazené z 7ab60c8 po
 úspěšném CI. Povinné serverové směrování platí i pro nativní kód/vypnuté DEV
 přepínače; starý web potřebuje obnovu a starý mobilní build aktualizaci. Živě
-ověřené vlastní čtení 200 a přímé zápisy 403 bez změny dat/updateTime. Zbývá
-společný pozitivní UI průchod po tomto cutoveru, serverové dokončení a úklid
-jediné schválené dočasné fixture. Není to uzavření ostatních obsahových operací.
-Celý účtový milník vyžaduje také dokončený test žádosti, Auth smazání,
-částečného selhání, opakování, zachování cizího obsahu a retence.
+ověřené vlastní čtení 200 a přímé zápisy 403 bez změny dat/updateTime. Pozitivní
+UI průchod po cutoveru, serverové dokončení i úklid jediné fixture jsou uzavřené
+5. listopadu. Starší token navíc nesmí smazat žádost nebo změnit retenci.
+Účtová DEV kritéria žádosti, Auth smazání, částečného selhání/opakování,
+zachování cizího obsahu a retence jsou pokrytá živým pilotem a níže odkazovanými
+integračními/purge testy. Není to uzavření ostatních obsahových operací ani
+souhrnného MVP milníku životnosti Shoutů; sedmidenní fyzický úklid ještě zbývá.
 Konkrétní souhlasy pro lokální úseky, rollouty a dočasné Auth testy jsou u etap níže;
 samotné dokončení této opravy neschvaluje nové migrace či změny Rules.
 
@@ -139,10 +141,37 @@ kontrolních dokumentů a neexistující žádost zůstaly stejné. Důkaz:
 build/deletion-cutover-client-before-ui-proof.json. Přihlášení proběhlo jen
 novým dočasným účtem; žádný cizí účet nebyl použitý nebo měněný.
 
-Pozitivní UI mazání, serverové dokončení a úklid zatím čekají. Browser access
-host je stále nedostupný; vlastník dostal nový anonymní průchod a údaje pouze
-v ignorovaném docs/local/account-finalization-fixture.json. Nezaměnit tento
-pending pilot za uzavřenou fixture předchozí opravy odběrů.
+### Uzavření DEV pilotu – 5. listopadu 2026
+
+Vlastník potvrdil první UI smazání bez problému s návratem na přihlášení
+a následné odmítnutí přihlášení smazaným účtem. Samotné HTTP 400 není důkaz
+odstranění; Auth user-not-found je samostatně ověřený. UI provedl vlastník,
+protože browser access host nebyl dostupný. Žádné pokračování druhým pokusem
+nebylo potřebné; happyPathVerified=true.
+
+Server potvrdil právě jeden preparation receipt hidden=2/hasMore=false před
+jedinou žádostí, validní Auth/App Check a HTTP 200 callable. Worker dokončil
+content-archived, minimální veřejný marker a purge scheduled v původním
+request.createTime +60 dní. Průchod využil standardní trigger/plánovač, také
+ruční spuštění existujícího plánovače pouze v okamžiku splatnosti; jeho rozvrh,
+60sekundový odstup ani prostředky se neměnily. Po přerušení kontrolní Shout řádně
+expiroval; kromě statusu po expiresAt je celý obsah shodný s původním digestem.
+Cizí komentář zůstal zachovaný. Starý skutečný ID token má vlastní čtení 200,
+ale delete žádosti a změna retainUntil vracejí 403 bez změny dat/updateTime.
+
+Po terminálním stavu a ověření Auth absent byla odstraněna jen schválená fixture,
+její receipt/žádost/joby/purge job a potomci. Přihlašovací soubor i dočasný token
+jsou odstraněné; původní inventura je shodná. Po úklidu znovu ověřené oba originy,
+pravidla a zachování Functions/Storage Rules/IAM/plánovačů. Důkazy jsou v ignorovaném
+build/deletion-cutover-live-test/ (pilot/cleanup/UI review a oba klientské testy)
+a build/deletion-cutover-post-cleanup-proof.json. Nezůstává aktivní testovací účet
+ani nedokončený pilot. Produkce, main a původní pending žádost se nezměnily.
+
+Tím je účtová DEV část uzavřená. Konec 60denní retence není nové živé čekání
+60 dní: navazuje na dříve ověřený stejný kernel nad skutečným Firestore/Storage
+s řízeným časem a aktuální CI purge 15/15. Nativní fyzický průchod a produkční
+aktivace zůstávají pod vlastními vydávacími branami. Další vývoj je prostorový
+indexový writer; nic z tohoto pilotu živý index neaktivovalo.
 
 ## Lokální atomické založení žádosti – schváleno 3. listopadu 2026
 

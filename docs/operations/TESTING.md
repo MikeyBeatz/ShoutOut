@@ -40,8 +40,23 @@ nasazené; oba originy odpovídají čistému 7ab60c8, Functions/Storage Rules/I
 plánovače a původní inventura se nezměnily. Skutečné přihlášení běžným dočasným
 účtem: vlastní čtení 200, přímé create/delete žádosti a skrytí vlastního/cizího
 Shoutu 403 PERMISSION_DENIED. Data/updateTime i absence žádosti zůstaly stejné.
-build/deletion-cutover-client-before-ui-proof.json. Pozitivní UI mazání,
-serverové dokončení a úklid dosud čekají; nejde o dokončený nový pilot.
+Před-UI klientský důkaz je archivovaný v build/deletion-cutover-live-test/.
+Vlastník potvrdil první smazání s návratem na login bez problému a odmítnuté další
+přihlášení. Starý skutečný ID token má vlastní čtení 200, ale mazání žádosti a
+změnu retainUntil 403 bez změny dat/updateTime. Konečná kontrola 5. listopadu:
+Auth absent, právě jeden preparation receipt hidden=2 před jedinou žádostí,
+Auth/App Check VALID + HTTP 200, content-archived, minimální marker a purge
+scheduled s původním +60denním termínem, zachovaný cizí komentář. Kontrolní Shout
+po přerušení pouze řádně expiroval; kromě statusu je jeho digest původní.
+Standardní worker pokračoval i ručním vyvoláním stávajícího Scheduleru až po
+splatnosti; rozvrh a limity se neměnily. Jde o skutečné služby, nikoli emulátor.
+
+Jen schválená fixture je uklizená, přihlašovací soubor i klientský token odstraněné,
+původní inventura shodná. Oba originy a zachování Functions/Storage Rules/IAM/
+plánovačů jsou po úklidu znovu ověřené. Důkazy:
+build/deletion-cutover-live-test/ a build/deletion-cutover-post-cleanup-proof.json.
+UI provedl vlastník, browser access host nebyl dostupný. Pilot je uzavřený;
+neprokazuje nativní fyzický průchod ani nové živé uplynutí celých 60 dní.
 
 Nová `prepare_account_deletion.integration.test.js` je součástí test:rules.
 Cíleně s receipt cleanupem prošlo 9 emulátorových scénářů: 51 vlastních Shoutů,

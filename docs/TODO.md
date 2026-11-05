@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 4. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 5. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -24,18 +24,15 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit živé ověření mazání účtu po uzavření přímých zápisů.**
-   Serverové fáze, příprava po 50 Shoutech, finalizace, UI a oprava odběrů jsou
-   v DEV. Nový web i Rules z 7ab60c8 po success CI 41915977658 (375 Rules/server)
-   jsou nasazené a ověřené proti čistému release. DEV směrování je povinné;
-   starší web potřebuje obnovu, starý mobilní build aktualizaci. Živě vlastní
-   čtení 200 a čtyři přímé zápisy 403 bez změny dat/updateTime. Ostatní backend
-   i původní inventura zachované. Zbývá UI smazání jediného schváleného dočasného
-   účtu, serverové dokončení a úklid; vlastník dostal ruční postup, protože
-   prohlížeč není dostupný. Historie dílčích oprav a důkazy jsou zachované v
-   [účtovém plánu](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-   [Rozsah, přechod klientů a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
-2. **Pokračovat prostorovým feedem a jeho čtením/obnovou.** Zapojit všechny
+1. **Připravit dávkový indexový writer pro serverovou přípravu mazání účtu.**
+   Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
+   první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
+   i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.
+   [Účtové důkazy a meze](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+   Před živým prostorovým indexem chybí writer v prepareAccountDeletion;
+   samostatné změny více Shoutů ve stejné buňce se nesmějí přepsat. Další konkrétní
+   implementační rozsah nejdřív předložit podle [zápisových cest](plans/feed/FEED_WRITER_INTEGRATION.md).
+2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
    [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav); lokální prototyp není

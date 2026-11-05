@@ -1,15 +1,15 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 4. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 5. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-Dokončit schválený živý UI průchod po DEV uzavření přímých zápisů a uklidit jeho
-jedinou dočasnou fixture. Web i Rules už jsou nasazené a klientské zákazy ověřené.
-Klientský tok i serverové fáze už jsou
-ověřené v DEV. Kritéria a otevřené části:
+Pokračovat prostorovým feedem: nejprve připravit konkrétní úsek dávkového writeru
+pro přípravu mazání účtu a ověřit jeho skládání v emulátoru. Živý index ani migrace
+dosud nejsou schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
+uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
 Vlastník schválil další lokální úsek 4. listopadu: povinné serverové mazání
@@ -23,20 +23,26 @@ Po navazujícím souhlasu vlastníka je tento web i Firestore Rules nasazený po
 v DEV: Hosting f5c7ef14f1b5e04b, ruleset c70b6f10-a51e-415d-aef5-8f8b685adb3d,
 normalizovaný hash e93fee381fd8a96f3a3c02a87211c0e5a4989e7bc28502cb7a5754dd24c30dc0.
 Oba originy odpovídají čistému release; Functions/Storage Rules/IAM/plánovače
-a původní účtová inventura zůstaly shodné. Jeden nový dočasný Auth účet má
+a původní účtová inventura zůstaly shodné. Jeden nový dočasný Auth účet měl
 schválené dva vlastní Shouty, cizí kontrolní Shout a cizí komentář. Vlastní čtení
 vrací 200, čtyři přímé zápisy 403 PERMISSION_DENIED bez změny dat/updateTime.
-Pozitivní UI smazání a následný serverový postup/úklid zatím nejsou ověřené.
-Browser access host je stále nedostupný; vlastník dostal postup s novými údaji
-v ignorovaném docs/local/account-finalization-fixture.json. Důkazy:
-build/deletion-cutover-{pre,web,rules}-proof.json a client-before-ui-proof.json.
+Vlastník potvrdil první UI pokus s návratem na přihlášení bez problému a odmítnuté
+další přihlášení. Server potvrdil Auth absent, jednu přípravu před žádostí,
+Auth/App Check VALID, content-archived, marker a purge scheduled v původním +60d.
+Dřívější token smí číst vlastní žádost, ale její smazání/změna retence vrací 403
+bez změny dat/updateTime. Cizí obsah je zachovaný; kontrolní Shout během přerušení
+pouze řádně expiroval, jeho ostatní pole odpovídají původnímu digestu.
+Fixture včetně přihlašovacích údajů a dočasného klientského tokenu je uklizená.
+Oba originy, nezměněné ostatní vrstvy a původní inventura po úklidu znovu ověřené.
+UI provedl vlastník kvůli nedostupnému browser hostu. Důkazy:
+build/deletion-cutover-post-cleanup-proof.json a build/deletion-cutover-live-test/.
 [Kompatibilita, rozsah a návrat](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 
 DEV má zapnutou přípravu po 50 Shoutech, společný první/resume pokus a potvrzení
 s blokujícím průběhem. Nový i starší kompatibilní tok byly živě ověřené a fixture
 uklizené. Potvrzení/průběh i oprava odběrů mají widgetové testy, shodu artefaktů
 a nový živý průchod bez Uncaught Error.
-Nasazené vrstvy a důkazy jsou níže; cutover má ověřené zákazy, závěrečný UI test čeká.
+Nasazené vrstvy a důkazy jsou níže; účtový DEV cutover i závěrečný test jsou uzavřené.
 
 DEV má zapnutou serverovou finalizaci a9ff425: atomická kontrola vlastních aktivních
 Shoutů a založení žádosti, potom klientské potvrzení commitu před Auth.delete.
@@ -136,7 +142,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 |---|---|---|
 | Obsahové operace | DEV klient používá serverovou tvorbu, reakce, ukládání, hlášení i mazání; přepínače v config/dev.json jsou zapnuté. | Závěrečné uzavření přímých Rules zápisů a celý milník serverové brány. |
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a denní DEV cleanup 02:15 UTC, max. 500 záznamů/běh. | Produkční nastavení a společná vydávací brána. |
-| Mazání účtu | Serverové fáze včetně 60denního purge, povinné DEV směrování a živé uzavření přímých žádostí/skrytí. | Závěrečný UI průchod, serverové dokončení a úklid nové fixture. |
+| Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků; zapojení writeru před živým prostorovým indexem. |
 | Feed | Plný detail A0, pořadí negativního obsahu a lokální moduly indexu/relace/expozice/kurzoru. | Provozní limity, integrace všech writerů, migrace, živé query API, klient a osobní přečtení/novinky. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |

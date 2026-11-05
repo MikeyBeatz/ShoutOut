@@ -272,7 +272,8 @@ z 96b0782 mají také samostatný purge v původním termínu createTime +60 dn�
 ten odstraní osobní/Business potomky, archivní kopie, soubory a stále vlastní
 rezervaci. Minimální veřejný marker a anonymní Shout kontext pro cizí
 konverzace zůstávají. Staré přímé klienty DEV Rules odmítnou; web potřebuje obnovu
-a mobilní build aktualizaci. Společný pozitivní UI test po cutoveru zatím čeká.
+a mobilní build aktualizaci. Společný pozitivní UI/serverový test po cutoveru
+a úklid jsou v DEV uzavřené 5. listopadu; produkční aktivace zůstává samostatná.
 [Aktuální rozsah a provoz](../plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md),
 [konfirmace a její hranice](../plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md#auth-deletion-confirmation).
 

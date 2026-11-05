@@ -7,6 +7,14 @@ maintenance wrapper jej zatím nepředává. Před aktivací živého indexu mus
 writer zapojený i do této volací cesty a ověřený přes celý maintenance tick,
 nikoli jen přímé volání helperu. [Stav exspirace](../accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 
+Aktualizace 4. listopadu: DEV web/Rules 7ab60c8 už vynucují serverové mazání
+účtu/Shoutu; klientské create/delete žádosti a přímé statusové skrytí jsou
+uzavřené. Příprava a57ae9b i finalizace a9ff425 jsou nasazené a zapnuté.
+Index writer se tímto rolloutem neaktivoval; před živým indexem zůstává nutné
+dávkové skládání a pokrytí všech dalších zápisových cest.
+Účtový DEV pilot po cutoveru a úklid jsou uzavřené 5. listopadu; žádná fixture nečeká.
+[Aktuální účtový cutover a důkazy](../accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
+
 31. října 2026. Vlastník schválil pokračování plánu až k dokončení; nová produktová,
 datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 [model indexu](FEED_BLOCK_INDEX_PLAN.md) a [retenci](FEED_INDEX_RETENTION.md).
@@ -18,9 +26,9 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Publikace Shoutu | Serverová `createShout` | Index ve stejné transakci jako dokument a receipt. |
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
-| Moderace Shoutu | Sdílená klientská cesta pro odstranění používá přepínač `serverShoutDeletion` | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
-| Mazání účtu | Serverové fáze včetně konečného purge hotové v DEV; přímé klientské skrytí stále existuje. | Dokončit klientský přechod a writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; neuzavírat Rules před kompatibilní regresí. |
-| Příprava mazání účtu | Lokální prepareAccountDeletion, nejvýše 50 vlastních aktivních Shoutů/transakce; přepínač false, nic nenasazené. | Před živým indexem integrovat dávkový writer: 50 samostatně připravených změn stejné buňky se nesmí navzájem přepsat. |
+| Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
+| Mazání účtu | Serverové fáze včetně konečného purge, klientská příprava/finalizace, Rules cutover a závěrečný živý pilot hotové v DEV. | Zapojit writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; uzavření účtových cest není aktivací indexu. |
+| Příprava mazání účtu | prepareAccountDeletion a57ae9b, nejvýše 50 vlastních aktivních Shoutů/transakce, v DEV nasazená/zapnutá. | Před živým indexem integrovat dávkový writer: 50 samostatně připravených změn stejné buňky se nesmí navzájem přepsat. |
 | Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
@@ -44,6 +52,9 @@ stejný pokus při nejasném výsledku. TimedOperationGateway doplní serverový
 z Auth. Feed/detail/moderace používají společný helper; zapnutá serverová cesta
 při chybě nepřechází na přímý zápis. Detail se po chybě nezavře a zobrazí chybu.
 `serverShoutDeletion` je volitelný boolean s výchozí false, vyžaduje App Check.
+Od 7ab60c8 má DEV nad tímto přepínačem povinnou serverovou politiku také pro
+nativní kód; mimo DEV zůstává dosavadní přepínačové chování. Následující lokální
+počty testů a původní rollouty jsou historie, poslední stav je v PROJECT_STATUS.
 
 Lokálně prošly: lint, celá Functions sada (71 pass, 89 emulator-only skip),
 analyzátor, 24 cílených Flutter testů a šest nových emulátorových scénářů.
