@@ -38,8 +38,13 @@ metadat smazaného autora. Přidaný test v feed_maintenance ověřuje skutečn�
 Konečná sada prošla 61/61: 15 R5, 11 maintenance, 14 dávkových writerů,
 10 indexových, 10 retenčních a 1 portable scénář. Předchozí sady 46/46 a 50/50
 také prošly. Poslední lint a kontrola dokumentace jsou čisté. Předchozí unit
-průchod měl 108 pass (emulátorové testy přeskočené); celé CI ještě čeká.
+průchod měl 108 pass (emulátorové testy přeskočené). Zdroj
+2909874312f0e72f48d09c9ad468817cbdb10877 má success
+[CI 42076107087](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42076107087):
+293 Flutter, 42 tools, 108 unit, 389 Rules/server, 41 purge/15 Storage,
+analýza/lint/formát/build. Lokální úsek je uzavřený bez nasazení.
 Logy: build/feed-account-retention-{targeted,regression,final-regression,unit,lint}.log.
+Konečné důkazy: build/feed-account-retention-ci.{json,log}, build/feed-account-retention-local-proof.json.
 
 ## Index přes maintenance/purge – lokální úsek 5. listopadu
 

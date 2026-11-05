@@ -8,10 +8,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 R5 je schválené a lokálně připravené na feature/feed-account-retention:
 verze dotčených oblastí, ochrana autora, pokračovatelný fyzický úklid bloků,
-cache/kurzory a volitelné dokončení přes skutečný účtový worker. Konečná regrese
-61/61 (včetně 15 R5 případů a skutečného účtového workeru), lint a kontrola
-dokumentace prošly; CI ještě čeká. Předchozí unit průchod měl 108 pass.
-Potom pokračovat regresí moderace a konkrétním provozním návrhem indexu.
+cache/kurzory a volitelné dokončení přes skutečný účtový worker. Zdroj
+2909874312f0e72f48d09c9ad468817cbdb10877 má success CI 42076107087: 293 Flutter,
+42 tools, 108 unit, 389 Rules/server, 41 purge/15 Storage, analýza/lint/formát/build.
+Lokálně také konečná regrese 61/61 včetně 15 R5 případů a skutečného účtového
+workeru; lokální úsek je uzavřený. Pokračovat regresí moderace a konkrétním
+provozním návrhem indexu. Důkazy: build/feed-account-retention-ci.{json,log}
+a build/feed-account-retention-local-proof.json. Nic se nenasazovalo.
 R5 umožňuje dřívější obnovu dotčené relace, nezavádí další hodinovou retenci.
 Provozní brána zůstává otevřená: včasná příprava, globální inventory/náklady,
 serializace úklidu a délka dočasné blokace zápisů ve stejné oblasti.

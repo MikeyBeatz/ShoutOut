@@ -10,7 +10,7 @@ K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutove
 a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je
 navíc připravený sdílený dávkový plán přípravy a propojení maintenance/purge;
 runtime indexWriter není zapojený. R5 pro historii/cache má schválený lokální
-protokol a 61/61 cílených testů (CI čeká). Před aktivací zbývá provozní ověření
+protokol, 61/61 cílených testů a success CI 42076107087. Před aktivací zbývá provozní ověření
 včasného úklidu, inventory/nákladů a délky blokace zápisů.
 [Dávkový kontrakt](FEED_WRITER_INTEGRATION.md#batch-preparation),
 [maintenance a retenční brána](FEED_WRITER_INTEGRATION.md#maintenance-purge). Následující

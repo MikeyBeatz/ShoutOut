@@ -23,7 +23,7 @@ expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou
 5. listopadu 2026. Lokální dávková příprava 1ba2b4a má success CI 42053726540
 a je uzavřená bez živé aktivace indexu.
 Maintenance/purge má lokální propojení; R5 pro historii a cache má schválený
-lokální protokol s 61/61 cílenými testy (CI čeká). Následuje regrese moderace
+lokální protokol s 61/61 cílenými testy a success CI 42076107087. Následuje regrese moderace
 a provozní měření inventory, včasného úklidu a blokace zápisů, potom schválit konkrétní
 živé schéma/migraci, provozní limity a query API. Následuje klient A2/A3,
 osobní metadata B1–B3 a indikátor B4 se společnou regresí. Původní úplná
@@ -98,6 +98,9 @@ Pro velký hustý feed může být nutný dražší index; není předem rozhodn
 - R4 schválené: pořadí platí pevně hodinu od otevření/obnovy. Po expiraci
   načtené karty zůstanou, další stránka nabídne obnovu; přečtení a záložky neexpirují.
   [Lokální protokol a ověření](FEED_INDEX_RETENTION.md).
+- R5 schválené: konečný účtový úklid může zneplatnit relaci dotčených oblastí
+  před koncem hodiny; cizí načtené karty zůstanou a další stránka vyžádá obnovu.
+  Přečtení/záložky se nemažou. [Protokol a meze](FEED_INDEX_RETENTION.md#account-retention-proposal).
 - Po restartu A vytvoří novou relaci; návrat z detailu/přepnutí karty v otevřené
   aplikaci zachová rozpracovanou relaci a scroll. Trvalé obnovení celého seznamu
   ani přesné polohy mezi restarty se do MVP tímto nepřidává.

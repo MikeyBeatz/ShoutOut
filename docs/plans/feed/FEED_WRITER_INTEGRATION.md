@@ -203,7 +203,8 @@ Před aktivací rovněž ověřit konzistenci rozpracovaných jobů: samotný mi
 kontext není důkazem odstranění všech starších indexových kopií.
 Navazující diagnostika potvrdila novou historii u deadline i cache druhého
 adaptéru. [R5 a lokální protokol](FEED_INDEX_RETENTION.md#account-retention-proposal)
-jsou nyní schválené/připravené, konečná regrese 61/61 prošla, CI ještě čeká.
+jsou lokálně uzavřené: 61/61 cílených testů a success CI 42076107087 pro
+2909874 včetně 41 purge testů.
 Provedená diagnostika samotná index neopravuje ani neaktivuje. Režim R5 se
 zapíná pouze v explicitně vytvořeném emulátorovém namespace; živý wrapper jej
 nepředává. Provozní inventory, časování a blokace zápisů mají ještě vlastní bránu.

@@ -7,6 +7,8 @@ nasazení. Navazuje na [model indexu](FEED_BLOCK_INDEX_PLAN.md) a
 ## Platnost pořadí
 
 Relace platí pevně hodinu od otevření nebo obnovy. Stránkování ji neprodlužuje.
+R5 z 5. listopadu přidává schválenou výjimku při konečném účtovém úklidu:
+[dřívější obnova dotčené relace](#account-retention-proposal).
 Laboratorní view používá monotónní čas; přesně na hodinové hranici odmítne další
 i opakovanou uloženou stránku chybou `FeedSessionExpired`. Nové otevření vydá
 novou relaci. Již vrácené karty zůstávají volajícímu a jejich aktuální dostupnost
@@ -167,8 +169,12 @@ nemigrují. Helper dovoluje přípravu již po potvrzení Auth před 60. dnem; �
 časování tohoto předběžného běhu ještě zapojené není. Konečný worker spouštěný
 až u deadline neprokazuje fyzické dokončení přesně v jeho milisekundě.
 
-Konečná širší regrese prošla 61/61 včetně 15 R5 případů a účtového workeru,
-lint i kontrola dokumentace prošly; CI ještě čeká. Případ 82 zdrojových řádků,
+Konečná širší regrese prošla 61/61 včetně 15 R5 případů a účtového workeru.
+Zdroj 2909874312f0e72f48d09c9ad468817cbdb10877 má úspěšné
+[CI 42076107087](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42076107087):
+293 Flutter, 42 tools, 108 unit, 389 Rules/server, 41 purge/15 Storage,
+analýza/lint/formát/build. Lokální úsek je uzavřený bez nasazení.
+Případ 82 zdrojových řádků,
 historické/orphan kopie a studený adaptér
 každý krok: 32 volání, 242 dokumentových/query čtení a 69 zápisů samotných kroků.
 Neobsahuje seed, přípravu historie, závěrečný prepareFinish ani celou účtovou práci;

@@ -31,6 +31,11 @@ checkpoint. Každý krok znovu kontroluje platnost relace. Nová serverová inst
 se stejným tajným klíčem může pokračovat bez session mapy a bez zápisu polohy
 čtenáře do databáze. Finální metadata se musí stále hydratovat z aktuálního zdroje.
 
+R5 z 5. listopadu přidává v opt-in laboratorním režimu verze zachycených oblastí
+do podepsaného kontextu. Každý krok je ověří před cache a po čekajícím čtení;
+změna při účtovém úklidu vyžádá obnovu, i když ještě neuplynula hodina.
+[Schválený protokol, ověření a provozní meze](FEED_INDEX_RETENTION.md#account-retention-proposal).
+
 ## Soukromý read stav
 
 Lab adaptér `capturePortable` zachytí databázový readTime. Důvěryhodný callback

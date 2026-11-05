@@ -43,6 +43,11 @@ needsRefresh. Serverové FeedSessionExpired ošetří stejně. Jen úspěšná o
 stav resetuje; chyba starého požadavku neoznačí novější relaci za expirovanou.
 Ve skutečném Home feedu tento koordinátor ještě není zapojený.
 
+R5 z 5. listopadu umožňuje při konečném účtovém úklidu zneplatnit relaci
+dotčených oblastí dřív. Serverový lokální protokol používá FeedSessionExpired;
+načtené cizí karty, přečtení a záložky se tím nemažou. Není to změna běžné
+obnovy při publikaci/reakci. [Rozhodnutí a ověření](FEED_INDEX_RETENTION.md#account-retention-proposal).
+
 Lokálně prošlo 21 cílených Flutter testů (11 koordinátor, 7 expozice, 3 řazení)
 a 23 cílených emulátorových případů indexu/retence/zápisových cest. Pořadí na
 skutečném webu je nasazené z `ca67ebd4fc8dfdf06e65bf72865616dc6eae169b`
