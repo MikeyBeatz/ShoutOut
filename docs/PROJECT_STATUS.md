@@ -6,9 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další krok: schválit konkrétní lokální R6a runner podle
-[provozního návrhu indexu](plans/feed/FEED_RUNTIME_PROPOSAL.md#konkretni-nejblizsi-rozsah-ke-schvaleni).
-Návrh je připravený na feature/feed-runtime-proposal. Čtyři emulátorové vzorky
+Další krok: připravit konkrétní kontrolní schéma a vynucenou ochranu Admin
+zápisů za building/active generace; před změnami předložit rozsah ke schválení.
+[Schválený lokální R6a runner](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results)
+je připravený na feature/feed-retention-runner. Nejvýše 32 kroků / 10 s mezi
+transakcemi, dávky 32/16, povinný transakční guard; žádný nový lease/scheduler.
+Závěrečných 11/11 runner testů a předchozí společná regrese 46/46 prošly,
+unit 109 pass a lint čistý. Včetně guardu naměřeno 34 kroků ve dvou řezech,
+908 čtení / 61 zápisů / 246 delete; nejde o cloudovou latenci ani úsporu čtení.
+Chyby zachovají cause a dílčí metriky, ztracený commit ack neznamená rollback.
+Dokončení journalu zůstává vnější atomický krok. Bez živých dat, Auth či nasazení.
+Důkazy: build/feed-retention-runner-{regression,final,unit,lint}.log a
+[benchmark](benchmarks/FEED_RETENTION_RUNNER_2026-11-05.json).
+
+Provozní návrh z 69f2b770dcf2dce13dc172de035daf60f3ca21aa má success CI 42112092816.
+Čtyři emulátorové vzorky
 měří celou R5 inventory i zavření journalu: 15–116 kroků, 161–3 919 čtení,
 33–244 zápisů a 21–1 071 mazání. Model jednoho kroku/min drží oblast 8–79 minut;
 takto živě nezapínat. Studený restart každého kroku, odstranění autora,

@@ -1,0 +1,34 @@
+{
+    "schemaVersion":  1,
+    "date":  "2026-11-05",
+    "environment":  "shoutout-rules-test / 127.0.0.1:8080",
+    "fixture":  {
+                    "foreignRows":  80,
+                    "ownRows":  1,
+                    "ownReactionUpdates":  80
+                },
+    "elapsedClock":  "fixed for deterministic step-budget verification; not a latency measurement",
+    "outerGuard":  "readAccountPurgeGuard",
+    "result":  {
+                   "invocations":  2,
+                   "steps":  34,
+                   "totals":  {
+                                  "attempts":  34,
+                                  "readRequests":  205,
+                                  "failedReadRequests":  0,
+                                  "readUnits":  908,
+                                  "writeCalls":  61,
+                                  "deleteCalls":  246,
+                                  "acknowledgedTransactions":  34,
+                                  "acknowledgedWrites":  61,
+                                  "acknowledgedDeletes":  246
+                              }
+               },
+    "excludes":  [
+                     "setup and fixture cleanup",
+                     "final prepareAccountIndexFinish transaction",
+                     "cloud billing index entries and runtime"
+                 ],
+    "liveWrites":  0,
+    "authAccountsCreated":  0
+}

@@ -24,12 +24,14 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Schválit navazující lokální úsek R6a prostorového indexu.**
+1. **Připravit konkrétní ochranu Admin zápisů před aktivací indexu.**
    [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
-   8–79 minut; není vhodný k nasazení. R6a navrhuje lokální omezený runner
-   a ověření lease/obnovy; ceny/SKU a cloudové chování zůstávají bránou pilotu.
+   8–79 minut; není vhodný k nasazení. Schválený R6a runner je lokálně hotový:
+   [11/11 regresí, rozpočty, skutečný guard a retry](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results).
+   Zbývá konkrétní návrh kontrolního schématu a vynucení Admin cest; ceny/SKU,
+   časná fronta a cloudové chování zůstávají bránou pilotu.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
    jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
    [Přesné zdroje a důkazy](PROJECT_STATUS.md),

@@ -1,6 +1,7 @@
 # Provozní návrh prostorového indexu
 
-5. listopadu 2026. **Návrh k rozhodnutí, nikoli schválená živá konfigurace.**
+5. listopadu 2026. **R6a schválená a lokálně ověřená; zbývající provozní návrh
+není schválená živá konfigurace.** [Výsledek runneru](#r6a-results).
 Navazuje na [writer](FEED_WRITER_INTEGRATION.md), [R5](FEED_INDEX_RETENTION.md#account-retention-proposal)
 a [migrační připravenost](FEED_MIGRATION_READINESS.md). Lokální jádro je ověřené;
 živý adaptér, generace, backfill, API ani plánování indexu dosud neběží.
@@ -16,8 +17,8 @@ kdy už má být dokončený. Navíc drží oblast zamčenou přes několik pokr
 
 Doporučené pořadí:
 
-1. Lokálně ověřit více omezených R5 kroků v jednom běhu, obnovu vlastnictví
-   a náklady vnějšího guardu; doplnit vynucenou ochranu Admin nástrojů.
+1. R6a více omezených kroků, obnovy a vnějšího guardu je lokálně ověřená níže.
+   Následuje konkrétní návrh vynucené ochrany Admin nástrojů a schématu přepnutí.
 2. Připravit včasnou indexovou frontu po potvrzení odstranění Auth, produkční
    adaptér za vypnutým přepínačem a přesný migrační nástroj. Každý z těchto
    rozsahů před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
@@ -240,8 +241,9 @@ zdroj již odstraněných metadat.
 
 <a id="konkretni-nejblizsi-rozsah-ke-schvaleni"></a>
 
-## Konkrétní nejbližší rozsah ke schválení
+## Rozsah R6a schválený 5. listopadu
 
+Vlastník zvolil „Schvaluji R6a a lokální testy“ pro návrh z commitu 69f2b77.
 **R6a — pouze lokálně:** runner nad existujícím R5 (nejvýše 32 kroků a 10 s mezi
 transakcemi), cold restart, ztracený lease, souběh workerů, kontrola ukončení
 při rozpočtu a evidence všech operací včetně vnějšího guardu. Bez nového živého
@@ -251,3 +253,62 @@ provozní parametry a Admin ochrany jako další konkrétní rozsah.
 
 Přijetí tohoto textu samo nepotvrzuje živou migraci ani dosud neověřené ceny.
 Celý MVP milník zůstává otevřený; lokální návrh není důkaz nasazeného feedu.
+
+<a id="r6a-results"></a>
+
+## R6a — ověřený lokální runner
+
+`functions/feed_account_retention_runner_lab.js` vytváří při každém volání nový
+adaptér, který pokračuje výhradně z uloženého R5 journalu. Nepřidává callable,
+plánovač ani claim/release lease. Vyžaduje přesný emulátor a projekt; povinný
+vnější guard předává **do každé transakce**, nikdy pouze před celou smyčku.
+Zachovává R5 dávky 32/16 a původní termín. Nezapojuje časnou frontu do živého
+workeru a nenahrazuje pravidla guardu: skutečný account purge guard stále
+odmítá spuštění před 60. dnem. Časná fronta bude potřebovat vlastní schválený
+guard a doklad dokončení; R6a je nezavádí.
+
+Řez vrací complete nebo yielded s důvodem step-budget/time-budget, počtem
+potvrzených kroků a metrikami. Nejvýše 32 kroků, časový rozpočet nejvýše 10 s;
+menší laboratorní hodnoty lze použít v testu. Hodiny jsou monotónní. Čas se
+kontroluje mezi transakcemi, **již běžící transakce může skončit po rozpočtu**.
+Virtuální test dvou šestisekundových kroků proto skončí na 12 s a třetí nezačne.
+Nejde o tvrdý desetisekundový timeout celé Function.
+
+Chyba okamžitě zastaví smyčku a vrací se jako AccountIndexSliceError s původní
+cause a dílčím reportem. Počítá všechny SDK čtecí požadavky, dokončené čtecí
+jednotky, neúspěšné čtecí požadavky a pokusy o mutace včetně transakčních retry.
+Zvlášť eviduje pouze potvrzené transakce/zápisy/delete. Při ztraceném potvrzení
+je výsledek nejistý; nula potvrzených commitů **není důkaz rollbacku**. Skutečné
+index entries a náklady neúspěšných RPC z těchto počtů určit nelze.
+
+Complete znamená dokončenou R5 fázi, **ne smazaný účet ani odstraněný journal**.
+Dosavadní prepareAccountIndexFinish zůstává zvláštním atomickým krokem vnějšího
+postupu. Runner po dosažení complete nepokračuje a neopakuje dokončení účtu.
+
+[Deterministické měření](../../benchmarks/FEED_RETENTION_RUNNER_2026-11-05.json):
+80 cizích Shoutů, jeden vlastní a 80 změn jeho palců. Celkem 34 transakčních
+kroků ve dvou řezech místo 34 samostatných návštěv; 908 čtecích jednotek,
+61 potvrzených zápisů a 246 delete včetně skutečného readAccountPurgeGuard.
+Časové hodiny tohoto měření jsou pevné pro stabilní test hranice 32 kroků;
+nejde o měření latence. Samotné spojení kroků nesnižuje jejich databázovou
+práci. Úsporu invocation/startup a skutečnou délku blokace musí teprve ověřit
+cloudový pilot. Neporovnávat cenu přímo s jinak velkými vzorky předchozí tabulky.
+
+Závěrečná sada `feed_account_retention_runner.integration.test.js`: **11/11**.
+Pokrývá step/time rozpočty včetně nula kroků, odmítnutí živého projektu a
+vadných voleb/hodin, cold pokračování, všech sedm čtení prvního kroku včetně
+guardu, ztrátu/převzetí/expiraci lease, změnu žádosti, původní deadline,
+souběh správného a cizího tokenu i dvou volání stejného vlastníka, rollback,
+ztracené potvrzení a skutečný SDK retry s kódem ABORTED. Retry měl 14 čtení,
+čtyři pokusy o zápis a jen dva potvrzené zápisy. Cizí metadata/zdroj a pevný
+termín jsou zachované. Sada je v tools test:purge, tedy v běžném CI.
+
+Předtím prošla společná regrese 46/46 (R5, první runner sada, maintenance,
+moderace); přidané dvě retry/souběhové zkoušky pak prošly v závěrečné sadě.
+Functions unit 109 pass, emulator-only přeskočené bez emulátoru; lint čistý.
+Fixture jsou uklizené, žádné živé zápisy/nasazení ani nové Auth účty.
+
+Další konkrétní návrh má řešit společný přepínací dokument a transakční
+odmítnutí nekompatibilních Admin zápisů za building/active generace. Není
+součástí implementace R6a. Časná fronta, produkční adaptér, backfill a cloudové
+ceny/latence dál zůstávají otevřené brány této listiny.
