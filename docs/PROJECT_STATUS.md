@@ -18,6 +18,12 @@ Chyby zachovají cause a dílčí metriky, ztracený commit ack neznamená rollb
 Dokončení journalu zůstává vnější atomický krok. Bez živých dat, Auth či nasazení.
 Důkazy: build/feed-retention-runner-{regression,final,unit,lint}.log a
 [benchmark](benchmarks/FEED_RETENTION_RUNNER_2026-11-05.json).
+Zdroj 7079cdd74d615b05c7c7e3029df89fc9adfcf230 má success CI 42114669640:
+42 tools, 109 Functions unit, 389 Rules/server, 63 purge a 15 Storage,
+Flutter testy/analýza/formát/lint i DEV web build. R6a je lokálně uzavřená;
+provozní adaptér ani živá aktivace tím nejsou schválené.
+Důkazy: build/feed-retention-runner-ci.{json,log} a
+build/feed-retention-runner-local-proof.json.
 
 Provozní návrh z 69f2b770dcf2dce13dc172de035daf60f3ca21aa má success CI 42112092816.
 Čtyři emulátorové vzorky

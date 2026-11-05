@@ -308,6 +308,13 @@ moderace); přidané dvě retry/souběhové zkoušky pak prošly v závěrečné
 Functions unit 109 pass, emulator-only přeskočené bez emulátoru; lint čistý.
 Fixture jsou uklizené, žádné živé zápisy/nasazení ani nové Auth účty.
 
+R6a je uzavřená na feature/feed-retention-runner. Zdroj
+`7079cdd74d615b05c7c7e3029df89fc9adfcf230` má
+[success CI 42114669640](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42114669640):
+42 tools, 109 Functions unit, 389 Rules/server, 63 purge, 15 Storage, Flutter
+testy/analýza/formát/lint a DEV build. To neaktivuje živý index. Strojové důkazy
+jsou build/feed-retention-runner-ci.{json,log} a build/feed-retention-runner-local-proof.json.
+
 Další konkrétní návrh má řešit společný přepínací dokument a transakční
 odmítnutí nekompatibilních Admin zápisů za building/active generace. Není
 součástí implementace R6a. Časná fronta, produkční adaptér, backfill a cloudové

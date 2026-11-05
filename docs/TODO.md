@@ -29,7 +29,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
    8–79 minut; není vhodný k nasazení. Schválený R6a runner je lokálně hotový:
-   [11/11 regresí, rozpočty, skutečný guard a retry](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results).
+   [11/11 regresí, rozpočty, skutečný guard a retry](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results),
+   success CI 42114669640 pro zdroj 7079cdd. Tento lokální úsek je uzavřený.
    Zbývá konkrétní návrh kontrolního schématu a vynucení Admin cest; ceny/SKU,
    časná fronta a cloudové chování zůstávají bránou pilotu.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
