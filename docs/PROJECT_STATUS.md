@@ -6,17 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Dokončit CI lokálního dávkového writeru, potom pokračovat zbývajícími indexovými
-cestami přes maintenance a konečný purge. Živý index ani migrace dosud nejsou
+Pokračovat zbývajícími indexovými cestami přes maintenance a konečný purge;
+nejprve ověřit předání writeru přes celý maintenance tick, nikoli jen pomocné
+funkce. Dávková příprava účtu je lokálně hotová. Živý index ani migrace dosud nejsou
 schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
 uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
-Na feature/feed-batch-index-writer je připravený schválený lokální prepareBatch
-a volitelné zapojení do prepareAccountDeletion. Konečných 18 cílených emulátorových
-testů, předchozích 38 indexových regresí, 107 unit/42 tools a lint prošly. Pro
+Na feature/feed-batch-index-writer je dokončený schválený lokální prepareBatch
+a volitelné zapojení do prepareAccountDeletion, zdroj
+1ba2b4ac94ecc6d1f519e168e794172e3260d0aa. CI 42053726540 success: 293 Flutter,
+42 tools, 107 Functions unit, 389 Rules/server, 15 purge/15 Storage, analýza/lint/build.
+Lokálně také konečných 18 cílených emulátorových testů a předchozích 38 indexových
+regresí. Pro
 50 Shoutů v jedné oblasti naměřena 3 indexová čtení, 1 nový blok/kořen/archiv;
-celkem 54 zápisů včetně zdrojů a receipt. CI celé konečné podoby ještě čeká.
+celkem 54 zápisů včetně zdrojů a receipt. Dávkový lokální úsek je uzavřený.
 Živý wrapper writer nepředává; nic se nenasazovalo a žádná živá data neměnila.
 [Kontrakt, měření a meze](plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
 

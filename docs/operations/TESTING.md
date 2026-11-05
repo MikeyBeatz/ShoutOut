@@ -13,7 +13,9 @@ Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktu
 feed_batch_writers.integration.test.js přidává 14 případů do test:rules. Konečná
 cílená sada s původní přípravou má 18/18; předchozí sada index/historie/writeři/
 příprava 38/38. 107 unit (emulátorové testy v této sadě přeskočené), 42 tools a
-celý ESLint prošly. Konečnou celou podobu ještě ověří CI. Wrapper content.js,
+celý ESLint prošly. Konečná podoba 1ba2b4ac94ecc6d1f519e168e794172e3260d0aa má
+success CI 42053726540: 293 Flutter, 42 tools, 107 unit, 389 Rules/server,
+15 purge/15 Storage, analýza/lint/formát/build. Wrapper content.js,
 Rules a nasazené verze se nemění; všechny nové zápisy jsou jen v emulátoru.
 
 Ověřené sdílení kořenů, 100 Shoutů ve větveném hotspotu, dvojice oblastí a přesuny,
@@ -25,6 +27,8 @@ a receipt. Dávka má celkem 54 zápisů se zdroji a receipt, dvě oblasti 57.
 Nejde o skutečnou cloudovou fakturaci nebo benchmark velkého indexu.
 [Kontrakt a výsledky](../plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
 Logy build/feed-batch-{targeted,final-targeted,unit,tools,lint}.log jsou ignorované.
+Konečné CI/proof: build/feed-batch-ci.{json,log}, build/feed-batch-local-proof.json.
+Tento lokální úsek je uzavřený bez nasazení.
 
 ## Lokální příprava mazání účtu – 3. listopadu
 

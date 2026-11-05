@@ -28,7 +28,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | Serverové fáze včetně konečného purge, klientská příprava/finalizace, Rules cutover a závěrečný živý pilot hotové v DEV. | Zapojit writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; uzavření účtových cest není aktivací indexu. |
-| Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokálně doplněný volitelný dávkový plán nejvýše 50 změn ve stejné transakci. | Potvrdit konečné CI; před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
+| Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokální dávkový plán nejvýše 50 změn z 1ba2b4a má success CI 42053726540. | Před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
 | Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
@@ -137,7 +137,7 @@ požadavek i různí autoři ve stejné oblasti, lost ack/replay/expirace klíč
 rollback, vadný plán, poškozená/stará metadata, prunovaná expirace a vstupní guardy.
 107 Functions unit, 42 tools a ESLint také prošly. Nový soubor
 feed_batch_writers.integration.test.js je přidaný do celé CI test:rules sady.
-Celou konečnou podobu ještě musí potvrdit CI. Důkazy:
+Celou konečnou podobu potvrdilo CI níže. Důkazy:
 build/feed-batch-{targeted,final-targeted,unit,tools,lint}.log.
 
 Naměřené syntetické případy pro 50 skrytých Shoutů se dvěma cizími kontrolami:
@@ -152,6 +152,13 @@ U samostatných mutací bylo navíc 50 čtení zdroje (celkem 200). Čtení plá
 neobsahují způsobilost účtu, receipt ani výběr zdrojové stránky. Nejde o cloudový
 ceník či zátěžový benchmark; velký/fragmentovaný index má jiné počty. Skutečné
 provozní limity a náklady zůstávají samostatnou branou před živou aktivací.
+
+Zdroj 1ba2b4ac94ecc6d1f519e168e794172e3260d0aa má úspěšné
+[CI 42053726540](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42053726540):
+293 Flutter, 42 tools, 107 Functions unit, 389 Rules/server, 15 purge/15 Storage,
+analýza/lint/formát/build. Lokální úsek je uzavřený. Nic z něj se nenasazovalo;
+živé vrstvy zůstávají podle PROJECT_STATUS. Konečné důkazy:
+build/feed-batch-ci.{json,log} a build/feed-batch-local-proof.json.
 
 Aktuální DEV Hosting, stav ručního testu a návazná kontrola historických dat:
 [migrační připravenost](FEED_MIGRATION_READINESS.md). Výše uvedené čekání na CI/Hosting
