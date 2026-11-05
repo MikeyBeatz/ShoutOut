@@ -25,7 +25,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 |---|---|---|
 | Publikace Shoutu | Serverová `createShout` | Index ve stejné transakci jako dokument a receipt. |
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
-| Mazání autorem/moderátorem | Function/web v DEV, Business živě ověřený. Lokální R5 regrese rolí 3–6/legacy a oprav má 35/35 cílených testů; CI čeká. | Živá indexová regrese po provozní aktivaci; celé serverové rozhodování/audit je samostatný milník. |
+| Mazání autorem/moderátorem | Function/web v DEV, Business živě ověřený. Lokální R5 regrese rolí 3–6/legacy a oprav má 35/35 cílených testů a success CI 42107616925. | Živá indexová regrese po provozní aktivaci; celé serverové rozhodování/audit je samostatný milník. |
 | Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | Účtové fáze a cutover hotové v DEV. Lokálně ověřené indexové odpočty a konečný purge v celém maintenance ticku. | Před aktivací dořešit osobní metadata ve starých indexových blocích do původního deadline. Runtime indexWriter se nepředává. |
 | Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokální dávkový plán nejvýše 50 změn z 1ba2b4a má success CI 42053726540. | Před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
@@ -97,12 +97,16 @@ plánových metrik; privátní erasure plán nepotřebuje tento nový profilový
 Konečná lokální regrese 35/35: 11 nových moderačních scénářů, 15 R5, 3 existující
 indexové writery a 6 serverových mazání. 108 unit a celý lint prošly. Nová sada
 feed_moderation_index.integration.test.js je součástí test:purge, odděleně od
-časového rozpočtu Rules sady. CI přesného commitu ještě čeká.
+časového rozpočtu Rules sady. Zdroj cda647e575090711b2a87944f8a45523dbfd7de9 má
+úspěšné [CI 42107616925](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42107616925):
+293 Flutter, 42 tools, 108 unit, 389 Rules/server, 52 purge/15 Storage,
+analýza/lint/formát/build. Tento lokální úsek je uzavřený bez nasazení.
 
 Jde o indexové mazání. Celé rozhodnutí/report/audit v klientovi zůstávají
 odděleným serverovým milníkem; tato sada je nečiní atomickými.
 Lokální důkaz: build/feed-moderation-index-before-fix.log (6 pass / 2 fail).
 Konečné lokální logy: build/feed-moderation-index-{regression,unit,lint}.log.
+CI/proof: build/feed-moderation-index-ci.{json,log}, build/feed-moderation-index-local-proof.json.
 
 ## Další kontrola před aktivací indexu
 

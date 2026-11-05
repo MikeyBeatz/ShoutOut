@@ -24,27 +24,17 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit indexovou regresi moderace a provozní návrh indexu.**
-   Moderační oprava neplatného plánu a mazání/expirace zdroje po R5 je
-   schválená/připravená; cílená regrese 35/35, unit a lint prošly. CI čeká.
-   [Konkrétní rozsah](plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
-   Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
-   první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
-   i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.
-   [Účtové důkazy a meze](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-   Lokální dávkový plán a volitelné zapojení přípravy jsou hotové: zdroj 1ba2b4a
-   má success CI 42053726540 včetně 389 Rules/server testů. Writer v živém wrapperu
-   není zapnutý. Navazující lokální maintenance/purge předává writer přes celý
-   tick a ošetřuje anonymní kontext; úsek c410ce3 je uzavřený: 45/45 cílených
-   testů a success CI 42063945148 včetně 25 purge testů. Nic se nenasazovalo.
-   Před živou aktivací dořešit odstranění UID/polohy ze starých bloků do původního
-   +60denního deadline, včetně selhání primární účtové fáze.
-   R5 na dřívější obnovu dotčené relace je schválené. Lokální protokol historie,
-   cache/kurzorů a účtového workeru je lokálně uzavřený: 61/61 cílených testů
-   a success CI 42076107087 pro 2909874 včetně 41 purge testů. Před živou aktivací změřit inventory, předběžné
-   časování a délku dočasné blokace zápisů v uklízené oblasti.
-   [Protokol R5](plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal),
-   [zápisový kontrakt](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
+1. **Připravit a schválit provozní návrh prostorového indexu.**
+   Změřit celou inventory/náklady, přípravu úklidu před původním deadline,
+   délku blokace zápisů a obnovu; navrhnout živé schéma/generaci, migraci/návrat
+   a zapojit nebo bezpečně zablokovat administrátorské zápisy mimo writer.
+   Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
+   jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
+   [Přesné zdroje a důkazy](PROJECT_STATUS.md),
+   [R5 a provozní meze](plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal),
+   [moderační rozsah](plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
+   Účtová DEV část je uzavřená a bez čekající Auth fixture;
+   [účtové důkazy](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

@@ -19,11 +19,16 @@ neplatný marker, chybějící index běžného autora i přítomný nesouhlasí
 
 Před opravou 6/8 pass a dvě reprodukované chyby. Po schválené opravě prošla
 celá cílená sada 35/35 (11 nových, 15 R5, 3 indexové writery a 6 mazání),
-108 unit (emulátorové testy přeskočené) a lint. CI přesného commitu ještě čeká.
+108 unit (emulátorové testy přeskočené) a lint. Zdroj
+cda647e575090711b2a87944f8a45523dbfd7de9 má success
+[CI 42107616925](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42107616925):
+293 Flutter, 42 tools, 108 unit, 389 Rules/server, 52 purge/15 Storage,
+analýza/lint/formát/build. Lokální úsek je uzavřený bez nasazení.
 Syntetické dokumenty se po testech uklízejí; nevytváří se Auth účet ani živá data.
 Nejde o živý UI průchod ani atomické rozhodnutí/report/audit moderace.
 [Kontrakt a rozsah](../plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
 Logy build/feed-moderation-index-{before-fix,regression,unit,lint}.log.
+Konečné důkazy: build/feed-moderation-index-ci.{json,log}, build/feed-moderation-index-local-proof.json.
 
 ## Diagnostika retenční hranice indexu – 5. listopadu
 

@@ -13,7 +13,7 @@ runtime indexWriter není zapojený. R5 pro historii/cache má schválený loká
 protokol, 61/61 cílených testů a success CI 42076107087. Před aktivací zbývá provozní ověření
 včasného úklidu, inventory/nákladů a délky blokace zápisů.
 Lokální moderační regrese a navazující schválené opravy mají 35/35 cílených
-testů (CI čeká); jejich dokončení samo není atomickým rozhodováním/report/auditem
+testů a success CI 42107616925; jejich dokončení samo není atomickým rozhodováním/report/auditem
 ani živou indexovou regresí. [Rozsah](FEED_WRITER_INTEGRATION.md#moderation-regression).
 [Dávkový kontrakt](FEED_WRITER_INTEGRATION.md#batch-preparation),
 [maintenance a retenční brána](FEED_WRITER_INTEGRATION.md#maintenance-purge). Následující

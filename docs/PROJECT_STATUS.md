@@ -6,11 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Moderační indexová regrese na feature/feed-moderation-index má připravenou
-schválenou opravu neplatného plánu a mazání/expirace zachovaného zdroje po R5.
-Konečná cílená sada 35/35 (11 nových scénářů), 108 unit a lint prošly.
-CI přesného commitu ještě čeká. Potom pokračovat provozním návrhem indexu;
-živý index se nezapíná. Role, oprávnění a retence zůstávají stejné.
+Další krok: připravit konkrétní provozní návrh prostorového indexu, zejména
+celou cenu/práci inventory, přípravu úklidu před deadline, délku dočasného zámku,
+všechny administrátorské zápisy, živé schéma a migraci/návrat.
+Moderační indexový úsek na feature/feed-moderation-index je lokálně uzavřený:
+zdroj cda647e575090711b2a87944f8a45523dbfd7de9 má success CI 42107616925:
+293 Flutter, 42 tools, 108 unit, 389 Rules/server, 52 purge/15 Storage,
+analýza/lint/formát/build. Lokálně také 35/35 cílených testů (11 nových).
+Opravený neplatný plán a mazání/expirace zachovaného zdroje po R5; role,
+oprávnění a retence zůstávají stejné. Nic se nenasazovalo a živý index je
+stále mimo tento souhlas. Celé serverové rozhodnutí/report/audit je jiný milník.
+Důkazy: build/feed-moderation-index-ci.{json,log}, build/feed-moderation-index-local-proof.json.
 [Nálezy a přesný rozsah](plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
 
 R5 je schválené a lokálně připravené na feature/feed-account-retention:
