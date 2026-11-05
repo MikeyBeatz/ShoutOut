@@ -6,9 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další krok: připravit konkrétní provozní návrh prostorového indexu, zejména
-celou cenu/práci inventory, přípravu úklidu před deadline, délku dočasného zámku,
-všechny administrátorské zápisy, živé schéma a migraci/návrat.
+Další krok: schválit konkrétní lokální R6a runner podle
+[provozního návrhu indexu](plans/feed/FEED_RUNTIME_PROPOSAL.md#konkretni-nejblizsi-rozsah-ke-schvaleni).
+Návrh je připravený na feature/feed-runtime-proposal. Čtyři emulátorové vzorky
+měří celou R5 inventory i zavření journalu: 15–116 kroků, 161–3 919 čtení,
+33–244 zápisů a 21–1 071 mazání. Model jednoho kroku/min drží oblast 8–79 minut;
+takto živě nezapínat. Studený restart každého kroku, odstranění autora,
+cizí kontrolní zdroj a audit prošly, fixture jsou uklizené. DEV databáze
+read-only potvrzena Standard/europe-west3; produkční dotaz vrátil 403, parametry
+nejsou ověřené. Regionální sazby/SKU, cloudové index entries/runtime a konkrétní
+pilot zůstávají neověřené. Důkazy a návrh včetně Admin zápisů/migrace/návratu:
+[měření](benchmarks/FEED_RUNTIME_2026-11-05.json). Žádné nasazení ani živá data.
+Lokální měření prošlo ve všech čtyřech vzorcích; ochrana nástroje bez emulátoru
+odmítá spuštění. Prošlo 42/42 tools testů, syntaxe nástroje, diff-check a
+kontrola dokumentace (522 odkazů, žádná chyba/osiřelý dokument, archivy shodné).
+
 Moderační indexový úsek na feature/feed-moderation-index je lokálně uzavřený:
 zdroj cda647e575090711b2a87944f8a45523dbfd7de9 má success CI 42107616925:
 293 Flutter, 42 tools, 108 unit, 389 Rules/server, 52 purge/15 Storage,

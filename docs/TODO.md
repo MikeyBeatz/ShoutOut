@@ -24,10 +24,12 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit a schválit provozní návrh prostorového indexu.**
-   Změřit celou inventory/náklady, přípravu úklidu před původním deadline,
-   délku blokace zápisů a obnovu; navrhnout živé schéma/generaci, migraci/návrat
-   a zapojit nebo bezpečně zablokovat administrátorské zápisy mimo writer.
+1. **Schválit navazující lokální úsek R6a prostorového indexu.**
+   [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
+   celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
+   a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
+   8–79 minut; není vhodný k nasazení. R6a navrhuje lokální omezený runner
+   a ověření lease/obnovy; ceny/SKU a cloudové chování zůstávají bránou pilotu.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
    jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
    [Přesné zdroje a důkazy](PROJECT_STATUS.md),

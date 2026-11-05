@@ -10,8 +10,9 @@ Také konečný purge má doplněnou kompatibilitu s anonymním kontextem Shoutu
 Aktualizace 4. listopadu: DEV web/Rules 7ab60c8 už vynucují serverové mazání
 účtu/Shoutu; klientské create/delete žádosti a přímé statusové skrytí jsou
 uzavřené. Příprava a57ae9b i finalizace a9ff425 jsou nasazené a zapnuté.
-Index writer se tímto rolloutem neaktivoval; před živým indexem zůstává nutné
-dávkové skládání a pokrytí všech dalších zápisových cest.
+Index writer se tímto rolloutem neaktivoval. Dávkové skládání je již lokálně
+ověřené; před živým indexem zbývá provozní adaptér a pokrytí všech dalších
+zápisových cest včetně [Admin nástrojů a migračního kontraktu](FEED_RUNTIME_PROPOSAL.md).
 Účtový DEV pilot po cutoveru a úklid jsou uzavřené 5. listopadu; žádná fixture nečeká.
 [Aktuální účtový cutover a důkazy](../accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#dev-deletion-cutover).
 

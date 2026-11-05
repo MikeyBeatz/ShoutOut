@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "sourceBase": "20cd41f8c3b42b8d03bddc83bda3c3fab85147c3",
+  "environment": {
+    "project": "shoutout-rules-test",
+    "emulator": "127.0.0.1:8080",
+    "authAccountsCreated": 0
+  },
+  "notes": [
+    "Counts cover R5 transaction attempts and final journal closure; setup, observation, audit and fixture cleanup are excluded.",
+    "No cloud latency, billing index entries, storage overhead, retries under load or scheduling delay is measured.",
+    "Single-step-per-minute duration is a scheduling model, not cloud timing. Limits are existing reads=32/deletes=16."
+  ],
+  "cases": [
+    {
+      "name": "small-hotspot",
+      "foreignRows": 80,
+      "requestedRegions": 1,
+      "churn": 4,
+      "before": {
+        "roots": 1,
+        "retainedNodes": 12,
+        "maxNodeBytes": 14800,
+        "retainedBytes": 90532
+      },
+      "historyBefore": 5,
+      "currentNodesBefore": 3,
+      "after": {
+        "roots": 1,
+        "retainedNodes": 3,
+        "maxNodeBytes": 12172,
+        "retainedBytes": 24566
+      },
+      "calls": 15,
+      "phases": {
+        "start": 1,
+        "inventory": 1,
+        "cells": 10,
+        "verify": 1,
+        "cleanup": 2
+      },
+      "lockedAfterCalls": 8,
+      "singleStepPerMinuteLockMinutes": 8,
+      "elapsedMs": 1747,
+      "longestStepMs": 235,
+      "stepCounters": {
+        "attempts": 15,
+        "readUnits": 155,
+        "writeCalls": 32,
+        "deleteCalls": 20
+      },
+      "totalIncludingFinish": {
+        "attempts": 16,
+        "readUnits": 161,
+        "writeCalls": 33,
+        "deleteCalls": 21
+      },
+      "verification": {
+        "foreignSourceUnchanged": true,
+        "ownerAbsentFromAllNodes": true,
+        "coldAdapterEveryStep": true,
+        "journalClosed": true
+      }
+    },
+    {
+      "name": "distributed",
+      "foreignRows": 1024,
+      "requestedRegions": 128,
+      "churn": 32,
+      "before": {
+        "roots": 129,
+        "retainedNodes": 1057,
+        "maxNodeBytes": 2689,
+        "retainedBytes": 1588687
+      },
+      "historyBefore": 928,
+      "currentNodesBefore": 129,
+      "after": {
+        "roots": 128,
+        "retainedNodes": 1024,
+        "maxNodeBytes": 2689,
+        "retainedBytes": 1571184
+      },
+      "calls": 82,
+      "phases": {
+        "start": 1,
+        "inventory": 34,
+        "cells": 12,
+        "verify": 33,
+        "cleanup": 2
+      },
+      "lockedAfterCalls": 10,
+      "singleStepPerMinuteLockMinutes": 10,
+      "elapsedMs": 8856,
+      "longestStepMs": 161,
+      "stepCounters": {
+        "attempts": 82,
+        "readUnits": 2571,
+        "writeCalls": 95,
+        "deleteCalls": 67
+      },
+      "totalIncludingFinish": {
+        "attempts": 83,
+        "readUnits": 2577,
+        "writeCalls": 96,
+        "deleteCalls": 68
+      },
+      "verification": {
+        "foreignSourceUnchanged": true,
+        "ownerAbsentFromAllNodes": true,
+        "coldAdapterEveryStep": true,
+        "journalClosed": true
+      }
+    },
+    {
+      "name": "wide-directory",
+      "foreignRows": 1024,
+      "requestedRegions": 1024,
+      "churn": 32,
+      "before": {
+        "roots": 1025,
+        "retainedNodes": 1057,
+        "maxNodeBytes": 554,
+        "retainedBytes": 545151
+      },
+      "historyBefore": 32,
+      "currentNodesBefore": 1025,
+      "after": {
+        "roots": 1024,
+        "retainedNodes": 1024,
+        "maxNodeBytes": 554,
+        "retainedBytes": 527648
+      },
+      "calls": 82,
+      "phases": {
+        "start": 1,
+        "inventory": 34,
+        "cells": 12,
+        "verify": 33,
+        "cleanup": 2
+      },
+      "lockedAfterCalls": 10,
+      "singleStepPerMinuteLockMinutes": 10,
+      "elapsedMs": 8407,
+      "longestStepMs": 150,
+      "stepCounters": {
+        "attempts": 82,
+        "readUnits": 2574,
+        "writeCalls": 95,
+        "deleteCalls": 67
+      },
+      "totalIncludingFinish": {
+        "attempts": 83,
+        "readUnits": 2580,
+        "writeCalls": 96,
+        "deleteCalls": 68
+      },
+      "verification": {
+        "foreignSourceUnchanged": true,
+        "ownerAbsentFromAllNodes": true,
+        "coldAdapterEveryStep": true,
+        "journalClosed": true
+      }
+    },
+    {
+      "name": "dense-history",
+      "foreignRows": 1024,
+      "requestedRegions": 1,
+      "churn": 96,
+      "before": {
+        "roots": 1,
+        "retainedNodes": 948,
+        "maxNodeBytes": 18868,
+        "retainedBytes": 5194177
+      },
+      "historyBefore": 116,
+      "currentNodesBefore": 49,
+      "after": {
+        "roots": 1,
+        "retainedNodes": 49,
+        "maxNodeBytes": 18868,
+        "retainedBytes": 323668
+      },
+      "calls": 116,
+      "phases": {
+        "start": 1,
+        "inventory": 30,
+        "cells": 81,
+        "verify": 2,
+        "cleanup": 2
+      },
+      "lockedAfterCalls": 79,
+      "singleStepPerMinuteLockMinutes": 79,
+      "elapsedMs": 16240,
+      "longestStepMs": 538,
+      "stepCounters": {
+        "attempts": 116,
+        "readUnits": 3913,
+        "writeCalls": 243,
+        "deleteCalls": 1070
+      },
+      "totalIncludingFinish": {
+        "attempts": 117,
+        "readUnits": 3919,
+        "writeCalls": 244,
+        "deleteCalls": 1071
+      },
+      "verification": {
+        "foreignSourceUnchanged": true,
+        "ownerAbsentFromAllNodes": true,
+        "coldAdapterEveryStep": true,
+        "journalClosed": true
+      }
+    }
+  ]
+}

@@ -187,6 +187,10 @@ výpadku a rozvržení přípravy před deadline. Při stálém zatížení/velk
 být potřeba jiný locator nebo generační postup; bez měření tuto variantu nenasazovat.
 Nezavádí se další hodinová retenční tolerance ani garance termínu při výpadku.
 
+Navazující měření celé R5 inventory, návrh včasného plánování a zjištěné délky
+zámku jsou nyní v [provozním návrhu](FEED_RUNTIME_PROPOSAL.md). Regionální ceny,
+cloudová latence a schválení živého pilotu tím nejsou uzavřené.
+
 ## Výsledky a hranice
 
 Aktualizace 5. listopadu: lokální zapojení expirace a konečného účtového purge

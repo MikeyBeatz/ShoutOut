@@ -116,10 +116,14 @@ Původní plán i výsledek jsou v docs/local/migrations/, výsledek má přípo
 
 1. Business mazání je živě ověřené; další role zůstávají v regresní matici.
    Schválená oprava geohashů je dokončená; příprava živého indexu má vlastní brány.
-2. Dokončit skutečné serverové zapojení účtového a moderátorského toku; uzavření
-   přímých Rules až po pokrytí všech platforem a schváleném ověření.
-3. Předložit konkrétní živé schéma/generaci, migrační zápisy za souběhu, provozní
-   worker/limity a nákladový rozpočet. Read-only preflight toto nepovoluje.
+2. Účtový tok a povinné serverové mazání jsou v DEV uzavřené; lokální indexová
+   moderační regrese také. Zbývá živý indexový adaptér a uzavření ostatních
+   přímých indexovaných zápisů po kompatibilitě všech podporovaných klientů.
+   Celé serverové moderační rozhodnutí/report/audit je samostatný milník.
+3. [Provozní návrh](FEED_RUNTIME_PROPOSAL.md) nyní obsahuje měření R5,
+   návrh generace/migrace, Admin cesty a nákladový model. Zbývá schválení R6a,
+   jeho ověření a konkrétní DEV pilot s regionálními cenami a cloudovým měřením.
+   Read-only preflight ani tento návrh samy živé změny nepovolují.
 4. Zabezpečené query API, přenositelné kurzory a DEV klientské A2/A3.
 5. B1–B4; vlastník schválil 1 souvislou sekundu na každou část obsahu.
    Negativní hodnocení mimo Top nemění časové/prostorové místo, obsah se sbalí

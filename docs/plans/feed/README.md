@@ -6,6 +6,7 @@ A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální labora
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)
+- [Provozní návrh indexu – náklady, plánování a migrace](FEED_RUNTIME_PROPOSAL.md)
 - [Feed – implementační etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md)
 - [Retence prostorového indexu – lokální ověření R4](FEED_INDEX_RETENTION.md)
 - [Migrační připravenost feedu a zbývající brány](FEED_MIGRATION_READINESS.md)

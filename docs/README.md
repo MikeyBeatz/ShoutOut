@@ -42,6 +42,7 @@ Celé A0–A3/B1–B4 před MVP. Plný detail a rating jsou v DEV; index, relace
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](plans/feed/FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](plans/feed/FEED_BLOCK_INDEX_PLAN.md)
+- [Provozní návrh indexu – náklady, plánování a migrace](plans/feed/FEED_RUNTIME_PROPOSAL.md)
 - [Feed – implementační etapy a návrhy ke schválení](plans/feed/FEED_IMPLEMENTATION_STAGES.md)
 - [Retence prostorového indexu – lokální ověření R4](plans/feed/FEED_INDEX_RETENTION.md)
 - [Migrační připravenost feedu a zbývající brány](plans/feed/FEED_MIGRATION_READINESS.md)
