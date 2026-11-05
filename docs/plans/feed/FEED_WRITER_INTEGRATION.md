@@ -28,7 +28,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | Serverové fáze včetně konečného purge, klientská příprava/finalizace, Rules cutover a závěrečný živý pilot hotové v DEV. | Zapojit writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; uzavření účtových cest není aktivací indexu. |
-| Příprava mazání účtu | prepareAccountDeletion a57ae9b, nejvýše 50 vlastních aktivních Shoutů/transakce, v DEV nasazená/zapnutá. | Před živým indexem integrovat dávkový writer: 50 samostatně připravených změn stejné buňky se nesmí navzájem přepsat. |
+| Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokálně doplněný volitelný dávkový plán nejvýše 50 změn ve stejné transakci. | Potvrdit konečné CI; před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
 | Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
@@ -98,9 +98,60 @@ návratu do indexu. Spolu s předchozími index/retention testy prošlo 22 pří
 Test se souběžným prvním zápisem narazil na emulator lock retry (cca 20 s);
 konzistence prošla, není to důkaz přijatelné cloudové latence pod zátěží.
 
-Dávkové mazání účtu a migrace nejsou ještě zapojené. Více změn jedné oblasti
-se nesmí slepě plánovat nezávisle nad týmž původním kořenem: přepsaly by se navzájem.
-Je potřeba sdílený plán dávky, nebo omezené samostatné transakce s opakováním.
+Původní tato etapa ještě dávkové mazání účtu a migrace nezapojovala. Více změn
+jedné oblasti se nesmí slepě plánovat nezávisle nad týmž původním kořenem:
+přepsaly by se navzájem. Navazující lokální dávkový plán je popsaný níže;
+živý adaptér a migrace nadále zapojené nejsou.
+
+<a id="batch-preparation"></a>
+
+## Dávkový writer přípravy účtu – lokální úsek 5. listopadu 2026
+
+Vlastník po vysvětlení schválil pokračování vývoje a testování: sdílený plán
+nejvýše dosavadních 50 Shoutů, volitelné serverové zapojení, pouze lokálně
+a v emulátoru. Bez nasazení, migrací, živých kolekcí a nových účtů. Auth/App Check,
+oprávnění, payload, dávka 50 a retence se nemění.
+
+Laboratorní adaptér má `prepareBatch(transaction, changes, {operationId,
+additionalWrites})`. Přečte marker, každý dotčený kořen a potřebné bloky jednou,
+postupné změny skládá nad společnými pracovními kořeny. Všechny čtecí operace
+proběhnou před apply plánem. Uloží jen dosažitelné konečné bloky a jeden nový
+kořen/archiv původního kořene na změněnou oblast. Jednotlivé prepare deleguje
+do stejného mechanismu. Zachovává prunované expirace, historii a původní schéma.
+Duplicitní ID a více než 50 změn se odmítnou. Původní laboratorní mez 450 zápisů
+nyní zahrnuje celý plán včetně projekčně změněných zdrojů a dodaných dalších
+zápisů; pro receipt se rezervuje jeden zápis. Nejde o schválení provozního budgetu.
+
+`prepareAccountDeletionOperation` přijímá volitelný důvěryhodný indexWriter.
+Po načtení/validaci celé stránky připraví jediný plán, potom ve stejné transakci
+zapíše zdrojové statusy, index a receipt. Chyba plánu/apply/commitu vrátí všechny
+zápisy. Chybějící použitelný plán zapnutého writeru je chyba, nikdy fallback na
+samotné skrytí. Replay receipt nečte ani nemění index, prázdná stránka writer
+nevolá. content.js writer stále nepředává; DEV ani produkční runtime se neměnil.
+
+Konečná cílená sada má 18/18 případů: 14 nových dávkových a 4 původní přípravy.
+Před ní prošlo 38 testů indexu, writerů, historie a přípravy. Pokryté jsou jedna/
+více oblastí, větvený hotspot se 100 Shouty ve dvou dávkách, přesné zachování
+plných zdrojů/potomků, studená starší relace a ochrana před GC, souběžný stejný
+požadavek i různí autoři ve stejné oblasti, lost ack/replay/expirace klíče,
+rollback, vadný plán, poškozená/stará metadata, prunovaná expirace a vstupní guardy.
+107 Functions unit, 42 tools a ESLint také prošly. Nový soubor
+feed_batch_writers.integration.test.js je přidaný do celé CI test:rules sady.
+Celou konečnou podobu ještě musí potvrdit CI. Důkazy:
+build/feed-batch-{targeted,final-targeted,unit,tools,lint}.log.
+
+Naměřené syntetické případy pro 50 skrytých Shoutů se dvěma cizími kontrolami:
+
+| Případ | Čtení indexového plánu | Nové bloky / kořeny / archivy | Celkové zápisy včetně 50 zdrojů a receipt |
+|---|---|---|---|
+| Jedna oblast, dávka | 3 | 1 / 1 / 1 | 54 |
+| Dvě oblasti, dávka | 5 | 2 / 2 / 2 | 57 |
+| Jedna oblast, 50 samostatných laboratorních mutací | 150 | 50 / 50 / 50 | Bez společného receipt; nesrovnávat jako celý callable. |
+
+U samostatných mutací bylo navíc 50 čtení zdroje (celkem 200). Čtení plánu
+neobsahují způsobilost účtu, receipt ani výběr zdrojové stránky. Nejde o cloudový
+ceník či zátěžový benchmark; velký/fragmentovaný index má jiné počty. Skutečné
+provozní limity a náklady zůstávají samostatnou branou před živou aktivací.
 
 Aktuální DEV Hosting, stav ručního testu a návazná kontrola historických dat:
 [migrační připravenost](FEED_MIGRATION_READINESS.md). Výše uvedené čekání na CI/Hosting

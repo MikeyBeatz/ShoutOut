@@ -6,11 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Pokračovat prostorovým feedem: nejprve připravit konkrétní úsek dávkového writeru
-pro přípravu mazání účtu a ověřit jeho skládání v emulátoru. Živý index ani migrace
-dosud nejsou schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
+Dokončit CI lokálního dávkového writeru, potom pokračovat zbývajícími indexovými
+cestami přes maintenance a konečný purge. Živý index ani migrace dosud nejsou
+schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
 uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
+Na feature/feed-batch-index-writer je připravený schválený lokální prepareBatch
+a volitelné zapojení do prepareAccountDeletion. Konečných 18 cílených emulátorových
+testů, předchozích 38 indexových regresí, 107 unit/42 tools a lint prošly. Pro
+50 Shoutů v jedné oblasti naměřena 3 indexová čtení, 1 nový blok/kořen/archiv;
+celkem 54 zápisů včetně zdrojů a receipt. CI celé konečné podoby ještě čeká.
+Živý wrapper writer nepředává; nic se nenasazovalo a žádná živá data neměnila.
+[Kontrakt, měření a meze](plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
 
 Vlastník schválil další lokální úsek 4. listopadu: povinné serverové mazání
 účtu/Shoutu pro všechny DEV klienty a zákaz přímých zápisů v emulátoru. Kód

@@ -24,14 +24,15 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit dávkový indexový writer pro serverovou přípravu mazání účtu.**
+1. **Uzavřít CI dávkového writeru, potom doplnit zbývající indexové cesty.**
    Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
    první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
    i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.
    [Účtové důkazy a meze](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
-   Před živým prostorovým indexem chybí writer v prepareAccountDeletion;
-   samostatné změny více Shoutů ve stejné buňce se nesmějí přepsat. Další konkrétní
-   implementační rozsah nejdřív předložit podle [zápisových cest](plans/feed/FEED_WRITER_INTEGRATION.md).
+   Schválený lokální dávkový plán a volitelné zapojení přípravy jsou připravené:
+   18 cílených emulátorových testů, předchozí indexové regrese a lint prošly;
+   čeká celá konečná CI sada. Writer v živém wrapperu není zapnutý. Následují
+   zbývající maintenance/purge cesty podle [zápisových cest](plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
 2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

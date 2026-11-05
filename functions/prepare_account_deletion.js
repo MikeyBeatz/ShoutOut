@@ -10,7 +10,7 @@ const identifier = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$
 const fail = (code, message) => { throw new HttpsError(code, message); };
 
 // Preparation only: never creates/renews an intent, deletes Auth or removes children.
-export async function prepareAccountDeletionOperation(request, db, clock = () => new Date(), { beforeCommit = null } = {}) {
+export async function prepareAccountDeletionOperation(request, db, clock = () => new Date(), { beforeCommit = null, indexWriter = null } = {}) {
   const { uid } = requireCallableIdentity(request), input = request.data;
   if (!input || typeof input !== 'object' || Array.isArray(input) ||
       Object.keys(input).some(key => !['idempotencyKey', 'expectedUserId'].includes(key)) ||
@@ -38,7 +38,14 @@ export async function prepareAccountDeletionOperation(request, db, clock = () =>
       const data = shout.data();
       if (data.authorId !== uid || data.status !== 'active') fail('failed-precondition', 'Invalid preparation selection.');
     }
+    // Trusted injection only; the callable wrapper does not enable an index.
+    // Plan all changes before source/receipt writes, sharing roots within cells.
+    const indexPlan = !page.empty && indexWriter ? await indexWriter.prepareBatch(transaction,
+      page.docs.map(shout => ({ id: shout.id, before: shout.data(), after: { ...shout.data(), status: 'deleted' } })),
+      { operationId: receiptRef.id, additionalWrites: 1 }) : null;
+    if (!page.empty && indexWriter && typeof indexPlan?.apply !== 'function') throw new Error('invalid-index-batch-plan');
     for (const shout of page.docs) transaction.update(shout.ref, { status: 'deleted' });
+    indexPlan?.apply();
     // A full page conservatively needs another call, including an empty final check.
     const result = { hidden: page.size, hasMore: page.size === 50 };
     transaction.create(receiptRef, { ...retention, action, userId: uid, fingerprint, result, createdAt: now });

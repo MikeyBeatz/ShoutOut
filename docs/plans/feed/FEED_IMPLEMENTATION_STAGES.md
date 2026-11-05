@@ -20,8 +20,8 @@ nejsou napojené jako živé query API ani nový Home feed. B1 má lokální já
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené
-5. listopadu 2026. Teď dokončit všechny indexové zapisovače (nejprve dávkovou
-přípravu mazání účtu, dále moderaci, exspiraci a konečný purge), potom schválit konkrétní
+5. listopadu 2026. Lokální dávková příprava má hotové cílené testy a čeká konečné CI.
+Teď dokončit zbývající indexové zapisovače přes maintenance/purge a moderaci, potom schválit konkrétní
 živé schéma/migraci, provozní limity a query API. Následuje klient A2/A3,
 osobní metadata B1–B3 a indikátor B4 se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.

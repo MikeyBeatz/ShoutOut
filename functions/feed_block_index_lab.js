@@ -195,21 +195,39 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
   // Read-only planning inside the caller's existing transaction. No nested
   // transaction and no source write: production operations retain full bodies.
   async function prepare(tx, id, beforeValue, afterValue, { operationId = randomUUID(), reconcileExpired = false } = {}) {
-    assertId(id); assertId(operationId);
-    const old = beforeValue === null ? null : metadataOf({ ...beforeValue, id });
-    const next = afterValue === null ? null : metadataOf({ ...afterValue, id });
+    return prepareBatch(tx, [{ id, before: beforeValue, after: afterValue }], { operationId, reconcileExpired });
+  }
+
+  // One working root per cell for the entire bounded batch. Every edit sees
+  // prior edits in this plan, while all database reads still precede apply().
+  // Reserve receipt/other caller writes with additionalWrites; sourceChanges
+  // counts changed index projections, not unrelated full-body updates.
+  async function prepareBatch(tx, changes, { operationId = randomUUID(), reconcileExpired = false, additionalWrites = 0 } = {}) {
+    assertId(operationId);
+    if (!Array.isArray(changes) || changes.length > 50 || !Number.isSafeInteger(additionalWrites) ||
+        additionalWrites < 0 || additionalWrites > 450) throw new Error('invalid-index-batch');
+    const ids = new Set();
+    const normalized = changes.map(change => {
+      if (!change || typeof change !== 'object') throw new Error('invalid-index-batch');
+      const { id, before, after } = change;
+      assertId(id);
+      if (ids.has(id)) throw new Error('duplicate-index-id');
+      ids.add(id);
+      const old = before === null ? null : metadataOf({ ...before, id });
+      const next = after === null ? null : metadataOf({ ...after, id });
+      return { old, next, changed: canonical(old) !== canonical(next) };
+    });
     let reads = 1;
     const marker = await tx.get(base);
     if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
-    const sourceChanged = canonical(old) !== canonical(next);
-    if (!sourceChanged && !reconcileExpired) return {
-      reads, sourceChanged, nodeWrites: 0, directoryWrites: 0, historyWrites: 0, apply() {},
-    };
-    const retirement = operationId;
     const cutoff = marker.data().prunedThrough ?? -1;
-    let oldIndex = old?.status === 'active' ? old : null;
-    const newIndex = next?.status === 'active' && next.expiresAt > cutoff ? next : null;
-    const regionIds = [...new Set([oldIndex, newIndex].filter(Boolean).map(row => row.geohash.slice(0, 4)))];
+    const sourceChanges = normalized.filter(change => change.changed).length;
+    const edits = normalized.filter(change => change.changed || reconcileExpired).map(({ old, next }) => ({
+      oldIndex: old?.status === 'active' ? old : null,
+      newIndex: next?.status === 'active' && next.expiresAt > cutoff ? next : null,
+    }));
+    const regionIds = [...new Set(edits.flatMap(({ oldIndex, newIndex }) => [oldIndex, newIndex])
+      .filter(Boolean).map(row => row.geohash.slice(0, 4)))].sort();
     const roots = new Map();
     for (const cell of regionIds) {
       const doc = await tx.get(cells.doc(cell)); reads++;
@@ -223,30 +241,36 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
       }
       return loaded.get(key);
     };
-    const updates = new Map();
-    if (oldIndex && oldIndex.expiresAt <= cutoff) {
-      const root = roots.get(oldIndex.geohash.slice(0, 4));
-      if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
+    const working = new Map(roots);
+    for (const edit of edits) {
+      let { oldIndex } = edit;
+      const { newIndex } = edit;
+      if (oldIndex && oldIndex.expiresAt <= cutoff) {
+        const root = working.get(oldIndex.geohash.slice(0, 4));
+        if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
+      }
+      const affected = new Set([oldIndex, newIndex].filter(Boolean).map(row => row.geohash.slice(0, 4)));
+      for (const cell of affected) {
+        const root = working.get(cell);
+        working.set(cell, await builder.edit(root ? { hash: root.hash } : null, cell,
+          oldIndex?.geohash.startsWith(cell) ? oldIndex : null, newIndex?.geohash.startsWith(cell) ? newIndex : null, load));
+      }
     }
-    for (const cell of regionIds) {
-      const originalRoot = roots.get(cell);
-      if (!oldIndex?.geohash.startsWith(cell) && !newIndex?.geohash.startsWith(cell)) continue;
-      const descriptor = await builder.edit(originalRoot ? { hash: originalRoot.hash } : null, cell,
-        oldIndex?.geohash.startsWith(cell) ? oldIndex : null, newIndex?.geohash.startsWith(cell) ? newIndex : null, load);
-      if (descriptor?.hash !== originalRoot?.hash) updates.set(cell, descriptor);
-    }
+    const updates = new Map([...working].filter(([cell, descriptor]) => descriptor?.hash !== roots.get(cell)?.hash));
     const reachable = builder.reachable([...updates.values()].filter(Boolean));
     for (const key of [...reachable.keys()]) if (loaded.has(key)) reachable.delete(key);
     const historyWrites = [...updates.keys()].filter(cell => roots.get(cell)).length;
-    if (reachable.size + updates.size + historyWrites + Number(sourceChanged) > 450) throw new Error('lab-mutation-too-large');
+    const totalWrites = reachable.size + updates.size + historyWrites + sourceChanges + additionalWrites;
+    if (totalWrites > 450) throw new Error('lab-mutation-too-large');
     let applied = false;
-    return { reads, sourceChanged, nodeWrites: reachable.size, directoryWrites: updates.size, historyWrites,
+    return { reads, sourceChanged: sourceChanges > 0, sourceChanges, nodeWrites: reachable.size,
+      directoryWrites: updates.size, historyWrites, totalWrites,
       apply() {
         if (applied) throw new Error('index-plan-already-applied');
         applied = true;
         for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
         for (const [cell, descriptor] of updates) {
-          if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${retirement}`), {
+          if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${operationId}`), {
             v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
           });
           if (!descriptor) tx.delete(cells.doc(cell));
@@ -502,7 +526,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     return { ...result, metrics: { ...result.metrics, ...metrics } };
   }
 
-  return { seed, mutate, prepare, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage,
+  return { seed, mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage,
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');
       const result = await cells.where('minExpiry', '<=', now).orderBy('minExpiry').limit(limit).get();

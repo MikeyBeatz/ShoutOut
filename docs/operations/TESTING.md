@@ -8,6 +8,24 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+## Dávkový indexový writer – lokální úsek 5. listopadu
+
+feed_batch_writers.integration.test.js přidává 14 případů do test:rules. Konečná
+cílená sada s původní přípravou má 18/18; předchozí sada index/historie/writeři/
+příprava 38/38. 107 unit (emulátorové testy v této sadě přeskočené), 42 tools a
+celý ESLint prošly. Konečnou celou podobu ještě ověří CI. Wrapper content.js,
+Rules a nasazené verze se nemění; všechny nové zápisy jsou jen v emulátoru.
+
+Ověřené sdílení kořenů, 100 Shoutů ve větveném hotspotu, dvojice oblastí a přesuny,
+konkurenční autoři i duplicitní klíč, rollback po apply, lost ack, odmítnutí
+vadného plánu/metadata/budgetu, starý studený snapshot a GC, expirace a guardy.
+50 Shoutů v jedné oblasti: 3 indexová čtení a 3 indexové zápisy místo 150 čtení
+a 150 zápisů u 50 samostatných laboratorních mutací; bez čtení zdrojů/eligibility
+a receipt. Dávka má celkem 54 zápisů se zdroji a receipt, dvě oblasti 57.
+Nejde o skutečnou cloudovou fakturaci nebo benchmark velkého indexu.
+[Kontrakt a výsledky](../plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
+Logy build/feed-batch-{targeted,final-targeted,unit,tools,lint}.log jsou ignorované.
+
 ## Lokální příprava mazání účtu – 3. listopadu
 
 Novější schválený úsek 4. listopadu uzavírá přímé žádosti a statusové skrytí

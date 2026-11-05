@@ -6,8 +6,10 @@ Tento dokument nerozhoduje názvy živých indexových kolekcí ani jejich aktiv
 
 ## Současná brána
 
-K 3. listopadu je serverová účtová vrstva včetně konečného purge hotová v DEV;
-zůstává přímé klientské skrytí a nezapojený runtime indexWriter. Následující
+K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutoveru
+a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je
+navíc připravený sdílený dávkový plán přípravy; runtime indexWriter není zapojený.
+[Dávkový kontrakt a měření](FEED_WRITER_INTEGRATION.md#batch-preparation). Následující
 rollout/geohash záznamy jsou důkazy svých datovaných etap. Neoznačují všechny
 Functions ani web za jedinou dosud aktuální verzi. Přesné poslední ověření:
 [PROJECT_STATUS](../../PROJECT_STATUS.md#posledni-overene-nasazeni).
