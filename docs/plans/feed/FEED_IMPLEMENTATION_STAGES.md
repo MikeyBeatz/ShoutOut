@@ -23,8 +23,9 @@ expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou
 5. listopadu 2026. Lokální dávková příprava 1ba2b4a má success CI 42053726540
 a je uzavřená bez živé aktivace indexu.
 Maintenance/purge má lokální propojení; R5 pro historii a cache má schválený
-lokální protokol s 61/61 cílenými testy a success CI 42076107087. Následuje regrese moderace
-a provozní měření inventory, včasného úklidu a blokace zápisů, potom schválit konkrétní
+lokální protokol s 61/61 cílenými testy a success CI 42076107087. Navazující
+moderační regrese a opravy mají 35/35 cílených testů (CI čeká). Následuje
+provozní měření inventory, včasného úklidu a blokace zápisů, potom schválit konkrétní
 živé schéma/migraci, provozní limity a query API. Následuje klient A2/A3,
 osobní metadata B1–B3 a indikátor B4 se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.

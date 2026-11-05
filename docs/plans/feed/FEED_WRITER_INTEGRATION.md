@@ -25,7 +25,7 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 |---|---|---|
 | Publikace Shoutu | Serverová `createShout` | Index ve stejné transakci jako dokument a receipt. |
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
-| Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
+| Mazání autorem/moderátorem | Function/web v DEV, Business živě ověřený. Lokální R5 regrese rolí 3–6/legacy a oprav má 35/35 cílených testů; CI čeká. | Živá indexová regrese po provozní aktivaci; celé serverové rozhodování/audit je samostatný milník. |
 | Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
 | Mazání účtu | Účtové fáze a cutover hotové v DEV. Lokálně ověřené indexové odpočty a konečný purge v celém maintenance ticku. | Před aktivací dořešit osobní metadata ve starých indexových blocích do původního deadline. Runtime indexWriter se nepředává. |
 | Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokální dávkový plán nejvýše 50 změn z 1ba2b4a má success CI 42053726540. | Před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
@@ -62,6 +62,47 @@ Před aktivací je nutné CI přesného commitu, nasadit pouze nový endpoint a
 aktualizovaný cleanup do `shoutout-dev-46c81`, potom otestovanou aktivaci webu.
 Limity endpointu: europe-west3, min 0 / max 1 instance, concurrency 1,
 256 MiB, 15 s. Žádná produkce nebo Rules tímto přípravným krokem změněné nejsou.
+
+<a id="moderation-regression"></a>
+
+## Moderační indexová regrese – 5. listopadu
+
+Na feature/feed-moderation-index je připravená emulátorová sada skutečné
+deleteShoutOperation s R5 writerem. Regrese před opravou potvrdila
+6/8 scénářů: role 3–6 a legacy, zákaz běžných/Business/podvržených rolí,
+odebrání role/ban/čekající smazání při replay, rollback po apply, souběh dvou
+moderátorů a blokaci během R5 úklidu. Všechny nové dokumenty jsou syntetické
+fixture; nejde o nové Auth účty ani živou moderační zkoušku.
+
+Regrese před opravou odhalila dvě chyby:
+
+- Při zapnutém writeru a neplatném plánu null se uloží status/receipt bez indexu.
+- Po úplném R5 úklidu zůstává kanonický zdroj zachovaný, ale jeho pozdější
+  soft-delete skončí incomplete-index, protože writer očekává již odstraněný řádek.
+
+Vlastník schválil navazující lokální opravu 5. listopadu: v delete_shout odmítnout plán bez
+apply, pokud je writer zapnutý. V R5 adaptéru dovolovat chybějící starou projekci
+jen po ověření serverového markeru smazaného autora a skutečné absence řádku;
+přítomný, ale odlišný řádek dál odmítat. Novou aktivní projekci smazaného autora
+dál zakázat. Ověřit také expiraci zachovaného zdroje a chybějící/vadný index
+běžného autora. Žádná změna rolí, geografických oprávnění, retencí, Rules,
+nasazení nebo živých dat. Výchozí cesta bez writeru se nemění.
+Kód opravy je připravený. Přesný minimální marker se porovnává se společným
+deletedPublicIdentity; samotný accountStatus nebo marker s dalšími údaji
+nepovoluje přeskočit chybějící řádek. Výjimka kontroluje skutečnou absenci přes
+builder.find; přítomná odlišná projekce nadále selže. Nová aktivní projekce
+smazaného autora zůstává odmítnutá. Dodatečné čtení profilu je započtené do
+plánových metrik; privátní erasure plán nepotřebuje tento nový profilový read.
+
+Konečná lokální regrese 35/35: 11 nových moderačních scénářů, 15 R5, 3 existující
+indexové writery a 6 serverových mazání. 108 unit a celý lint prošly. Nová sada
+feed_moderation_index.integration.test.js je součástí test:purge, odděleně od
+časového rozpočtu Rules sady. CI přesného commitu ještě čeká.
+
+Jde o indexové mazání. Celé rozhodnutí/report/audit v klientovi zůstávají
+odděleným serverovým milníkem; tato sada je nečiní atomickými.
+Lokální důkaz: build/feed-moderation-index-before-fix.log (6 pass / 2 fail).
+Konečné lokální logy: build/feed-moderation-index-{regression,unit,lint}.log.
 
 ## Další kontrola před aktivací indexu
 

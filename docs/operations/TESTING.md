@@ -8,6 +8,23 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+## Moderační mazání s indexem R5 – 5. listopadu
+
+feed_moderation_index.integration.test.js přidává 11 případů do test:purge.
+Ověřuje skutečnou deleteShoutOperation se skutečným laboratorním writerem:
+role 3–6/legacy, zákaz běžných/Business/podvržených rolí, revokaci/ban/žádost
+o smazání při replay, rollback, duplicitní i souběžné moderátory a blokaci
+během R5. Regrese navíc pokrývá neplatný plán, smazání/expiraci zdroje po R5,
+neplatný marker, chybějící index běžného autora i přítomný nesouhlasící řádek.
+
+Před opravou 6/8 pass a dvě reprodukované chyby. Po schválené opravě prošla
+celá cílená sada 35/35 (11 nových, 15 R5, 3 indexové writery a 6 mazání),
+108 unit (emulátorové testy přeskočené) a lint. CI přesného commitu ještě čeká.
+Syntetické dokumenty se po testech uklízejí; nevytváří se Auth účet ani živá data.
+Nejde o živý UI průchod ani atomické rozhodnutí/report/audit moderace.
+[Kontrakt a rozsah](../plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
+Logy build/feed-moderation-index-{before-fix,regression,unit,lint}.log.
+
 ## Diagnostika retenční hranice indexu – 5. listopadu
 
 `tools/diagnose_feed_retention.mjs` je opakovatelná diagnostika původního režimu bez R5,

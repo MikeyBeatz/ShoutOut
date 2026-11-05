@@ -25,6 +25,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 ## Nejbližší práce
 
 1. **Dokončit indexovou regresi moderace a provozní návrh indexu.**
+   Moderační oprava neplatného plánu a mazání/expirace zdroje po R5 je
+   schválená/připravená; cílená regrese 35/35, unit a lint prošly. CI čeká.
+   [Konkrétní rozsah](plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
    Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
    první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
    i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.

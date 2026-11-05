@@ -56,6 +56,7 @@ export async function deleteShoutOperation(request, db, clock = () => new Date()
     // Shouts, with no new deletion rate bucket or recursive child cleanup.
     const indexPlan = await indexWriter?.prepare(transaction, input.shoutId, data,
       { ...data, status: 'deleted' }, { operationId: receiptRef.id });
+    if (indexWriter && typeof indexPlan?.apply !== 'function') throw new Error('invalid-shout-deletion-index-plan');
     indexPlan?.apply();
     if (data.status !== 'deleted') transaction.update(shoutRef, { status: 'deleted' });
     transaction.create(receiptRef, { ...retention, action: 'deleteShout', userId: uid,

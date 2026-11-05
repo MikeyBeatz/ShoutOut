@@ -9,6 +9,7 @@ import { beginIndexGcLab } from './feed_index_gc_lab.js';
 import { createAccountRetentionLab, retentionCell } from './feed_account_retention_lab.js';
 import { portableIndexPage } from './feed_portable_selection.js';
 import { isPurgedShoutContext } from './shout_context.js';
+import { deletedPublicIdentity } from './account_public_identity.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
 
@@ -274,15 +275,19 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     }));
     const regionIds = [...new Set(edits.flatMap(({ oldIndex, newIndex }) => [oldIndex, newIndex])
       .filter(Boolean).map(row => row.geohash.slice(0, 4)))].sort();
+    const erasedAuthors = new Set();
     if (accountRetention) {
       const guards = regionIds.length ? await tx.getAll(...regionIds.map(cell => fences.doc(cell))) : []; reads += guards.length;
       guards.forEach(doc => retentionCell(doc.data()));
       for (const guard of guards) if (guard.get('owner') && (!privateErasure || guard.get('owner') !== erasure.id || guard.id !== erasure.cell)) {
         throw new Error('index-cell-retention-busy');
       }
-      const authors = [...new Set(edits.filter(edit => edit.newIndex).map(edit => edit.newIndex.authorId))];
+      const authors = [...new Set(edits.flatMap(edit => [edit.newIndex?.authorId,
+        ...(!privateErasure && edit.oldIndex ? [edit.oldIndex.authorId] : [])]).filter(Boolean))];
       const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : []; reads += profiles.length;
-      if (profiles.some(doc => doc.get('accountStatus') === 'deleted')) throw new Error('index-author-erased');
+      const deletedAuthors = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
+      for (const profile of profiles) if (canonical(profile.data()) === canonical(deletedPublicIdentity)) erasedAuthors.add(profile.id);
+      if (edits.some(edit => edit.newIndex && deletedAuthors.has(edit.newIndex.authorId))) throw new Error('index-author-erased');
     }
     const roots = new Map();
     for (const cell of regionIds) {
@@ -301,7 +306,10 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     for (const edit of edits) {
       let { oldIndex } = edit;
       const { newIndex } = edit;
-      if (oldIndex && oldIndex.expiresAt <= cutoff) {
+      // R5 may legitimately erase metadata before the retained source changes
+      // status. Only an exact server marker permits reconciling an absent row;
+      // a present but different row still fails the normal edit validation.
+      if (oldIndex && (oldIndex.expiresAt <= cutoff || !newIndex && erasedAuthors.has(oldIndex.authorId))) {
         const root = working.get(oldIndex.geohash.slice(0, 4));
         if (!await builder.find(root ? { hash: root.hash } : null, oldIndex, load)) oldIndex = null;
       }
