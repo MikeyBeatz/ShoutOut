@@ -20,11 +20,11 @@ after(async () => {
   await db.terminate(); await deleteApp(app);
 });
 
-async function fixture() {
+async function fixture({ accountRetention = false } = {}) {
   const uid = randomUUID(), prefix = `mi-${uid.slice(0, 8)}-`, key = `mvp_${uid.replaceAll('-', '').slice(0, 12)}`;
   const query = db.collection('shouts').where(FieldPath.documentId(), '>=', prefix)
     .where(FieldPath.documentId(), '<', prefix + '\uf8ff');
-  const lab = createLabBlockIndex(db, { namespace: `maint-${uid.slice(0, 8)}`,
+  const lab = createLabBlockIndex(db, { namespace: `maint-${uid.slice(0, 8)}`, accountRetention,
     sourceCollection: { doc: id => db.doc(`shouts/${id}`), get: () => query.get() } });
   roots.push(lab.base);
   const scoped = { projectId: db.projectId, collectionGroup: db.collectionGroup.bind(db),
@@ -205,4 +205,20 @@ test('anonymous context is unavailable to hydration but cannot conceal stale ind
   await f.ref('context').set(purgedShoutContext);
   assert.equal((await f.lab.hydrate(old, [f.ref('context').id], f.options.clock().getTime())).items[0].available, false);
   await assert.rejects(f.lab.audit(), /incomplete-index/);
+});
+
+test('account maintenance waits for R5 index erasure and atomically removes its journal with the original request', { skip: !enabled }, async () => {
+  const f = await fixture({ accountRetention: true }); await f.purge();
+  await f.seed([['own', { authorId: f.uid, createdAt: Math.floor(f.identity.requestCreateTime.toMillis()) - 1000,
+    expiresAt: Math.floor(f.identity.requestCreateTime.toMillis()) + 86400000 }], ['foreign']]);
+  const child = f.ref('own').collection('comments').doc('foreign'); await child.set({ authorId: 'other', text: 'Keep foreign context' });
+  const foreign = await f.ref('foreign').get(), deadline = (await f.job.get()).get('retainUntil');
+  await f.finish({ indexWriter: f.lab });
+  assert.equal((await f.request.get()).exists, false); assert.equal((await f.lab.erasureJobFor(f.identity).get()).exists, false);
+  assert.equal((await f.lab.base.get()).get('activeErasure'), undefined);
+  assert.deepEqual((await f.ref('own').get()).data(), purgedShoutContext);
+  assert.equal((await child.get()).get('text'), 'Keep foreign context'); assert.ok((await f.ref('foreign').get()).updateTime.isEqual(foreign.updateTime));
+  for (const doc of (await f.lab.base.collection('nodes').get()).docs) assert.equal(JSON.stringify(doc.data()).includes(f.uid), false);
+  assert.equal((await f.lab.audit()).activeMetadata, 1);
+  assert.equal(deadline.toMillis(), Timestamp.fromMillis(f.identity.requestCreateTime.toMillis() + accountRetentionMillis).toMillis());
 });

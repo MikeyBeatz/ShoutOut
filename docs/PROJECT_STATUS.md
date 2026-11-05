@@ -6,11 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další brána prostorového indexu: dořešit odstranění osobních metadat z jeho
-historických bloků do původního účtového +60denního termínu a doplnit regresi
-moderace. Maintenance/purge i dávková příprava mají lokální propojení. Živý index ani migrace dosud nejsou
-schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
-uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
+R5 je schválené a lokálně připravené na feature/feed-account-retention:
+verze dotčených oblastí, ochrana autora, pokračovatelný fyzický úklid bloků,
+cache/kurzory a volitelné dokončení přes skutečný účtový worker. Konečná regrese
+61/61 (včetně 15 R5 případů a skutečného účtového workeru), lint a kontrola
+dokumentace prošly; CI ještě čeká. Předchozí unit průchod měl 108 pass.
+Potom pokračovat regresí moderace a konkrétním provozním návrhem indexu.
+R5 umožňuje dřívější obnovu dotčené relace, nezavádí další hodinovou retenci.
+Provozní brána zůstává otevřená: včasná příprava, globální inventory/náklady,
+serializace úklidu a délka dočasné blokace zápisů ve stejné oblasti.
+[Rozhodnutí, protokol a meze](plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal).
+Maintenance/purge i dávková příprava mají lokální propojení. Živý index ani
+migrace dosud nejsou schválené. Účtová DEV část je včetně závěrečného pilotu
+uzavřená, její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
 
 Na feature/feed-maintenance-index-writer je dokončené předání writeru přes celý

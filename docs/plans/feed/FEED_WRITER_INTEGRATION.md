@@ -201,6 +201,12 @@ Neprodlužovat retenci; navrhnout a ověřit cílené odstranění těchto metad
 včetně souběhu se snapshoty/GC a nedokončené primární účtové fáze.
 Před aktivací rovněž ověřit konzistenci rozpracovaných jobů: samotný minimální
 kontext není důkazem odstranění všech starších indexových kopií.
+Navazující diagnostika potvrdila novou historii u deadline i cache druhého
+adaptéru. [R5 a lokální protokol](FEED_INDEX_RETENTION.md#account-retention-proposal)
+jsou nyní schválené/připravené, konečná regrese 61/61 prošla, CI ještě čeká.
+Provedená diagnostika samotná index neopravuje ani neaktivuje. Režim R5 se
+zapíná pouze v explicitně vytvořeném emulátorovém namespace; živý wrapper jej
+nepředává. Provozní inventory, časování a blokace zápisů mají ještě vlastní bránu.
 Tento lokální úsek to neřeší ani nepovoluje živou aktivaci. Pozitivní purge test
 vychází z vlastních Shoutů již vyřazených z indexu v dřívější účtové fázi;
 historii cizího Shoutu zachovává a neobsahuje UID mazaného hlasujícího.

@@ -1,10 +1,12 @@
 // Emulator-only adapter. Deliberately cannot run against DEV or production.
 import { Buffer } from 'node:buffer';
 import { performance } from 'node:perf_hooks';
+import { setTimeout, clearTimeout } from 'node:timers';
 import { randomUUID, createHash } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
-import { sessionDeadline } from './feed_session_policy.js';
+import { sessionDeadline, FeedSessionExpired, feedSessionLifetimeMillis } from './feed_session_policy.js';
 import { beginIndexGcLab } from './feed_index_gc_lab.js';
+import { createAccountRetentionLab, retentionCell } from './feed_account_retention_lab.js';
 import { portableIndexPage } from './feed_portable_selection.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
@@ -16,20 +18,25 @@ const tupleCompare = (a, b) => {
 };
 const frozen = value => { if (value && typeof value === 'object') { Object.values(value).forEach(frozen); Object.freeze(value); } return value; };
 
-export function blockCache({ maxBytes = 4194304, maxEntries = 1024 } = {}) {
-  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || !Number.isSafeInteger(maxEntries) || maxEntries < 1) throw new Error('invalid-cache-config');
+export function blockCache({ maxBytes = 4194304, maxEntries = 1024, maxAgeMillis = feedSessionLifetimeMillis,
+  clock = () => performance.now() } = {}) {
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || !Number.isSafeInteger(maxEntries) || maxEntries < 1 ||
+      !Number.isSafeInteger(maxAgeMillis) || maxAgeMillis < 1 || maxAgeMillis > feedSessionLifetimeMillis || typeof clock !== 'function') throw new Error('invalid-cache-config');
   const entries = new Map(), flights = new Map(), invalidated = new Set();
   let bytes = 0;
+  const remove = key => { const entry = entries.get(key); if (entry) { clearTimeout(entry.timer); bytes -= entry.bytes; entries.delete(key); } };
+  const expire = () => { for (const [key, entry] of entries) if (clock() >= entry.expiresAt) remove(key); };
   return {
-    get size() { return entries.size; }, get bytes() { return bytes; },
+    get size() { expire(); return entries.size; }, get bytes() { expire(); return bytes; },
     get prefetchWidth() { return Math.max(1, Math.min(8, maxEntries, Math.floor(maxBytes / 65536))); },
-    contains(key) { return entries.has(key) || flights.has(key); },
-    clear() { entries.clear(); bytes = 0; },
+    contains(key) { expire(); return entries.has(key) || flights.has(key); },
+    clear() { for (const key of entries.keys()) remove(key); for (const flight of flights.values()) invalidated.add(flight); },
     invalidate(key) {
-      if (entries.has(key)) { bytes -= entries.get(key).bytes; entries.delete(key); }
+      remove(key);
       if (flights.has(key)) invalidated.add(flights.get(key));
     },
     async load(key, fetcher) {
+      expire();
       if (entries.has(key)) {
         const entry = entries.get(key); entries.delete(key); entries.set(key, entry);
         return { node: entry.node, hit: true, bytes: entry.bytes };
@@ -40,9 +47,10 @@ export function blockCache({ maxBytes = 4194304, maxEntries = 1024 } = {}) {
         if (size <= maxBytes && !invalidated.has(flight)) {
           while (entries.size >= maxEntries || bytes + size > maxBytes) {
             const oldest = entries.keys().next().value;
-            bytes -= entries.get(oldest).bytes; entries.delete(oldest);
+            remove(oldest);
           }
-          entries.set(key, { node, bytes: size }); bytes += size;
+          const timer = setTimeout(() => remove(key), maxAgeMillis); timer.unref();
+          entries.set(key, { node, bytes: size, expiresAt: clock() + maxAgeMillis, timer }); bytes += size;
         }
         return { node, hit: false, bytes: size };
       })();
@@ -132,14 +140,45 @@ function nodeKey(summary, c) {
     -summary.maxCreated, summary.minId];
 }
 
-export function createLabBlockIndex(db, { namespace, cache = blockCache(), elapsedClock = () => performance.now(), sourceCollection = null, ...blockOptions }) {
+export function createLabBlockIndex(db, { namespace, cache = blockCache(), elapsedClock = () => performance.now(), sourceCollection = null,
+  accountRetention = false, ...blockOptions }) {
   if (db.projectId !== 'shoutout-rules-test' || process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8080') throw new Error('index-lab-emulator-only');
+  if (typeof accountRetention !== 'boolean') throw new Error('invalid-account-retention-mode');
   if (!/^[a-z][a-z0-9-]{0,39}$/.test(namespace)) throw new Error('invalid-index-namespace');
   const base = db.collection('feedIndexLab').doc(namespace);
   // Trusted emulator fixture can use real shouts/{id} paths to exercise purge
   // ownership/path checks. The guard above still refuses every live database.
   const cells = base.collection('cells'), nodes = base.collection('nodes'), source = sourceCollection ?? base.collection('source');
   const reconcile = Symbol('reconcile-current-source');
+  const erasureCapability = Symbol('trusted-account-erasure');
+  const fences = base.collection('cellRetention');
+  let cacheRevision = null;
+  const mode = marker => { if ((marker.accountRetention === true) !== accountRetention) throw new Error('index-retention-mode-mismatch'); };
+  async function retentionFence(tx, marker, roots, expected = null, metrics = null) {
+    mode(marker);
+    if (!accountRetention) return null;
+    const revision = marker.erasureRevision ?? 0;
+    if (cacheRevision !== revision) { cache.clear(); cacheRevision = revision; }
+    const docs = roots.length ? await tx.getAll(...roots.map(root => fences.doc(root.path))) : [];
+    if (metrics) metrics.retentionReadUnits = (metrics.retentionReadUnits ?? 0) + docs.length;
+    docs.forEach(doc => retentionCell(doc.data()));
+    const versions = Object.fromEntries(docs.map(doc => [doc.id, doc.get('version') ?? 0]));
+    if (docs.some(doc => doc.get('phase') === 'erasing') ||
+        expected && roots.some(root => expected[root.path] !== versions[root.path])) throw new FeedSessionExpired();
+    return versions;
+  }
+  async function checkRetention(captured, rows = [], metrics = null) {
+    await db.runTransaction(async tx => {
+      const marker = await tx.get(base);
+      if (metrics) metrics.retentionReadUnits = (metrics.retentionReadUnits ?? 0) + 1;
+      await retentionFence(tx, marker.data(), captured.roots, captured.retention, metrics);
+      if (!accountRetention) return;
+      const authors = [...new Set(rows.map(row => row.authorId))];
+      const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
+      if (metrics) metrics.retentionReadUnits += profiles.length;
+      if (profiles.some(doc => doc.get('accountStatus') === 'deleted')) throw new FeedSessionExpired();
+    }, { readOnly: true });
+  }
   const views = new WeakMap();
   let queuedReads = [], flushScheduled = false;
   const assertId = id => { if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error('invalid-index-id'); };
@@ -187,7 +226,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     if (writes > 450) throw new Error('lab-seed-too-large');
     await db.runTransaction(async tx => {
       if ((await tx.get(base)).exists) throw new Error('index-already-seeded');
-      tx.create(base, { v: 1, prunedThrough: -1 });
+      tx.create(base, { v: 1, prunedThrough: -1, ...(accountRetention ? { accountRetention: true, erasureRevision: 0 } : {}) });
       for (const row of rows) tx.create(source.doc(row.id), row);
       for (const [key, node] of builder.writes) tx.set(nodes.doc(key), node);
       for (const [cell, descriptor] of roots) tx.create(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: 1, ...cellGrid(cell) });
@@ -205,7 +244,8 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
   // prior edits in this plan, while all database reads still precede apply().
   // Reserve receipt/other caller writes with additionalWrites; sourceChanges
   // counts changed index projections, not unrelated full-body updates.
-  async function prepareBatch(tx, changes, { operationId = randomUUID(), reconcileExpired = false, additionalWrites = 0 } = {}) {
+  async function prepareBatch(tx, changes, { operationId = randomUUID(), reconcileExpired = false, additionalWrites = 0,
+    erasure = null } = {}) {
     assertId(operationId);
     if (!Array.isArray(changes) || changes.length > 50 || !Number.isSafeInteger(additionalWrites) ||
         additionalWrites < 0 || additionalWrites > 450) throw new Error('invalid-index-batch');
@@ -223,6 +263,9 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     let reads = 1;
     const marker = await tx.get(base);
     if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+    mode(marker.data());
+    const privateErasure = erasure?.capability === erasureCapability;
+    if (erasure && !privateErasure) throw new Error('invalid-erasure-capability');
     const cutoff = marker.data().prunedThrough ?? -1;
     const sourceChanges = normalized.filter(change => change.changed).length;
     const edits = normalized.filter(change => change.changed || reconcileExpired).map(({ old, next }) => ({
@@ -231,6 +274,16 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     }));
     const regionIds = [...new Set(edits.flatMap(({ oldIndex, newIndex }) => [oldIndex, newIndex])
       .filter(Boolean).map(row => row.geohash.slice(0, 4)))].sort();
+    if (accountRetention) {
+      const guards = regionIds.length ? await tx.getAll(...regionIds.map(cell => fences.doc(cell))) : []; reads += guards.length;
+      guards.forEach(doc => retentionCell(doc.data()));
+      for (const guard of guards) if (guard.get('owner') && (!privateErasure || guard.get('owner') !== erasure.id || guard.id !== erasure.cell)) {
+        throw new Error('index-cell-retention-busy');
+      }
+      const authors = [...new Set(edits.filter(edit => edit.newIndex).map(edit => edit.newIndex.authorId))];
+      const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : []; reads += profiles.length;
+      if (profiles.some(doc => doc.get('accountStatus') === 'deleted')) throw new Error('index-author-erased');
+    }
     const roots = new Map();
     for (const cell of regionIds) {
       const doc = await tx.get(cells.doc(cell)); reads++;
@@ -261,8 +314,10 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     }
     const updates = new Map([...working].filter(([cell, descriptor]) => descriptor?.hash !== roots.get(cell)?.hash));
     const reachable = builder.reachable([...updates.values()].filter(Boolean));
+    if (accountRetention && marker.get('activeErasure') && !privateErasure && [...reachable.values()]
+      .some(node => node.rows?.some(row => row.authorId === marker.get('activeErasure').userId))) throw new Error('index-author-erasure-pending');
     for (const key of [...reachable.keys()]) if (loaded.has(key)) reachable.delete(key);
-    const historyWrites = [...updates.keys()].filter(cell => roots.get(cell)).length;
+    const historyWrites = privateErasure ? 0 : [...updates.keys()].filter(cell => roots.get(cell)).length;
     const totalWrites = reachable.size + updates.size + historyWrites + sourceChanges + additionalWrites;
     if (totalWrites > 450) throw new Error('lab-mutation-too-large');
     let applied = false;
@@ -273,7 +328,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
         applied = true;
         for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
         for (const [cell, descriptor] of updates) {
-          if (roots.get(cell)) tx.create(base.collection('retiredRoots').doc(`${cell}-${operationId}`), {
+          if (roots.get(cell) && !privateErasure) tx.create(base.collection('retiredRoots').doc(`${cell}-${operationId}`), {
             v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
           });
           if (!descriptor) tx.delete(cells.doc(cell));
@@ -310,7 +365,10 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     const c = context(input), ranges = directoryWindows(c.point, c.radiusKm);
     const metrics = { rootQueries: 0, rootDocuments: 0, emptyRootQueries: 0, nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0, metadataExamined: 0 };
     let readTime;
+    let retention;
     const roots = await db.runTransaction(async tx => {
+      const marker = await tx.get(base); mode(marker.data());
+      if (accountRetention) metrics.retentionReadUnits = (metrics.retentionReadUnits ?? 0) + 1;
       const result = new Map();
       for (const window of ranges) {
         metrics.rootQueries++;
@@ -325,7 +383,9 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
           result.set(doc.id, data.hash);
         }
       }
-      return [...result].map(([path, key]) => ({ hash: key, path, summary: null }));
+      const roots = [...result].map(([path, key]) => ({ hash: key, path, summary: null }));
+      retention = await retentionFence(tx, marker.data(), roots, null, metrics);
+      return roots;
     }, { readOnly: true });
     alive();
     const frontier = new FeedMinHeap((a, b) => tupleCompare(a.key, b.key));
@@ -387,17 +447,18 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     }
     const view = {
       first,
-      page(token, work = { nodes: 32 }) {
-        try { alive(); } catch (error) { return Promise.reject(error); }
-        if (!pages.has(token) || (!pages.get(token).result && token !== active)) return Promise.reject(new Error('invalid-index-cursor'));
-        if (!work || !Number.isInteger(work.nodes) || work.nodes < 1) return Promise.reject(new Error('invalid-index-work'));
+      async page(token, work = { nodes: 32 }) {
+        alive();
+        const captured = views.get(view); await checkRetention(captured, [], metrics);
+        if (!pages.has(token) || (!pages.get(token).result && token !== active)) throw new Error('invalid-index-cursor');
+        if (!work || !Number.isInteger(work.nodes) || work.nodes < 1) throw new Error('invalid-index-work');
         const page = pages.get(token);
-        if (page.result) return Promise.resolve({ ...page.result, rows: clone(page.result.rows) });
+        if (page.result) { await checkRetention(captured, page.result.rows, metrics); alive(); return { ...page.result, rows: clone(page.result.rows), metrics: { ...metrics } }; }
         if (!page.flight) page.flight = advance(token, work).finally(() => { page.flight = null; });
-        return page.flight;
+        const result = await page.flight; await checkRetention(captured, result.rows, metrics); alive(); return { ...result, metrics: { ...metrics } };
       },
     };
-    views.set(view, { context: c, roots, alive, readTime });
+    views.set(view, { context: c, roots, alive, readTime, retention });
     return view;
   }
 
@@ -406,9 +467,12 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     if (!c || !Number.isSafeInteger(now) || now < c.now || !Array.isArray(ids) || ids.length > 50 || new Set(ids).size !== ids.length) throw new Error('invalid-index-hydration');
     ids.forEach(assertId);
     const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
-    return { sourceReads: docs.length, items: docs.map(doc => {
+    const authors = accountRetention ? [...new Set(docs.filter(doc => doc.exists && !isPurgedShoutContext(doc.data())).map(doc => doc.get('authorId')))] : [];
+    const profiles = authors.length ? await db.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
+    const erasedAuthors = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
+    return { sourceReads: docs.length, ...(accountRetention ? { retentionReadUnits: profiles.length } : {}), items: docs.map(doc => {
       const row = doc.exists && !isPurgedShoutContext(doc.data()) ? metadataOf({ ...doc.data(), id: doc.id }) : null;
-      return row && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
+      return row && !erasedAuthors.has(row.authorId) && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
     }) };
   }
 
@@ -419,6 +483,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     if (!before || !after || after.context.now < before.context.now ||
         canonical(identity(before.context)) !== canonical(identity(after.context))) throw new Error('incompatible-index-views');
     before.alive(); after.alive();
+    await checkRetention(before); await checkRetention(after);
     const oldRoots = new Map(before.roots.map(root => [root.path, root.hash]));
     const newRoots = new Map(after.roots.map(root => [root.path, root.hash]));
     const oldRows = new Map(), newRows = new Map();
@@ -453,6 +518,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     // Raw index delta, not the UI novelty count. Expiry/access changes require
     // availability checks even when immutable index hashes do not change.
     before.alive(); after.alive();
+    await checkRetention(before); await checkRetention(after);
     return clone({ added, removed, updated, metrics });
   }
 
@@ -463,6 +529,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     const root = await db.runTransaction(async tx => {
       const [marker, header] = await tx.getAll(base, cells.doc(cell));
       if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+      await retentionFence(tx, marker.data(), [{ path: cell }]);
       if (now > (marker.data().prunedThrough ?? -1)) tx.update(base, { prunedThrough: now });
       return header.exists ? directoryEntry(cell, header.data()).hash : null;
     });
@@ -513,6 +580,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     captured.alive();
     return clone({ v: 1, project: db.projectId, namespace, roots: captured.roots,
       readTime: { seconds: captured.readTime.seconds, nanoseconds: captured.readTime.nanoseconds },
+      retention: captured.retention,
       context: { uid: c.uid, point: c.point, radiusKm: c.radiusKm, now: c.now, order: c.order,
         unreadFirst: c.unreadFirst, blocked: [...c.blocked], followed: [...c.followed], category: c.category,
         readDigest: readDigest(readIds) } });
@@ -521,15 +589,21 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     if (snapshot?.v !== 1 || snapshot.project !== db.projectId || snapshot.namespace !== namespace ||
         uid !== snapshot.context?.uid || readDigest(readIds) !== snapshot.context?.readDigest) throw new Error('incompatible-portable-context');
     const c = context({ ...snapshot.context, readIds });
+    if (accountRetention && (!snapshot.retention || typeof snapshot.retention !== 'object')) throw new Error('invalid-retention-snapshot');
     const metrics = { nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0 };
+    await checkRetention(snapshot, [], metrics);
     const result = await portableIndexPage({ roots: snapshot.roots, position,
       readNode: key => loadBlock(key, metrics), eligible: row => available(row, c),
       mayContainRows: summary => minimumDistance(c.point, summary) <= c.radiusKm,
       rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c), assertSessionAlive }, { nodes: workNodes });
+    await checkRetention(snapshot, result.rows, metrics); assertSessionAlive();
     return { ...result, metrics: { ...result.metrics, ...metrics } };
   }
 
+  const erasure = accountRetention ? createAccountRetentionLab(db, base, (tx, rows, context) => prepareBatch(tx,
+    rows.map(row => ({ id: row.id, before: row, after: null })), { erasure: { ...context, capability: erasureCapability } })) : null;
   return { seed, mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage,
+    ...(erasure ? { purgeAccountIndex: erasure.step, prepareAccountIndexFinish: erasure.prepareFinish, erasureJobFor: erasure.jobFor } : {}),
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');
       const result = await cells.where('minExpiry', '<=', now).orderBy('minExpiry').limit(limit).get();
@@ -555,6 +629,12 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
       }
       const expected = sourceDocs.docs.filter(doc => !isPurgedShoutContext(doc.data()))
         .map(doc => metadataOf({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
+      if (accountRetention) {
+        const authors = [...new Set(expected.map(row => row.authorId))];
+        const profiles = authors.length ? await db.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
+        const erased = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
+        for (let i = expected.length - 1; i >= 0; i--) if (erased.has(expected[i].authorId)) expected.splice(i, 1);
+      }
       const sort = rows => rows.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
       const byId = new Map(expected.map(row => [row.id, row]));
       if (found.some(row => canonical(row) !== canonical(byId.get(row.id) ?? null)) || new Set(found.map(row => row.id)).size !== found.length ||

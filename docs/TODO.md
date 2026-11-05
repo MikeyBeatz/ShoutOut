@@ -24,7 +24,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dořešit osobní metadata v historii indexu a regresi moderace.**
+1. **Uzavřít lokální ověření R5, potom regresi moderace a provozní návrh indexu.**
    Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
    první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
    i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.
@@ -36,7 +36,12 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    testů a success CI 42063945148 včetně 25 purge testů. Nic se nenasazovalo.
    Před živou aktivací dořešit odstranění UID/polohy ze starých bloků do původního
    +60denního deadline, včetně selhání primární účtové fáze.
-   [Kontrakt a zbývající brána](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
+   R5 na dřívější obnovu dotčené relace je schválené. Lokální protokol historie,
+   cache/kurzorů a účtového workeru prošel konečnou regresí 61/61;
+   CI čeká. Před živou aktivací změřit inventory, předběžné
+   časování a délku dočasné blokace zápisů v uklízené oblasti.
+   [Protokol R5](plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal),
+   [zápisový kontrakt](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
 2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "25cd6dece3dcdf4ff844fbe0b298ab0272925af3",
+  "environment": "emulator-only",
+  "simulatedAccountTime": true,
+  "actual60DayWait": false,
+  "implementationChanged": false,
+  "fixturesCleaned": true,
+  "cases": [
+    {
+      "name": "late-removal-at-original-deadline",
+      "simulatedRequestAt": 1700000000000,
+      "simulatedDeadline": 1705184000000,
+      "ownerVisibleBeforeRemoval": false,
+      "sourceDeleted": true,
+      "foreignRows": 79,
+      "foreignSnapshotPages": [
+        50,
+        29
+      ],
+      "ownerLeafCopiesAfterCompletedGc": 1,
+      "mutation": {
+        "sourceWrites": 1,
+        "nodeWrites": 2,
+        "directoryWrites": 1,
+        "historyWrites": 1,
+        "reads": 5,
+        "attempts": 1
+      },
+      "gc": {
+        "state": "done",
+        "markedNodes": 5,
+        "metrics": {
+          "initialReads": 2,
+          "historyReadUnits": 2,
+          "markReads": 5,
+          "scanReadUnits": 6,
+          "archiveReadUnits": 2,
+          "rootCheckReads": 0,
+          "nodesDeleted": 0,
+          "archivesDeleted": 0,
+          "casAttempts": 0,
+          "deleteRequests": 0,
+          "changedOrGone": 0
+        },
+        "steps": 8
+      }
+    },
+    {
+      "name": "same-data-after-extra-history-grace",
+      "testTimeAdvanceMillis": 3660000,
+      "ownerLeafCopiesAfterCompletedGc": 0,
+      "foreignRows": 79,
+      "gc": {
+        "state": "done",
+        "markedNodes": 3,
+        "metrics": {
+          "initialReads": 2,
+          "historyReadUnits": 2,
+          "markReads": 3,
+          "scanReadUnits": 6,
+          "archiveReadUnits": 2,
+          "rootCheckReads": 3,
+          "nodesDeleted": 2,
+          "archivesDeleted": 1,
+          "casAttempts": 3,
+          "deleteRequests": 3,
+          "changedOrGone": 0
+        },
+        "steps": 7
+      }
+    },
+    {
+      "name": "separate-cache-after-database-reclamation",
+      "databaseOwnerCopies": 0,
+      "oldBlockExistsInDatabase": false,
+      "separateCacheStillContainsOwnerMetadata": true,
+      "gc": {
+        "state": "done",
+        "markedNodes": 1,
+        "metrics": {
+          "initialReads": 2,
+          "historyReadUnits": 2,
+          "markReads": 1,
+          "scanReadUnits": 2,
+          "archiveReadUnits": 2,
+          "rootCheckReads": 2,
+          "nodesDeleted": 1,
+          "archivesDeleted": 1,
+          "casAttempts": 2,
+          "deleteRequests": 2,
+          "changedOrGone": 0
+        },
+        "steps": 4
+      }
+    }
+  ],
+  "conclusion": "Existing root-age GC alone does not establish the account-retention deadline or cross-instance cache eviction."
+}

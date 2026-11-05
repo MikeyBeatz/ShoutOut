@@ -2,6 +2,7 @@
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { verifyNode } from './feed_block_index.js';
 import { feedSessionLifetimeMillis } from './feed_session_policy.js';
+import { retentionCell } from './feed_account_retention_lab.js';
 
 const compareTime = (a, b) => a.seconds - b.seconds || a.nanoseconds - b.nanoseconds;
 const preconditionFailure = error => [5, 9, 'not-found', 'failed-precondition'].includes(error.code);
@@ -12,12 +13,19 @@ export async function beginIndexGcLab(db, base, cell, { onNodeDeleted = () => {}
   if (!/^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$/.test(cell)) throw new Error('invalid-index-cell');
   if (!Number.isSafeInteger(testTimeAdvanceMillis) || testTimeAdvanceMillis < 0) throw new Error('invalid-gc-test-clock');
   const cells = base.collection('cells'), nodes = base.collection('nodes'), history = base.collection('retiredRoots');
-  const [marker, root] = await db.runTransaction(tx => tx.getAll(base, cells.doc(cell)), { readOnly: true });
+  const [marker, root, retention] = await db.runTransaction(async tx => {
+    const [marker, root] = await tx.getAll(base, cells.doc(cell));
+    const retention = marker.get('accountRetention') ? await tx.get(base.collection('cellRetention').doc(cell)) : null;
+    if (retention) retentionCell(retention.data());
+    if (retention?.get('owner')) throw new Error('index-cell-retention-busy');
+    return [marker, root, retention];
+  }, { readOnly: true });
   if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
   const fence = marker.readTime;
   const cutoff = new Timestamp(fence.seconds - feedSessionLifetimeMillis / 1000 + Math.floor(testTimeAdvanceMillis / 1000), fence.nanoseconds);
   const metrics = { initialReads: 2, historyReadUnits: 0, markReads: 0, scanReadUnits: 0,
-    archiveReadUnits: 0, rootCheckReads: 0, nodesDeleted: 0, archivesDeleted: 0, casAttempts: 0, deleteRequests: 0, changedOrGone: 0 };
+    archiveReadUnits: 0, rootCheckReads: 0, retentionCheckReads: retention ? 1 : 0,
+    nodesDeleted: 0, archivesDeleted: 0, casAttempts: 0, deleteRequests: 0, changedOrGone: 0 };
   const queue = [], queued = new Set(), marked = new Set();
   const enqueue = key => {
     if (!/^[a-f0-9]{64}$/.test(key)) throw new Error('invalid-index-history');
@@ -45,6 +53,12 @@ export async function beginIndexGcLab(db, base, cell, { onNodeDeleted = () => {}
     const commit = selected => db.runTransaction(async tx => {
       metrics.rootCheckReads++;
       const current = await tx.get(cells.doc(cell));
+      if (retention) {
+        metrics.retentionCheckReads++;
+        const fresh = await tx.get(retention.ref);
+        retentionCell(fresh.data());
+        if (fresh.get('owner') || (fresh.get('version') ?? 0) !== (retention.get('version') ?? 0)) throw new Error('index-gc-retention-changed');
+      }
       if (current.exists !== root.exists || (current.exists && !current.updateTime.isEqual(root.updateTime))) {
         throw new Error('index-gc-root-changed');
       }

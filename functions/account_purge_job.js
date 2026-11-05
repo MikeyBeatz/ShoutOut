@@ -93,6 +93,10 @@ export async function runAccountPurgeJob(identity, db, auth, {
     while (examined < pageSize) {
       const { job } = await db.runTransaction(guard), stage = stages[job.stage];
       if (!stage) {
+        if (indexWriter?.purgeAccountIndex) {
+          const erased = await indexWriter.purgeAccountIndex(identity, { clock, guard }); examined++;
+          if (erased.state !== 'complete') break;
+        }
         const nicknameRef = db.doc(`nicknames/${job.reservationKey}`);
         for (const ref of [jobRef, requestRef, mainRef, profileRef, nicknameRef, userRef]) {
           if ((await ref.listCollections()).length) throw new AccountPurgeNeedsReview('unexpected-final-purge-descendants');
@@ -101,6 +105,9 @@ export async function runAccountPurgeJob(identity, db, auth, {
           const current = await guard(transaction), [reservation, main, user] = await transaction.getAll(nicknameRef, mainRef, userRef);
           if (current.job.version !== job.version || current.job.selected || current.job.pendingFile) throw new AccountPurgeLeaseLost();
           if (user.exists) throw new AccountPurgeNeedsReview('private-profile-recreated-during-purge');
+          const indexPlan = indexWriter?.purgeAccountIndex ? await indexWriter.prepareAccountIndexFinish(transaction, identity, { clock, guard }) : null;
+          if (indexWriter?.purgeAccountIndex && typeof indexPlan?.apply !== 'function') throw new Error('invalid-account-index-finish-plan');
+          indexPlan?.apply();
           if (reservation.get('uid') === identity.userId) transaction.delete(nicknameRef, { lastUpdateTime: reservation.updateTime });
           if (main.exists) transaction.delete(mainRef, { lastUpdateTime: main.updateTime });
           transaction.delete(requestRef, { lastUpdateTime: current.request.updateTime });

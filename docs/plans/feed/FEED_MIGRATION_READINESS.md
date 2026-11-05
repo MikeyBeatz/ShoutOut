@@ -9,8 +9,9 @@ Tento dokument nerozhoduje názvy živých indexových kolekcí ani jejich aktiv
 K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutoveru
 a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je
 navíc připravený sdílený dávkový plán přípravy a propojení maintenance/purge;
-runtime indexWriter není zapojený. Před aktivací dořešit osobní metadata v historii
-indexu do původního účtového deadline.
+runtime indexWriter není zapojený. R5 pro historii/cache má schválený lokální
+protokol a 61/61 cílených testů (CI čeká). Před aktivací zbývá provozní ověření
+včasného úklidu, inventory/nákladů a délky blokace zápisů.
 [Dávkový kontrakt](FEED_WRITER_INTEGRATION.md#batch-preparation),
 [maintenance a retenční brána](FEED_WRITER_INTEGRATION.md#maintenance-purge). Následující
 rollout/geohash záznamy jsou důkazy svých datovaných etap. Neoznačují všechny

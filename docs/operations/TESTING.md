@@ -8,6 +8,39 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+## Diagnostika retenční hranice indexu – 5. listopadu
+
+`tools/diagnose_feed_retention.mjs` je opakovatelná diagnostika původního režimu bez R5,
+nikoli pozitivní regresní test hotové opravy. Vyžaduje emulátor na 127.0.0.1:8080
+a pevný projekt shoutout-rules-test; nepoužívá živý Firebase ani Auth účty.
+Spustit z kořene přes `firebase emulators:exec --config firebase.rules-test.json
+--only firestore --project shoutout-rules-test "node tools/diagnose_feed_retention.mjs"`
+(jeden shellový příkaz, Node 22 a Java podle provozního nastavení).
+
+Prošly 3/3 diagnostické scénáře a syntetická fixture je uklizená: nová historie
+při opožděném vyřazení starého expirovaného zdroje v simulovaném +60denním termínu,
+její odstranění až po další hodině a samostatná cache přežívající DB GC. Cizích
+79 položek i stránky 50 + 29 zachované. Není to skutečný 60denní běh, cloudový
+benchmark ani důkaz, že živé API vrací smazaný obsah. Syntaxe nástroje ověřená.
+Nástroj není registrovaný v běžné CI sadě: po opravě se musí očekávání této
+diagnostiky změnit, nikoli udržovat mezeru jako požadované chování.
+[Naměřený důkaz](../benchmarks/FEED_RETENTION_BOUNDARY_2026-11-05.json),
+[schválené R5 a lokální protokol](../plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal).
+Ignorované lokální výstupy: build/feed-retention-boundary.log a -proof.json.
+
+`feed_account_retention.integration.test.js` je pozitivní R5 sada v test:purge.
+Ověřuje fyzický úklid current/history/orphan kopií, restart s novým adaptérem
+každý krok, teplou/studenou cache a portable/cached/in-flight odpověď, nezasažené
+oblasti, zachování cizích zdrojů, dávku přes 50 vlastních řádků, souběh s GC
+a skutečným cizím zápisem, lost ack/rollback, vadné brány/žádosti a zákaz návratu
+metadat smazaného autora. Přidaný test v feed_maintenance ověřuje skutečný
+účtový worker a atomické odstranění erasure journalu s původní žádostí.
+Konečná sada prošla 61/61: 15 R5, 11 maintenance, 14 dávkových writerů,
+10 indexových, 10 retenčních a 1 portable scénář. Předchozí sady 46/46 a 50/50
+také prošly. Poslední lint a kontrola dokumentace jsou čisté. Předchozí unit
+průchod měl 108 pass (emulátorové testy přeskočené); celé CI ještě čeká.
+Logy: build/feed-account-retention-{targeted,regression,final-regression,unit,lint}.log.
+
 ## Index přes maintenance/purge – lokální úsek 5. listopadu
 
 `feed_maintenance.integration.test.js` používá skutečný laboratorní blokový index
