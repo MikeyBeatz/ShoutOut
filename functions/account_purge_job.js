@@ -8,7 +8,7 @@ import { purgeTreeFrame, stepAccountPurgeTree } from './account_purge_tree.js';
 import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { purgeActivity } from './account_purge_activity.js';
 import { stepAccountPurgeStorage } from './account_purge_storage.js';
-import { purgedShoutContext } from './shout_context.js';
+import { purgedShoutContext, isPurgedShoutContext } from './shout_context.js';
 export { purgedShoutContext } from './shout_context.js';
 
 const marker = { schemaVersion: 1, accountStatus: 'deleted' };
@@ -66,6 +66,22 @@ export async function runAccountPurgeJob(identity, db, auth, {
   if (claim !== 'claimed') return { state: claim, examined: 0 };
   const documentPager = pager ?? createPurgeDocumentPager(db);
   const guard = transaction => readAccountPurgeGuard(transaction, db, identity, jobRef, token, clock, stages.length);
+  const prepareShoutIndexRemoval = async (transaction, snapshot, version) => {
+    if (!indexWriter) return null;
+    const data = snapshot.data();
+    if (isPurgedShoutContext(data)) {
+      // Freeze and its journal cursor were committed atomically with index
+      // removal. This persisted context has no metadata to project again.
+      if (Object.keys(data).some(key => !['schemaVersion', 'status', 'contentPurged', 'authorId'].includes(key))) {
+        throw new AccountPurgeNeedsReview('invalid-frozen-shout-context');
+      }
+      return null;
+    }
+    const operationId = createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, version])).digest('hex');
+    const plan = await indexWriter.prepare(transaction, snapshot.id, data, null, { operationId });
+    if (typeof plan?.apply !== 'function') throw new Error('invalid-purge-index-plan');
+    return plan;
+  };
   const commitProgress = async (version, patch, mutation = null) => db.runTransaction(async transaction => {
     const current = await guard(transaction);
     if (current.job.version !== version) throw new AccountPurgeLeaseLost();
@@ -113,8 +129,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
             if (!fresh.exists || !samePurgeTime(fresh.createTime, source.createTime) || !validatePurgeSelection(fresh, stage, identity.userId)) {
               throw new AccountPurgeNeedsReview('purge-freeze-target-replaced');
             }
-            const operationId = createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, job.version])).digest('hex');
-            const plan = await indexWriter?.prepare(transaction, fresh.id, fresh.data(), null, { operationId }); plan?.apply();
+            const plan = await prepareShoutIndexRemoval(transaction, fresh, job.version); plan?.apply();
             transaction.set(source.ref, { ...purgedShoutContext, authorId: identity.userId });
           });
           examined++; continue;
@@ -194,8 +209,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
                 }
               }
             }
-            const plan = stage.action === 'shout' ? await indexWriter?.prepare(transaction, root.id, root.data(), null,
-              { operationId: createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, job.version])).digest('hex') }) : null;
+            const plan = stage.action === 'shout' ? await prepareShoutIndexRemoval(transaction, root, job.version) : null;
             plan?.apply();
             if (keepContext) transaction.set(root.ref, purgedShoutContext);
             else transaction.delete(root.ref, { lastUpdateTime: root.updateTime });

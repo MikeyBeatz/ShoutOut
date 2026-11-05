@@ -8,8 +8,11 @@ Tento dokument nerozhoduje názvy živých indexových kolekcí ani jejich aktiv
 
 K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutoveru
 a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je
-navíc připravený sdílený dávkový plán přípravy; runtime indexWriter není zapojený.
-[Dávkový kontrakt a měření](FEED_WRITER_INTEGRATION.md#batch-preparation). Následující
+navíc připravený sdílený dávkový plán přípravy a propojení maintenance/purge;
+runtime indexWriter není zapojený. Před aktivací dořešit osobní metadata v historii
+indexu do původního účtového deadline.
+[Dávkový kontrakt](FEED_WRITER_INTEGRATION.md#batch-preparation),
+[maintenance a retenční brána](FEED_WRITER_INTEGRATION.md#maintenance-purge). Následující
 rollout/geohash záznamy jsou důkazy svých datovaných etap. Neoznačují všechny
 Functions ani web za jedinou dosud aktuální verzi. Přesné poslední ověření:
 [PROJECT_STATUS](../../PROJECT_STATUS.md#posledni-overene-nasazeni).

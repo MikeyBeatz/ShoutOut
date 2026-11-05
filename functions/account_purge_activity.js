@@ -19,6 +19,9 @@ export async function purgeActivity(transaction, snapshot, action, uid, { indexW
   const count = field ? parent.get(field) ?? 0 : null;
   if (!field || !Number.isSafeInteger(count) || count < 1) throw new AccountPurgeNeedsReview('purge-activity-counter-invalid');
   const after = { ...parent.data(), [field]: count - 1 };
-  const plan = parent.ref.path.split('/').length === 2 ? await indexWriter?.prepare(transaction, parent.id, parent.data(), after, { operationId }) : null;
+  // Saves and comment reactions do not change the Shout ordering projection.
+  const indexedReaction = action === 'reaction' && parent.ref.path.split('/').length === 2;
+  const plan = indexedReaction ? await indexWriter?.prepare(transaction, parent.id, parent.data(), after, { operationId }) : null;
+  if (indexedReaction && indexWriter && typeof plan?.apply !== 'function') throw new Error('invalid-purge-index-plan');
   plan?.apply(); transaction.update(parent.ref, { [field]: count - 1 });
 }

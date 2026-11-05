@@ -2,10 +2,10 @@
 
 Poslední ověřená DEV účtová/exspirační vrstva je 96b0782; 91d8d9b je zdroj
 původního zavedení exspirace. Běží bez aktivního prostorového indexu.
-`expireDueShouts` má lokálně ověřený atomický indexWriter adaptér; samotný
-maintenance wrapper jej zatím nepředává. Před aktivací živého indexu musí být
-writer zapojený i do této volací cesty a ověřený přes celý maintenance tick,
-nikoli jen přímé volání helperu. [Stav exspirace](../accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+Lokální maintenance wrapper již předává volitelný indexWriter do expirace.
+Také konečný purge má doplněnou kompatibilitu s anonymním kontextem Shoutu;
+živý wrapper index stále nezapíná. [Lokální ověření a zbývající retenční brána](#maintenance-purge),
+[stav nasazené exspirace](../accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
 
 Aktualizace 4. listopadu: DEV web/Rules 7ab60c8 už vynucují serverové mazání
 účtu/Shoutu; klientské create/delete žádosti a přímé statusové skrytí jsou
@@ -27,9 +27,9 @@ datová a provozní rozhodnutí se nadále předkládají zvlášť. Navazuje na
 | Reakce na Shout | Serverová `toggleShoutReaction` | Aktualizace likes/dislikes v indexu ve stejné transakci. |
 | Mazání autorem/moderátorem | Function i aktivace webu nasazené ve vývoji, Business živě ověřený; další role ještě v regresní matici | Dokončit živou regresi; atomické vyřazení z indexu je ověřené lokálně. |
 | Moderace Shoutu | Sdílená cesta pro odstranění používá v DEV povinný server podle DeletionWritePolicy; přímé skrytí Rules odmítnou. | Rozhodnutí/report/audit mají vlastní serverový milník, nejsou touto změnou automaticky atomické. |
-| Mazání účtu | Serverové fáze včetně konečného purge, klientská příprava/finalizace, Rules cutover a závěrečný živý pilot hotové v DEV. | Zapojit writer pro skrytí, odpočty i konečný purge. Runtime indexWriter se nepředává; uzavření účtových cest není aktivací indexu. |
+| Mazání účtu | Účtové fáze a cutover hotové v DEV. Lokálně ověřené indexové odpočty a konečný purge v celém maintenance ticku. | Před aktivací dořešit osobní metadata ve starých indexových blocích do původního deadline. Runtime indexWriter se nepředává. |
 | Příprava mazání účtu | Živá prepareAccountDeletion a57ae9b je zapnutá bez indexu; lokální dávkový plán nejvýše 50 změn z 1ba2b4a má success CI 42053726540. | Před živým indexem zvolit provozní adaptér a aktivaci. Dávkový laboratorní writer se živému wrapperu nepředává. |
-| Expirace | DEV maintenance materializuje status podle expiresAt; indexový adaptér ověřen lokálně. | Připojit indexWriter přes celý maintenance tick; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
+| Expirace | DEV materializuje status podle expiresAt bez indexu. Lokálně je předání writeru i atomické vyřazení ověřené přes celý tick. | Provozní adaptér a aktivace indexu; sedmidenní fyzický Shout cleanup zůstává samostatnou otevřenou částí. |
 | Obohacení geografie | Trigger doplňuje `geography`, nemění location/geohash | Není změnou současné indexové projekce. |
 | Komentáře/záložky | Jejich souhrny nejsou v řadicí indexové projekci | Bez zbytečného přepisování indexu. |
 
@@ -163,6 +163,43 @@ build/feed-batch-ci.{json,log} a build/feed-batch-local-proof.json.
 Aktuální DEV Hosting, stav ručního testu a návazná kontrola historických dat:
 [migrační připravenost](FEED_MIGRATION_READINESS.md). Výše uvedené čekání na CI/Hosting
 popisuje přípravu prvního rolloutu; aktuální aktivace `3b159f2` již nasazená je.
+
+<a id="maintenance-purge"></a>
+
+## Maintenance a konečný purge – lokální úsek 5. listopadu
+
+`runAccountMaintenanceTick` předává volitelný writer do expirace. Chybějící
+`apply` při zapnutém writeru ukončí transakci chybou; není tichý přechod na zápis
+samotného statusu. Priorita purge → účtový job → expirace i společný rozpočet
+jednoho jobu / nejvýše 50 kroků zůstávají beze změny.
+
+Konečný purge atomicky odstraní indexovou projekci při prvním zmrazení Shoutu
+spolu se zdrojem a journal kurzorem. Pozdější fáze už nepředává minimální
+anonymní kontext znovu do metadatového writeru: neobsahuje původní polohu ani
+časy. Neočekávaná další pole takového kontextu znamenají needs-review.
+Odebrání palce na cizím Shoutu mění index ve stejné transakci jako zdroj,
+reakce a journal. Záložky a komentářové reakce index nepotřebují; savesCount
+ani počty komentářů nejsou součástí jeho řadicí projekce.
+
+Laboratorní adaptér může v přísně střeženém emulátoru používat skutečné cesty
+`shouts/{id}`, aby test nepřeskakoval path/owner ochrany purge. Audit a hydratace
+rozpoznávají anonymní kontext; starý indexový řádek audit stále odmítne.
+Živý projekt ani namespace tím nevzniká. Nová sada
+`functions/feed_maintenance.integration.test.js` je zařazená do `test:purge`.
+Ověření a přesné výsledky jsou v [TESTING](../../operations/TESTING.md).
+
+**Zbývající povinná brána před živým indexem:** dosavadní GC chrání archivní
+kořeny hodinu od jejich vyřazení. To samo nezaručuje odstranění UID/polohy
+smazaného účtu do původního +60denního termínu. Kdyby až konečný purge našel
+ještě aktivní vlastní projekci, běžná archivace kořene by vytvořila novou historii
+právě u tohoto termínu. Také starší bloky potřebují skutečně zapojený úklid.
+Neprodlužovat retenci; navrhnout a ověřit cílené odstranění těchto metadat,
+včetně souběhu se snapshoty/GC a nedokončené primární účtové fáze.
+Tento lokální úsek to neřeší ani nepovoluje živou aktivaci. Pozitivní purge test
+vychází z vlastních Shoutů již vyřazených z indexu v dřívější účtové fázi;
+historii cizího Shoutu zachovává a neobsahuje UID mazaného hlasujícího.
+
+Bez nasazení, migrace, živých kolekcí, Auth účtů, změny Rules nebo retencí.
 
 ## Malý lokální úsek – identita žádosti o smazání účtu
 

@@ -6,12 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Pokračovat zbývajícími indexovými cestami přes maintenance a konečný purge;
-nejprve ověřit předání writeru přes celý maintenance tick, nikoli jen pomocné
-funkce. Dávková příprava účtu je lokálně hotová. Živý index ani migrace dosud nejsou
+Další brána prostorového indexu: dořešit odstranění osobních metadat z jeho
+historických bloků do původního účtového +60denního termínu a doplnit regresi
+moderace. Maintenance/purge i dávková příprava mají lokální propojení. Živý index ani migrace dosud nejsou
 schválené. Účtová DEV část je včetně cutoveru a závěrečného pilotu
 uzavřená, veškerá její fixture je uklizená. Kritéria a důkazy:
 [účtový plán](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
+Na feature/feed-maintenance-index-writer je připravené předání writeru přes celý
+tick, ošetření již anonymizovaného Shoutu v konečném purge a indexové odpočty
+bez zbytečných změn při odebrání záložky. Konečných 45/45 emulátorových testů
+(10 nových), 107 Functions unit, lint a kontrola dokumentace prošly; CI ještě čeká.
+Zahrnuje rollback, lost ack a zachování cizího obsahu. Živý wrapper index
+nepředává, žádné nasazení ani živá data. Hodinová historie sama negarantuje
+pevnou účtovou retenci; to zůstává povinná brána, nikoli změna schválené lhůty.
+[Kontrakt a meze](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
 
 Na feature/feed-batch-index-writer je dokončený schválený lokální prepareBatch
 a volitelné zapojení do prepareAccountDeletion, zdroj

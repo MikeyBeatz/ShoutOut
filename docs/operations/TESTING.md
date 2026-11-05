@@ -8,6 +8,25 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+## Index přes maintenance/purge – lokální úsek 5. listopadu
+
+`feed_maintenance.integration.test.js` používá skutečný laboratorní blokový index
+a kořenové Shout cesty v emulátoru. Je součástí `npm --prefix tools run test:purge`,
+odděleně od časového limitu Rules sady. Konečných 45/45 případů (10 nových,
+15 původních purge, 14 dávkových writerů a 6 expirace), 107 unit (emulátorové
+testy v unit průchodu přeskočené), celý ESLint a kontrola dokumentace prošly.
+Celé CI zatím není uzavřené.
+
+Pokrývá celý maintenance tick, expiraci zdroje/indexu, prioritu a rozpočet purge,
+anonymní kontext s cizími komentáři, odpočty reakcí bez zbytečných indexových
+zápisů záložek, rollback a chybějící plán, lost commit ack/journal, vadný kontext
+a audit zastaralého indexového řádku. Testy nepřidávají žádný živý účet/data.
+Pozitivní purge vychází z vlastních Shoutů již vyřazených z indexu. Odstranění
+osobních metadat ze všech starých indexových bloků do pevného deadline je stále
+otevřená aktivační brána, nikoli prokázaný výsledek této sady.
+[Kontrakt a meze](../plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
+Lokální logy: build/feed-maintenance-{targeted,regression,unit,lint}.log.
+
 ## Dávkový indexový writer – lokální úsek 5. listopadu
 
 feed_batch_writers.integration.test.js přidává 14 případů do test:rules. Konečná

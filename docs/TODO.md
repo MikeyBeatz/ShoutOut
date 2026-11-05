@@ -24,15 +24,18 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Doplnit zbývající indexové cesty přes maintenance a konečný purge.**
+1. **Dořešit osobní metadata v historii indexu a regresi moderace.**
    Účtová DEV část je uzavřená: web/Rules 7ab60c8 po success CI 41915977658,
    první UI pokus, content-archived, původní deadline, zákazy přímých zápisů
    i starého tokenu a úplný úklid prošly. Není další čekající Auth fixture.
    [Účtové důkazy a meze](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
    Lokální dávkový plán a volitelné zapojení přípravy jsou hotové: zdroj 1ba2b4a
    má success CI 42053726540 včetně 389 Rules/server testů. Writer v živém wrapperu
-   není zapnutý. Následuje předání writeru a ověření přes celý maintenance tick,
-   dále zbývající purge cesty podle [zápisových cest](plans/feed/FEED_WRITER_INTEGRATION.md#batch-preparation).
+   není zapnutý. Navazující lokální maintenance/purge předává writer přes celý
+   tick a ošetřuje anonymní kontext; 45/45 cílených testů prošlo, CI ještě čeká.
+   Před živou aktivací dořešit odstranění UID/polohy ze starých bloků do původního
+   +60denního deadline, včetně selhání primární účtové fáze.
+   [Kontrakt a zbývající brána](plans/feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
 2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

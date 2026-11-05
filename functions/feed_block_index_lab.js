@@ -6,6 +6,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { sessionDeadline } from './feed_session_policy.js';
 import { beginIndexGcLab } from './feed_index_gc_lab.js';
 import { portableIndexPage } from './feed_portable_selection.js';
+import { isPurgedShoutContext } from './shout_context.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
 
@@ -131,11 +132,13 @@ function nodeKey(summary, c) {
     -summary.maxCreated, summary.minId];
 }
 
-export function createLabBlockIndex(db, { namespace, cache = blockCache(), elapsedClock = () => performance.now(), ...blockOptions }) {
+export function createLabBlockIndex(db, { namespace, cache = blockCache(), elapsedClock = () => performance.now(), sourceCollection = null, ...blockOptions }) {
   if (db.projectId !== 'shoutout-rules-test' || process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8080') throw new Error('index-lab-emulator-only');
   if (!/^[a-z][a-z0-9-]{0,39}$/.test(namespace)) throw new Error('invalid-index-namespace');
   const base = db.collection('feedIndexLab').doc(namespace);
-  const cells = base.collection('cells'), nodes = base.collection('nodes'), source = base.collection('source');
+  // Trusted emulator fixture can use real shouts/{id} paths to exercise purge
+  // ownership/path checks. The guard above still refuses every live database.
+  const cells = base.collection('cells'), nodes = base.collection('nodes'), source = sourceCollection ?? base.collection('source');
   const reconcile = Symbol('reconcile-current-source');
   const views = new WeakMap();
   let queuedReads = [], flushScheduled = false;
@@ -404,7 +407,7 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
     ids.forEach(assertId);
     const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
     return { sourceReads: docs.length, items: docs.map(doc => {
-      const row = doc.exists ? metadataOf({ ...doc.data(), id: doc.id }) : null;
+      const row = doc.exists && !isPurgedShoutContext(doc.data()) ? metadataOf({ ...doc.data(), id: doc.id }) : null;
       return row && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
     }) };
   }
@@ -550,7 +553,8 @@ export function createLabBlockIndex(db, { namespace, cache = blockCache(), elaps
         visit(header.hash, doc.id);
         if (blocks.get(header.hash).summary.minExpiry !== header.minExpiry) throw new Error('invalid-index-directory');
       }
-      const expected = sourceDocs.docs.map(doc => metadataOf({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
+      const expected = sourceDocs.docs.filter(doc => !isPurgedShoutContext(doc.data()))
+        .map(doc => metadataOf({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
       const sort = rows => rows.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
       const byId = new Map(expected.map(row => [row.id, row]));
       if (found.some(row => canonical(row) !== canonical(byId.get(row.id) ?? null)) || new Set(found.map(row => row.id)).size !== found.length ||

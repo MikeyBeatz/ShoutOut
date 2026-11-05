@@ -26,6 +26,7 @@ export async function expireDueShouts(db, { maxCandidates, clock = () => new Dat
       const operationId = createHash('sha256').update(JSON.stringify(['expireShout', candidate.ref.path,
         current.updateTime.seconds, current.updateTime.nanoseconds])).digest('hex');
       const plan = await indexWriter?.prepare(transaction, candidate.id, data, after, { operationId });
+      if (indexWriter && typeof plan?.apply !== 'function') throw new Error('invalid-expiration-index-plan');
       plan?.apply();
       transaction.update(candidate.ref, { status: 'expired' });
       return 'expired';
@@ -41,6 +42,7 @@ export async function runAccountMaintenanceTick(db, auth, options) {
   if (purge.purgeScanned) return { ...purge, scanned: 0, failed: 0, expirationScanned: 0, expirationChanged: 0 };
   const account = await scanDueAccountDeletionJobs(db, auth, options);
   if (!options.shoutExpirationEnabled || account.scanned > 0) return { ...purge, ...account, expirationScanned: 0, expirationChanged: 0 };
-  const expiration = await expireDueShouts(db, { clock: options.clock, maxCandidates: options.pageSize });
+  const expiration = await expireDueShouts(db, { clock: options.clock, maxCandidates: options.pageSize,
+    indexWriter: options.indexWriter });
   return { ...purge, ...account, expirationScanned: expiration.scanned, expirationChanged: expiration.expired, expirationInvalid: expiration.invalid };
 }

@@ -36,6 +36,12 @@ souhrnného MVP milníku životnosti Shoutů; sedmidenní fyzický úklid ješt�
 Konkrétní souhlasy pro lokální úseky, rollouty a dočasné Auth testy jsou u etap níže;
 samotné dokončení této opravy neschvaluje nové migrace či změny Rules.
 
+Navazující lokální prostorový index má propojení maintenance/purge, ale před
+jeho aktivací musí být samostatně ověřené odstranění UID/polohy ze starých
+indexových bloků do stejného původního +60denního termínu. Tento dosud neživý
+index není součástí dokončeného DEV účtového pilotu.
+[Přesná mez a další brána](../feed/FEED_WRITER_INTEGRATION.md#maintenance-purge).
+
 <a id="dev-deletion-cutover"></a>
 
 ## Uzavření přímých zápisů – lokální úsek 4. listopadu 2026

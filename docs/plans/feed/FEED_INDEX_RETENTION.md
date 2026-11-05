@@ -71,6 +71,13 @@ transakce s načtením guardu, source a potřebné větve. Žádný Scheduler ne
 
 ## Výsledky a hranice
 
+Aktualizace 5. listopadu: lokální zapojení expirace a konečného účtového purge
+nemění pravidla historie. Před živou aktivací zůstává zvláštní brána odstranění
+osobních metadat smazaného účtu do původního +60denního termínu, včetně starých
+bloků a selhání primární účtové fáze. Hodinová ochrana nově vyřazeného kořene
+není oprávněním tuto lhůtu prodloužit.
+[Konkrétní mez a další ověření](FEED_WRITER_INTEGRATION.md#maintenance-purge).
+
 Testy: `functions/feed_session_policy.test.js` a
 `functions/feed_index_retention.integration.test.js`; integrace jsou součástí
 `tools` příkazu `test:rules`. Lokálně prošel lint, celá Functions sada (69 pass, 83 integrací přeskočených bez

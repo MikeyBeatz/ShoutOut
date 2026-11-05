@@ -24,7 +24,7 @@ platí pro uvedenou etapu, současné revize jsou pouze v PROJECT_STATUS.
 
 [Tematické plány](plans/README.md) · [Rozcestník účtové oblasti](plans/accounts/README.md).
 
-Serverové fáze jsou hotové v DEV; nejbližší otevřená práce je klientský přechod a společný závěrečný test. Podrobné datované piloty zůstávají důkazy svých etap.
+Serverové fáze, klientský přechod, Rules cutover i závěrečný účtový test jsou hotové v DEV. Prostorový index má vlastní integrační a retenční brány. Podrobné datované piloty zůstávají důkazy svých etap.
 
 - [Odebrání oprávnění a materializace exspirace](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md)
 - [Archiv zpráv a komentářů smazaného účtu](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md)
