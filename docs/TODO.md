@@ -40,7 +40,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    závěrečných testů, success CI 42251697874 pro 75ce8f3); R6c je lokálně uzavřená.
    Schválená [R6d koordinace](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results)
    lokálně propojuje doklad a dávkový úklid s konečným workerem (14/14 finálních
-   testů), včetně ochrany checkpointu před návratem UID. Zbývá provozní adaptér
+   testů, success CI 42258910004 pro c7c1fef); R6d je lokálně uzavřená,
+   včetně ochrany checkpointu před návratem UID. Zbývá provozní adaptér
    za vypnutou volbou, migrace a pilot s cenami/SKU a cloudovým měřením.
    Živý řídicí dokument, index ani časná fronta nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese

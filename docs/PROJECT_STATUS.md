@@ -18,6 +18,11 @@ recovery checkpoint proti návratu UID. Původní Auth/lease/retence zůstávaj�
 bez koordinátoru dosavadní cesta. Finálních 14/14 regresí, unit 114 pass,
 lint čistý. Žádné nasazení, živá data, Rules, plánovač ani nové Auth účty.
 Důkazy: build/feed-purge-coordinator-{final,unit-final,lint-final}.log.
+R6d je lokálně uzavřená: zdroj c7c1fef708e93a5a50ca73d6549d22d777d33543 má
+success CI 42258910004 — 293 Flutter, 45 tools, 114 Functions unit,
+397 Rules/server, 95 purge, 15 Storage, analýza/formát/lint a DEV build.
+Strojové důkazy: build/feed-purge-coordinator-ci.{json,log} a
+build/feed-purge-coordinator-local-proof.json. Zdroj i dokumentace jsou pushnuté.
 
 [R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results) je připravená
 na feature/feed-early-erasure-queue. Pouze emulátor: nezávislé recovery,

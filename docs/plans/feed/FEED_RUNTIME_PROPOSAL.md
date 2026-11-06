@@ -564,7 +564,7 @@ dávkového restartu, generation change, rollbacku/lost final ack, stale recover
 neočekávaných potomků, vadného plánu, ztráty outer lease a cizího checkpointu.
 Functions unit 114 pass, lint čistý. První společná regrese odhalila chybějící
 explicitní checkpoint revizi; po opravě prošla výše uvedená finální sada.
-Nový testový soubor je v tools test:purge a celé CI ověří i legacy cestu.
+Nový testový soubor je v tools test:purge a celé CI ověřilo i legacy cestu.
 Důkazy: build/feed-purge-coordinator-{final,unit-final,lint-final}.log.
 
 Aktivace časné fronty a koordinátoru musí být v provozním adaptéru společná.
@@ -573,3 +573,11 @@ prostředků. Registry invarianty R6c dál platí. Prostorové zdroje v testech 
 syntetické, Auth/Storage rozhraní jsou stuby; nové Auth účty ani živé záznamy
 nevznikly. Provozní ceny, cloudové indexy/latence a konkrétní DEV pilot zůstávají
 otevřené brány. Žádná nová tolerance po původních 60 dnech se nezavedla.
+
+R6d je lokálně uzavřená na feature/feed-purge-proof-coordinator. Zdroj
+`c7c1fef708e93a5a50ca73d6549d22d777d33543` má
+[success CI 42258910004](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42258910004):
+293 Flutter, 45 tools, 114 Functions unit, 397 Rules/server, 95 purge,
+15 Storage, analýza/formát/lint a DEV web build. Důkazy:
+build/feed-purge-coordinator-ci.{json,log} a build/feed-purge-coordinator-local-proof.json.
+Živý index, wrappery a plánovač zůstaly beze změny.
