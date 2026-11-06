@@ -121,8 +121,8 @@ Původní plán i výsledek jsou v docs/local/migrations/, výsledek má přípo
    přímých indexovaných zápisů po kompatibilitě všech podporovaných klientů.
    Celé serverové moderační rozhodnutí/report/audit je samostatný milník.
 3. [Provozní návrh](FEED_RUNTIME_PROPOSAL.md) nyní obsahuje měření R5,
-   návrh generace/migrace, Admin cesty a nákladový model. R6a–R6c mají lokální
-   ověření; zbývá provozní adaptér, koordinace dokladu/úklidu s konečným purge,
+   návrh generace/migrace, Admin cesty a nákladový model. R6a–R6d mají lokální
+   ověření včetně volitelné koordinace purge; zbývá provozní adaptér,
    migrace a konkrétní DEV pilot s regionálními cenami a cloudovým měřením.
    Read-only preflight ani tento návrh samy živé změny nepovolují.
 4. Zabezpečené query API, přenositelné kurzory a DEV klientské A2/A3.

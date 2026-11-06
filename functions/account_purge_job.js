@@ -18,9 +18,11 @@ const keyValid = key => typeof key === 'string' && key.length >= 3 && key.length
 export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
+  indexErasureCoordinator = null,
 } = {}) {
   if (!Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
-      ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function') {
+      ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||
+      indexErasureCoordinator !== null && (typeof indexErasureCoordinator.step !== 'function' || typeof indexErasureCoordinator.prepareFinish !== 'function')) {
     throw new Error('invalid-account-purge-options');
   }
   const jobRef = accountPurgeJobRef(db, identity), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`),
@@ -93,7 +95,14 @@ export async function runAccountPurgeJob(identity, db, auth, {
     while (examined < pageSize) {
       const { job } = await db.runTransaction(guard), stage = stages[job.stage];
       if (!stage) {
-        if (indexWriter?.purgeAccountIndex) {
+        if (indexErasureCoordinator) {
+          const remaining = pageSize - examined;
+          const result = await indexErasureCoordinator.step(identity, { guard, limit: remaining });
+          if (!result || !['ready', 'waiting'].includes(result.state) || !Number.isSafeInteger(result.examined) ||
+              result.examined < 0 || result.examined > remaining) throw new Error('invalid-index-coordinator-step');
+          examined += Math.max(1, result.examined);
+          if (result.state !== 'ready') break;
+        } else if (indexWriter?.purgeAccountIndex) {
           const erased = await indexWriter.purgeAccountIndex(identity, { clock, guard }); examined++;
           if (erased.state !== 'complete') break;
         }
@@ -105,8 +114,9 @@ export async function runAccountPurgeJob(identity, db, auth, {
           const current = await guard(transaction), [reservation, main, user] = await transaction.getAll(nicknameRef, mainRef, userRef);
           if (current.job.version !== job.version || current.job.selected || current.job.pendingFile) throw new AccountPurgeLeaseLost();
           if (user.exists) throw new AccountPurgeNeedsReview('private-profile-recreated-during-purge');
-          const indexPlan = indexWriter?.purgeAccountIndex ? await indexWriter.prepareAccountIndexFinish(transaction, identity, { clock, guard }) : null;
-          if (indexWriter?.purgeAccountIndex && typeof indexPlan?.apply !== 'function') throw new Error('invalid-account-index-finish-plan');
+          const indexPlan = indexErasureCoordinator ? await indexErasureCoordinator.prepareFinish(transaction, identity, { guard }) :
+            indexWriter?.purgeAccountIndex ? await indexWriter.prepareAccountIndexFinish(transaction, identity, { clock, guard }) : null;
+          if ((indexErasureCoordinator || indexWriter?.purgeAccountIndex) && typeof indexPlan?.apply !== 'function') throw new Error('invalid-account-index-finish-plan');
           indexPlan?.apply();
           if (reservation.get('uid') === identity.userId) transaction.delete(nicknameRef, { lastUpdateTime: reservation.updateTime });
           if (main.exists) transaction.delete(mainRef, { lastUpdateTime: main.updateTime });

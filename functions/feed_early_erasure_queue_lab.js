@@ -1,8 +1,9 @@
 // R6c experiment. No live wrapper, trigger, scheduler, Auth mutation or account
 // purge integration. Generations map to equally named feedIndexLab fixtures.
 import { createHash, randomUUID } from 'node:crypto';
-import { FieldPath, Timestamp } from 'firebase-admin/firestore';
-import { accountPurgeJobRef, accountRetentionMillis, samePurgeTime, validPurgeUid } from './account_purge_guard.js';
+import { FieldPath, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { accountPurgeJobRef, accountRetentionMillis, samePurgeTime, validPurgeUid,
+  AccountPurgeNeedsReview, AccountPurgeConflict } from './account_purge_guard.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { createLabBlockIndex } from './feed_block_index_lab.js';
 import { runAccountIndexErasureSlice } from './feed_account_retention_runner_lab.js';
@@ -16,12 +17,13 @@ const stamp = time => [time.seconds, time.nanoseconds];
 const emptyDigest = hash([]);
 const leaseMillis = 120000, retryMillis = 60000;
 
-export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => new Date(), beforeFinishCommit } = {}) {
+export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => new Date(), beforeFinishCommit, transactionGuard } = {}) {
   if (db?.projectId !== 'shoutout-rules-test' || process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8080') {
     throw new Error('early-erasure-emulator-only');
   }
   if (!idValid(namespace) || typeof auth?.getUser !== 'function' || typeof clock !== 'function' ||
-      !(beforeFinishCommit === undefined || typeof beforeFinishCommit === 'function')) throw new Error('invalid-early-erasure-options');
+      !(beforeFinishCommit === undefined || typeof beforeFinishCommit === 'function') ||
+      !(transactionGuard === undefined || typeof transactionGuard === 'function')) throw new Error('invalid-early-erasure-options');
   const base = db.doc(`feedErasureQueueLab/${namespace}`), jobs = base.collection('jobs');
   const controlRef = db.doc('feedIndexControl/current'), registry = db.collection('feedIndexGenerations');
   const jobFor = identity => jobs.doc(accountPurgeJobRef(db, identity).id);
@@ -37,6 +39,7 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
     catch (error) { if (error?.code === 'auth/user-not-found') return true; throw error; }
   }
   async function eligible(tx, identity) {
+    if (transactionGuard) await transactionGuard(tx);
     jobFor(identity); const time = now();
     const [request, profile] = await tx.getAll(db.doc(`accountDeletionRequests/${identity.userId}`), db.doc(`publicProfiles/${identity.userId}`));
     if (!request.exists || !samePurgeTime(request.createTime, identity.requestCreateTime) ||
@@ -54,7 +57,7 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
   }
   function validateJob(data, identity) {
     if (!data || data.v !== 1 || data.userId !== identity.userId || !samePurgeTime(data.requestCreateTime, identity.requestCreateTime) ||
-        !samePurgeTime(data.retainUntil, deadline(identity)) || !['queued', 'working', 'complete', 'obsolete', 'needs-review'].includes(data.phase) ||
+        !samePurgeTime(data.retainUntil, deadline(identity)) || !['queued', 'working', 'complete', 'finalizing', 'obsolete', 'needs-review'].includes(data.phase) ||
         !['inventory', 'processing'].includes(data.stage) || !(data.cursor === null || idValid(data.cursor)) ||
         !(data.activeGeneration === null || idValid(data.activeGeneration)) ||
         !(data.registryToken === null || data.registryToken === 'absent' || /^[a-f0-9]{64}$/.test(data.registryToken)) ||
@@ -62,7 +65,7 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
         data.doneCount > data.targetCount || data.seenWriters > data.targetCount || !(data.leaseToken === null || typeof data.leaseToken === 'string') ||
         (data.leaseToken === null) !== (data.leaseUntil === null) || !(data.leaseUntil === null || data.leaseUntil instanceof Timestamp) ||
         !(data.nextAttemptAt === null || data.nextAttemptAt instanceof Timestamp) || !(data.completedAt === null || data.completedAt instanceof Timestamp) ||
-        data.phase === 'complete' && (data.doneCount !== data.targetCount || data.activeGeneration !== null || !data.completedAt || data.registryToken === null ||
+        ['complete', 'finalizing'].includes(data.phase) && (data.doneCount !== data.targetCount || data.activeGeneration !== null || !data.completedAt || data.registryToken === null ||
           data.leaseToken !== null || data.nextAttemptAt !== null || data.stage !== 'processing' || data.cursor !== null)) {
       throw new EarlyErasureNeedsReview('invalid-early-erasure-job');
     }
@@ -114,7 +117,9 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
   async function recover({ pageSize = 50 } = {}) {
     if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('invalid-early-erasure-page');
     const checkpoint = await base.get(), cursor = checkpoint.get('cursor') ?? null;
-    if (checkpoint.exists && checkpoint.get('v') !== 1 || !(cursor === null || validPurgeUid(cursor))) throw new EarlyErasureNeedsReview('invalid-early-erasure-scan');
+    const purgeRevision = checkpoint.get('purgeRevision') ?? 0;
+    if (checkpoint.exists && checkpoint.get('v') !== 1 || !(cursor === null || validPurgeUid(cursor)) ||
+        !Number.isSafeInteger(purgeRevision) || purgeRevision < 0) throw new EarlyErasureNeedsReview('invalid-early-erasure-scan');
     let query = db.collection('accountDeletionRequests').orderBy(FieldPath.documentId());
     if (cursor) query = query.startAfter(cursor);
     const page = await query.limit(pageSize).get(), result = { scanned: page.size, queued: 0, skipped: 0, ineligible: 0, failed: 0, checkpointAdvanced: false };
@@ -132,7 +137,7 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
     if (!result.failed) result.checkpointAdvanced = await db.runTransaction(async tx => {
       const current = await tx.get(base);
       if (checkpoint.exists !== current.exists || checkpoint.exists && !checkpoint.updateTime.isEqual(current.updateTime)) return false;
-      tx.set(base, { v: 1, cursor: page.size === pageSize ? page.docs.at(-1).id : null }); return true;
+      tx.set(base, { v: 1, cursor: page.size === pageSize ? page.docs.at(-1).id : null }, { merge: true }); return true;
     });
     return result;
   }
@@ -224,7 +229,7 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
       const proof = await verify(identity);
       return { state: proof.valid ? 'complete' : 'stale-proof', proof };
     }
-    if (['obsolete', 'needs-review'].includes(initial.phase)) return { state: initial.phase };
+    if (['finalizing', 'obsolete', 'needs-review'].includes(initial.phase)) return { state: initial.phase };
     const time = now();
     if (initial.leaseUntil?.toMillis() > time.toMillis()) return { state: 'busy' };
     if (initial.nextAttemptAt?.toMillis() > time.toMillis()) return { state: 'deferred' };
@@ -299,13 +304,106 @@ export function createEarlyErasureQueueLab(db, auth, { namespace, clock = () => 
       const doc = await tx.get(jobFor(identity)), snapshot = await control(tx);
       if (!doc.exists) return { valid: false, reason: 'missing' };
       const data = doc.data(); validateJob(data, identity);
-      if (data.phase === 'complete' && data.registryToken === snapshot.token && data.seenWriters !== snapshot.writers.length) {
+      if (['complete', 'finalizing'].includes(data.phase) && data.registryToken === snapshot.token && data.seenWriters !== snapshot.writers.length) {
         throw new EarlyErasureNeedsReview('incomplete-generation-proof');
       }
-      return data.phase === 'complete' && data.registryToken === snapshot.token
+      return ['complete', 'finalizing'].includes(data.phase) && data.registryToken === snapshot.token
         ? { valid: true, retainUntil: data.retainUntil, generations: data.targetCount, digest: data.digest }
         : { valid: false, reason: data.phase === 'complete' ? 'registry-changed' : 'incomplete' };
     });
   }
-  return { base, jobFor, enqueue, recover, run, runNext, verify };
+
+  function purgeCoordinator() {
+    // The account worker supplies its actual transacted lease guard. The
+    // independent early queue guard alone must never authorize final deletion.
+    async function context(tx, identity, outerGuard) {
+      if (typeof outerGuard !== 'function') throw new AccountPurgeNeedsReview('index-purge-guard-required');
+      const owner = await outerGuard(tx), time = await eligible(tx, identity);
+      if (!owner?.job || owner.job.phase !== 'purging' || owner.job.userId !== identity.userId ||
+          !samePurgeTime(owner.job.requestCreateTime, identity.requestCreateTime) ||
+          !samePurgeTime(owner.job.retainUntil, deadline(identity)) || typeof owner.job.leaseToken !== 'string' || !owner.job.leaseToken ||
+          !(owner.job.leaseUntil instanceof Timestamp) || owner.job.leaseUntil.toMillis() <= time.toMillis() || time.toMillis() < deadline(identity).toMillis()) {
+        throw new AccountPurgeNeedsReview('invalid-index-purge-context');
+      }
+      const ref = jobFor(identity), doc = await tx.get(ref), snapshot = await control(tx);
+      const data = doc.exists ? doc.data() : null;
+      if (data) validateJob(data, identity);
+      return { ref, doc, data, snapshot, time };
+    }
+    const currentProof = ({ data, snapshot }) => data && ['complete', 'finalizing'].includes(data.phase) &&
+      data.registryToken === snapshot.token && data.seenWriters === snapshot.writers.length;
+    function mapped(error) {
+      const cause = error.cause ?? error;
+      if (cause instanceof EarlyErasureNeedsReview || cause instanceof EarlyErasureIdentityChanged || /invalid-|incomplete-/.test(cause.message ?? '')) {
+        return new AccountPurgeNeedsReview(cause.message || 'invalid-index-purge-proof');
+      }
+      return cause;
+    }
+    async function step(identity, { guard: outerGuard, limit } = {}) {
+      if (!Number.isInteger(limit) || limit < 1 || limit > 50) throw new Error('invalid-index-purge-limit');
+      try {
+        const prepared = await db.runTransaction(async tx => {
+          const ctx = await context(tx, identity, outerGuard), { data, ref, snapshot, time } = ctx;
+          if (data && ['obsolete', 'needs-review'].includes(data.phase)) throw new AccountPurgeNeedsReview('index-erasure-not-eligible');
+          if (currentProof(ctx)) {
+            if (data.phase === 'complete') tx.update(ref, { phase: 'finalizing', version: data.version + 1 });
+            return true;
+          }
+          // A new generation may appear between cleanup pages. Re-open the
+          // queue before touching more targets; missing per-target proof then
+          // causes safe reprocessing, never optimistic certification.
+          if (data?.phase === 'finalizing') tx.update(ref, { phase: 'queued', stage: 'inventory', cursor: null,
+            registryToken: null, completedAt: null, nextAttemptAt: time, version: data.version + 1 });
+          if (data && data.registryToken === snapshot.token && ['complete', 'finalizing'].includes(data.phase)) {
+            throw new AccountPurgeNeedsReview('incomplete-index-purge-proof');
+          }
+          return false;
+        });
+        if (!prepared) {
+          const linked = createEarlyErasureQueueLab(db, auth, { namespace, clock, beforeFinishCommit, transactionGuard: outerGuard });
+          await linked.enqueue(identity);
+          await linked.run(identity);
+          return { state: 'waiting', examined: 1 };
+        }
+        const collections = await jobFor(identity).listCollections();
+        if (collections.some(collection => collection.id !== 'targets')) throw new AccountPurgeNeedsReview('unexpected-index-proof-descendants');
+        return await db.runTransaction(async tx => {
+          const ctx = await context(tx, identity, outerGuard);
+          if (!currentProof(ctx) || ctx.data.phase !== 'finalizing') throw new AccountPurgeConflict('index-proof-changed');
+          const page = await tx.get(ctx.ref.collection('targets').orderBy(FieldPath.documentId()).limit(limit));
+          const children = await Promise.all(page.docs.map(doc => doc.ref.listCollections()));
+          if (children.some(collections => collections.length)) throw new AccountPurgeNeedsReview('unexpected-index-target-descendants');
+          page.docs.forEach(doc => validateTarget(doc.data()));
+          await outerGuard(tx); // Recheck ownership/time after auxiliary RPCs.
+          page.docs.forEach(doc => tx.delete(doc.ref, { lastUpdateTime: doc.updateTime }));
+          if (!page.empty) tx.update(ctx.ref, { version: ctx.data.version + 1 });
+          return { state: page.empty ? 'ready' : 'waiting', examined: page.size };
+        });
+      } catch (error) { throw mapped(error); }
+    }
+    async function prepareFinish(tx, identity, { guard: outerGuard } = {}) {
+      try {
+        const ctx = await context(tx, identity, outerGuard);
+        if (!currentProof(ctx) || ctx.data.phase !== 'finalizing') throw new AccountPurgeConflict('index-proof-changed');
+        const pending = await tx.get(ctx.ref.collection('targets').limit(1));
+        if (!pending.empty) throw new AccountPurgeNeedsReview('index-proof-cleanup-incomplete');
+        const checkpoint = await tx.get(base), cursor = checkpoint.get('cursor') ?? null;
+        const purgeRevision = checkpoint.get('purgeRevision') ?? 0;
+        if (checkpoint.exists && checkpoint.get('v') !== 1 || !(cursor === null || validPurgeUid(cursor)) ||
+            !Number.isSafeInteger(purgeRevision) || purgeRevision < 0 || purgeRevision >= Number.MAX_SAFE_INTEGER) {
+          throw new AccountPurgeNeedsReview('invalid-index-recovery-checkpoint');
+        }
+        let applied = false;
+        return { apply() {
+          if (applied) throw new Error('index-purge-plan-already-applied'); applied = true;
+          tx.delete(ctx.ref, { lastUpdateTime: ctx.doc.updateTime });
+          // Fence scans that captured a request before this final transaction.
+          // A cursor must not reintroduce the retired UID after its deletion.
+          tx.set(base, { v: 1, cursor: cursor === identity.userId ? null : cursor, purgeRevision: FieldValue.increment(1) }, { merge: true });
+        } };
+      } catch (error) { throw mapped(error); }
+    }
+    return { step, prepareFinish };
+  }
+  return { base, jobFor, enqueue, recover, run, runNext, verify, purgeCoordinator };
 }

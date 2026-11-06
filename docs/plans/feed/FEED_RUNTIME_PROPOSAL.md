@@ -1,8 +1,9 @@
 # Provozní návrh prostorového indexu
 
-6. listopadu 2026. **R6a–R6c jsou schválené lokální úseky; zbývající provozní
+6. listopadu 2026. **R6a–R6d jsou schválené lokální úseky; zbývající provozní
 návrh není schválená živá konfigurace.** [Runner](#r6a-results),
-[ochrana Admin nástrojů](#r6b-results), [časná fronta](#r6c-results).
+[ochrana Admin nástrojů](#r6b-results), [časná fronta](#r6c-results),
+[koordinace konečného purge](#r6d-results).
 Navazuje na [writer](FEED_WRITER_INTEGRATION.md), [R5](FEED_INDEX_RETENTION.md#account-retention-proposal)
 a [migrační připravenost](FEED_MIGRATION_READINESS.md). Lokální jádro je ověřené;
 živý adaptér, generace, backfill, API ani plánování indexu dosud neběží.
@@ -18,10 +19,10 @@ kdy už má být dokončený. Navíc drží oblast zamčenou přes několik pokr
 
 Doporučené pořadí:
 
-1. R6a runner, R6b transakční ochrana a R6c časná fronta mají lokální ověření níže.
-   Zbývá skutečný adaptér a koordinace časné fronty s konečným purge.
-2. Připravit provozní adaptér za vypnutým přepínačem, propojení dokladů/úklidu
-   s účtovým workerem a přesný migrační nástroj. Každý z těchto
+1. R6a–R6d mají lokální ověření včetně volitelné koordinace s konečným purge.
+   Živý worker stále běží dosavadní cestou bez indexu a koordinátoru.
+2. Připravit provozní adaptér za vypnutým přepínačem, společné zapojení fronty
+   a koordinátoru do skutečných wrapperů a přesný migrační nástroj. Každý z těchto
    rozsahů před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
 3. Předložit DEV pilot s měřením skutečných index entries, cloudové latence,
    prostředků a rozpočtu. Teprve schválený pilot může měnit živé indexy/data.
@@ -476,10 +477,9 @@ shodnými počty a epoch dokončí celkový doklad.
 
 Celkový doklad je serverový stav svázaný s inkarnací žádosti, epoch registru,
 digestem generací a původním retainUntil. Verify vždy znovu čte aktuální
-žádost, marker a kontrolní dokument. **Stávající konečný purge ho zatím
-nečte**; jeho původní Auth/deadline kontroly zůstávají stejné. Před živým
-pilotem propojit aktuální doklad i jeho soukromé job/target záznamy s konečným
-úklidem v původním +60d. Datum samo dokumenty neodstraní. Selhání registru,
+žádost, marker a kontrolní dokument. R6d níže přidává volitelné lokální
+propojení s konečným purge; živý worker ho zatím nepoužívá. Původní
+Auth/deadline kontroly zůstávají stejné. Datum samo dokumenty neodstraní. Selhání registru,
 identity či R5 může ponechat chráněné oblasti zablokované pro ruční kontrolu;
 prototyp není garance termínu při výpadku služby.
 
@@ -505,3 +505,71 @@ R6c je lokálně uzavřená na feature/feed-early-erasure-queue. Zdroj
 15 Storage, analýza/formát/lint a DEV web build. Důkazy jsou
 build/feed-early-queue-ci.{json,log} a build/feed-early-queue-local-proof.json.
 Živý index, plánovač a konečný purge tím nebyly změněné.
+
+<a id="r6d-results"></a>
+
+## R6d — koordinace dokladu a konečného purge (6. listopadu)
+
+Vlastník schválil R6d a lokální testy, nikoli provozní adaptér/nasazení.
+`runAccountPurgeJob` přijímá volitelný indexErasureCoordinator se step a
+prepareFinish. Výchozí null zachovává dosavadní cestu včetně staršího R5
+fallbacku. Aktuální živé wrappery tuto volbu nepředávají. Jediný nový
+koordinátor je zatím součástí emulator-only R6c factory.
+
+Původní Auth check, retainUntil, claim/lease, vlastnictví nickname, ochrany
+privátních profilů a ostatní canonical stages zůstávají zachované. Neplatný
+koordinátor se odmítne před přístupem k účtu. S koordinátorem worker vyžaduje
+platný výsledek step a apply plán; chyba nesmí tiše obejít indexovou práci.
+
+Koordinátor navíc v každé zapisující transakci kontroluje skutečný purge
+guard, UID/inkarnaci žádosti, původní deadline, platný lease a minimální
+marker. Bez zralého purge kontextu nesmí mazat soukromé doklady. Pro obnovu
+chybějícího dokladu vytvoří propojenou R6c instanci, která předá vnější guard
+i do všech svých eligibility/R5 transakcí. Ztráta vnějšího lease proto zastaví
+i nově spouštěnou práci a nevymaže lease nového vlastníka.
+
+| Stav | Postup |
+|---|---|
+| Aktuální dokončený doklad | Přechod na finalizing; bez nové globální R5 inventury. |
+| Chybějící/nedokončený/zastaralý doklad | Obnovit jednu omezenou R6c práci a čekat. Původní retainUntil se nepřepisuje. |
+| Změna generace během dočišťování | Zrušit finalizing, obnovit inventuru a ověřit novou sadu. Ztracené target doklady mohou vyžadovat opakovaný scan starší generace. |
+| Vadný doklad/neočekávané podkolekce | Needs-review; původní žádost zůstane. Žádné automatické odemčení. |
+| Platný doklad a prázdné targets | Připravit jednorázový finální apply plán ve stejné transakci jako smazání žádosti. |
+
+Finalizing zachovává doklad, ale běžné enqueue/run/recovery už nesmí měnit
+jeho cíle. Verify při shodné epoch dál ověří dokončený stav. Jen koordinátor
+může při změně registru obnovit queued inventuru. Každá dávka target cleanup
+respektuje zbývající page budget workeru, nejvýše 50; zahrne i staré epoch
+targetů. Znovu ověřuje outer guard po pomocných listCollections RPC a používá
+updateTime preconditions. Nejde o strop všech databázových čtení. Indexový
+fallback dál používá samostatný R6a rozpočet 32 kroků / 10 s mezi transakcemi.
+
+Rodičovská hlavička fronty se smaže atomicky s accountDeletionRequests,
+accountPurgeJobs, příslušným hlavním jobem a vlastní nickname rezervací.
+Target děti jsou předtím vyprázdněné po dávkách. Cizí joby a cizí obsah se
+nemění; veřejný minimální marker podle schváleného pravidla zůstává.
+Neplatný finální plán ani změna epoch mezi krokem a apply nesmějí žádost smazat.
+
+Recovery checkpoint může obsahovat UID jako cursor. Finální apply jej vyčistí,
+pokud patří mazanému UID; cizí cursor zachová. **Vždy také zvýší purgeRevision**
+(neidentifikující technické celé číslo). Původní test ukázal, že samotný
+zápis stejných hodnot nebyl spolehlivou změnou snapshotu. Nový inkrement spolu
+s updateTime CAS nedovolí starému recovery scanu po smazání vrátit UID do
+checkpointu. Recovery používá merge, aby tuto revizi nesmazalo. Ani novou
+hlavičku nevytvoří bez znovu ověřené původní žádosti.
+
+Ověření: závěrečná sada 14/14 včetně skutečného purge s foreign kontextem,
+bez rescan hotového indexu, původního deadline/Auth, chybějícího dokladu,
+dávkového restartu, generation change, rollbacku/lost final ack, stale recovery,
+neočekávaných potomků, vadného plánu, ztráty outer lease a cizího checkpointu.
+Functions unit 114 pass, lint čistý. První společná regrese odhalila chybějící
+explicitní checkpoint revizi; po opravě prošla výše uvedená finální sada.
+Nový testový soubor je v tools test:purge a celé CI ověří i legacy cestu.
+Důkazy: build/feed-purge-coordinator-{final,unit-final,lint-final}.log.
+
+Aktivace časné fronty a koordinátoru musí být v provozním adaptéru společná.
+R6d není živý registrátor generací, migration tool, Scheduler ani aktualizace
+prostředků. Registry invarianty R6c dál platí. Prostorové zdroje v testech jsou
+syntetické, Auth/Storage rozhraní jsou stuby; nové Auth účty ani živé záznamy
+nevznikly. Provozní ceny, cloudové indexy/latence a konkrétní DEV pilot zůstávají
+otevřené brány. Žádná nová tolerance po původních 60 dnech se nezavedla.

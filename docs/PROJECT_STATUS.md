@@ -6,17 +6,27 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další krok: konkretizovat provozní adaptér indexu a koordinaci časné fronty
-s konečným purge (ověření aktuálního dokladu a úklid soukromých záznamů
-v původním +60d), potom migrační nástroj a DEV pilot. Před úpravami schválit rozsah.
+Další krok: konkretizovat provozní adaptér indexu se společným zapojením časné
+fronty/koordinátoru za vypnutou volbou, potom migrační nástroj a DEV pilot.
+Před úpravami schválit konkrétní rozsah.
+[R6d koordinace purge](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results) je lokálně
+připravená na feature/feed-purge-proof-coordinator. Volitelný koordinátor
+využije aktuální doklad bez globálního rescanu, jinak obnoví omezenou práci;
+po původním termínu dočistí targets a atomicky smaže hlavičku s žádostí.
+Finalizing brání obnově dokladů během dočišťování; purgeRevision chrání
+recovery checkpoint proti návratu UID. Původní Auth/lease/retence zůstávají;
+bez koordinátoru dosavadní cesta. Finálních 14/14 regresí, unit 114 pass,
+lint čistý. Žádné nasazení, živá data, Rules, plánovač ani nové Auth účty.
+Důkazy: build/feed-purge-coordinator-{final,unit-final,lint-final}.log.
+
 [R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results) je připravená
 na feature/feed-early-erasure-queue. Pouze emulátor: nezávislé recovery,
 lease/guard, stránkované generace, inkarnace/digest, R6a řez a atomický doklad
 se zavřením R5 journalu. Lokálně 18/18 závěrečných testů a předchozí společná
 regrese 29/29, Functions unit 113 pass a lint. Primární obsah/archiv/žádost
 zůstaly v testu shodné včetně updateTime; původní deadline se neprodlužuje.
-Konečný worker doklad dosud nekonzumuje a nové soukromé záznamy ještě potřebují
-zapojit do jeho úklidu. Žádné živé změny, plánovač, Rules ani nové Auth účty.
+Živý worker doklad dosud nekonzumuje; lokální volitelné zapojení přidává R6d
+výše. Žádné živé změny, plánovač, Rules ani nové Auth účty.
 Důkazy: build/feed-early-queue-{final,regression,unit-final,lint-final}.log.
 R6c je lokálně uzavřená: zdroj 75ce8f35c7fb335fca16c08324aaad8394015610 má
 success CI 42251697874 — 293 Flutter, 45 tools, 113 Functions unit,
