@@ -111,6 +111,19 @@ class WebEnvironment {
       throw StateError('Server Shout reactions require web App Check.');
     }
     serverShoutCreation = gateway == true;
+    final spatial = json['serverSpatialFeed'];
+    if (json.containsKey('serverSpatialFeed') && spatial is! bool) {
+      throw StateError('serverSpatialFeed must be a boolean.');
+    }
+    serverSpatialFeed = spatial == true;
+    if (serverSpatialFeed &&
+        (appCheckSiteKey == null ||
+            !serverShoutCreation ||
+            !serverShoutReactions ||
+            !serverShoutDeletion ||
+            !serverAccountDeletionFinalization)) {
+      throw StateError('Spatial feed requires server gateways and App Check.');
+    }
     serverCommentCreation = commentsGateway == true;
     serverPrivateReplyCreation = privateRepliesGateway == true;
     if (serverShoutCreation && appCheckSiteKey == null) {
@@ -208,6 +221,7 @@ class WebEnvironment {
   final Map<String, dynamic> firebase;
   late final String? appCheckSiteKey;
   late final bool serverShoutCreation;
+  late final bool serverSpatialFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;
   late final bool serverShoutReactions;

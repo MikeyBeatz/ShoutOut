@@ -6,6 +6,72 @@ import 'package:shoutout/web_environment.dart';
 
 void main() {
   test(
+    'spatial feed defaults off, requires server gateways and rejects invalid flags',
+    () {
+      final dev =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(
+        WebEnvironment.fromJson(
+          {...dev}..remove('serverSpatialFeed'),
+        ).serverSpatialFeed,
+        isFalse,
+      );
+      expect(
+        WebEnvironment.fromJson({
+          ...dev,
+          'serverSpatialFeed': true,
+        }).serverSpatialFeed,
+        isTrue,
+      );
+      for (final value in [null, 'true', 1]) {
+        expect(
+          () => WebEnvironment.fromJson({...dev, 'serverSpatialFeed': value}),
+          throwsStateError,
+        );
+      }
+      for (final key in [
+        'serverShoutCreation',
+        'serverShoutReactions',
+        'serverShoutDeletion',
+        'serverAccountDeletionFinalization',
+      ]) {
+        expect(
+          () => WebEnvironment.fromJson({
+            ...dev,
+            'serverSpatialFeed': true,
+            key: false,
+          }),
+          throwsStateError,
+        );
+      }
+      expect(
+        () => WebEnvironment.fromJson({
+          ...dev,
+          'environment': 'prod',
+          'serverSpatialFeed': true,
+        }),
+        throwsStateError,
+      );
+      final production =
+          jsonDecode(File('config/prod.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(
+        WebEnvironment.fromJson({
+          ...production,
+          'appCheckSiteKey': 'x' * 40,
+          'serverSpatialFeed': true,
+          'serverShoutCreation': true,
+          'serverShoutReactions': true,
+          'serverShoutDeletion': true,
+          'serverAccountDeletionPreparation': true,
+          'serverAccountDeletionFinalization': true,
+        }).serverSpatialFeed,
+        isTrue,
+      );
+    },
+  );
+  test(
     'account finalization defaults off and requires preparation and App Check',
     () {
       final config =

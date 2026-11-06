@@ -1,21 +1,28 @@
 import { assertIndexBinding } from './feed_index_paths.js';
 // Internal generation-bound engine; lab and DEV entry points remain separate.
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
-import { verifyNode } from './feed_block_index.js';
+import { createHash } from 'node:crypto';
+import { canonical, clone, encodedBytes, verifyNode } from './feed_block_index.js';
 import { feedSessionLifetimeMillis } from './feed_session_policy.js';
 import { retentionCell } from './feed_account_retention_store.js';
 
 const compareTime = (a, b) => a.seconds - b.seconds || a.nanoseconds - b.nanoseconds;
 const preconditionFailure = error => [5, 9, 'not-found', 'failed-precondition'].includes(error.code);
 
-export async function beginIndexGc(db, binding, cell, { onNodeDeleted = () => {}, testTimeAdvanceMillis = 0 } = {}) {
+const timeData = time => time ? [time.seconds, time.nanoseconds] : null;
+const checkpointDigest = data => createHash('sha256').update(canonical(data)).digest('hex');
+export async function beginIndexGc(db, binding, cell, {
+  onNodeDeleted = () => {}, testTimeAdvanceMillis = 0, checkpoint = null, transactionGuard = null,
+} = {}) {
   assertIndexBinding(db, binding);
   const { base } = binding;
   if (binding.kind !== 'lab' && testTimeAdvanceMillis !== 0) throw new Error('gc-test-clock-emulator-only');
   if (!/^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$/.test(cell)) throw new Error('invalid-index-cell');
   if (!Number.isSafeInteger(testTimeAdvanceMillis) || testTimeAdvanceMillis < 0) throw new Error('invalid-gc-test-clock');
+  if (transactionGuard !== null && typeof transactionGuard !== 'function') throw new Error('invalid-gc-guard');
   const cells = base.collection('cells'), nodes = base.collection('nodes'), history = base.collection('retiredRoots');
   const [marker, root, retention] = await db.runTransaction(async tx => {
+    if (transactionGuard) await transactionGuard(tx);
     const [marker, root] = await tx.getAll(base, cells.doc(cell));
     const retention = marker.get('accountRetention') ? await tx.get(base.collection('cellRetention').doc(cell)) : null;
     if (retention) retentionCell(retention.data());
@@ -23,11 +30,34 @@ export async function beginIndexGc(db, binding, cell, { onNodeDeleted = () => {}
     return [marker, root, retention];
   }, { readOnly: true });
   if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
-  const fence = marker.readTime;
+  let saved = null;
+  if (checkpoint !== null) {
+    const { digest, ...data } = checkpoint;
+    if (encodedBytes(checkpoint) > 262144 || digest !== checkpointDigest(data) || data.v !== 1 || data.base !== base.path || data.cell !== cell ||
+        !Array.isArray(data.fence) || data.fence.length !== 2 || !data.fence.every(Number.isSafeInteger) ||
+        data.fence[0] < 0 || data.fence[1] < 0 || data.fence[1] >= 1000000000 ||
+        !['mark', 'sweep', 'archives', 'done'].includes(data.phase) ||
+        !Array.isArray(data.marked) || !Array.isArray(data.queue) ||
+        [...data.marked, ...data.queue].some(key => typeof key !== 'string' || !/^[a-f0-9]{64}$/.test(key)) ||
+        new Set([...data.marked, ...data.queue]).size !== data.marked.length + data.queue.length ||
+        ![data.historyCursor, data.archiveCursor].every(value => value === null || typeof value === 'string' && /^[A-Za-z0-9_-]{1,256}$/.test(value)) ||
+        typeof data.historyDone !== 'boolean' || typeof data.scanDone !== 'boolean' ||
+        data.scanCursor !== null && (!data.scanCursor || typeof data.scanCursor.path !== 'string' || !data.scanCursor.path.startsWith(cell) ||
+          !/^[a-f0-9]{64}$/.test(data.scanCursor.id)) || data.testTimeAdvanceMillis !== testTimeAdvanceMillis ||
+        !data.metrics || Object.values(data.metrics).some(value => !Number.isSafeInteger(value) || value < 0)) throw new Error('invalid-gc-checkpoint');
+    if (canonical(data.generationCreateTime) !== canonical(timeData(marker.createTime))) throw new Error('index-gc-generation-changed');
+    if (canonical(data.rootUpdateTime) !== canonical(timeData(root.updateTime)) || data.rootHash !== (root.get('hash') ?? null)) throw new Error('index-gc-root-changed');
+    if (data.retentionVersion !== (retention?.get('version') ?? 0)) throw new Error('index-gc-retention-changed');
+    if (data.phase !== 'mark' && (data.queue.length || !data.historyDone || root.exists && !data.marked.includes(root.get('hash')))) throw new Error('invalid-gc-checkpoint');
+    saved = data;
+  }
+  const fence = saved ? new Timestamp(...saved.fence) : marker.readTime;
+  if (compareTime(fence, marker.readTime) > 0) throw new Error('invalid-gc-checkpoint');
   const cutoff = new Timestamp(fence.seconds - feedSessionLifetimeMillis / 1000 + Math.floor(testTimeAdvanceMillis / 1000), fence.nanoseconds);
   const metrics = { initialReads: 2, historyReadUnits: 0, markReads: 0, scanReadUnits: 0,
     archiveReadUnits: 0, rootCheckReads: 0, retentionCheckReads: retention ? 1 : 0,
     nodesDeleted: 0, archivesDeleted: 0, casAttempts: 0, deleteRequests: 0, changedOrGone: 0 };
+  if (saved) { Object.assign(metrics, saved.metrics); metrics.initialReads += 2; }
   const queue = [], queued = new Set(), marked = new Set();
   const enqueue = key => {
     if (!/^[a-f0-9]{64}$/.test(key)) throw new Error('invalid-index-history');
@@ -39,6 +69,11 @@ export async function beginIndexGc(db, binding, cell, { onNodeDeleted = () => {}
   }
   let phase = 'mark', flight = null, historyCursor = null, historyDone = false;
   let scanCursor = null, scanDone = false, buffer = [], archiveCursor = null;
+  if (saved) {
+    queue.length = 0; queued.clear();
+    saved.marked.forEach(key => marked.add(key)); saved.queue.forEach(enqueue);
+    ({ phase, historyCursor, historyDone, scanCursor, scanDone, archiveCursor } = saved);
+  }
   const status = () => ({ state: phase, markedNodes: marked.size, metrics: { ...metrics } });
 
   function validateArchive(doc) {
@@ -53,6 +88,7 @@ export async function beginIndexGc(db, binding, cell, { onNodeDeleted = () => {}
     if (hook) await hook({ phase: kind, docs, fence });
     if (phase === 'cancelled') return;
     const commit = selected => db.runTransaction(async tx => {
+      if (transactionGuard) await transactionGuard(tx);
       metrics.rootCheckReads++;
       const current = await tx.get(cells.doc(cell));
       if (retention) {
@@ -172,6 +208,19 @@ export async function beginIndexGc(db, binding, cell, { onNodeDeleted = () => {}
   return {
     get state() { return phase; },
     cancel() { phase = 'cancelled'; },
+    checkpoint() {
+      if (flight || phase === 'cancelled') throw new Error('gc-checkpoint-unavailable');
+      // Re-read an unconsumed scan tail after restart instead of persisting
+      // document bodies. Cursor progress always denotes the last handled node.
+      const data = clone({ v: 1, base: base.path, cell, generationCreateTime: timeData(marker.createTime),
+        rootUpdateTime: timeData(root.updateTime), rootHash: root.get('hash') ?? null,
+        retentionVersion: retention?.get('version') ?? 0, fence: timeData(fence), testTimeAdvanceMillis,
+        phase, queue: [...queue], marked: [...marked], historyCursor, historyDone,
+        scanCursor, scanDone: buffer.length ? false : scanDone, archiveCursor, metrics });
+      const result = { ...data, digest: checkpointDigest(data) };
+      if (encodedBytes(result) > 262144) throw new Error('gc-checkpoint-too-large');
+      return result;
+    },
     step(work = { reads: 32, deletes: 16 }, hooks = {}) {
       if (!Number.isInteger(work.reads) || work.reads < 1 || !Number.isInteger(work.deletes) || work.deletes < 1) {
         return Promise.reject(new Error('invalid-gc-work'));

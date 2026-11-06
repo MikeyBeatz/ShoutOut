@@ -1,5 +1,17 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
+  'Obnovit': 'Оновити',
+  'Načíst další': 'Завантажити ще',
+  'Pro zobrazení okolí povol polohu.':
+      'Дозволь доступ до місцезнаходження, щоб побачити дописи поруч.',
+  'Používáme poslední známou polohu.':
+      'Використовуємо останнє відоме місцезнаходження.',
+  'Pro další stránku obnov feed.':
+      'Онови стрічку, щоб завантажити наступну сторінку.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Не вдалося завантажити стрічку. Спробуй ще раз.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Місцезнаходження змінилося. Онови стрічку для нової місцевості.',
   'Tento krok nenávratně smaže váš účet.':
       'Цей крок безповоротно видалить ваш обліковий запис.',
   'Probíhá mazání…': 'Видалення облікового запису…',

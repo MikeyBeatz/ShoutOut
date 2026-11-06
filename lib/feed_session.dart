@@ -86,6 +86,17 @@ class FeedSessionController<T, C extends Object> {
 
   void setActive(bool active) => _active = active;
 
+  /// Cancel in-flight work when leaving the feed, preserving committed cards,
+  /// scroll context and an already prepared page. Late responses cannot commit.
+  void cancelPending() {
+    ++_generation;
+    _refreshFlight = null;
+    _refreshContext = null;
+    _prefetchFlight = null;
+    _appendFlight = null;
+    _newsFlight = null;
+  }
+
   List<T> _unique(Iterable<T> values) {
     final ids = <String>{};
     return values.where((value) => ids.add(idOf(value))).toList();

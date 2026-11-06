@@ -1,5 +1,16 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
+  'Obnovit': 'Làm mới',
+  'Načíst další': 'Tải thêm',
+  'Pro zobrazení okolí povol polohu.':
+      'Cho phép truy cập vị trí để xem các Shout ở gần.',
+  'Používáme poslední známou polohu.':
+      'Đang sử dụng vị trí được biết gần nhất.',
+  'Pro další stránku obnov feed.': 'Làm mới bảng tin để tải trang tiếp theo.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Không thể tải bảng tin. Hãy thử lại.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Vị trí đã thay đổi. Làm mới bảng tin để cập nhật khu vực.',
   'Tento krok nenávratně smaže váš účet.':
       'Bước này sẽ xóa vĩnh viễn tài khoản của bạn.',
   'Probíhá mazání…': 'Đang xóa tài khoản…',

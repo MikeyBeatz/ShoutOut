@@ -11,6 +11,13 @@ Aktuální DEV aplikace a účtové mazání zůstávají podle [PROJECT_STATUS]
 
 ## Závěr pro další práci
 
+Aktualizace po R6e: podle pokynu vlastníka probíhá společná integrace API,
+klienta a trvalého provozního zapojení. Zjištěný DEV stav bez aktivních Shoutů
+umožňuje první atomickou instalaci bez backfillu; při aktivním zdroji se
+nástroj zastaví. [Aktuální konkrétní postup a meze](FEED_INSTALLATION_AND_ROLLOUT.md)
+nahrazují níže uvedené pořadí „nejdřív pilot, potom API“; historické důkazy
+R6a–R6e zůstávají platné pro své zdroje. Živá aktivace dosud neproběhla.
+
 Současný R5 prototyp **nezapínat pouhým předáním writeru do živého workeru**.
 Konečný account purge začíná až u původního +60denního termínu a pro R5 nyní
 udělá pouze jeden krok na průchod. Indexový úklid tak teprve začíná v okamžiku,

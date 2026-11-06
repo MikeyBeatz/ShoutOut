@@ -9,6 +9,20 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const dev = loadConfig('dev');
 
+test('spatial feed defaults off and requires server gateways and App Check', () => {
+  const without = { ...dev }; delete without.serverSpatialFeed;
+  assert.doesNotThrow(() => validateConfig(without, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverSpatialFeed: true }, 'dev'));
+  for (const invalid of [null, 'true', 1, {}]) assert.throws(() => validateConfig({ ...dev, serverSpatialFeed: invalid }, 'dev'));
+  for (const key of ['serverShoutCreation', 'serverShoutReactions', 'serverShoutDeletion', 'serverAccountDeletionFinalization']) {
+    assert.throws(() => validateConfig({ ...dev, serverSpatialFeed: true, [key]: false }, 'dev'));
+  }
+  assert.throws(() => validateConfig({ ...loadConfig('prod'), serverSpatialFeed: true }, 'prod'));
+  assert.doesNotThrow(() => validateConfig({ ...loadConfig('prod'), appCheckSiteKey: 'x'.repeat(40),
+    serverSpatialFeed: true, serverShoutCreation: true, serverShoutReactions: true,
+    serverShoutDeletion: true, serverAccountDeletionPreparation: true, serverAccountDeletionFinalization: true }, 'prod'));
+});
+
 test('account finalization defaults off and requires preparation and App Check', () => {
   const config = { ...dev }; delete config.serverAccountDeletionFinalization;
   assert.doesNotThrow(() => validateConfig(config, 'dev'));

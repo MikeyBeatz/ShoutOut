@@ -389,6 +389,12 @@ Dočasný `authorId` při zmrazení slouží pouze dokončení vlastnického pr�
 
 ## Co je zdroj pravdy
 
+Připravovaná prostorová vrstva používá soukromé `feedIndexControl/current`,
+`feedIndexGenerations/{generation}` a `feedIndexMaintenance`. Schéma instalace,
+provozních úloh, indexů a aktuální stav přepínačů jsou v
+[plánu zapojení](../plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md). Tyto kolekce
+nejsou tímto zápisem živě vytvořené a klienti je nesmějí přímo číst či zapisovat.
+
 Při rozporu použijte v tomto pořadí:
 
 1. `firestore.rules` pro oprávnění, povinná pole a atomické invarianty;

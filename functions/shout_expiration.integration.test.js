@@ -58,3 +58,12 @@ test('maintenance reuses idle account ticks and never runs a second full page be
  const busy=await tick(f.scoped,{getUser:async()=>({uid})},options);assert.equal(busy.scanned,1);assert.equal(busy.expirationScanned,0);assert.equal((await source.get()).data().status,'active');
  const idle=await tick(f.scoped,{getUser(){assert.fail('no due account');}},options);assert.equal(idle.scanned,0);assert.equal(idle.expirationChanged,1);
 });
+
+test('one optional index slice precedes the existing source page without adding a second content batch',{skip:!enabled},async()=>{
+ const f=await fixture(); for(let i=0;i<3;i++)await f.add('s'+i); let calls=0;
+ const options={clock:f.clock,pageSize:2,maxJobs:1,leaseMillis:60000,retryDelayMillis:1000,authWaitMillis:86400000,shoutExpirationEnabled:true,
+  indexMaintenance:async()=>{calls++;return {indexState:'gc:yielded',indexSteps:32,indexFailed:0};}};
+ const result=await tick(f.scoped,{getUser(){assert.fail('no account fixture');}},options);
+ assert.equal(calls,1);assert.equal(result.indexSteps,32);assert.equal(result.expirationScanned,2);assert.equal(result.expirationChanged,2);
+ assert.equal((await f.base.collection('shouts').where('status','==','active').get()).size,1);
+});

@@ -3,7 +3,10 @@ rules_version = '2';
 // string, requestedAt/retainUntil: timestamp, optional server confirmation).
 // All request fields and lifecycle transitions are immutable to clients.
 // Existing shouts/{id}.status: string changed by the server; client counter
-// updates cannot change it. The existing validated create path is unchanged.
+// updates cannot change it. The validated client create path is used only
+// while no managed index control exists.
+// feedIndexControl/current: private server-owned index control. Its presence
+// closes direct client creation/reaction writes; Admin callables own projection.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -15,6 +18,10 @@ service cloud.firestore {
       return signedIn() &&
         request.auth.token.email_verified == true &&
         request.auth.token.email is string;
+    }
+
+    function managedFeedProjection() {
+      return exists(/databases/$(database)/documents/feedIndexControl/current);
     }
 
     function hasRoleLevel(minimumLevel) {
@@ -2024,10 +2031,16 @@ service cloud.firestore {
       allow get: if eligibleUser();
       allow list: if eligibleUser() && limited(50);
       allow create: if canCreateContent() &&
+        !managedFeedProjection() &&
         consumedRate('shout', shoutId) &&
         validShoutCreate();
       allow update: if eligibleUser() &&
         resource.data.get('contentPurged', false) != true &&
+        (
+          !managedFeedProjection() ||
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['likesCount', 'dislikesCount'])
+        ) &&
         validShoutCounterUpdate(shoutId);
       allow delete: if false;
 
@@ -2225,6 +2238,7 @@ service cloud.firestore {
       match /reactions/{userId} {
         allow get: if eligibleUser() && userId == request.auth.uid;
         allow create, update: if eligibleUser() &&
+          !managedFeedProjection() &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'shoutReaction_' + shoutId) &&
           request.resource.data.keys().hasOnly(['type', 'updatedAt', 'userId']) &&
@@ -2233,6 +2247,7 @@ service cloud.firestore {
           request.resource.data.type in ['like', 'dislike'] &&
           request.resource.data.updatedAt == request.time;
         allow delete: if eligibleUser() &&
+          !managedFeedProjection() &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'shoutReaction_' + shoutId);
         allow list: if false;

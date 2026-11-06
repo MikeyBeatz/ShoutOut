@@ -10,6 +10,15 @@ runs in CI. It does not crawl ignored local credentials or external URLs.
 
 ## Development utilities
 
+The [permanent feed installation plan](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)
+describes `feed_empty_bootstrap.mjs` (`plan/status` are read-only; all other
+commands require explicit project/digest approval and exact successful CI).
+Install both tools and Functions dependencies first. Use an existing Firebase
+CLI login or a project-matching `FIREBASE_SERVICE_ACCOUNT_PATH`; credentials
+are never printed. This is an empty initial installation, not an active-data
+backfill. An active source aborts it. Production additionally requires main
+and the matching version tag; do not bypass the separate public-release gate.
+
 Archive index changes have a separate read-only planner:
 [`archive_index_plan.mjs`](archive_index_plan.mjs), verified by
 [`archive_index_plan.test.mjs`](archive_index_plan.test.mjs).

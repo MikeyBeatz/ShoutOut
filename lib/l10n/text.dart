@@ -22,6 +22,16 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Obnovit': 'Refresh',
+  'Načíst další': 'Load more',
+  'Pro zobrazení okolí povol polohu.':
+      'Allow location access to see nearby Shouts.',
+  'Používáme poslední známou polohu.': 'Using your last known location.',
+  'Pro další stránku obnov feed.': 'Refresh the feed to load another page.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Could not load the feed. Try again.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Your location changed. Refresh the feed to update the area.',
   'Tento krok nenávratně smaže váš účet.':
       'This step will permanently delete your account.',
   'Probíhá mazání…': 'Deleting your account…',
@@ -377,6 +387,18 @@ const _english = <String, String>{
 };
 
 const _german = <String, String>{
+  'Obnovit': 'Aktualisieren',
+  'Načíst další': 'Mehr laden',
+  'Pro zobrazení okolí povol polohu.':
+      'Erlaube den Standortzugriff, um Shouts in deiner Nähe zu sehen.',
+  'Používáme poslední známou polohu.':
+      'Dein letzter bekannter Standort wird verwendet.',
+  'Pro další stránku obnov feed.':
+      'Aktualisiere den Feed, um die nächste Seite zu laden.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Der Feed konnte nicht geladen werden. Versuche es erneut.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Dein Standort hat sich geändert. Aktualisiere den Feed für die neue Umgebung.',
   'Tento krok nenávratně smaže váš účet.':
       'Dieser Schritt löscht dein Konto unwiderruflich.',
   'Probíhá mazání…': 'Dein Konto wird gelöscht…',
@@ -743,6 +765,16 @@ const _german = <String, String>{
 };
 
 const _polish = <String, String>{
+  'Obnovit': 'Odśwież',
+  'Načíst další': 'Wczytaj kolejne',
+  'Pro zobrazení okolí povol polohu.':
+      'Aby zobaczyć okolicę, zezwól na dostęp do lokalizacji.',
+  'Používáme poslední známou polohu.': 'Używamy ostatniej znanej lokalizacji.',
+  'Pro další stránku obnov feed.': 'Odśwież feed, aby wczytać kolejną stronę.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Nie udało się wczytać feedu. Spróbuj ponownie.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Lokalizacja się zmieniła. Odśwież feed, aby zaktualizować okolicę.',
   'Tento krok nenávratně smaže váš účet.':
       'Ten krok nieodwracalnie usunie Twoje konto.',
   'Probíhá mazání…': 'Usuwanie konta…',

@@ -1,8 +1,9 @@
-// R6e preparation. Changing this switch is a separate migration/activation gate.
+// Shared runtime. Activation requires the checked installation and live writer cutover.
 import { createBlockIndexStore } from './feed_block_index_store.js';
 import { createEarlyErasureQueueStore } from './feed_early_erasure_queue.js';
 import { assertFeedRuntimeTarget, runtimeIndexBinding } from './feed_index_paths.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
+import { indexMaintenance } from './feed_index_maintenance.js';
 
 export const feedRuntimeConfiguration = Object.freeze({ enabled: false });
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
@@ -39,7 +40,7 @@ export function createFeedGenerationStore(db, generationId) {
   // No seed, arbitrary source mutation, fake GC time, or fixture hooks. Runtime
   // generation creation/backfill/GC orchestration is a separate migration gate.
   return Object.freeze({ base: store.base, prepare: store.prepare, prepareBatch: store.prepareBatch,
-    open: store.open, hydrate: store.hydrate, capturePortable: store.capturePortable, portablePage: store.portablePage,
+    open: store.open, hydrate: store.hydrate, capturePortable: store.capturePortable, portablePage: store.portablePage, hydratePortable: store.hydratePortable,
     purgeAccountIndex: store.purgeAccountIndex, prepareAccountIndexFinish: store.prepareAccountIndexFinish });
 }
 
@@ -47,7 +48,7 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   if (typeof enabled !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
   // Disabled wrappers keep the exact legacy database and do not even inspect
   // control/registry/queue documents or require a new Auth capability.
-  if (!enabled) return Object.freeze({ enabled: false, database: db, indexWriter: null, earlyErasureQueue: null, indexErasureCoordinator: null });
+  if (!enabled) return Object.freeze({ enabled: false, database: db, indexWriter: null, earlyErasureQueue: null, indexErasureCoordinator: null, indexMaintenance: null });
   assertFeedRuntimeTarget(db);
   if (typeof clock !== 'function' || typeof auth?.getUser !== 'function') throw new Error('invalid-feed-runtime-options');
   const database = budgetDatabase(db);
@@ -94,5 +95,6 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   const indexWriter = Object.freeze({ prepareBatch,
     prepare: (tx, id, before, after, options) => prepareBatch(tx, [{ id, before, after }], options) });
   return Object.freeze({ enabled: true, database, indexWriter, earlyErasureQueue,
-    indexErasureCoordinator: Object.freeze(earlyErasureQueue.purgeCoordinator()) });
+    indexMaintenance: indexMaintenance(database, earlyErasureQueue, { clock }),
+    indexErasureCoordinator: Object.freeze(earlyErasureQueue.purgeCoordinator({ deferWork: true })) });
 }

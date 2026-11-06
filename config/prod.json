@@ -1,5 +1,6 @@
 {
   "environment": "prod",
+  "serverSpatialFeed": false,
   "appUrl": "https://go.shoutout-app.eu",
   "hostingSite": "shoutout-go-a1b34",
   "firebase": {

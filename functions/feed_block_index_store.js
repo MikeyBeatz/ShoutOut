@@ -317,7 +317,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
         for (const [key, node] of reachable) tx.set(nodes.doc(key), node);
         for (const [cell, descriptor] of updates) {
           if (roots.get(cell) && !privateErasure) tx.create(base.collection('retiredRoots').doc(`${cell}-${operationId}`), {
-            v: 1, cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
+            v: 1, kind: 'feed-index-root', cell, hash: roots.get(cell).hash, retiredAt: FieldValue.serverTimestamp(),
           });
           if (!descriptor) tx.delete(cells.doc(cell));
           else tx.set(cells.doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: (roots.get(cell)?.revision ?? 0) + 1, ...cellGrid(cell) });
@@ -584,13 +584,35 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       readNode: key => loadBlock(key, metrics), eligible: row => available(row, c),
       mayContainRows: summary => minimumDistance(c.point, summary) <= c.radiusKm,
       rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c), assertSessionAlive }, { nodes: workNodes });
-    await checkRetention(snapshot, result.rows, metrics); assertSessionAlive();
+    // Preparing cursors carry buffered metadata too. A signature does not
+    // encrypt it: apply the same deleted-author fence before returning it.
+    const exposed = [...result.rows, ...(result.position?.pending ?? []), ...(result.position?.candidates ?? [])];
+    await checkRetention(snapshot, exposed, metrics); assertSessionAlive();
     return { ...result, metrics: { ...result.metrics, ...metrics } };
+  }
+
+  // Current full bodies are read only for the selected page. Selection/order
+  // stays pinned to the signed snapshot; availability is checked again now.
+  async function hydratePortable(snapshot, ids, now, { blocked = [] } = {}) {
+    if (snapshot?.v !== 1 || snapshot.project !== db.projectId || snapshot.namespace !== namespace ||
+        !Number.isSafeInteger(now) || now < snapshot.context?.now || !Array.isArray(ids) || ids.length > 50 ||
+        new Set(ids).size !== ids.length) throw new Error('invalid-index-hydration');
+    const c = context({ ...snapshot.context, blocked }); ids.forEach(assertId);
+    const metrics = {};
+    await checkRetention(snapshot, [], metrics);
+    const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
+    const items = docs.flatMap(doc => {
+      if (!doc.exists || isPurgedShoutContext(doc.data())) return [];
+      const row = metadataOf({ ...doc.data(), id: doc.id });
+      return available(row, c, now) ? [{ id: doc.id, row, data: doc.data() }] : [];
+    });
+    await checkRetention(snapshot, items.map(item => item.row), metrics);
+    return { items, metrics: { sourceReads: docs.length, ...metrics } };
   }
 
   const erasure = accountRetention ? createAccountRetentionStore(db, binding, (tx, rows, context) => prepareBatch(tx,
     rows.map(row => ({ id: row.id, before: row, after: null })), { erasure: { ...context, capability: erasureCapability } })) : null;
-  return { mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage,
+  return { mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage, hydratePortable,
     ...(erasure ? { purgeAccountIndex: erasure.step, prepareAccountIndexFinish: erasure.prepareFinish, erasureJobFor: erasure.jobFor } : {}),
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');

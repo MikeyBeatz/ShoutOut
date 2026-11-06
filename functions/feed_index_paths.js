@@ -2,7 +2,9 @@
 const validId = id => typeof id === 'string' && /^[a-z][a-z0-9-]{0,39}$/.test(id);
 const emulator = db => db?.projectId === 'shoutout-rules-test' && process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 export function assertFeedRuntimeTarget(db) {
-  if (db?.projectId !== 'shoutout-dev-46c81' && !emulator(db)) throw new Error('feed-runtime-dev-project-required');
+  if (!['shoutout-dev-46c81', 'shoutout-production-a1b34'].includes(db?.projectId) && !emulator(db)) {
+    throw new Error('feed-runtime-project-required');
+  }
 }
 export function labIndexBinding(db, namespace, sourceCollection = null) {
   if (!emulator(db)) throw new Error('index-lab-emulator-only');

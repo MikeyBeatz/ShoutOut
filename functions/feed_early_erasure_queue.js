@@ -285,9 +285,9 @@ export function createEarlyErasureQueueStore(db, auth, { binding, clock = () => 
     }
   }
 
-  async function runNext(sliceOptions) {
+  async function runNext({ workingOnly = false, ...sliceOptions } = {}) {
     const time = now();
-    for (const phase of ['working', 'queued']) {
+    for (const phase of workingOnly ? ['working'] : ['working', 'queued']) {
       const page = await jobs.where('phase', '==', phase).where('retainUntil', '>=', Timestamp.fromMillis(0))
         .where('nextAttemptAt', '<=', time).orderBy('retainUntil').orderBy('nextAttemptAt').orderBy(FieldPath.documentId()).limit(1).get();
       if (!page.empty) {
@@ -314,7 +314,7 @@ export function createEarlyErasureQueueStore(db, auth, { binding, clock = () => 
     });
   }
 
-  function purgeCoordinator() {
+  function purgeCoordinator({ deferWork = false } = {}) {
     // The account worker supplies its actual transacted lease guard. The
     // independent early queue guard alone must never authorize final deletion.
     async function context(tx, identity, outerGuard) {
@@ -363,7 +363,7 @@ export function createEarlyErasureQueueStore(db, auth, { binding, clock = () => 
         if (!prepared) {
           const linked = createEarlyErasureQueueStore(db, auth, { binding, clock, beforeFinishCommit, transactionGuard: outerGuard });
           await linked.enqueue(identity);
-          await linked.run(identity);
+          if (!deferWork) await linked.run(identity);
           return { state: 'waiting', examined: 1 };
         }
         const collections = await jobFor(identity).listCollections();

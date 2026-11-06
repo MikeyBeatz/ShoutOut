@@ -1,5 +1,14 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Obnovit': 'Obnoviť',
+  'Načíst další': 'Načítať ďalšie',
+  'Pro zobrazení okolí povol polohu.': 'Na zobrazenie okolia povoľ polohu.',
+  'Používáme poslední známou polohu.': 'Používame poslednú známu polohu.',
+  'Pro další stránku obnov feed.': 'Pre ďalšiu stránku obnov feed.',
+  'Feed se nepodařilo načíst. Zkus to znovu.':
+      'Feed sa nepodarilo načítať. Skús to znova.',
+  'Poloha se změnila. Pro nové okolí obnov feed.':
+      'Poloha sa zmenila. Pre nové okolie obnov feed.',
   'Tento krok nenávratně smaže váš účet.':
       'Tento krok nenávratne vymaže váš účet.',
   'Probíhá mazání…': 'Prebieha mazanie…',

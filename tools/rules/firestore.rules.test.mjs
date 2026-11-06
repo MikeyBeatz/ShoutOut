@@ -565,6 +565,45 @@ beforeEach(async () => {
   await testEnvironment.clearFirestore();
 });
 
+describe('managed spatial index write fence', () => {
+  for (const mode of ['off', 'active', 'paused', 'malformed']) {
+    test(`control presence fences source creation and Shout votes in ${mode}, while reads and saves remain usable`, async () => {
+      await seedEligibleUser('writer', 'SafeWriter'); await seedShout();
+      await testEnvironment.withSecurityRulesDisabled(async context => {
+        const admin = context.firestore();
+        await setDoc(doc(admin, 'feedIndexControl/current'), mode === 'malformed' ? { unexpected: true } : {
+          schemaVersion: 1, revision: 1, mode, readGenerationId: mode === 'active' ? 'fixture' : null,
+          writeGenerationIds: mode === 'off' ? [] : ['fixture'],
+        });
+        await setDoc(doc(admin, 'shouts/shout-1/reactions/writer'), { userId: 'writer', type: 'like', updatedAt: now() });
+      });
+      for (const [role, level] of [['user', 1], ['business', 2], ['moderator', 3], ['owner', 6]]) {
+        await testEnvironment.withSecurityRulesDisabled(async context => {
+          await setDoc(doc(context.firestore(), 'accountRoles/writer'), { role, level });
+        });
+        const db = authenticatedDb('writer');
+        await assertFails(createShoutBatch(db, 'writer', 'SafeWriter', 'blocked-create'));
+        const vote = writeBatch(db);
+        vote.set(doc(db, 'rateLimits/writer/actions/interaction'), rateData('shoutReaction_shout-1'));
+        vote.set(doc(db, 'shouts/shout-1/reactions/writer'), { userId: 'writer', type: 'dislike', updatedAt: serverTimestamp() });
+        vote.update(doc(db, 'shouts/shout-1'), { likesCount: 0, dislikesCount: 1 });
+        await assertFails(vote.commit());
+        const remove = writeBatch(db);
+        remove.set(doc(db, 'rateLimits/writer/actions/interaction'), rateData('shoutReaction_shout-1'));
+        remove.delete(doc(db, 'shouts/shout-1/reactions/writer')); await assertFails(remove.commit());
+        await assertSucceeds(getDoc(doc(db, 'shouts/shout-1')));
+        await assertSucceeds(getDoc(doc(db, 'shouts/shout-1/reactions/writer')));
+      }
+      const db = authenticatedDb('writer'), save = writeBatch(db);
+      save.set(doc(db, 'rateLimits/writer/actions/interaction'), rateData('save_shout-1'));
+      save.set(doc(db, 'shouts/shout-1/saves/writer'), { userId: 'writer', createdAt: serverTimestamp() });
+      save.update(doc(db, 'shouts/shout-1'), { savesCount: 1 });
+      await assertSucceeds(save.commit());
+      await assertSucceeds(getDoc(doc(db, 'shouts/shout-1/saves/writer')));
+    });
+  }
+});
+
 after(async () => {
   await testEnvironment.cleanup();
 });

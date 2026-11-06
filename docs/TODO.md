@@ -24,39 +24,20 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit omezené provozní plánování časné fronty a migrační nástroj.**
-   Schválené [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně
-   připravené za vypnutou volbou: společné jádro a DEV cesty, více generací,
-   společný rozpočet zápisů, fronta/koordinátor a oba balíčky Functions.
-   R6e je lokálně uzavřené: závěrečných 47/47 cílených testů a success CI
-   42292159081 pro 9a054bb. Žádné nasazení ani živé kolekce. Před aktivací je
-   nutné zapojit omezené recover/runNext do provozního plánování, doložit migraci a DEV pilot.
-   [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
-   celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
-   a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
-   8–79 minut; není vhodný k nasazení. Schválený R6a runner je lokálně hotový:
-   [11/11 regresí, rozpočty, skutečný guard a retry](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results),
-   success CI 42114669640 pro zdroj 7079cdd. Tento lokální úsek je uzavřený.
-   Schválená [R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results)
-   má lokální kontrolní kontrakt, transakční blokaci opravných zápisů a zákaz
-   tří starých seed/reset CLI (11 emulátorových regresí, 112 unit/45 tools).
-   Zdroj e646d79 má success CI 42243312876; R6b je lokálně uzavřená.
-   Schválená [R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results)
-   má lokální recovery, guard, stránkování generací a atomický doklad (18/18
-   závěrečných testů, success CI 42251697874 pro 75ce8f3); R6c je lokálně uzavřená.
-   Schválená [R6d koordinace](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results)
-   lokálně propojuje doklad a dávkový úklid s konečným workerem (14/14 finálních
-   testů, success CI 42258910004 pro c7c1fef); R6d je lokálně uzavřená,
-   včetně ochrany checkpointu před návratem UID. R6e stav je výše; zbývá
-   provozní plánování, migrace a pilot s cenami/SKU a cloudovým měřením.
-   Živý řídicí dokument, index ani časná fronta nejsou vytvořené.
-   Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
-   jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
-   [Přesné zdroje a důkazy](PROJECT_STATUS.md),
-   [R5 a provozní meze](plans/feed/FEED_INDEX_RETENTION.md#account-retention-proposal),
-   [moderační rozsah](plans/feed/FEED_WRITER_INTEGRATION.md#moderation-regression).
-   Účtová DEV část je uzavřená a bez čekající Auth fixture;
-   [účtové důkazy](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+1. **Dokončit společné zapojení nového feedu a ověřit je v DEV.**
+   Na `feature/feed-page-integration` se propojují serverové stránky, Home,
+   uložené Shouty, minutový úklid a trvalá instalace společná pro DEV/produkci.
+   Podle read-only kontroly má DEV 37 Shoutů / 0 active; nástroj pro první
+   instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
+   [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
+   Dokončit regresi a CI, předložit připravený živý datový/klíčový přechod,
+   pak nasadit a změřit reálné stránky i běžný/Business průchod. Zatím nic
+   neaktivováno, oba klientské přepínače a serverový runtime jsou vypnuté.
+   Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
+   v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
+   [PROJECT_STATUS](PROJECT_STATUS.md). Účtový DEV přechod je uzavřený;
+   [důkazy](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+
 2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
    zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
    API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle

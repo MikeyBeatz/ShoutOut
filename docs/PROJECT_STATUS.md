@@ -6,6 +6,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+Rozpracováno na feature/feed-page-integration po pokynu vlastníka směřovat
+k viditelnému feedu: propojení indexu, zabezpečeného stránkovacího API a hlavní
+obrazovky. Serverové emulátorové ověření má 10/10 průchodů (včetně existujícího
+přenositelného kurzoru); klientský transport/relace/UI/konfigurace 39/39.
+Podle upřesnění vlastníka připravujeme trvalé společné řešení pro DEV i produkci,
+nikoli jednorázové demo. Přibyly vlastní stránky uložených Shoutů, restartovatelný
+běžný GC, zapojení jednoho indexového úseku do minutového workeru, podmíněné
+uzavření přímých zápisů v Rules a kontrolovaný instalační nástroj. Společných
+38/38 serverových testů a 8/8 instalace/uložených Shoutů prošlo; konečná regrese
+a CI ještě zbývá. Klient 305/305, tools 50/50, Functions unit 118 pass,
+analýza/formát/lint a kontrola dokumentačních odkazů prošly lokálně.
+Read-only DEV inventura: 37 Shoutů / 0 active, control/generace
+neexistují. [Přesný postup, testy, návrat a zbývající brány](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
+Žádná aktivace ani živé zápisy. Oba klientské přepínače i serverový runtime jsou
+vypnuté. Podpisové tajemství není vytvořené, produkce se neměnila.
+
 [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně uzavřené na
 feature/feed-runtime-adapter. Zdroj 9a054bb66f4e871de305d4af02ebcd41a9ec6188 má
 [success CI 42292159081](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42292159081):

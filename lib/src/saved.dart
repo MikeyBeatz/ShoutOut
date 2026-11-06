@@ -9,12 +9,16 @@ class FollowedPage extends StatefulWidget {
     required this.onSave,
     required this.onReaction,
     required this.followedUserIds,
+    this.pagedSavedShouts = false,
+    this.savedPosition,
   });
 
   final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final Set<String> followedUserIds;
+  final bool pagedSavedShouts;
+  final Position? savedPosition;
 
   @override
   State<FollowedPage> createState() => _FollowedPageState();
@@ -65,14 +69,23 @@ class _FollowedPageState extends State<FollowedPage> {
       ),
       Expanded(
         child: _section == _FollowedSection.shouts
-            ? ShoutListPage(
-                title: null,
-                emptyText: tr(context, 'Zatím nemáš uložené žádné shouty.'),
-                emptyIcon: Icons.bookmark_border,
-                shouts: widget.shouts,
-                onSave: widget.onSave,
-                onReaction: widget.onReaction,
-              )
+            ? widget.pagedSavedShouts
+                  ? _SavedShoutsLibrary(
+                      onSave: widget.onSave,
+                      onReaction: widget.onReaction,
+                      position: widget.savedPosition,
+                    )
+                  : ShoutListPage(
+                      title: null,
+                      emptyText: tr(
+                        context,
+                        'Zatím nemáš uložené žádné shouty.',
+                      ),
+                      emptyIcon: Icons.bookmark_border,
+                      shouts: widget.shouts,
+                      onSave: widget.onSave,
+                      onReaction: widget.onReaction,
+                    )
             : FollowedProfilesList(
                 followedUserIds: widget.followedUserIds,
                 onSave: widget.onSave,

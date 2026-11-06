@@ -52,12 +52,15 @@ import 'shout_deletion_gateway.dart';
 import 'timed_operation_gateway.dart';
 import 'archived_comment_target.dart';
 import 'live_shout_state.dart';
+import 'feed_session.dart';
+import 'feed_page_gateway.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';
 part 'src/account_roles.dart';
 part 'src/business.dart';
 part 'src/feed.dart';
+part 'src/spatial_feed.dart';
 part 'src/following.dart';
 part 'src/firestore_security.dart';
 part 'src/home.dart';

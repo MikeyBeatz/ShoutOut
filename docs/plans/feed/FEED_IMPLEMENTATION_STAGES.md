@@ -16,7 +16,11 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 A0 (plný detail) je nasazené v DEV; A1 je dokončený lokální prototyp.
 Negativní hodnocení už mimo Top nemění pořadí, ale sbalení. A2/A3 mají
 lokální moduly prostorového indexu, historické relace, kurzoru a koordinátoru;
-nejsou napojené jako živé query API ani nový Home feed. B1 má lokální jádro
+nejsou napojené jako živé query API ani nový Home feed. Na větvi
+`feature/feed-page-integration` už probíhá společné propojení zabezpečeného
+API, Home, vlastních uložených Shoutů, provozního úklidu a trvalé instalace
+pro DEV i produkční kód podle [aktuálního přechodového plánu](FEED_INSTALLATION_AND_ROLLOUT.md).
+Přepínače zůstávají vypnuté; živé ověření ani A2/A3 tím nejsou dokončené. B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené

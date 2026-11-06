@@ -13,6 +13,14 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverSpatialFeed !== undefined && typeof config.serverSpatialFeed !== 'boolean') {
+    throw new Error('serverSpatialFeed must be a boolean.');
+  }
+  if (config.serverSpatialFeed === true && (!config.appCheckSiteKey ||
+      config.serverShoutCreation !== true || config.serverShoutReactions !== true ||
+      config.serverShoutDeletion !== true || config.serverAccountDeletionFinalization !== true)) {
+    throw new Error('Spatial feed requires server gateways and App Check.');
+  }
   if (config.serverAccountDeletionFinalization !== undefined && typeof config.serverAccountDeletionFinalization !== 'boolean') {
     throw new Error('serverAccountDeletionFinalization must be a boolean.');
   }

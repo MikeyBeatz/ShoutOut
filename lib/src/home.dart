@@ -16,7 +16,8 @@ enum _LocationRefreshResult {
   unavailable,
 }
 
-class _ShoutOutHomeState extends State<ShoutOutHome> {
+class _ShoutOutHomeState extends State<ShoutOutHome>
+    with WidgetsBindingObserver {
   final List<Shout> _shouts = [];
   late final _saveGateway = SaveGateway(
     currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
@@ -41,7 +42,17 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
     },
     isDefinitiveFailure: isDefinitiveReactionFailure,
   );
-  final FeedFilters _feedFilters = FeedFilters();
+  FeedFilters _feedFilters = FeedFilters();
+  late final bool _useSpatialFeed;
+  late final FeedPageGateway<Shout> _spatialGateway;
+  late final FeedSessionController<Shout, SpatialFeedContext> _spatialSession;
+  final _spatialScroll = ScrollController();
+  final Map<String, double> _spatialHeights = {};
+  bool _spatialLoading = false;
+  bool _spatialLoadingMore = false;
+  bool _spatialFailed = false;
+  String? _spatialMessage;
+  int _spatialRequest = 0;
   Set<String> _blockedUserIds = {};
   Set<String> _followedUserIds = {};
   Position? _currentPosition;
@@ -62,6 +73,35 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
   @override
   void initState() {
     super.initState();
+    _useSpatialFeed = kIsWeb && WebEnvironment.current.serverSpatialFeed;
+    _spatialGateway = FeedPageGateway(
+      currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+      decodeItem: decodeSpatialFeedItem,
+      send: (payload) async {
+        try {
+          final reply = await FirebaseFunctions.instanceFor(
+            region: 'europe-west3',
+          ).httpsCallable('getFeedPage').call<Map<String, dynamic>>(payload);
+          return reply.data;
+        } on FirebaseFunctionsException catch (error) {
+          final details = error.details;
+          if (error.code == 'failed-precondition' &&
+              details is Map &&
+              details['reason'] == 'feed-session-expired') {
+            throw const FeedSessionExpired();
+          }
+          rethrow;
+        }
+      },
+    );
+    _spatialSession = FeedSessionController(
+      load: _spatialGateway.load,
+      idOf: (shout) => shout.id,
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    );
+    WidgetsBinding.instance.addObserver(this);
     RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
       _interactions = _shoutInteractions(
@@ -82,6 +122,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   Future<void> _initializeFeed() async {
     _startFeedListeners();
+    if (_useSpatialFeed) {
+      await _refreshSpatialFeed();
+      return;
+    }
     // Location improves distance sorting but must never hold up the feed.
     unawaited(
       _refreshLocation().then((_) {
@@ -177,6 +221,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _spatialGateway.dispose();
+    _spatialSession.dispose();
+    _spatialScroll.dispose();
     _expiryTimer.cancel();
     _shoutSubscription?.cancel();
     _blockedSubscription?.cancel();
@@ -214,6 +262,174 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       });
     }
   }
+
+  Future<void> _refreshSpatialFeed([FeedFilters? requested]) async {
+    final attempt = ++_spatialRequest;
+    final nextFilters = requested ?? _feedFilters;
+    setState(() {
+      _spatialLoading = true;
+      _spatialFailed = false;
+      _spatialMessage = null;
+    });
+    try {
+      _LocationRefreshResult? result;
+      if (requested == null || _currentPosition == null) {
+        result = await _refreshLocation();
+      }
+      if (!mounted || attempt != _spatialRequest) return;
+      final position = _currentPosition;
+      if (position == null) {
+        setState(() => _spatialMessage = 'Pro zobrazení okolí povol polohu.');
+        return;
+      }
+      if (_feedDocuments != null) _applyShoutDocuments(_feedDocuments!);
+      final context = SpatialFeedContext(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        radiusKm: nextFilters.radius,
+        order: nextFilters.order.name,
+        category: nextFilters.selectedCategory,
+      );
+      await _spatialSession.refresh(context);
+      if (!mounted || attempt != _spatialRequest) return;
+      setState(() {
+        _feedFilters = nextFilters;
+        _spatialHeights.clear();
+        _spatialMessage =
+            result != null && result != _LocationRefreshResult.available
+            ? 'Používáme poslední známou polohu.'
+            : null;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            attempt == _spatialRequest &&
+            _spatialScroll.hasClients) {
+          _spatialScroll.jumpTo(0);
+        }
+      });
+    } catch (error) {
+      if (!mounted || attempt != _spatialRequest) return;
+      setState(() {
+        _spatialFailed = true;
+        _spatialMessage = error is FeedSessionExpired
+            ? 'Pro další stránku obnov feed.'
+            : 'Feed se nepodařilo načíst. Zkus to znovu.';
+      });
+      debugPrint('Feed request failed: code=${liveDataFailureCode(error)}');
+    } finally {
+      if (mounted && attempt == _spatialRequest) {
+        setState(() => _spatialLoading = false);
+      }
+    }
+  }
+
+  Future<void> _spatialMore({bool prefetchOnly = false}) async {
+    if (!_useSpatialFeed ||
+        _tab != 0 ||
+        _spatialFailed ||
+        _spatialLoading ||
+        _spatialLoadingMore) {
+      return;
+    }
+    final attempt = _spatialRequest;
+    if (!prefetchOnly) setState(() => _spatialLoadingMore = true);
+    try {
+      if (prefetchOnly) {
+        await _spatialSession.prefetch();
+      } else {
+        await _spatialSession.loadMore();
+      }
+    } catch (error) {
+      if (!mounted || attempt != _spatialRequest) return;
+      setState(() {
+        _spatialFailed = true;
+        _spatialMessage = error is FeedSessionExpired
+            ? 'Pro další stránku obnov feed.'
+            : 'Feed se nepodařilo načíst. Zkus to znovu.';
+      });
+    } finally {
+      if (mounted && attempt == _spatialRequest && !prefetchOnly) {
+        setState(() => _spatialLoadingMore = false);
+      }
+    }
+  }
+
+  void _selectTab(int index) {
+    if (_useSpatialFeed) {
+      _spatialSession.setActive(index == 0);
+      if (index != 0) {
+        _spatialGateway.cancelPending();
+        _spatialSession.cancelPending();
+        ++_spatialRequest;
+        _spatialLoading = false;
+        _spatialLoadingMore = false;
+      }
+    }
+    setState(() => _tab = index);
+    if (_useSpatialFeed && index == 0 && _spatialSession.context == null) {
+      unawaited(_refreshSpatialFeed());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_useSpatialFeed) return;
+    final active = state == AppLifecycleState.resumed && _tab == 0;
+    _spatialSession.setActive(active);
+    if (!active) {
+      _spatialGateway.cancelPending();
+      _spatialSession.cancelPending();
+      ++_spatialRequest;
+      _spatialLoading = false;
+      _spatialLoadingMore = false;
+    } else if (_spatialSession.context == null) {
+      unawaited(_refreshSpatialFeed());
+    } else {
+      unawaited(_noticeSpatialMovement());
+    }
+  }
+
+  Future<void> _noticeSpatialMovement() async {
+    final attempt = _spatialRequest;
+    final result = await _refreshLocation();
+    if (!mounted ||
+        attempt != _spatialRequest ||
+        result != _LocationRefreshResult.available) {
+      return;
+    }
+    final previous = _spatialSession.context, position = _currentPosition;
+    if (previous != null &&
+        position != null &&
+        (previous.latitude != position.latitude ||
+            previous.longitude != position.longitude)) {
+      setState(
+        () => _spatialMessage = 'Poloha se změnila. Pro nové okolí obnov feed.',
+      );
+    }
+  }
+
+  SpatialFeedPresentation _spatialPresentation() => SpatialFeedPresentation(
+    scrollController: _spatialScroll,
+    refresh: () => unawaited(_refreshSpatialFeed()),
+    changeFilters: (filters) => unawaited(_refreshSpatialFeed(filters)),
+    prefetch: () => unawaited(_spatialMore(prefetchOnly: true)),
+    loadMore: () => unawaited(_spatialMore()),
+    hasMore: _spatialSession.hasMore && !_spatialFailed,
+    loadingMore: _spatialLoadingMore,
+    refreshing: _spatialLoading,
+    message: _spatialSession.needsRefresh
+        ? 'Pro další stránku obnov feed.'
+        : _spatialMessage,
+    card: (shout) => _SpatialShoutCard(
+      key: ValueKey(shout.id),
+      shout: shout,
+      blocked: _blockedUserIds.contains(shout.authorId),
+      onSave: () => _toggleSaved(shout),
+      onReaction: (like) => _toggleReaction(shout, like: like),
+      heightOf: () => _spatialHeights[shout.id],
+      recordHeight: (height) => _spatialHeights[shout.id] = height,
+    ),
+  );
 
   Future<void> _addShout(Shout shout) async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -627,8 +843,12 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
       body: _BrandedTabBackground(
         child: switch (_tab) {
           0 => FeedPage(
-            shouts: activeShouts,
-            isLoading: _isLoadingShouts,
+            shouts: _useSpatialFeed ? _spatialSession.items : activeShouts,
+            promotionShouts: _useSpatialFeed ? activeShouts : null,
+            spatial: _useSpatialFeed ? _spatialPresentation() : null,
+            isLoading: _useSpatialFeed
+                ? _spatialLoading && _spatialSession.context == null
+                : _isLoadingShouts,
             onSave: _toggleSaved,
             onReaction: _toggleReaction,
             onNotifications: () => Navigator.push(
@@ -644,6 +864,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
             followedUserIds: _followedUserIds,
           ),
           1 => FollowedPage(
+            pagedSavedShouts: _useSpatialFeed,
+            savedPosition: _currentPosition,
             shouts: activeShouts.where((shout) => shout.isSaved).toList(),
             onSave: _toggleSaved,
             onReaction: _toggleReaction,
@@ -819,7 +1041,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome> {
                   height: 64,
                   selectedIndex: _tab,
                   onDestinationSelected: (index) {
-                    setState(() => _tab = index);
+                    _selectTab(index);
                     if (index == 3) completeInteractiveTutorialAction(4);
                   },
                   destinations: [

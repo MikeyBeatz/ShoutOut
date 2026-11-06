@@ -2,7 +2,7 @@ import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID, createHash } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { Firestore, getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { createFeedRuntime, createFeedGenerationStore, feedRuntimeConfiguration, feedTransactionWriteBudget } from './feed_runtime.js';
 import { createLabBlockIndex } from './feed_block_index_lab.js';
 import { encodeGeohash } from './geohash.js';
@@ -72,15 +72,28 @@ async function fixture(t, { count = 2, generations = 2, separated = false } = {}
   return f;
 }
 
-test('runtime defaults off with zero database access and rejects enabled production', () => {
+test('runtime defaults off with zero database access and rejects unrelated projects', () => {
   const unusable = new Proxy({}, { get() { throw new Error('unexpected-database-access'); } });
   const runtime = createFeedRuntime(unusable, null);
   assert.equal(feedRuntimeConfiguration.enabled, false); assert.equal(runtime.enabled, false);
   assert.equal(runtime.database, unusable);
-  for (const option of ['indexWriter', 'earlyErasureQueue', 'indexErasureCoordinator']) assert.equal(runtime[option], null);
-  assert.throws(() => createFeedRuntime({ projectId: 'shoutout-production-a1b34' }, absent, { enabled: true }), /dev-project-required/);
+  for (const option of ['indexWriter', 'earlyErasureQueue', 'indexErasureCoordinator', 'indexMaintenance']) assert.equal(runtime[option], null);
+  assert.throws(() => createFeedRuntime({ projectId: 'unrelated-project' }, absent, { enabled: true }), /project-required/);
   assert.throws(() => createFeedRuntime({}, absent, { enabled: 'true' }), /invalid-feed-runtime-enabled/);
   assert.throws(() => createLabBlockIndex({ projectId: 'shoutout-dev-46c81' }, { namespace: 'fixture' }), /emulator-only/);
+});
+
+test('the same inactive runtime can be bound to production without any network or data access', async () => {
+  const production = new Firestore({ projectId: 'shoutout-production-a1b34' });
+  const guarded = new Proxy(production, { get(target, key) {
+    if (['runTransaction', 'getAll', 'batch', 'bulkWriter'].includes(key)) return () => assert.fail('No production data access is allowed in this test');
+    return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
+  } });
+  try {
+    const runtime = createFeedRuntime(guarded, absent, { enabled: true });
+    assert.equal(runtime.enabled, true);
+    assert.equal(createFeedGenerationStore(guarded, 'fixture').base.path, 'feedIndexGenerations/fixture');
+  } finally { await production.terminate(); }
 });
 
 test('runtime interface uses actual generation paths and excludes fixture mutation/time hooks', { skip: !enabled }, async t => {

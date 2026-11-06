@@ -1,6 +1,26 @@
 {
   "indexes": [
     {
+      "collectionGroup": "cells", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "latCell", "order": "ASCENDING" }, { "fieldPath": "lonCell", "order": "ASCENDING" }]
+    },
+    {
+      "collectionGroup": "jobs", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "phase", "order": "ASCENDING" }, { "fieldPath": "retainUntil", "order": "ASCENDING" }, { "fieldPath": "nextAttemptAt", "order": "ASCENDING" }]
+    },
+    {
+      "collectionGroup": "targets", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "epoch", "order": "ASCENDING" }, { "fieldPath": "complete", "order": "ASCENDING" }]
+    },
+    {
+      "collectionGroup": "retiredRoots", "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "kind", "order": "ASCENDING" }, { "fieldPath": "retiredAt", "order": "ASCENDING" }]
+    },
+    {
+      "collectionGroup": "gcJobs", "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "kind", "order": "ASCENDING" }, { "fieldPath": "phase", "order": "ASCENDING" }, { "fieldPath": "nextAttemptAt", "order": "ASCENDING" }]
+    },
+    {
       "collectionGroup": "shouts",
       "queryScope": "COLLECTION",
       "fields": [
@@ -58,6 +78,11 @@
     }
   ],
   "fieldOverrides": [
+    { "collectionGroup": "nodes", "fieldPath": "rows", "indexes": [] },
+    { "collectionGroup": "nodes", "fieldPath": "children", "indexes": [] },
+    { "collectionGroup": "nodes", "fieldPath": "summary", "indexes": [] },
+    { "collectionGroup": "gcJobs", "fieldPath": "checkpoint", "indexes": [] },
+    { "collectionGroup": "cells", "fieldPath": "frontier", "indexes": [] },
     {
       "collectionGroup": "reactions",
       "fieldPath": "userId",

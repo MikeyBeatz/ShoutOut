@@ -38,11 +38,13 @@ export async function expireDueShouts(db, { maxCandidates, clock = () => new Dat
 
 // Reuse the existing minute tick and its source-work budget: never two full pages.
 export async function runAccountMaintenanceTick(db, auth, options) {
+  if (options.indexMaintenance != null && typeof options.indexMaintenance !== 'function') throw new Error('invalid-index-maintenance');
+  const index = options.indexMaintenance ? await options.indexMaintenance() : {};
   const purge = options.retentionPurgeEnabled ? await scanDueAccountPurges(db, auth, options) : { purgeScanned: 0, purged: 0, purgeFailed: 0, purgeNeedsReview: 0 };
-  if (purge.purgeScanned) return { ...purge, scanned: 0, failed: 0, expirationScanned: 0, expirationChanged: 0 };
+  if (purge.purgeScanned) return { ...index, ...purge, scanned: 0, failed: 0, expirationScanned: 0, expirationChanged: 0 };
   const account = await scanDueAccountDeletionJobs(db, auth, options);
-  if (!options.shoutExpirationEnabled || account.scanned > 0) return { ...purge, ...account, expirationScanned: 0, expirationChanged: 0 };
+  if (!options.shoutExpirationEnabled || account.scanned > 0) return { ...index, ...purge, ...account, expirationScanned: 0, expirationChanged: 0 };
   const expiration = await expireDueShouts(db, { clock: options.clock, maxCandidates: options.pageSize,
     indexWriter: options.indexWriter });
-  return { ...purge, ...account, expirationScanned: expiration.scanned, expirationChanged: expiration.expired, expirationInvalid: expiration.invalid };
+  return { ...index, ...purge, ...account, expirationScanned: expiration.scanned, expirationChanged: expiration.expired, expirationInvalid: expiration.invalid };
 }
