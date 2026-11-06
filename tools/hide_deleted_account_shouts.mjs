@@ -3,6 +3,7 @@ import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { applyLegacyFeedAdminUpdates, runLegacyFeedAdminTransaction } from '../functions/feed_index_admin_guard.js';
 
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 const nickname = process.argv[2]?.trim();
@@ -76,13 +77,11 @@ console.log(JSON.stringify({
 }, null, 2));
 
 if (!apply || activeShouts.empty) process.exit(0);
+await runLegacyFeedAdminTransaction(db, () => undefined);
 
 for (let offset = 0; offset < activeShouts.docs.length; offset += 400) {
-  const batch = db.batch();
-  for (const shout of activeShouts.docs.slice(offset, offset + 400)) {
-    batch.update(shout.ref, { status: 'deleted' });
-  }
-  await batch.commit();
+  await applyLegacyFeedAdminUpdates(db, activeShouts.docs.slice(offset, offset + 400)
+    .map(shout => ({ ref: shout.ref, data: { status: 'deleted' }, updateTime: shout.updateTime })));
 }
 
 const remaining = await db

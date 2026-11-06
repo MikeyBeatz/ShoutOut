@@ -8,6 +8,8 @@ import {
   moderationSeedUserAt,
 } from './moderation_seed.mjs';
 
+throw new Error('legacy-feed-seed-disabled: seed_moderation_queue requires an approved index-aware fixture workflow.');
+
 const expectedProjectId = 'shoutout-dev-46c81';
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!serviceAccountPath) throw new Error('Set FIREBASE_SERVICE_ACCOUNT_PATH.');

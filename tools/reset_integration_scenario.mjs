@@ -9,6 +9,8 @@ import {
   getFirestore,
 } from 'firebase-admin/firestore';
 
+throw new Error('legacy-feed-seed-disabled: reset_integration_scenario requires an approved index-aware reset workflow.');
+
 const expectedProjectId = 'shoutout-dev-46c81';
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 const password = process.env.SHOUTOUT_TEST_PASSWORD;

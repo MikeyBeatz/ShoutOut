@@ -5,6 +5,8 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, GeoPoint, Timestamp, getFirestore } from 'firebase-admin/firestore';
 
+throw new Error('legacy-feed-seed-disabled: seed_test_users requires an approved index-aware fixture workflow.');
+
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 const password = process.env.SHOUTOUT_TEST_PASSWORD;
 

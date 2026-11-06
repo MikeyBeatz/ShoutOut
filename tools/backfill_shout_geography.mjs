@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { applyLegacyFeedAdminUpdates, runLegacyFeedAdminTransaction } from '../functions/feed_index_admin_guard.js';
 
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -22,6 +23,7 @@ function component(components, type) {
 }
 
 const db = getFirestore();
+await runLegacyFeedAdminTransaction(db, () => undefined);
 const snapshot = await db.collection('shouts').get();
 let updated = 0;
 for (const document of snapshot.docs) {
@@ -56,7 +58,7 @@ for (const document of snapshot.docs) {
     component(components, 'administrative_area_level_2');
   const countryCode = country?.short_name?.toUpperCase() ?? null;
   const providerSubdivision = subdivision?.short_name?.toUpperCase() ?? null;
-  await document.ref.update({
+  const update = {
     geohash: hash,
     geography: {
       schemaVersion: 1,
@@ -71,7 +73,8 @@ for (const document of snapshot.docs) {
       providerPlaceId: result.place_id ?? null,
       resolvedAt: FieldValue.serverTimestamp(),
     },
-  });
+  };
+  await applyLegacyFeedAdminUpdates(db, [{ ref: document.ref, updateTime: document.updateTime, data: update }]);
   updated += 1;
 }
 console.log(`Updated ${updated} shout geography documents.`);

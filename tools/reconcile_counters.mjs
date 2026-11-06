@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import process from 'node:process';
 import { cert, initializeApp } from 'firebase-admin/app';
 import { GeoPoint, getFirestore } from 'firebase-admin/firestore';
+import { applyLegacyFeedAdminUpdates, runLegacyFeedAdminTransaction } from '../functions/feed_index_admin_guard.js';
 
 const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 if (!serviceAccountPath) {
@@ -17,6 +18,7 @@ if (serviceAccount.project_id !== 'shoutout-dev-46c81') {
 
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
+await runLegacyFeedAdminTransaction(db, () => undefined);
 const shouts = await db.collection('shouts').get();
 const roundToPublicGrid = (value) => Math.round(value * 100) / 100;
 let updatedShouts = 0;
@@ -47,7 +49,7 @@ for (const shout of shouts.docs) {
       roundToPublicGrid(location.longitude),
     );
   }
-  await shout.ref.update(update);
+  await applyLegacyFeedAdminUpdates(db, [{ ref: shout.ref, data: update, updateTime: shout.updateTime }]);
   updatedShouts += 1;
 
   for (const comment of comments.docs) {

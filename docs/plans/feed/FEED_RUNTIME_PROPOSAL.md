@@ -1,7 +1,8 @@
 # Provozní návrh prostorového indexu
 
-5. listopadu 2026. **R6a schválená a lokálně ověřená; zbývající provozní návrh
-není schválená živá konfigurace.** [Výsledek runneru](#r6a-results).
+6. listopadu 2026. **R6a a R6b jsou schválené lokální úseky; zbývající provozní
+návrh není schválená živá konfigurace.** [Runner](#r6a-results),
+[ochrana Admin nástrojů](#r6b-results).
 Navazuje na [writer](FEED_WRITER_INTEGRATION.md), [R5](FEED_INDEX_RETENTION.md#account-retention-proposal)
 a [migrační připravenost](FEED_MIGRATION_READINESS.md). Lokální jádro je ověřené;
 živý adaptér, generace, backfill, API ani plánování indexu dosud neběží.
@@ -17,8 +18,8 @@ kdy už má být dokončený. Navíc drží oblast zamčenou přes několik pokr
 
 Doporučené pořadí:
 
-1. R6a více omezených kroků, obnovy a vnějšího guardu je lokálně ověřená níže.
-   Následuje konkrétní návrh vynucené ochrany Admin nástrojů a schématu přepnutí.
+1. R6a runner a R6b transakční ochrana Admin nástrojů mají lokální ověření níže.
+   Následuje návrh časné indexové fronty a jejího guardu před původním deadline.
 2. Připravit včasnou indexovou frontu po potvrzení odstranění Auth, produkční
    adaptér za vypnutým přepínačem a přesný migrační nástroj. Každý z těchto
    rozsahů před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
@@ -173,22 +174,23 @@ cutover uzavřel mazání, **nikoli automaticky všechny indexované změny**.
 | createShout, toggleShoutReaction, deleteShout | Zapojit transakční writer a R5, fail-closed; platí i moderátorské odstranění. |
 | prepareAccountDeletion, account_shout_hiding, odebrání palců účtu | Použít existující lokální integrace a ověřit přes živý adaptér. |
 | Expirace a konečný account purge | Writer i včasné R5; terminal-only fallback není plán retence. |
-| `reconcile_counters.mjs` | Dnes mění palce **i polohu**, bez přepočtu geohashe/indexu. Za aktivní generace blokovat, později transakční opravný nástroj s dry-runem. |
-| `round_shout_locations.mjs` | Dnes mění polohu bez geohashe/indexu. Blokovat; případná oprava musí měnit všechny odvozené údaje atomicky. |
-| `backfill_shout_geography.mjs` | Geography samotná není v projekci, nástroj ale může doplnit kořenový geohash. Tuto větev blokovat bez writeru. |
-| `seed_test_users.mjs`, `reset_integration_scenario.mjs`, `seed_moderation_queue.mjs` | Přímé seed/overwrite blokovat za aktivní generace; používat pouze vyhrazenou fixture cestu nebo budoucí writer. Live-activity větev prvního nástroje stále vynechává geohash. |
-| `hide_deleted_account_shouts.mjs` | Přímé statusové batch zápisy blokovat; živý worker už má bezpečnější serverovou cestu. |
-| Jednorázová oprava geohashů | Historicky schválená a provedená; starý nástroj nesmí být znovu použit jako výjimka z writeru. |
+| `reconcile_counters.mjs` | Mění palce **i polohu**, bez přepočtu geohashe/indexu. R6b dovolí starou opravu pouze bez indexu, s transakční kontrolou a updateTime precondition. |
+| `round_shout_locations.mjs` | Mění polohu bez geohashe/indexu. R6b stejná ochrana; opravu odvozených údajů nyní nezavádí. |
+| `backfill_shout_geography.mjs` | Geography není v projekci, nástroj ale doplňuje i kořenový geohash. R6b chrání celý jeho root zápis. |
+| `seed_test_users.mjs`, `reset_integration_scenario.mjs`, `seed_moderation_queue.mjs` | R6b všechny tři CLI zablokuje před credentials/první mutací, bez živé výjimky. Potřebují nový bezpečný fixture/reset postup; jeho zavedení není součástí R6b. |
+| `hide_deleted_account_shouts.mjs` | R6b chrání každou statusovou dávku; živý worker má vlastní serverovou cestu. |
+| Jednorázová oprava geohashů | Historický digestový souhlas není výjimka: R6b přidává stejnou transakční kontrolu a zachovává digest/updateTime preconditions. |
 | Geography trigger v `functions/index.js` | Mění pouze `geography`; nevyžaduje indexovou verzi. Ověřit to regresí, až se změní schéma projekce. |
 | Komentářové/saves počty, profily a role | Samy nejsou indexovanými Shout palci/polohou. Nepřidávat zbytečné blokové zápisy; případné změny Shout Business flagů už writer vyžadují. |
 | Ruční Admin SDK, konzole, jiné servisní identity | Rules je nezastaví. Omezit provozní přístup a evidovat opravy; sdílená ochrana nástrojů není bezpečnostní bariéra proti držiteli neomezeného Admin oprávnění. |
 
-Lokální nejbližší varianta: společný serverový kontrolní dokument/generace
+Schválená R6b varianta: společný serverový kontrolní dokument/generace
 kontrolovaný **ve stejné transakci jako zápis nástroje**. Přepnutí generace mění
 týž dokument, takže souběh nemůže obejít starý preflight. CLI kontrola před
 dlouhým `.get()`/batchem sama nestačí. Offline/emulator seed nesmí dostat
 univerzální živý bypass. Nástroj bez podporovaného zápisu skončí bez změn.
-Kontrolní schéma a ochranu je potřeba schválit před úpravami těchto nástrojů.
+Kontrolní schéma a ochranu vlastník schválil 6. listopadu, pouze lokálně.
+Živý řídicí dokument/generace tím nevznikly. [Kontrakt a meze](#r6b-results).
 
 ## Živé schéma, migrace a návrat — návrh kontraktu
 
@@ -315,7 +317,77 @@ R6a je uzavřená na feature/feed-retention-runner. Zdroj
 testy/analýza/formát/lint a DEV build. To neaktivuje živý index. Strojové důkazy
 jsou build/feed-retention-runner-ci.{json,log} a build/feed-retention-runner-local-proof.json.
 
-Další konkrétní návrh má řešit společný přepínací dokument a transakční
-odmítnutí nekompatibilních Admin zápisů za building/active generace. Není
-součástí implementace R6a. Časná fronta, produkční adaptér, backfill a cloudové
-ceny/latence dál zůstávají otevřené brány této listiny.
+Navazující R6b ochrana je popsána níže; není součástí dřívější implementace R6a.
+Časná fronta, produkční adaptér, backfill a cloudové ceny/latence dál zůstávají
+otevřené brány této listiny.
+
+<a id="r6b-results"></a>
+
+## R6b — ochrana opravných Admin zápisů (6. listopadu)
+
+Vlastník výslovně schválil R6b včetně blokace starých skriptů. Připraveno na
+feature/feed-admin-write-guard, bez spuštění oprav na živých datech, nasazení,
+změn Rules, Auth účtů či retence. Sdílený modul je
+`functions/feed_index_admin_guard.js`; sám nic neinicializuje ani neaktivuje.
+Podporuje pouze DEV projekt a přesný místní emulátor shoutout-rules-test.
+
+Kontrakt `feedIndexControl/current` má právě těchto pět polí:
+
+| Pole | Validace |
+|---|---|
+| schemaVersion | Přesně 1. Neznámá pole/schéma jsou chyba. |
+| revision | Nezáporné bezpečné celé číslo. Přechody ani monotónní zvyšování revize R6b neimplementuje. |
+| mode | off / building / active / paused. |
+| readGenerationId | null nebo ID uvedené i mezi zapisovanými generacemi. |
+| writeGenerationIds | Pole různých ID podle stávajícího laboratorního formátu `[a-z][a-z0-9-]{0,39}`. |
+
+Off vyžaduje null reader a prázdné writers. Active vyžaduje reader; paused
+null reader a neprázdné writers. Building potřebuje zapisovanou generaci,
+při souběžném čtení staré generace také jinou zapisovanou generaci pro build.
+Guard žádný z režimů building/active/paused nepovoluje pro legacy root zápisy.
+
+Chybějící kontrolní dokument odpovídá současnému projektu před indexem pouze
+tehdy, pokud není žádný záznam v `feedIndexGenerations`. Také explicitní off
+se zachovanou generací zápis odmítne. Vadná data se nikdy nepovažují za off.
+Budoucí správce musí registrovat generaci před/atomicky s prvním indexovým
+zápisem a odstranit její rodičovský záznam až po vyprázdnění všech podkolekcí.
+Guard není inventura osiřelých podkolekcí bez rodiče a nenahrazuje řízení
+Admin oprávnění. Konzole/držitel neomezeného Admin přístupu ho může obejít.
+
+Kontrola řídicího dokumentu i registru proběhne **ve stejné transakci** jako
+oprava. Pokud už přepnutí proběhlo, oprava se odmítne; jinak se úspěšná oprava
+serializuje před čekajícím přepnutím. Budoucí aktivace musí měnit tentýž
+řídicí dokument. Dřívější preflight samotný nedává oprávnění pozdější dávce.
+
+Čtyři CLI mají preflight (hide pouze pro apply) a každou root dávku přes
+applyLegacyFeedAdminUpdates. Každý zdroj vyžaduje původní updateTime; změna
+libovolného zdroje vrátí celou dávku. Zachováno 450 u round, 400 u hide,
+jednotlivé zápisy u reconcile/geography a nejvýše 50 u staré opravy geohashů.
+Celé vícedávkové CLI není jedna transakce: dřívější dokončené dávky se při
+pozdějším odmítnutí nevracejí. Ani geokódovací HTTP požadavek nelze rollbackem
+odvolat; jeho živé volání nebylo testováno. Neindexované komentářové čítače
+zůstávají původní cestou. R6b neopravuje starý vztah zaokrouhlené polohy/geohashe.
+
+Tři seed/reset CLI vždy skončí zprávou legacy-feed-seed-disabled ještě před
+čtením credentials, potvrzení nebo síťovou mutací, včetně starého dry-run
+vstupu resetu. Read-only inspect nástroj zůstává dostupný. Nepřibyla možnost
+obejít ochranu přepínačem. Bezpečný nový fixture/reset postup se teprve navrhne.
+
+Stará applyGeohashRepairPlan zachovává přesný digest, počet a updateTime
+preconditions i atomický výsledek. Výstup writes nově obsahuje pouze ID;
+runTransaction neposkytuje per-write commit timestamp a pozdější read jej
+nemůže nahradit. Historické migrační plány/důkazy se tím nepřepisují.
+
+Ověření: 3 nové kontraktové unit testy, 3 CLI testy blokace před credentials,
+8 emulátorových scénářů ochrany a 3 původní geohash regrese (11/11 společně).
+Celá Functions unit sada 112 pass, tools 45 pass, lint a syntaxe čisté.
+Testy zahrnují oba platné legacy stavy, všechny udržované režimy/vadná data,
+zachovanou generaci, stale batch rollback, přepnutí po preflightu, serializaci,
+starý schválený geohash plán i vadný rozsah. Jsou registrované v běžném CI.
+Skutečné CLI s credentials se nespouštěly; ověřená je jejich syntaxe/zapojení,
+sdílené transakční jádro a blokované entrypointy. Fixture jsou uklizené.
+Důkazy: build/feed-admin-guard-{regression,unit,tools,lint}.log.
+
+Další krok: konkrétní časná indexová fronta a její guard před původním +60d
+deadline, včetně dokladu inkarnace/generací a bezpečného dokončení. R6b ji
+nezapíná a nezakládá řídicí dokument ve skutečném DEV ani produkčním projektu.

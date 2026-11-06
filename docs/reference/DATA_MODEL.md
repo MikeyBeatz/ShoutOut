@@ -271,7 +271,8 @@ hodnoty. Běžná platnost je 15 minut až 24 hodin, Business až 7 dní při po
 Čítače jsou denormalizované kvůli feedu. Nejsou autoritativní samy o sobě:
 pravidla dovolí změnu pouze při odpovídajícím vytvoření, změně nebo smazání
 podřízeného dokumentu. Skript `tools/reconcile_counters.mjs` umí vývojová data
-srovnat.
+srovnat pouze při vypnutém indexu bez udržované generace, s transakční kontrolou
+a updateTime preconditions. [R6b ochrana Admin zápisů](../plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results).
 
 ## Sociální vazby, blokace a nastavení
 

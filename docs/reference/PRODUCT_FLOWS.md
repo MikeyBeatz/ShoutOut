@@ -45,6 +45,8 @@ důvěryhodným Admin SDK nástrojem `tools/hide_deleted_account_shouts.mjs`.
 Nástroj před změnou vyžaduje retenční žádost ve stavu `pending`, ověří, že
 Authentication účet už neexistuje, a po dávkovém skrytí zkontroluje nulový počet
 aktivních Shoutů.
+R6b navíc chrání každou opravnou dávku kontrolou vypnutého indexu bez udržované
+generace ve stejné transakci a původním updateTime zdrojů. [Přesné meze nástroje](../plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results).
 Po úspěšném odstranění Authentication účtu se vyčistí celý navigační
 zásobník. Přihlašovací formulář se proto zobrazí okamžitě bez ručního návratu
 z obrazovky Upravit profil nebo z Business registrace.

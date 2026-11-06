@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 5. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 6. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -24,15 +24,18 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní ochranu Admin zápisů před aktivací indexu.**
+1. **Navrhnout časnou indexovou frontu před původním retenčním deadline.**
    [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
    8–79 minut; není vhodný k nasazení. Schválený R6a runner je lokálně hotový:
    [11/11 regresí, rozpočty, skutečný guard a retry](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results),
    success CI 42114669640 pro zdroj 7079cdd. Tento lokální úsek je uzavřený.
-   Zbývá konkrétní návrh kontrolního schématu a vynucení Admin cest; ceny/SKU,
-   časná fronta a cloudové chování zůstávají bránou pilotu.
+   Schválená [R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results)
+   má lokální kontrolní kontrakt, transakční blokaci opravných zápisů a zákaz
+   tří starých seed/reset CLI (11 emulátorových regresí, 112 unit/45 tools).
+   Zbývá časná fronta s vlastním guardem/dokladem dokončení; ceny/SKU a cloudové
+   chování zůstávají bránou pilotu. Živý řídicí dokument ani index nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
    jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
    [Přesné zdroje a důkazy](PROJECT_STATUS.md),

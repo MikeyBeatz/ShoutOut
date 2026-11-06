@@ -411,6 +411,14 @@ inicializací Admin SDK a explicitně nastavují vývojové project ID. Ostatní
 existující Admin SDK nástroje už kontrolu cílového projektu obsahují.
 Negativní testy používají pouze syntetické credentials a nevolají Firebase.
 
+Od R6b čtyři opravné CLI a stará oprava geohashů navíc kontrolují stav indexu
+v každé zapisující transakci a vyžadují původní updateTime zdrojů. Legacy zápis
+je povolený pouze bez udržované indexové generace. `seed_test_users.mjs`,
+`reset_integration_scenario.mjs` a `seed_moderation_queue.mjs` jsou zablokované
+před credentials/první mutací; starý reset dry-run také. Nepoužívat je jako
+aktuální postup tvorby fixture. [Kontrakt, ověření a meze](../plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results).
+Tato příprava nástrojů není povolení spustit opravu živých dat.
+
 ## Další externí kroky
 
 Po samostatném schválení prověřit služby projektu `shoutout-production-a1b34`.

@@ -4,6 +4,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { canonical } from './feed_block_index.js';
 import { encodeGeohash } from './geohash.js';
 import { preflightFeedIndex } from './feed_index_preflight.js';
+import { applyLegacyFeedAdminUpdates } from './feed_index_admin_guard.js';
 
 const digest = value => createHash('sha256').update(canonical(value)).digest('hex');
 function allowedProject(projectId) {
@@ -42,11 +43,11 @@ export async function applyGeohashRepairPlan(db, plan, { approvedDigest } = {}) 
     return db.doc(`shouts/${change.id}`);
   });
   if (!refs.length) return { updated: 0, digest: checksum };
-  const batch = db.batch();
-  body.changes.forEach((change, i) => batch.update(refs[i], { geohash: change.after }, {
-    lastUpdateTime: new Timestamp(change.updateTime.seconds, change.updateTime.nanoseconds),
-  }));
-  const result = await batch.commit();
-  return { updated: result.length, digest: checksum,
-    writes: result.map((write, i) => ({ id: body.changes[i].id, updateTime: write.writeTime.toDate().toISOString() })) };
+  const result = await applyLegacyFeedAdminUpdates(db, body.changes.map((change, i) => ({
+    ref: refs[i], data: { geohash: change.after },
+    updateTime: new Timestamp(change.updateTime.seconds, change.updateTime.nanoseconds),
+  })));
+  // runTransaction does not expose per-write commit times. Do not report a
+  // later read's updateTime as this operation's commit timestamp.
+  return { updated: result.updated, digest: checksum, writes: body.changes.map(change => ({ id: change.id })) };
 }

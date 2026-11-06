@@ -1,13 +1,22 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 5. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 6. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-Další krok: připravit konkrétní kontrolní schéma a vynucenou ochranu Admin
-zápisů za building/active generace; před změnami předložit rozsah ke schválení.
+Další krok: navrhnout časnou indexovou frontu a její guard před původním +60d
+deadline, s dokladem inkarnace/generací a bezpečným dokončením. Rozsah předložit
+ke schválení před dalšími změnami.
+[R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results) je lokálně
+připravená na feature/feed-admin-write-guard: striktní kontrolní kontrakt,
+transakční kontrola off/žádná generace, updateTime preconditions čtyř opravných
+CLI a staré geohash opravy; tři seed/reset CLI blokované před první mutací.
+11/11 emulátorových regresí, 112 Functions unit, 45 tools, lint/syntaxe prošly.
+Žádný živý řídicí dokument, generace, opravy, Auth účty či nasazení.
+Důkazy: build/feed-admin-guard-{regression,unit,tools,lint}.log.
+
 [Schválený lokální R6a runner](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results)
 je připravený na feature/feed-retention-runner. Nejvýše 32 kroků / 10 s mezi
 transakcemi, dávky 32/16, povinný transakční guard; žádný nový lease/scheduler.
