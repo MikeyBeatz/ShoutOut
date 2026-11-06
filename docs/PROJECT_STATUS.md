@@ -16,6 +16,11 @@ CLI a staré geohash opravy; tři seed/reset CLI blokované před první mutací
 11/11 emulátorových regresí, 112 Functions unit, 45 tools, lint/syntaxe prošly.
 Žádný živý řídicí dokument, generace, opravy, Auth účty či nasazení.
 Důkazy: build/feed-admin-guard-{regression,unit,tools,lint}.log.
+R6b je lokálně uzavřená: zdroj e646d79ea730f45f7da95de9b192e737f80132a7 má
+success CI 42243312876 — 293 Flutter, 45 tools, 112 Functions unit,
+397 Rules/server, 63 purge, 15 Storage, analýza/formát/lint a DEV build.
+Stav a úplný log: build/feed-admin-guard-ci.{json,log}; souhrn
+build/feed-admin-guard-local-proof.json. Pracovní změny jsou commitnuté a pushnuté.
 
 [Schválený lokální R6a runner](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6a-results)
 je připravený na feature/feed-retention-runner. Nejvýše 32 kroků / 10 s mezi

@@ -388,6 +388,13 @@ Skutečné CLI s credentials se nespouštěly; ověřená je jejich syntaxe/zapo
 sdílené transakční jádro a blokované entrypointy. Fixture jsou uklizené.
 Důkazy: build/feed-admin-guard-{regression,unit,tools,lint}.log.
 
+R6b je lokálně uzavřená. Zdroj `e646d79ea730f45f7da95de9b192e737f80132a7`
+má [success CI 42243312876](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42243312876):
+293 Flutter, 45 tools, 112 Functions unit, 397 Rules/server, 63 purge a
+15 Storage, analýza/formát/lint a DEV web build. Strojové důkazy jsou
+build/feed-admin-guard-ci.{json,log} a build/feed-admin-guard-local-proof.json.
+Žádná živá aktivace nebo oprava dat se tím neprovedla.
+
 Další krok: konkrétní časná indexová fronta a její guard před původním +60d
 deadline, včetně dokladu inkarnace/generací a bezpečného dokončení. R6b ji
 nezapíná a nezakládá řídicí dokument ve skutečném DEV ani produkčním projektu.

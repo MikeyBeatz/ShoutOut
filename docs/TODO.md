@@ -34,6 +34,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Schválená [R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results)
    má lokální kontrolní kontrakt, transakční blokaci opravných zápisů a zákaz
    tří starých seed/reset CLI (11 emulátorových regresí, 112 unit/45 tools).
+   Zdroj e646d79 má success CI 42243312876; R6b je lokálně uzavřená.
    Zbývá časná fronta s vlastním guardem/dokladem dokončení; ceny/SKU a cloudové
    chování zůstávají bránou pilotu. Živý řídicí dokument ani index nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
