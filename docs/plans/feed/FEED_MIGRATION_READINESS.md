@@ -6,6 +6,13 @@ Tento dokument nerozhoduje názvy živých indexových kolekcí ani jejich aktiv
 
 ## Současná brána
 
+K 6. listopadu je schválené [R6e](FEED_RUNTIME_PROPOSAL.md#r6e-results) lokálně
+připravené za společnou vypnutou volbou. Runtime factory, pevné DEV cesty,
+vícegeneracový writer a společný rozpočet jsou napojené v obsahových/účtových
+wrapperech; časná fronta a koordinátor používají totéž jádro jako laboratoř.
+Recover/runNext dosud nejsou v minutovém plánovači. Závěrečných 47/47 cílených
+testů prošlo, CI přesného commitu zatím zbývá. Živý index ani migrace neběží.
+
 K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutoveru
 a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je
 navíc připravený sdílený dávkový plán přípravy a propojení maintenance/purge;
@@ -122,8 +129,9 @@ Původní plán i výsledek jsou v docs/local/migrations/, výsledek má přípo
    Celé serverové moderační rozhodnutí/report/audit je samostatný milník.
 3. [Provozní návrh](FEED_RUNTIME_PROPOSAL.md) nyní obsahuje měření R5,
    návrh generace/migrace, Admin cesty a nákladový model. R6a–R6d mají lokální
-   ověření včetně volitelné koordinace purge; zbývá provozní adaptér,
-   migrace a konkrétní DEV pilot s regionálními cenami a cloudovým měřením.
+   ověření včetně koordinace purge; R6e má adaptér za vypnutou volbou.
+   Zbývá omezené provozní plánování, migrace a konkrétní DEV pilot
+   s regionálními cenami a cloudovým měřením.
    Read-only preflight ani tento návrh samy živé změny nepovolují.
 4. Zabezpečené query API, přenositelné kurzory a DEV klientské A2/A3.
 5. B1–B4; vlastník schválil 1 souvislou sekundu na každou část obsahu.

@@ -24,7 +24,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Navrhnout provozní adaptér se společným zapojením fronty a koordinátoru.**
+1. **Uzavřít CI adaptéru, potom připravit plánování časné fronty a migraci.**
+   Schválené [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně
+   připravené za vypnutou volbou: společné jádro a DEV cesty, více generací,
+   společný rozpočet zápisů, fronta/koordinátor a oba balíčky Functions.
+   Závěrečných 47/47 cílených testů, unit 115/tools 47 a lint prošly; přesné CI
+   zbývá. Žádné nasazení ani živé kolekce. Před aktivací je nutné zapojit
+   omezené recover/runNext do provozního plánování, doložit migraci a DEV pilot.
    [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
@@ -41,8 +47,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Schválená [R6d koordinace](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results)
    lokálně propojuje doklad a dávkový úklid s konečným workerem (14/14 finálních
    testů, success CI 42258910004 pro c7c1fef); R6d je lokálně uzavřená,
-   včetně ochrany checkpointu před návratem UID. Zbývá provozní adaptér
-   za vypnutou volbou, migrace a pilot s cenami/SKU a cloudovým měřením.
+   včetně ochrany checkpointu před návratem UID. R6e stav je výše; zbývá
+   provozní plánování, migrace a pilot s cenami/SKU a cloudovým měřením.
    Živý řídicí dokument, index ani časná fronta nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
    jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.

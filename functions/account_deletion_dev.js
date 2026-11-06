@@ -4,6 +4,7 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { createFeedRuntime } from './feed_runtime.js';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as logger from 'firebase-functions/logger';
@@ -34,8 +35,8 @@ function database() {
   const db = getFirestore(); assertAccountDeletionDevTarget(db.projectId); return db;
 }
 
-function workerOptions(db) {
-  return { ...accountDeletionDevProposal,
+function workerOptions(db, runtime) {
+  return { ...accountDeletionDevProposal, indexWriter: runtime.indexWriter, indexErasureCoordinator: runtime.indexErasureCoordinator,
     logoBucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`),
     bucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`) };
 }
@@ -47,8 +48,8 @@ export const accountDeletionRequestCreatedDev = onDocumentCreated({
   ...common, document: 'accountDeletionRequests/{userId}', retry: true,
 }, async event => {
   try {
-    const db = database();
-    const result = await runAccountDeletionCreatedEvent(event, db, getAuth(), workerOptions(db));
+    const runtime = createFeedRuntime(database(), getAuth()), db = runtime.database;
+    const result = await runAccountDeletionCreatedEvent(event, db, getAuth(), workerOptions(db, runtime));
     const summary = { phase: result.state, hidden: result.hidden ?? 0, privateDeleted: result.deleted ?? 0 };
     (result.state === 'needs-review' ? logger.warn : logger.info)('account-deletion-shout-job', summary);
   } catch {
@@ -61,9 +62,9 @@ export const resumeAccountDeletionJobsDev = onSchedule({
   ...common, schedule: '* * * * *', timeZone: 'Etc/UTC', retryCount: 0,
 }, async () => {
   try {
-    const db = database();
+    const runtime = createFeedRuntime(database(), getAuth()), db = runtime.database;
     const result = await runAccountMaintenanceTick(db, getAuth(), {
-      ...workerOptions(db), clock: () => new Date(),
+      ...workerOptions(db, runtime), clock: () => new Date(),
     });
     const log = result.purgeFailed || result.purgeNeedsReview || result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);

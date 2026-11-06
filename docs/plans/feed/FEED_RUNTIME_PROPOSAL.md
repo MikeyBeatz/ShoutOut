@@ -1,9 +1,9 @@
 # Provozní návrh prostorového indexu
 
-6. listopadu 2026. **R6a–R6d jsou schválené lokální úseky; zbývající provozní
+6. listopadu 2026. **R6a–R6e jsou schválené lokální úseky; zbývající provozní
 návrh není schválená živá konfigurace.** [Runner](#r6a-results),
 [ochrana Admin nástrojů](#r6b-results), [časná fronta](#r6c-results),
-[koordinace konečného purge](#r6d-results).
+[koordinace konečného purge](#r6d-results), [provozní adaptér](#r6e-results).
 Navazuje na [writer](FEED_WRITER_INTEGRATION.md), [R5](FEED_INDEX_RETENTION.md#account-retention-proposal)
 a [migrační připravenost](FEED_MIGRATION_READINESS.md). Lokální jádro je ověřené;
 živý adaptér, generace, backfill, API ani plánování indexu dosud neběží.
@@ -21,9 +21,9 @@ Doporučené pořadí:
 
 1. R6a–R6d mají lokální ověření včetně volitelné koordinace s konečným purge.
    Živý worker stále běží dosavadní cestou bez indexu a koordinátoru.
-2. Připravit provozní adaptér za vypnutým přepínačem, společné zapojení fronty
-   a koordinátoru do skutečných wrapperů a přesný migrační nástroj. Každý z těchto
-   rozsahů před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
+2. R6e připravuje adaptér a společnou factory za vypnutým přepínačem. Po uzavření
+   jeho kontrol doplnit omezené plánování časné fronty a přesný migrační nástroj.
+   Každý další rozsah před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
 3. Předložit DEV pilot s měřením skutečných index entries, cloudové latence,
    prostředků a rozpočtu. Teprve schválený pilot může měnit živé indexy/data.
 4. Po úspěchu připojit query API a klienta A2/A3, potom přečtení B1–B4.
@@ -581,3 +581,90 @@ R6d je lokálně uzavřená na feature/feed-purge-proof-coordinator. Zdroj
 15 Storage, analýza/formát/lint a DEV web build. Důkazy:
 build/feed-purge-coordinator-ci.{json,log} a build/feed-purge-coordinator-local-proof.json.
 Živý index, wrappery a plánovač zůstaly beze změny.
+
+<a id="r6e-results"></a>
+
+## R6e — DEV adaptér za vypnutou volbou (6. listopadu)
+
+Vlastník schválil lokální adaptér, ověření, dokumentaci, commit/push a CI.
+Výslovně bez živých dat, migrace, zapnutí plánovače, nasazení, Rules a nových
+Auth účtů. Práce je na feature/feed-runtime-adapter. Původní R6a–R6d výsledky zůstávají platné pro
+uvedené zdroje, nejsou samy důkazem kontroly refaktorovaného jádra.
+
+Společné moduly *_store.js, feed_early_erasure_queue.js a
+feed_account_retention_runner.js oddělují algoritmus od datových cest.
+Původní *_lab.js jsou chráněné obaly pro přesný emulátor a testovací projekt.
+Lab seed je pouze v obalu, který se nepřibaluje do Functions. DEV rozhraní
+nezpřístupňuje seed, mutate, umělý čas GC ani fixture hooky. Samotné sdílené
+GC navíc odmítne posun testovacího času u provozní vazby.
+
+| Účel | Pevná serverová cesta |
+|---|---|
+| Zdroj plného obsahu | shouts/{id} |
+| Generace a současně její registrace | feedIndexGenerations/{generationId} |
+| Bloky, kořeny, historie a R5 journal | Podkolekce dané generace podle dosavadního schématu |
+| Řízení | feedIndexControl/current; dosavadní striktní R6b kontrakt |
+| Recovery checkpoint | feedIndexMaintenance/erasureQueue |
+| Soukromé úlohy a doklady | Podkolekce jobs/{identityHash}/targets/{generationId} pod checkpointem |
+
+createFeedRuntime vrací databázi, writer, časnou frontu a konečný koordinátor
+společně. Jediná sdílená feedRuntimeConfiguration má **enabled: false**.
+Při false se vrací původní databáze a null adaptéry bez přístupu k novým
+dokumentům. Zapnutý adaptér odmítá produkční projekt; podporuje pouze DEV
+a přesný testovací emulátor. Nezakládá automaticky control ani generace.
+
+Čtyři obsahové wrappery (createShout, toggleShoutReaction, deleteShout,
+prepareAccountDeletion) a obě účtové Functions používají tuto společnou
+factory. Přepínač zůstává vypnutý. **Tento krok nezapojuje recover/runNext
+časné fronty do minutového plánovače.** Před aktivací je nutné doložit jeho
+omezené plánování včetně soužití s primárním mazáním, purge a expirací; samotné
+přepnutí na true není hotový provozní rollout. Nový Scheduler ani jiný interval
+nevznikl. Query API a klient nejsou součástí tohoto adaptéru.
+
+Writer čte control ve stejné transakci jako zdroje a plány všech zapisovaných
+generací. Active/building/paused udržují vyjmenované generace; off vyžaduje
+prázdný registr. Neplatný/chybějící control nebo marker generace nesmí vést
+k neindexovanému fallbacku. Registrace/výměna generace musí podle R6c stále
+atomicky měnit control; registrátor a backfill jsou další migrační krok.
+
+Původní konzervativní hranice **450 zápisových SDK operací** je společná pro
+všechny generace i zdroje, receipt, rate a journal v jedné transakci. Plány
+se nejprve připraví bez zápisu, sečtou indexové změny a až potom dovolí apply.
+Databázový obal navíc počítá skutečné mutace včetně pozdějších zápisů volajícího;
+každý retry má nový čítač. Překročení ukončí transakci bez částečného commitu.
+Nejde o měření cloudových wire bytes ani všech účtovaných index entries;
+serverové velikostní limity dál platí a nákladová brána zůstává otevřená.
+Dávka přípravy účtu se nekrátí: nadále nejvýše 50 a hasMore == (hidden == 50),
+včetně uloženého výsledku opakované operace. Příliš velký plán vrátí chybu,
+nikoli neúplné potvrzení. Kapacitní meze je nutné zohlednit při návrhu pilotu.
+
+Registrace a marker generace sdílejí dokument; fronta proto znovu nečte
+již načtený marker z registru. Writer rovněž ověřuje marker v existujícím
+plánovacím čtení. Cache klíč zahrnuje celou cestu generace, takže laboratorní
+a provozní vazba nemíchají položky. R5 protokol, lease, původní 60denní termín
+a atomické dokončení R6d zůstávají společné s laboratorní regresí.
+
+Příprava obou balíčků Functions nově následuje skutečný strom lokálních importů,
+odmítá lab/test moduly a cesty mimo zdrojovou složku a odstraní zastaralé
+kořenové JS moduly z předchozího buildu. Ověření balíčků nic nenasazuje.
+Následují provozní plánování, migrační nástroj a konkrétní schválený DEV pilot
+s cloudovými indexy, latencí, regionální cenou a návratem. MVP/backlog checkboxy
+se samotnou lokální přípravou nezavírají.
+
+Lokální závěrečná sada 47/47 ověřila refaktorované jádro, snapshoty/GC/R5,
+11 runtime průchodů a kontrolu přístupu klientů se stávajícími Rules.
+Runtime scénáře zahrnují dvě generace, ztracenou odpověď přípravy účtu,
+opakování bez dalších zápisů, souběh, rollback, společný rozpočet v pěti
+generacích i pozdější mutace, off/paused, chybné řízení a restart úklidu
+na provozních cestách včetně konečného dokladu. Předchozí společná sada 66/66
+ověřila také R6a–R6d. Širší regrese nejprve zachytila nekompatibilní použití
+db.doc v lab facade; oprava obnovila původní collection().doc() a následná
+závěrečná sada prošla. Functions unit 115 pass, tools 47 pass a lint čistý.
+Důkazy: build/feed-runtime-{regression,final-fixed,unit-final,tools-final,lint-final}.log.
+Oba artefakty po čistém npm ci --omit=dev prošly načtením: shodné exporty se
+zdrojem a vypnutá konfigurace, build/feed-runtime-artifact-smoke-final.log.
+Původní lokální node_modules artefaktů neobsahovaly již deklarovaný geofire-common;
+čistá instalace podle existujícího lockfile tento stav odstranila, závislosti
+ani lockfile projektu se neměnily. Kontrola stromu importů, deklarovaných
+balíčků a vyloučení fixture modulů má navíc 2/2 závěrečné testy
+v build/feed-runtime-artifact-test-final.log. CI přesného zdroje zatím zbývá.

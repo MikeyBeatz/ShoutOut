@@ -6,9 +6,24 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další krok: konkretizovat provozní adaptér indexu se společným zapojením časné
-fronty/koordinátoru za vypnutou volbou, potom migrační nástroj a DEV pilot.
-Před úpravami schválit konkrétní rozsah.
+Schválené [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně
+připravené na feature/feed-runtime-adapter: společné jádro, pevné DEV cesty,
+writer pro více generací, časná fronta a purge koordinátor v jedné factory.
+Obsahové/účtové wrappery ji používají za společnou **vypnutou** volbou; při off
+nevznikají nové databázové přístupy. Původní lab vstupy dál vyžadují emulátor.
+Společný rozpočet 450 mutací zahrnuje i pozdější zdroj/receipt/journal zápisy;
+kontrakt dávky 50 zůstává. Oba balíčky sledují skutečné importy a vylučují lab/test.
+Závěrečná cílená sada 47/47, Functions unit 115 pass, tools 47 pass a lint čistý;
+předchozí společná regrese 66/66. Širší kontrola zachytila rozdíl lab facade
+collection/doc; po opravě prošla závěrečná sada. CI přesného commitu ještě zbývá.
+Důkazy: build/feed-runtime-{regression,final-fixed,unit-final,tools-final,lint-final}.log.
+Oba balíčky po čisté instalaci podle lockfile prošly načtením se shodnými exporty
+a vypnutou volbou; build/feed-runtime-artifact-smoke-final.log.
+Žádné nasazení, živá data, Rules, Scheduler ani nové Auth účty.
+Další krok po uzavření CI: omezené provozní plánování časné fronty (recover/runNext
+ještě není v minutovém ticku), migrační nástroj a konkrétní DEV pilot.
+Pouhé přepnutí volby na true není hotový rollout. Před dalšími úpravami schválit rozsah.
+
 [R6d koordinace purge](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results) je lokálně
 připravená na feature/feed-purge-proof-coordinator. Volitelný koordinátor
 využije aktuální doklad bez globálního rescanu, jinak obnoví omezenou práci;

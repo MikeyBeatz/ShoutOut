@@ -1,4 +1,6 @@
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { createFeedRuntime } from './feed_runtime.js';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { onCall } from 'firebase-functions/v2/https';
 import { secureCallableOptions } from './callable_security.js';
@@ -17,6 +19,13 @@ import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js
 
 if (getApps().length === 0) initializeApp();
 
+// One switch selects writer + early queue + purge coordinator together. The
+// queue is not scheduled here; activation requires the migration/runtime gate.
+function indexedOperation(operation, request) {
+  const runtime = createFeedRuntime(getFirestore(), { getUser: uid => getAuth().getUser(uid) });
+  return operation(request, runtime.database, () => new Date(), { indexWriter: runtime.indexWriter });
+}
+
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
 
 // Local preparation only: the client switch remains disabled.
@@ -29,7 +38,7 @@ export const finalizeAccountDeletion = onCall({
 export const prepareAccountDeletion = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => prepareAccountDeletionOperation(request, getFirestore()));
+}, request => indexedOperation(prepareAccountDeletionOperation, request));
 
 export const deleteShout = onCall({
   ...secureCallableOptions,
@@ -38,7 +47,7 @@ export const deleteShout = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, request => deleteShoutOperation(request, getFirestore()));
+}, request => indexedOperation(deleteShoutOperation, request));
 
 export const deleteComment = onCall({
   ...secureCallableOptions,
@@ -56,7 +65,7 @@ export const createShout = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => createShoutOperation(request, getFirestore()));
+}, (request) => indexedOperation(createShoutOperation, request));
 
 export const createComment = onCall({
   ...secureCallableOptions,
@@ -83,7 +92,7 @@ export const toggleShoutReaction = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => toggleShoutReactionOperation(request, getFirestore()));
+}, (request) => indexedOperation(toggleShoutReactionOperation, request));
 
 export const toggleCommentReaction = onCall({
   ...secureCallableOptions,

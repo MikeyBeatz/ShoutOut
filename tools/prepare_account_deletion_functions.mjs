@@ -1,22 +1,11 @@
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prepareFunctionArtifact } from './function_artifact.mjs';
 
 // Preparation only. Separate codebase; does not run Firebase or deploy anything.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const target = resolve(root, 'build/functions-account-deletion');
-mkdirSync(target, { recursive: true });
-for (const file of ['account_deletion_dev.js', 'account_deletion_job.js', 'account_deletion_job_scan.js',
-  'account_deletion_event.js', 'account_shout_hiding.js', 'account_private_cleanup.js', 'account_content_archive.js', 'account_deletion_confirmation.js',
-  'account_public_identity.js', 'account_logo_revocation.js', 'account_identity_job.js',
-  'account_actor_reactions_job.js', 'account_reaction_removal.js', 'shout_expiration.js',
-  'account_purge_guard.js', 'account_purge_pager.js', 'account_purge_policy.js', 'account_purge_tree.js',
-  'account_purge_activity.js', 'account_purge_storage.js', 'account_purge_job.js', 'account_purge_scan.js', 'shout_context.js', 'package-lock.json']) {
-  copyFileSync(resolve(root, 'functions', file), resolve(target, file));
-}
-const manifest = JSON.parse(readFileSync(resolve(root, 'functions/package.json'), 'utf8'));
-manifest.main = 'account_deletion_dev.js'; delete manifest.scripts;
-writeFileSync(resolve(target, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
+prepareFunctionArtifact(root, 'functions-account-deletion', 'account_deletion_dev.js');
 writeFileSync(resolve(root, 'build/firebase-account-deletion.json'), JSON.stringify({
   functions: { source: 'functions-account-deletion', codebase: 'account-deletion' },
 }, null, 2) + '\n');
