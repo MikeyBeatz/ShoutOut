@@ -15,7 +15,9 @@ nikoli jednorázové demo. Přibyly vlastní stránky uložených Shoutů, resta
 běžný GC, zapojení jednoho indexového úseku do minutového workeru, podmíněné
 uzavření přímých zápisů v Rules a kontrolovaný instalační nástroj. Společných
 38/38 serverových testů a 8/8 instalace/uložených Shoutů prošlo; konečná regrese
-a CI ještě zbývá. Klient 305/305, tools 50/50, Functions unit 118 pass,
+a úplné CI ještě zbývá. První běh 42305776552 selhal na izolaci instalačních
+fixture a Business expression budget; opravy mají 92/92 místních regresí.
+Klient 305/305, tools 50/50, Functions unit 118 pass,
 analýza/formát/lint a kontrola dokumentačních odkazů prošly lokálně.
 Read-only DEV inventura: 37 Shoutů / 0 active, control/generace
 neexistují. [Přesný postup, testy, návrat a zbývající brány](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).

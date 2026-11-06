@@ -8,10 +8,12 @@ class _SavedShoutsLibrary extends StatefulWidget {
     required this.onSave,
     required this.onReaction,
     this.position,
+    this.blockedUserIds = const {},
   });
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final Position? position;
+  final Set<String> blockedUserIds;
   @override
   State<_SavedShoutsLibrary> createState() => _SavedShoutsLibraryState();
 }
@@ -114,7 +116,7 @@ class _SavedShoutsLibraryState extends State<_SavedShoutsLibrary> {
                   return _SpatialShoutCard(
                     key: ValueKey(shout.id),
                     shout: shout,
-                    blocked: false,
+                    blocked: widget.blockedUserIds.contains(shout.authorId),
                     onSave: () => widget.onSave(shout),
                     onReaction: (like) => widget.onReaction(shout, like: like),
                     heightOf: () => _heights[shout.id],

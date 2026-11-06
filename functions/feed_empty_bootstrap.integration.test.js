@@ -1,4 +1,4 @@
-import { after, test } from 'node:test';
+import { before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
@@ -9,6 +9,14 @@ import { planEmptyFeedBootstrap as plan, initializeEmptyFeedBootstrap as initial
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'feed-bootstrap-tests') : null;
 const db = app ? getFirestore(app) : null;
+before(async () => {
+  if (!enabled) return;
+  // Installation deliberately requires a truly empty active source. Other
+  // suites leave their unrelated emulator fixtures behind. Reset only this
+  // literal local test database before this independent installation suite.
+  const response = await fetch('http://127.0.0.1:8080/emulator/v1/projects/shoutout-rules-test/databases/(default)/documents', { method: 'DELETE' });
+  assert.equal(response.status, 200);
+});
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 async function fixture(t) {
   const generation = `start-${randomUUID().slice(0, 8)}`, roots = [db.doc('feedIndexControl/current'),

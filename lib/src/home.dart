@@ -866,6 +866,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
           1 => FollowedPage(
             pagedSavedShouts: _useSpatialFeed,
             savedPosition: _currentPosition,
+            blockedUserIds: _blockedUserIds,
             shouts: activeShouts.where((shout) => shout.isSaved).toList(),
             onSave: _toggleSaved,
             onReaction: _toggleReaction,

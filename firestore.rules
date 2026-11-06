@@ -459,14 +459,14 @@ service cloud.firestore {
         ).data.nickname;
     }
 
-    function validBusinessShout(data) {
+    function validBusinessShout(data, businessAccount) {
       let businessPath =
         /databases/$(database)/documents/businessProfiles/$(request.auth.uid);
       let locationPath =
         /databases/$(database)/documents/businessProfiles/$(request.auth.uid)/locations/$(data.businessLocationId);
       let business = get(businessPath).data;
       let location = get(locationPath).data;
-      return isBusinessAccount() &&
+      return businessAccount &&
         data.businessLocationId is string &&
         exists(businessPath) &&
         exists(locationPath) &&
@@ -1862,6 +1862,10 @@ service cloud.firestore {
     }
 
     function validShoutCreate() {
+      // Reuse trusted role/profile snapshots; repeated helper/path evaluation
+      // otherwise pushes a valid Business branch write over the expression cap.
+      let businessAccount = isBusinessAccount();
+      let profile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
       return request.resource.data.keys().hasOnly([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
           'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
@@ -1880,7 +1884,7 @@ service cloud.firestore {
         request.resource.data.authorNickname is string &&
         (
           (
-            !isBusinessAccount() &&
+            !businessAccount &&
             !request.resource.data.keys().hasAny([
               'businessLocationId', 'businessAuthorFormat',
               'businessHighlighted', 'businessSpotlight',
@@ -1888,7 +1892,7 @@ service cloud.firestore {
             ]) &&
             canonicalNickname(request.resource.data)
           ) ||
-          validBusinessShout(request.resource.data)
+          validBusinessShout(request.resource.data, businessAccount)
         ) &&
         request.resource.data.keys().hasAll([
           'avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd',
@@ -1896,13 +1900,13 @@ service cloud.firestore {
         ]) &&
         validAvatarStyle(request.resource.data) &&
         request.resource.data.avatarId ==
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarId &&
+          profile.avatarId &&
         request.resource.data.avatarBackgroundStart ==
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarBackgroundStart &&
+          profile.avatarBackgroundStart &&
         request.resource.data.avatarBackgroundEnd ==
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarBackgroundEnd &&
+          profile.avatarBackgroundEnd &&
         request.resource.data.avatarGradientDirection ==
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.avatarGradientDirection &&
+          profile.avatarGradientDirection &&
         request.resource.data.title is string &&
         request.resource.data.title.size() >= 1 &&
         request.resource.data.title.size() <= 60 &&
@@ -1923,7 +1927,7 @@ service cloud.firestore {
         request.resource.data.expiresAt >=
           request.time + duration.value(14, 'm') &&
         request.resource.data.expiresAt <= request.time +
-          duration.value(isBusinessAccount() ? 10081 : 1441, 'm') &&
+          duration.value(businessAccount ? 10081 : 1441, 'm') &&
         request.resource.data.status == 'active' &&
         request.resource.data.likesCount == 0 &&
         request.resource.data.dislikesCount == 0 &&

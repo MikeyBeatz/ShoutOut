@@ -131,6 +131,22 @@ datový rozsah, úklid i konečný stav doložit před živým provedením.
 
 ## Ověření této implementace
 
+První úplné CI `42305776552` pro `cc262af` selhalo: pět instalačních případů
+správně odmítlo aktivní fixture předchozích sad a Business branch průchod
+překročil limit 1 000 výrazů Rules. Instalační sada nyní před spuštěním resetuje
+výhradně doslovný lokální emulátorový projekt; živé instalační kontroly se
+neoslabují. Rules opakovaně používají tentýž ověřený role/profile snapshot,
+se stejnými podmínkami. Navazujících 92/92 lokálních regresí včetně Business,
+instalace a uzavřených zápisů prošlo (`build/feed-install-rules-regression.log`).
+Nové CI musí ověřit přesný opravený commit; první běh není release důkaz.
+
+Produkční nasazení potřebuje vlastní konfiguraci účtového wrapperu, který je
+dosud výslovně chráněný pro DEV; společné jádro nepotřebuje jiný datový model.
+Uzavření přímých create/vote Rules platí pro všechny klienty. Aktuální web má
+serverové cesty, ale staré/nativní DEV buildy s přímými zápisy po přechodu tyto
+akce neprovedou. Mobilní distribuce a nativní App Check patří podle rozsahu
+MVP do samostatného navazujícího plánu; tuto podmínku uvést před živým přechodem.
+
 Průběžné lokální důkazy: 38/38 společných serverových regresí
 (`build/feed-start-maintenance-final.log`), 8/8 instalace a uložených Shoutů
 (`build/feed-saved-bootstrap-final.log`), předchozí 4/4 checkpoint testy a

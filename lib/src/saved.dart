@@ -11,6 +11,7 @@ class FollowedPage extends StatefulWidget {
     required this.followedUserIds,
     this.pagedSavedShouts = false,
     this.savedPosition,
+    this.blockedUserIds = const {},
   });
 
   final List<Shout> shouts;
@@ -19,6 +20,7 @@ class FollowedPage extends StatefulWidget {
   final Set<String> followedUserIds;
   final bool pagedSavedShouts;
   final Position? savedPosition;
+  final Set<String> blockedUserIds;
 
   @override
   State<FollowedPage> createState() => _FollowedPageState();
@@ -74,6 +76,7 @@ class _FollowedPageState extends State<FollowedPage> {
                       onSave: widget.onSave,
                       onReaction: widget.onReaction,
                       position: widget.savedPosition,
+                      blockedUserIds: widget.blockedUserIds,
                     )
                   : ShoutListPage(
                       title: null,
