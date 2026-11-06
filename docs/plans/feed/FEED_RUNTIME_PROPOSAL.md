@@ -1,8 +1,8 @@
 # Provozní návrh prostorového indexu
 
-6. listopadu 2026. **R6a a R6b jsou schválené lokální úseky; zbývající provozní
+6. listopadu 2026. **R6a–R6c jsou schválené lokální úseky; zbývající provozní
 návrh není schválená živá konfigurace.** [Runner](#r6a-results),
-[ochrana Admin nástrojů](#r6b-results).
+[ochrana Admin nástrojů](#r6b-results), [časná fronta](#r6c-results).
 Navazuje na [writer](FEED_WRITER_INTEGRATION.md), [R5](FEED_INDEX_RETENTION.md#account-retention-proposal)
 a [migrační připravenost](FEED_MIGRATION_READINESS.md). Lokální jádro je ověřené;
 živý adaptér, generace, backfill, API ani plánování indexu dosud neběží.
@@ -18,10 +18,10 @@ kdy už má být dokončený. Navíc drží oblast zamčenou přes několik pokr
 
 Doporučené pořadí:
 
-1. R6a runner a R6b transakční ochrana Admin nástrojů mají lokální ověření níže.
-   Následuje návrh časné indexové fronty a jejího guardu před původním deadline.
-2. Připravit včasnou indexovou frontu po potvrzení odstranění Auth, produkční
-   adaptér za vypnutým přepínačem a přesný migrační nástroj. Každý z těchto
+1. R6a runner, R6b transakční ochrana a R6c časná fronta mají lokální ověření níže.
+   Zbývá skutečný adaptér a koordinace časné fronty s konečným purge.
+2. Připravit provozní adaptér za vypnutým přepínačem, propojení dokladů/úklidu
+   s účtovým workerem a přesný migrační nástroj. Každý z těchto
    rozsahů před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
 3. Předložit DEV pilot s měřením skutečných index entries, cloudové latence,
    prostředků a rozpočtu. Teprve schválený pilot může měnit živé indexy/data.
@@ -155,7 +155,8 @@ do té doby nemáme podklad k tvrzení „vejde se to do 5 000 Kč“.
 - Dokončení časného úklidu musí atomicky uložit doklad inkarnace/generací a
   zavřít indexový journal. Závěrečný account purge jej ověří místo opětovné
   inventory. Nová generace, neplatný doklad či nepokrytá kopie znamená novou
-  práci, ne slepé přeskočení. Dnes takový časný doklad implementovaný není.
+  práci, ne slepé přeskočení. R6c již má lokální doklad; živý purge jej dosud
+  nekonzumuje a celý provozní protokol není tímto hotový.
 - Provozní alarmy: stáří fronty, čas nejbližšího deadline, stáří zámku,
   počet čtení/retry a blokovaných operací. Konkrétní prahy, interval a prostředky
   předložit po lokálním runneru a cloudovém měření. Výpadek služby nemůže být
@@ -395,6 +396,104 @@ má [success CI 42243312876](https://github.com/MikeyBeatz/ShoutOut/actions/runs
 build/feed-admin-guard-ci.{json,log} a build/feed-admin-guard-local-proof.json.
 Žádná živá aktivace nebo oprava dat se tím neprovedla.
 
-Další krok: konkrétní časná indexová fronta a její guard před původním +60d
-deadline, včetně dokladu inkarnace/generací a bezpečného dokončení. R6b ji
-nezapíná a nezakládá řídicí dokument ve skutečném DEV ani produkčním projektu.
+Navazující [R6c časná fronta](#r6c-results) má vlastní lokální ověření níže.
+R6b ji nezapíná a nezakládá řídicí dokument ve skutečném DEV ani produkčním projektu.
+
+<a id="r6c-results"></a>
+
+## R6c — časná indexová fronta (6. listopadu, pouze emulátor)
+
+Vlastník schválil R6c a lokální ověření po vysvětlení, že stávající purge guard
+výslovně vyžaduje původní +60denní termín. Nový modul
+`functions/feed_early_erasure_queue_lab.js` tento guard ani účetní worker
+nemění. Nemá callable/trigger/scheduler export. Odmítá jiné prostředí než
+shoutout-rules-test a přesný host `127.0.0.1:8080`. Auth je předané rozhraní;
+testy používají stub, nikoli nově vytvořené účty.
+
+| Laboratorní cesta | Význam |
+|---|---|
+| `feedErasureQueueLab/{namespace}` | CAS checkpoint omezeného recovery scanu. |
+| `.../jobs/{hash}` | UID, přesná request createTime, původní retainUntil, fáze, lease, kurzor/digest inventury a počty cílů. Hash váže projekt, UID a inkarnaci žádosti. |
+| `.../jobs/{hash}/targets/{generation}` | CreateTime registrace i indexové báze, epoch inventury, stav a čas dokončení generace. |
+
+R6c mapuje registrované generace na stejně pojmenované `feedIndexLab/{id}`.
+Produkční cesty ani skutečný queue namespace tím nejsou zavedené. Před pilotem
+musí být jeden koordinátor fronty pro daný registr; testové namespaces nejsou
+návod na několik nezávislých živých front nad stejnými bloky.
+
+Enqueue i každý claim vyžadují potvrzeně chybějící Auth účet, aktuální pending
+žádost se shodnou createTime a přesně minimální veřejný marker smazání. Guard
+ověřuje žádost/marker a lease v každé R5 transakci; nepotřebuje čekat 60 dní.
+Nevytváří chybějící potvrzení ani marker. Auth outage není důkaz smazání.
+Když se Auth účet znovu najde u již zařazené práce, úkol skončí v needs-review.
+Retenční archiv, kanonické Shouty, role a původní retainUntil ostatních dat
+se nemění. Test porovnal i updateTime žádosti, kanonického obsahu, archivu a
+nedokončené primární práce před/po časném úklidu.
+
+Recovery stránkuje nejvýše 50 žádostí podle ID a znovu cykluje po konci.
+Na primární fázi/nextAttemptAt se nespoléhá, takže najde i žádost s již
+potvrzeným Auth a markerem, jejíž primární worker skončil needs-review.
+Chybějící potvrzení/marker eviduje jako nezpůsobilé, nikoli jako dokončení;
+jejich oprava a alarmy zůstávají provozní bránou. Auth chyby nepostoupí
+checkpoint. Souběžné recovery používají jeho updateTime CAS.
+
+Nové úkoly se vybírají podle nejbližšího původního retainUntil. Rozpracovaná
+due práce má přednost, aby se uvolnily její oblasti. Jeden průchod vezme
+nejvýše jeden úkol a jednu stránku inventury nebo výběr cíle nebo R6a řez.
+Lease 120 s a retry 60 s přebírají stávající laboratorní vzor; není tím
+schválený nový živý interval. R6a zachovává nejvýše 32 kroků / 10 s mezi
+transakcemi a čtecí/mazací dávky 32/16. Claim/inventura/finalizace jsou práce
+navíc mimo čas samotného R6a řezu. Úkol nesmí být nasazen jako 10s Function
+na základě tohoto parametru.
+
+Inventura registru je také stránkovaná po 50, bez stropu celé sady generací.
+Zahrne všechny registrované generace, včetně zachovaných mimo současný reader.
+Chybějící kontrolní generace, vadný registr/báze nebo ztracený target vedou
+k odmítnutí dokončení. Každý target váže createTime registrace a indexové báze;
+výměna inkarnace během zpracování je needs-review, nikoli důvod automaticky
+smazat její fence. Lease takeover rovněž nedovolí starému workeru uvolnit lease
+nového vlastníka.
+
+Epoch registru je hash createTime/updateTime řídicího dokumentu. **Každá změna
+členství/incarnace registru musí atomicky změnit tentýž kontrolní dokument.**
+R6c toto ověřuje na kontrolované fixture; skutečný registrátor ještě není
+implementovaný. Platí také R6b zákaz odstranit rodiče generace před vyprázdněním
+jejích podkolekcí. Bez těchto invariantů nelze doklad použít jako důkaz úplnosti.
+
+Při změně epoch během aktivního úklidu se dokončí rozpracovaná generace a až
+pak obnoví inventura. Již dokončený target se znovu použije jen při shodě obou
+createTime. Nová generace zneplatní starý globální doklad; verify vrací
+registry-changed a run vrací stale-proof. Recovery/enqueue ji opět zařadí.
+Čítače pending/done a digest celé sady brání tomu, aby chybějící target vypadal
+jako prázdná dokončená fronta. Výběr ověřuje i hash identity proti klíči úkolu.
+
+Dokončení jednoho targetu je jedna transakce: kontrola lease/identity/generace,
+R5 prepareAccountIndexFinish, odstranění jeho journalu a activeErasure,
+označení targetu a zvýšení doneCount. Injekce chyby před commitem vrátí všechny
+tyto změny. Při ztraceném potvrzení commit může být uložený; cold pokračování
+se řídí databází a neprovede druhé vymazání. Teprve prázdná pending sada se
+shodnými počty a epoch dokončí celkový doklad.
+
+Celkový doklad je serverový stav svázaný s inkarnací žádosti, epoch registru,
+digestem generací a původním retainUntil. Verify vždy znovu čte aktuální
+žádost, marker a kontrolní dokument. **Stávající konečný purge ho zatím
+nečte**; jeho původní Auth/deadline kontroly zůstávají stejné. Před živým
+pilotem propojit aktuální doklad i jeho soukromé job/target záznamy s konečným
+úklidem v původním +60d. Datum samo dokumenty neodstraní. Selhání registru,
+identity či R5 může ponechat chráněné oblasti zablokované pro ruční kontrolu;
+prototyp není garance termínu při výpadku služby.
+
+Ověření: 18/18 závěrečných testů; předtím 29/29 společně s R6a. Zahrnují
+studené pokračování dvou generací před deadline, zachování obsahu/archivu,
+recovery bez úspěšné primární fáze, oba pagery (51 generací v 50+1), Auth
+outage/existující účet, claim/retry/takeover, změnu/revizi/inkarnaci registru,
+záměnu žádosti, atomický finish/rollback/ztracené potvrzení, CAS recovery,
+vadný klíč a chybějící cíle. Functions unit 113 pass, lint čistý. Nová sada
+je v tools test:purge, tedy v běžném CI. Emulátor neověřuje potřebné cloudové
+složené indexy, jejich Query Explain ani náklady.
+
+Dvougenerační scénář použil 18 laboratorních volání s uměle sníženým řezem
+na dva kroky a posouvanými hodinami; nejde o cloudovou latenci/cenu ani
+schválenou frekvenci Scheduleru. Důkazy: build/feed-early-queue-{final,regression,
+unit-final,lint-final}.log. Fixture byly uklizené. Žádné živé kolekce, indexy,
+Auth účty, migrace, Rules, prostředky nebo nasazení se neměnily.

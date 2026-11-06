@@ -24,7 +24,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Navrhnout časnou indexovou frontu před původním retenčním deadline.**
+1. **Navrhnout provozní adaptér a propojení časné fronty s konečným purge.**
    [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
@@ -35,8 +35,11 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    má lokální kontrolní kontrakt, transakční blokaci opravných zápisů a zákaz
    tří starých seed/reset CLI (11 emulátorových regresí, 112 unit/45 tools).
    Zdroj e646d79 má success CI 42243312876; R6b je lokálně uzavřená.
-   Zbývá časná fronta s vlastním guardem/dokladem dokončení; ceny/SKU a cloudové
-   chování zůstávají bránou pilotu. Živý řídicí dokument ani index nejsou vytvořené.
+   Schválená [R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results)
+   má lokální recovery, guard, stránkování generací a atomický doklad (18/18
+   závěrečných testů). Zbývá jeho ověření a úklid soukromých záznamů v konečném
+   workeru, provozní adaptér, migrace a pilot s cenami/SKU a cloudovým měřením.
+   Živý řídicí dokument, index ani časná fronta nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese
    jsou uzavřené s úspěšným CI. Index se tím živě nezapnul.
    [Přesné zdroje a důkazy](PROJECT_STATUS.md),

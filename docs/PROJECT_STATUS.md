@@ -6,9 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Další krok: navrhnout časnou indexovou frontu a její guard před původním +60d
-deadline, s dokladem inkarnace/generací a bezpečným dokončením. Rozsah předložit
-ke schválení před dalšími změnami.
+Další krok: konkretizovat provozní adaptér indexu a koordinaci časné fronty
+s konečným purge (ověření aktuálního dokladu a úklid soukromých záznamů
+v původním +60d), potom migrační nástroj a DEV pilot. Před úpravami schválit rozsah.
+[R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results) je připravená
+na feature/feed-early-erasure-queue. Pouze emulátor: nezávislé recovery,
+lease/guard, stránkované generace, inkarnace/digest, R6a řez a atomický doklad
+se zavřením R5 journalu. Lokálně 18/18 závěrečných testů a předchozí společná
+regrese 29/29, Functions unit 113 pass a lint. Primární obsah/archiv/žádost
+zůstaly v testu shodné včetně updateTime; původní deadline se neprodlužuje.
+Konečný worker doklad dosud nekonzumuje a nové soukromé záznamy ještě potřebují
+zapojit do jeho úklidu. Žádné živé změny, plánovač, Rules ani nové Auth účty.
+Důkazy: build/feed-early-queue-{final,regression,unit-final,lint-final}.log.
+
 [R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results) je lokálně
 připravená na feature/feed-admin-write-guard: striktní kontrolní kontrakt,
 transakční kontrola off/žádná generace, updateTime preconditions čtyř opravných
