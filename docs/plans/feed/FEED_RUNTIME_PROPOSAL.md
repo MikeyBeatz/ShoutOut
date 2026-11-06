@@ -497,3 +497,11 @@ na dva kroky a posouvanými hodinami; nejde o cloudovou latenci/cenu ani
 schválenou frekvenci Scheduleru. Důkazy: build/feed-early-queue-{final,regression,
 unit-final,lint-final}.log. Fixture byly uklizené. Žádné živé kolekce, indexy,
 Auth účty, migrace, Rules, prostředky nebo nasazení se neměnily.
+
+R6c je lokálně uzavřená na feature/feed-early-erasure-queue. Zdroj
+`75ce8f35c7fb335fca16c08324aaad8394015610` má
+[success CI 42251697874](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42251697874):
+293 Flutter, 45 tools, 113 Functions unit, 397 Rules/server, 81 purge,
+15 Storage, analýza/formát/lint a DEV web build. Důkazy jsou
+build/feed-early-queue-ci.{json,log} a build/feed-early-queue-local-proof.json.
+Živý index, plánovač a konečný purge tím nebyly změněné.

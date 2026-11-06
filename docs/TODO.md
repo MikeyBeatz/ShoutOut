@@ -37,7 +37,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Zdroj e646d79 má success CI 42243312876; R6b je lokálně uzavřená.
    Schválená [R6c časná fronta](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6c-results)
    má lokální recovery, guard, stránkování generací a atomický doklad (18/18
-   závěrečných testů). Zbývá jeho ověření a úklid soukromých záznamů v konečném
+   závěrečných testů, success CI 42251697874 pro 75ce8f3); R6c je lokálně uzavřená.
+   Zbývá jeho ověření a úklid soukromých záznamů v konečném
    workeru, provozní adaptér, migrace a pilot s cenami/SKU a cloudovým měřením.
    Živý řídicí dokument, index ani časná fronta nejsou vytvořené.
    Lokální dávkový writer, maintenance/purge, R5 a moderační indexová regrese

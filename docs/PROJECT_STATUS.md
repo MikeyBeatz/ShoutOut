@@ -18,6 +18,11 @@ zůstaly v testu shodné včetně updateTime; původní deadline se neprodlužuj
 Konečný worker doklad dosud nekonzumuje a nové soukromé záznamy ještě potřebují
 zapojit do jeho úklidu. Žádné živé změny, plánovač, Rules ani nové Auth účty.
 Důkazy: build/feed-early-queue-{final,regression,unit-final,lint-final}.log.
+R6c je lokálně uzavřená: zdroj 75ce8f35c7fb335fca16c08324aaad8394015610 má
+success CI 42251697874 — 293 Flutter, 45 tools, 113 Functions unit,
+397 Rules/server, 81 purge, 15 Storage, analýza/formát/lint a DEV build.
+Strojové důkazy: build/feed-early-queue-ci.{json,log} a
+build/feed-early-queue-local-proof.json. Zdroj i dokumentace jsou pushnuté.
 
 [R6b Admin ochrana](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6b-results) je lokálně
 připravená na feature/feed-admin-write-guard: striktní kontrolní kontrakt,
