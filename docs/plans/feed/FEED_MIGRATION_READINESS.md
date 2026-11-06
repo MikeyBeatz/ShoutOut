@@ -11,7 +11,9 @@ připravené za společnou vypnutou volbou. Runtime factory, pevné DEV cesty,
 vícegeneracový writer a společný rozpočet jsou napojené v obsahových/účtových
 wrapperech; časná fronta a koordinátor používají totéž jádro jako laboratoř.
 Recover/runNext dosud nejsou v minutovém plánovači. Závěrečných 47/47 cílených
-testů prošlo, CI přesného commitu zatím zbývá. Živý index ani migrace neběží.
+testů prošlo; zdroj 9a054bb66f4e871de305d4af02ebcd41a9ec6188 má
+[success CI 42292159081](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42292159081).
+R6e je lokálně uzavřené; živý index ani migrace neběží.
 
 K 5. listopadu je účtová DEV vrstva včetně purge, klientského/Rules cutoveru
 a závěrečného pilotu hotová. Přímé žádosti a skrytí jsou uzavřené. Lokálně je

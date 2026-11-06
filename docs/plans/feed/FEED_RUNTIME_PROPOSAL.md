@@ -21,8 +21,8 @@ Doporučené pořadí:
 
 1. R6a–R6d mají lokální ověření včetně volitelné koordinace s konečným purge.
    Živý worker stále běží dosavadní cestou bez indexu a koordinátoru.
-2. R6e připravuje adaptér a společnou factory za vypnutým přepínačem. Po uzavření
-   jeho kontrol doplnit omezené plánování časné fronty a přesný migrační nástroj.
+2. R6e má lokálně uzavřený adaptér a společnou factory za vypnutým přepínačem.
+   Doplnit omezené plánování časné fronty a přesný migrační nástroj.
    Každý další rozsah před úpravami konkretizovat, nejde o automatický souhlas touto listinou.
 3. Předložit DEV pilot s měřením skutečných index entries, cloudové latence,
    prostředků a rozpočtu. Teprve schválený pilot může měnit živé indexy/data.
@@ -667,4 +667,12 @@ Původní lokální node_modules artefaktů neobsahovaly již deklarovaný geofi
 čistá instalace podle existujícího lockfile tento stav odstranila, závislosti
 ani lockfile projektu se neměnily. Kontrola stromu importů, deklarovaných
 balíčků a vyloučení fixture modulů má navíc 2/2 závěrečné testy
-v build/feed-runtime-artifact-test-final.log. CI přesného zdroje zatím zbývá.
+v build/feed-runtime-artifact-test-final.log.
+
+R6e je lokálně uzavřené: zdroj `9a054bb66f4e871de305d4af02ebcd41a9ec6188` má
+[success CI 42292159081](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42292159081):
+293 Flutter, 47 tools, 115 Functions unit, 398 Rules/server, 106 purge,
+15 Storage, analýza/formát/lint a DEV web build. Přesný stav/log jsou
+build/feed-runtime-ci.{json,log}, souhrn build/feed-runtime-local-proof.json.
+Kód i závěrečný záznam jsou ve stejné pracovní větvi; CI výše patří uvedenému zdrojovému commitu.
+Tento CI běh ani lokální uzavření nemění vypnutý přepínač nebo živé prostředí.

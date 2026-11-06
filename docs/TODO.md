@@ -24,13 +24,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Uzavřít CI adaptéru, potom připravit plánování časné fronty a migraci.**
+1. **Připravit omezené provozní plánování časné fronty a migrační nástroj.**
    Schválené [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně
    připravené za vypnutou volbou: společné jádro a DEV cesty, více generací,
    společný rozpočet zápisů, fronta/koordinátor a oba balíčky Functions.
-   Závěrečných 47/47 cílených testů, unit 115/tools 47 a lint prošly; přesné CI
-   zbývá. Žádné nasazení ani živé kolekce. Před aktivací je nutné zapojit
-   omezené recover/runNext do provozního plánování, doložit migraci a DEV pilot.
+   R6e je lokálně uzavřené: závěrečných 47/47 cílených testů a success CI
+   42292159081 pro 9a054bb. Žádné nasazení ani živé kolekce. Před aktivací je
+   nutné zapojit omezené recover/runNext do provozního plánování, doložit migraci a DEV pilot.
    [Provozní návrh a měření](plans/feed/FEED_RUNTIME_PROPOSAL.md) jsou připravené:
    celá R5 inventory, nákladový model, včasné plánování, zámky, Admin zápisy
    a návrh generace/migrace/návratu. Model 1 krok/min držel oblast zamčenou
