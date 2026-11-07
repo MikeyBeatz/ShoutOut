@@ -1,6 +1,6 @@
 # Trvalá instalace a zapojení prostorového feedu
 
-6. listopadu 2026. Rozpracováno na `feature/feed-page-integration` podle pokynu
+6.–7. listopadu 2026. Lokálně dokončeno na `feature/feed-page-integration` podle pokynu
 vlastníka připravit konečné řešení použitelné také pro produkci. Tento dokument
 popisuje připravené řešení a kontrolní brány; **není záznam živé aktivace**.
 Aktuální nasazení dokládá [PROJECT_STATUS](../../PROJECT_STATUS.md).
@@ -22,6 +22,12 @@ Aktuální nasazení dokládá [PROJECT_STATUS](../../PROJECT_STATUS.md).
   počtů, reakce a záložky. Aktualizace nepřerovnávají stabilní feed; odchod
   karty odběry ukončí. Spotlight a dosavadní osobní sekce zůstávají kompatibilní.
   Jejich původní dotaz na posledních 50 není zdroj nového hlavního feedu.
+  Kontrola 7. listopadu zjistila existující omezení **Mé shouty**: původní
+  `Home._startFeedListeners` dotazuje jen posledních 50 globálních aktivních
+  zdrojů, i v předchozím `77d0f15`. Nezaručuje vlastní historii a po serverové
+  materializaci expirace ji nemůže zobrazit. Samostatný úplný vlastní zdroj
+  Aktivní/Expirované je evidovaný v [otevřené akceptaci](../../BACKLOG.md#feed-read-refresh)
+  a zbývá před veřejným MVP; tato integrace ho nevydává za hotový.
 - Společný minutový worker vybírá nejvýše jeden indexový úsek: pokračování
   rozpracovaného výmazu, novou časnou úlohu nebo běžný úklid historie. Zachovává
   32 kroků / 10 s mezi transakcemi, jednotlivé dávky 32 čtení / 16 mazání,
@@ -74,8 +80,10 @@ obsah schválení a startovní bránu ověřuje operátor podle
 
 ## Připravený sled živého DEV přechodu
 
-Přesný zdrojový SHA, CI a digest se doplní po dokončení kontrol. Před novou
-datovou vrstvou a tajemstvím předložit tento připravený celek vlastníkovi.
+Základ přechodu je zdroj **25a3f92f565bde633844214cca8419fc3053b094**, ověřený
+[success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115).
+Před novou datovou vrstvou a tajemstvím předložit tento připravený celek
+vlastníkovi. Následné aktivační commity také potřebují vlastní úspěšné CI.
 
 Read-only plán pro DEV `feed-v1` je připravený v ignorovaném
 `docs/local/migrations/feed-bootstrap-shoutout-dev-46c81-feed-v1.json`,
@@ -153,7 +161,22 @@ jen diagnostické logy. Pro limity přístupů nelze předpokládat, že se vše
 `exists/get/getAfter` navzájem cachují:
 [oficiální podmínky a limity Rules](https://firebase.google.com/docs/firestore/security/rules-conditions#access_call_limits).
 Read-only DEV inventura byla dnes opakovaná: stále 37 / 0 active, bez control
-a generace. Nové živé zápisy neproběhly. Konečné CI ještě musí projít.
+a generace. Nové živé zápisy neproběhly.
+
+Konečné **success CI 42356245115** pro přesný zdroj
+`25a3f92f565bde633844214cca8419fc3053b094`: 305 Flutter, 50 tools,
+118 Functions unit (397 integračních případů v této ne-emulátorové sadě
+přeskočeno), 421 Rules/server, 116 purge a 15 Storage. Formát, analýza, lint,
+dokumentace a DEV web build prošly. Samostatný nový start Business sady
+potvrdil 16/16 (`build/feed-business-cold-repeat.log`). Oba připravené balíčky
+mají shodné zdroje a exporty s commitem (41 modulů content / 37 účtového
+workeru). Strojové důkazy: `build/feed-page-ci-proof.json`,
+`build/feed-page-ci-final.{json,log}`, `build/feed-page-artifact-proof.json`.
+Metadata klíče byla přečtena bez přístupu k hodnotám: HTTP 404 / neexistuje
+(`build/feed-key-metadata-readonly.json`). Indexový read-only plán obsahuje
+přesně 5 složených indexů a 5 výjimek, bez TTL; jeho lokální digest je
+`6c03d3a6cbb8e18f01dde4b109a698e0d97b7a071773f1544a0d87d5f3ca9591`
+(`build/feed-index-readonly-plan.json`). Před aplikací tyto metadata znovu ověřit.
 
 Produkční nasazení potřebuje vlastní konfiguraci účtového wrapperu, který je
 dosud výslovně chráněný pro DEV; společné jádro nepotřebuje jiný datový model.
@@ -167,5 +190,5 @@ Průběžné lokální důkazy: 38/38 společných serverových regresí
 (`build/feed-saved-bootstrap-final.log`), předchozí 4/4 checkpoint testy a
 úspěšná Rules regrese v `build/feed-start-maintenance-initial.log` (celý první
 průchod měl tři instalační/testovací chyby, které byly opravené; není vydáván
-za úspěšnou celkovou kontrolu). Přesné konečné CI bude doplněné po pushi.
+za úspěšnou celkovou kontrolu). Konečné CI je doložené výše.
 Žádné živé zápisy, tajemství, nasazení nebo nové Auth účty v této přípravě.

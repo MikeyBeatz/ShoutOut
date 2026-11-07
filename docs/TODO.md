@@ -24,14 +24,15 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit společné zapojení nového feedu a ověřit je v DEV.**
-   Na `feature/feed-page-integration` se propojují serverové stránky, Home,
-   uložené Shouty, minutový úklid a trvalá instalace společná pro DEV/produkci.
+1. **Provést trvalé živé zapojení nového feedu a ověřit je v DEV.**
+   Společná lokální integrace serverových stránek, Home, uložených Shoutů,
+   minutového úklidu a trvalé instalace má zdroj `25a3f92` a
+   [success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115).
    Podle read-only kontroly má DEV 37 Shoutů / 0 active; nástroj pro první
    instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
    [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
-   Dokončit regresi a CI, předložit připravený živý datový/klíčový přechod,
-   pak nasadit a změřit reálné stránky i běžný/Business průchod. Zatím nic
+   Předložit připravený živý datový/klíčový přechod, potom nasadit a změřit
+   reálné stránky i běžný/Business průchod. Zatím nic
    neaktivováno, oba klientské přepínače a serverový runtime jsou vypnuté.
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a

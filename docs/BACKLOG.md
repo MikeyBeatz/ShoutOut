@@ -66,6 +66,12 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     počítadla. Volby budoucího B nesmějí zbytečně blokovat samostatné A0/A1.
   - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
     nepsat každý read automaticky zvlášť ani nepředstírat, že batch snižuje počet dokumentových zápisů.
+  - Integrační kontrola 7. listopadu: uložené Shouty mají připravený samostatný
+    zdroj stránek. Před MVP ověřit také **Mé shouty → Aktivní/Expirované**:
+    dosavadní Home bere pouze posledních 50 globálních `status=active`, což
+    nezaručuje úplný vlastní seznam a vyřazuje serverem označené expirované.
+    Omezení existovalo už před touto integrací; nezaměňovat je za hotovou
+    osobní historii. [Aktuální integrační plán](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
   - [Etapový návrh a schvalovací brány](plans/feed/FEED_IMPLEMENTATION_STAGES.md).
     [Analýza, otevřené volby a akceptace cílového rozšíření](plans/feed/FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).

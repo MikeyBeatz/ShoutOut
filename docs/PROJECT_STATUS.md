@@ -6,25 +6,31 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Rozpracováno na feature/feed-page-integration po pokynu vlastníka směřovat
-k viditelnému feedu: propojení indexu, zabezpečeného stránkovacího API a hlavní
-obrazovky. Serverové emulátorové ověření má 10/10 průchodů (včetně existujícího
-přenositelného kurzoru); klientský transport/relace/UI/konfigurace 39/39.
-Podle upřesnění vlastníka připravujeme trvalé společné řešení pro DEV i produkci,
-nikoli jednorázové demo. Přibyly vlastní stránky uložených Shoutů, restartovatelný
-běžný GC, zapojení jednoho indexového úseku do minutového workeru, podmíněné
-uzavření přímých zápisů v Rules a kontrolovaný instalační nástroj. Společných
-38/38 serverových testů a 8/8 instalace/uložených Shoutů prošlo; konečná regrese
-a úplné CI ještě zbývá. Běhy 42305776552 / 42306973622 selhaly na izolaci
-instalačních fixture a rozpočtech Business Rules. Aktuální oprava sdílí datové
-načtení profilu/rate, zachovává oprávnění a má 93/93 místních regresí včetně
-chybějícího profilu/firmy/pobočky (`build/feed-business-gates-final.log`).
-Klient 305/305, tools 50/50, Functions unit 118 pass,
-analýza/formát/lint a kontrola dokumentačních odkazů prošly lokálně.
-Read-only DEV inventura znovu ověřena 7. listopadu: 37 Shoutů / 0 active, control/generace
-neexistují. [Přesný postup, testy, návrat a zbývající brány](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
-Žádná aktivace ani živé zápisy. Oba klientské přepínače i serverový runtime jsou
-vypnuté. Podpisové tajemství není vytvořené, produkce se neměnila.
+Na `feature/feed-page-integration` je lokálně dokončená společná integrace
+serverových stránek, Home, vlastních uložených Shoutů, běžného GC, minutové
+indexové údržby, podmíněného Rules uzavření a trvalé první instalace indexu.
+Společné jádro podporuje DEV i produkční projekt; produkční účtový wrapper
+a provozní konfigurace nadále patří do startovní brány.
+
+Zdroj **25a3f92f565bde633844214cca8419fc3053b094** má
+[success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115):
+305 Flutter, 50 tools, 118 Functions unit, 421 Rules/server, 116 purge,
+15 Storage, analýza/formát/lint a DEV web build. Oba balíčky Functions mají
+ověřenou shodu zdrojů/exportů (41/37 modulů). Důkazy:
+`build/feed-page-ci-proof.json`, `build/feed-page-ci-final.{json,log}`,
+`build/feed-page-artifact-proof.json`. Oprava Business Rules má také 93/93
+lokálních regresí a 16/16 při novém startu emulátoru. Neúspěšné starší běhy
+nejsou release důkazem; jejich příčiny zůstávají v integračním plánu.
+
+**Další krok:** předložit trvalý živý DEV přechod včetně nového podpisového
+tajemství, indexových změn a 120 testovacích Shoutů podle
+[konkrétního plánu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md), potom po schválení
+aktivovat a změřit API/klienta. Read-only kontrola 7. listopadu: 37 Shoutů /
+0 active, žádný control/generace; metadata podpisového tajemství vracejí 404.
+Žádná aktivace ani živé zápisy, oba klientské přepínače a runtime jsou vypnuté.
+Produkce/main se neměnily. Živý UI průchod zatím neproběhl; poslední automatický
+pokus skončil kontrolou URL v Chrome. Před MVP dál zbývají B1–B4 i vlastní
+Aktivní/Expirované podle otevřené akceptace, neoznačovat celý feed za dokončený.
 
 [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně uzavřené na
 feature/feed-runtime-adapter. Zdroj 9a054bb66f4e871de305d4af02ebcd41a9ec6188 má
@@ -36,9 +42,9 @@ regresí a načtení obou artefaktů se shodnými exporty. Společná factory wr
 nevznikají nové databázové přístupy. Lab ochrany, dávka 50 a retence zůstávají.
 Důkazy: build/feed-runtime-ci.{json,log}, build/feed-runtime-local-proof.json
 a lokální logy uvedené v R6e. Žádné nasazení, živá data, Rules, Scheduler ani nové Auth účty.
-Další krok: omezené provozní plánování časné fronty (recover/runNext ještě není
-v minutovém ticku), migrační nástroj a konkrétní DEV pilot. Pouhé přepnutí volby
-na true není hotový rollout; další konkrétní rozsah před úpravami schválit.
+Navazující provozní plánování, instalační nástroj a API/klient jsou nyní
+připravené ve výše uvedené integraci. Pouhé přepnutí volby na true není
+hotový rollout; živý datový/klíčový přechod má vlastní schvalovací bránu.
 
 [R6d koordinace purge](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6d-results) je lokálně
 připravená na feature/feed-purge-proof-coordinator. Volitelný koordinátor
