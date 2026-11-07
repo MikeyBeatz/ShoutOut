@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 6. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 7. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.

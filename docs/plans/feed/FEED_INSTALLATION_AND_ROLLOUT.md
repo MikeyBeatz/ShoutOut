@@ -140,6 +140,21 @@ se stejnými podmínkami. Navazujících 92/92 lokálních regresí včetně Bus
 instalace a uzavřených zápisů prošlo (`build/feed-install-rules-regression.log`).
 Nové CI musí ověřit přesný opravený commit; první běh není release důkaz.
 
+7. listopadu: také CI `42306973622` pro `7832379` odmítlo dva platné Business
+průchody při přístupu k pobočce. Navazující oprava sjednocuje `hasProfile` a
+kontrolu kanonických údajů na datový `get`, sdílí `getAfter` rate dokumentu a
+ověřovaná data/klíče. Povinná pole firmy/pobočky dál odmítají neexistující
+dokumenty bez nadbytečného `exists`. Regrese kontroluje správné názvy poboček
+i chybějící firmu/pobočku a výslovně zachovává původní zákaz bez profilu
+i původní čtení s existujícím prázdným profilem. Výsledek **93/93** v
+`build/feed-business-gates-final.log`. Samostatně předtím 83/83 v
+`build/feed-business-profile-cache.log`; dřívější neúspěšné varianty zůstávají
+jen diagnostické logy. Pro limity přístupů nelze předpokládat, že se všechny
+`exists/get/getAfter` navzájem cachují:
+[oficiální podmínky a limity Rules](https://firebase.google.com/docs/firestore/security/rules-conditions#access_call_limits).
+Read-only DEV inventura byla dnes opakovaná: stále 37 / 0 active, bez control
+a generace. Nové živé zápisy neproběhly. Konečné CI ještě musí projít.
+
 Produkční nasazení potřebuje vlastní konfiguraci účtového wrapperu, který je
 dosud výslovně chráněný pro DEV; společné jádro nepotřebuje jiný datový model.
 Uzavření přímých create/vote Rules platí pro všechny klienty. Aktuální web má

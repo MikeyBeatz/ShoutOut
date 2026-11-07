@@ -60,8 +60,10 @@ service cloud.firestore {
     }
 
     function hasProfile() {
+      // Use the same document-data access as canonical nickname/avatar checks;
+      // do not rely on exists/get cross-caching at the per-write access limit.
       return signedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data != null;
     }
 
     function hasAcceptedLegal() {
@@ -446,10 +448,10 @@ service cloud.firestore {
     function consumedRate(action, eventId) {
       let ratePath =
         /databases/$(database)/documents/rateLimits/$(request.auth.uid)/actions/$(action);
+      let rate = getAfter(ratePath).data;
       // Missing getAfter data already denies the write. Avoid a redundant
       // existsAfter access so recipient fencing fits the per-write budget.
-      return getAfter(ratePath).data.lastAt == request.time &&
-        getAfter(ratePath).data.lastEventId == eventId;
+      return rate.lastAt == request.time && rate.lastEventId == eventId;
     }
 
     function canonicalNickname(data) {
@@ -466,10 +468,10 @@ service cloud.firestore {
         /databases/$(database)/documents/businessProfiles/$(request.auth.uid)/locations/$(data.businessLocationId);
       let business = get(businessPath).data;
       let location = get(locationPath).data;
+      // Required status/location fields already fail closed for missing docs;
+      // the data snapshots suffice without separate existence lookups.
       return businessAccount &&
         data.businessLocationId is string &&
-        exists(businessPath) &&
-        exists(locationPath) &&
         business.status == 'active' &&
         location.active == true &&
         location.deleted == false &&
@@ -1862,11 +1864,13 @@ service cloud.firestore {
     }
 
     function validShoutCreate() {
+      let data = request.resource.data;
+      let keys = data.keys();
       // Reuse trusted role/profile snapshots; repeated helper/path evaluation
       // otherwise pushes a valid Business branch write over the expression cap.
       let businessAccount = isBusinessAccount();
       let profile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      return request.resource.data.keys().hasOnly([
+      return keys.hasOnly([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
           'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
           'dislikesCount', 'commentsCount', 'savesCount', 'avatarId',
@@ -1875,64 +1879,64 @@ service cloud.firestore {
           'businessAuthorFormat', 'businessHighlighted',
           'businessSpotlight', 'businessExtendedDuration'
         ]) &&
-        request.resource.data.keys().hasAll([
+        keys.hasAll([
           'authorId', 'authorNickname', 'title', 'text', 'categories',
           'location', 'geohash', 'createdAt', 'expiresAt', 'status', 'likesCount',
           'dislikesCount', 'commentsCount', 'savesCount'
         ]) &&
-        request.resource.data.authorId == request.auth.uid &&
-        request.resource.data.authorNickname is string &&
+        data.authorId == request.auth.uid &&
+        data.authorNickname is string &&
         (
           (
             !businessAccount &&
-            !request.resource.data.keys().hasAny([
+            !keys.hasAny([
               'businessLocationId', 'businessAuthorFormat',
               'businessHighlighted', 'businessSpotlight',
               'businessExtendedDuration'
             ]) &&
-            canonicalNickname(request.resource.data)
+            canonicalNickname(data)
           ) ||
-          validBusinessShout(request.resource.data, businessAccount)
+          validBusinessShout(data, businessAccount)
         ) &&
-        request.resource.data.keys().hasAll([
+        keys.hasAll([
           'avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd',
           'avatarGradientDirection'
         ]) &&
-        validAvatarStyle(request.resource.data) &&
-        request.resource.data.avatarId ==
+        validAvatarStyle(data) &&
+        data.avatarId ==
           profile.avatarId &&
-        request.resource.data.avatarBackgroundStart ==
+        data.avatarBackgroundStart ==
           profile.avatarBackgroundStart &&
-        request.resource.data.avatarBackgroundEnd ==
+        data.avatarBackgroundEnd ==
           profile.avatarBackgroundEnd &&
-        request.resource.data.avatarGradientDirection ==
+        data.avatarGradientDirection ==
           profile.avatarGradientDirection &&
-        request.resource.data.title is string &&
-        request.resource.data.title.size() >= 1 &&
-        request.resource.data.title.size() <= 60 &&
-        request.resource.data.text is string &&
-        request.resource.data.text.size() >= 1 &&
-        request.resource.data.text.size() <= 220 &&
-        request.resource.data.categories is list &&
-        request.resource.data.categories.size() >= 1 &&
-        request.resource.data.categories.size() <= 2 &&
-        request.resource.data.categories.hasOnly([
+        data.title is string &&
+        data.title.size() >= 1 &&
+        data.title.size() <= 60 &&
+        data.text is string &&
+        data.text.size() >= 1 &&
+        data.text.size() <= 220 &&
+        data.categories is list &&
+        data.categories.size() >= 1 &&
+        data.categories.size() <= 2 &&
+        data.categories.hasOnly([
           'Událost', 'Dotaz', 'Nabídka', 'Pomoc', 'Ztráty a nálezy',
           'Tip', 'Doprava', 'Diskuze', 'Varování!', 'Ostatní'
         ]) &&
-        request.resource.data.location is latlng &&
-        request.resource.data.geohash is string &&
-        request.resource.data.geohash.size() == 7 &&
-        request.resource.data.createdAt == request.time &&
-        request.resource.data.expiresAt >=
+        data.location is latlng &&
+        data.geohash is string &&
+        data.geohash.size() == 7 &&
+        data.createdAt == request.time &&
+        data.expiresAt >=
           request.time + duration.value(14, 'm') &&
-        request.resource.data.expiresAt <= request.time +
+        data.expiresAt <= request.time +
           duration.value(businessAccount ? 10081 : 1441, 'm') &&
-        request.resource.data.status == 'active' &&
-        request.resource.data.likesCount == 0 &&
-        request.resource.data.dislikesCount == 0 &&
-        request.resource.data.commentsCount == 0 &&
-        request.resource.data.savesCount == 0;
+        data.status == 'active' &&
+        data.likesCount == 0 &&
+        data.dislikesCount == 0 &&
+        data.commentsCount == 0 &&
+        data.savesCount == 0;
     }
 
     function validShoutReactionCounters(shoutId) {

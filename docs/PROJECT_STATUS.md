@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 6. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 7. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -15,11 +15,13 @@ nikoli jednorázové demo. Přibyly vlastní stránky uložených Shoutů, resta
 běžný GC, zapojení jednoho indexového úseku do minutového workeru, podmíněné
 uzavření přímých zápisů v Rules a kontrolovaný instalační nástroj. Společných
 38/38 serverových testů a 8/8 instalace/uložených Shoutů prošlo; konečná regrese
-a úplné CI ještě zbývá. První běh 42305776552 selhal na izolaci instalačních
-fixture a Business expression budget; opravy mají 92/92 místních regresí.
+a úplné CI ještě zbývá. Běhy 42305776552 / 42306973622 selhaly na izolaci
+instalačních fixture a rozpočtech Business Rules. Aktuální oprava sdílí datové
+načtení profilu/rate, zachovává oprávnění a má 93/93 místních regresí včetně
+chybějícího profilu/firmy/pobočky (`build/feed-business-gates-final.log`).
 Klient 305/305, tools 50/50, Functions unit 118 pass,
 analýza/formát/lint a kontrola dokumentačních odkazů prošly lokálně.
-Read-only DEV inventura: 37 Shoutů / 0 active, control/generace
+Read-only DEV inventura znovu ověřena 7. listopadu: 37 Shoutů / 0 active, control/generace
 neexistují. [Přesný postup, testy, návrat a zbývající brány](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
 Žádná aktivace ani živé zápisy. Oba klientské přepínače i serverový runtime jsou
 vypnuté. Podpisové tajemství není vytvořené, produkce se neměnila.

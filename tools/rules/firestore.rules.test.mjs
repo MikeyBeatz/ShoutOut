@@ -429,7 +429,7 @@ describe('business locations', () => {
     ));
   });
 
-  test('paused, deleted or unverified branch cannot publish', async () => {
+  test('paused, deleted, unverified or missing branch/company cannot publish', async () => {
     await seedEligibleUser('blocked-branch', 'BlockedBranch');
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const db = context.firestore();
@@ -454,11 +454,11 @@ describe('business locations', () => {
         });
       }
     });
-    for (const id of ['paused', 'deleted', 'pending']) {
+    for (const id of ['paused', 'deleted', 'pending', 'missing']) {
       await assertFails(createShoutBatch(
         authenticatedDb('blocked-branch'),
         'blocked-branch',
-        `Blocked Business – ${id}`,
+        id,
         `blocked-${id}-shout`,
         {
           businessLocationId: id,
@@ -468,6 +468,17 @@ describe('business locations', () => {
         },
       ));
     }
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      const db = context.firestore();
+      await setDoc(doc(db, 'businessProfiles/blocked-branch/locations/valid'), {
+        displayName: 'valid', active: true, deleted: false, geocodingStatus: 'verified',
+        location: new GeoPoint(50.66, 14.04), geohash: 'u31bpqr',
+      });
+      await deleteDoc(doc(db, 'businessProfiles/blocked-branch'));
+    });
+    await assertFails(createShoutBatch(authenticatedDb('blocked-branch'), 'blocked-branch', 'valid', 'missing-company', {
+      businessLocationId: 'valid', businessAuthorFormat: 'branch', location: new GeoPoint(50.66, 14.04), geohash: 'u31bpqr',
+    }));
   });
 
   test('ordinary user cannot create a business branch', async () => {
@@ -731,6 +742,23 @@ async function createShoutBatch(db, uid, nickname, shoutId, overrides = {}) {
 }
 
 describe('identity and account gates', () => {
+  test('profile-data access preserves the existing absent/present profile read gate', async () => {
+    await seedEligibleUser('profile-reader'); await seedShout();
+    const db = authenticatedDb('profile-reader'), target = doc(db, 'shouts/shout-1');
+    await assertSucceeds(getDoc(target));
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      // The legal child intentionally remains: its presence cannot replace
+      // the required root profile document.
+      await deleteDoc(doc(context.firestore(), 'users/profile-reader'));
+    });
+    await assertFails(getDoc(target));
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), 'users/profile-reader'), {});
+    });
+    // An empty existing map qualified under the prior existence check too.
+    await assertSucceeds(getDoc(target));
+  });
+
   test('verified onboarding can accept legal terms and create profile atomically', async () => {
     const db = authenticatedDb('new-user');
     await assertSucceeds(
