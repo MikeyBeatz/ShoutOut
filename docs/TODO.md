@@ -24,16 +24,21 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Provést trvalé živé zapojení nového feedu a ověřit je v DEV.**
+1. **Dokončit připomínky a úklid živého DEV feedu.**
    Společná lokální integrace serverových stránek, Home, uložených Shoutů,
    minutového úklidu a trvalé instalace má zdroj `25a3f92` a
    [success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115).
    Podle read-only kontroly má DEV 37 Shoutů / 0 active; nástroj pro první
    instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
    [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
-   Vlastník schválil živý přechod i testy 7. listopadu. Připravuje se aktivační
-   commit; po jeho CI nasadit server → index → DEV web a změřit reálné stránky
-   i běžný/Business průchod. Zatím nic živě neaktivováno.
+   Vlastník schválil živý přechod i testy 7. listopadu. Klíč, 10 indexových
+   změn, Rules, osm Functions, aktivní feed-v1 i DEV web jsou nasazené
+   a ověřené. Zdroj `ccc879f` má success CI `42358058964`. Serverové stránky
+   50 → 100 → 120 prošly pro oba účty včetně reakcí/záložek; vlastník potvrdil
+   Business načítání dalších stránek, cloud potvrzuje platný Auth/App Check.
+   Projít avizované poznámky vlastníka, doplnit zbývající klientská ověření
+   a uklidit přesně 120 testovacích Shoutů; zatím jsou ponechané pro kontrolu.
+   [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
    [PROJECT_STATUS](PROJECT_STATUS.md). Účtový DEV přechod je uzavřený;

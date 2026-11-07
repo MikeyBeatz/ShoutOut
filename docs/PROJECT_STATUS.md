@@ -6,41 +6,39 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Na `feature/feed-page-integration` je lokálně dokončená společná integrace
-serverových stránek, Home, vlastních uložených Shoutů, běžného GC, minutové
-indexové údržby, podmíněného Rules uzavření a trvalé první instalace indexu.
-Společné jádro podporuje DEV i produkční projekt; produkční účtový wrapper
-a provozní konfigurace nadále patří do startovní brány.
+**Dokončit kontrolu připomínek vlastníka k právě nasazenému DEV feedu a poté
+uklidit schválené testovací fixture.** Na `feature/feed-page-integration` je
+nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
+Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.
+Aktivační zdroj **ccc879f485caa24374cadc1dba49ddcec50a4a95** má
+[success CI 42358058964](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42358058964).
+Nasazovalo se z čisté samostatné kopie v pořadí server → index → web.
+Obsah nasazených Functions byl porovnaný se zdroji (41/37 modulů), web
+s release manifestem; konkrétní revize jsou v tabulce níže.
 
-Zdroj **25a3f92f565bde633844214cca8419fc3053b094** má
-[success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115):
-305 Flutter, 50 tools, 118 Functions unit, 421 Rules/server, 116 purge,
-15 Storage, analýza/formát/lint a DEV web build. Oba balíčky Functions mají
-ověřenou shodu zdrojů/exportů (41/37 modulů). Důkazy:
-`build/feed-page-ci-proof.json`, `build/feed-page-ci-final.{json,log}`,
-`build/feed-page-artifact-proof.json`. Oprava Business Rules má také 93/93
-lokálních regresí a 16/16 při novém startu emulátoru. Neúspěšné starší běhy
-nejsou release důkazem; jejich příčiny zůstávají v integračním plánu.
+Živý serverový test pod existujícími Bright_Otter_182/TestBusiness prošel:
+50 → 100 → 120, žádné duplicity, vzdálenost, kategorie, radius, Top/Končící/
+Sledované, odmítnutí cizího kurzoru, idempotentní reakce, záložka/odebrání
+a stabilní pořadí až do obnovy. Jde o test jádra přes Admin SDK, nikoli
+náhradu klientského Auth/App Check. Vlastník samostatně potvrdil zobrazení
+po zvětšení dosahu i načítání dalších stránek v Business webu; serverové logy
+to potvrzují platným Auth/App Check a třemi HTTP 200 (0,52–1,07 s na serveru).
+Minutový worker běží na nové revizi bez chyb; rozvrh a obsahová dávka se neměnily.
 
-**Aktuální práce:** vlastník 7. listopadu schválil celý trvalý živý DEV přechod,
-nový podpisový klíč, indexové změny a 120 testovacích Shoutů podle
-[konkrétního plánu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md). Připravuje se společný
-aktivační commit runtime + DEV klienta; nasazení proběhne odděleně server →
-index → web až po jeho úspěšném CI. Read-only kontrola 7. listopadu: 37 Shoutů /
-0 active, žádný control/generace; metadata podpisového tajemství vracejí 404.
-Živá příprava zahájená: v DEV vytvořený a ověřený podpisový klíč (verze 1,
-hodnota pouze v Secret Manageru) a odeslaných přesně 10 schválených indexových
-operací bez TTL. Checkpointy `build/feed-secret-created-proof.json` a
-`build/feed-index-apply-proof.json`. Control/generace ani nový web zatím
-neaktivované. Aktivační `a9a3b41` byl zrušený kvůli neizolovaným testovacím
-konfiguracím; `7d0b167` ještě odhalil dva obdobné testy mazací politiky.
-Úplná lokální opravená regrese má 305 Flutter / 50 tools / 118 Functions unit.
-Připravuje se její nové CI; validační závislosti se neoslabují.
-Přepínače jsou jen připravené v kódu (runtime/DEV zapnuté, produkční klient
-vypnutý); živý web je stále původní.
-Produkce/main se neměnily. Živý UI průchod zatím neproběhl; poslední automatický
-pokus skončil kontrolou URL v Chrome. Před MVP dál zbývají B1–B4 i vlastní
-Aktivní/Expirované podle otevřené akceptace, neoznačovat celý feed za dokončený.
+**Otevřený checkpoint:** 120 syntetických Shoutů `mvp-feed-20261107-*` je
+zatím zachovaných pro připomínky vlastníka. Úklid ještě neproběhl. Reakce
+i testovací záložka jsou vrácené na původní stav, všechny původní 37 zdroje
+mají nezměněný updateTime; žádný Auth účet nebyl vytvořen ani smazán.
+Identifikace fixture a další postup jsou v
+[záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
+celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
+příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.
+
+Produkce/main se neměnily. Produkční účtový wrapper a provozní konfigurace
+nadále patří do startovní brány. Před MVP dál zbývají B1–B4 i úplný vlastní
+zdroj Aktivní/Expirované podle otevřené akceptace. Starší R6 výsledky níže
+popisují tehdejší lokální etapy; současné zapnutí dokládá tento rollout.
 
 [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně uzavřené na
 feature/feed-runtime-adapter. Zdroj 9a054bb66f4e871de305d4af02ebcd41a9ec6188 má
@@ -280,23 +278,31 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `7ab60c88892921101215076690a73837e15b94b4` / `f5c7ef14f1b5e04b` |
+| Webový zdroj / Hosting verze | `ccc879f485caa24374cadc1dba49ddcec50a4a95` / `428dd3e025e17023`; DEV prostorový feed zapnutý |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
-| Příprava mazání / receipt cleanup | Zdroj `a57ae9b46767a7491a743a20c6da93f9407afa7a`, obě ACTIVE; revize `prepareaccountdeletion-00001-mix` / `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
-| Účtové Functions | `96b078202e2d5adf749d7d7a685ef2cfa9eabcdc`, obě ACTIVE, revize `00010-nif` / `00010-hoz` |
-| Účtový hash artefaktu | `fa459ba9128728f23b6b1a69f20111862fb72605` |
-| Pět aktualizovaných obsahových Functions | Zdroj f81eaf4; `deleteComment`, `toggleCommentReaction`, `toggleShoutReaction`, `toggleShoutSave`, `createContentReport`; hash `e9d161330bbca061dc1532b2518ef40f74a5d988` |
-| Firestore Rules | `c70b6f10-a51e-415d-aef5-8f8b685adb3d`, zdroj 7ab60c8; žádosti/status Shoutu pouze serverově |
-| Indexy / Storage | Šest nových CG indexů READY a dotazy ověřené; DEV soft delete 0; ostatní bucket nastavení beze změny. |
+| Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
+| Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
+| Účtové Functions | `ccc879f`, obě ACTIVE; request `00011-kob`, recovery `00011-lad`; hash `3cf911bd6ef4eb7350ef68068ed9a231ab347fa5` |
+| Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav` |
+| Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`, `toggleshoutreaction-00007-yoy`; společný indexový writer |
+| Ostatní obsahové Functions | Poslední feed rollout je neaktualizoval; `deleteComment`, `toggleCommentReaction`, `toggleShoutSave`, `createContentReport` zůstávají ze zdroje f81eaf4 |
+| Firestore Rules | `832178f3-e140-47c8-852b-425e16c475af`, zdroj 25a3f92; s řídicím dokumentem také create/vote pouze serverově |
+| Prostorový index | `feed-v1` active, klíč v1; dalších 5 složených indexů READY a 5 výjimek ověřeno, bez změny TTL |
+| Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
-za jeden nový společný artefakt. Oba DEV originy odpovídaly webovému manifestu.
-Návrat posledního webového rolloutu: Hosting b274e8c83ebd616a (zdroj 776e147); backend je
-kompatibilní i s předchozím klientem. Nová příprava má timeout 15 s, cleanup 60 s.
+za jeden nový společný artefakt. Čtyři veřejné soubory web.app odpovídají
+release manifestu (`build/feed-hosting-live-proof.json`). Návrat webu:
+Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8), případně pozastavení readeru;
+společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,
+receipt cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
-256 MiB/60 s. Obsahové callable mají 15 s. Minutový účtový Scheduler, IAM,
-Storage Rules a ostatní Functions se při posledním rolloutu nezměnily;
-Firestore Rules byly cíleně zpřísněné výše.
+256 MiB/60 s. Obsahové a čtecí callable mají 15 s. Minutový Scheduler zůstal
+stejný; worker dostal schválený indexový úsek 32 kroků / 10 s. Firebase CLI
+přidělilo pouze přístup runtime service account k novému podpisovému tajemství.
+Storage Rules se při tomto rolloutu neměnily. Firestore Rules byly cíleně
+zpřísněné výše. Důkazy revizí/zdrojů: `build/feed-functions-after.json`,
+`build/feed-deployed-source-proof.json`; běh workeru: `build/feed-worker-live-proof.json`.
 
 Produkční aplikace na `go.shoutout-app.eu` dosud nemá první release.
 Projekt `shoutout-production-a1b34` sdílí s prezentací, app site je

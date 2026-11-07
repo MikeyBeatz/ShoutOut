@@ -2,7 +2,8 @@
 
 6.–7. listopadu 2026. Lokálně dokončeno na `feature/feed-page-integration` podle pokynu
 vlastníka připravit konečné řešení použitelné také pro produkci. Tento dokument
-popisuje připravené řešení a kontrolní brány; **není záznam živé aktivace**.
+popisuje řešení a kontrolní brány. Živý DEV přechod 7. listopadu je doložený
+v [záznamu níže](#dev-rollout-results); původní přípravná měření jsou historická.
 Aktuální nasazení dokládá [PROJECT_STATUS](../../PROJECT_STATUS.md).
 
 ## Co se připravuje společně
@@ -194,3 +195,105 @@ Průběžné lokální důkazy: 38/38 společných serverových regresí
 průchod měl tři instalační/testovací chyby, které byly opravené; není vydáván
 za úspěšnou celkovou kontrolu). Konečné CI je doložené výše.
 Žádné živé zápisy, tajemství, nasazení nebo nové Auth účty v této přípravě.
+
+<a id="dev-rollout-results"></a>
+
+## Živý DEV přechod 7. listopadu 2026
+
+Vlastník výslovně schválil popsanou novou datovou vrstvu, klíč, Rules,
+aktivační rollout i 120 syntetických Shoutů pod existujícími testovacími
+identitami. Nezahrnuje produkci, main ani nové/mazané Auth účty.
+
+Původní zdroj 25a3f92 a CI 42356245115 zůstávají důkazem společné přípravy
+(305 Flutter / 50 tools / 118 Functions unit / 421 Rules-server / 116 purge /
+15 Storage), včetně 93 lokálních Business regresí a 16 při studeném startu.
+Aktivační a9a3b41 byl zrušený kvůli neizolovaným testovacím konfiguracím;
+7d0b167 odhalil ještě dvě obdobné závislosti mazací politiky. Opravy izolují
+volitelné testovací přepínače, neoslabují závislosti skutečné konfigurace.
+Aktivace se provedla až z čistého zdroje
+**ccc879f485caa24374cadc1dba49ddcec50a4a95** po
+[success CI 42358058964](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42358058964).
+Úplné lokální regrese mají 305 Flutter / 50 tools / 118 Functions unit;
+logy `build/feed-activation-{flutter,tools,functions}-all.log`.
+
+Provedeno a ověřeno:
+
+- Nový projektový Secret Manager klíč, verze 1, náhodných 32 bytů
+  v kanonickém base64; hodnota nebyla vypsaná ani uložená do souboru/Gitu.
+  První metadata před vytvořením vracela 404. API vrací kanonickou cestu
+  s číslem projektu; po vytvoření resource se proto nejprve ověřilo jeho
+  vlastnictví a absence verzí, poté se vytvořila a v paměti ověřila verze 1.
+  Důkaz `build/feed-secret-created-proof.json` obsahuje jen metadata/otisk.
+- Přesně pět složených indexů READY a pět výjimek, TTL beze změny.
+  `build/feed-index-apply-proof.json`; původní schválený read-only plán je
+  zachovaný jako `build/feed-index-approved-plan.json`.
+- Rules ze zdroje 25a3f92, ruleset `832178f3-e140-47c8-852b-425e16c475af`,
+  obsahově porovnané přes Rules API (`build/feed-rules-deployed-proof.json`).
+- `initialize` podle schváleného digestu nejprve nastavil off a uzavřel přímé
+  create/vote zápisy. Následovalo osm Functions ze zdroje ccc879f; všechny
+  ACTIVE, max1/concurrency1/256 MiB, min0; callable 15 s, účtové 60 s.
+  Stažené nasazené archivy mají shodné skutečné moduly (41 obsahových /
+  37 účtových) s čistou release kopií. Důkazy
+  `build/feed-active-artifact-proof.json`, `build/feed-functions-after.json`,
+  `build/feed-deployed-source-proof.json`. CLI přidělilo runtime service account
+  přístup k tomuto tajemství; reader používá verzi 1.
+- Po ověření revizí a doběhnutí starých timeoutů proběhl atomický `activate`:
+  `feed-v1` active, read/write generace shodná. Logy
+  `build/feed-initialize-proof.log`, `build/feed-activate-proof.log`.
+- DEV release web je Hosting verze `428dd3e025e17023`, vydaná
+  7. listopadu 09:17:29 UTC. Index, main.dart.js, bootstrap i veřejná konfigurace
+  na web.app odpovídají SHA-256 manifestu čistého sestavení; DEV prostorový
+  přepínač true. Důkaz `build/feed-hosting-live-proof.json`.
+- Stávající minutový Scheduler zůstal ENABLED s původním rozvrhem. Nový
+  worker `00011-lad` zpracovává údržbu bez indexFailed/indexNeedsReview či
+  chyb. Neproběhlo založení dalšího Scheduleru ani změna retence/Storage.
+  Důkaz `build/feed-worker-live-proof.json`.
+
+Živý test založil přesně 120 Shoutů `mvp-feed-20261107-000` až `-119`,
+střídavě Bright_Otter_182/TestBusiness. Business používá existující ověřenou
+pobočku, běžné testovací body jsou zaokrouhlené na dosavadní veřejnou mřížku.
+Zdroj i index vznikly atomicky přes společný runtime writer v dávkách
+50/50/20. Samotné plány hlásily 6/9/13 indexových čtení a 52/61/33 celkových
+zápisů; není to úplný fakturační součet ani měření ceny jednoho feed requestu.
+Fixture má předvyplněná geografická metadata schemaVersion 1, takže test
+nevyvolává 120 externích geokódování. Původních 37 zdrojů bylo před i po
+testu ověřeno včetně nezměněného updateTime. Plán a restartovací checkpoint:
+`build/feed-live-fixture-plan.json`, `build/feed-live-fixture-state.json`.
+Žádný Auth účet nebyl vytvořen nebo smazán.
+
+Serverové jádro nad skutečným DEV Firestore prošlo pro oba účty stránkami
+**50 → 100 → 120**, bez duplicit a podle přesné vzdálenosti. Prošlo Top,
+Končící, prioritní řazení sledovaných (zbytek feedu zůstává podle dosavadního
+kontraktu), kategorie (60), radius 1 km (3), odmítnutí kurzoru jiného účtu,
+opakování stejné reakce, záložka/odebrání a stabilní Top snapshot: reakce
+změní pořadí až v nové obnově. Testovací reakce i záložka jsou odebrané.
+Důkaz `build/feed-live-core-proof.json`. První měřicí harness mylně očekával
+ve Sledované pouze sledované autory; opravil se podle existujícího kontraktu,
+aplikační řazení se neměnilo. Toto je Admin SDK test s důvěryhodným vstupem,
+ne důkaz skutečného přihlášení/App Check ani klientské UI akce.
+
+Vlastník samostatně potvrdil Business UI: po zvětšení dosahu se Shouty
+zobrazily a po dosažení konce se načetly další. Cloudové logy potvrzují
+platný Auth i App Check a tři getFeedPage POST HTTP 200 s latencí na serveru
+1,071 / 0,841 / 0,522 s. Nepřihlášené HTTP volání obou readerů vrací 401.
+Důkaz `build/feed-reader-cloud-proof.json`. Lokální SDK měření mělo 23 volání,
+medián přibližně 1,96 s a jeden vzorek 65,8 s; příčina tohoto odlehlého vzorku
+není potvrzená. Nelze jej zaměnit za latenci cloudového endpointu ani z těchto
+malých vzorků vyvozovat kapacitu, cenu nebo záruku odezvy.
+
+**Otevřené před uzavřením:** vlastník avizoval další poznámky; vyžádané jsou
+před úklidem. Všech 120 fixture zatím zůstává aktivních, úklid ještě neproběhl.
+Pro UI reakce/záložky zatím existuje pouze serverový test; chybí také přímý
+klientský důkaz uzavřených zápisů s přihlášenou identitou (obsah Rules a jejich
+emulátorová regrese jsou ověřené). Automatické převzetí Chrome zastavila
+bezpečnostní kontrola neověřené aktuální URL, takže UI průchod provedl vlastník.
+Při navázání nejprve ověřit checkpoint a připomínky, pak testovací obsah
+smazat přes deleteShoutOperation s runtime writerem a uklidit výhradně
+vlastní fixture záložky, reakce, jejich oznámení a technická potvrzení.
+Historické indexové bloky nesmí úklid obejít; běžný GC dodržuje hodinové okno.
+Neodstraňovat původní 37 zdrojů ani jiné účty/jejich data.
+
+Návrat při problému: pozastavit reader a případně vrátit kompatibilní web
+`f5c7ef14f1b5e04b` (7ab60c8), společné writery/údržbu, generaci, klíč a Rules
+zachovat. Celý feed B1–B4, vlastní Aktivní/Expirované a ostatní MVP brány
+zůstávají otevřené; tento DEV přechod sám nemění metriku 9/24.

@@ -15,12 +15,15 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 A0 (plný detail) je nasazené v DEV; A1 je dokončený lokální prototyp.
 Negativní hodnocení už mimo Top nemění pořadí, ale sbalení. A2/A3 mají
-lokální moduly prostorového indexu, historické relace, kurzoru a koordinátoru;
-nejsou napojené jako živé query API ani nový Home feed. Na větvi
-`feature/feed-page-integration` už probíhá společné propojení zabezpečeného
-API, Home, vlastních uložených Shoutů, provozního úklidu a trvalé instalace
-pro DEV i produkční kód podle [aktuálního přechodového plánu](FEED_INSTALLATION_AND_ROLLOUT.md).
-Přepínače zůstávají vypnuté; živé ověření ani A2/A3 tím nejsou dokončené. B1 má lokální jádro
+moduly prostorového indexu, historické relace, kurzoru a koordinátoru.
+Od 7. listopadu je v DEV skutečně zapojené zabezpečené API, Home, vlastní
+uložené Shouty, provozní úklid a aktivní generace feed-v1 ze zdroje ccc879f
+po success CI 42358058964. DEV přepínače jsou zapnuté; produkce se neměnila.
+Pro oba účty prošel serverový test 50 → 100 → 120 a interakce. Vlastník
+potvrdil Business stránkování v UI, platný Auth/App Check potvrzují logy.
+Před uzavřením A2/A3 zbývají jeho avizované připomínky, další klientská
+ověření a úklid 120 fixture; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené
@@ -28,10 +31,11 @@ expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou
 a je uzavřená bez živé aktivace indexu.
 Maintenance/purge má lokální propojení; R5 pro historii a cache má schválený
 lokální protokol s 61/61 cílenými testy a success CI 42076107087. Navazující
-moderační regrese a opravy jsou lokálně uzavřené: 35/35 cílených testů a success CI 42107616925. Následuje
-provozní měření inventory, včasného úklidu a blokace zápisů, potom schválit konkrétní
-živé schéma/migraci, provozní limity a query API. Následuje klient A2/A3,
-osobní metadata B1–B3 a indikátor B4 se společnou regresí. Původní úplná
+moderační regrese a opravy jsou lokálně uzavřené: 35/35 cílených testů a success CI 42107616925.
+Navazující R6a–R6e, provozní měření, instalace a query API jsou doložené
+v přechodovém plánu; jejich živý DEV výsledek je uveden výše. Po uzavření
+právě ověřovaného A2/A3 následují osobní metadata B1–B3 a indikátor B4
+se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.
 [Progresivní směr](FEED_PROGRESSIVE_PLAN.md), [writeři](FEED_WRITER_INTEGRATION.md),
 [migrační brány](FEED_MIGRATION_READINESS.md), [přečtení](FEED_READING_POLICY.md).
