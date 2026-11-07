@@ -35,11 +35,11 @@ Map<String, Object?> reply(List<Map<String, dynamic>> items, {String? next}) =>
       'next': next,
     };
 
-Widget harness(Widget child) => MaterialApp(
+Widget harness(Widget child, {Widget? floatingActions}) => MaterialApp(
   locale: const Locale('cs'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  home: Scaffold(body: child),
+  home: Scaffold(body: child, floatingActionButton: floatingActions),
 );
 
 void main() {
@@ -113,7 +113,7 @@ void main() {
   });
 
   testWidgets(
-    'actual page transport and view append without resetting scroll; a failed refresh keeps cards and position',
+    'floating refresh stays reachable after paging, preserves failed position and returns to top on success',
     (tester) async {
       final scroll = ScrollController();
       addTearDown(scroll.dispose);
@@ -151,6 +151,7 @@ void main() {
       Future<void> refresh() async {
         try {
           await session.refresh(context);
+          error = null;
           if (scroll.hasClients) scroll.jumpTo(0);
         } catch (_) {
           error = 'Feed se nepodařilo načíst. Zkus to znovu.';
@@ -189,9 +190,15 @@ void main() {
               );
             },
           ),
+          floatingActions: FeedFloatingActions(
+            onCreate: () {},
+            onRefresh: () => unawaited(refresh()),
+          ),
         ),
       );
       await tester.pumpAndSettle();
+      final refreshButton = find.byKey(const ValueKey('spatial-feed-refresh'));
+      final refreshPosition = tester.getRect(refreshButton);
       expect(session.items.length, 50);
       expect(calls, 1);
       expect(
@@ -213,18 +220,33 @@ void main() {
       expect(calls, 2);
       expect(scroll.offset, greaterThan(1000));
       expect(session.items.map((shout) => shout.id).toSet().length, 70);
-      scroll.jumpTo(40);
-      await tester.pumpAndSettle();
+      expect(refreshButton.hitTestable(), findsOneWidget);
+      expect(tester.getRect(refreshButton), refreshPosition);
+      expect(
+        tester.getRect(refreshButton).bottom,
+        lessThan(tester.getRect(find.text('Přidat shout')).top),
+      );
       final before = scroll.offset;
       failRefresh = true;
       await tester.tap(find.byKey(const ValueKey('spatial-feed-refresh')));
       await tester.pumpAndSettle();
       expect(session.items.length, 70);
       expect(scroll.offset, before);
+      expect(error, 'Feed se nepodařilo načíst. Zkus to znovu.');
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const ValueKey('spatial-feed-message')),
         findsOneWidget,
       );
+      expect(tester.takeException(), isNull);
+      scroll.jumpTo(before);
+      await tester.pumpAndSettle();
+      failRefresh = false;
+      await tester.tap(refreshButton);
+      await tester.pumpAndSettle();
+      expect(session.items.length, 50);
+      expect(scroll.offset, 0);
       expect(tester.takeException(), isNull);
     },
   );

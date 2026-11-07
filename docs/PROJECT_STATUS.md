@@ -31,6 +31,9 @@ i testovací záložka jsou vrácené na původní stav, všechny původní 37 z
 mají nezměněný updateTime; žádný Auth účet nebyl vytvořen ani smazán.
 Identifikace fixture a další postup jsou v
 [záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+Vlastník požaduje plovoucí obnovu dostupnou po celou dobu scrollování;
+úprava je připravená na `fix/feed-floating-refresh`, lokálně 15/15 widget/session
+testů. Ještě není nasazená; následuje CI a pouze DEV Hosting rollout.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.

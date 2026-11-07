@@ -297,3 +297,16 @@ Návrat při problému: pozastavit reader a případně vrátit kompatibilní we
 `f5c7ef14f1b5e04b` (7ab60c8), společné writery/údržbu, generaci, klíč a Rules
 zachovat. Celý feed B1–B4, vlastní Aktivní/Expirované a ostatní MVP brány
 zůstávají otevřené; tento DEV přechod sám nemění metriku 9/24.
+
+### Připomínka: trvale dostupná obnova
+
+Vlastník 7. listopadu požaduje plovoucí „Obnovit“, dostupné i po odscrollování
+hlavičky. Na `fix/feed-floating-refresh` je připravené umístění ve stejném
+Scaffold FAB prostoru nad „Přidat shout“, s oddělenými Hero identitami.
+Původní tlačítko ve scrollujícím obsahu se odstraní. Při obnově zůstává vidět
+průběh a další stisk je blokovaný; používá se dosavadní serverová obnova.
+Úspěch vrací scroll nahoru, chyba ponechává karty i pozici. Ostatní záložky
+ani legacy feed nezískávají novou akci. Bez změny API, Functions či Rules.
+Lokální widget/session regrese ověřuje tlačítko dosažitelné po načtení další
+stránky, zachování pozice při chybě i návrat nahoru po úspěchu (15/15).
+Nasazení této úpravy zatím neproběhlo; čeká na přesné úspěšné CI.

@@ -887,8 +887,12 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         },
       ),
       floatingActionButton: _tab == 0
-          ? FloatingActionButton.extended(
-              onPressed: () async {
+          ? FeedFloatingActions(
+              onRefresh: _useSpatialFeed
+                  ? () => unawaited(_refreshSpatialFeed())
+                  : null,
+              refreshing: _spatialLoading,
+              onCreate: () async {
                 completeInteractiveTutorialAction(3);
                 final shout = await showDialog<Shout>(
                   context: context,
@@ -999,8 +1003,6 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
                   }
                 }
               },
-              icon: const Icon(Icons.campaign_outlined),
-              label: Text(tr(context, 'Přidat shout')),
             )
           : null,
       bottomNavigationBar: Stack(

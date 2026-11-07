@@ -498,38 +498,13 @@ class _FeedPageState extends State<FeedPage> {
                 ),
               ),
 
-            if (widget.spatial case final spatial?)
+            if (widget.spatial?.message case final message?)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          key: const ValueKey('spatial-feed-refresh'),
-                          onPressed: spatial.refreshing
-                              ? null
-                              : spatial.refresh,
-                          icon: spatial.refreshing
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.refresh),
-                          label: Text(tr(context, 'Obnovit')),
-                        ),
-                      ),
-                      if (spatial.message != null)
-                        Text(
-                          tr(context, spatial.message!),
-                          key: const ValueKey('spatial-feed-message'),
-                        ),
-                    ],
+                  child: Text(
+                    tr(context, message),
+                    key: const ValueKey('spatial-feed-message'),
                   ),
                 ),
               ),
