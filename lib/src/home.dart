@@ -842,26 +842,32 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       extendBodyBehindAppBar: _tab == 0,
       body: _BrandedTabBackground(
         child: switch (_tab) {
-          0 => FeedPage(
-            shouts: _useSpatialFeed ? _spatialSession.items : activeShouts,
-            promotionShouts: _useSpatialFeed ? activeShouts : null,
-            spatial: _useSpatialFeed ? _spatialPresentation() : null,
-            isLoading: _useSpatialFeed
-                ? _spatialLoading && _spatialSession.context == null
-                : _isLoadingShouts,
-            onSave: _toggleSaved,
-            onReaction: _toggleReaction,
-            onNotifications: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => NotificationsPage(
-                  onSave: _toggleSaved,
-                  onReaction: _toggleReaction,
+          0 => FeedRefreshOverlay(
+            onRefresh: _useSpatialFeed
+                ? () => unawaited(_refreshSpatialFeed())
+                : null,
+            refreshing: _spatialLoading,
+            child: FeedPage(
+              shouts: _useSpatialFeed ? _spatialSession.items : activeShouts,
+              promotionShouts: _useSpatialFeed ? activeShouts : null,
+              spatial: _useSpatialFeed ? _spatialPresentation() : null,
+              isLoading: _useSpatialFeed
+                  ? _spatialLoading && _spatialSession.context == null
+                  : _isLoadingShouts,
+              onSave: _toggleSaved,
+              onReaction: _toggleReaction,
+              onNotifications: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NotificationsPage(
+                    onSave: _toggleSaved,
+                    onReaction: _toggleReaction,
+                  ),
                 ),
               ),
+              filters: _feedFilters,
+              followedUserIds: _followedUserIds,
             ),
-            filters: _feedFilters,
-            followedUserIds: _followedUserIds,
           ),
           1 => FollowedPage(
             pagedSavedShouts: _useSpatialFeed,
@@ -887,12 +893,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         },
       ),
       floatingActionButton: _tab == 0
-          ? FeedFloatingActions(
-              onRefresh: _useSpatialFeed
-                  ? () => unawaited(_refreshSpatialFeed())
-                  : null,
-              refreshing: _spatialLoading,
-              onCreate: () async {
+          ? FloatingActionButton.extended(
+              heroTag: 'create-shout',
+              onPressed: () async {
                 completeInteractiveTutorialAction(3);
                 final shout = await showDialog<Shout>(
                   context: context,
@@ -1003,6 +1006,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
                   }
                 }
               },
+              icon: const Icon(Icons.campaign_outlined),
+              label: Text(tr(context, 'Přidat shout')),
             )
           : null,
       bottomNavigationBar: Stack(

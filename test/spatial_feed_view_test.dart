@@ -35,11 +35,18 @@ Map<String, Object?> reply(List<Map<String, dynamic>> items, {String? next}) =>
       'next': next,
     };
 
-Widget harness(Widget child, {Widget? floatingActions}) => MaterialApp(
+Widget harness(
+  Widget child, {
+  Widget? floatingActions,
+  VoidCallback? onRefresh,
+}) => MaterialApp(
   locale: const Locale('cs'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  home: Scaffold(body: child, floatingActionButton: floatingActions),
+  home: Scaffold(
+    body: FeedRefreshOverlay(onRefresh: onRefresh, child: child),
+    floatingActionButton: floatingActions,
+  ),
 );
 
 void main() {
@@ -190,15 +197,30 @@ void main() {
               );
             },
           ),
-          floatingActions: FeedFloatingActions(
-            onCreate: () {},
-            onRefresh: () => unawaited(refresh()),
+          onRefresh: () => unawaited(refresh()),
+          floatingActions: FloatingActionButton.extended(
+            heroTag: 'create-shout',
+            onPressed: () {},
+            icon: const Icon(Icons.campaign_outlined),
+            label: const Text('Přidat shout'),
           ),
         ),
       );
       await tester.pumpAndSettle();
       final refreshButton = find.byKey(const ValueKey('spatial-feed-refresh'));
       final refreshPosition = tester.getRect(refreshButton);
+      expect(refreshPosition.top, lessThan(24));
+      expect(refreshPosition.right, greaterThan(700));
+      expect(
+        refreshPosition.overlaps(
+          tester.getRect(find.byType(NotificationBellButton)),
+        ),
+        isFalse,
+      );
+      expect(
+        find.descendant(of: refreshButton, matching: find.byType(Text)),
+        findsNothing,
+      );
       expect(session.items.length, 50);
       expect(calls, 1);
       expect(
@@ -247,6 +269,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(session.items.length, 50);
       expect(scroll.offset, 0);
+      expect(tester.takeException(), isNull);
+      tester.view.physicalSize = Size(
+        320 * tester.view.devicePixelRatio,
+        740 * tester.view.devicePixelRatio,
+      );
+      addTearDown(tester.view.resetPhysicalSize);
+      await tester.pumpAndSettle();
+      expect(refreshButton.hitTestable(), findsOneWidget);
+      expect(tester.getRect(refreshButton).right, lessThanOrEqualTo(320));
+      expect(
+        tester
+            .getRect(refreshButton)
+            .overlaps(tester.getRect(find.byType(NotificationBellButton))),
+        isFalse,
+      );
       expect(tester.takeException(), isNull);
     },
   );

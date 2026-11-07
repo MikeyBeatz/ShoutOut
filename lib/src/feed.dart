@@ -289,8 +289,13 @@ class _FeedPageState extends State<FeedPage> {
                                   ),
                                   Align(
                                     alignment: Alignment.centerRight,
-                                    child: NotificationBellButton(
-                                      onPressed: widget.onNotifications,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        right: widget.spatial == null ? 0 : 56,
+                                      ),
+                                      child: NotificationBellButton(
+                                        onPressed: widget.onNotifications,
+                                      ),
                                     ),
                                   ),
                                 ],

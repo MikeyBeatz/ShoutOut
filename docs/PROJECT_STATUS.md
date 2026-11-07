@@ -35,8 +35,12 @@ Plovoucí obnova nad „Přidat shout“ je již nasazená z `fix/feed-floating-
 zdroj `e43e0e1f93fabffc83e1de523cd28013196fa92f`,
 [success CI 42360773795](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42360773795).
 Lokálně 15/15 widget/session testů a čistá analýza; oba DEV originy odpovídají
-manifestu nového release. Vlastník ji nyní vyzkouší; živý UI výsledek této
-úpravy zatím není potvrzený. Functions, Rules ani data se tímto UI rolloutem neměnily.
+manifestu nového release. Vlastník potvrdil funkčnost této varianty a požaduje
+další úpravu: pouze ikona, plovoucí vpravo nahoře. Ta je připravená na
+`fix/feed-refresh-top-right`, lokálně 15/15 testů včetně šířky 320 bodů,
+nekolidujícího zvonku, zachování scrollu při chybě a návratu nahoru po úspěchu;
+analýza je čistá. Ještě není nasazená, čeká na přesné CI a DEV Hosting.
+Functions, Rules ani data se tímto UI rolloutem neměnily.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.

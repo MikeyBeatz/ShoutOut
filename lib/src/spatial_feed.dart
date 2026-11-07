@@ -134,47 +134,49 @@ class _SavedShoutsLibraryState extends State<_SavedShoutsLibrary> {
   );
 }
 
-class FeedFloatingActions extends StatelessWidget {
-  const FeedFloatingActions({
+class FeedRefreshOverlay extends StatelessWidget {
+  const FeedRefreshOverlay({
     super.key,
-    required this.onCreate,
+    required this.child,
     this.onRefresh,
     this.refreshing = false,
   });
 
-  final VoidCallback onCreate;
+  final Widget child;
   final VoidCallback? onRefresh;
   final bool refreshing;
 
   @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      if (onRefresh != null) ...[
-        FloatingActionButton.extended(
-          key: const ValueKey('spatial-feed-refresh'),
-          heroTag: 'refresh-feed',
-          onPressed: refreshing ? null : onRefresh,
-          icon: refreshing
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.refresh),
-          label: Text(tr(context, 'Obnovit')),
-        ),
-        const SizedBox(height: 12),
-      ],
-      FloatingActionButton.extended(
-        heroTag: 'create-shout',
-        onPressed: onCreate,
-        icon: const Icon(Icons.campaign_outlined),
-        label: Text(tr(context, 'Přidat shout')),
-      ),
-    ],
-  );
+  Widget build(BuildContext context) => onRefresh == null
+      ? child
+      : Stack(
+          fit: StackFit.expand,
+          children: [
+            child,
+            Positioned(
+              top: 6,
+              right: 20,
+              child: SafeArea(
+                bottom: false,
+                child: FloatingActionButton.small(
+                  key: const ValueKey('spatial-feed-refresh'),
+                  heroTag: 'refresh-feed',
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).refreshIndicatorSemanticLabel,
+                  onPressed: refreshing ? null : onRefresh,
+                  child: refreshing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh),
+                ),
+              ),
+            ),
+          ],
+        );
 }
 
 /// One feed view over the shared page/session controller. It does not re-sort

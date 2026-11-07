@@ -323,3 +323,19 @@ opakované sestavení bez této shellové pasti dokončilo release i manifest.
 zastavila kontrola neověřené URL. Produkce, main, Functions, Rules i data
 zůstaly při tomto UI rolloutu beze změny. Návrat této úpravy je předchozí
 kompatibilní web `428dd3e025e17023` (ccc879f); writery a generaci zachovat.
+
+### Upřesnění: pouze ikona vpravo nahoře
+
+Vlastník potvrdil funkční plovoucí obnovu a následně požaduje pouze ikonu
+v pravém horním rohu, stále dostupnou při scrollování. Na
+`fix/feed-refresh-top-right` ji pevná vrstva nad feedem kotví do SafeArea;
+zvonek dostává vlastní místo vlevo od ikony, „Přidat shout“ zůstává dole.
+Viditelný popisek se odstraní. Tooltip a popis pro čtečky používají vestavěnou
+lokalizaci Material, takže nevzniká nový překladový klíč ani text v tlačítku.
+Průběh a blokace opakovaného stisku i dosavadní obnova zůstávají zachované.
+Patnáct widget/session testů prošlo včetně stabilní polohy po stránkování,
+chyby/úspěchu obnovy a šířky 320 logických bodů bez překrytí zvonku;
+analýza je čistá. První zkouška šířky omylem nastavila fyzické pixely bez DPR,
+po správném přepočtu prošla bez aplikační opravy rozložení filtrů.
+Logy `build/feed-refresh-icon-{test,analyze}.log`. Úprava ještě není nasazená;
+po vlastním úspěšném CI následuje jen DEV Hosting, bez backendových změn.

@@ -38,8 +38,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Business načítání dalších stránek, cloud potvrzuje platný Auth/App Check.
    Projít avizované poznámky vlastníka, doplnit zbývající klientská ověření
    a uklidit přesně 120 testovacích Shoutů; zatím jsou ponechané pro kontrolu.
-   První připomínka: plovoucí „Obnovit“ nad „Přidat shout“ je nasazené
-   z `e43e0e1` po success CI `42360773795`; čeká na kontrolu vlastníka.
+   První plovoucí varianta z `e43e0e1` je potvrzená vlastníkem. Navazující
+   požadavek na ikonu bez popisku vpravo nahoře je lokálně připravený
+   na `fix/feed-refresh-top-right`; následuje vlastní CI a DEV Hosting.
    [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
