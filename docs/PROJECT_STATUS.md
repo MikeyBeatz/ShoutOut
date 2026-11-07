@@ -28,8 +28,16 @@ nový podpisový klíč, indexové změny a 120 testovacích Shoutů podle
 aktivační commit runtime + DEV klienta; nasazení proběhne odděleně server →
 index → web až po jeho úspěšném CI. Read-only kontrola 7. listopadu: 37 Shoutů /
 0 active, žádný control/generace; metadata podpisového tajemství vracejí 404.
-Žádná aktivace ani živé zápisy. Přepínače jsou zatím jen lokálně připravené
-(runtime/DEV zapnuté, produkční klient vypnutý); živý web je stále původní.
+Živá příprava zahájená: v DEV vytvořený a ověřený podpisový klíč (verze 1,
+hodnota pouze v Secret Manageru) a odeslaných přesně 10 schválených indexových
+operací bez TTL. Checkpointy `build/feed-secret-created-proof.json` a
+`build/feed-index-apply-proof.json`. Control/generace ani nový web zatím
+neaktivované. Aktivační `a9a3b41` byl zrušený kvůli neizolovaným testovacím
+konfiguracím; `7d0b167` ještě odhalil dva obdobné testy mazací politiky.
+Úplná lokální opravená regrese má 305 Flutter / 50 tools / 118 Functions unit.
+Připravuje se její nové CI; validační závislosti se neoslabují.
+Přepínače jsou jen připravené v kódu (runtime/DEV zapnuté, produkční klient
+vypnutý); živý web je stále původní.
 Produkce/main se neměnily. Živý UI průchod zatím neproběhl; poslední automatický
 pokus skončil kontrolou URL v Chrome. Před MVP dál zbývají B1–B4 i vlastní
 Aktivní/Expirované podle otevřené akceptace, neoznačovat celý feed za dokončený.

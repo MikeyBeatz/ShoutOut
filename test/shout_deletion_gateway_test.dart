@@ -127,7 +127,8 @@ void main() {
       final config =
           jsonDecode(File('config/dev.json').readAsStringSync())
                 as Map<String, dynamic>
-            ..remove('serverShoutDeletion');
+            ..remove('serverShoutDeletion')
+            ..['serverSpatialFeed'] = false;
       expect(WebEnvironment.fromJson(config).serverShoutDeletion, isFalse);
       expect(
         WebEnvironment.fromJson({
