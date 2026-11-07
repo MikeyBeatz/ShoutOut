@@ -309,4 +309,17 @@ průběh a další stisk je blokovaný; používá se dosavadní serverová obno
 ani legacy feed nezískávají novou akci. Bez změny API, Functions či Rules.
 Lokální widget/session regrese ověřuje tlačítko dosažitelné po načtení další
 stránky, zachování pozice při chybě i návrat nahoru po úspěchu (15/15).
-Nasazení této úpravy zatím neproběhlo; čeká na přesné úspěšné CI.
+Lokální analýza je čistá. Zdroj `e43e0e1f93fabffc83e1de523cd28013196fa92f`
+má [success CI 42360773795](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42360773795).
+Z jeho čisté samostatné kopie je 7. listopadu v 11:08 SEČ nasazený pouze
+DEV Hosting `shoutout-dev-46c81`, verze `82efffc97375c3ec`. Čtyři veřejné
+soubory na web.app i firebaseapp.com mají shodné SHA-256 s release manifestem.
+Důkazy: `build/feed-floating-ci-proof.json`, `build/feed-floating-hosting-proof.json`,
+`build/feed-floating-hosting-deploy.log`; místní regrese/analýza v
+`build/feed-floating-refresh-{test,analyze}.log`. První lokální build zastavilo
+PowerShell ErrorAction Stop při běžném stderr upozornění Flutteru o Wasm;
+opakované sestavení bez této shellové pasti dokončilo release i manifest.
+Živá UI kontrola zatím čeká na vlastníka, automatické převzetí Chrome znovu
+zastavila kontrola neověřené URL. Produkce, main, Functions, Rules i data
+zůstaly při tomto UI rolloutu beze změny. Návrat této úpravy je předchozí
+kompatibilní web `428dd3e025e17023` (ccc879f); writery a generaci zachovat.

@@ -31,9 +31,12 @@ i testovací záložka jsou vrácené na původní stav, všechny původní 37 z
 mají nezměněný updateTime; žádný Auth účet nebyl vytvořen ani smazán.
 Identifikace fixture a další postup jsou v
 [záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
-Vlastník požaduje plovoucí obnovu dostupnou po celou dobu scrollování;
-úprava je připravená na `fix/feed-floating-refresh`, lokálně 15/15 widget/session
-testů. Ještě není nasazená; následuje CI a pouze DEV Hosting rollout.
+Plovoucí obnova nad „Přidat shout“ je již nasazená z `fix/feed-floating-refresh`,
+zdroj `e43e0e1f93fabffc83e1de523cd28013196fa92f`,
+[success CI 42360773795](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42360773795).
+Lokálně 15/15 widget/session testů a čistá analýza; oba DEV originy odpovídají
+manifestu nového release. Vlastník ji nyní vyzkouší; živý UI výsledek této
+úpravy zatím není potvrzený. Functions, Rules ani data se tímto UI rolloutem neměnily.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.
@@ -281,7 +284,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `ccc879f485caa24374cadc1dba49ddcec50a4a95` / `428dd3e025e17023`; DEV prostorový feed zapnutý |
+| Webový zdroj / Hosting verze | `e43e0e1f93fabffc83e1de523cd28013196fa92f` / `82efffc97375c3ec`; DEV prostorový feed a plovoucí obnova |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
@@ -294,9 +297,11 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
-za jeden nový společný artefakt. Čtyři veřejné soubory web.app odpovídají
-release manifestu (`build/feed-hosting-live-proof.json`). Návrat webu:
-Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8), případně pozastavení readeru;
+za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
+odpovídají release manifestu (`build/feed-floating-hosting-proof.json`).
+Návrat poslední UI úpravy: Hosting `428dd3e025e17023` (zdroj ccc879f).
+Při problému celého prostorového feedu lze pozastavit reader a vrátit
+kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
 společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,
 receipt cleanup 60 s.
 Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
