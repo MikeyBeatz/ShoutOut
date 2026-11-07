@@ -28,7 +28,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Společná lokální integrace serverových stránek, Home, uložených Shoutů,
    minutového úklidu a trvalé instalace má zdroj `25a3f92` a
    [success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115).
-   Podle read-only kontroly má DEV 37 Shoutů / 0 active; nástroj pro první
+   Před instalací měla read-only kontrola DEV 37 Shoutů / 0 active; nástroj pro první
    instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
    [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
    Vlastník schválil živý přechod i testy 7. listopadu. Klíč, 10 indexových
@@ -39,8 +39,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Projít avizované poznámky vlastníka, doplnit zbývající klientská ověření
    a uklidit přesně 120 testovacích Shoutů; zatím jsou ponechané pro kontrolu.
    První plovoucí varianta z `e43e0e1` je potvrzená vlastníkem. Navazující
-   požadavek na ikonu bez popisku vpravo nahoře je lokálně připravený
-   na `fix/feed-refresh-top-right`; následuje vlastní CI a DEV Hosting.
+   ikona bez popisku vpravo nahoře je už nasazená z `f08abf9` po success CI
+   `42363878639`; čeká na kontrolu vlastníka.
    [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a

@@ -337,5 +337,14 @@ Patnáct widget/session testů prošlo včetně stabilní polohy po stránkován
 chyby/úspěchu obnovy a šířky 320 logických bodů bez překrytí zvonku;
 analýza je čistá. První zkouška šířky omylem nastavila fyzické pixely bez DPR,
 po správném přepočtu prošla bez aplikační opravy rozložení filtrů.
-Logy `build/feed-refresh-icon-{test,analyze}.log`. Úprava ještě není nasazená;
-po vlastním úspěšném CI následuje jen DEV Hosting, bez backendových změn.
+Logy `build/feed-refresh-icon-{test,analyze}.log`. Zdroj
+`f08abf97cf34686a7c776848c01bb7627ca08719` má
+[success CI 42363878639](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42363878639)
+a z čisté kopie byl 7. listopadu nasazený pouze na DEV Hosting, verze
+`529bbcd5bb0c6ee8`. Čtyři veřejné soubory na web.app i firebaseapp.com
+odpovídají SHA-256 release manifestu. Důkazy
+`build/feed-refresh-icon-ci-proof.json`, `build/feed-refresh-icon-hosting-proof.json`
+a `build/feed-refresh-icon-hosting-deploy.log`. Kontrola skutečné UI polohy
+čeká na vlastníka; testovací obsah zůstává pro jeho další připomínky.
+Návrat UI změny: Hosting `82efffc97375c3ec` (e43e0e1). Bez změny Functions,
+Rules, dat, produkce či main; generaci a writery zachovat.
