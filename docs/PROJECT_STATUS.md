@@ -22,12 +22,14 @@ ověřenou shodu zdrojů/exportů (41/37 modulů). Důkazy:
 lokálních regresí a 16/16 při novém startu emulátoru. Neúspěšné starší běhy
 nejsou release důkazem; jejich příčiny zůstávají v integračním plánu.
 
-**Další krok:** předložit trvalý živý DEV přechod včetně nového podpisového
-tajemství, indexových změn a 120 testovacích Shoutů podle
-[konkrétního plánu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md), potom po schválení
-aktivovat a změřit API/klienta. Read-only kontrola 7. listopadu: 37 Shoutů /
+**Aktuální práce:** vlastník 7. listopadu schválil celý trvalý živý DEV přechod,
+nový podpisový klíč, indexové změny a 120 testovacích Shoutů podle
+[konkrétního plánu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md). Připravuje se společný
+aktivační commit runtime + DEV klienta; nasazení proběhne odděleně server →
+index → web až po jeho úspěšném CI. Read-only kontrola 7. listopadu: 37 Shoutů /
 0 active, žádný control/generace; metadata podpisového tajemství vracejí 404.
-Žádná aktivace ani živé zápisy, oba klientské přepínače a runtime jsou vypnuté.
+Žádná aktivace ani živé zápisy. Přepínače jsou zatím jen lokálně připravené
+(runtime/DEV zapnuté, produkční klient vypnutý); živý web je stále původní.
 Produkce/main se neměnily. Živý UI průchod zatím neproběhl; poslední automatický
 pokus skončil kontrolou URL v Chrome. Před MVP dál zbývají B1–B4 i vlastní
 Aktivní/Expirované podle otevřené akceptace, neoznačovat celý feed za dokončený.

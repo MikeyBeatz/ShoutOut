@@ -72,10 +72,10 @@ async function fixture(t, { count = 2, generations = 2, separated = false } = {}
   return f;
 }
 
-test('runtime defaults off with zero database access and rejects unrelated projects', () => {
+test('approved runtime defaults on; explicit off has zero database access and unrelated projects are rejected', () => {
   const unusable = new Proxy({}, { get() { throw new Error('unexpected-database-access'); } });
-  const runtime = createFeedRuntime(unusable, null);
-  assert.equal(feedRuntimeConfiguration.enabled, false); assert.equal(runtime.enabled, false);
+  const runtime = createFeedRuntime(unusable, null, { enabled: false });
+  assert.equal(feedRuntimeConfiguration.enabled, true); assert.equal(runtime.enabled, false);
   assert.equal(runtime.database, unusable);
   for (const option of ['indexWriter', 'earlyErasureQueue', 'indexErasureCoordinator', 'indexMaintenance']) assert.equal(runtime[option], null);
   assert.throws(() => createFeedRuntime({ projectId: 'unrelated-project' }, absent, { enabled: true }), /project-required/);
@@ -83,14 +83,14 @@ test('runtime defaults off with zero database access and rejects unrelated proje
   assert.throws(() => createLabBlockIndex({ projectId: 'shoutout-dev-46c81' }, { namespace: 'fixture' }), /emulator-only/);
 });
 
-test('the same inactive runtime can be bound to production without any network or data access', async () => {
+test('the default configured runtime can be bound to production without any network or data access', async () => {
   const production = new Firestore({ projectId: 'shoutout-production-a1b34' });
   const guarded = new Proxy(production, { get(target, key) {
     if (['runTransaction', 'getAll', 'batch', 'bulkWriter'].includes(key)) return () => assert.fail('No production data access is allowed in this test');
     return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
   } });
   try {
-    const runtime = createFeedRuntime(guarded, absent, { enabled: true });
+    const runtime = createFeedRuntime(guarded, absent);
     assert.equal(runtime.enabled, true);
     assert.equal(createFeedGenerationStore(guarded, 'fixture').base.path, 'feedIndexGenerations/fixture');
   } finally { await production.terminate(); }

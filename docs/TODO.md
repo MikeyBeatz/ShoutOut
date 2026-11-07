@@ -31,9 +31,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Podle read-only kontroly má DEV 37 Shoutů / 0 active; nástroj pro první
    instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
    [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
-   Předložit připravený živý datový/klíčový přechod, potom nasadit a změřit
-   reálné stránky i běžný/Business průchod. Zatím nic
-   neaktivováno, oba klientské přepínače a serverový runtime jsou vypnuté.
+   Vlastník schválil živý přechod i testy 7. listopadu. Připravuje se aktivační
+   commit; po jeho CI nasadit server → index → DEV web a změřit reálné stránky
+   i běžný/Business průchod. Zatím nic živě neaktivováno.
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
    [PROJECT_STATUS](PROJECT_STATUS.md). Účtový DEV přechod je uzavřený;

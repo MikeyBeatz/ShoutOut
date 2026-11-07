@@ -40,8 +40,10 @@ Aktuální nasazení dokládá [PROJECT_STATUS](../../PROJECT_STATUS.md).
   nikoli klientem zadaný `retiredAt`. Poškozený/velký checkpoint vede na kontrolu,
   nikoli k neomezenému či neověřenému mazání.
 
-Kód používá stejné rozhraní a cesty v DEV i produkci; oba klientské přepínače
-`serverSpatialFeed` i společný serverový runtime jsou zatím **vypnuté**.
+Kód používá stejné rozhraní a cesty v DEV i produkci. Vlastník 7. listopadu
+schválil celý živý DEV přechod a testy. Připravovaný aktivační commit zapíná
+společný runtime a DEV `serverSpatialFeed`, produkční klientská konfigurace
+zůstává vypnutá. Samotná příprava přepínačů není živé nasazení.
 Přečtení a indikátor B1–B4 nejsou touto integrací dokončené. Před MVP dál platí
 [celý schválený rozsah](FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
 
@@ -101,7 +103,7 @@ opakují instalační transakce. Žádný mutační příkaz zatím nebyl spušt
 | 6 | Z přesného navazujícího CI commitu zapnout společný runtime a aktualizovat všechny relevantní obsahové writery a účtový worker; nasadit oba čtecí endpointy. Klientský feed zůstává vypnutý. |
 | 7 | Ověřit skutečné revize, úplnost writerů a odmítnutí přímých zápisů. Nechat doběhnout staré revize podle jejich timeoutů. Samotná deklarace nasazovacího commitu tuto kontrolu nenahrazuje. |
 | 8 | `activate` provede atomickou poslední kontrolu prázdného aktivního zdroje. Pokud mezitím někdo publikoval, zastavit a nově vyhodnotit stav; žádné tiché smazání, skrytí ani backfill. |
-| 9 | V otestovaném navazujícím commitu zapnout `serverSpatialFeed` jen pro DEV a nasadit Hosting site `shoutout-dev-46c81`. Ověřit skutečný build a oba typy účtů. |
+| 9 | Ze stejného otestovaného aktivačního commitu teprve nyní nasadit Hosting site `shoutout-dev-46c81` s `serverSpatialFeed` zapnutým jen pro DEV. Ověřit skutečný build a oba typy účtů. |
 
 Složené indexy: `cells(latCell,lonCell)` collection;
 `jobs(phase,retainUntil,nextAttemptAt)` collection;
