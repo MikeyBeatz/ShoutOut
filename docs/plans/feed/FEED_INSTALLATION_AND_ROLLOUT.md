@@ -348,3 +348,19 @@ a `build/feed-refresh-icon-hosting-deploy.log`. Kontrola skutečné UI polohy
 čeká na vlastníka; testovací obsah zůstává pro jeho další připomínky.
 Návrat UI změny: Hosting `82efffc97375c3ec` (e43e0e1). Bez změny Functions,
 Rules, dat, produkce či main; generaci a writery zachovat.
+
+### Stejný plovoucí styl pro oznámení
+
+Vlastník potvrdil ikonu obnovy vpravo nahoře a požaduje stejný způsob pro
+oznámení. Na `fix/feed-floating-notifications` je zvonek ve stejné pevné
+SafeArea vrstvě vlevo od obnovy, se stejným FloatingActionButton.small,
+barvami motivu a samostatnou Hero identitou. Ve scrollující hlavičce nového
+feedu už není duplicitní zvonek. Původní cesta otevření NotificationsPage
+a počet nepřečtených nad dosavadním nejvýše 50 položek zůstávají stejné;
+jediný dosavadní odběr se přesouvá, další dotaz se nepřidává. Ostatní sekce
+a legacy feed používají původní neplovoucí variantu. Viditelný popisek není,
+tooltip používá existující překlad Oznámení; číselný odznak zůstává.
+Patnáct widget/session testů prošlo včetně stálé polohy, vzájemného oddělení,
+šířky 320 bodů a kliknutí na oznámení po stránkování bez nové feed query.
+Log `build/feed-floating-notifications-test.log`. Úprava zatím není nasazená;
+po vlastním úspěšném CI následuje pouze DEV Hosting, bez změny backendu/dat.

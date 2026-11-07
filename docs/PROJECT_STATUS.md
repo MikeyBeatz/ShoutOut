@@ -36,9 +36,12 @@ Plovoucí obnova je nyní **pouze ikona vpravo nahoře**, ze zdroje
 [success CI 42363878639](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42363878639).
 Lokálně 15/15 widget/session testů a čistá analýza, včetně šířky 320 bodů,
 nekolidujícího zvonku a chování scrollu. Oba DEV originy odpovídají manifestu
-nového release; UI kontrola této polohy čeká na vlastníka. Předchozí spodní
-plovoucí variantu vlastník ověřil jako funkční. Functions, Rules ani data
-se těmito UI rollouty neměnily.
+nového release; vlastník tuto polohu potvrdil a požaduje stejný plovoucí
+styl také pro oznámení. Na `fix/feed-floating-notifications` je připravený
+zvonek vlevo od obnovy se stejným odznakem a jediným dosavadním odběrem.
+Lokálně 15/15 widget/session testů, včetně dosahu obou tlačítek po scrollu
+a otevření oznámení bez dalšího načtení feedu. Ještě není nasazený; následuje
+vlastní CI a pouze DEV Hosting. Functions, Rules ani data se těmito UI rollouty neměnily.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.

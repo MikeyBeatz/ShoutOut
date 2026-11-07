@@ -40,7 +40,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    a uklidit přesně 120 testovacích Shoutů; zatím jsou ponechané pro kontrolu.
    První plovoucí varianta z `e43e0e1` je potvrzená vlastníkem. Navazující
    ikona bez popisku vpravo nahoře je už nasazená z `f08abf9` po success CI
-   `42363878639`; čeká na kontrolu vlastníka.
+   `42363878639` a vlastník ji potvrdil. Stejný plovoucí zvonek vedle obnovy
+   je lokálně připravený na `fix/feed-floating-notifications`; čeká na CI a DEV rollout.
    [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a

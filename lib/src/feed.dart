@@ -56,6 +56,7 @@ class FeedPage extends StatefulWidget {
     required this.followedUserIds,
     this.spatial,
     this.promotionShouts,
+    this.showNotifications = true,
   });
 
   final List<Shout> shouts;
@@ -67,6 +68,7 @@ class FeedPage extends StatefulWidget {
   final Set<String> followedUserIds;
   final SpatialFeedPresentation? spatial;
   final List<Shout>? promotionShouts;
+  final bool showNotifications;
 
   @override
   State<FeedPage> createState() => _FeedPageState();
@@ -287,17 +289,13 @@ class _FeedPageState extends State<FeedPage> {
                                       ],
                                     ),
                                   ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                        right: widget.spatial == null ? 0 : 56,
-                                      ),
+                                  if (widget.showNotifications)
+                                    Align(
+                                      alignment: Alignment.centerRight,
                                       child: NotificationBellButton(
                                         onPressed: widget.onNotifications,
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                               const SizedBox(height: 4),

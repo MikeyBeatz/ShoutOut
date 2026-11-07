@@ -829,6 +829,18 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     );
   }
 
+  void _openNotifications() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NotificationsPage(
+          onSave: _toggleSaved,
+          onReaction: _toggleReaction,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeShouts = _shouts
@@ -847,6 +859,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
                 ? () => unawaited(_refreshSpatialFeed())
                 : null,
             refreshing: _spatialLoading,
+            onNotifications: _useSpatialFeed ? _openNotifications : null,
             child: FeedPage(
               shouts: _useSpatialFeed ? _spatialSession.items : activeShouts,
               promotionShouts: _useSpatialFeed ? activeShouts : null,
@@ -856,15 +869,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
                   : _isLoadingShouts,
               onSave: _toggleSaved,
               onReaction: _toggleReaction,
-              onNotifications: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NotificationsPage(
-                    onSave: _toggleSaved,
-                    onReaction: _toggleReaction,
-                  ),
-                ),
-              ),
+              onNotifications: _openNotifications,
+              showNotifications: !_useSpatialFeed,
               filters: _feedFilters,
               followedUserIds: _followedUserIds,
             ),

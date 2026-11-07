@@ -39,12 +39,17 @@ Widget harness(
   Widget child, {
   Widget? floatingActions,
   VoidCallback? onRefresh,
+  VoidCallback? onNotifications,
 }) => MaterialApp(
   locale: const Locale('cs'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
-    body: FeedRefreshOverlay(onRefresh: onRefresh, child: child),
+    body: FeedRefreshOverlay(
+      onRefresh: onRefresh,
+      onNotifications: onNotifications,
+      child: child,
+    ),
     floatingActionButton: floatingActions,
   ),
 );
@@ -120,13 +125,14 @@ void main() {
   });
 
   testWidgets(
-    'floating refresh stays reachable after paging, preserves failed position and returns to top on success',
+    'floating feed actions stay reachable after paging; refresh preserves failure and returns to top on success',
     (tester) async {
       final scroll = ScrollController();
       addTearDown(scroll.dispose);
       StateSetter? update;
       var calls = 0;
       var failRefresh = false;
+      var notificationsOpened = 0;
       String? error;
       final gateway = FeedPageGateway<Shout>(
         currentUserId: () => 'reader',
@@ -177,6 +183,7 @@ void main() {
                 onSave: (_) {},
                 onReaction: (_, {required bool like}) async {},
                 onNotifications: () {},
+                showNotifications: false,
                 filters: FeedFilters(),
                 followedUserIds: {},
                 spatial: SpatialFeedPresentation(
@@ -198,6 +205,7 @@ void main() {
             },
           ),
           onRefresh: () => unawaited(refresh()),
+          onNotifications: () => notificationsOpened++,
           floatingActions: FloatingActionButton.extended(
             heroTag: 'create-shout',
             onPressed: () {},
@@ -209,6 +217,13 @@ void main() {
       await tester.pumpAndSettle();
       final refreshButton = find.byKey(const ValueKey('spatial-feed-refresh'));
       final refreshPosition = tester.getRect(refreshButton);
+      final notificationsButton = find.byKey(
+        const ValueKey('feed-notifications'),
+      );
+      final notificationsPosition = tester.getRect(notificationsButton);
+      expect(notificationsPosition.size, refreshPosition.size);
+      expect(notificationsPosition.top, refreshPosition.top);
+      expect(notificationsPosition.right, lessThan(refreshPosition.left));
       expect(refreshPosition.top, lessThan(24));
       expect(refreshPosition.right, greaterThan(700));
       expect(
@@ -244,6 +259,12 @@ void main() {
       expect(session.items.map((shout) => shout.id).toSet().length, 70);
       expect(refreshButton.hitTestable(), findsOneWidget);
       expect(tester.getRect(refreshButton), refreshPosition);
+      expect(notificationsButton.hitTestable(), findsOneWidget);
+      expect(tester.getRect(notificationsButton), notificationsPosition);
+      await tester.tap(notificationsButton);
+      await tester.pumpAndSettle();
+      expect(notificationsOpened, 1);
+      expect(calls, 2);
       expect(
         tester.getRect(refreshButton).bottom,
         lessThan(tester.getRect(find.text('Přidat shout')).top),
@@ -277,6 +298,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       await tester.pumpAndSettle();
       expect(refreshButton.hitTestable(), findsOneWidget);
+      expect(notificationsButton.hitTestable(), findsOneWidget);
       expect(tester.getRect(refreshButton).right, lessThanOrEqualTo(320));
       expect(
         tester

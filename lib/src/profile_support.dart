@@ -1,18 +1,43 @@
 part of '../main.dart';
 
 class NotificationBellButton extends StatelessWidget {
-  const NotificationBellButton({super.key, required this.onPressed});
+  const NotificationBellButton({
+    super.key,
+    required this.onPressed,
+    this.floating = false,
+  });
 
   final VoidCallback onPressed;
+  final bool floating;
+
+  Widget _button(BuildContext context, int unread) {
+    final icon = Badge.count(
+      count: unread,
+      isLabelVisible: unread > 0,
+      child: Icon(
+        Icons.notifications_none_rounded,
+        color: floating ? null : Colors.white,
+      ),
+    );
+    return floating
+        ? FloatingActionButton.small(
+            key: const ValueKey('feed-notifications'),
+            heroTag: 'feed-notifications',
+            tooltip: tr(context, 'Oznámení'),
+            onPressed: onPressed,
+            child: icon,
+          )
+        : IconButton(
+            tooltip: tr(context, 'Oznámení'),
+            onPressed: onPressed,
+            icon: icon,
+          );
+  }
 
   @override
   Widget build(BuildContext context) {
     if (Firebase.apps.isEmpty) {
-      return IconButton(
-        tooltip: tr(context, 'Oznámení'),
-        onPressed: onPressed,
-        icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-      );
+      return _button(context, 0);
     }
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return const SizedBox.shrink();
@@ -31,18 +56,7 @@ class NotificationBellButton extends StatelessWidget {
                 .where((document) => document.data()['readAt'] == null)
                 .length ??
             0;
-        return IconButton(
-          tooltip: tr(context, 'Oznámení'),
-          onPressed: onPressed,
-          icon: Badge.count(
-            count: unread,
-            isLabelVisible: unread > 0,
-            child: const Icon(
-              Icons.notifications_none_rounded,
-              color: Colors.white,
-            ),
-          ),
-        );
+        return _button(context, unread);
       },
     );
   }

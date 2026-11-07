@@ -139,15 +139,18 @@ class FeedRefreshOverlay extends StatelessWidget {
     super.key,
     required this.child,
     this.onRefresh,
+    this.onNotifications,
     this.refreshing = false,
   });
 
   final Widget child;
   final VoidCallback? onRefresh;
+  final VoidCallback? onNotifications;
   final bool refreshing;
 
   @override
-  Widget build(BuildContext context) => onRefresh == null
+  Widget build(BuildContext context) =>
+      onRefresh == null && onNotifications == null
       ? child
       : Stack(
           fit: StackFit.expand,
@@ -158,20 +161,35 @@ class FeedRefreshOverlay extends StatelessWidget {
               right: 20,
               child: SafeArea(
                 bottom: false,
-                child: FloatingActionButton.small(
-                  key: const ValueKey('spatial-feed-refresh'),
-                  heroTag: 'refresh-feed',
-                  tooltip: MaterialLocalizations.of(
-                    context,
-                  ).refreshIndicatorSemanticLabel,
-                  onPressed: refreshing ? null : onRefresh,
-                  child: refreshing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.refresh),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onNotifications case final openNotifications?) ...[
+                      NotificationBellButton(
+                        floating: true,
+                        onPressed: openNotifications,
+                      ),
+                      if (onRefresh != null) const SizedBox(width: 8),
+                    ],
+                    if (onRefresh != null)
+                      FloatingActionButton.small(
+                        key: const ValueKey('spatial-feed-refresh'),
+                        heroTag: 'refresh-feed',
+                        tooltip: MaterialLocalizations.of(
+                          context,
+                        ).refreshIndicatorSemanticLabel,
+                        onPressed: refreshing ? null : onRefresh,
+                        child: refreshing
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.refresh),
+                      ),
+                  ],
                 ),
               ),
             ),
