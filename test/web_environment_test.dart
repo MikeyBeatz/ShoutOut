@@ -4,13 +4,24 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/web_environment.dart';
 
+Map<String, dynamic> gatewayFixture() => {
+  ...jsonDecode(File('config/dev.json').readAsStringSync())
+      as Map<String, dynamic>,
+  'serverSpatialFeed': false,
+};
+
 void main() {
   test(
     'spatial feed defaults off, requires server gateways and rejects invalid flags',
     () {
-      final dev =
+      expect(
+        WebEnvironment.fromJson(
           jsonDecode(File('config/dev.json').readAsStringSync())
-              as Map<String, dynamic>;
+              as Map<String, dynamic>,
+        ).serverSpatialFeed,
+        isTrue,
+      );
+      final dev = gatewayFixture();
       expect(
         WebEnvironment.fromJson(
           {...dev}..remove('serverSpatialFeed'),
@@ -74,10 +85,8 @@ void main() {
   test(
     'account finalization defaults off and requires preparation and App Check',
     () {
-      final config =
-          (jsonDecode(File('config/dev.json').readAsStringSync())
-                as Map<String, dynamic>)
-            ..remove('serverAccountDeletionFinalization');
+      final config = (gatewayFixture())
+        ..remove('serverAccountDeletionFinalization');
       expect(
         WebEnvironment.fromJson(config).serverAccountDeletionFinalization,
         isFalse,
@@ -124,11 +133,9 @@ void main() {
   test(
     'account deletion preparation defaults off and independently requires App Check and a boolean',
     () {
-      final config =
-          (jsonDecode(File('config/dev.json').readAsStringSync())
-                as Map<String, dynamic>)
-            ..remove('serverAccountDeletionPreparation')
-            ..['serverAccountDeletionFinalization'] = false;
+      final config = (gatewayFixture())
+        ..remove('serverAccountDeletionPreparation')
+        ..['serverAccountDeletionFinalization'] = false;
       expect(
         WebEnvironment.fromJson(config).serverAccountDeletionPreparation,
         isFalse,
@@ -166,10 +173,7 @@ void main() {
   test(
     'content reports default off and independently require a boolean and App Check',
     () {
-      final config =
-          jsonDecode(File('config/dev.json').readAsStringSync())
-                as Map<String, dynamic>
-            ..remove('serverContentReports');
+      final config = gatewayFixture()..remove('serverContentReports');
       expect(WebEnvironment.fromJson(config).serverContentReports, isFalse);
       expect(
         WebEnvironment.fromJson({
@@ -220,10 +224,7 @@ void main() {
   test(
     'Shout saves default off and independently require App Check and a boolean',
     () {
-      final config =
-          jsonDecode(File('config/dev.json').readAsStringSync())
-                as Map<String, dynamic>
-            ..remove('serverShoutSaves');
+      final config = gatewayFixture()..remove('serverShoutSaves');
       expect(WebEnvironment.fromJson(config).serverShoutSaves, isFalse);
       expect(
         WebEnvironment.fromJson({
@@ -268,10 +269,7 @@ void main() {
   test(
     'comment reactions are independently optional and require App Check',
     () {
-      final config =
-          jsonDecode(File('config/dev.json').readAsStringSync())
-                as Map<String, dynamic>
-            ..remove('serverCommentReactions');
+      final config = gatewayFixture()..remove('serverCommentReactions');
       expect(WebEnvironment.fromJson(config).serverCommentReactions, isFalse);
       expect(
         WebEnvironment.fromJson({
@@ -306,10 +304,7 @@ void main() {
     },
   );
   test('Shout reaction gateway defaults off and requires App Check', () {
-    final config =
-        jsonDecode(File('config/dev.json').readAsStringSync())
-              as Map<String, dynamic>
-          ..remove('serverShoutReactions');
+    final config = gatewayFixture()..remove('serverShoutReactions');
     expect(WebEnvironment.fromJson(config).serverShoutReactions, isFalse);
     expect(
       WebEnvironment.fromJson({
@@ -389,7 +384,7 @@ void main() {
       ..['serverShoutReactions'] = false
       ..['serverCommentReactions'] = false
       ..['serverPrivateReplyCreation'] = false;
-    final defaultConfig = development()..remove('serverShoutCreation');
+    final defaultConfig = gatewayFixture()..remove('serverShoutCreation');
     expect(WebEnvironment.fromJson(defaultConfig).serverShoutCreation, isFalse);
     for (final change in [
       {'serverShoutCreation': true},

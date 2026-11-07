@@ -7,9 +7,14 @@ import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
-const dev = loadConfig('dev');
+const actualDev = loadConfig('dev');
+// Individual optional-gateway tests must not inherit the active feed's
+// dependencies. The complete actual DEV configuration is checked separately.
+const dev = { ...actualDev, serverSpatialFeed: false };
 
 test('spatial feed defaults off and requires server gateways and App Check', () => {
+  assert.equal(actualDev.serverSpatialFeed, true);
+  assert.doesNotThrow(() => validateConfig(actualDev, 'dev'));
   const without = { ...dev }; delete without.serverSpatialFeed;
   assert.doesNotThrow(() => validateConfig(without, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev, serverSpatialFeed: true }, 'dev'));
