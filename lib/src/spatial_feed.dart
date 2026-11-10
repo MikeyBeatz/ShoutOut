@@ -254,6 +254,9 @@ class _SpatialShoutCard extends StatefulWidget {
     required this.onReaction,
     required this.heightOf,
     required this.recordHeight,
+    this.ownSection,
+    this.onDelete,
+    this.onUnavailable,
   });
   final Shout shout;
   final bool blocked;
@@ -261,6 +264,9 @@ class _SpatialShoutCard extends StatefulWidget {
   final Future<void> Function(bool) onReaction;
   final double? Function() heightOf;
   final ValueChanged<double> recordHeight;
+  final OwnShoutsSection? ownSection;
+  final Future<void> Function()? onDelete;
+  final VoidCallback? onUnavailable;
   @override
   State<_SpatialShoutCard> createState() => _SpatialShoutCardState();
 }
@@ -269,6 +275,33 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
   final _measure = GlobalKey();
   StreamSubscription<LiveShoutState>? _subscription;
   bool _unavailable = false;
+
+  bool get _visible => switch (widget.ownSection) {
+    OwnShoutsSection.expired => widget.shout.isRetainedExpired,
+    _ => widget.shout.isActive,
+  };
+
+  bool _accepts(Map<String, dynamic> data) {
+    if (data['contentPurged'] == true) return false;
+    if (widget.ownSection == null) return data['status'] == 'active';
+    if (!['active', 'expired'].contains(data['status']) ||
+        data['expiresAt'] is! Timestamp) {
+      return false;
+    }
+    final expiry = (data['expiresAt'] as Timestamp).toDate(),
+        now = DateTime.now();
+    return widget.ownSection == OwnShoutsSection.active
+        ? expiry.isAfter(now)
+        : !expiry.isAfter(now) &&
+              !now.isAfter(expiry.add(_expiredShoutRetention));
+  }
+
+  void _notifyUnavailable() {
+    if (widget.onUnavailable == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onUnavailable?.call();
+    });
+  }
 
   @override
   void initState() {
@@ -285,9 +318,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
               .where((doc) => doc.exists || !doc.metadata.isFromCache)
               .map((doc) {
                 final data = doc.data();
-                if (data == null ||
-                    data['status'] != 'active' ||
-                    data['contentPurged'] == true) {
+                if (data == null || !_accepts(data)) {
                   return null;
                 }
                 return data;
@@ -316,6 +347,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                 ..isDisliked = value.reaction == 'dislike'
                 ..isSaved = value.saved;
             });
+            if (_unavailable) _notifyUnavailable();
           },
           onError: (Object error, StackTrace stack) {
             if (!mounted) return;
@@ -326,6 +358,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                   'unauthenticated',
                 ].contains(error.code)) {
               setState(() => _unavailable = true);
+              _notifyUnavailable();
             }
             debugPrint(
               'Feed card subscription failed: code=${liveDataFailureCode(error)}',
@@ -342,7 +375,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_unavailable || widget.blocked || !widget.shout.isActive) {
+    if (_unavailable || widget.blocked || !_visible) {
       return SizedBox(
         height: widget.heightOf(),
         child: Card(
@@ -361,11 +394,20 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
     });
     return SizedBox(
       key: _measure,
-      child: RatedShoutCard(
-        shout: widget.shout,
-        onSave: widget.onSave,
-        onReaction: widget.onReaction,
-      ),
+      child: widget.ownSection == null
+          ? RatedShoutCard(
+              shout: widget.shout,
+              onSave: widget.onSave,
+              onReaction: widget.onReaction,
+            )
+          : ShoutCard(
+              shout: widget.shout,
+              onSave: widget.onSave,
+              onReaction: widget.onReaction,
+              showSaveCount: true,
+              showDeleteButton: widget.onDelete != null,
+              onDelete: widget.onDelete,
+            ),
     );
   }
 }

@@ -29,9 +29,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    stránky 50 → 100 → 120 prošly pro oba účty; Business stránkování, plovoucí
    obnova i zvonek jsou potvrzené vlastníkem. Zbývají klientské interakce
    a oprava vlastních Aktivních/Expirovaných, dosud závislých na posledních
-   50 globálně aktivních Shoutech. Nový konkrétní rozsah je předložený
-   ke schválení: vlastní serverové stránky po 50, stávající řazení/retence,
-   lokální testy a po CI DEV rollout. Před přechodem na B uzavřít A2/A3.
+   50 globálně aktivních Shoutech. Vlastník schválil vlastní serverové stránky
+   po 50 se stávajícím řazením/retencí. Implementace na
+   `fix/own-shouts-pagination` má lokálně zelené testy a analýzu; nyní přesné
+   CI, jeden dotazový index, reader a DEV web. Před přechodem na B uzavřít A2/A3.
    Read-only kontrola 10. listopadu: všech 120 fixture je expired, 60 na účet,
    bez podkolekcí; původních 37 zdrojů beze změny. Využít je pro ověření
    navržené vlastní historie a poté dokončit schválený úklid včetně oznámení.

@@ -106,12 +106,16 @@ class MyShoutsPage extends StatefulWidget {
     required this.onSave,
     required this.onReaction,
     required this.onDelete,
+    this.serverPages = false,
+    this.position,
   });
 
   final List<Shout> shouts;
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final Future<void> Function(Shout shout) onDelete;
+  final bool serverPages;
+  final Position? position;
 
   @override
   State<MyShoutsPage> createState() => _MyShoutsPageState();
@@ -177,6 +181,18 @@ class _MyShoutsPageState extends State<MyShoutsPage> {
               onSave: widget.onSave,
               onReaction: widget.onReaction,
               showTitle: false,
+            ),
+            _ when widget.serverPages => OwnShoutsLibrary(
+              key: ValueKey(
+                'own-${FirebaseAuth.instance.currentUser?.uid}-${_section.name}',
+              ),
+              section: _section == _MyShoutsSection.active
+                  ? OwnShoutsSection.active
+                  : OwnShoutsSection.expired,
+              position: widget.position,
+              onSave: widget.onSave,
+              onReaction: widget.onReaction,
+              onDelete: widget.onDelete,
             ),
             _ => ShoutListPage(
               title: null,

@@ -24,8 +24,9 @@ potvrdil Business stránkování v UI, platný Auth/App Check potvrzují logy.
 Vlastník 10. listopadu potvrdil plovoucí obnovu i oznámení. Před uzavřením
 A2/A3 zbývají další klientská ověření, úplné vlastní Aktivní/Expirované
 a úklid 120 fixture; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
-Konkrétní oprava vlastního seznamu je předložená ke schválení; stávajících
-120 expirovaných fixture lze využít k ověření stránkování po 60 na účet.
+Konkrétní oprava vlastního seznamu je od 10. listopadu schválená a lokálně
+implementovaná na `fix/own-shouts-pagination`; ještě není nasazená.
+Stávajících 120 expirovaných fixture lze využít k ověření po 60 na účet.
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 

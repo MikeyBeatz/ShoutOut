@@ -4,6 +4,7 @@ import { createFeedRuntime } from './feed_runtime.js';
 import { feedRuntimeConfiguration } from './feed_runtime.js';
 import { getFeedPageOperation } from './get_feed_page.js';
 import { getSavedShoutsOperation } from './get_saved_shouts.js';
+import { getOwnShoutsOperation } from './get_own_shouts.js';
 import { defineSecret } from 'firebase-functions/params';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { Buffer } from 'node:buffer';
@@ -37,6 +38,13 @@ export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
 // The declaration does not provision a key. Each project's checked initial
 // installation provisions its own secret before activating this endpoint.
 const feedCursorKey = defineSecret('SHOUTOUT_FEED_CURSOR_KEY');
+export const getOwnShouts = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => {
+  if (!feedRuntimeConfiguration.enabled) throw new HttpsError('failed-precondition', 'Spatial feed is not enabled.');
+  return getOwnShoutsOperation(request, getFirestore());
+});
 export const getSavedShouts = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,

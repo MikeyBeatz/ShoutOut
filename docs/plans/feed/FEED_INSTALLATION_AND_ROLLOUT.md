@@ -394,7 +394,7 @@ Jejich následné filtrování podle autora nemůže vrátit vlastní starší a
 serverem materializované expired Shouty. Jde o dříve evidovanou otevřenou
 akceptaci A, nikoli nový produktový požadavek nebo hotový milník.
 
-Vlastníkovi je předložený konkrétní rozsah: samostatný čtecí endpoint s Auth,
+Vlastník 10. listopadu schválil konkrétní rozsah: samostatný čtecí endpoint s Auth,
 App Check, stavem účtu a serverově určeným autorem; stránky nejvýše 50,
 řazení od nejnovějších, stávající časová dostupnost a sedmidenní zobrazení
 expirovaných. Klient používá vlastní stránky, dosavadní živé karty/počty
@@ -408,4 +408,44 @@ Po souhlasu připravit kód/testy; po úspěšném CI pouze DEV reader, potřebn
 dotazové indexy a web. Živé ověření může využít právě těchto 60 expirovaných
 Shoutů na každém z obou existujících účtů, poté dokončit schválený úklid
 zdrojů přes writer a jen jejich vlastních vedlejších dat. Žádný nový Auth
-účet, produkce ani main. Do schválení neprovádět zdrojové změny této opravy.
+účet, produkce ani main.
+
+### Lokální oprava vlastních stránek
+
+Na `fix/own-shouts-pagination` je `getOwnShouts`: Auth/App Check, ověřený
+e-mail, právní souhlas, stav účtu před i po query. Autor je vždy Auth UID.
+Sekce se vybírá podle serverového času, nikoli jen materializovaného statusu;
+aktivní/expired zdroje v query tak správně obslouží i opožděnou exspiraci.
+Deleted/purged se nevrací; expired má původní včetně sedmidenní hranice.
+Nejvýše 50 zdrojů na dotaz, pořadí createdAt DESC, expiresAt DESC, ID DESC.
+Nepodepsaný rank kurzor obsahuje UID/sekci a oba přesné Timestamp páry;
+oprávnění nerozšiřuje, query je vždy omezena ověřeným autorem. Funguje i po
+odstranění posledního dokumentu předchozí stránky. Nezakládá session ani klíč.
+
+Query používá authorId equality, status in active/expired, nezáporné createdAt
+a časový rozsah expiresAt. Požadovaný jeden složený index:
+shouts collection (authorId ASC, status ASC, createdAt DESC, expiresAt DESC),
+navazující __name__ DESC. Read-only plán `build/own-shouts-index-plan.json`,
+digest `e54dd82d95b342d8780f5ab6919c181a6335fd1535208f94204c9e3ac7718f13`,
+potvrdil 1 chybějící index / 0 zápisů / bez TTL či field změn. Před tvrzením
+provozních nákladů ověřit skutečný plán a index entries pomocí Query Explain.
+Databáze je potvrzená STANDARD/FIRESTORE_NATIVE v europe-west3
+(`build/own-shouts-database.json`). Žádná migrace zdrojů nebo nové Rules.
+
+DEV reader má stejné limity jako stávající čtecí callable: europe-west3,
+max1/min0, concurrency1, 256 MiB, 15 s. Web jej používá v již zapnutém DEV
+prostorovém režimu. Ostatní konfigurace a nativní fallback se nemění.
+Vlastní seznam má lazy živé karty s počty, reakcí a uložením; expired karty
+nejsou omylem odmítané jako v hlavním aktivním feedu. Vlastní odstranění
+zmizí až po serverovém potvrzení nebo živém signálu; chyba kartu zachová.
+Obnova při chybě zachová seznam i scroll, úspěch vrátí nahoru. Změna sekce,
+účtu nebo zánik obrazovky ohradí pozdní odpověď; empty nefinální stránka
+nepředstírá konec historie. Další dávka je ručně vyžádaná, bez pollingu.
+
+Lokálně: 313/313 Flutter (`build/own-shouts-flutter-all.log`), 16/16 cílených
+klientských případů (`build/own-shouts-client-test.log`), čistá analýza/lint
+(`build/own-shouts-{analyze,lint}.log`), 9/9 own/saved serverových případů
+(`build/own-shouts-server-test.log`) a 2/2 kontrol balíčků. Test nanosekund
+byl upraven podle skutečné mikrosekundové přesnosti Firestore; kurzor
+zachovává i submilisekundovou část. Nová sada je přidaná do test:rules CI.
+Zatím žádný živý zápis, rollout nebo úklid této opravy; čeká na přesné CI.

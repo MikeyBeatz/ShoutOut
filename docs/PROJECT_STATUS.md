@@ -7,8 +7,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 ## Další konkrétní krok
 
 **Dokončit zbývající klientskou regresi feedu a úplný vlastní seznam Shoutů,
-potom uklidit schválené fixture.** Konkrétní oprava „Mé shouty“ je předložená
-vlastníkovi ke schválení; do odpovědi žádné zdrojové změny této opravy.
+potom uklidit schválené fixture.** Vlastník schválil konkrétní opravu
+„Mé shouty“ 10. listopadu. Na `fix/own-shouts-pagination` je lokálně připravený
+getOwnShouts, vlastní klientské stránky i živé karty/mazání. Celá Flutter sada
+313/313, analýza a lint čisté, 9/9 cílených serverových regresí (6 own / 3 saved),
+16/16 cílených klientských regresí a 2/2 testy balíčků. Nový kombinovaný index
+je zatím jen v read-only plánu; žádné nasazení této opravy ještě neproběhlo.
+Následuje přesné CI, cílený index/reader/DEV web a živé ověření před úklidem.
 Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
 Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.

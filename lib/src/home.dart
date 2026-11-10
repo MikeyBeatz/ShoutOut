@@ -885,6 +885,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
             followedUserIds: _followedUserIds,
           ),
           2 => MyShoutsPage(
+            serverPages: _useSpatialFeed,
+            position: _currentPosition,
             shouts: _shouts
                 .where(
                   (shout) =>
@@ -893,7 +895,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
                 .toList(),
             onSave: _toggleSaved,
             onReaction: _toggleReaction,
-            onDelete: _deleteShout,
+            onDelete: _useSpatialFeed
+                ? (shout) => _deleteShoutContent(shout.id)
+                : _deleteShout,
           ),
           _ => const ProfilePage(),
         },
