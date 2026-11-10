@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 7. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 10. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -25,10 +25,11 @@ po zvětšení dosahu i načítání dalších stránek v Business webu; servero
 to potvrzují platným Auth/App Check a třemi HTTP 200 (0,52–1,07 s na serveru).
 Minutový worker běží na nové revizi bez chyb; rozvrh a obsahová dávka se neměnily.
 
-**Otevřený checkpoint:** 120 syntetických Shoutů `mvp-feed-20261107-*` je
-zatím zachovaných pro připomínky vlastníka. Úklid ještě neproběhl. Reakce
-i testovací záložka jsou vrácené na původní stav, všechny původní 37 zdroje
-mají nezměněný updateTime; žádný Auth účet nebyl vytvořen ani smazán.
+**Otevřený checkpoint ze 7. listopadu:** 120 syntetických Shoutů
+`mvp-feed-20261107-*` bylo ponechaných pro připomínky vlastníka. Ruční úklid
+ještě neproběhl; před dalším testem ověřit současný stav a expiraci fixture.
+Při poslední kontrole byly reakce i testovací záložka vrácené na původní stav
+a původních 37 zdrojů mělo nezměněný updateTime. Žádný Auth účet nebyl vytvořen ani smazán.
 Identifikace fixture a další postup jsou v
 [záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Plovoucí obnova je nyní **pouze ikona vpravo nahoře**, ze zdroje
@@ -37,11 +38,16 @@ Plovoucí obnova je nyní **pouze ikona vpravo nahoře**, ze zdroje
 Lokálně 15/15 widget/session testů a čistá analýza, včetně šířky 320 bodů,
 nekolidujícího zvonku a chování scrollu. Oba DEV originy odpovídají manifestu
 nového release; vlastník tuto polohu potvrdil a požaduje stejný plovoucí
-styl také pro oznámení. Na `fix/feed-floating-notifications` je připravený
-zvonek vlevo od obnovy se stejným odznakem a jediným dosavadním odběrem.
-Lokálně 15/15 widget/session testů, včetně dosahu obou tlačítek po scrollu
-a otevření oznámení bez dalšího načtení feedu. Ještě není nasazený; následuje
-vlastní CI a pouze DEV Hosting. Functions, Rules ani data se těmito UI rollouty neměnily.
+styl také pro oznámení. **Plovoucí zvonek je od 10. listopadu nasazený** vlevo
+od obnovy se stejným odznakem a jediným dosavadním odběrem. Zdroj
+`1fbf2ae40d34802069c365559c74d402a26f0b37` na `fix/feed-floating-notifications`
+má [success CI 42365663624](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42365663624).
+Lokálně 15/15 widget/session testů a čistá analýza; ověřený dosah obou
+tlačítek po scrollu a otevření oznámení bez dalšího načtení feedu.
+Přerušení ponechalo hotový build před nasazením; před navázáním bylo ověřené,
+že DEV stále vydával předchozí f08abf9. Nyní oba DEV originy odpovídají
+novému manifestu. Živý UI výsledek zvonku čeká na vlastníka.
+Functions, Rules ani data se těmito UI rollouty neměnily.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.
@@ -289,7 +295,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `f08abf97cf34686a7c776848c01bb7627ca08719` / `529bbcd5bb0c6ee8`; DEV prostorový feed, obnova jako ikona vpravo nahoře |
+| Webový zdroj / Hosting verze | `1fbf2ae40d34802069c365559c74d402a26f0b37` / `941a97a6683b8e14`; DEV prostorový feed, plovoucí zvonek i obnova vpravo nahoře |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
@@ -303,8 +309,8 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
-odpovídají release manifestu (`build/feed-refresh-icon-hosting-proof.json`).
-Návrat poslední UI úpravy: Hosting `82efffc97375c3ec` (zdroj e43e0e1).
+odpovídají release manifestu (`build/feed-floating-notifications-hosting-proof.json`).
+Návrat poslední UI úpravy: Hosting `529bbcd5bb0c6ee8` (zdroj f08abf9).
 Při problému celého prostorového feedu lze pozastavit reader a vrátit
 kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
 společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,

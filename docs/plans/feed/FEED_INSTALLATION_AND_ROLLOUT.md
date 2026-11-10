@@ -282,7 +282,9 @@ není potvrzená. Nelze jej zaměnit za latenci cloudového endpointu ani z těc
 malých vzorků vyvozovat kapacitu, cenu nebo záruku odezvy.
 
 **Otevřené před uzavřením:** vlastník avizoval další poznámky; vyžádané jsou
-před úklidem. Všech 120 fixture zatím zůstává aktivních, úklid ještě neproběhl.
+před úklidem. Při checkpointu 7. listopadu bylo všech 120 fixture aktivních,
+ruční úklid ještě neproběhl. Po časovém odstupu jejich dostupnost a expiraci
+před dalším testem znovu ověřit; historický počet není důkaz současné aktivity.
 Pro UI reakce/záložky zatím existuje pouze serverový test; chybí také přímý
 klientský důkaz uzavřených zápisů s přihlášenou identitou (obsah Rules a jejich
 emulátorová regrese jsou ověřené). Automatické převzetí Chrome zastavila
@@ -362,5 +364,17 @@ a legacy feed používají původní neplovoucí variantu. Viditelný popisek ne
 tooltip používá existující překlad Oznámení; číselný odznak zůstává.
 Patnáct widget/session testů prošlo včetně stálé polohy, vzájemného oddělení,
 šířky 320 bodů a kliknutí na oznámení po stránkování bez nové feed query.
-Log `build/feed-floating-notifications-test.log`. Úprava zatím není nasazená;
-po vlastním úspěšném CI následuje pouze DEV Hosting, bez změny backendu/dat.
+Log `build/feed-floating-notifications-test.log`, čistá analýza v
+`build/feed-floating-notifications-analyze.log`. Zdroj
+`1fbf2ae40d34802069c365559c74d402a26f0b37` má
+[success CI 42365663624](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42365663624).
+Přerušení nastalo před nasazením; 10. listopadu read-only kontrola ověřila
+původní f08abf9 na živém webu, čistou release kopii, hotový manifest a přesné
+úspěšné CI. Následoval pouze DEV Hosting rollout na site/projekt
+`shoutout-dev-46c81`, verze `941a97a6683b8e14`. Čtyři veřejné soubory na
+web.app i firebaseapp.com mají shodné SHA-256 s manifestem připraveného releasu.
+Důkazy `build/feed-floating-notifications-ci-proof.json`,
+`build/feed-floating-notifications-hosting-proof.json` a
+`build/feed-floating-notifications-hosting-deploy.log`. Živá UI kontrola
+čeká na vlastníka. Návrat: `529bbcd5bb0c6ee8` (f08abf9), backendové writery
+a generaci zachovat. Functions, Rules, data, produkce ani main se neměnily.

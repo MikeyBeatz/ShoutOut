@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 7. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 10. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -37,11 +37,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    50 → 100 → 120 prošly pro oba účty včetně reakcí/záložek; vlastník potvrdil
    Business načítání dalších stránek, cloud potvrzuje platný Auth/App Check.
    Projít avizované poznámky vlastníka, doplnit zbývající klientská ověření
-   a uklidit přesně 120 testovacích Shoutů; zatím jsou ponechané pro kontrolu.
+   a uklidit přesně 120 testovacích Shoutů; před dalším testem ověřit jejich
+   současnou expiraci a stav po časovém odstupu od 7. listopadu.
    První plovoucí varianta z `e43e0e1` je potvrzená vlastníkem. Navazující
    ikona bez popisku vpravo nahoře je už nasazená z `f08abf9` po success CI
    `42363878639` a vlastník ji potvrdil. Stejný plovoucí zvonek vedle obnovy
-   je lokálně připravený na `fix/feed-floating-notifications`; čeká na CI a DEV rollout.
+   je od 10. listopadu nasazený z `1fbf2ae` po success CI `42365663624`;
+   čeká na kontrolu vlastníka.
    [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
    Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
    v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
