@@ -21,8 +21,19 @@ vlastní expired stránky 50 + 10 běžnému účtu a 50 + 11 Business (60 fixtu
 a jeden původní Shout), bez duplicit/cizích autorů a od nejnovějších.
 Query Explain: první stránka 50 dokumentů / 51 indexových položek / 51 read
 operations; nejde o celkovou cenu celé callable včetně kontrol účtu.
-UI průchod obou účtů a úklid ještě čekají. Browser host je nedostupný;
-vlastník byl požádán o Business kontrolu stránek, reakcí, záložky a mazání.
+Vlastník ověřil Business další stránku až na konec, palce a mazání. Tlačítko
+bylo nenápadné a pokračování přesunulo seznam nahoru. Příčina je lokálně
+reprodukovaná: vložení progress indikátoru znovu vytvořilo neoznačený Expanded
+a ScrollPosition (offset 3716 → 0). Oprava stabilní identity obsahu a výraznějšího
+tlačítka má 17/17 cílených regresí včetně skutečně čekající síťové odpovědi,
+314/314 celé Flutter sady a čistou analýzu. Zatím není nasazená, čeká na
+přesné CI. První testy
+vracely Future ihned, takže přechodový loading frame nepokryly.
+Logy potvrzují platné Auth/App Check a HTTP 200 pro stránky/palce/mazání;
+rychlé palce občas vrátily 429, v souladu se stávajícím odstupem 1 sekundy.
+Limity ani obecná hláška nejsou měněné. Dva fixture jsou deleted, 118 expired,
+bez podkolekcí, původních 37 zdrojů beze změny. Browser host je nedostupný;
+zbývá ověřit opravený scroll, záložky a běžný účet, potom úklid.
 Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
 Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.

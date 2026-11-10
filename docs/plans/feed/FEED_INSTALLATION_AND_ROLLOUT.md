@@ -473,6 +473,26 @@ ověřena před přepnutím webu. Žádný zdroj se při tomto testu nezměnil.
 
 Důkazy `build/own-shouts-{ci,index,function,deployed-source,hosting}-proof.json`,
 `build/own-shouts-live-query-proof.json` a logy nasazení. Browser access host
-je nedostupný; UI ještě neověřeno, vlastník dostal žádost o Business průchod.
-Do jeho ověření zůstává všech 120 fixture zachovaných; úklid je připravený
-v omezeném lokálním helperu, zatím neprovedený. A2/A3 ani milník neuzavírat.
+je nedostupný. Vlastník následně potvrdil Business další stránku (původní
+konec MVP feed 097 byl pouze první dávkou), funkční palce a mazání. Pokračování
+však vrátilo seznam nahoru a tlačítko bylo málo výrazné. Lokální regrese se
+skutečně odloženou odpovědí to reprodukuje: podmíněný loading sourozenec
+znovu vytvoří neoznačený Expanded/Scrollable a offset 3716 se změní na 0.
+Předchozí test s okamžitě dokončenou Future loading frame vůbec nevykreslil.
+Oprava klíče obsahového Expanded zachovává ScrollPosition přes loading,
+chybu i pokračování; úspěšná výslovná obnova nadále vrací nahoru. Tlačítko
+je výrazné FilledButton.tonalIcon přes šířku seznamu se stávajícím překladem.
+Cíleně 17/17 testů (`build/own-shouts-scroll-test.log`), celá Flutter sada
+314/314 (`build/own-shouts-scroll-all.log`) a čistá analýza
+(`build/own-shouts-scroll-analyze.log`). Oprava ještě čeká na přesné CI
+a vlastní DEV web rollout. Backend se nemění.
+
+Živé logy `build/own-shouts-ui-diagnostics.json` potvrzují Auth/App Check VALID
+a HTTP 200 stránek, palců i mazání. Tři rychlé reakce dostaly 429; zdroj má
+stávající společný interaction cooldown 1 s / 120 za hodinu. Jde o očekávané
+odmítnutí rychlé akce, nikoli důkaz pádu Function; obecná klientská hláška
+zatím kód limitu nerozlišuje. Limity ani společné chybové texty se nemění.
+Read-only inventura po testu: 118 expired / 2 deleted, žádné podkolekce,
+původních 37 zdrojů má stále shodné updateTime; 1 testovací notifikace zůstává.
+Záložky a běžný UI účet zatím nejsou potvrzené. Fixture i úklidový helper
+zůstávají připravené, úplný úklid zatím neprovedený. A2/A3 ani milník neuzavírat.

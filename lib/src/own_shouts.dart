@@ -182,6 +182,7 @@ class _OwnShoutsLibraryState extends State<OwnShoutsLibrary> {
             ),
           ),
         Expanded(
+          key: const ValueKey('own-shouts-content'),
           child: _loading && _items.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : _items.isEmpty && (_next != null || _failed)
@@ -226,10 +227,17 @@ class _OwnShoutsLibraryState extends State<OwnShoutsLibrary> {
                 ),
         ),
         if (_next != null)
-          TextButton(
-            key: const ValueKey('own-shouts-more'),
-            onPressed: _loading ? null : () => unawaited(_load()),
-            child: Text(tr(context, 'Načíst další')),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                key: const ValueKey('own-shouts-more'),
+                onPressed: _loading ? null : () => unawaited(_load()),
+                icon: const Icon(Icons.expand_more),
+                label: Text(tr(context, 'Načíst další')),
+              ),
+            ),
           ),
       ],
     );

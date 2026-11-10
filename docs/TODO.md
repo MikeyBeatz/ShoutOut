@@ -31,10 +31,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    a živé klientské ověření vlastních Aktivních/Expirovaných. Oprava vlastního
    zdroje po 50 je po success CI 42884625807 nasazená pouze v DEV ze zdroje
    4e7e5bd: index READY, reader a web ověřené proti čistému releasu. Živé
-   serverové vlastní stránky 50 + 10 / 50 + 11 prošly; nyní UI kontrola obou
-   účtů, interakcí a mazání. Před přechodem na B uzavřít A2/A3.
-   Read-only kontrola 10. listopadu: všech 120 fixture je expired, 60 na účet,
-   bez podkolekcí; původních 37 zdrojů beze změny. Využít je pro ověření
+   serverové vlastní stránky 50 + 10 / 50 + 11 prošly. Vlastník ověřil Business
+   pokračování, palce a mazání; zachytil návrat nahoru při pokračování. Lokální
+   oprava zachovává seznam během čekání a zvýrazňuje tlačítko, 17/17 cílených
+   testů; následuje CI/DEV a kontrola scrollu, záložek a běžného účtu.
+   Před přechodem na B uzavřít A2/A3. Read-only kontrola po UI testu:
+   118 fixture expired / 2 deleted, bez podkolekcí; původních 37 zdrojů
+   beze změny. Využít je pro ověření
    vlastní historie v UI a poté dokončit schválený úklid včetně oznámení.
    [Důkazy, omezení a úklid](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 

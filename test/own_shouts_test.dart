@@ -224,6 +224,43 @@ void main() {
   );
 
   testWidgets(
+    'a pending continuation keeps the mounted list and bottom scroll until the page arrives',
+    (tester) async {
+      final continuation = Completer<Map<String, dynamic>>();
+      final gateway = OwnShoutsGateway<Shout>(
+        currentUserId: () => 'owner',
+        decodeItem: decodeSpatialFeedItem,
+        send: (payload) async => payload['after'] == null
+            ? page(List.generate(50, (i) => i), next: cursor(49))
+            : continuation.future,
+      );
+      await tester.pumpWidget(view(gateway));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.text('Owned 49'), 500);
+      await tester.pumpAndSettle();
+      final scroll = tester.state<ScrollableState>(find.byType(Scrollable));
+      final position = scroll.position, before = position.pixels;
+      expect(before, greaterThan(0));
+      await tester.tap(find.byKey(const ValueKey('own-shouts-more')));
+      await tester.pump();
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      final pending = tester.state<ScrollableState>(find.byType(Scrollable));
+      expect(pending.position, same(position));
+      expect(pending.position.pixels, before);
+      expect(find.text('Owned 49').hitTestable(), findsOneWidget);
+      continuation.complete(page(List.generate(10, (i) => i + 50)));
+      await tester.pumpAndSettle();
+      final completed = tester.state<ScrollableState>(find.byType(Scrollable));
+      expect(completed.position, same(position));
+      expect(completed.position.pixels, before);
+      expect(find.byKey(const ValueKey('own-shouts-more')), findsNothing);
+      await tester.scrollUntilVisible(find.text('Owned 59'), 500);
+      expect(find.text('Owned 59').hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'refresh failure keeps loaded rows; a successful retry returns to the first page',
     (tester) async {
       var calls = 0, fail = false;
