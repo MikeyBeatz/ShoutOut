@@ -67,7 +67,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     if (![data.likesCount, data.dislikesCount, data.commentsCount].every(counter)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');
     }
-    if (!shoutAcceptsInteractions(data, now)) fail('failed-precondition', 'shout-interactions-closed');
+    if (!shoutAcceptsInteractions(data, Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     const result = saveTransition(save.exists, data.savesCount === undefined ? 0 : data.savesCount);
     const rateData = nextInteractionRate(rate.data(), now, `save_${input.shoutId}`);
     if (result.saved) transaction.create(saveRef, { createdAt: now, userId: uid });

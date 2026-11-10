@@ -54,6 +54,17 @@ for (const operation of operations) {
     const fresh = await fixture(), empty = await snapshot(fresh);
     await assert.rejects(operation(fresh.request(operation, 'add'), db, () => new Date(deadline)), closed);
     assert.deepEqual(await snapshot(fresh), empty);
+    // The request starts before expiry, but database reads finish afterwards.
+    let ticks = 0;
+    await assert.rejects(operation(fresh.request(operation, 'late-read'), db,
+      () => ticks++ === 0 ? now : new Date(deadline)), closed);
+    assert.deepEqual(await snapshot(fresh), empty);
+    if (operation !== toggleShoutSaveOperation) {
+      ticks = 0;
+      await assert.rejects(operation(fresh.request(operation, 'late-write'), db,
+        () => ticks++ < 2 ? now : new Date(deadline)), closed);
+      assert.deepEqual(await snapshot(fresh), empty);
+    }
   });
   test(`${operation.name}: status and invalid deadlines fail closed even before the time boundary`, { skip: !enabled }, async () => {
     for (const change of [{ status: 'expired' }, { status: 'deleted' }, { expiresAt: null }, { expiresAt: 'future' }, { contentPurged: true }]) {

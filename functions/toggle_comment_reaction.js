@@ -58,7 +58,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     const [shout, comment, reaction, rate] = await transaction.getAll(shoutRef, commentRef, reactionRef, rateRef);
     if (!shout.exists || !comment.exists) fail('not-found', 'The comment or its Shout is no longer available.');
     const shoutTitle = isPurgedShoutContext(shout.data()) ? '' : shout.data().title;
-    if (!shoutAcceptsInteractions(shout.data(), now)) fail('failed-precondition', 'shout-interactions-closed');
+    if (!shoutAcceptsInteractions(shout.data(), Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     const data = comment.data();
     const oldType = reaction.exists ? reaction.data().type : null;
     const result = reactionTransition(oldType, input.button, data.likesCount ?? 0, data.dislikesCount ?? 0);
@@ -79,6 +79,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
         }
       }
     }
+    if (!shoutAcceptsInteractions(shout.data(), Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     if (result.type === null) transaction.delete(reactionRef);
     else transaction.set(reactionRef, { type: result.type, updatedAt: now, userId: uid });
     transaction.update(commentRef, { likesCount: result.likes, dislikesCount: result.dislikes });

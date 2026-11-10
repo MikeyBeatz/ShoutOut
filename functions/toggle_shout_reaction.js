@@ -94,7 +94,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
     if (!counter(data.commentsCount) || !counter(data.savesCount)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');
     }
-    if (!shoutAcceptsInteractions(data, now)) fail('failed-precondition', 'shout-interactions-closed');
+    if (!shoutAcceptsInteractions(data, Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     const oldType = reaction.exists ? reaction.data().type : null;
     const result = reactionTransition(oldType, input.button, data.likesCount ?? 0, data.dislikesCount ?? 0);
     const rateData = nextInteractionRate(rate.data(), now, `shoutReaction_${input.shoutId}`);
@@ -117,6 +117,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
     }
     const indexPlan = await indexWriter?.prepare(transaction, input.shoutId, data,
       { ...data, likesCount: result.likes, dislikesCount: result.dislikes }, { operationId: receiptRef.id });
+    if (!shoutAcceptsInteractions(data, Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     indexPlan?.apply();
     if (result.type === null) transaction.delete(reactionRef);
     else transaction.set(reactionRef, { type: result.type, updatedAt: now, userId: uid });

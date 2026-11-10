@@ -524,6 +524,10 @@ Shouty pod existujícími testovacími identitami, včetně jejich úklidu.
 
 Nová změna vyžaduje aktivní status, validní Timestamp expiresAt a serverový
 čas transakce přísně před expiresAt. Platí i při opožděné materializaci expired.
+Čas se znovu ověří po databázových čteních a u palců také po přípravě indexu
+či oznámení těsně před zařazením zápisů. Pomalejší čtení nesmí použít čas
+z počátku požadavku jako trvalou vstupenku. Commit stále trvá síťovou dobu;
+nejde o samostatný auditní snapshot statistik přesně v nanosekundě expirace.
 Tři operace (toggleShoutReaction, toggleCommentReaction, toggleShoutSave)
 odmítnou nový požadavek před přechodem čítačů, rate a oznámení. Guard pokrývá
 i odebrání již uložené reakce/záložky a neplatné či chybějící deadline.
@@ -566,3 +570,6 @@ Navíc 9/9 writer/deletion-cutover regresí
 (`build/expired-interactions-writer-regression.log`). Starý indexový test
 výslovně povoloval palec po expiry prune; podle nového rozhodnutí nyní ověřuje
 odmítnutí, nezměněný zdroj a nepřítomnost metadat v aktivním indexu.
+Závěrečných 6/6 expiry regresí (`build/expired-interactions-final-deadline.log`)
+ověřuje i posun času během čtení a před zápisy; rate, receipt, obsah, uložené
+stopy i oznámení zůstávají při odmítnutí beze změny.
