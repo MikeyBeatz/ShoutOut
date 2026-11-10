@@ -27,7 +27,10 @@ a úklid 120 fixture; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#de
 Konkrétní oprava vlastního seznamu je od 10. listopadu schválená a nasazená
 v DEV ze zdroje 4e7e5bd po success CI 42884625807: index READY, getOwnShouts
 a web ověřené proti releasu. Živé serverové vlastní stránky 50 + 10 / 50 + 11
-prošly; zůstává UI kontrola obou účtů a úklid 120 expirovaných fixture.
+prošly. Vlastník potvrdil Business pokračování, palce a mazání; chyba návratu
+nahoru při čekání na další stránku je opravená v ce6b07a a po success CI
+42890208984 nasazená pouze na DEV web. Zůstává ověření opraveného scrollu,
+záložek a běžného účtu, regrese Uložených a úklid 120 fixture.
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 

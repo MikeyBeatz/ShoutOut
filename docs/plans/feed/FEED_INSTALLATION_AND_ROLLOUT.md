@@ -484,8 +484,15 @@ chybu i pokračování; úspěšná výslovná obnova nadále vrací nahoru. Tla
 je výrazné FilledButton.tonalIcon přes šířku seznamu se stávajícím překladem.
 Cíleně 17/17 testů (`build/own-shouts-scroll-test.log`), celá Flutter sada
 314/314 (`build/own-shouts-scroll-all.log`) a čistá analýza
-(`build/own-shouts-scroll-analyze.log`). Oprava ještě čeká na přesné CI
-a vlastní DEV web rollout. Backend se nemění.
+(`build/own-shouts-scroll-analyze.log`). Zdroj
+`ce6b07a6ca0670235da8da3ab44bbcf91fa98b40` má
+[success CI 42890208984](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42890208984).
+Z čistého `build/own-shouts-scroll-release` následoval pouze DEV Hosting:
+`fa0a450ecbce236e`, release 10. listopadu 20:04:26 UTC. Čtyři soubory obou
+originů mají shodné otisky s release manifestem. Důkazy
+`build/own-shouts-scroll-{ci,hosting}-proof.json`, build/deploy logy se stejným
+prefixem. Návrat je `4c61d6a850b330b7` (4e7e5bd, původní scroll chyba);
+backend, Rules, data, produkce a main se tímto web rolloutem neměnily.
 
 Živé logy `build/own-shouts-ui-diagnostics.json` potvrzují Auth/App Check VALID
 a HTTP 200 stránek, palců i mazání. Tři rychlé reakce dostaly 429; zdroj má
@@ -496,3 +503,9 @@ Read-only inventura po testu: 118 expired / 2 deleted, žádné podkolekce,
 původních 37 zdrojů má stále shodné updateTime; 1 testovací notifikace zůstává.
 Záložky a běžný UI účet zatím nejsou potvrzené. Fixture i úklidový helper
 zůstávají připravené, úplný úklid zatím neprovedený. A2/A3 ani milník neuzavírat.
+Vlastník dostal nový URL/pokyn k ověření opraveného scrollu. Původní testovací
+pokyn mylně očekával expired kartu v Uložených; byl výslovně opraven. Podle
+současného getSavedShouts jde jen o aktivní zdroje, u expired tedy ověřit
+ikonu/čítač v Mé shouty, bez změny dostupnosti/retence. Při čtení kódu je
+stejný rizikový loading/Expanded vzor také v _SavedShoutsLibrary; živá chyba
+tam zatím není doložená, zahrnout do zbývající klientské regrese Uložených.

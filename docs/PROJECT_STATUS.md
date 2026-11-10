@@ -26,14 +26,19 @@ bylo nenápadné a pokračování přesunulo seznam nahoru. Příčina je lokál
 reprodukovaná: vložení progress indikátoru znovu vytvořilo neoznačený Expanded
 a ScrollPosition (offset 3716 → 0). Oprava stabilní identity obsahu a výraznějšího
 tlačítka má 17/17 cílených regresí včetně skutečně čekající síťové odpovědi,
-314/314 celé Flutter sady a čistou analýzu. Zatím není nasazená, čeká na
-přesné CI. První testy
+314/314 celé Flutter sady a čistou analýzu. Zdroj
+`ce6b07a6ca0670235da8da3ab44bbcf91fa98b40` má
+[success CI 42890208984](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42890208984)
+a je nasazený pouze na DEV Hosting `fa0a450ecbce236e`; obě adresy souhlasí
+s čistým release manifestem. První testy
 vracely Future ihned, takže přechodový loading frame nepokryly.
 Logy potvrzují platné Auth/App Check a HTTP 200 pro stránky/palce/mazání;
 rychlé palce občas vrátily 429, v souladu se stávajícím odstupem 1 sekundy.
 Limity ani obecná hláška nejsou měněné. Dva fixture jsou deleted, 118 expired,
 bez podkolekcí, původních 37 zdrojů beze změny. Browser host je nedostupný;
-zbývá ověřit opravený scroll, záložky a běžný účet, potom úklid.
+zbývá ověřit opravený scroll, záložky a běžný účet, potom úklid. Vlastník dostal
+nový URL/pokyn. Test záložky u expired se týká ikony/počtu v Mé shouty;
+sekce Uložené podle dosavadní politiky vrací jen aktivní obsah.
 Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
 Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.
@@ -324,7 +329,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `4e7e5bdfd9e026a2ff76b253a9a233fee2022f65` / `4c61d6a850b330b7`; vlastní stránky Aktivní/Expirované, DEV prostorový feed i plovoucí tlačítka |
+| Webový zdroj / Hosting verze | `ce6b07a6ca0670235da8da3ab44bbcf91fa98b40` / `fa0a450ecbce236e`; vlastní stránky se zachováním scrollu během pokračování, výraznější tlačítko, DEV prostorový feed i plovoucí tlačítka |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
@@ -339,8 +344,9 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
-odpovídají release manifestu (`build/own-shouts-hosting-proof.json`).
-Návrat poslední opravy: Hosting `941a97a6683b8e14` (zdroj 1fbf2ae);
+odpovídají release manifestu (`build/own-shouts-scroll-hosting-proof.json`).
+Návrat poslední opravy: Hosting `4c61d6a850b330b7` (zdroj 4e7e5bd,
+obsahuje původní chybu scrollu při čekání na další stránku);
 kompatibilní nový reader a index lze ponechat.
 Při problému celého prostorového feedu lze pozastavit reader a vrátit
 kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
