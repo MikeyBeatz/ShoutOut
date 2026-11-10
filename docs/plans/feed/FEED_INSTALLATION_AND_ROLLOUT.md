@@ -562,3 +562,7 @@ Lokálně: 316/316 Flutter, 11/11 own/deadline widget testů, čistá analýza/l
 analyze,lint,unit,server-rules,artifact}.log`. Nová serverová sada je zapojená
 do CI test:rules. Zatím bez nasazení této politiky; následuje přesné CI,
 tři DEV Functions, Rules a web, živé ověření a schválený úklid.
+Navíc 9/9 writer/deletion-cutover regresí
+(`build/expired-interactions-writer-regression.log`). Starý indexový test
+výslovně povoloval palec po expiry prune; podle nového rozhodnutí nyní ověřuje
+odmítnutí, nezměněný zdroj a nepřítomnost metadat v aktivním indexu.

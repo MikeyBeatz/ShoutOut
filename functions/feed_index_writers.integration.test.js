@@ -91,7 +91,7 @@ test('index failures roll back creation and reaction including receipts, rates a
   assert.equal((await f.lab.audit()).activeMetadata, 1);
 });
 
-test('expired pruned source accepts real reactions without reentering the active index', { skip: !enabled }, async () => {
+test('expired pruned source rejects new reactions without changing counters or reentering the active index', { skip: !enabled }, async () => {
   const f = await fixture();
   const { shoutId } = await create(f.publication, f.db, clock(), f.writers);
   const source = f.lab.base.collection('source').doc(shoutId), before = (await source.get()).data();
@@ -99,9 +99,10 @@ test('expired pruned source accepts real reactions without reentering the active
   const prune = await f.lab.beginExpiryPrune(cell, cutoff);
   let result; do { result = await prune.step(); } while (result.state !== 'done');
   assert.equal(result.metrics.sourceWrites, 0);
-  await react(f.request({ shoutId, button: 'like', idempotencyKey: key('expired-reaction') }),
-    f.db, () => Timestamp.fromMillis(cutoff + 1).toDate(), f.writers);
-  assert.equal((await source.get()).data().likesCount, 1);
+  await assert.rejects(react(f.request({ shoutId, button: 'like', idempotencyKey: key('expired-reaction') }),
+    f.db, () => Timestamp.fromMillis(cutoff + 1).toDate(), f.writers), error =>
+    error.code === 'failed-precondition' && error.message === 'shout-interactions-closed');
+  assert.deepEqual((await source.get()).data(), before);
   assert.equal((await f.lab.audit()).activeMetadata, 0);
   assert.equal((await f.lab.base.collection('cells').get()).size, 0);
 });
