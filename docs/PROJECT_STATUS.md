@@ -6,8 +6,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit zbývající klientskou regresi feedu a úplný vlastní seznam Shoutů,
-potom uklidit schválené fixture.** Vlastník schválil konkrétní opravu
+**Nasadit a ověřit schválený zámek interakcí po expiraci a menší pokračování
+až za poslední kartou, potom dokončit regresi a úklid.** Vlastník 10. listopadu
+schválil tento konkrétní další úsek včetně výjimek pro vlastní mazání,
+moderaci a účtový úklid, CI/DEV a dvou krátce platných syntetických Shoutů
+pod stávajícími účty. Na `feature/expired-shout-read-only` je lokálně připravený
+serverový guard tří interakčních operací, devět omezení přímých Rules cest,
+časovač klientského zámku karet/detailu/komentářů/soukromých odpovědí a tlačítko
+uvnitř seznamu. Čtení, hlášení a vlastní odstranění jsou zachované. Nový pokus
+po expiresAt se odmítne, dokončený timed požadavek lze potvrdit bez dalšího zápisu.
+Lokálně 316/316 Flutter, 11/11 own/expiry widget testů, čistá analýza/lint,
+119 unit, 120/120 cílených serverových/Rules a 2/2 balíčkových kontrol.
+Nová politika zatím není nasazená; následuje přesné CI, pouze DEV tři Functions,
+Rules a web, ověření přechodu přes skutečnou expiraci a schválený úklid.
+[Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
+
+Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
 „Mé shouty“ 10. listopadu. Na `fix/own-shouts-pagination` je dokončený
 getOwnShouts, vlastní klientské stránky i živé karty/mazání. Celá Flutter sada
 313/313, analýza a lint čisté, 9/9 cílených serverových regresí (6 own / 3 saved),
@@ -36,8 +50,9 @@ Logy potvrzují platné Auth/App Check a HTTP 200 pro stránky/palce/mazání;
 rychlé palce občas vrátily 429, v souladu se stávajícím odstupem 1 sekundy.
 Limity ani obecná hláška nejsou měněné. Dva fixture jsou deleted, 118 expired,
 bez podkolekcí, původních 37 zdrojů beze změny. Browser host je nedostupný;
-zbývá ověřit opravený scroll, záložky a běžný účet, potom úklid. Vlastník dostal
-nový URL/pokyn. Test záložky u expired se týká ikony/počtu v Mé shouty;
+uložení a okamžitou změnu počtu vlastník mezitím potvrdil. Změnu tlačítka
+a novou politiku expired řeší schválený úsek výše; úklid ještě neproběhl.
+Test záložky u expired se týkal ikony/počtu v Mé shouty;
 sekce Uložené podle dosavadní politiky vrací jen aktivní obsah.
 Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,

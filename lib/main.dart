@@ -55,6 +55,7 @@ import 'live_shout_state.dart';
 import 'feed_session.dart';
 import 'feed_page_gateway.dart';
 import 'own_shouts_gateway.dart';
+import 'shout_interaction_gate.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';

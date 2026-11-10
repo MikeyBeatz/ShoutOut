@@ -25,6 +25,7 @@ async function fixture() {
   await db.doc(`users/${owner}`).set({ nickname: 'Shout owner' });
   const shoutRef = db.doc(`shouts/${randomUUID()}`);
   await shoutRef.set({ authorId: owner, title: 'Target', status: 'active',
+    expiresAt: Timestamp.fromMillis(now.getTime() + 3600000),
     likesCount: 2, dislikesCount: 3, commentsCount: 4, savesCount: 5 });
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
     app: { appId: 'test-app' }, data: { idempotencyKey: timedKey('first'), shoutId: shoutRef.id, button: 'like' } };
@@ -139,7 +140,6 @@ test('shared hourly limit resets at boundary and content restrictions do not cha
   await assert.rejects(toggleShoutReactionOperation(f.request, db, at()), (e) => e.code === 'resource-exhausted');
   assert.equal((await f.shoutRef.collection('reactions').doc(f.uid).get()).exists, false);
   await db.doc(`contentRestrictions/${f.uid}`).set({ expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
-  await f.shoutRef.update({ status: 'deleted' });
   await toggleShoutReactionOperation(f.request, db, at(1000));
   assert.equal((await rate(f.uid).get()).data().count, 1);
   assert.equal((await f.shoutRef.get()).data().likesCount, 3);

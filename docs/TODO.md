@@ -24,7 +24,14 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Uzavřít zbývající klientskou regresi a úplné „Mé shouty“.** Prostorový
+1. **Dokončit schválené připomínky „Mé shouty“, potom klientskou regresi.**
+   Nový úsek schválený 10. listopadu: menší pokračování až za poslední kartou,
+   po expiraci zámek palců Shoutu/komentářů, uložení a psaní odpovědí;
+   vlastní mazání, hlášení, moderace a účtový úklid zůstávají. Lokálně připravené
+   na `feature/expired-shout-read-only`: 316 Flutter, 120 serverových/Rules,
+   čistá analýza/lint. Zatím bez nového nasazení. Následuje přesné CI/DEV,
+   dva schválené krátce platné syntetické Shouty a úklid. [Kontrakt](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
+   Prostorový
    feed, writery, generace feed-v1 i klient jsou v DEV nasazené. Serverové
    stránky 50 → 100 → 120 prošly pro oba účty; Business stránkování, plovoucí
    obnova i zvonek jsou potvrzené vlastníkem. Zbývají klientské interakce
@@ -35,7 +42,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    pokračování, palce a mazání; zachytil návrat nahoru při pokračování. Lokální
    oprava zachovává seznam během čekání a zvýrazňuje tlačítko, 17/17 cílených
    a 314/314 Flutter testů. Po success CI 42890208984 je ce6b07a nasazené
-   na DEV webu; zbývá UI kontrola scrollu, záložek a běžného účtu.
+   na DEV webu. Uložení a okamžité změny počtu jsou potvrzené vlastníkem;
+   novější umístění tlačítka a expired chování ověřit po novém rolloutu.
    Před přechodem na B uzavřít A2/A3. Read-only kontrola po UI testu:
    118 fixture expired / 2 deleted, bez podkolekcí; původních 37 zdrojů
    beze změny. Využít je pro ověření

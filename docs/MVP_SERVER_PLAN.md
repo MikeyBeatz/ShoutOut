@@ -261,6 +261,9 @@ ještě implementované není. [Kontrakt a důkazy](plans/accounts/ACCOUNT_AUTHO
 
 - pravidelně vyhledat Shouty po skončení platnosti podle serverového času,
 - změnit stav na expirovaný bez spoléhání na čas zařízení,
+- od expiresAt odmítnout nové změny palců Shoutu/komentářů a uložení,
+  zachovat čtení a výjimky pro vlastní mazání, moderaci a účtový úklid;
+  [schválené upřesnění a ověření](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions),
 - po sedmi dnech odstranit Shout i všechny podkolekce,
 - respektovat obsah zadržený kvůli hlášení nebo právnímu požadavku,
 - zabránit osiřelým komentářům, reakcím, uložením a soukromým odpovědím,

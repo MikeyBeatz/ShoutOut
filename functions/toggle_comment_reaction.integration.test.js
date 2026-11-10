@@ -26,6 +26,7 @@ async function fixture() {
   await db.doc(`users/${owner}`).set({ nickname: 'Comment owner' });
   const shoutRef = db.doc(`shouts/${randomUUID()}`), commentRef = shoutRef.collection('comments').doc(randomUUID());
   const shoutData = { authorId: shoutOwner, title: 'Parent Shout', status: 'active',
+    expiresAt: Timestamp.fromMillis(now.getTime() + 3600000),
     likesCount: 7, dislikesCount: 8, commentsCount: 1, savesCount: 9 };
   const commentData = { authorId: owner, authorNickname: 'Comment author', text: 'Original comment',
     likesCount: 2, dislikesCount: 3 };
@@ -52,11 +53,11 @@ const change = (request, idempotencyKey, button) => ({ ...request, data: { ...re
 const notice = (f, type) => db.doc(`users/${f.owner}/notifications/commentReaction_${type}_${f.shoutRef.id}_${f.commentRef.id}`);
 const receipt = (f, key = 'first') => db.doc(`serverOperations/${createHash('sha256').update(`${f.uid}\ntoggleCommentReaction\n${timedKey(key)}`).digest('hex')}`);
 
-test('foreign comment reactions work under a purged context and never recreate its title or counters', { skip: !enabled }, async () => {
+test('a purged context rejects new comment reactions without recreating its title or counters', { skip: !enabled }, async () => {
   const f = await fixture(), context = { schemaVersion: 1, status: 'deleted', contentPurged: true };
   await f.shoutRef.set(context); const before = await f.shoutRef.get();
-  const result = await toggle(f.request, db, at()); assert.equal(result.likes, 3);
-  assert.equal((await notice(f, 'like').get()).get('targetTitle'), '');
+  await assert.rejects(toggle(f.request, db, at()), error => error.code === 'failed-precondition');
+  assert.equal((await notice(f, 'like').get()).exists, false);
   assert.ok((await f.shoutRef.get()).updateTime.isEqual(before.updateTime));
   assert.deepEqual((await f.shoutRef.get()).data(), context);
 });
@@ -176,11 +177,10 @@ test('invalid targets, account or stored state reject without partial comment wr
   }
 });
 
-test('retained inactive Shouts and creation restrictions do not block comment reactions', { skip: !enabled }, async () => {
-  for (const status of ['expired', 'deleted']) {
+test('creation restrictions do not block reactions to active comments', { skip: !enabled }, async () => {
+  for (const restricted of [false, true]) {
     const f = await fixture();
-    await f.shoutRef.update({ status });
-    await db.doc(`contentRestrictions/${f.uid}`).set({ expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
+    if (restricted) await db.doc(`contentRestrictions/${f.uid}`).set({ expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
     await toggle(f.request, db, at());
     assert.equal((await f.commentRef.get()).data().likesCount, 3);
   }

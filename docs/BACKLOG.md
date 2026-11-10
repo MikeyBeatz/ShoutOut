@@ -368,6 +368,9 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 - [x] **Rozhodnout pravidla životnosti Shoutu před změnou expirace.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-4--životnost-obsahu-a-business-účty).
+  - Upřesnění schválené 10. listopadu: po expiraci běžné interakce jen ke čtení,
+    včetně palců komentářů a přidání/odebrání uložení; vlastní mazání, moderace
+    a účtový úklid zůstávají možné a mohou změnit počty. [Realizace a důkazy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 - [ ] **Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web.** **MVP**
   - Současný postup a otevřená kritéria ruční kontroly jsou v

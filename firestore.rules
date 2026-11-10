@@ -2013,11 +2013,13 @@ service cloud.firestore {
           (
             request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['likesCount', 'dislikesCount']) &&
+            activeShout(shoutId) &&
             validShoutReactionCounters(shoutId)
           ) ||
           (
             request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['savesCount']) &&
+            activeShout(shoutId) &&
             validSaveCounter(shoutId)
           ) ||
           (
@@ -2120,6 +2122,7 @@ service cloud.firestore {
               /databases/$(database)/documents/shouts/$(shoutId)
             ).data.get('commentsCount', 0) + 1;
         allow update: if eligibleUser() &&
+          activeShout(shoutId) &&
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['likesCount', 'dislikesCount']) &&
           request.resource.data.likesCount is int &&
@@ -2164,6 +2167,7 @@ service cloud.firestore {
           allow get: if eligibleUser() && userId == request.auth.uid;
           allow create, update: if eligibleUser() &&
             userId == request.auth.uid &&
+            activeShout(shoutId) &&
             commentParentSurvives() &&
             consumedRate(
               'interaction',
@@ -2172,6 +2176,7 @@ service cloud.firestore {
             validCommentReactionData();
           allow delete: if eligibleUser() &&
             userId == request.auth.uid &&
+            activeShout(shoutId) &&
             commentParentSurvives() &&
             consumedRate(
               'interaction',
@@ -2247,6 +2252,7 @@ service cloud.firestore {
         allow get: if eligibleUser() && userId == request.auth.uid;
         allow create, update: if eligibleUser() &&
           !managedFeedProjection() &&
+          activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'shoutReaction_' + shoutId) &&
           request.resource.data.keys().hasOnly(['type', 'updatedAt', 'userId']) &&
@@ -2256,6 +2262,7 @@ service cloud.firestore {
           request.resource.data.updatedAt == request.time;
         allow delete: if eligibleUser() &&
           !managedFeedProjection() &&
+          activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'shoutReaction_' + shoutId);
         allow list: if false;
@@ -2264,6 +2271,7 @@ service cloud.firestore {
       match /saves/{userId} {
         allow get: if eligibleUser() && userId == request.auth.uid;
         allow create: if eligibleUser() &&
+          activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'save_' + shoutId) &&
           request.resource.data.keys().hasOnly(['createdAt', 'userId']) &&
@@ -2271,6 +2279,7 @@ service cloud.firestore {
           request.resource.data.userId == request.auth.uid &&
           request.resource.data.createdAt == request.time;
         allow delete: if eligibleUser() &&
+          activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'save_' + shoutId);
         allow update, list: if false;

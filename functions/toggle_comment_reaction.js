@@ -1,5 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
-import { isPurgedShoutContext } from './shout_context.js';
+import { isPurgedShoutContext, shoutAcceptsInteractions } from './shout_context.js';
 import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -58,7 +58,7 @@ export async function toggleCommentReactionOperation(request, db, clock = () => 
     const [shout, comment, reaction, rate] = await transaction.getAll(shoutRef, commentRef, reactionRef, rateRef);
     if (!shout.exists || !comment.exists) fail('not-found', 'The comment or its Shout is no longer available.');
     const shoutTitle = isPurgedShoutContext(shout.data()) ? '' : shout.data().title;
-    // Retained expired/deleted Shouts remain valid reaction targets, as in Rules.
+    if (!shoutAcceptsInteractions(shout.data(), now)) fail('failed-precondition', 'shout-interactions-closed');
     const data = comment.data();
     const oldType = reaction.exists ? reaction.data().type : null;
     const result = reactionTransition(oldType, input.button, data.likesCount ?? 0, data.dislikesCount ?? 0);

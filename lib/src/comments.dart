@@ -12,6 +12,7 @@ class CommentTile extends StatefulWidget {
     required this.onSave,
     required this.onReaction,
     required this.onDeleted,
+    required this.interactionsOpen,
   });
 
   final QueryDocumentSnapshot<Map<String, dynamic>> comment;
@@ -24,6 +25,7 @@ class CommentTile extends StatefulWidget {
   final ValueChanged<Shout> onSave;
   final Future<void> Function(Shout shout, {required bool like}) onReaction;
   final ValueChanged<int?> onDeleted;
+  final bool interactionsOpen;
 
   @override
   State<CommentTile> createState() => _CommentTileState();
@@ -139,14 +141,18 @@ class _CommentTileState extends State<CommentTile> {
                             icon: Icons.thumb_up_outlined,
                             value: likes,
                             selected: ownType == 'like',
-                            onPressed: () => _toggleReaction('like'),
+                            onPressed: widget.interactionsOpen
+                                ? () => _toggleReaction('like')
+                                : null,
                           ),
                           const SizedBox(width: 4),
                           ReactionButton(
                             icon: Icons.thumb_down_outlined,
                             value: dislikes,
                             selected: ownType == 'dislike',
-                            onPressed: () => _toggleReaction('dislike'),
+                            onPressed: widget.interactionsOpen
+                                ? () => _toggleReaction('dislike')
+                                : null,
                           ),
                         ],
                       ),
@@ -165,10 +171,12 @@ class _CommentTileState extends State<CommentTile> {
                             builder: (context, identity) => IconButton(
                               tooltip: tr(context, 'Odpovědět'),
                               visualDensity: VisualDensity.compact,
-                              onPressed: () => widget.onReply(
-                                widget.comment.id,
-                                identity.nickname,
-                              ),
+                              onPressed: !widget.interactionsOpen
+                                  ? null
+                                  : () => widget.onReply(
+                                      widget.comment.id,
+                                      identity.nickname,
+                                    ),
                               icon: const Icon(Icons.reply_outlined, size: 20),
                             ),
                           ),
@@ -178,11 +186,13 @@ class _CommentTileState extends State<CommentTile> {
                               child: IconButton(
                                 tooltip: tr(context, 'Soukromě'),
                                 visualDensity: VisualDensity.compact,
-                                onPressed: () => widget.onPrivateReply(
-                                  data['authorId'] as String,
-                                  data['authorNickname'] as String,
-                                  widget.comment.id,
-                                ),
+                                onPressed: !widget.interactionsOpen
+                                    ? null
+                                    : () => widget.onPrivateReply(
+                                        data['authorId'] as String,
+                                        data['authorNickname'] as String,
+                                        widget.comment.id,
+                                      ),
                                 icon: const Icon(Icons.lock_outline, size: 20),
                               ),
                             ),

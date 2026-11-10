@@ -198,9 +198,10 @@ void main() {
       );
       await tester.pumpWidget(view(gateway));
       await tester.pumpAndSettle();
-      await tester.drag(
-        find.byKey(const ValueKey('own-shouts-list')),
-        const Offset(0, -500),
+      expect(find.byKey(const ValueKey('own-shouts-more')), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('own-shouts-more')),
+        500,
       );
       await tester.pumpAndSettle();
       final scroll = tester.state<ScrollableState>(find.byType(Scrollable));
@@ -237,10 +238,21 @@ void main() {
       await tester.pumpWidget(view(gateway));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(find.text('Owned 49'), 500);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('own-shouts-more')),
+        100,
+      );
       await tester.pumpAndSettle();
       final scroll = tester.state<ScrollableState>(find.byType(Scrollable));
       final position = scroll.position, before = position.pixels;
       expect(before, greaterThan(0));
+      expect(
+        tester.getSize(find.byKey(const ValueKey('own-shouts-more'))).width,
+        lessThan(
+          tester.getSize(find.byKey(const ValueKey('own-shouts-list'))).width /
+              2,
+        ),
+      );
       await tester.tap(find.byKey(const ValueKey('own-shouts-more')));
       await tester.pump();
       expect(find.byType(LinearProgressIndicator), findsOneWidget);

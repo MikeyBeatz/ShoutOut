@@ -86,7 +86,16 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   @override
-  Widget build(BuildContext context) => _page(context);
+  Widget build(BuildContext context) => ShoutInteractionGate(
+    expiresAt: widget.shout.expiresAt,
+    enabled: widget.shout.status == ShoutStatus.active,
+    builder: (context, open) => _page(context, open && !_contentPurged),
+  );
+
+  bool get _canInteract =>
+      !_contentPurged &&
+      widget.shout.status == ShoutStatus.active &&
+      widget.shout.expiresAt.isAfter(DateTime.now());
 
   Widget _purgedCard() => Card(
     child: ListTile(
@@ -157,7 +166,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     super.dispose();
   }
 
-  Widget _page(BuildContext context) => Scaffold(
+  Widget _page(BuildContext context, bool interactionsOpen) => Scaffold(
     resizeToAvoidBottomInset: true,
     appBar: AppBar(
       title: Text(tr(context, 'Shout')),
@@ -248,6 +257,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             const SizedBox(height: 8),
             ...comments.map((comment) {
               return CommentTile(
+                interactionsOpen: interactionsOpen,
                 key: _commentKey(comment.id),
                 comment: comment,
                 shoutAuthorId: widget.shout.authorId,
@@ -274,6 +284,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
               );
             }),
             PrivateReplyList(
+              interactionsOpen: interactionsOpen,
               shoutId: widget.shout.id,
               onReply: _replyPrivately,
               onReport: _reportPrivateReply,
@@ -332,7 +343,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                       child: AvailableAccountAction(
                         userId: _privateRecipientId ?? '',
                         child: TextField(
-                          enabled: !_sendingComment,
+                          enabled: interactionsOpen && !_sendingComment,
                           controller: _commentController,
                           focusNode: _commentFocusNode,
                           keyboardType: TextInputType.text,
@@ -378,7 +389,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       _commentKeys.putIfAbsent(commentId, GlobalKey<_CommentTileState>.new);
 
   void _replyTo(String commentId, String nickname) {
-    if (_sendingComment) return;
+    if (_sendingComment || !_canInteract) return;
     setState(() {
       _privateRecipientId = null;
       _privateRecipientNickname = null;
@@ -400,7 +411,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
     String? parentCommentId,
     String? parentPrivateReplyId,
   }) {
-    if (_sendingComment) return;
+    if (_sendingComment || !_canInteract) return;
     setState(() {
       _privateRecipientId = recipientId;
       _privateRecipientNickname = recipientNickname;
@@ -477,7 +488,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _sendComment() async {
-    if (_sendingComment) return;
+    if (_sendingComment || !_canInteract) return;
     final comment = _commentController.text.trim();
     if (comment.isEmpty) return;
     final user = FirebaseAuth.instance.currentUser!;

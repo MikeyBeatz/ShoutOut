@@ -1686,6 +1686,50 @@ describe('following profiles', () => {
 });
 
 describe('comments, reactions, saves and reports', () => {
+  test('expired interactions reject add/remove/switch batches without changing counts; reading and owner deletion survive', async () => {
+    await seedEligibleUser('writer', 'SafeWriter');
+    const db = authenticatedDb('writer');
+    for (const mode of ['deadline', 'expired', 'deleted', 'missing-deadline']) {
+      for (const target of ['shout', 'comment', 'save']) for (const action of ['add', 'remove', 'switch']) {
+        if (target === 'save' && action === 'switch') continue;
+        const id = `frozen-${mode}-${target}-${action}`, source = `shouts/${id}`, comment = `${source}/comments/comment`;
+        const tracking = target === 'comment' ? `${comment}/reactions/writer` : `${source}/${target === 'save' ? 'saves' : 'reactions'}/writer`;
+        await seedShout({ id, authorId: 'writer', commentsCount: 1 });
+        await testEnvironment.withSecurityRulesDisabled(async context => {
+          const admin = context.firestore();
+          await updateDoc(doc(admin, source), { likesCount: 20, savesCount: 4,
+            ...(mode === 'deadline' ? { expiresAt: Timestamp.fromMillis(Date.now() - 1000) } : {}),
+            ...(mode === 'missing-deadline' ? { expiresAt: deleteField() } : {}),
+            ...(mode === 'expired' || mode === 'deleted' ? { status: mode } : {}),
+          });
+          await setDoc(doc(admin, comment), { authorId: 'writer', text: 'Retained comment', likesCount: 20, dislikesCount: 0 });
+          if (action !== 'add') await setDoc(doc(admin, tracking), target === 'save'
+            ? { userId: 'writer', createdAt: now() } : { userId: 'writer', type: 'like', updatedAt: now() });
+        });
+        const before = (await getDoc(doc(db, source))).data(), oldComment = (await getDoc(doc(db, comment))).data();
+        const event = target === 'save' ? `save_${id}` : target === 'comment' ? `commentReaction_${id}_comment` : `shoutReaction_${id}`;
+        const batch = writeBatch(db); batch.set(doc(db, 'rateLimits/writer/actions/interaction'), rateData(event));
+        if (action === 'remove') batch.delete(doc(db, tracking));
+        else batch.set(doc(db, tracking), target === 'save' ? { userId: 'writer', createdAt: serverTimestamp() }
+          : { userId: 'writer', type: action === 'switch' ? 'dislike' : 'like', updatedAt: serverTimestamp() });
+        batch.update(doc(db, target === 'comment' ? comment : source), target === 'save'
+          ? { savesCount: action === 'add' ? 5 : 3 }
+          : { likesCount: action === 'add' ? 21 : 19, dislikesCount: action === 'switch' ? 1 : 0 });
+        await assertFails(batch.commit());
+        assert.deepEqual((await getDoc(doc(db, source))).data(), before);
+        assert.deepEqual((await getDoc(doc(db, comment))).data(), oldComment);
+      }
+    }
+    const id = 'expired-owner-delete'; await seedShout({ id, authorId: 'writer', commentsCount: 1 });
+    await testEnvironment.withSecurityRulesDisabled(async context => {
+      const admin = context.firestore(); await updateDoc(doc(admin, `shouts/${id}`), { expiresAt: Timestamp.fromMillis(Date.now() - 1000) });
+      await setDoc(doc(admin, `shouts/${id}/comments/own`), { authorId: 'writer', text: 'Own retained comment', likesCount: 0, dislikesCount: 0 });
+    });
+    const deletion = writeBatch(db); deletion.set(doc(db, 'rateLimits/writer/actions/delete'), rateData('own'));
+    deletion.delete(doc(db, `shouts/${id}/comments/own`)); deletion.update(doc(db, `shouts/${id}`), { commentsCount: 0 });
+    await assertSucceeds(deletion.commit());
+  });
+
   test('comment creation requires an atomic parent counter increment', async () => {
     await seedEligibleUser('writer', 'SafeWriter');
     await seedEligibleUser('author', 'ShoutAuthor');

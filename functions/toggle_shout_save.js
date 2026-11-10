@@ -1,5 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
-import { isPurgedShoutContext } from './shout_context.js';
+import { isPurgedShoutContext, shoutAcceptsInteractions } from './shout_context.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -67,7 +67,7 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     if (![data.likesCount, data.dislikesCount, data.commentsCount].every(counter)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');
     }
-    // Current Rules permit saves on retained Shouts regardless of their status.
+    if (!shoutAcceptsInteractions(data, now)) fail('failed-precondition', 'shout-interactions-closed');
     const result = saveTransition(save.exists, data.savesCount === undefined ? 0 : data.savesCount);
     const rateData = nextInteractionRate(rate.data(), now, `save_${input.shoutId}`);
     if (result.saved) transaction.create(saveRef, { createdAt: now, userId: uid });

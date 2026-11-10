@@ -42,7 +42,8 @@ async function request(data = {}) {
 async function savedFixture() {
   const r = await request({ shoutId: randomUUID() });
   const shout = db.doc(`shouts/${r.data.shoutId}`);
-  await shout.set({ authorId: r.auth.uid, likesCount: 0, dislikesCount: 0, commentsCount: 0, savesCount: 0 });
+  await shout.set({ authorId: r.auth.uid, status: 'active', expiresAt: Timestamp.fromMillis(now.getTime() + 3600000),
+    likesCount: 0, dislikesCount: 0, commentsCount: 0, savesCount: 0 });
   const receiptId = createHash('sha256').update(`${r.auth.uid}\ntoggleShoutSave\n${key}`).digest('hex');
   return { r, shout, receipt: db.doc(`serverOperations/${receiptId}`),
     rate: db.doc(`rateLimits/${r.auth.uid}/actions/interaction`) };

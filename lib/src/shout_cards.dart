@@ -74,7 +74,13 @@ class ShoutCard extends StatelessWidget {
   final VoidCallback? onPrivateReply;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ShoutInteractionGate(
+    expiresAt: shout.expiresAt,
+    enabled: shout.status == ShoutStatus.active,
+    builder: (context, open) => _buildCard(context, open),
+  );
+
+  Widget _buildCard(BuildContext context, bool open) {
     final theme = Theme.of(context);
     Future<void> openComments() async {
       completeInteractiveTutorialAction(1);
@@ -202,7 +208,7 @@ class ShoutCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: onSave,
+                    onPressed: open ? onSave : null,
                     tooltip: shout.isSaved
                         ? tr(context, 'Odebrat z uložených')
                         : tr(context, 'Uložit shout'),
@@ -295,14 +301,18 @@ class ShoutCard extends StatelessWidget {
                               icon: Icons.thumb_up_outlined,
                               value: shout.likes,
                               selected: shout.isLiked,
-                              onPressed: () => unawaited(onReaction(true)),
+                              onPressed: open
+                                  ? () => unawaited(onReaction(true))
+                                  : null,
                             ),
                             const SizedBox(width: 4),
                             ReactionButton(
                               icon: Icons.thumb_down_outlined,
                               value: shout.dislikes,
                               selected: shout.isDisliked,
-                              onPressed: () => unawaited(onReaction(false)),
+                              onPressed: open
+                                  ? () => unawaited(onReaction(false))
+                                  : null,
                             ),
                             const SizedBox(width: 8),
                             ReactionButton(
@@ -319,7 +329,7 @@ class ShoutCard extends StatelessWidget {
                     AvailableAccountAction(
                       userId: shout.authorId,
                       child: IconButton(
-                        onPressed: onPrivateReply,
+                        onPressed: open ? onPrivateReply : null,
                         tooltip: tr(context, 'Soukromě odpovědět'),
                         icon: const Icon(Icons.lock_outline, size: 18),
                         visualDensity: VisualDensity.compact,

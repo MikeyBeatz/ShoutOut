@@ -1,5 +1,5 @@
 import { receiptRetentionFields } from './operation_retention.js';
-import { isPurgedShoutContext } from './shout_context.js';
+import { isPurgedShoutContext, shoutAcceptsInteractions } from './shout_context.js';
 import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -94,7 +94,7 @@ export async function toggleShoutReactionOperation(request, db, clock = () => ne
     if (!counter(data.commentsCount) || !counter(data.savesCount)) {
       fail('failed-precondition', 'Invalid stored Shout counters.');
     }
-    // Existing Rules permit interactions on retained Shouts regardless of status.
+    if (!shoutAcceptsInteractions(data, now)) fail('failed-precondition', 'shout-interactions-closed');
     const oldType = reaction.exists ? reaction.data().type : null;
     const result = reactionTransition(oldType, input.button, data.likesCount ?? 0, data.dislikesCount ?? 0);
     const rateData = nextInteractionRate(rate.data(), now, `shoutReaction_${input.shoutId}`);

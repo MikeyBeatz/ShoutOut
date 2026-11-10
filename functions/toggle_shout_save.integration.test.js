@@ -24,6 +24,7 @@ async function fixture() {
   const uid = await actor(), owner = randomUUID();
   const shoutRef = db.doc(`shouts/${randomUUID()}`);
   const shoutData = { authorId: owner, title: 'Target', text: 'Original content', status: 'active',
+    expiresAt: Timestamp.fromMillis(now.getTime() + 3600000),
     likesCount: 2, dislikesCount: 3, commentsCount: 4, savesCount: 5 };
   await shoutRef.set(shoutData);
   const request = { auth: { uid, token: { email: 'test@example.test', email_verified: true } },
@@ -141,11 +142,10 @@ test('invalid account, missing target and inconsistent counters leave no partial
   }
 });
 
-test('hourly boundary, retained inactive Shouts and creation restrictions preserve current save policy', { skip: !enabled }, async () => {
-  for (const status of ['expired','deleted']) {
+test('hourly boundary and creation restrictions preserve active save policy', { skip: !enabled }, async () => {
+  for (const restricted of [false, true]) {
     const f = await fixture();
-    await f.shoutRef.update({ status });
-    await db.doc(`contentRestrictions/${f.uid}`).set({ expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
+    if (restricted) await db.doc(`contentRestrictions/${f.uid}`).set({ expiresAt: Timestamp.fromMillis(now.getTime() + 60000) });
     await rate(f.uid).set({ count: 120, lastAt: Timestamp.fromMillis(now.getTime() - 1000),
       windowStartedAt: Timestamp.fromMillis(now.getTime() - 3599000), lastEventId: 'shoutReaction_previous' });
     await assert.rejects(toggle(f.request, db, at()), error => error.code === 'resource-exhausted');

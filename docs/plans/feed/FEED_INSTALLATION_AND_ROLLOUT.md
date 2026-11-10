@@ -509,3 +509,56 @@ současného getSavedShouts jde jen o aktivní zdroje, u expired tedy ověřit
 ikonu/čítač v Mé shouty, bez změny dostupnosti/retence. Při čtení kódu je
 stejný rizikový loading/Expanded vzor také v _SavedShoutsLibrary; živá chyba
 tam zatím není doložená, zahrnout do zbývající klientské regrese Uložených.
+
+<a id="expired-interactions"></a>
+
+### Zámek interakcí po expiraci a pokračování za kartami
+
+Vlastník 10. listopadu schválil menší tlačítko až jako poslední položku seznamu,
+zachování scrollu a serverově vynucené uzavření běžných interakcí po expiraci.
+Uložení a okamžitou aktualizaci počtu předchozí verze potvrdil; dřívější otázku
+o zobrazení expired v Uložených neopakovat. Pro nový úsek platí také souhlas
+s DEV rolloutem po přesném CI a dvěma novými krátce platnými syntetickými
+Shouty pod existujícími testovacími identitami, včetně jejich úklidu.
+Žádné nové Auth účty, změna retenčních lhůt, produkce nebo main.
+
+Nová změna vyžaduje aktivní status, validní Timestamp expiresAt a serverový
+čas transakce přísně před expiresAt. Platí i při opožděné materializaci expired.
+Tři operace (toggleShoutReaction, toggleCommentReaction, toggleShoutSave)
+odmítnou nový požadavek před přechodem čítačů, rate a oznámení. Guard pokrývá
+i odebrání již uložené reakce/záložky a neplatné či chybějící deadline.
+Historický timed receipt dál vrací původní potvrzení bez nových zápisů,
+nejde o opětovné provedení interakce. createComment a createPrivateReply už
+serverově odmítají neaktivní/časově expirované zdroje, včetně soukromého pokračování.
+
+Počty se zmrazují pro běžné interakce, nevzniká zvláštní snapshot statistiky.
+Čtení obsahu a diskuse, hlášení, vlastní mazání, moderace a schválené odstranění
+reakcí smazaných účtů zůstávají; poslední tři mohou počty změnit. Mazání komentáře
+a odpovídající snížení commentsCount se novým guardem neblokuje.
+Retence ani oprávnění čtení se nemění.
+
+Rules přidávají activeShout do větví změny palců a savesCount, změny palců
+komentáře i přímých create/update/delete stop reakce a create/delete záložky.
+Původní validace polí, UID, atomických čítačů a omezení managed indexu zůstávají.
+Úzký audit: pokusy přes starý klient, samotný čítač, přepnutí typu, odebrání,
+chybějící deadline, neaktivní status, zánik rodiče a souběžnou změnu nemohou
+obejít stávající transakční/rules podmínky. 85 Rules testů v cíleném běhu
+zahrnuje vlastnictví, schémata, soukromá data, role a nový test 32 zakázaných
+expired interakčních batchů s ověřením nezměněného obsahu; vlastní smazání
+expired komentáře naopak projde. Čtecí query kontrakty se nemění.
+
+Klient používá ShoutInteractionGate s jedním zrušitelným deadline časovačem
+na připojený pohled a kontrolou při návratu aplikace; bez pollingu či volání
+databáze uvnitř komponenty. Karta ponechá počty a možnost otevřít diskusi pro
+čtení; deaktivuje palce, uložení a soukromou odpověď. Detail deaktivuje composer,
+palce komentářů a veřejné/soukromé odpovědi, včetně již otevřeného pohledu.
+Server zůstává autoritou při nepřesných hodinách zařízení. Tlačítko pokračování
+je kompaktní položkou za poslední kartou, ne trvalou lištou; klíč obsahu a
+ScrollPosition zůstávají stabilní při čekání, chybě a připojení stránky.
+
+Lokálně: 316/316 Flutter, 11/11 own/deadline widget testů, čistá analýza/lint,
+119 Functions unit, 120/120 cílených serverových/Rules (35 server / 85 Rules),
+2/2 kontrol balíčků. Důkazy `build/expired-interactions-{flutter-all,client-test,
+analyze,lint,unit,server-rules,artifact}.log`. Nová serverová sada je zapojená
+do CI test:rules. Zatím bez nasazení této politiky; následuje přesné CI,
+tři DEV Functions, Rules a web, živé ověření a schválený úklid.

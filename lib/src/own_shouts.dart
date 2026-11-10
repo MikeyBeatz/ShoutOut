@@ -185,9 +185,9 @@ class _OwnShoutsLibraryState extends State<OwnShoutsLibrary> {
           key: const ValueKey('own-shouts-content'),
           child: _loading && _items.isEmpty
               ? const Center(child: CircularProgressIndicator())
-              : _items.isEmpty && (_next != null || _failed)
+              : _items.isEmpty && _failed
               ? const SizedBox.shrink()
-              : _items.isEmpty
+              : _items.isEmpty && _next == null
               ? EmptyState(
                   icon: Icons.campaign_outlined,
                   title: tr(context, 'V této části zatím nemáš žádné shouty.'),
@@ -196,9 +196,19 @@ class _OwnShoutsLibraryState extends State<OwnShoutsLibrary> {
                   controller: _scroll,
                   key: const ValueKey('own-shouts-list'),
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  itemCount: _items.length,
+                  itemCount: _items.length + (_next == null ? 0 : 1),
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (_, index) {
+                    if (index == _items.length) {
+                      return Center(
+                        child: FilledButton.tonalIcon(
+                          key: const ValueKey('own-shouts-more'),
+                          onPressed: _loading ? null : () => unawaited(_load()),
+                          icon: const Icon(Icons.expand_more),
+                          label: Text(tr(context, 'Načíst další')),
+                        ),
+                      );
+                    }
                     final shout = _items[index];
                     return KeyedSubtree(
                       key: ValueKey(shout.id),
@@ -226,19 +236,6 @@ class _OwnShoutsLibraryState extends State<OwnShoutsLibrary> {
                   },
                 ),
         ),
-        if (_next != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.tonalIcon(
-                key: const ValueKey('own-shouts-more'),
-                onPressed: _loading ? null : () => unawaited(_load()),
-                icon: const Icon(Icons.expand_more),
-                label: Text(tr(context, 'Načíst další')),
-              ),
-            ),
-          ),
       ],
     );
   }

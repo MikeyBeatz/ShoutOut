@@ -7,9 +7,11 @@ class PrivateReplyList extends StatelessWidget {
     required this.onReply,
     required this.onReport,
     required this.onJumpToComment,
+    required this.interactionsOpen,
   });
 
   final String shoutId;
+  final bool interactionsOpen;
   final void Function({
     required String recipientId,
     required String recipientNickname,
@@ -60,6 +62,7 @@ class PrivateReplyList extends StatelessWidget {
                 children: privateReplies
                     .map(
                       (reply) => PrivateReplyTile(
+                        interactionsOpen: interactionsOpen,
                         reply: reply,
                         onReply: () {
                           final data = reply.data();
@@ -91,10 +94,12 @@ class PrivateReplyTile extends StatelessWidget {
     required this.onReply,
     required this.onReport,
     required this.onJumpToComment,
+    required this.interactionsOpen,
   });
 
   final QueryDocumentSnapshot<Map<String, dynamic>> reply;
   final VoidCallback onReply;
+  final bool interactionsOpen;
   final VoidCallback onReport;
   final ValueChanged<String> onJumpToComment;
 
@@ -170,7 +175,7 @@ class PrivateReplyTile extends StatelessWidget {
                   AvailableAccountAction(
                     userId: data['authorId'] as String,
                     child: TextButton.icon(
-                      onPressed: onReply,
+                      onPressed: interactionsOpen ? onReply : null,
                       icon: const Icon(Icons.lock_outline, size: 17),
                       label: Text(tr(context, 'Odpovědět soukromě')),
                     ),

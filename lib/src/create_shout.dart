@@ -540,7 +540,7 @@ class ReactionButton extends StatelessWidget {
   });
   final IconData icon;
   final int value;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool selected;
   @override
   Widget build(BuildContext context) => InkWell(
@@ -553,7 +553,11 @@ class ReactionButton extends StatelessWidget {
           Icon(
             icon,
             size: 19,
-            color: selected ? Theme.of(context).colorScheme.primary : null,
+            color: onPressed == null
+                ? Theme.of(context).disabledColor
+                : selected
+                ? Theme.of(context).colorScheme.primary
+                : null,
           ),
           const SizedBox(width: 5),
           Text('$value'),
