@@ -6,8 +6,10 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit kontrolu připomínek vlastníka k právě nasazenému DEV feedu a poté
-uklidit schválené testovací fixture.** Na `feature/feed-page-integration` je
+**Dokončit zbývající klientskou regresi feedu a úplný vlastní seznam Shoutů,
+potom uklidit schválené fixture.** Konkrétní oprava „Mé shouty“ je předložená
+vlastníkovi ke schválení; do odpovědi žádné zdrojové změny této opravy.
+Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
 Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.
 Aktivační zdroj **ccc879f485caa24374cadc1dba49ddcec50a4a95** má
@@ -25,11 +27,13 @@ po zvětšení dosahu i načítání dalších stránek v Business webu; servero
 to potvrzují platným Auth/App Check a třemi HTTP 200 (0,52–1,07 s na serveru).
 Minutový worker běží na nové revizi bez chyb; rozvrh a obsahová dávka se neměnily.
 
-**Otevřený checkpoint ze 7. listopadu:** 120 syntetických Shoutů
-`mvp-feed-20261107-*` bylo ponechaných pro připomínky vlastníka. Ruční úklid
-ještě neproběhl; před dalším testem ověřit současný stav a expiraci fixture.
-Při poslední kontrole byly reakce i testovací záložka vrácené na původní stav
-a původních 37 zdrojů mělo nezměněný updateTime. Žádný Auth účet nebyl vytvořen ani smazán.
+**Read-only kontrola 10. listopadu:** všech 120 syntetických Shoutů
+`mvp-feed-20261107-*` existuje a má serverový status expired; bez konfliktu
+obsahu/vlastníka/časů, bez podkolekcí. Jedno testovací oznámení zůstává.
+Původních 37 zdrojů má nezměněný updateTime. Generace feed-v1 je active;
+0 zápisů, důkaz `build/feed-resume-inventory.json`. Fixture zatím ponechané
+pro možné ověření 60 vlastních expirovaných Shoutů na každý účet v navržené
+opravě; teprve potom schválený úklid. Žádný Auth účet nebyl vytvořen ani smazán.
 Identifikace fixture a další postup jsou v
 [záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Plovoucí obnova je nyní **pouze ikona vpravo nahoře**, ze zdroje
@@ -46,7 +50,7 @@ Lokálně 15/15 widget/session testů a čistá analýza; ověřený dosah obou
 tlačítek po scrollu a otevření oznámení bez dalšího načtení feedu.
 Přerušení ponechalo hotový build před nasazením; před navázáním bylo ověřené,
 že DEV stále vydával předchozí f08abf9. Nyní oba DEV originy odpovídají
-novému manifestu. Živý UI výsledek zvonku čeká na vlastníka.
+novému manifestu. Vlastník nyní potvrdil hotový zvonek; tato UI připomínka je uzavřená.
 Functions, Rules ani data se těmito UI rollouty neměnily.
 Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
 celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;

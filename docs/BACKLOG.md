@@ -75,7 +75,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - [Etapový návrh a schvalovací brány](plans/feed/FEED_IMPLEMENTATION_STAGES.md).
     [Analýza, otevřené volby a akceptace cílového rozšíření](plans/feed/FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-  - A0/A1 hotové ([měření](plans/feed/FEED_A1_RESULTS.md)); [progresivní jádro](plans/feed/FEED_PROGRESSIVE_PLAN.md) a [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md) lokálně ověřené, nenapojené. Celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace); technické limity před A2. Nezaměňovat
+  - A0/A1 hotové ([měření](plans/feed/FEED_A1_RESULTS.md)); [progresivní jádro](plans/feed/FEED_PROGRESSIVE_PLAN.md), [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), API a klient jsou v DEV živě zapojené od 7. listopadu. Před uzavřením A2/A3 zbývají klientská regrese, úplné vlastní Shouty a úklid fixture. B1–B4 ještě nejsou hotové, celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace). [Důkazy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results). Nezaměňovat
     osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**

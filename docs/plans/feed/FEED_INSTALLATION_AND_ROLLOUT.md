@@ -281,8 +281,8 @@ medián přibližně 1,96 s a jeden vzorek 65,8 s; příčina tohoto odlehlého 
 není potvrzená. Nelze jej zaměnit za latenci cloudového endpointu ani z těchto
 malých vzorků vyvozovat kapacitu, cenu nebo záruku odezvy.
 
-**Otevřené před uzavřením:** vlastník avizoval další poznámky; vyžádané jsou
-před úklidem. Při checkpointu 7. listopadu bylo všech 120 fixture aktivních,
+**Otevřené před uzavřením:** dosavadní připomínky k plovoucí obnově a zvonku
+vlastník 10. listopadu potvrdil jako hotové. Při checkpointu 7. listopadu bylo všech 120 fixture aktivních,
 ruční úklid ještě neproběhl. Po časovém odstupu jejich dostupnost a expiraci
 před dalším testem znovu ověřit; historický počet není důkaz současné aktivity.
 Pro UI reakce/záložky zatím existuje pouze serverový test; chybí také přímý
@@ -376,5 +376,36 @@ web.app i firebaseapp.com mají shodné SHA-256 s manifestem připraveného rele
 Důkazy `build/feed-floating-notifications-ci-proof.json`,
 `build/feed-floating-notifications-hosting-proof.json` a
 `build/feed-floating-notifications-hosting-deploy.log`. Živá UI kontrola
-čeká na vlastníka. Návrat: `529bbcd5bb0c6ee8` (f08abf9), backendové writery
+byla následně potvrzená vlastníkem. Návrat: `529bbcd5bb0c6ee8` (f08abf9), backendové writery
 a generaci zachovat. Functions, Rules, data, produkce ani main se neměnily.
+
+### Navázání podle TODO 10. listopadu
+
+Read-only inventura původních 120 fixture: všechny existují, jsou serverově
+expired, bez konfliktu autora/obsahu/časů a bez podkolekcí. Zůstává jedno
+testovací oznámení. Původních 37 Shoutů má nezměněný updateTime, řídicí
+dokument je active pro feed-v1. Důkaz `build/feed-resume-inventory.json`,
+0 živých zápisů. Aktuálně proto nelze vydávat staré aktivní UI scénáře
+za znovu ověřené; novou datovou vrstvu není třeba znovu instalovat.
+
+Před B1 má smysl opravit vlastní Aktivní/Expirované: skutečný Home pořád
+předává MyShoutsPage pouze výběr z posledních 50 globálně aktivních zdrojů.
+Jejich následné filtrování podle autora nemůže vrátit vlastní starší ani
+serverem materializované expired Shouty. Jde o dříve evidovanou otevřenou
+akceptaci A, nikoli nový produktový požadavek nebo hotový milník.
+
+Vlastníkovi je předložený konkrétní rozsah: samostatný čtecí endpoint s Auth,
+App Check, stavem účtu a serverově určeným autorem; stránky nejvýše 50,
+řazení od nejnovějších, stávající časová dostupnost a sedmidenní zobrazení
+expirovaných. Klient používá vlastní stránky, dosavadní živé karty/počty
+a serverové mazání, s ochranou změny účtu, chyby a zániku obrazovky.
+Konkrétní query/indexový plán se ověří v emulátoru a před DEV rolloutem;
+neslibovat, že 50 vrácených dokumentů znamená jen 50 fakturačních čtení.
+Při měření započítat také případná [čtení indexových položek](https://firebase.google.com/docs/firestore/pricing).
+Nejde o nový prostorový ani osobní read index a retence/oprávnění se nemění.
+
+Po souhlasu připravit kód/testy; po úspěšném CI pouze DEV reader, potřebné
+dotazové indexy a web. Živé ověření může využít právě těchto 60 expirovaných
+Shoutů na každém z obou existujících účtů, poté dokončit schválený úklid
+zdrojů přes writer a jen jejich vlastních vedlejších dat. Žádný nový Auth
+účet, produkce ani main. Do schválení neprovádět zdrojové změny této opravy.

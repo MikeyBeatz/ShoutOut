@@ -2,7 +2,7 @@
 
 ## Aktuální stav a použití plánu
 
-Souhrn k 5. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
+Souhrn k 10. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
 Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
 
@@ -10,11 +10,11 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace a timed idempotence nasazené. | Živý prostorový feed, indexové cesty a uzavření přímých zápisů. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery a Home jsou nasazené; přímé Shout create/vote zápisy uzavřené. | Úplná klientská regrese, vlastní Aktivní/Expirované, B1–B4 a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
-| Životnost Shoutů | Exspirace mění status v DEV. | Sedmidenní fyzický úklid Shoutů a potomků, indexové napojení. |
+| Životnost Shoutů | Exspirace mění status v DEV se společným indexovým writerem. | Sedmidenní fyzický úklid Shoutů a potomků včetně odpovídající indexové konzistence. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
 | Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
 | Bezpečnostní kontrola | Dílčí testy jsou doložené v TESTING. | Závěrečná předprodukční revize a odstranění/přijetí rizik. |
@@ -151,10 +151,11 @@ indexy a nákladové limity mají bránu před A2 po výsledku A1. Samotné
 seřazení jedné stránky ani globální čítač novinek nezaručují splnění zadání.
 Aktuálně schválený výběr stránek a jeho neuzavřené náklady jsou v
 [progresivním plánu](plans/feed/FEED_PROGRESSIVE_PLAN.md); úplná příprava regionu před
-první stránkou není zvolená. Připravené moduly ještě nejsou živým query API.
-Lokálně ověřený [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md) rozpracovává tyto
-požadavky; lokální historie/GC jsou ověřené, před aktivací zbývá integrace všech zápisů,
-migrace, zabezpečené query API a klientské napojení. Neuzavírá tuto bránu.
+první stránkou není zvolená. Od 7. listopadu jsou prostorové query API,
+[sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), writery/údržba i Home
+skutečně zapojené v DEV; [nasazení a omezení](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+Před uzavřením A2/A3 zbývají klientská regrese, úplný vlastní seznam Shoutů
+a úklid fixture. B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

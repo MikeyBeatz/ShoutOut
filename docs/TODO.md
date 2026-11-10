@@ -24,37 +24,25 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit připomínky a úklid živého DEV feedu.**
-   Společná lokální integrace serverových stránek, Home, uložených Shoutů,
-   minutového úklidu a trvalé instalace má zdroj `25a3f92` a
-   [success CI 42356245115](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42356245115).
-   Před instalací měla read-only kontrola DEV 37 Shoutů / 0 active; nástroj pro první
-   instalaci při aktivním zdroji zastaví, nic potichu nemigruje ani nemaže.
-   [Přesný přechod, ověření, meze a návrat](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md).
-   Vlastník schválil živý přechod i testy 7. listopadu. Klíč, 10 indexových
-   změn, Rules, osm Functions, aktivní feed-v1 i DEV web jsou nasazené
-   a ověřené. Zdroj `ccc879f` má success CI `42358058964`. Serverové stránky
-   50 → 100 → 120 prošly pro oba účty včetně reakcí/záložek; vlastník potvrdil
-   Business načítání dalších stránek, cloud potvrzuje platný Auth/App Check.
-   Projít avizované poznámky vlastníka, doplnit zbývající klientská ověření
-   a uklidit přesně 120 testovacích Shoutů; před dalším testem ověřit jejich
-   současnou expiraci a stav po časovém odstupu od 7. listopadu.
-   První plovoucí varianta z `e43e0e1` je potvrzená vlastníkem. Navazující
-   ikona bez popisku vpravo nahoře je už nasazená z `f08abf9` po success CI
-   `42363878639` a vlastník ji potvrdil. Stejný plovoucí zvonek vedle obnovy
-   je od 10. listopadu nasazený z `1fbf2ae` po success CI `42365663624`;
-   čeká na kontrolu vlastníka.
-   [Důkazy a checkpoint úklidu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
-   Lokální R6a–R6e jsou uzavřené; jejich úplné výsledky a závislosti zůstávají
-   v [provozním plánu](plans/feed/FEED_RUNTIME_PROPOSAL.md) a
-   [PROJECT_STATUS](PROJECT_STATUS.md). Účtový DEV přechod je uzavřený;
-   [důkazy](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md#aktualni-stav).
+1. **Uzavřít zbývající klientskou regresi a úplné „Mé shouty“.** Prostorový
+   feed, writery, generace feed-v1 i klient jsou v DEV nasazené. Serverové
+   stránky 50 → 100 → 120 prošly pro oba účty; Business stránkování, plovoucí
+   obnova i zvonek jsou potvrzené vlastníkem. Zbývají klientské interakce
+   a oprava vlastních Aktivních/Expirovaných, dosud závislých na posledních
+   50 globálně aktivních Shoutech. Nový konkrétní rozsah je předložený
+   ke schválení: vlastní serverové stránky po 50, stávající řazení/retence,
+   lokální testy a po CI DEV rollout. Před přechodem na B uzavřít A2/A3.
+   Read-only kontrola 10. listopadu: všech 120 fixture je expired, 60 na účet,
+   bez podkolekcí; původních 37 zdrojů beze změny. Využít je pro ověření
+   navržené vlastní historie a poté dokončit schválený úklid včetně oznámení.
+   [Důkazy, omezení a úklid](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 
-2. **Dokončit ostatní prostorový feed a jeho čtení/obnovu.** Zapojit všechny
-   zápisové cesty indexu, schválit provozní/migrační brány, zabezpečené query
-   API a klienta. Dokončit celé A0–A3 i B1–B4 před MVP podle
-   [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav); lokální prototyp není
-   živý prostorový feed.
+2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
+   a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální
+   unread-first v Nejblíž; B4: oddělený počet novinek. Konkrétní úložiště,
+   retence read stavu a polling ještě vyžadují návrh/schválení podle
+   [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav). Celé A0–A3
+   i B1–B4 zůstává před MVP; dílčí rollout neuzavírá celý milník.
 3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.

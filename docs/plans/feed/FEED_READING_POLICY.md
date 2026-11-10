@@ -41,7 +41,8 @@ nevznikají osobní read záznamy ani nové kolekce.
 nepřipojí ani dříve prefetchnutou stránku, zachová načtené karty a vystaví
 needsRefresh. Serverové FeedSessionExpired ošetří stejně. Jen úspěšná obnova
 stav resetuje; chyba starého požadavku neoznačí novější relaci za expirovanou.
-Ve skutečném Home feedu tento koordinátor ještě není zapojený.
+Od 7. listopadu je tento koordinátor zapojený ve skutečném DEV Home feedu;
+[současné nasazení a jeho hranice](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 
 R5 z 5. listopadu umožňuje při konečném účtovém úklidu zneplatnit relaci
 dotčených oblastí dřív. Serverový lokální protokol používá FeedSessionExpired;
@@ -55,7 +56,8 @@ po CI `41216198053` na DEV Hosting `42d86a762a74a2dd`. Živý test pod TestBusin
 potvrdil negativní sbalený Shout před běžným v Nejblíž a za ním v Top.
 Oba disposable fixtures byly soft-deleted a úklid ověřený v DB i UI; původní
 dosah 5 km a Nejblíž obnovené. Důkazy: build/feed-rating-nearest.png a
-build/feed-rating-fixture-cleanup.json. Expozice/koordinátor zůstávají přípravou.
+build/feed-rating-fixture-cleanup.json. Expozice zůstává přípravou; klientský
+koordinátor má od 7. listopadu navazující živé zapojení uvedené výše.
 
 ## Důkaz pro přenositelný API kurzor
 
@@ -71,9 +73,10 @@ kontextem a polohou přenášenou klientem, bez povinné per-user session v data
 nebo závislosti na životě serverové instance. Současné view/WeakMap samo není tento
 protokol. [Lokální přenositelný kurzor](FEED_PORTABLE_CURSOR.md) již ověřuje
 UID/projekt/kontext, hodinový limit a pokračování omezené práce; aktuální hydratace
-a živé API zůstávají navazujícím krokem. Historické čtení
+a živé API byly v pozdější etapě zapojené do DEV (viz aktuální rollout výše). Historické čtení
 nenahrazuje dnešní ověření Auth/App Check a dostupnosti obsahu.
 
-Před živými kolekcemi/klíčem/API zůstávají brány ve
-[migrační připravenosti](FEED_MIGRATION_READINESS.md). Retence osobního přečtení,
+Původní brány před živými kolekcemi/klíčem/API zachovává
+[migrační připravenost](FEED_MIGRATION_READINESS.md); první DEV přechod je již
+doložený v instalačním plánu. Retence osobního přečtení,
 protokol synchronizace a polling novinek stále potřebují konkrétní návrh.

@@ -38,7 +38,7 @@ Serverové fáze, klientský přechod, Rules cutover i závěrečný účtový t
 
 [Rozcestník feedu](plans/feed/README.md).
 
-Celé A0–A3/B1–B4 před MVP. Plný detail a rating jsou v DEV; index, relace, expozice a kurzor jsou převážně lokální příprava, nikoli živý prostorový feed.
+Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, stránkované API i Home jsou od 7. listopadu zapojené v DEV. Zbývá úplná klientská regrese a vlastní historie; skutečné přečtení B1–B4 ještě není hotové. Přesné revize a otevřené kontroly určuje PROJECT_STATUS.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](plans/feed/FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](plans/feed/FEED_BLOCK_INDEX_PLAN.md)
