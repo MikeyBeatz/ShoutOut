@@ -448,4 +448,31 @@ klientských případů (`build/own-shouts-client-test.log`), čistá analýza/l
 (`build/own-shouts-server-test.log`) a 2/2 kontrol balíčků. Test nanosekund
 byl upraven podle skutečné mikrosekundové přesnosti Firestore; kurzor
 zachovává i submilisekundovou část. Nová sada je přidaná do test:rules CI.
-Zatím žádný živý zápis, rollout nebo úklid této opravy; čeká na přesné CI.
+Zdroj `4e7e5bdfd9e026a2ff76b253a9a233fee2022f65` prošel
+[CI 42884625807](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42884625807).
+Z čistého `build/own-shouts-release` proběhl 10. listopadu pouze DEV rollout:
+jediný index `CICAgLiT_JAK` READY, getOwnShouts ACTIVE
+`getownshouts-00001-fik` a Hosting `4c61d6a850b330b7` (19:39:20 UTC).
+Nová Function má ověřené prostředky, anonymní POST 401 a všech 42 JS modulů
+staženého zdroje se shoduje s releasem; testy/lab soubory nejsou přibalené.
+Čtyři veřejné soubory obou DEV originů souhlasí s SHA-256 manifestu.
+Návrat webu je `941a97a6683b8e14`; reader/index lze ponechat kompatibilní.
+Rules, ostatní Functions, TTL, produkce a main se tímto rolloutem neměnily.
+
+Read-only živý test jádra pod důvěryhodným kontextem Admin SDK (nenahrazuje
+HTTP Auth/App Check ani UI): běžný účet 50 + 10, Business 50 + 11 (60 fixture
+a jeden původní Shout), všichni vlastní, od nejnovějších, bez duplicit.
+Aktivní stránky jsou u obou prázdné, expirované fixture se do nich nevrací.
+Query Explain u obou prvních stránek: 50 vrácených/skenovaných dokumentů,
+51 skenovaných a fakturovatelných indexových položek, 51 read operations,
+serverová executionDuration 9,82 / 11,02 ms. Měření celého SDK volání
+198–711 ms zahrnuje další kontroly i síť; není cloudovým UI benchmarkem.
+Explain nezahrnuje kontroly způsobilosti účtu v callable ani živé odběry.
+Po READY byla ještě krátká propagace do query vrstvy; úspěšná query byla
+ověřena před přepnutím webu. Žádný zdroj se při tomto testu nezměnil.
+
+Důkazy `build/own-shouts-{ci,index,function,deployed-source,hosting}-proof.json`,
+`build/own-shouts-live-query-proof.json` a logy nasazení. Browser access host
+je nedostupný; UI ještě neověřeno, vlastník dostal žádost o Business průchod.
+Do jeho ověření zůstává všech 120 fixture zachovaných; úklid je připravený
+v omezeném lokálním helperu, zatím neprovedený. A2/A3 ani milník neuzavírat.

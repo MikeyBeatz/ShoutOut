@@ -28,14 +28,14 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    feed, writery, generace feed-v1 i klient jsou v DEV nasazené. Serverové
    stránky 50 → 100 → 120 prošly pro oba účty; Business stránkování, plovoucí
    obnova i zvonek jsou potvrzené vlastníkem. Zbývají klientské interakce
-   a oprava vlastních Aktivních/Expirovaných, dosud závislých na posledních
-   50 globálně aktivních Shoutech. Vlastník schválil vlastní serverové stránky
-   po 50 se stávajícím řazením/retencí. Implementace na
-   `fix/own-shouts-pagination` má lokálně zelené testy a analýzu; nyní přesné
-   CI, jeden dotazový index, reader a DEV web. Před přechodem na B uzavřít A2/A3.
+   a živé klientské ověření vlastních Aktivních/Expirovaných. Oprava vlastního
+   zdroje po 50 je po success CI 42884625807 nasazená pouze v DEV ze zdroje
+   4e7e5bd: index READY, reader a web ověřené proti čistému releasu. Živé
+   serverové vlastní stránky 50 + 10 / 50 + 11 prošly; nyní UI kontrola obou
+   účtů, interakcí a mazání. Před přechodem na B uzavřít A2/A3.
    Read-only kontrola 10. listopadu: všech 120 fixture je expired, 60 na účet,
    bez podkolekcí; původních 37 zdrojů beze změny. Využít je pro ověření
-   navržené vlastní historie a poté dokončit schválený úklid včetně oznámení.
+   vlastní historie v UI a poté dokončit schválený úklid včetně oznámení.
    [Důkazy, omezení a úklid](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice

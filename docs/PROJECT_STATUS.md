@@ -8,12 +8,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 **Dokončit zbývající klientskou regresi feedu a úplný vlastní seznam Shoutů,
 potom uklidit schválené fixture.** Vlastník schválil konkrétní opravu
-„Mé shouty“ 10. listopadu. Na `fix/own-shouts-pagination` je lokálně připravený
+„Mé shouty“ 10. listopadu. Na `fix/own-shouts-pagination` je dokončený
 getOwnShouts, vlastní klientské stránky i živé karty/mazání. Celá Flutter sada
 313/313, analýza a lint čisté, 9/9 cílených serverových regresí (6 own / 3 saved),
-16/16 cílených klientských regresí a 2/2 testy balíčků. Nový kombinovaný index
-je zatím jen v read-only plánu; žádné nasazení této opravy ještě neproběhlo.
-Následuje přesné CI, cílený index/reader/DEV web a živé ověření před úklidem.
+16/16 cílených klientských regresí a 2/2 testy balíčků. Zdroj
+`4e7e5bdfd9e026a2ff76b253a9a233fee2022f65` má
+[success CI 42884625807](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42884625807).
+Pouze v DEV je nasazený jeden dotazový index READY, Function getOwnShouts
+`00001-fik` a web `4c61d6a850b330b7`; 42 modulů Function i otisky webu na
+obou originech souhlasí s čistým releasem. Živé jádro přes Admin SDK vrátilo
+vlastní expired stránky 50 + 10 běžnému účtu a 50 + 11 Business (60 fixture
+a jeden původní Shout), bez duplicit/cizích autorů a od nejnovějších.
+Query Explain: první stránka 50 dokumentů / 51 indexových položek / 51 read
+operations; nejde o celkovou cenu celé callable včetně kontrol účtu.
+UI průchod obou účtů a úklid ještě čekají. Browser host je nedostupný;
+vlastník byl požádán o Business kontrolu stránek, reakcí, záložky a mazání.
 Na `feature/feed-page-integration` je
 nový prostorový feed skutečně zapojený v `shoutout-dev-46c81`: osm Functions,
 Rules, podpisový klíč, indexy, aktivní generace `feed-v1` i web.
@@ -304,22 +313,24 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `1fbf2ae40d34802069c365559c74d402a26f0b37` / `941a97a6683b8e14`; DEV prostorový feed, plovoucí zvonek i obnova vpravo nahoře |
+| Webový zdroj / Hosting verze | `4e7e5bdfd9e026a2ff76b253a9a233fee2022f65` / `4c61d6a850b330b7`; vlastní stránky Aktivní/Expirované, DEV prostorový feed i plovoucí tlačítka |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `ccc879f`, obě ACTIVE; request `00011-kob`, recovery `00011-lad`; hash `3cf911bd6ef4eb7350ef68068ed9a231ab347fa5` |
-| Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav` |
+| Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav`; `4e7e5bd`: ACTIVE `getownshouts-00001-fik`, 42 modulů shodných, anonymní HTTP 401, max1/min0, concurrency1, 256 MiB/15 s |
 | Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`, `toggleshoutreaction-00007-yoy`; společný indexový writer |
 | Ostatní obsahové Functions | Poslední feed rollout je neaktualizoval; `deleteComment`, `toggleCommentReaction`, `toggleShoutSave`, `createContentReport` zůstávají ze zdroje f81eaf4 |
 | Firestore Rules | `832178f3-e140-47c8-852b-425e16c475af`, zdroj 25a3f92; s řídicím dokumentem také create/vote pouze serverově |
 | Prostorový index | `feed-v1` active, klíč v1; dalších 5 složených indexů READY a 5 výjimek ověřeno, bez změny TTL |
+| Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
-odpovídají release manifestu (`build/feed-floating-notifications-hosting-proof.json`).
-Návrat poslední UI úpravy: Hosting `529bbcd5bb0c6ee8` (zdroj f08abf9).
+odpovídají release manifestu (`build/own-shouts-hosting-proof.json`).
+Návrat poslední opravy: Hosting `941a97a6683b8e14` (zdroj 1fbf2ae);
+kompatibilní nový reader a index lze ponechat.
 Při problému celého prostorového feedu lze pozastavit reader a vrátit
 kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
 společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,
