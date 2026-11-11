@@ -21,9 +21,9 @@ uložené Shouty, provozní úklid a aktivní generace feed-v1 ze zdroje ccc879f
 po success CI 42358058964. DEV přepínače jsou zapnuté; produkce se neměnila.
 Pro oba účty prošel serverový test 50 → 100 → 120 a interakce. Vlastník
 potvrdil Business stránkování v UI, platný Auth/App Check potvrzují logy.
-Vlastník 10. listopadu potvrdil plovoucí obnovu i oznámení. Před uzavřením
-A2/A3 zbývá klientská regrese Uložených; vlastní Aktivní/Expirované i úklid
-120 fixture jsou od 11. listopadu uzavřené; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+Vlastník 10. listopadu potvrdil plovoucí obnovu i oznámení. Společná DEV
+akceptace A2/A3 je po 11. listopadu uzavřená, včetně poslední regrese Uložených.
+Vlastní Aktivní/Expirované i úklid 120 fixture jsou uzavřené; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Konkrétní oprava vlastního seznamu je od 10. listopadu schválená a nasazená
 v DEV ze zdroje 4e7e5bd po success CI 42884625807: index READY, getOwnShouts
 a web ověřené proti releasu. Živé serverové vlastní stránky 50 + 10 / 50 + 11
@@ -34,19 +34,21 @@ nahoru při čekání na další stránku je opravená v ce6b07a a po success CI
 v klientu/serveru/Rules. Vlastník potvrdil UI, živé jádro obě testovací identity;
 nové dva i původních 120 fixture jsou uklizené. Novější regrese Uložených
 `dbf2aad` má success CI 42932603771 a DEV web `de78cfc631c1acc1`; 328 Flutter
-a 5/5 cílených serverových testů prošlo. Živé jádro ověřilo oba účty, čeká
-krátký ruční UI průchod; dva novější `mvp-saved-20261111-*` už vypršely
+a 5/5 cílených serverových testů prošlo. Živé jádro ověřilo oba účty;
+navazující ruční UI průchod při B1 je potvrzený níže. Dva starší `mvp-saved-20261111-*` už vypršely
 a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 [Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
-B1 má lokální jádro
-expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
+Webové B1 má skutečnou expozici i místní trvalé označování a je uzavřené
+v DEV; synchronizace B2 a navazující B3–B4 nejsou hotové.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu
 47268ed17fd2eebd. Functions/Rules beze změny. Na dvou nových schválených
-24hodinových fixture vlastník potvrdil zmizení odebrané karty; nepřítomnost
-po obnově a místní B1 značky/restart ještě čekají na read-only kontrolu.
-Úklid této nové dvojice zbývá; [checkpoint](FEED_READING_POLICY.md#b1-implementation).
+24hodinových fixture vlastník potvrdil zmizení odebrané karty i její nepřítomnost
+po znovuotevření. Dva read-only výpisy dokládají obě přečtení se shodnými časy
+před/po restartu pod Bright_Otter_182. Business živé čtení netvrdit.
+Oba zdroje, 3 záložky a 9 receipt jsou uklizené přes writer, 37 původních
+zdrojů beze změny. B1 je uzavřené; [checkpoint](FEED_READING_POLICY.md#b1-implementation).
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené
 5. listopadu 2026. Lokální dávková příprava 1ba2b4a má success CI 42053726540
@@ -55,8 +57,8 @@ Maintenance/purge má lokální propojení; R5 pro historii a cache má schvále
 lokální protokol s 61/61 cílenými testy a success CI 42076107087. Navazující
 moderační regrese a opravy jsou lokálně uzavřené: 35/35 cílených testů a success CI 42107616925.
 Navazující R6a–R6e, provozní měření, instalace a query API jsou doložené
-v přechodovém plánu; jejich živý DEV výsledek je uveden výše. Po uzavření
-právě ověřovaného A2/A3 následují osobní metadata B1–B3 a indikátor B4
+v přechodovém plánu; jejich živý DEV výsledek je uveden výše. Po uzavřeném
+A2/A3 a B1 následuje synchronizace B2, osobní pořadí B3 a indikátor B4
 se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.
 [Progresivní směr](FEED_PROGRESSIVE_PLAN.md), [writeři](FEED_WRITER_INTEGRATION.md),

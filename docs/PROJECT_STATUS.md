@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit živé ověření B1 a při něm doplnit Uložené.**
+**B1 a regrese Uložených jsou v DEV uzavřené. Další je konkrétní návrh B2.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na
 `feature/feed-read-tracking` má
 [success CI 43056516730](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43056516730):
@@ -27,15 +27,23 @@ Produkční přepínač se neměnil. Přes indexový writer vznikly právě dva
 schválené 24hodinové Shouty `mvp-read-20261111-{short,long}`, po jednom pod
 existujícími Bright_Otter_182/TestBusiness. Živé jádro oběma účtům ověřilo
 záložky, odebrání/obnovení a idempotentní replay; nejde o HTTP/UI důkaz.
-Vlastník potvrdil zmizení krátké karty bez ruční obnovy; databáze potvrzuje
-odebranou záložku Bright_Otter_182. Nepřítomnost po obnově a místní značky
-včetně restartu zatím čekají na kontrolu. Browser host je nedostupný;
-vlastník má připravený read-only check dvou testovacích značek.
-Fixture ještě nejsou uklizené; původních 37 zdrojů zůstává zachovaných.
+Vlastník pod Bright_Otter_182 potvrdil zmizení krátké karty bez ruční obnovy
+i její nepřítomnost po znovuotevření. Dva read-only IndexedDB výpisy potvrzují
+short i long jako přečtené se stejnými časy před/po restartu (1794414568452 /
+1794414596259). TestBusiness nemá v tomto originu databázi; jeho živé čtení
+netvrdit. Oddělení účtů, logout, vymazání i souběh pokrývá browserová/lokální sada.
+Oba testovací Shouty jsou uklizené přes indexový writer: 2 kořeny, 3 záložky,
+9 receipt, nulový zůstatek zdrojů/receipt i aktuálních indexových metadat.
+Původních 37 zdrojů má stejná updateTime; 0 nových/smazaných Auth účtů.
+Dvě místní testovací značky uživateli ručně nemažeme; platí jejich původní
+expiresAt + 7 dní. Důkaz: build/read-tracking-ui-proof.json a cleanup proof.
 Log první akce ukazuje start instance asi 3,3 s a vlastní volání 0,69 s,
 Auth/App Check VALID. Jde o diagnózu latence, žádná změna prostředků nebyla provedena.
 [Podrobnosti B1](plans/feed/FEED_READING_POLICY.md#b1-implementation).
-B1 ani společná akceptace A2/A3 nejsou dosud uzavřené; B2–B4 zůstávají otevřené.
+Společná DEV akceptace A2/A3 i webové B1 jsou uzavřené. B2–B4 zůstávají
+otevřené: další práce je návrh soukromé cloudové synchronizace, její retence,
+dávkování, nákladů a hranice živého testu k předložení vlastníkovi. Nové serverové
+schéma ani produktové limity nepovažovat za schválené implementací B1.
 
 Předchozí oprava Uložených dbf2aad / CI 42932603771 / web de78cfc631c1acc1
 je základem této verze. Její dva starší `mvp-saved-20261111-*` fixture jsou
@@ -64,9 +72,8 @@ vedlejších záznamů jsou uklizené. Po UI potvrzení je uklizených také pů
 Původních 37 Shoutů má shodné updateTime; Auth účty se nevytvářely ani nemazaly.
 Výjimky pro vlastní mazání, moderaci a účtový úklid platí; retence se nemění.
 Chování Uložených při čekání/chybě/pokračování řeší novější úsek výše;
-jeho živé UI potvrzení je částečné podle aktuálního checkpointu výše. Starší
-fixture jsou uklizené, nová dvojice B1 ještě čeká na dokončení testu a úklid.
-B1–B4 ani celý milník hotové nejsou.
+jeho živé UI potvrzení i úklid nové dvojice B1 jsou uzavřené podle checkpointu výše.
+B2–B4 ani celý milník hotové nejsou.
 [Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
@@ -143,14 +150,14 @@ Přerušení ponechalo hotový build před nasazením; před navázáním bylo o
 že DEV stále vydával předchozí f08abf9. Nyní oba DEV originy odpovídají
 novému manifestu. Vlastník nyní potvrdil hotový zvonek; tato UI připomínka je uzavřená.
 Functions, Rules ani data se těmito UI rollouty neměnily.
-Je třeba doplnit zbývající regresi Uložených; vlastní reakce/uložení, nové
-tlačítko, zámek expired i úklid jsou uzavřené. Celý feed/milník tím není hotový.
+Regrese Uložených, vlastní reakce/uložení, nové tlačítko, zámek expired
+i úklid jsou uzavřené. Celý feed/milník tím není hotový; B2–B4 zbývají.
 Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.
 
 Produkce/main se neměnily. Produkční účtový wrapper a provozní konfigurace
-nadále patří do startovní brány. Před MVP dál zbývají B1–B4 a poslední regrese
-Uložených; vlastní zdroj Aktivní/Expirované je uzavřený. Starší R6 výsledky níže
+nadále patří do startovní brány. Před MVP dál zbývají B2–B4; B1, regrese
+Uložených i vlastní zdroj Aktivní/Expirované jsou uzavřené v DEV. Starší R6 výsledky níže
 popisují tehdejší lokální etapy; současné zapnutí dokládá tento rollout.
 
 [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně uzavřené na
@@ -391,7 +398,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `503eea672db85fb06200115488a4e313cd751d48` / `47268ed17fd2eebd`; B1 místní přečtení, CI 43056516730 success. Zmizení odebrané karty potvrzené; obnova a B1/restart čekají. Dvě nové B1 fixture dosud aktivní, starší skupiny uklizené. |
+| Webový zdroj / Hosting verze | `503eea672db85fb06200115488a4e313cd751d48` / `47268ed17fd2eebd`; B1 místní přečtení, CI 43056516730 success. Odebrání karty i nepřítomnost po znovuotevření potvrzené, stejně jako B1/restart pod Bright_Otter_182. Všechny testovací skupiny uklizené. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
@@ -437,7 +444,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a denní DEV cleanup 02:15 UTC, max. 500 záznamů/běh. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
-| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka jsou nasazené; vlastní knihovna a úklid fixture ověřené. | Zbývající regrese Uložených a osobní přečtení/synchronizace/unread-first/novinky B1–B4. |
+| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka jsou nasazené; vlastní knihovna a úklid fixture ověřené. | Cloudová synchronizace, unread-first a novinky B2–B4. Regrese Uložených a místní B1 uzavřené v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 MVP zůstává 9/24 milníků (38 %), backlog 107/157 (68 %). Konečný account

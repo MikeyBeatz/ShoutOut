@@ -10,7 +10,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. | Zbývající klientská regrese Uložených, B1–B4 a ostatní níže uvedená kritéria. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. | B2–B4 a ostatní níže uvedená kritéria; A2/A3, regrese Uložených a B1 jsou uzavřené v DEV. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
@@ -155,15 +155,18 @@ první stránkou není zvolená. Od 7. listopadu jsou prostorové query API,
 [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), writery/údržba i Home
 skutečně zapojené v DEV; [nasazení a omezení](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Úplný vlastní seznam, jeho UI regrese a původní fixture jsou uzavřené.
-Oprava Uložených dbf2aad je po success CI 42932603771 na DEV webu;
-před uzavřením A2/A3 zbývá její ruční UI potvrzení. Dva nové fixture mezitím
-vypršely a byly uklizené včetně záložek/receipt i aktuálního indexu.
+Oprava Uložených dbf2aad po success CI 42932603771 tvoří součást novějšího
+DEV webu 503eea6. Vlastník potvrdil odebrání karty i nepřítomnost po znovuotevření;
+tím je uzavřená poslední regrese a společná DEV akceptace A2/A3.
+Předchozí dvě fixture byly uklizené včetně záložek/receipt i aktuálního indexu.
 [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 Novější B1 zdroj 503eea6 má success CI 43056516730 a je nasazený pouze
 na DEV web 47268ed17fd2eebd. Vlastník na nové dvojici 24hodinových fixture
-potvrdil zmizení odebrané karty; poobnovovací kontrola a místní B1/restart
-jsou ještě otevřené, nový úklid zbývá. Functions/Rules beze změny.
-B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
+potvrdil zmizení odebrané karty i nepřítomnost po restartu. Přečtení obou
+testovacích Shoutů má stejné lokální časy před/po znovuotevření pod Bright_Otter_182.
+B1 uzavřené; nová dvojice je uklizená přes writer (2 zdroje, 3 záložky,
+9 receipt), 37 původních zdrojů beze změny. Functions/Rules beze změny.
+B2–B4 i ostatní požadavky serverové brány zůstávají otevřené.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

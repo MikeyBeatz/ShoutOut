@@ -713,8 +713,11 @@ CI 43056516730 / DEV Hosting 47268ed17fd2eebd zachovává tuto opravu. Nové,
 samostatně schválené 24hodinové fixture `mvp-read-20261111-{short,long}`
 umožnily opakovat UI za aktivního stavu. Vlastník potvrdil zmizení odebrané
 krátké karty bez ruční obnovy; databáze potvrzuje odebranou záložku Bright_Otter_182.
-Nepřítomnost po obnově ještě není výslovně doložená. První akce čekala na
+Vlastník následně potvrdil i nepřítomnost po znovuotevření. První akce čekala na
 novou instanci Function (asi 3,3 s), vlastní volání 0,69 s, Auth/App Check VALID.
-Žádná změna prostředků. Nová dvojice zatím není uklizená, předchozí skupiny
-zůstávají uklizené. Pokračovat kontrolou B1 a poté vymezeným úklidem;
+Žádná změna prostředků. Nová dvojice je uklizená přes writer: 2 zdroje,
+3 záložky, 9 receipt; nulový aktuální indexový/zdrojový zůstatek, 37 původních
+zdrojů se stejným updateTime a 0 nových/smazaných Auth účtů. Předchozí skupiny
+zůstávají uklizené. Regrese Uložených a společná DEV akceptace A2/A3 jsou uzavřené;
+B1 má také důkaz místních značek/restartu pod Bright_Otter_182, viz
 [aktuální checkpoint](FEED_READING_POLICY.md#b1-implementation).

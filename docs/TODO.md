@@ -24,43 +24,27 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
-   Oprava `dbf2aad` prošla CI 42932603771 a je součástí novějšího DEV webu
-   503eea6 / `47268ed17fd2eebd`; Functions/Rules beze změny. Živé jádro
-   prošlo pod oběma stávajícími testovacími účty. Dva starší vypršelé fixture
-   `mvp-saved-20261111-*` jsou uklizené včetně 4 záložek a 8 receipt.
-   Nové UI ověření běží na dvojici schválené spolu s B1, viz níže.
-   [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
-   Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
-   zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
-   vlastníkem. Zdroj 14b7885 prošel CI 42902048239 a je nasazený: tři Functions,
-   Rules a web. Původních 120 i dva nové krátce platné testovací Shouty jsou
-   uklizené včetně vedlejších dat; 37 původních zdrojů i Auth účty zachované.
-   [Důkazy a výjimky zámku](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
-   Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
-   živá UI akceptace opravených Uložených; lokální regrese čekání/chyb,
-   pokračování a změny účtu už prošly. Původní fixture jsou odstraněné,
-   dva ze starší regrese Uložených jsou také uklizené. Nový průchod je schválený spolu
-   s B1: právě dva 24hodinové syntetické Shouty pod stávajícími účty a úklid.
-   V tomto novém testu vlastník již potvrdil zmizení krátké karty bez ruční
-   obnovy; databáze potvrzuje odebrání pod Bright_Otter_182. Nepřítomnost
-   po obnově ještě není výslovně doložená. Potom uzavřít společnou
-   akceptaci A2/A3; B1 už běží souběžně podle bodu 2.
+1. **Připravit konkrétní návrh B2 — soukromou synchronizaci přečtení mezi zařízeními.**
+   Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
+   web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
+   Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
+   před/po znovuotevření. Regrese Uložených je také uzavřená: potvrzené zmizení
+   odebrané karty bez obnovy a její nepřítomnost po restartu. Tím je doplněná
+   poslední otevřená kontrola společné DEV akceptace A2/A3. Oba nové 24hodinové
+   testovací Shouty jsou uklizené přes writer včetně 3 záložek a 9 receipt;
+   37 původních zdrojů i Auth zůstaly zachované. Starší testovací skupiny jsou
+   rovněž uklizené; neotvírat je znovu jako čekající rollout/test.
+   [B1 a důkazy](plans/feed/FEED_READING_POLICY.md#b1-implementation),
+   [Uložené](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+   B2 potřebuje konkrétní schéma, retenci cloudových dat, dávkování, pravidla,
+   nákladové limity a test/rollout ke schválení. Souhlas s B1 tyto volby nenahrazuje.
 
-2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
-   a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální
-   unread-first v Nejblíž; B4: oddělený počet novinek. Konkrétní úložiště,
-   [webové B1](plans/feed/FEED_READING_POLICY.md#b1-proposal) je schválené
-   (IndexedDB, místní značky a expiresAt + 7 dní, bez cloudových operací).
-   B1 je po success CI 43056516730 (350 Flutter / 8 Chrome) nasazené pouze
-   na DEV Hosting 47268ed17fd2eebd ze zdroje 503eea6. Živé místní značky
-   a restart čekají na read-only kontrolu. Dva nové schválené 24hodinové
-   fixture jsou aktivní; úklid po ověření ještě zbývá.
-   [Checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).
-   Cloudová retence/synchronizace a polling zůstávají rozhodnutím pro B2/B4.
-   Další závislosti jsou podle
-   [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav). Celé A0–A3
-   i B1–B4 zůstává před MVP; dílčí rollout neuzavírá celý milník.
+2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
+   první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
+   pořadí. Cloudové chování a polling jsou stále otevřená rozhodnutí pro B2/B4.
+   [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
+   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění
+   automaticky celý serverový milník ani procentní metriku.
 3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.

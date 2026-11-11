@@ -19,7 +19,7 @@ automatické sbalení od 50 reakcí a 80 % dislike, s dosavadní výjimkou pro a
 Nové rozhodnutí samo neurčilo jiná čísla. Read stav ani počítadlo novinek nesmějí
 negativní Shout vyloučit jen kvůli jeho hodnocení.
 
-## Jádro expozice – zatím bez zapojení do ukládání
+## Jádro expozice a aktuální zapojení
 
 `lib/read_exposure.dart` sleduje souvislou expozici každého úseku relevantního
 obsahu, ne procento jedné obrazovky. Až po celé sekundě započte viditelný úsek;
@@ -28,11 +28,11 @@ kratších návštěv téhož místa ani pouhá návštěva detailu. Nepokrytá 
 dokončení. Čas je monotónní, změna layoutu před dokončením resetuje souřadnicové
 pokrytí; inactive/occlusion a nerozbalený či oříznutý obsah ruší čekající expozici.
 
-Jde o otestované transportně nezávislé jádro. **Ještě není připojené ke skutečné
-geometrii widgetů, trvalému lokálnímu úložišti ani cloudové synchronizaci.** UI
-adaptér musí dodat skutečný viditelný interval celého nadpisu/textu, stav route,
-aplikace a ořezu. Nelze jeho přítomnost vydávat za hotové B1/B2. Zatím nikde
-nevznikají osobní read záznamy ani nové kolekce.
+Jde o otestované transportně nezávislé jádro. Od B1 z 11. listopadu je na DEV
+webu připojené ke skutečné geometrii widgetů, ořezům, aktivitě/překrytí a
+trvalé IndexedDB. Místní značky prokazatelně přežily znovuotevření aplikace.
+Cloudová synchronizace ani nové read kolekce ještě nejsou implementované;
+to je další B2. [Důkazy B1](#b1-implementation).
 
 ## Hodinová relace i na klientovi
 
@@ -56,8 +56,8 @@ po CI `41216198053` na DEV Hosting `42d86a762a74a2dd`. Živý test pod TestBusin
 potvrdil negativní sbalený Shout před běžným v Nejblíž a za ním v Top.
 Oba disposable fixtures byly soft-deleted a úklid ověřený v DB i UI; původní
 dosah 5 km a Nejblíž obnovené. Důkazy: build/feed-rating-nearest.png a
-build/feed-rating-fixture-cleanup.json. Expozice zůstává přípravou; klientský
-koordinátor má od 7. listopadu navazující živé zapojení uvedené výše.
+build/feed-rating-fixture-cleanup.json. Jde o historický test pořadí; novější
+zapojení expozice dokládá B1 níže a koordinátor má od 7. listopadu živé zapojení.
 
 ## Důkaz pro přenositelný API kurzor
 
@@ -91,11 +91,11 @@ při potvrzené žádosti o smazání účtu. Schválené jsou implementace, tes
 DEV web po přesném CI a právě dva čerstvé 24hodinové syntetické Shouty pod
 existujícími testovacími účty včetně úklidu. Následující návrh sám není důkaz
 dokončeného kódu či nasazení; aktuální checkpoint je uveden níže.
-Chybějící živé UI potvrzení Uložených
-zůstává otevřené; staré dva fixture jsou uklizené, viz
+Živé UI potvrzení Uložených bylo následně při B1 doplněné a všechny tři
+testovací skupiny jsou uklizené, viz
 [checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
-### Ověřený výchozí stav
+### Historický výchozí stav před B1
 
 - `FullContentExposure` má otestované souvislé pokrytí a jednu sekundu, ale
   žádný skutečný widget ani trvalé ukládání na něj není napojené.
@@ -322,12 +322,22 @@ aby i při dodržení dosavadního limitu 220 znaků vyžadoval posouvání.
 Živé jádro ověřilo oběma účtům záložky, odebrání/obnovení i replay bez změny;
 jde o Admin SDK core, nikoli HTTP/Auth/App Check nebo UI důkaz.
 Vlastník potvrdil zmizení krátké karty bez ruční obnovy a databáze potvrzuje
-odebrání pod Bright_Otter_182. Nepřítomnost po obnově ještě není výslovně doložená.
-Read-only lokální check čte jen dva známé testovací klíče a vrací stav i čas
-značky; shodný čas před/po restartu má doložit zachování bez nového přečtení.
-Browser host není dostupný, proto je tento krok předaný vlastníkovi.
-Živé místní značky/restart ani B1 zatím neoznačovat za hotové; fixture a jejich
-vedlejší data ještě zbývá uklidit přes indexový writer. B2–B4 se tím neuzavírají.
+odebrání pod Bright_Otter_182. Následně výslovně potvrdil nepřítomnost odebrané
+karty po znovuotevření. Dva read-only IndexedDB výpisy mají shodné obě značky:
+short read=true / readAtLocal=1794414568452, long read=true / 1794414596259,
+pendingSync=true před/po restartu. To dokládá zachování místního přečtení,
+nikoli cloudovou synchronizaci. TestBusiness v tomto originu neměl databázi;
+jeho živé přečtení se netvrdí. Oddělení účtů, odhlášení, souběh a smazání
+jsou doložené samostatnými lokálními/browserovými testy.
+
+Po potvrzení jsou obě fixture uklizené přes indexWriter.prepareBatch atomicky
+se zdroji: 2 kořeny, 3 zbývající záložky a 9 receipt. Aktuální index nemá jejich
+metadata, zdroje/receipt mají nulový zůstatek; 37 původních Shoutů má stejná
+updateTime. Auth účty se neměnily, rate buckety zachované, historické uzly
+podléhají normálnímu GC. Dvě místní testovací značky nejsou ručně smazané
+z uživatelova browseru; zůstává jejich schválená retence expiresAt + 7 dní.
+**Webové B1 a společná DEV akceptace A2/A3 včetně regrese Uložených jsou uzavřené.**
+Celý milník ani B2–B4 tím dokončené nejsou; další je konkrétní návrh B2 ke schválení.
 
 První uživatelovo odebrání záložky mělo v logu start instance asi 3,3 s a
 vlastní volání 0,685 s, Auth/App Check VALID. Stejný vzor prvního startu je
@@ -339,6 +349,7 @@ zachovaný, neprovádět opakované pollingové dotazy.
 Důkazy: `build/read-tracking-{ci,deploy,build}.log`,
 `build/read-tracking-hosting-proof.json`, `build/read-tracking-environment-proof.json`,
 `build/read-tracking-live-{state,proof}.json`,
-`build/read-tracking-save-latency-proof.json`, `build/read-tracking-check.js`.
+`build/read-tracking-save-latency-proof.json`, `build/read-tracking-check.js`,
+`build/read-tracking-ui-proof.json`, `build/read-tracking-cleanup.log`.
 Lokální testy: `build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
 `build/read-store-browser.log`, `build/read-store-browser-verbose.log`.
