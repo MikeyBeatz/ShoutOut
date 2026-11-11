@@ -353,3 +353,131 @@ Důkazy: `build/read-tracking-{ci,deploy,build}.log`,
 `build/read-tracking-ui-proof.json`, `build/read-tracking-cleanup.log`.
 Lokální testy: `build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
 `build/read-store-browser.log`, `build/read-store-browser-verbose.log`.
+
+<a id="b2-proposal"></a>
+
+## Návrh B2 — synchronizace přečtení mezi zařízeními
+
+11. listopadu 2026. **Návrh k rozhodnutí, nikoli schválená implementace.**
+B1 a klientská regrese Uložených jsou uzavřené; další závislost je B2 před
+globálním unread-first B3. Následující úsek zatím nemění kód, Rules ani živá data.
+Read-only kontrola potvrdila DEV `(default)`, Standard / FIRESTORE_NATIVE,
+europe-west3, historické verze 3 600 sekund a vypnuté PITR.
+
+### Doporučené uživatelské chování
+
+1. Přečtení se uloží místně ihned podle B1. Síť ani pomalý start Function
+   nesmějí blokovat posouvání, otevření detailu nebo místní označení.
+2. Nové značky posílat dávkově: navrženě nejvýše 32 za požadavek, nejpozději
+   10 sekund od první čekající značky v aktivní aplikaci. Další čtení nesmí
+   posouvat tento termín do nekonečna. Větší fronta pokračuje dalšími dávkami.
+3. Na jiném zařízení načíst stav při přihlášení, návratu aplikace do popředí
+   a ruční obnově feedu. Doporučení: bez pravidelného prázdného pollingu.
+   Dvě trvale otevřená zařízení si tedy cizí změny převezmou při těchto akcích,
+   nikoli okamžitě během nepřerušeného scrollování. Pokud je požadovaná průběžná
+   aktualizace, interval je samostatná produktová volba; nyní ji nezapínat.
+4. Při výpadku ponechat trvalou místní frontu a bezpečně opakovat; při běžném
+   logout ji zachovat odděleně, po změně UID zahodit jen práci v paměti staré
+   relace. Odeslání při zavření karty není zaručené, proto je nutná perzistence.
+5. Synchronizace nepřehazuje rozpracované stránky. B3 později zachytí potvrzený
+   stav pro novou relaci; při neúplném stavu nesmí tvrdit úplné globální pořadí.
+   B2 samo zatím nemění řazení ani nepřidává veřejnou značku/počet zobrazení.
+
+### Retence k výslovnému rozhodnutí
+
+Doporučení: cloudová značka má stejně jako B1 logickou platnost do
+**expiresAt + 7 dní**. Opakování, pozdější upload ani jiné zařízení termín
+neprodlouží. Čas expirace určuje server ze zdroje; klient nemůže prodlužovat
+historii. Starý/přepsaný obsah se nemíchá: identita značky je Shout ID a hash
+přesného nadpisu/textu. Při potvrzené žádosti o smazání účtu ihned zakázat
+cloudové čtení/zápis a obnovu jeho fronty; fyzické odstranění zahrnout do
+stávající soukromé fáze po potvrzeném odstranění Auth. Read metadata se
+nearchivují jako texty zpráv/komentářů na 60 dní.
+
+Po expiraci značku logicky nepoužít. Navržený fyzický úklid je denní, omezený
+s pokračováním, bez nového minutového plánovače a zatím bez TTL. Přesné
+zapojení do existující denní úlohy nebo samostatného běhu i jeho kapacitu
+určit po měření; nevydávat denní dávku za záruku vymazání v přesné sekundě.
+Zavřené/offline lokální kopie podléhají dosavadním omezením B1.
+
+### Serverový kontrakt a ukládání
+
+- Osobní metadata patří výhradně pod vlastní UID; návrh prostoru
+  `users/{uid}/readState` a `users/{uid}/readBuckets`. Nepřidávat read stav
+  do veřejných Shoutů, indexových bloků okolí, profilu ani statistik autora.
+- Značka obsahuje technický klíč, contentHash, serverově ověřenou expiraci
+  a termín, serverové potvrzení a verzi. Neobsahuje text, polohu, profil,
+  e-mail, token ani důkaz lidského čtení. Klientský čas není veřejná metrika.
+- Dva připravované interní kontrakty: potvrzení dávky značek a omezené
+  stránkování vlastního stavu. Host až při pozdějším DEV aktivování vyžaduje
+  existující Auth/App Check/eligibility kontroly. Přímé klientské cloudové
+  zápisy zůstanou zakázané, bez nových rolí.
+- Server ověří vlastníka, tvar/velikost dávky a existenci i verzi zdroje;
+  klient nesmí pomocí odpovědi zjišťovat cizí nepřístupný obsah. Sloučení je
+  monotónní a transakční: opakování potvrzené značky nemění její termín,
+  současné dva uploady nesmějí ztratit značky. Ztracená odpověď nesmí násobit
+  stav; samostatný receipt pro každý Shout by zbytečně přidával zápisy.
+- Odpověď potvrzuje konkrétní klíče/verze. Část fronty označit za doručenou
+  až po potvrzení odpovídajícího uploadu; neoznačit mezitím změněný obsah
+  ani cizí účet. Neplatné, zaniklé a dočasně nedostupné položky rozlišit
+  tak, aby zbytek dávky nezůstal uvězněný za jedinou neodeslatelnou značkou.
+- B1 dnes považuje za platnou značku jen `pendingSync == true`. B2 musí
+  oddělit platnost přečtení od stavu doručení, jinak by potvrzení false
+  přečtení po restartu ztratilo. IndexedDB rozšířit se zachováním starých
+  značek, hranic projektu/UID a trvalé zábrany po smazání účtu.
+- Pro B3 musí stránkování umožnit úplný potvrzený snapshot, navázaný na
+  serverovou verzi/readTime. Další synchronizace nemění starší snapshot;
+  historické Firestore čtení není důvod pro neomezené načítání celé historie
+  při každém požadavku. B2 nezapíná unread-first ani neposílá historii do kurzoru.
+
+### Rozhodnutí o blocích až podle jednoho místního měření
+
+Doporučený směr je více malých omezených bloků místo jednoho dokumentu
+za každý Shout nebo jednoho stále rostoucího dokumentu za celý účet.
+Než zafixujeme nové schéma, jeden lokální úsek porovná:
+
+| Varianta | Výhoda | Co zahrnout do nákladů a testu |
+|---|---|---|
+| Dokument na značku | Jednoduchá reference správnosti a opakování. | Zápis/čtení každé značky, plný snapshot a příslušné indexy. |
+| Omezené sdílené bloky | Více značek se může vejít do jednoho čtení/zápisu. | Reálné naplnění, rozdělování, adresář/revize, souběh a úklid. |
+
+Laboratorní kandidát pro blok má nejvýše 128 značek a 64 KiB serializovaného
+obsahu; při naplnění se rozdělí podle hashe klíče. Nesmí vzniknout produktový
+strop historie, tiché zahazování nebo neomezeně velký kořenový dokument.
+V implementaci porovnat jednu referenci s jedním kandidátem, nikoli budovat
+dvě kompletní produkční služby. Změřit také přidanou složitost; pokud bloky
+nepřinesou prospěch, jejich cenu neskrývat. Konečné schéma a provozní meze
+se zapíší podle výsledku před aktivováním nové datové vrstvy.
+
+Vzorek 100 / 1 000 / 10 000 syntetických značek je pouze místní metadata
+a emulátor; žádných 10 000 živých Shoutů. Měřit první/inkrementální stažení,
+odeslání 1/32 značek, dvě zařízení, replay, restart a úklid. Výsledek obsahuje
+všechny zdrojové a kontrolní reads, zápisy bloků/revizí, dělení, retries,
+mazání, bajty a časy; počty emulátoru nejsou účet ani cloudová latence.
+Pro N značek je ideální dolní mez bloků ceil(N/128), skutečný počet bude
+vyšší podle naplnění. Neprezentovat tuto mez jako naměřenou úsporu.
+
+Firestore účtuje operace nad dokumenty: dávka 32 samostatných dokumentů
+není jeden placený zápis. Jeden Function požadavek může navíc provést čtení
+zdrojů i transakční opakování. Bez naměřených operací a objemu používání
+nepřislibovat cenu v Kč ani absolutní rozpočtový strop.
+[Účtování Firestore](https://firebase.google.com/docs/firestore/pricing),
+[transakce](https://firebase.google.com/docs/firestore/manage-data/transactions),
+[indexace velkých map](https://firebase.google.com/docs/firestore/best-practices).
+
+### Konkrétní první implementační úsek k souhlasu
+
+Po schválení výše uvedené retence a načasování: samostatná větev, lokální
+slučování/acknowledgement/retry, kompatibilní IndexedDB fronta, emulátorový
+serverový kontrakt a jedno srovnání ukládání. Ověřit změnu UID, restart,
+offline, dvě zařízení, změnu obsahu, expiraci, request/Auth deletion fence,
+transakční rollback i částečně odmítnutou dávku. Prověřit zapojení do účtového
+úklidu, který dnes prochází notifications/following/blocked a nové větve
+automaticky nevyčistí. Připravit kontrakt soukromých oprávnění a otestovat jej.
+
+Výstup: jedna zvolená implementace, skutečné počty operací, testy/analýza,
+source commit/push a CI, výsledky v tomto dokumentu. Zatím bez živých
+kolekcí, migrace, TTL/Scheduler změn, nasazení či nových Auth účtů.
+Živé zapojení předložit konkrétně po měření včetně cílových Functions,
+Rules/indexů, denního úklidu, prostředků, rollbacku a vymezených testovacích dat.
+Trvalý souhlas s rutinním rolloutem nenahrazuje schválení této nové datové vrstvy.

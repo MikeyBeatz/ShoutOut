@@ -176,6 +176,8 @@ B1 může nejprve sloužit pouze na jednom zařízení. Tím ještě nebude doko
 celé původní zadání. B3 nesmí používat pouze částečnou lokální historii a tvrdit
 garantovanou konzistenci mezi zařízeními. Pokud se pořadí B2/B3 změní, tento
 dočasný kompromis vyžaduje výslovný souhlas.
+Konkrétní [návrh B2](FEED_READING_POLICY.md#b2-proposal) je připravený
+k rozhodnutí o cloudové retenci, načasování a prvním lokálním úseku.
 
 ### Schválený směr a zbývající produktové volby
 

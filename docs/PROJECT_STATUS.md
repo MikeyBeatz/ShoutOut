@@ -44,6 +44,10 @@ Společná DEV akceptace A2/A3 i webové B1 jsou uzavřené. B2–B4 zůstávaj�
 otevřené: další práce je návrh soukromé cloudové synchronizace, její retence,
 dávkování, nákladů a hranice živého testu k předložení vlastníkovi. Nové serverové
 schéma ani produktové limity nepovažovat za schválené implementací B1.
+[Návrh B2 je připravený k rozhodnutí](plans/feed/FEED_READING_POLICY.md#b2-proposal):
+stejná logická retence jako B1, dávkový upload a synchronizace při výslovné
+obnově/přihlášení/návratu, nejprve jedno lokální porovnání dokumentů a bloků.
+Stav je pouze dokumentovaný návrh; žádný B2 kód, Rules, živá data ani nasazení.
 
 Předchozí oprava Uložených dbf2aad / CI 42932603771 / web de78cfc631c1acc1
 je základem této verze. Její dva starší `mvp-saved-20261111-*` fixture jsou

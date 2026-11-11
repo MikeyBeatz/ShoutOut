@@ -38,6 +38,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    [Uložené](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
    B2 potřebuje konkrétní schéma, retenci cloudových dat, dávkování, pravidla,
    nákladové limity a test/rollout ke schválení. Souhlas s B1 tyto volby nenahrazuje.
+   [Připravený návrh B2](plans/feed/FEED_READING_POLICY.md#b2-proposal) doporučuje
+   expiresAt + 7 dní, upload 32 značek / 10 s a přenos mezi zařízeními při
+   přihlášení/návratu/obnově bez prázdného pollingu. Čeká souhlas s retencí,
+   načasováním a jedním lokálním implementačním úsekem; nic živého se neměnilo.
 
 2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
    první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
