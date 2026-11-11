@@ -156,7 +156,8 @@ první stránkou není zvolená. Od 7. listopadu jsou prostorové query API,
 skutečně zapojené v DEV; [nasazení a omezení](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Úplný vlastní seznam, jeho UI regrese a původní fixture jsou uzavřené.
 Oprava Uložených dbf2aad je po success CI 42932603771 na DEV webu;
-před uzavřením A2/A3 zbývá její ruční UI potvrzení a úklid dvou nových fixture.
+před uzavřením A2/A3 zbývá její ruční UI potvrzení. Dva nové fixture mezitím
+vypršely a byly uklizené včetně záložek/receipt i aktuálního indexu.
 [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná

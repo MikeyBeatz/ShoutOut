@@ -686,11 +686,23 @@ updateTime, 0 nových/smazaných Auth účtů, stejný řídicí dokument genera
 Jde o test živého jádra, nikoli HTTP Auth/App Check nebo browserový UI průchod.
 Stránkování nad 50 je ověřené lokálně/emulátorem, ne těmito dvěma živými kartami.
 
-**Čeká ruční UI potvrzení a následný úklid těchto dvou fixture.** Browser access
+**Čeká ruční UI potvrzení.** Browser access
 host je nedostupný; náhradní Windows ovládání PWA bylo automatickou kontrolou
 odmítnuté kvůli nemožnosti spolehlivě ověřit URL. Vlastník dostal otázku na
 zobrazení obou karet, odebrání jedné záložky bez ruční obnovy a její nepřítomnost
-po následné obnově. Do odpovědi test ani úklid neoznačovat za dokončené.
+po následné obnově. Odpověď s výsledkem nebyla zaznamenaná; UI akceptaci
+neoznačovat za dokončenou.
 Důkazy: `build/saved-shouts-{ci,hosting,environment,live}-proof.json`,
-`build/saved-shouts-live-state.json` (awaiting-ui), `build/saved-shouts-ci.log`
-a `build/saved-shouts-deploy.log`. UI a úklid doplnit do tohoto odstavce.
+`build/saved-shouts-live-state.json`, `build/saved-shouts-ci.log`
+a `build/saved-shouts-deploy.log`.
+
+11. listopadu v 16:11 SEČ byly po read-only ověření oba testovací Shouty již
+expirované (jejich deadline byl 03:45 SEČ), proto na nich již nejde ověřit
+odebrání záložky za aktivního stavu. Proběhl původně schválený úklid přes
+indexWriter.prepareBatch atomicky se zdroji: 2 kořeny, 4 záložky, 8 receipt.
+Aktuální index nemá žádné fixture řádky, zdroje/receipt mají nulový zůstatek.
+37 původních zdrojů má stejné updateTime, Auth ani řídicí dokument se neměnily;
+rate buckety zůstaly zachované a historické uzly podléhají běžnému GC.
+`build/saved-shouts-live-proof.json` a stav mají phase cleaned,
+`build/saved-shouts-cleanup.log` dokládá provedení. Tento úklid není náhradou
+chybějícího UI potvrzení. Pro nový živý průchod vymezit čerstvé testovací údaje.

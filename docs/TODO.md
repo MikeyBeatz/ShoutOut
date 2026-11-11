@@ -27,8 +27,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
    Konkrétní oprava `dbf2aad` má success CI 42932603771 a je nasazená pouze
    na DEV web `de78cfc631c1acc1`; Functions/Rules beze změny. Živé jádro
-   prošlo pod oběma stávajícími testovacími účty. Čeká se na odeslaný ruční
-   UI průchod a úklid dvou nových aktivních fixture `mvp-saved-20261111-*`.
+   prošlo pod oběma stávajícími testovacími účty. Výsledek ručního UI průchodu
+   zatím není potvrzený; dva mezitím vypršelé fixture `mvp-saved-20261111-*`
+   jsou uklizené včetně 4 záložek a 8 receipt. Čerstvý test předem vymezit.
    [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
    Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
    zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
@@ -39,7 +40,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
    živá UI akceptace opravených Uložených; lokální regrese čekání/chyb,
    pokračování a změny účtu už prošly. Původní fixture jsou odstraněné,
-   nové dva jsou schválené výše uvedeným rozsahem. Potom uzavřít společnou
+   novější dva jsou také uklizené. Potom uzavřít společnou
    akceptaci A2/A3 a přejít na B.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice

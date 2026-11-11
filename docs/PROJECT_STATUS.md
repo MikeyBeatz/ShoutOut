@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit pouze živé UI potvrzení Uložených a úklid dvou nových fixture.**
+**Doplnit chybějící živé UI potvrzení Uložených; připravit návrh B1.**
 Oprava na `fix/saved-shouts-pagination`, zdroj
 `dbf2aad2b5d5ab7490fa716318625ea1d0705697`, má
 [success CI 42932603771](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42932603771):
@@ -16,12 +16,15 @@ z čistého releasu; otisky čtyř souborů obou originů souhlasí. Všech 18 F
 a Firestore Rules se podle API nezměnilo. Oba existující testovací účty mají
 přes živé jádro ověřené uložení, odebrání/obnovení i idempotentní replay bez zápisu;
 nejde o HTTP Auth/App Check ani UI důkaz. Dva nové aktivní Shouty
-`mvp-saved-20261111-{user,business}` čekají na krátký ruční UI průchod a úklid
-přes indexový writer. Původních 37 zdrojů má stejné updateTime, Auth se neměnil.
+`mvp-saved-20261111-{user,business}` mezitím vypršely a jsou od 16:11 SEČ
+uklizené přes indexový writer: 2 kořeny, 4 záložky a 8 receipt, nulový zůstatek
+v aktuálním indexu. Původních 37 zdrojů má stejné updateTime, Auth se neměnil.
 Browser host není dostupný; náhradní ovládání PWA automatická kontrola odmítla
 kvůli neověřitelné URL. Dotaz vlastníkovi je odeslaný: pod TestBusiness nebo
 Bright_Otter_182 odebrat jednu testovací záložku a ověřit zmizení karty i po obnově.
-Do odpovědi neoznačovat živou UI akceptaci ani úklid za dokončené.
+Odpověď s výsledkem UI zatím není zaznamenaná. Původní expired fixture již
+nepoužívat pro nové ověření ukládání; čerstvý test vyžaduje konkrétní rozsah.
+Živá UI akceptace A2/A3 zůstává otevřená, úklid je dokončený.
 Návrat webu je `831e3baaea8a8df3`. Produkce, main, retence a Auth beze změn.
 [Rozsah a checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
@@ -45,7 +48,7 @@ vedlejších záznamů jsou uklizené. Po UI potvrzení je uklizených také pů
 Původních 37 Shoutů má shodné updateTime; Auth účty se nevytvářely ani nemazaly.
 Výjimky pro vlastní mazání, moderaci a účtový úklid platí; retence se nemění.
 Chování Uložených při čekání/chybě/pokračování řeší novější úsek výše;
-jeho živé UI potvrzení a úklid zatím zbývají. B1–B4 ani celý milník hotové nejsou.
+jeho živé UI potvrzení zatím zbývá, úklid je hotový. B1–B4 ani celý milník hotové nejsou.
 [Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
@@ -370,7 +373,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `dbf2aad2b5d5ab7490fa716318625ea1d0705697` / `de78cfc631c1acc1`; navíc stabilní Uložené, retry, potvrzené odebrání; CI 42932603771 success. Živé UI potvrzení a úklid dvou fixture čekají. |
+| Webový zdroj / Hosting verze | `dbf2aad2b5d5ab7490fa716318625ea1d0705697` / `de78cfc631c1acc1`; navíc stabilní Uložené, retry, potvrzené odebrání; CI 42932603771 success. Živé UI potvrzení čeká, dvě fixture jsou uklizené. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
