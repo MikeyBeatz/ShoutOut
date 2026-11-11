@@ -80,3 +80,162 @@ Původní brány před živými kolekcemi/klíčem/API zachovává
 [migrační připravenost](FEED_MIGRATION_READINESS.md); první DEV přechod je již
 doložený v instalačním plánu. Retence osobního přečtení,
 protokol synchronizace a polling novinek stále potřebují konkrétní návrh.
+
+<a id="b1-proposal"></a>
+
+## Návrh B1 k rozhodnutí — 11. listopadu 2026
+
+**Stav: připravený návrh, implementace ani nová retence zatím nejsou schválené.**
+Vlastník povolil pokračovat přípravou konkrétního návrhu B1. Následující volby
+nejsou důkazem, že už existují v kódu. Chybějící živé UI potvrzení Uložených
+zůstává otevřené; staré dva fixture jsou uklizené, viz
+[checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+
+### Ověřený výchozí stav
+
+- `FullContentExposure` má otestované souvislé pokrytí a jednu sekundu, ale
+  žádný skutečný widget ani trvalé ukládání na něj není napojené.
+- `ShoutCard` v seznamu ořezává nadpis na 2 řádky a text na 3; detail používá
+  `showFullContent: true`. Samotné otevření detailu ani rozbalení ratingu
+  proto není dostatečným důkazem přečtení.
+- Home sleduje lifecycle pro relaci feedu; v `MaterialApp` nyní není společný
+  route observer pro expozici textu a překrytí dialogem.
+- Projekt už obsahuje `web`, `crypto` a `shared_preferences`. Evidenci
+  přečtení zatím nemá. Existující preference skóre hry nebudeme používat ani měnit.
+
+### Doporučené lokální úložiště
+
+Pro webové MVP použít IndexedDB přes již přítomné `package:web`, s úzkým
+rozhraním `ReadStateStore` a paměťovou implementací pro jednotkové testy.
+IndexedDB poskytuje klíčované záznamy, indexy a transakce; to odpovídá
+potřebě slučovat značky i při dvou otevřených kartách.
+[Stabilní specifikace W3C](https://www.w3.org/TR/IndexedDB-2/).
+Jde o návrh vhodnosti pro tuto aplikaci, nikoli naměřený výsledek výkonu.
+
+Alternativa přes shared_preferences by znamenala ukládat/slučovat serializované
+seznamy a řešit jejich přepis při souběhu. Dokumentace balíčku také upozorňuje
+na vlastnosti cache a nezaručenou perzistenci každého zápisu.
+[Dokumentace správce balíčku](https://pub.dev/packages/shared_preferences).
+Nový databázový balíček ani novou službu B1 nevyžaduje. Mobilní trvalý adaptér
+není součástí webového MVP; newebový build musí dál fungovat s vypnutým B1.
+
+Navržený lokální záznam:
+
+| Pole | Účel |
+|---|---|
+| `schemaVersion: 1` | Řízená změna lokálního formátu. |
+| `projectId`, `userId`, `shoutId` | Společný klíč odděluje DEV/produkci i účty. |
+| `contentHash` | SHA-256 verzovaného JSON pole `[title, text]`, bez normalizace textu. Značka patří přesnému obsahu. |
+| `readAtLocal` | Čas dokončení pro osobní metadata, nikdy důvěryhodný veřejný počet zobrazení. |
+| `expiresAt`, `retainUntil` | Deadline převzatý ze zdroje a schválený termín místního úklidu. |
+| `pendingSync` | Fronta změn připravená pro B2, v B1 se nikam neodesílá. |
+
+Text, nadpis, souřadnice, profil, e-mail ani tokeny do tohoto úložiště
+nekopírovat. UID je jen technická součást oddělení záznamů. Dva prohlížečové
+originy mají oddělené databáze: například web.app a firebaseapp.com si B1
+nesdílejí; propojení zařízení/originů zajistí až schválené B2.
+
+**Produktová volba k potvrzení:** navrhuji uchovat značku do `expiresAt + 7 dní`,
+aby zůstala dostupná i během dnešního sedmidenního zobrazení expirovaných.
+Hodinová obnova feedu ji nemaže. Při odhlášení vyprázdnit paměť a zavřít
+přístup předchozího účtu; záznamy ponechat oddělené pro jeho příští přihlášení
+na stejném originu do výše uvedeného termínu. Při potvrzené žádosti o smazání
+účtu odstranit jeho lokální namespace. Nejde o změnu stávající serverové
+60denní retence obsahu. Návrh se týká pouze osobních lokálních značek.
+
+Po termínu záznam logicky nepoužít; fyzický úklid provést průběžně při otevření
+úložiště a práci s ním, po malých dávkách kurzoru. Zavřený prohlížeč nemůže
+garantovat fyzické smazání přesně v danou sekundu. Vymazání dat prohlížeče,
+anonymní režim nebo nedostupná kapacita mohou značky odstranit; B2 později
+doplní jejich obnovu z cloudu. B1 samotné nezaručí synchronizaci ani zálohu.
+
+### Napojení na skutečně zobrazený text
+
+1. Pro vlastní nadpis a text měřit skutečný layout po vykreslení. Ověřit
+   případný ořez; při neúplně vykresleném relevantním obsahu nedokončit přečtení.
+   Flutter poskytuje geometrii textových úseků a detekci vynechaných řádků;
+   konkrétní adaptér bude ověřený widget testy, nikoli pouze procentem karty.
+   [Geometrie](https://api.flutter.dev/flutter/rendering/RenderParagraph/getBoxesForSelection.html),
+   [detekce ořezu](https://api.flutter.dev/flutter/painting/TextPainter/didExceedMaxLines.html).
+2. Pokrytí nadpisu a textu převést na relevantní textové úseky bez avataru,
+   tlačítek, mezer mezi widgety, komentářů a soukromých zpráv. Zohlednit
+   obě osy ořezu, viewport, appbar, klávesnici a spodní composer detailu.
+3. Po celou schválenou sekundu musí být úsek viditelný, aplikace aktivní,
+   aktuální záložka/route nezakrytá. Dialog, jiná route, skrytá prohlížečová
+   karta, ztráta aktivity a dispose přeruší čekající expozici. Změna layoutu
+   resetuje dosud nedokončené souřadnicové pokrytí. Nemíchat souřadnice karty a detailu.
+4. Po dokončení označit obsah ihned v paměti a zahájit místní atomický zápis.
+   Čekání na načtení starších značek nesmí přepsat právě dokončené přečtení.
+   Dva pozorovatelé téhož obsahu se sloučí, nevytvoří dva záznamy.
+5. Použít události scrollu/layoutu/route a zrušitelný časovač nejbližšího
+   dokončení; žádný databázový polling ani trvalé měření všech karet 60× za sekundu.
+
+Pokrýt plný detail ze všech jeho vstupů a společné karty v Home, Uložených,
+vlastních seznamech i veřejném profilu. Skrytá ratingová karta se nezapočítá;
+po rozbalení musí dál projít stejnou kontrolou úplného textu. Spotlightu
+nepřidávat reklamní metriku. Zvětšené písmo, klávesnice a čtečka obrazovky
+musí zůstat použitelné; samotný accessibility focus nebude důkazem vizuální
+expozice. Žádné nové tlačítko nebo badge přečtení tento úsek nepřidává.
+
+### Restart, chyby a návaznost B2/B3
+
+Lokální upsert je monotónní: přečtení stejného obsahu se samo nevrací na
+nepřečtené. Místní `pendingSync` je součást stejné transakce. Při chybě zápisu
+ponechat stav v paměti, zachovat dosavadní data, nabídnout neblokující informaci
+o nemožnosti uložit stav a zkusit zápis znovu při další vhodné akci/návratu.
+Nezavádět nekonečnou retry smyčku. Po restartu načíst pouze namespace aktuálního
+účtu; neblokovat kvůli tomu první zobrazení současného nepřerovnávaného feedu.
+Opožděná odpověď nesmí změnit jiný účet ani zaniklý pohled.
+
+B1 poskytne samostatné rozhraní značek pro B2/B3. **Nemění pořadí současné
+relace, kurzor, serverový výběr ani chování refresh tlačítka.** B3 později
+potřebuje úplný konzistentní osobní snapshot, ne pouze lokální readIds první
+stránky. Nesmí se tvářit, že samotné B1 splnilo globální unread-first.
+
+### Náklady, ověření a konkrétní rozsah
+
+Samotná evidence B1 přidá **0 Firestore čtení, 0 Firestore zápisů a 0 Functions
+volání**: je výhradně místní. Dosavadní feed/detail a jejich odběry dál mají
+svůj stávající provoz. Nové lokální zápisy vzniknou jen při dokončení dosud
+neevidovaného obsahu, nikoli při každém scroll eventu nebo sekundě zobrazení.
+Zápisy více značek lze spojit v jedné IndexedDB transakci; cloudové dávkování
+a jeho peněžní cenu navrhnout samostatně až v B2.
+
+Ověření po schválení:
+
+- krátký/velmi dlouhý a oříznutý text, přesná hranice 999/1000 ms,
+  rychlé posouvání, částečně viditelné řádky, ratingové sbalení/rozbalení;
+- mobilní šířka, text scale, RTL, otočení/změna šířky, klávesnice,
+  překrytí dialogem, přepnutí route/záložky/aplikace a zánik pohledu;
+- restart, pomalé načtení, dvě souběžné instance úložiště, chyba/abort/quota,
+  změna UID/projektu, poškozený záznam a logický/fyzický retenční úklid;
+- skutečný webový IndexedDB adaptér v browserových testech, nikoli pouze mock;
+  lokální syntetická metadata 100/1 000/10 000 značek pro velikost/čas práce,
+  bez vytváření tisíců Shoutů či zápisů do Firebase;
+- analýza, build a přesné CI, následně pouze DEV web; ověřit skutečné UI,
+  restart a zachování pořadí, nepřipisovat headless/memory testům živý Auth/App Check.
+
+Předpokládané soubory: nové `lib/read_state_store.dart`, webový adaptér a
+testovací/nonweb stub, controller a widgetový adaptér expozice; dosavadní
+`lib/read_exposure.dart`, `lib/src/shout_cards.dart`, `lib/src/shout_detail.dart`,
+napojení scope v `lib/main.dart`/`lib/auth_gate.dart`/`lib/src/home.dart`,
+DEV přepínač v `lib/web_environment.dart` a `config/dev.json`, cílené testy
+a dokumentace. `config/prod.json` zůstane vypnuté. Nejsou potřeba změny
+Functions, Firestore Rules, indexů, Scheduleru nebo stávajících zdrojových dat.
+
+**Navržený živý test ke schválení spolu s B1:** právě dva nové syntetické
+Shouty (krátký a dlouhý, platnost 24 hodin), po jednom pod existujícím
+Bright_Otter_182/TestBusiness, vytvořené přes indexový writer až při připraveném
+průchodu. Záložky obou účtů umožní současně doplnit chybějící UI kontrolu
+Uložených. Test nesmí měnit nebo mazat Auth účty; po ověření uklidit oba
+Shouty a jejich přesně vymezená vedlejší data stejnou indexovou cestou.
+Produkce, main a stávající obsah se nemění. Samotné schválení tohoto návrhu
+neuzavírá A2/A3 ani B1 bez doložených výsledků.
+
+### Rozhodnutí potřebná před implementací
+
+1. Potvrdit navrženou retenci `expiresAt + 7 dní` a ponechání oddělené lokální
+   kopie při běžném odhlášení; při potvrzeném mazání účtu ji odstranit.
+2. Schválit popsanou webovou B1 implementaci s IndexedDB, testy, následným
+   DEV webem a dvěma čerstvými testovacími Shouty včetně úklidu. B2/B3/B4,
+   jejich cloudová retence/náklady a produkční aktivace tím schválené nejsou.

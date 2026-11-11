@@ -28,6 +28,13 @@ nepoužívat pro nové ověření ukládání; čerstvý test vyžaduje konkrét
 Návrat webu je `831e3baaea8a8df3`. Produkce, main, retence a Auth beze změn.
 [Rozsah a checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
+Na `feature/feed-reading-proposal` je připravený
+[konkrétní návrh B1](plans/feed/FEED_READING_POLICY.md#b1-proposal): webové
+IndexedDB podle projektu/UID, skutečná expozice nadpisu/textu a místní fronta
+bez nových Firebase operací. Navržené uchování do expiresAt + 7 dní a další
+implementace/čerstvé dva živé fixture čekají na rozhodnutí vlastníka.
+Zatím pouze dokumentace; kód, přepínače, nasazení a B1/B2/B3/B4 se nezměnily.
+
 **Předchozí uzavřená část: vlastní seznam a expired interakce.**
 Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí
 po expiraci jsou uzavřené v DEV. Zdroj `14b7885b35b89f62633a3d7496e10483fa91a739`
