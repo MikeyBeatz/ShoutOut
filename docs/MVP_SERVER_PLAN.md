@@ -2,7 +2,7 @@
 
 ## Aktuální stav a použití plánu
 
-Souhrn k 10. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
+Souhrn k 11. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
 Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
 
@@ -10,11 +10,11 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery a Home jsou nasazené; přímé Shout create/vote zápisy uzavřené. | Úplná klientská regrese, vlastní Aktivní/Expirované, B1–B4 a ostatní níže uvedená kritéria. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. | Zbývající klientská regrese Uložených, B1–B4 a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
-| Životnost Shoutů | Exspirace mění status v DEV se společným indexovým writerem. | Sedmidenní fyzický úklid Shoutů a potomků včetně odpovídající indexové konzistence. |
+| Životnost Shoutů | Exspirace mění status v DEV se společným indexovým writerem; od 11. listopadu je nasazený a ověřený zámek běžných interakcí podle expiresAt. | Sedmidenní fyzický úklid Shoutů a potomků včetně odpovídající indexové konzistence. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
 | Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
 | Bezpečnostní kontrola | Dílčí testy jsou doložené v TESTING. | Závěrečná předprodukční revize a odstranění/přijetí rizik. |

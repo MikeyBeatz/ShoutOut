@@ -22,15 +22,17 @@ po success CI 42358058964. DEV přepínače jsou zapnuté; produkce se neměnila
 Pro oba účty prošel serverový test 50 → 100 → 120 a interakce. Vlastník
 potvrdil Business stránkování v UI, platný Auth/App Check potvrzují logy.
 Vlastník 10. listopadu potvrdil plovoucí obnovu i oznámení. Před uzavřením
-A2/A3 zbývají další klientská ověření, úplné vlastní Aktivní/Expirované
-a úklid 120 fixture; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+A2/A3 zbývá klientská regrese Uložených; vlastní Aktivní/Expirované i úklid
+120 fixture jsou od 11. listopadu uzavřené; [důkazy a checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Konkrétní oprava vlastního seznamu je od 10. listopadu schválená a nasazená
 v DEV ze zdroje 4e7e5bd po success CI 42884625807: index READY, getOwnShouts
 a web ověřené proti releasu. Živé serverové vlastní stránky 50 + 10 / 50 + 11
 prošly. Vlastník potvrdil Business pokračování, palce a mazání; chyba návratu
 nahoru při čekání na další stránku je opravená v ce6b07a a po success CI
-42890208984 nasazená pouze na DEV web. Zůstává ověření opraveného scrollu,
-záložek a běžného účtu, regrese Uložených a úklid 120 fixture.
+42890208984 nasazená pouze na DEV web. Navazující 14b7885 po success CI
+42902048239 uzavírá kompaktní pokračování za kartami a zámek expired interakcí
+v klientu/serveru/Rules. Vlastník potvrdil UI, živé jádro obě testovací identity;
+nové dva i původních 120 fixture jsou uklizené. Zůstává regrese Uložených.
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 

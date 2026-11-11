@@ -1,24 +1,32 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 10. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 11. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**Nasadit a ověřit schválený zámek interakcí po expiraci a menší pokračování
-až za poslední kartou, potom dokončit regresi a úklid.** Vlastník 10. listopadu
-schválil tento konkrétní další úsek včetně výjimek pro vlastní mazání,
-moderaci a účtový úklid, CI/DEV a dvou krátce platných syntetických Shoutů
-pod stávajícími účty. Na `feature/expired-shout-read-only` je lokálně připravený
-serverový guard tří interakčních operací, devět omezení přímých Rules cest,
-časovač klientského zámku karet/detailu/komentářů/soukromých odpovědí a tlačítko
-uvnitř seznamu. Čtení, hlášení a vlastní odstranění jsou zachované. Nový pokus
-po expiresAt se odmítne, dokončený timed požadavek lze potvrdit bez dalšího zápisu.
-Lokálně 316/316 Flutter, 11/11 own/expiry widget testů, čistá analýza/lint,
-119 unit, 120/120 cílených serverových/Rules a 2/2 balíčkových kontrol.
-Nová politika zatím není nasazená; následuje přesné CI, pouze DEV tři Functions,
-Rules a web, ověření přechodu přes skutečnou expiraci a schválený úklid.
+**Pokračovat zbývající klientskou regresí Uložených před uzavřením A2/A3.**
+Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí
+po expiraci jsou uzavřené v DEV. Zdroj `14b7885b35b89f62633a3d7496e10483fa91a739`
+na `feature/expired-shout-read-only` má
+[success CI 42902048239](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42902048239):
+316 Flutter, 50 tools, 119 Functions unit, 434 Rules/server, 116 purge a 15 Storage,
+formát/analýza/lint/build. Nasazené jsou pouze tři Functions, Rules a DEV web
+`831e3baaea8a8df3`; zdrojové archivy, prostředky, HTTP 401 i oba webové originy
+souhlasí s čistým releasem. Vlastník potvrdil tlačítko za kartami, zachování
+scrollu i neaktivní interakce při zachovaném čtení detailu. Browser host je
+nedostupný; jde o jeho UI potvrzení, ne automatizovaný browserový průchod.
+Živé jádro přes Admin SDK ověřilo dva schválené krátce platné Shouty:
+před expirací interakce prošly, po ní pět nových akcí na každém selhalo,
+čítače i vedlejší data zůstaly stejné a původní receipt se opakoval bez zápisu.
+Nejde o náhradu HTTP Auth/App Check testu. Oba nové Shouty, 10 potomků a 18
+vedlejších záznamů jsou uklizené. Po UI potvrzení je uklizených také původních
+120 fixture, 27 receipt a 1 oznámení; v aktuálním indexu nezůstala jejich metadata.
+Původních 37 Shoutů má shodné updateTime; Auth účty se nevytvářely ani nemazaly.
+Výjimky pro vlastní mazání, moderaci a účtový úklid platí; retence se nemění.
+Před B1 zbývá ověřit chování Uložených při čekání/chybě/pokračování a dořešit
+tam nalezený podobný loading/Expanded vzor. B1–B4 ani celý milník hotové nejsou.
 [Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
@@ -28,7 +36,7 @@ getOwnShouts, vlastní klientské stránky i živé karty/mazání. Celá Flutte
 16/16 cílených klientských regresí a 2/2 testy balíčků. Zdroj
 `4e7e5bdfd9e026a2ff76b253a9a233fee2022f65` má
 [success CI 42884625807](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42884625807).
-Pouze v DEV je nasazený jeden dotazový index READY, Function getOwnShouts
+Pouze v DEV byl nasazený jeden dotazový index READY, Function getOwnShouts
 `00001-fik` a web `4c61d6a850b330b7`; 42 modulů Function i otisky webu na
 obou originech souhlasí s čistým releasem. Živé jádro přes Admin SDK vrátilo
 vlastní expired stránky 50 + 10 běžnému účtu a 50 + 11 Business (60 fixture
@@ -43,15 +51,15 @@ tlačítka má 17/17 cílených regresí včetně skutečně čekající síťov
 314/314 celé Flutter sady a čistou analýzu. Zdroj
 `ce6b07a6ca0670235da8da3ab44bbcf91fa98b40` má
 [success CI 42890208984](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42890208984)
-a je nasazený pouze na DEV Hosting `fa0a450ecbce236e`; obě adresy souhlasí
+a byl nasazený pouze na DEV Hosting `fa0a450ecbce236e`; obě adresy souhlasily
 s čistým release manifestem. První testy
 vracely Future ihned, takže přechodový loading frame nepokryly.
 Logy potvrzují platné Auth/App Check a HTTP 200 pro stránky/palce/mazání;
 rychlé palce občas vrátily 429, v souladu se stávajícím odstupem 1 sekundy.
-Limity ani obecná hláška nejsou měněné. Dva fixture jsou deleted, 118 expired,
-bez podkolekcí, původních 37 zdrojů beze změny. Browser host je nedostupný;
+Limity ani obecná hláška se neměnily. Před závěrečným úklidem byly dva fixture
+deleted, 118 expired, bez podkolekcí, původních 37 zdrojů beze změny;
 uložení a okamžitou změnu počtu vlastník mezitím potvrdil. Změnu tlačítka
-a novou politiku expired řeší schválený úsek výše; úklid ještě neproběhl.
+a novou politiku expired uzavírá úsek výše včetně úklidu.
 Test záložky u expired se týkal ikony/počtu v Mé shouty;
 sekce Uložené podle dosavadní politiky vrací jen aktivní obsah.
 Na `feature/feed-page-integration` je
@@ -72,14 +80,12 @@ po zvětšení dosahu i načítání dalších stránek v Business webu; servero
 to potvrzují platným Auth/App Check a třemi HTTP 200 (0,52–1,07 s na serveru).
 Minutový worker běží na nové revizi bez chyb; rozvrh a obsahová dávka se neměnily.
 
-**Read-only kontrola 10. listopadu:** všech 120 syntetických Shoutů
-`mvp-feed-20261107-*` existuje a má serverový status expired; bez konfliktu
-obsahu/vlastníka/časů, bez podkolekcí. Jedno testovací oznámení zůstává.
-Původních 37 zdrojů má nezměněný updateTime. Generace feed-v1 je active;
-0 zápisů, důkaz `build/feed-resume-inventory.json`. Fixture zatím ponechané
-pro možné ověření 60 vlastních expirovaných Shoutů na každý účet v navržené
-opravě; teprve potom schválený úklid. Žádný Auth účet nebyl vytvořen ani smazán.
-Identifikace fixture a další postup jsou v
+**Read-only kontrola před úklidem 11. listopadu:** z původních 120 Shoutů
+`mvp-feed-20261107-*` bylo 118 expired a 2 deleted, bez konfliktů a podkolekcí;
+1 testovací oznámení, 37 původních zdrojů se shodným updateTime a feed-v1 active.
+Důkaz `build/feed-resume-inventory.json` předcházel úklidu; aktuální nulový
+zůstatek dokládá `build/own-shouts-cleanup-proof.json`. Žádný Auth účet se
+nevytvářel ani nemazal. Identifikace fixture a výsledky jsou v
 [záznamu rolloutu](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
 Plovoucí obnova je nyní **pouze ikona vpravo nahoře**, ze zdroje
 `f08abf97cf34686a7c776848c01bb7627ca08719` na `fix/feed-refresh-top-right`,
@@ -97,13 +103,14 @@ Přerušení ponechalo hotový build před nasazením; před navázáním bylo o
 že DEV stále vydával předchozí f08abf9. Nyní oba DEV originy odpovídají
 novému manifestu. Vlastník nyní potvrdil hotový zvonek; tato UI připomínka je uzavřená.
 Functions, Rules ani data se těmito UI rollouty neměnily.
-Je třeba doplnit klientský průchod záložek/reakcí a úplný úklid; neoznačovat
-celý feed ani milník za dokončený. Jeden lokální SDK vzorek měl 65,8 s;
+Je třeba doplnit zbývající regresi Uložených; vlastní reakce/uložení, nové
+tlačítko, zámek expired i úklid jsou uzavřené. Celý feed/milník tím není hotový.
+Jeden lokální SDK vzorek měl 65,8 s;
 příčina není potvrzená, toto měření není cloudová latence ani cenový benchmark.
 
 Produkce/main se neměnily. Produkční účtový wrapper a provozní konfigurace
-nadále patří do startovní brány. Před MVP dál zbývají B1–B4 i úplný vlastní
-zdroj Aktivní/Expirované podle otevřené akceptace. Starší R6 výsledky níže
+nadále patří do startovní brány. Před MVP dál zbývají B1–B4 a poslední regrese
+Uložených; vlastní zdroj Aktivní/Expirované je uzavřený. Starší R6 výsledky níže
 popisují tehdejší lokální etapy; současné zapnutí dokládá tento rollout.
 
 [R6e](plans/feed/FEED_RUNTIME_PROPOSAL.md#r6e-results) je lokálně uzavřené na
@@ -344,25 +351,25 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `ce6b07a6ca0670235da8da3ab44bbcf91fa98b40` / `fa0a450ecbce236e`; vlastní stránky se zachováním scrollu během pokračování, výraznější tlačítko, DEV prostorový feed i plovoucí tlačítka |
+| Webový zdroj / Hosting verze | `14b7885b35b89f62633a3d7496e10483fa91a739` / `831e3baaea8a8df3`; kompaktní pokračování za kartami, zámek expired interakcí, prostorový feed i plovoucí tlačítka |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
 | Účtové Functions | `ccc879f`, obě ACTIVE; request `00011-kob`, recovery `00011-lad`; hash `3cf911bd6ef4eb7350ef68068ed9a231ab347fa5` |
 | Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav`; `4e7e5bd`: ACTIVE `getownshouts-00001-fik`, 42 modulů shodných, anonymní HTTP 401, max1/min0, concurrency1, 256 MiB/15 s |
-| Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`, `toggleshoutreaction-00007-yoy`; společný indexový writer |
-| Ostatní obsahové Functions | Poslední feed rollout je neaktualizoval; `deleteComment`, `toggleCommentReaction`, `toggleShoutSave`, `createContentReport` zůstávají ze zdroje f81eaf4 |
-| Firestore Rules | `832178f3-e140-47c8-852b-425e16c475af`, zdroj 25a3f92; s řídicím dokumentem také create/vote pouze serverově |
+| Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`; `14b7885`: ACTIVE `toggleshoutreaction-00008-zek`; společný indexový writer |
+| Ostatní obsahové Functions | `14b7885`: ACTIVE `togglecommentreaction-00007-rir`, `toggleshoutsave-00006-roq`; všechny tři nové revize mají max1/min0, concurrency1, 256 MiB/15 s a shodu 42 modulů. `deleteComment` a `createContentReport` zůstávají ze zdroje f81eaf4 |
+| Firestore Rules | `d5193d0b-e957-4c76-ab46-54b0f9a8beac`, zdroj 14b7885; navíc zámek interakcí dle activeShout, čtení a vlastní mazání zachované |
 | Prostorový index | `feed-v1` active, klíč v1; dalších 5 složených indexů READY a 5 výjimek ověřeno, bez změny TTL |
 | Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
 Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
 za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
-odpovídají release manifestu (`build/own-shouts-scroll-hosting-proof.json`).
-Návrat poslední opravy: Hosting `4c61d6a850b330b7` (zdroj 4e7e5bd,
-obsahuje původní chybu scrollu při čekání na další stránku);
-kompatibilní nový reader a index lze ponechat.
+odpovídají release manifestu (`build/expired-interactions-hosting-proof.json`).
+Návrat posledního webu: Hosting `fa0a450ecbce236e` (ce6b07a, původní široké
+tlačítko). Serverové zámky a nové Rules zachovat; jejich samostatný návrat
+by znovu povolil schválením zakázané interakce. Reader a index se neměnily.
 Při problému celého prostorového feedu lze pozastavit reader a vrátit
 kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
 společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,
@@ -389,8 +396,8 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Obsahové operace | DEV klient používá serverovou tvorbu, reakce, ukládání, hlášení i mazání; přepínače v config/dev.json jsou zapnuté. | Závěrečné uzavření přímých Rules zápisů a celý milník serverové brány. |
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a denní DEV cleanup 02:15 UTC, max. 500 záznamů/běh. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
-| Exspirace Shoutů | Serverová změna statusu po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků; zapojení writeru před živým prostorovým indexem. |
-| Feed | Plný detail A0, pořadí negativního obsahu a lokální moduly indexu/relace/expozice/kurzoru. | Provozní limity, integrace všech writerů, migrace, živé query API, klient a osobní přečtení/novinky. |
+| Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
+| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka jsou nasazené; vlastní knihovna a úklid fixture ověřené. | Zbývající regrese Uložených a osobní přečtení/synchronizace/unread-first/novinky B1–B4. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 MVP zůstává 9/24 milníků (38 %), backlog 107/157 (68 %). Konečný account

@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 10. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 11. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -24,31 +24,18 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit schválené připomínky „Mé shouty“, potom klientskou regresi.**
-   Nový úsek schválený 10. listopadu: menší pokračování až za poslední kartou,
-   po expiraci zámek palců Shoutu/komentářů, uložení a psaní odpovědí;
-   vlastní mazání, hlášení, moderace a účtový úklid zůstávají. Lokálně připravené
-   na `feature/expired-shout-read-only`: 316 Flutter, 120 serverových/Rules,
-   čistá analýza/lint. Zatím bez nového nasazení. Následuje přesné CI/DEV,
-   dva schválené krátce platné syntetické Shouty a úklid. [Kontrakt](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
-   Prostorový
-   feed, writery, generace feed-v1 i klient jsou v DEV nasazené. Serverové
-   stránky 50 → 100 → 120 prošly pro oba účty; Business stránkování, plovoucí
-   obnova i zvonek jsou potvrzené vlastníkem. Zbývají klientské interakce
-   a živé klientské ověření vlastních Aktivních/Expirovaných. Oprava vlastního
-   zdroje po 50 je po success CI 42884625807 nasazená pouze v DEV ze zdroje
-   4e7e5bd: index READY, reader a web ověřené proti čistému releasu. Živé
-   serverové vlastní stránky 50 + 10 / 50 + 11 prošly. Vlastník ověřil Business
-   pokračování, palce a mazání; zachytil návrat nahoru při pokračování. Lokální
-   oprava zachovává seznam během čekání a zvýrazňuje tlačítko, 17/17 cílených
-   a 314/314 Flutter testů. Po success CI 42890208984 je ce6b07a nasazené
-   na DEV webu. Uložení a okamžité změny počtu jsou potvrzené vlastníkem;
-   novější umístění tlačítka a expired chování ověřit po novém rolloutu.
-   Před přechodem na B uzavřít A2/A3. Read-only kontrola po UI testu:
-   118 fixture expired / 2 deleted, bez podkolekcí; původních 37 zdrojů
-   beze změny. Využít je pro ověření
-   vlastní historie v UI a poté dokončit schválený úklid včetně oznámení.
-   [Důkazy, omezení a úklid](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
+   Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
+   zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
+   vlastníkem. Zdroj 14b7885 prošel CI 42902048239 a je nasazený: tři Functions,
+   Rules a web. Původních 120 i dva nové krátce platné testovací Shouty jsou
+   uklizené včetně vedlejších dat; 37 původních zdrojů i Auth účty zachované.
+   [Důkazy a výjimky zámku](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
+   Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
+   chování Uložených při síťovém čekání/chybě, připojení další dávky a změně
+   účtu; je tam nalezený podobný loading/Expanded vzor. Nové zdrojové změny
+   či čerstvé živé fixture předložit konkrétním rozsahem, původní fixture
+   jsou už odstraněné. Potom uzavřít společnou akceptaci A2/A3 a přejít na B.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
    a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální

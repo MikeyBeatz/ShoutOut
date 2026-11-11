@@ -564,8 +564,7 @@ Lokálně: 316/316 Flutter, 11/11 own/deadline widget testů, čistá analýza/l
 119 Functions unit, 120/120 cílených serverových/Rules (35 server / 85 Rules),
 2/2 kontrol balíčků. Důkazy `build/expired-interactions-{flutter-all,client-test,
 analyze,lint,unit,server-rules,artifact}.log`. Nová serverová sada je zapojená
-do CI test:rules. Zatím bez nasazení této politiky; následuje přesné CI,
-tři DEV Functions, Rules a web, živé ověření a schválený úklid.
+do CI test:rules. Výsledek živého nasazení a úklidu je uveden níže.
 Navíc 9/9 writer/deletion-cutover regresí
 (`build/expired-interactions-writer-regression.log`). Starý indexový test
 výslovně povoloval palec po expiry prune; podle nového rozhodnutí nyní ověřuje
@@ -573,3 +572,66 @@ odmítnutí, nezměněný zdroj a nepřítomnost metadat v aktivním indexu.
 Závěrečných 6/6 expiry regresí (`build/expired-interactions-final-deadline.log`)
 ověřuje i posun času během čtení a před zápisy; rate, receipt, obsah, uložené
 stopy i oznámení zůstávají při odmítnutí beze změny.
+
+#### Ověřený DEV výsledek 11. listopadu
+
+Zdroj `14b7885b35b89f62633a3d7496e10483fa91a739` má
+[success CI 42902048239](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42902048239):
+316 Flutter, 50 tools, 119 Functions unit, 434 Rules/server, 116 purge,
+15 Storage, formát/analýza/lint a DEV build. Starší běhy byly nahrazené
+po úpravě historického testu povolených expired reakcí a zpřísnění kontroly času.
+Přerušení limitem nastalo před nasazením, pokračovalo se z čistého releasu.
+
+V projektu `shoutout-dev-46c81` jsou ACTIVE nové revize
+`toggleshoutreaction-00008-zek`, `togglecommentreaction-00007-rir`,
+`toggleshoutsave-00006-roq`. Každá zachovává min0/max1, concurrency1,
+256 MiB/15 s; anonymní POST 401 a shoda všech 42 nasazených JS modulů
+s releasem jsou ověřené. První místní CLI analýza skončila timeoutem 10 s
+ještě před uploadem. Přímý import balíčku poté trval 946 ms a retry s lokálním
+FUNCTIONS_DISCOVERY_TIMEOUT=60 prošel; jde o
+[dokumentovaný CLI postup](https://firebase.google.com/docs/functions/tips#avoid_deployment_timeouts_during_initialization),
+nikoli změnu timeoutu běžících Functions. Zdroj se kvůli tomu neměnil.
+
+Nové Rules `d5193d0b-e957-4c76-ab46-54b0f9a8beac` se zkompilovaly a přes API
+se byteově shodují s releasem (normalizované konce řádků). Hash živého zdroje
+`7f0a1e664b9fc082242455e67c374191f0f84725aab791d1a041038ba8212bb8`.
+Předchozí ruleset byl read-only ověřený jako 832178f3. Hosting site
+`shoutout-dev-46c81` vydává `831e3baaea8a8df3` od 11. listopadu 00:54:34 SEČ
+(10. listopadu 23:54:34 UTC). Čtyři veřejné soubory obou DEV originů odpovídají
+release manifestu. Návrat webu je fa0a450ecbce236e; serverové zámky a Rules
+ponechat, jejich návrat by znovu povolil nyní zakázané interakce.
+Indexy, Scheduler, ostatní Functions, produkce ani main se neměnily.
+
+Vlastník ve své fungující relaci potvrdil menší tlačítko až za poslední
+kartou, připojení další dávky bez návratu nahoru a neaktivní interakce se
+zachovaným čtením detailu/počtů. Browser access host byl znovu nedostupný;
+neoznačovat toto potvrzení za automatizované ovládání prohlížeče.
+
+Živé jádro z čistého releasu přes Admin SDK (nenahrazuje HTTP Auth/App Check)
+vytvořilo pouze dva schválené Shouty `mvp-expiry-20261111-{user,business}`,
+po jednom na existující identitu, přes společný indexový writer.
+Před jejich skutečnou expirací prošly komentář, soukromá odpověď, palec Shoutu,
+uložení a palec komentáře. Po expiraci pět nových pokusů na každém selhalo;
+1 like / 0 dislike / 1 komentář / 1 uložení, potomci, rate, receipt i oznámení
+zůstaly beze změny. Původní timed palec šel potvrdit znovu bez zápisu.
+Následný úklid odstranil 2 kořeny, 10 potomků a 18 vedlejších záznamů,
+s rodiči a indexem v jedné transakci; rate buckety se nevracely.
+
+Po UI potvrzení byla původní skupina `mvp-feed-20261107-*` znovu inventarizovaná:
+118 expired / 2 deleted, 0 konfliktů/podkolekcí, 1 oznámení. Už expirované
+zdroje se v dávkách nejvýše 50 odstranily rovnou přes indexWriter.prepareBatch
+a transaction.delete, bez zbytečného mezikroku 120 nových delete receipt.
+Úklid odstranil přesně 120 kořenů, 27 jejich receipt a 1 oznámení. Zůstatek
+zdrojů/vedlejších dat je 0 a aktuální index neobsahuje žádná jejich metadata.
+Historické neměnné uzly indexu se tím plošně nemažou, podléhají svému GC;
+časná historie a retenční pravidla generace se neobcházejí.
+V obou úklidech zůstalo všech 37 původních zdrojů se stejným updateTime,
+0 nových/smazaných Auth účtů, nezměněný řídicí dokument/generace.
+
+Důkazy: `build/expired-interactions-{ci,hosting,function,deployed-source}-proof.json`,
+`build/expired-interactions-rules-{record,verify}.json`,
+`build/expired-interactions-live-proof.json`, `build/own-shouts-cleanup-proof.json`,
+`build/expired-interactions-rollout-state.json` a odpovídající logy.
+Vlastní knihovna, obě UI připomínky i tyto testy/úklidy jsou uzavřené.
+Před uzavřením celého A2/A3 zbývá klientská regrese Uložených, včetně tam
+nalezeného loading/Expanded vzoru; B1–B4 zůstávají otevřené.
