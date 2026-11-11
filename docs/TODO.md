@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 11. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 12. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -24,7 +24,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní návrh B2 — soukromou synchronizaci přečtení mezi zařízeními.**
+1. **Dokončit přesné CI lokálního B2 a připravit provozní DEV bránu.**
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
@@ -36,16 +36,18 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    rovněž uklizené; neotvírat je znovu jako čekající rollout/test.
    [B1 a důkazy](plans/feed/FEED_READING_POLICY.md#b1-implementation),
    [Uložené](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
-   B2 potřebuje konkrétní schéma, retenci cloudových dat, dávkování, pravidla,
-   nákladové limity a test/rollout ke schválení. Souhlas s B1 tyto volby nenahrazuje.
-   [Připravený návrh B2](plans/feed/FEED_READING_POLICY.md#b2-proposal) doporučuje
-   expiresAt + 7 dní, upload 32 značek / 10 s a přenos mezi zařízeními při
-   přihlášení/návratu/obnově bez prázdného pollingu. Čeká souhlas s retencí,
-   načasováním a jedním lokálním implementačním úsekem; nic živého se neměnilo.
+   Vlastník schválil B2 retenci expiresAt + 7 dní, upload 32 / 10 s a přenos
+   při loginu/návratu/obnově bez prázdného pollingu i první lokální implementaci.
+   Ta je připravená na feature/feed-read-sync: transakční bloky a snapshot/delta,
+   IndexedDB v2 fronta, retry/ack a soukromý účtový úklid za vypnutým zapojením.
+   [Výsledky a hranice](plans/feed/FEED_READING_POLICY.md#b2-local-results).
+   Přesné CI finálního zdroje následuje. Před živou aktivací ještě runtime/
+   limity, denní fyzický úklid, indexace, kompatibilní rollback a konkrétní
+   DEV pilot k předložení. Implementace B2 není nasazené B2; nic živého se neměnilo.
 
 2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
    první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
-   pořadí. Cloudové chování a polling jsou stále otevřená rozhodnutí pro B2/B4.
+   pořadí. B2 má schválený přenos při loginu/návratu/obnově; polling B4 je otevřený.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
    Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění
    automaticky celý serverový milník ani procentní metriku.

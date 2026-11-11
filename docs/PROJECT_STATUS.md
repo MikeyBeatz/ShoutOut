@@ -1,12 +1,25 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 11. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 12. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**B1 a regrese Uložených jsou v DEV uzavřené. Další je konkrétní návrh B2.**
+**Dokončit přesné CI lokálního B2 a připravit jeho provozní DEV bránu.**
+Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
+stránkovaný snapshot/delta, IndexedDB v2 outbox a připravené klientské napojení.
+360 Flutter, 10 Chrome/IndexedDB, 49 cílených emulátorových regresí, 124 Functions
+unit a 51 tools prošlo; přidaný test slučování souběžných požadavků prochází
+v 11 cílených testech. Analýza/lint čisté, debug web sestavený a otisky ověřené.
+Přesné CI finálního commitu ještě následuje. B2 nemá exportované Functions,
+syncFactory je v aplikaci null a účtový readSyncEnabled je false. Nic nebylo
+nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
+[B2 checkpointu](plans/feed/FEED_READING_POLICY.md#b2-local-results).
+Další po CI: konkrétní transport/runtime, denní fyzický úklid, indexace,
+kompatibilní návrat pro IndexedDB v2 a schválení nové živé vrstvy/DEV pilotu.
+
+**Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na
 `feature/feed-read-tracking` má
 [success CI 43056516730](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43056516730):
@@ -40,14 +53,11 @@ expiresAt + 7 dní. Důkaz: build/read-tracking-ui-proof.json a cleanup proof.
 Log první akce ukazuje start instance asi 3,3 s a vlastní volání 0,69 s,
 Auth/App Check VALID. Jde o diagnózu latence, žádná změna prostředků nebyla provedena.
 [Podrobnosti B1](plans/feed/FEED_READING_POLICY.md#b1-implementation).
-Společná DEV akceptace A2/A3 i webové B1 jsou uzavřené. B2–B4 zůstávají
-otevřené: další práce je návrh soukromé cloudové synchronizace, její retence,
-dávkování, nákladů a hranice živého testu k předložení vlastníkovi. Nové serverové
-schéma ani produktové limity nepovažovat za schválené implementací B1.
-[Návrh B2 je připravený k rozhodnutí](plans/feed/FEED_READING_POLICY.md#b2-proposal):
-stejná logická retence jako B1, dávkový upload a synchronizace při výslovné
-obnově/přihlášení/návratu, nejprve jedno lokální porovnání dokumentů a bloků.
-Stav je pouze dokumentovaný návrh; žádný B2 kód, Rules, živá data ani nasazení.
+Společná DEV akceptace A2/A3 i webové B1 jsou uzavřené. Vlastník následně
+schválil B2 retenci expiresAt + 7 dní, upload nejvýše 32 / první termín 10 s,
+přenos při loginu/návratu/obnově bez prázdného pollingu a první lokální úsek.
+Ten je připravený podle checkpointu výše; nejde o živé B2 ani dokončení B3/B4.
+Živá/provozní brána, denní fyzický úklid a konkrétní DEV pilot ještě zbývají.
 
 Předchozí oprava Uložených dbf2aad / CI 42932603771 / web de78cfc631c1acc1
 je základem této verze. Její dva starší `mvp-saved-20261111-*` fixture jsou

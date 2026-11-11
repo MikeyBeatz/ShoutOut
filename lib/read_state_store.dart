@@ -25,6 +25,17 @@ class ReadContent {
     }
   }
   final String shoutId, contentHash;
+  ReadContent.fromHash({
+    required this.shoutId,
+    required this.contentHash,
+    required this.expiresAt,
+  }) {
+    if (shoutId.isEmpty ||
+        shoutId.length > 256 ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(contentHash)) {
+      throw ArgumentError('Read content');
+    }
+  }
   final DateTime expiresAt;
   String get key => jsonEncode([shoutId, contentHash]);
   DateTime get retainUntil => expiresAt.add(const Duration(days: 7));
@@ -65,9 +76,47 @@ class ReadMarker {
         raw['retainUntil'] == content.retainUntil.millisecondsSinceEpoch &&
         raw['readAtLocal'] is int &&
         (raw['readAtLocal'] as int) >= 0 &&
-        raw['pendingSync'] == true &&
+        raw['pendingSync'] is bool &&
         now.isBefore(content.retainUntil);
   }
+}
+
+class ReadUpload {
+  const ReadUpload(this.content, this.readAtLocal);
+  final ReadContent content;
+  final int readAtLocal;
+  Map<String, Object> toPayload() => {
+    'shoutId': content.shoutId,
+    'contentHash': content.contentHash,
+    'expiresAt': content.expiresAt.millisecondsSinceEpoch,
+  };
+  static ReadUpload? parse(Object? raw, ReadScope scope, DateTime now) {
+    if (raw is! Map ||
+        raw['shoutId'] is! String ||
+        raw['contentHash'] is! String ||
+        raw['expiresAt'] is! int) {
+      return null;
+    }
+    try {
+      final content = ReadContent.fromHash(
+        shoutId: raw['shoutId'] as String,
+        contentHash: raw['contentHash'] as String,
+        expiresAt: DateTime.fromMillisecondsSinceEpoch(raw['expiresAt'] as int),
+      );
+      return ReadMarker.matches(raw, scope, content, now)
+          ? ReadUpload(content, raw['readAtLocal'] as int)
+          : null;
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+abstract interface class ReadSyncStore implements ReadStateStore {
+  Future<List<ReadUpload>> pending(DateTime now, {int limit = 32});
+  Future<void> acknowledge(List<ReadUpload> rows, DateTime now);
+  Future<void> merge(List<ReadUpload> rows, DateTime now);
+  Future<void> defer(List<ReadUpload> rows, DateTime until);
 }
 
 abstract interface class ReadStateStore {
@@ -80,10 +129,11 @@ abstract interface class ReadStateStore {
   Future<void> close();
 }
 
-class MemoryReadStateStore implements ReadStateStore {
+class MemoryReadStateStore implements ReadSyncStore {
   MemoryReadStateStore(this.scope);
   final ReadScope scope;
   final rows = <String, Map<String, dynamic>>{};
+  final _deferred = <String, DateTime>{};
   bool _closed = false, _erased = false;
   void _guard() {
     if (_closed || _erased) throw StateError('Read store unavailable');
@@ -123,9 +173,64 @@ class MemoryReadStateStore implements ReadStateStore {
   }
 
   @override
+  Future<List<ReadUpload>> pending(DateTime now, {int limit = 32}) async {
+    _guard();
+    if (limit < 1 || limit > 32) throw ArgumentError('Read batch limit');
+    return rows.values
+        .where(
+          (r) =>
+              r['pendingSync'] == true &&
+              !now.isBefore(_deferred[r['key']] ?? now),
+        )
+        .map((r) => ReadUpload.parse(r, scope, now))
+        .whereType<ReadUpload>()
+        .take(limit)
+        .toList();
+  }
+
+  @override
+  Future<void> defer(List<ReadUpload> batch, DateTime until) async {
+    _guard();
+    for (final row in batch) {
+      _deferred[row.content.key] = until;
+    }
+  }
+
+  @override
+  Future<void> acknowledge(List<ReadUpload> batch, DateTime now) async {
+    _guard();
+    for (final row in batch) {
+      final existing = rows[row.content.key];
+      if (ReadMarker.matches(existing, scope, row.content, now) &&
+          existing!['readAtLocal'] == row.readAtLocal) {
+        rows[row.content.key] = {...existing, 'pendingSync': false};
+      }
+    }
+  }
+
+  @override
+  Future<void> merge(List<ReadUpload> batch, DateTime now) async {
+    _guard();
+    for (final row in batch) {
+      if (!now.isBefore(row.content.retainUntil)) continue;
+      final existing = rows[row.content.key];
+      if (ReadMarker.matches(existing, scope, row.content, now)) continue;
+      rows[row.content.key] = {
+        ...ReadMarker(
+          scope,
+          row.content,
+          DateTime.fromMillisecondsSinceEpoch(row.readAtLocal),
+        ).toJson(),
+        'pendingSync': false,
+      };
+    }
+  }
+
+  @override
   Future<void> erase() async {
     _erased = true;
     rows.clear();
+    _deferred.clear();
   }
 
   @override

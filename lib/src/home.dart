@@ -264,6 +264,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   Future<void> _refreshSpatialFeed([FeedFilters? requested]) async {
+    // B2 remains dormant without an installed ReadSessions.syncFactory. B3
+    // will separately bind a confirmed read snapshot to its ordering barrier.
+    unawaited(readSessions.synchronize());
     final attempt = ++_spatialRequest;
     final nextFilters = requested ?? _feedFilters;
     setState(() {

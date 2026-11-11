@@ -8,11 +8,12 @@ const disabledPreferences = Object.freeze({ replies: false, reactions: false, pr
 export class AccountPrivateCleanupNeedsReview extends Error {}
 
 export async function cleanupAccountPrivatePage(identity, db, auth, {
-  pageSize = 50, beforeCommit = null, transactionGuard,
+  pageSize = 50, beforeCommit = null, transactionGuard, readSyncEnabled = false,
 } = {}) {
   if (!identity || identity.projectId !== db.projectId || typeof identity.userId !== 'string' ||
       !/^[A-Za-z0-9_-]{1,128}$/.test(identity.userId) || !(identity.requestCreateTime instanceof Timestamp) ||
-      !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof transactionGuard !== 'function') {
+      !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof transactionGuard !== 'function' ||
+      typeof readSyncEnabled !== 'boolean') {
     throw new Error('invalid-private-cleanup-options');
   }
   const user = db.doc(`users/${identity.userId}`), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`);
@@ -41,7 +42,7 @@ export async function cleanupAccountPrivatePage(identity, db, auth, {
     transaction.set(settingsRef, disabledPreferences); return true;
   });
   const candidates = []; let needsAnotherPage = false;
-  for (const name of ['notifications', 'following', 'blocked']) {
+  for (const name of ['notifications', 'following', 'blocked', ...(readSyncEnabled ? ['readBuckets', 'readState'] : [])]) {
     const remaining = pageSize - candidates.length;
     const page = await user.collection(name).orderBy(FieldPath.documentId()).select().limit(remaining).get();
     candidates.push(...page.docs);

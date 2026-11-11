@@ -3,12 +3,18 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'read_state_store.dart';
 import 'read_state_platform.dart';
+import 'read_sync_controller.dart';
 
 class ReadTrackingController extends ChangeNotifier {
-  ReadTrackingController(this.scope, this.store, {DateTime Function()? clock})
-    : clock = clock ?? DateTime.now;
+  ReadTrackingController(
+    this.scope,
+    this.store, {
+    DateTime Function()? clock,
+    this.sync,
+  }) : clock = clock ?? DateTime.now;
   final ReadScope scope;
   final ReadStateStore store;
+  final ReadSyncController? sync;
   final DateTime Function() clock;
   final _read = <String, ReadContent>{}, _pending = <String, ReadContent>{};
   final _loading = <String, Future<void>>{};
@@ -62,7 +68,10 @@ class ReadTrackingController extends ChangeNotifier {
       while (enabled && _pending.isNotEmpty) {
         final content = _pending.values.first;
         await store.put(content, clock()).timeout(const Duration(seconds: 10));
-        if (enabled) _pending.remove(content.key);
+        if (enabled) {
+          _pending.remove(content.key);
+          sync?.dirty();
+        }
       }
       if (enabled && storageFailed) {
         storageFailed = false;
@@ -102,6 +111,7 @@ class ReadTrackingController extends ChangeNotifier {
   Future<void> erase() async {
     if (_disposed) return;
     _erased = true;
+    sync?.dispose();
     _read.clear();
     _pending.clear();
     await store.erase().timeout(const Duration(seconds: 10));
@@ -110,16 +120,35 @@ class ReadTrackingController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    sync?.dispose();
     _read.clear();
     _pending.clear();
     unawaited(store.close().catchError((_) {}));
     super.dispose();
   }
+
+  void acceptRemote(List<ReadUpload> rows) {
+    if (!enabled) return;
+    for (final row in rows) {
+      if (clock().isBefore(row.content.retainUntil)) {
+        _read.putIfAbsent(row.content.key, () => row.content);
+      }
+    }
+  }
 }
 
 class ReadSessions extends ValueNotifier<ReadTrackingController?> {
-  ReadSessions({this.storeFactory = createReadStateStore}) : super(null);
+  ReadSessions({this.storeFactory = createReadStateStore, this.syncFactory})
+    : super(null);
   final ReadStateStore Function(ReadScope) storeFactory;
+  // Null until a separately approved live transport/rollout is installed.
+  final ReadSyncController Function(
+    ReadScope,
+    ReadSyncStore,
+    void Function(List<ReadUpload>),
+  )?
+  syncFactory;
+  bool _foreground = true;
   String? _project;
   bool get configured => _project != null;
   final _erasing = <String, Future<void>>{}, _erased = <String>{};
@@ -148,11 +177,37 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
     final old = value, scope = ReadScope(_project!, uid);
     value = _erased.contains(scope.databaseSuffix)
         ? null
-        : ReadTrackingController(scope, storeFactory(scope));
+        : _createController(scope);
     old?.dispose();
     if (value case final controller?) {
       unawaited(controller.prune());
+      controller.sync?.setActive(_foreground);
+      if (_foreground) unawaited(controller.sync?.synchronize());
     }
+  }
+
+  ReadTrackingController _createController(ReadScope scope) {
+    final store = storeFactory(scope);
+    ReadTrackingController? controller;
+    final sync = store is ReadSyncStore
+        ? syncFactory?.call(
+            scope,
+            store,
+            (rows) => controller?.acceptRemote(rows),
+          )
+        : null;
+    return controller = ReadTrackingController(scope, store, sync: sync);
+  }
+
+  void setForeground(bool active) {
+    final resumed = active && !_foreground;
+    _foreground = active;
+    value?.sync?.setActive(active);
+    if (resumed) unawaited(value?.sync?.synchronize());
+  }
+
+  Future<void> synchronize() async {
+    await value?.sync?.synchronize();
   }
 
   Future<void> eraseAccount(String uid) async {

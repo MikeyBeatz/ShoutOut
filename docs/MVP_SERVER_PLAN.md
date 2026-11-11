@@ -166,7 +166,9 @@ potvrdil zmizení odebrané karty i nepřítomnost po restartu. Přečtení obou
 testovacích Shoutů má stejné lokální časy před/po znovuotevření pod Bright_Otter_182.
 B1 uzavřené; nová dvojice je uklizená přes writer (2 zdroje, 3 záložky,
 9 receipt), 37 původních zdrojů beze změny. Functions/Rules beze změny.
-B2–B4 i ostatní požadavky serverové brány zůstávají otevřené.
+B2–B4 i ostatní požadavky serverové brány zůstávají otevřené. B2 má schválený
+první lokální úsek, retenci a načasování; připravené bloky/IndexedDB/fronta
+nejsou živá aktivace. [Checkpoint](plans/feed/FEED_READING_POLICY.md#b2-local-results).
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

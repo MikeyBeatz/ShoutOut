@@ -83,7 +83,7 @@ export async function runAccountDeletionCreatedEvent(event, db, auth, options) {
 export async function runAccountShoutHidingJob(identity, db, auth, {
   leaseMillis, retryDelayMillis, authWaitMillis, clock = () => new Date(),
   pageSize = 50, indexWriter = null, beforeTransaction = null,
-  privateCleanupEnabled = false, beforePrivateCommit = null,
+  privateCleanupEnabled = false, beforePrivateCommit = null, readSyncEnabled = false,
   contentArchiveEnabled = false, beforeContentTransaction = null,
   confirmAuthDeletionEnabled = false,
   retireRolePrivilegesEnabled = false,
@@ -94,11 +94,12 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
   // Callers supply policy explicitly; the DEV wrapper selects approved timings.
   if (![leaseMillis, retryDelayMillis, authWaitMillis].every(value => Number.isSafeInteger(value) && value > 0) ||
       !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 || typeof clock !== 'function' ||
-      typeof privateCleanupEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
+      typeof privateCleanupEnabled !== 'boolean' || typeof readSyncEnabled !== 'boolean' || typeof contentArchiveEnabled !== 'boolean' || typeof confirmAuthDeletionEnabled !== 'boolean' ||
       typeof publicIdentityEnabled !== 'boolean' || typeof retireRolePrivilegesEnabled !== 'boolean' || typeof reactionRemovalEnabled !== 'boolean' ||
       typeof retentionPurgeEnabled !== 'boolean' || retentionPurgeEnabled && !reactionRemovalEnabled ||
       (reactionRemovalEnabled && (!publicIdentityEnabled || !confirmAuthDeletionEnabled)) ||
       (retireRolePrivilegesEnabled && !confirmAuthDeletionEnabled) ||
+      (readSyncEnabled && !privateCleanupEnabled) ||
       (publicIdentityEnabled && (!confirmAuthDeletionEnabled || !contentArchiveEnabled || !logoBucket)) ||
       (contentArchiveEnabled && !privateCleanupEnabled)) {
     throw new Error('invalid-account-deletion-job-options');
@@ -271,7 +272,7 @@ export async function runAccountShoutHidingJob(identity, db, auth, {
         jobRef, clock, pageSize, assertOwner, indexWriter, beforeTransaction: beforeActorReactionTransaction,
       })
       : claim.content ? await contentSlice() : claim.private ? await cleanupAccountPrivatePage(identity, db, invocationAuth, {
-      pageSize, beforeCommit: beforePrivateCommit, transactionGuard: privateTransactionGuard,
+      pageSize, beforeCommit: beforePrivateCommit, transactionGuard: privateTransactionGuard, readSyncEnabled,
     }) : await hideDeletedAuthAccountShoutsPage(db, invocationAuth, identity.userId, {
       pageSize, indexWriter, beforeTransaction, transactionGuard, expectedRequestCreateTime: identity.requestCreateTime,
     });

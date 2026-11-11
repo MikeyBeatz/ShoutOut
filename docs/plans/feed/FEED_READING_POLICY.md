@@ -358,9 +358,10 @@ Lokální testy: `build/read-tracking-tests.log`, `build/read-tracking-analyze.l
 
 ## Návrh B2 — synchronizace přečtení mezi zařízeními
 
-11. listopadu 2026. **Návrh k rozhodnutí, nikoli schválená implementace.**
+11. listopadu 2026. **Vlastník schválil retenci, přenos při přihlášení/návratu/
+obnově a celý první lokální úsek; výsledky jsou níže.**
 B1 a klientská regrese Uložených jsou uzavřené; další závislost je B2 před
-globálním unread-first B3. Následující úsek zatím nemění kód, Rules ani živá data.
+globálním unread-first B3. Návrh není důkaz nasazení; živé prostředí se tímto úsekem nemění.
 Read-only kontrola potvrdila DEV `(default)`, Standard / FIRESTORE_NATIVE,
 europe-west3, historické verze 3 600 sekund a vypnuté PITR.
 
@@ -481,3 +482,89 @@ kolekcí, migrace, TTL/Scheduler změn, nasazení či nových Auth účtů.
 Živé zapojení předložit konkrétně po měření včetně cílových Functions,
 Rules/indexů, denního úklidu, prostředků, rollbacku a vymezených testovacích dat.
 Trvalý souhlas s rutinním rolloutem nenahrazuje schválení této nové datové vrstvy.
+
+<a id="b2-local-results"></a>
+
+### Lokální B2 — výsledky 12. listopadu 2026
+
+Schválený úsek je připravený na `feature/feed-read-sync`. Nejde o živé B2:
+DEV stále vydává 503eea6 / Hosting 47268ed17fd2eebd. Operace nejsou exportované
+z Functions entry pointů; kontrola obou balíčků jejich nepřítomnost vynucuje.
+`ReadSessions.syncFactory` je v aplikaci null. Functions, Rules, indexy,
+Scheduler, živá data, Auth i produkce se lokálním úsekem neměnily.
+
+- Zvolený kandidát: `users/{uid}/readState/current` s revizí a
+  `readBuckets/d{expiryDay}_r{binaryHashPrefix}`. List má nejvýše 128 značek /
+  64 KiB, při naplnění se rozdělí. Větve mají pouze technický prefix/den/revizi,
+  nikoli neomezený adresář. Záznamy neobsahují text ani polohu.
+- Transakce sloučí dávku, dělení i revizi atomicky. Laboratorní rozpočet je
+  200 blokových reads / 128 blokových writes plus revize; překročení nic
+  nezapíše. Klient na resource-exhausted zmenší dávku místo zahození historie.
+  Provozní meze tím nejsou schválené. Server kontroluje účet/žádost, zdroj,
+  hash, expiraci, blokace a smazaného autora. accepted/obsolete/deferred
+  umožňují postup i přes neodeslatelnou položku; odložená má místní minutový
+  cooldown, nikoli cloudový polling. Retry neprodlužuje termín ani potvrzení.
+- Podepsaný kurzor váže UID/projekt, historický readTime, revizi a pozici.
+  Prázdná nefinální stránka pokračuje. Po úplném snapshotu v otevřené relaci
+  knownRevision při shodě vynechá bloky; při změně se stáhnou pouze novější
+  bloky. Po restartu se první snapshot načte celý: samotné číslo není důkaz
+  úplné místní kopie. Delta řadí revision + document ID; živé Query Explain
+  ani indexové náklady zatím nejsou změřené. Celá historie není v kurzoru.
+- IndexedDB v2 přidává transakční outbox s migrací starých pending značek.
+  false po potvrzení zůstává platným přečtením, původní čas se nepřepisuje.
+  UID, dispose a erase ohradí opožděné odpovědi; fence chrání records/outbox.
+  Importovaná historie se neuploaduje znovu. Připravené napojení podporuje
+  login/návrat/obnovu a dirty po místním zápisu; desetisekundový termín se
+  dalšími čteními neposouvá. Prázdná fronta nevyvolává periodická volání.
+- Volitelný readSyncEnabled v účtovém workeru je defaultně false. Zapnutý
+  zahrne nové větve do stávající soukromé dávky nejvýše 50 po ověření chybějícího
+  Auth; bez soukromé fáze se odmítne. Test zachovává data druhého účtu.
+- Stávající Rules obě větve uzavírají. Test ověřuje get/list/create/update/delete
+  pro vlastníka, cizí účet, moderátora/seniora/admina/ownera i nepřihlášeného,
+  se skutečnými rolemi a právní fixture. Rules se neměnily. Budoucí callable
+  wrapper musí vynutit App Check; interní simulace tuto HTTP bránu nenahrazuje.
+
+**Místní porovnání layoutů, nikoli účet nebo cloudová latence:**
+
+| Značky | Reference: zápisy značek / dokumenty snapshotu | Blokové reads při přípravě | Blokové writes + revize | Dokumenty snapshotu |
+|---|---|---|---|---|
+| 100 | 100 / 100 | 4 | 4 + 4 | 1 |
+| 1 000 | 1 000 / 1 000 | 321 | 182 + 32 | 21 |
+| 10 000 | 10 000 / 10 000 | 19 817 | 6 968 + 313 | 253 |
+
+Vzorek posílá po 32, má jeden expiry den. Jiné dny/hashe/malé dávky mění
+naplnění. Tabulka nezahrnuje account/source/author/blocked kontroly, retries,
+indexové položky, Functions, síť ani cleanup. Reference je jeden dokument na
+značku, nikoli druhá produkční služba. Při stránce 8 dokumentů je potřeba ještě
+11 kontrolních bodových reads na stránku; delta má jiné indexové chování.
+Tyto části musí zůstat v budoucí kalkulaci.
+
+Na naplněném vzorku 10 000 přidání jedné značky potřebovalo 8 blokových reads
+a 2 writes včetně revize; dalších 32 potřebovalo 103 reads a 30 writes.
+Bloky tedy nejsou levnější při každém jednotlivém uploadu. Přínos je hlavně
+opakované čtení historie. Emulátorový replay dvou značek měl **0 writes,
+ale 11 dokumentových reads**: 5 account + 2 source + 1 author + 1 blocked
+(prázdný dotaz) + 1 meta + 1 blok. Nejde o úplnou cenu veřejné Function.
+
+Lokálně prošlo 360 Flutter, navazující slučování souběhu v 11 cílených testech,
+10 skutečných Chrome/IndexedDB, 124 Functions unit
+(416 integračních testů se bez emulátoru přeskakuje), 49 cílených emulátorových
+regresí včetně 42 stávajících účtových případů, 51 tools a analýza/lint.
+Debug web byl sestavený a manifest/konfigurace/otisky samostatně ověřené.
+PowerShell zachytil informativní Wasm stderr jako NativeCommandError;
+samotné sestavení vytvořilo manifest i web, následná kontrola prošla.
+Přesné CI finálního source commitu ještě následuje; starší CI B1 změnu nepokrývá.
+Důkazy: `build/read-sync-{client,flutter,browser,analyze,emulator,functions-unit,tools,build,layout}.log`
+a `build/read-sync-layout-proof.json`. Navazující finální emulátorová sada
+ověřuje také odpovědi bez hashového oracle pro skrytý/chybějící/blokovaný zdroj
+a upload po expiraci při offline návratu. Živé UI, nové Auth účty ani Shouty se netestovaly.
+
+**Před živým B2 zbývá:** callable transport/runtime/limity, indexace, denní
+omezený fyzický úklid, kapacita/retry a vymezený DEV pilot. Kvůli IndexedDB v2
+nejprve připravit kompatibilní neaktivní webový základ pro návrat. Stará B1 verze
+otevírá DB explicitně jako v1 a po migraci není plně kompatibilní rollback;
+staré karty potřebují obnovu. Chyba místní evidence neblokuje zbytek aplikace.
+Neslibovat návrat na 503eea6 bez tohoto omezení. Root readState drží technickou
+revizi, nikoli historii textů; jeho odstranění je svázané s účtem.
+B3 musí respektovat contentHash a nezaměnit starou verzi Shout ID za současný
+přečtený obsah. Tyto navazující živé/provozní kroky se nyní neprovádějí.

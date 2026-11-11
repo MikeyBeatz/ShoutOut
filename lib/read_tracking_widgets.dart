@@ -116,6 +116,7 @@ class _ReadTrackingRootState extends State<ReadTrackingRoot>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    browserReadActivity.addListener(_syncActivity);
     widget.sessions.addListener(_changed);
     _changed();
   }
@@ -124,13 +125,22 @@ class _ReadTrackingRootState extends State<ReadTrackingRoot>
     _observed?.removeListener(_fault);
     _observed = widget.sessions.value;
     _observed?.addListener(_fault);
+    _syncActivity();
   }
+
+  void _syncActivity() => widget.sessions.setForeground(
+    browserReadActivity.value &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.paused &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.hidden &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.inactive,
+  );
 
   @override
   void didUpdateWidget(ReadTrackingRoot oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.sessions != oldWidget.sessions) {
       oldWidget.sessions.removeListener(_changed);
+      oldWidget.sessions.setForeground(false);
       widget.sessions.addListener(_changed);
       _changed();
     }
@@ -152,6 +162,7 @@ class _ReadTrackingRootState extends State<ReadTrackingRoot>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _syncActivity();
     if (state == AppLifecycleState.resumed) {
       unawaited(_observed?.retry());
       unawaited(_observed?.prune());
@@ -162,6 +173,8 @@ class _ReadTrackingRootState extends State<ReadTrackingRoot>
   @override
   void dispose() {
     widget.sessions.removeListener(_changed);
+    browserReadActivity.removeListener(_syncActivity);
+    widget.sessions.setForeground(false);
     _observed?.removeListener(_fault);
     WidgetsBinding.instance.removeObserver(this);
     readNavigationObserver.clear();

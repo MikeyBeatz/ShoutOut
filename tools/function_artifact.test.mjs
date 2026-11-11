@@ -13,6 +13,9 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     for (const required of ['feed_runtime.js', 'feed_index_paths.js', 'feed_early_erasure_queue.js', 'feed_account_retention_runner.js',
       'feed_block_index_store.js', 'feed_account_retention_store.js', 'feed_index_gc_store.js']) assert(artifact.files.includes(required), required);
     const actual = readdirSync(artifact.target).filter(file => file.endsWith('.js')).sort();
+    // B2 is approved only locally. A later rollout must explicitly install its host.
+    assert(!actual.includes('read_sync.js'));
+    assert(!actual.includes('read_sync_blocks.js'));
     assert.deepEqual(actual, artifact.files);
     const manifest = JSON.parse(readFileSync(resolve(artifact.target, 'package.json')));
     assert.equal(manifest.main, entry); assert.equal(manifest.scripts, undefined);

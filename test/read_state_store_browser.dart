@@ -10,7 +10,7 @@ import 'package:shoutout/read_state_store.dart';
 
 Future<web.IDBDatabase> open(String name) {
   final done = Completer<web.IDBDatabase>(),
-      request = web.window.indexedDB.open(name, 1);
+      request = web.window.indexedDB.open(name);
   request.onsuccess = ((web.Event _) {
     done.complete(request.result as web.IDBDatabase);
   }).toJS;
@@ -275,5 +275,75 @@ void main() {
       print('B1_LOCAL_METADATA ${jsonEncode(measurements)}');
     },
     timeout: const Timeout(Duration(minutes: 2)),
+  );
+  test(
+    'B2 upgrade preserves v1 markers and durable queue after close/reopen',
+    () async {
+      final prefix = 'b2-migration-${serial++}';
+      final name = '$prefix-${scope.databaseSuffix}';
+      final ready = Completer<web.IDBDatabase>();
+      final request = web.window.indexedDB.open(name, 1);
+      request.onupgradeneeded = ((web.Event _) {
+        final db = request.result as web.IDBDatabase;
+        db.createObjectStore('meta');
+        db
+            .createObjectStore(
+              'records',
+              web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+            )
+            .createIndex('retainUntil', 'retainUntil'.toJS);
+      }).toJS;
+      request.onsuccess = ((web.Event _) {
+        ready.complete(request.result as web.IDBDatabase);
+      }).toJS;
+      final original = await ready.future;
+      final tx = original.transaction('records'.toJS, 'readwrite'),
+          saved = Completer<void>();
+      tx.oncomplete = ((web.Event _) {
+        saved.complete();
+      }).toJS;
+      tx
+          .objectStore('records')
+          .put(ReadMarker(scope, item(1), now).toJson().jsify()!);
+      await saved.future;
+      original.close();
+      final s = IndexedReadStateStore(scope, prefix: prefix);
+      expect((await s.pending(now)).length, 1);
+      final batch = await s.pending(now);
+      await s.close();
+      final reopened = IndexedReadStateStore(scope, prefix: prefix);
+      expect(
+        (await reopened.pending(now)).single.readAtLocal,
+        now.millisecondsSinceEpoch,
+      );
+      await reopened.acknowledge(batch, now);
+      expect(await reopened.pending(now), isEmpty);
+      expect(await reopened.contains(item(1), now), isTrue);
+      await reopened.close();
+      final finalStore = IndexedReadStateStore(scope, prefix: prefix);
+      expect(await finalStore.contains(item(1), now), isTrue);
+      expect(await finalStore.pending(now), isEmpty);
+      await finalStore.close();
+      await drop(name);
+    },
+  );
+  test(
+    'B2 downloaded history is clean, deferred entries do not starve queue, erasure fences all stores',
+    () async {
+      final s = store(), other = store(prefix: 'other-${serial++}');
+      await s.put(item(1), now);
+      await s.put(item(2), now);
+      final batch = await s.pending(now);
+      await s.defer([batch.first], now.add(const Duration(minutes: 1)));
+      expect((await s.pending(now)).length, 1);
+      await other.merge(batch, now);
+      expect(await other.pending(now), isEmpty);
+      expect(await other.contains(batch.first.content, now), isTrue);
+      expect((await s.pending(now.add(const Duration(minutes: 1)))).length, 2);
+      await s.erase();
+      await expectLater(s.merge(batch, now), throwsStateError);
+      await expectLater(s.pending(now), throwsStateError);
+      expect(await other.contains(batch.first.content, now), isTrue);
+    },
   );
 }

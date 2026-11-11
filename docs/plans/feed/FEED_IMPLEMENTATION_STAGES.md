@@ -176,8 +176,10 @@ B1 může nejprve sloužit pouze na jednom zařízení. Tím ještě nebude doko
 celé původní zadání. B3 nesmí používat pouze částečnou lokální historii a tvrdit
 garantovanou konzistenci mezi zařízeními. Pokud se pořadí B2/B3 změní, tento
 dočasný kompromis vyžaduje výslovný souhlas.
-Konkrétní [návrh B2](FEED_READING_POLICY.md#b2-proposal) je připravený
-k rozhodnutí o cloudové retenci, načasování a prvním lokálním úseku.
+Konkrétní [návrh B2](FEED_READING_POLICY.md#b2-proposal) vlastník schválil:
+expiresAt + 7 dní, 32 / 10 s a přenos při loginu/návratu/obnově bez pollingu.
+První lokální úsek je připravený, [výsledky](FEED_READING_POLICY.md#b2-local-results);
+source CI a navazující živá/provozní brána ještě zbývají. B2 není nasazené.
 
 ### Schválený směr a zbývající produktové volby
 
