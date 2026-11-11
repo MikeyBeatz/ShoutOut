@@ -32,7 +32,11 @@ nahoru při čekání na další stránku je opravená v ce6b07a a po success CI
 42890208984 nasazená pouze na DEV web. Navazující 14b7885 po success CI
 42902048239 uzavírá kompaktní pokračování za kartami a zámek expired interakcí
 v klientu/serveru/Rules. Vlastník potvrdil UI, živé jádro obě testovací identity;
-nové dva i původních 120 fixture jsou uklizené. Zůstává regrese Uložených.
+nové dva i původních 120 fixture jsou uklizené. Novější regrese Uložených
+`dbf2aad` má success CI 42932603771 a DEV web `de78cfc631c1acc1`; 328 Flutter
+a 5/5 cílených serverových testů prošlo. Živé jádro ověřilo oba účty, čeká
+krátký ruční UI průchod a úklid dvou nových `mvp-saved-20261111-*`.
+[Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 

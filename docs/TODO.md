@@ -25,9 +25,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 ## Nejbližší práce
 
 1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
-   Konkrétní oprava je schválená a lokálně připravená na
-   `fix/saved-shouts-pagination`; po přesném CI následuje pouze DEV web,
-   dva nové aktivní fixture pod stávajícími účty a úklid.
+   Konkrétní oprava `dbf2aad` má success CI 42932603771 a je nasazená pouze
+   na DEV web `de78cfc631c1acc1`; Functions/Rules beze změny. Živé jádro
+   prošlo pod oběma stávajícími testovacími účty. Čeká se na odeslaný ruční
+   UI průchod a úklid dvou nových aktivních fixture `mvp-saved-20261111-*`.
    [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
    Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
    zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
@@ -36,10 +37,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    uklizené včetně vedlejších dat; 37 původních zdrojů i Auth účty zachované.
    [Důkazy a výjimky zámku](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
    Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
-   chování Uložených při síťovém čekání/chybě, připojení další dávky a změně
-   účtu; je tam nalezený podobný loading/Expanded vzor. Nové zdrojové změny
-   či čerstvé živé fixture jsou nyní schválené výše uvedeným rozsahem; původní fixture
-   jsou už odstraněné. Potom uzavřít společnou akceptaci A2/A3 a přejít na B.
+   živá UI akceptace opravených Uložených; lokální regrese čekání/chyb,
+   pokračování a změny účtu už prošly. Původní fixture jsou odstraněné,
+   nové dva jsou schválené výše uvedeným rozsahem. Potom uzavřít společnou
+   akceptaci A2/A3 a přejít na B.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
    a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální

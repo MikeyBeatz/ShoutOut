@@ -154,8 +154,11 @@ Aktuálně schválený výběr stránek a jeho neuzavřené náklady jsou v
 první stránkou není zvolená. Od 7. listopadu jsou prostorové query API,
 [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), writery/údržba i Home
 skutečně zapojené v DEV; [nasazení a omezení](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
-Před uzavřením A2/A3 zbývají klientská regrese, úplný vlastní seznam Shoutů
-a úklid fixture. B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
+Úplný vlastní seznam, jeho UI regrese a původní fixture jsou uzavřené.
+Oprava Uložených dbf2aad je po success CI 42932603771 na DEV webu;
+před uzavřením A2/A3 zbývá její ruční UI potvrzení a úklid dvou nových fixture.
+[Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

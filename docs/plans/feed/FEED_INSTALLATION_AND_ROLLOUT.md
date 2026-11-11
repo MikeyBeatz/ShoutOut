@@ -661,7 +661,36 @@ dosavadní chování. Souběžné obnovení sdílí jeden probíhající požada
 
 Lokálně prošlo 11 nových klientských testů a 5/5 serverových regresí Uložených
 v emulátoru, včetně 50 + 5, smazaného hraničního bookmarku a zcela odfiltrované
-nefinální stránky. Celá první Flutter sada 327/327; následně doplněný test
-čekání na první potvrzení záložky bude ověřen také v CI. Analýza, přesné CI,
-release, živé ověření a úklid se teprve dokončují; dosavadní živý web je 14b7885.
+nefinální stránky. Celá první Flutter sada 327/327; doplněný test čekání
+na první potvrzení záložky prošel v 16/16 cílených klientských/live-state
+testech a konečných 328/328 Flutter v CI. Analýza je čistá.
 Důkazy: `build/saved-shouts-{targeted,flutter,analyze,server}.log`.
+
+Zdroj `dbf2aad2b5d5ab7490fa716318625ea1d0705697` má
+[success CI 42932603771](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42932603771):
+328 Flutter, 50 tools, 119 Functions unit (410 integračních případů se v této
+neemulátorové fázi přeskakuje), 436 Rules/server, 116 purge a 15 Storage;
+formát, analýza, lint i build prošly. Z čistého samostatného releasu byl
+11. listopadu 01:44:58 SEČ nasazený pouze Hosting `de78cfc631c1acc1`, projekt/site
+`shoutout-dev-46c81`. Čtyři veřejné soubory na obou DEV originech mají shodné
+SHA-256 s manifestem. Návratová Hosting verze je `831e3baaea8a8df3`.
+API porovnání před/po potvrzuje stejných 18 Functions (updateTime/revize)
+a totožný Firestore ruleset d5193d0b. Produkce ani main se neměnily.
+
+Živé jádro přes Admin SDK vytvořilo přes indexový writer pouze dva schválené
+aktivní Shouty `mvp-saved-20261111-{user,business}` pod existujícími identitami.
+Oběma účtům prošly vlastní stránky Uložených se dvěma kartami, odebrání jedné
+záložky a její opětovné uložení; opakování potvrzené operace nezměnilo updateTime
+zdroje. Po přípravě má každá karta dvě záložky. Původních 37 zdrojů má stejné
+updateTime, 0 nových/smazaných Auth účtů, stejný řídicí dokument generace.
+Jde o test živého jádra, nikoli HTTP Auth/App Check nebo browserový UI průchod.
+Stránkování nad 50 je ověřené lokálně/emulátorem, ne těmito dvěma živými kartami.
+
+**Čeká ruční UI potvrzení a následný úklid těchto dvou fixture.** Browser access
+host je nedostupný; náhradní Windows ovládání PWA bylo automatickou kontrolou
+odmítnuté kvůli nemožnosti spolehlivě ověřit URL. Vlastník dostal otázku na
+zobrazení obou karet, odebrání jedné záložky bez ruční obnovy a její nepřítomnost
+po následné obnově. Do odpovědi test ani úklid neoznačovat za dokončené.
+Důkazy: `build/saved-shouts-{ci,hosting,environment,live}-proof.json`,
+`build/saved-shouts-live-state.json` (awaiting-ui), `build/saved-shouts-ci.log`
+a `build/saved-shouts-deploy.log`. UI a úklid doplnit do tohoto odstavce.

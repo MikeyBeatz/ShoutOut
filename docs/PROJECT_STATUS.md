@@ -6,19 +6,26 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Právě schválený úsek: oprava Uložených na `fix/saved-shouts-pagination`.**
-Vlastník 11. listopadu schválil zachování seznamu/scrollu při čekání a chybě,
-opakování stejné stránky, návrat nahoru až po úspěšné obnově, kompaktní
-pokračování za kartami a ochranu opožděných odpovědí/odebrání záložky.
-Klientské jádro a testy jsou připravené; 11 nových klientských regresí a 5/5
-serverových testů Uložených prošlo lokálně. Nasazená verze je zatím stále
-14b7885, oprava ještě není živá. Následuje přesné CI, čistý release a pouze DEV
-Hosting; schválené jsou dva nové aktivní syntetické Shouty pod stávajícími
-testovacími účty a jejich úklid přes indexový writer. Bez nových Auth účtů,
-Functions/Rules/retence, produkce nebo main.
+**Dokončit pouze živé UI potvrzení Uložených a úklid dvou nových fixture.**
+Oprava na `fix/saved-shouts-pagination`, zdroj
+`dbf2aad2b5d5ab7490fa716318625ea1d0705697`, má
+[success CI 42932603771](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42932603771):
+328 Flutter, 50 tools, 119 Functions unit, 436 Rules/server, 116 purge a 15 Storage,
+formát/analýza/lint/build. Nasazený je pouze DEV Hosting `de78cfc631c1acc1`
+z čistého releasu; otisky čtyř souborů obou originů souhlasí. Všech 18 Functions
+a Firestore Rules se podle API nezměnilo. Oba existující testovací účty mají
+přes živé jádro ověřené uložení, odebrání/obnovení i idempotentní replay bez zápisu;
+nejde o HTTP Auth/App Check ani UI důkaz. Dva nové aktivní Shouty
+`mvp-saved-20261111-{user,business}` čekají na krátký ruční UI průchod a úklid
+přes indexový writer. Původních 37 zdrojů má stejné updateTime, Auth se neměnil.
+Browser host není dostupný; náhradní ovládání PWA automatická kontrola odmítla
+kvůli neověřitelné URL. Dotaz vlastníkovi je odeslaný: pod TestBusiness nebo
+Bright_Otter_182 odebrat jednu testovací záložku a ověřit zmizení karty i po obnově.
+Do odpovědi neoznačovat živou UI akceptaci ani úklid za dokončené.
+Návrat webu je `831e3baaea8a8df3`. Produkce, main, retence a Auth beze změn.
 [Rozsah a checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
-**Pokračovat zbývající klientskou regresí Uložených před uzavřením A2/A3.**
+**Předchozí uzavřená část: vlastní seznam a expired interakce.**
 Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí
 po expiraci jsou uzavřené v DEV. Zdroj `14b7885b35b89f62633a3d7496e10483fa91a739`
 na `feature/expired-shout-read-only` má
@@ -37,8 +44,8 @@ vedlejších záznamů jsou uklizené. Po UI potvrzení je uklizených také pů
 120 fixture, 27 receipt a 1 oznámení; v aktuálním indexu nezůstala jejich metadata.
 Původních 37 Shoutů má shodné updateTime; Auth účty se nevytvářely ani nemazaly.
 Výjimky pro vlastní mazání, moderaci a účtový úklid platí; retence se nemění.
-Před B1 zbývá ověřit chování Uložených při čekání/chybě/pokračování a dořešit
-tam nalezený podobný loading/Expanded vzor. B1–B4 ani celý milník hotové nejsou.
+Chování Uložených při čekání/chybě/pokračování řeší novější úsek výše;
+jeho živé UI potvrzení a úklid zatím zbývají. B1–B4 ani celý milník hotové nejsou.
 [Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
@@ -363,7 +370,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `14b7885b35b89f62633a3d7496e10483fa91a739` / `831e3baaea8a8df3`; kompaktní pokračování za kartami, zámek expired interakcí, prostorový feed i plovoucí tlačítka |
+| Webový zdroj / Hosting verze | `dbf2aad2b5d5ab7490fa716318625ea1d0705697` / `de78cfc631c1acc1`; navíc stabilní Uložené, retry, potvrzené odebrání; CI 42932603771 success. Živé UI potvrzení a úklid dvou fixture čekají. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
