@@ -85,9 +85,13 @@ protokol synchronizace a polling novinek stále potřebují konkrétní návrh.
 
 ## Návrh B1 k rozhodnutí — 11. listopadu 2026
 
-**Stav: připravený návrh, implementace ani nová retence zatím nejsou schválené.**
-Vlastník povolil pokračovat přípravou konkrétního návrhu B1. Následující volby
-nejsou důkazem, že už existují v kódu. Chybějící živé UI potvrzení Uložených
+**Stav: vlastník 11. listopadu schválil obě rozhodnutí i celý popsaný úsek.**
+Platí retence expiresAt + 7 dní, oddělené zachování při odhlášení a odstranění
+při potvrzené žádosti o smazání účtu. Schválené jsou implementace, testy,
+DEV web po přesném CI a právě dva čerstvé 24hodinové syntetické Shouty pod
+existujícími testovacími účty včetně úklidu. Následující návrh sám není důkaz
+dokončeného kódu či nasazení; aktuální checkpoint je uveden níže.
+Chybějící živé UI potvrzení Uložených
 zůstává otevřené; staré dva fixture jsou uklizené, viz
 [checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
@@ -135,12 +139,18 @@ nekopírovat. UID je jen technická součást oddělení záznamů. Dva prohlí�
 originy mají oddělené databáze: například web.app a firebaseapp.com si B1
 nesdílejí; propojení zařízení/originů zajistí až schválené B2.
 
-**Produktová volba k potvrzení:** navrhuji uchovat značku do `expiresAt + 7 dní`,
+**Schválená produktová volba:** uchovat značku do `expiresAt + 7 dní`,
 aby zůstala dostupná i během dnešního sedmidenního zobrazení expirovaných.
 Hodinová obnova feedu ji nemaže. Při odhlášení vyprázdnit paměť a zavřít
 přístup předchozího účtu; záznamy ponechat oddělené pro jeho příští přihlášení
 na stejném originu do výše uvedeného termínu. Při potvrzené žádosti o smazání
-účtu odstranit jeho lokální namespace. Nejde o změnu stávající serverové
+účtu odstranit jeho lokální značky v aktuálním originu. Kvůli souběhu zůstává
+jen technická zábrana opětovného zápisu v prázdné databázi pod hashovaným scope;
+neobsahuje historii přečtení, text, UID v otevřeném tvaru ani čas přečtení.
+Jiné zavřené/offline prohlížeče nelze vzdáleně vymazat samotným B1; jejich
+kopie podléhají místní retenci, při pozorované potvrzené žádosti se také vymažou.
+Úplná synchronizace a její účtový úklid patří do B2 před veřejným MVP.
+Nejde o změnu stávající serverové
 60denní retence obsahu. Návrh se týká pouze osobních lokálních značek.
 
 Po termínu záznam logicky nepoužít; fyzický úklid provést průběžně při otevření
@@ -223,7 +233,7 @@ DEV přepínač v `lib/web_environment.dart` a `config/dev.json`, cílené testy
 a dokumentace. `config/prod.json` zůstane vypnuté. Nejsou potřeba změny
 Functions, Firestore Rules, indexů, Scheduleru nebo stávajících zdrojových dat.
 
-**Navržený živý test ke schválení spolu s B1:** právě dva nové syntetické
+**Živý test schválený spolu s B1:** právě dva nové syntetické
 Shouty (krátký a dlouhý, platnost 24 hodin), po jednom pod existujícím
 Bright_Otter_182/TestBusiness, vytvořené přes indexový writer až při připraveném
 průchodu. Záložky obou účtů umožní současně doplnit chybějící UI kontrolu
@@ -232,10 +242,68 @@ Shouty a jejich přesně vymezená vedlejší data stejnou indexovou cestou.
 Produkce, main a stávající obsah se nemění. Samotné schválení tohoto návrhu
 neuzavírá A2/A3 ani B1 bez doložených výsledků.
 
-### Rozhodnutí potřebná před implementací
+### Schválená rozhodnutí před implementací
 
 1. Potvrdit navrženou retenci `expiresAt + 7 dní` a ponechání oddělené lokální
    kopie při běžném odhlášení; při potvrzeném mazání účtu ji odstranit.
 2. Schválit popsanou webovou B1 implementaci s IndexedDB, testy, následným
    DEV webem a dvěma čerstvými testovacími Shouty včetně úklidu. B2/B3/B4,
    jejich cloudová retence/náklady a produkční aktivace tím schválené nejsou.
+
+<a id="b1-implementation"></a>
+
+### Implementační checkpoint 11. listopadu
+
+Práce probíhá na `feature/feed-read-tracking`, od dokumentovaného návrhu
+f1c380d; zdrojové změny jsou připravené k commitu a CI, zatím nejsou nasazené. Připravené jsou
+model značek, IndexedDB transakce, místní controller/fronta, scope podle UID,
+vymazání s trvalou lokální zábranou proti souběžnému obnovení, widgetové
+měření skutečné geometrie textu, route/lifecycle a překrytí. DEV přepínač
+`localReadTracking` je lokálně zapnutý; produkční soubor se nemění. Hook do
+účtové přípravy se volá až po serverově potvrzené žádosti; neprovádí nové
+Firebase operace ani změny původních Auth/retencí.
+
+První cílená sada prošla 22/22, rozšířený průchod expozice/store/controller/
+widgetů/konfigurace/účtového opakování 55/55 a navazující přesné ořezy i
+skutečná Material karta 12/12 widget testů. Plná sada a finální analýza se
+ještě dokončují. Test zachytil cyklickou Future v úklidu mapy pending operací;
+callbacky load/erase nyní vracejí void a průchod již doběhl. Ořezy kontrolují
+skutečný ClipRect a známé konvexní Material tvary, ne jen jejich přibližný
+obdélník. Neznámý vlastní ClipPath není důkaz viditelnosti a nezapočítá se.
+
+Webová sada `test/read_state_store_browser.dart` prošla **7/7** ve skutečné
+IndexedDB izolovaného headless Chrome: restart, dvě souběžná spojení, hranice
+retence, oddělení UID/projektu, poškozený záznam, zavření během otevírání
+a vymazání s trvalou lokální zábranou. Je to lokální browserový test úložiště,
+nikoli živá aplikace/Auth/App Check. Původní `flutter test --platform chrome`
+uvízl ve startu suite i po přesunu souboru do test/; přesnou příčinu startu
+Flutter rendereru jsme nepotvrdili. Samotný transakční adaptér je proto
+oddělený od Flutter activity wrapperu do `lib/indexed_read_state_store.dart`
+a sada běží přes `dart test --platform chrome test/read_state_store_browser.dart`.
+Přibyla pouze dev závislost `test` 1.31.0 a její transitive lock; žádný nový
+runtime databázový balíček. Název sady nekončí `_test.dart`, proto ji nativní
+Flutter discovery nenačítá. CI ji explicitně spouští v samostatném kroku.
+
+Naměřené místní hodnoty ve Windows Chrome (nejde o SLA ani diskovou/cloudovou cenu):
+
+| Značky | Velikost JSON vzorku | Hromadná příprava testu | Dva bodové dotazy | Úklid po 100 položkách |
+|---|---|---|---|---|
+| 100 | 36 581 B | 17 ms | 1 ms | 28 ms |
+| 1 000 | 367 781 B | 71 ms | 2 ms | 470 ms |
+| 10 000 | 3 697 781 B | 795 ms | 1 ms | 7 987 ms |
+
+Příprava vzorku používá jednu testovací transakci, neměří jednotlivé produkční
+upserty. Úklid je asynchronní po malých transakcích a běží na pozadí,
+první zobrazení současného feedu na jeho dokončení nečeká. Vzorek jsou jen
+místní značky; žádný z 10 000 Shoutů nevznikl ve Firebase. Zápisy samotného
+B1 do Firestore a volání Functions zůstávají nulové.
+
+Celá místní Flutter sada prošla 350/350, cílené nástroje konfigurace 20/20,
+finální analýza je čistá a formát 145 souborů souhlasí.
+Přidána je samostatná Chrome sada do CI; všechny nové testovací závislosti
+jsou pouze dev a lockfile přidal 28 položek bez změny existujících verzí.
+Následuje source commit/push a přesné CI, čistý release
+a pouze DEV Hosting. Nové živé fixture dosud nevznikly. Nevydávat B1 ani
+chybějící UI Uložených za uzavřené. Důkazy rozpracování:
+`build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
+`build/read-store-browser.log`, `build/read-store-browser-verbose.log`.

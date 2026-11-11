@@ -27,35 +27,37 @@ class FeedRefreshOverlay extends StatelessWidget {
               right: 20,
               child: SafeArea(
                 bottom: false,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (onNotifications case final openNotifications?) ...[
-                      NotificationBellButton(
-                        floating: true,
-                        onPressed: openNotifications,
-                      ),
-                      if (onRefresh != null) const SizedBox(width: 8),
+                child: ReadOccluder(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onNotifications case final openNotifications?) ...[
+                        NotificationBellButton(
+                          floating: true,
+                          onPressed: openNotifications,
+                        ),
+                        if (onRefresh != null) const SizedBox(width: 8),
+                      ],
+                      if (onRefresh != null)
+                        FloatingActionButton.small(
+                          key: const ValueKey('spatial-feed-refresh'),
+                          heroTag: 'refresh-feed',
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).refreshIndicatorSemanticLabel,
+                          onPressed: refreshing ? null : onRefresh,
+                          child: refreshing
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh),
+                        ),
                     ],
-                    if (onRefresh != null)
-                      FloatingActionButton.small(
-                        key: const ValueKey('spatial-feed-refresh'),
-                        heroTag: 'refresh-feed',
-                        tooltip: MaterialLocalizations.of(
-                          context,
-                        ).refreshIndicatorSemanticLabel,
-                        onPressed: refreshing ? null : onRefresh,
-                        child: refreshing
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.refresh),
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -57,6 +57,9 @@ import 'feed_page_gateway.dart';
 import 'own_shouts_gateway.dart';
 import 'saved_shouts_gateway.dart';
 import 'shout_interaction_gate.dart';
+import 'read_state_store.dart';
+import 'read_tracking_controller.dart';
+import 'read_tracking_widgets.dart';
 
 part 'src/create_shout.dart';
 part 'src/comments.dart';
@@ -130,6 +133,11 @@ Future<void> main() async {
         break;
     }
   }
+  readSessions.configure(
+    kIsWeb && WebEnvironment.current.localReadTracking
+        ? Firebase.app().options.projectId
+        : null,
+  );
   runApp(const ShoutOutApp());
 }
 
@@ -143,6 +151,9 @@ class ShoutOutApp extends StatelessWidget {
       builder: (context, locale, _) => ValueListenableBuilder<ThemeMode>(
         valueListenable: appThemeMode,
         builder: (context, themeMode, _) => MaterialApp(
+          navigatorObservers: readSessions.configured
+              ? [readNavigationObserver]
+              : const [],
           debugShowCheckedModeBanner: false,
           builder: (context, child) => LayoutBuilder(
             builder: (context, constraints) {
@@ -160,7 +171,12 @@ class ShoutOutApp extends StatelessWidget {
                   child: SizedBox(
                     width: appWidth,
                     height: constraints.maxHeight,
-                    child: child,
+                    child: readSessions.configured
+                        ? ReadTrackingRoot(
+                            sessions: readSessions,
+                            child: child!,
+                          )
+                        : child,
                   ),
                 ),
               );

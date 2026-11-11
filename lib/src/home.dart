@@ -903,121 +903,123 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         },
       ),
       floatingActionButton: _tab == 0
-          ? FloatingActionButton.extended(
-              heroTag: 'create-shout',
-              onPressed: () async {
-                completeInteractiveTutorialAction(3);
-                final shout = await showDialog<Shout>(
-                  context: context,
-                  builder: (_) => Dialog(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: CreateShoutSheet(onPublish: _addShout),
+          ? ReadOccluder(
+              child: FloatingActionButton.extended(
+                heroTag: 'create-shout',
+                onPressed: () async {
+                  completeInteractiveTutorialAction(3);
+                  final shout = await showDialog<Shout>(
+                    context: context,
+                    builder: (_) => Dialog(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: CreateShoutSheet(onPublish: _addShout),
+                      ),
                     ),
-                  ),
-                );
-                if (shout != null) {
-                  try {
-                    await _addShout(shout);
-                  } on StateError catch (error) {
-                    await _recordClientError(
-                      action: 'publish_shout',
-                      error: error,
-                    );
-                    if (context.mounted &&
-                        error.message.toString().startsWith('location-')) {
-                      final message = switch (error.message) {
-                        'location-servicesDisabled' =>
-                          'Zapni polohové služby a zkus Shout publikovat znovu.',
-                        'location-permissionDeniedForever' =>
-                          'Povol aplikaci přístup k poloze v nastavení zařízení.',
-                        'location-permissionDenied' =>
-                          'Pro publikování Shoutu povol přístup k poloze.',
-                        'location-timedOut' =>
-                          'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.',
-                        _ =>
-                          'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.',
-                      };
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(tr(context, message)),
-                          action:
-                              error.message ==
-                                  'location-permissionDeniedForever'
-                              ? SnackBarAction(
-                                  label: tr(context, 'Otevřít nastavení'),
-                                  onPressed: Geolocator.openAppSettings,
-                                )
-                              : null,
-                        ),
+                  );
+                  if (shout != null) {
+                    try {
+                      await _addShout(shout);
+                    } on StateError catch (error) {
+                      await _recordClientError(
+                        action: 'publish_shout',
+                        error: error,
                       );
-                    } else if (context.mounted &&
-                        error.message == 'business-location-unavailable') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            tr(
-                              context,
-                              'Vybraná pobočka není dostupná. Zkontrolujte její adresu a aktivní stav.',
+                      if (context.mounted &&
+                          error.message.toString().startsWith('location-')) {
+                        final message = switch (error.message) {
+                          'location-servicesDisabled' =>
+                            'Zapni polohové služby a zkus Shout publikovat znovu.',
+                          'location-permissionDeniedForever' =>
+                            'Povol aplikaci přístup k poloze v nastavení zařízení.',
+                          'location-permissionDenied' =>
+                            'Pro publikování Shoutu povol přístup k poloze.',
+                          'location-timedOut' =>
+                            'Polohu se nepodařilo zjistit včas. Přejdi na otevřené místo a zkus to znovu.',
+                          _ =>
+                            'Polohu se nepodařilo zjistit. Zkontroluj připojení a polohové služby.',
+                        };
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(tr(context, message)),
+                            action:
+                                error.message ==
+                                    'location-permissionDeniedForever'
+                                ? SnackBarAction(
+                                    label: tr(context, 'Otevřít nastavení'),
+                                    onPressed: Geolocator.openAppSettings,
+                                  )
+                                : null,
+                          ),
+                        );
+                      } else if (context.mounted &&
+                          error.message == 'business-location-unavailable') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              tr(
+                                context,
+                                'Vybraná pobočka není dostupná. Zkontrolujte její adresu a aktivní stav.',
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    } else if (context.mounted &&
-                        error.message == 'rate-shout-cooldown') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            tr(
-                              context,
-                              'Mezi dvěma Shouty je potřeba počkat alespoň 2 minuty.',
+                        );
+                      } else if (context.mounted &&
+                          error.message == 'rate-shout-cooldown') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              tr(
+                                context,
+                                'Mezi dvěma Shouty je potřeba počkat alespoň 2 minuty.',
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    } else if (context.mounted &&
-                        error.message == 'rate-shout-daily-limit') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            tr(
-                              context,
-                              'Byl dosažen denní limit 50 Shoutů pro tento účet.',
+                        );
+                      } else if (context.mounted &&
+                          error.message == 'rate-shout-daily-limit') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              tr(
+                                context,
+                                'Byl dosažen denní limit 50 Shoutů pro tento účet.',
+                              ),
                             ),
                           ),
-                        ),
+                        );
+                      }
+                    } on FirebaseException catch (error) {
+                      await _recordClientError(
+                        action: 'publish_shout',
+                        error: error,
                       );
-                    }
-                  } on FirebaseException catch (error) {
-                    await _recordClientError(
-                      action: 'publish_shout',
-                      error: error,
-                    );
-                    if (context.mounted) {
-                      final message = switch (error.code) {
-                        'permission-denied' =>
-                          'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.',
-                        'unavailable' || 'deadline-exceeded' =>
-                          'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.',
-                        _ => 'Akci se nepodařilo dokončit. Zkus to znovu.',
-                      };
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            _serverWriteFailureText(
-                              context,
-                              error,
-                              fallback: message,
+                      if (context.mounted) {
+                        final message = switch (error.code) {
+                          'permission-denied' =>
+                            'Shout se nepodařilo publikovat kvůli oprávnění účtu. Zkontroluj ověření e-mailu a stav účtu.',
+                          'unavailable' || 'deadline-exceeded' =>
+                            'Služba je dočasně nedostupná. Zkontroluj připojení a zkus to znovu.',
+                          _ => 'Akci se nepodařilo dokončit. Zkus to znovu.',
+                        };
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _serverWriteFailureText(
+                                context,
+                                error,
+                                fallback: message,
+                              ),
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
                   }
-                }
-              },
-              icon: const Icon(Icons.campaign_outlined),
-              label: Text(tr(context, 'Přidat shout')),
+                },
+                icon: const Icon(Icons.campaign_outlined),
+                label: Text(tr(context, 'Přidat shout')),
+              ),
             )
           : null,
       bottomNavigationBar: Stack(

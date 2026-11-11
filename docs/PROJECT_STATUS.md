@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Doplnit chybějící živé UI potvrzení Uložených; připravit návrh B1.**
+**Dokončit schválenou implementaci B1 a při jejím živém testu doplnit Uložené.**
 Oprava na `fix/saved-shouts-pagination`, zdroj
 `dbf2aad2b5d5ab7490fa716318625ea1d0705697`, má
 [success CI 42932603771](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42932603771):
@@ -31,9 +31,15 @@ Návrat webu je `831e3baaea8a8df3`. Produkce, main, retence a Auth beze změn.
 Na `feature/feed-reading-proposal` je připravený
 [konkrétní návrh B1](plans/feed/FEED_READING_POLICY.md#b1-proposal): webové
 IndexedDB podle projektu/UID, skutečná expozice nadpisu/textu a místní fronta
-bez nových Firebase operací. Navržené uchování do expiresAt + 7 dní a další
-implementace/čerstvé dva živé fixture čekají na rozhodnutí vlastníka.
-Zatím pouze dokumentace; kód, přepínače, nasazení a B1/B2/B3/B4 se nezměnily.
+bez nových Firebase operací. Vlastník 11. listopadu potvrdil uchování do
+expiresAt + 7 dní a celý implementační úsek včetně dvou čerstvých 24hodinových
+fixture a úklidu. Na `feature/feed-read-tracking` je rozpracovaný kód a testy,
+dosud bez nasazení. Celá lokální sada 350/350 Flutter, 7/7 skutečných
+browserových IndexedDB a 20/20 cílených nástrojových testů prošla. Analýza
+a formát jsou čisté. Následuje source commit/CI a čistý release; živé UI
+potvrzení zůstává otevřené.
+[Přesný checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).
+Živý web zůstává dbf2aad; nové fixture zatím nevznikly. B1–B4 nejsou uzavřené.
 
 **Předchozí uzavřená část: vlastní seznam a expired interakce.**
 Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí

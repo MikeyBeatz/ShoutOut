@@ -23,6 +23,23 @@ class FullContentExposure {
 
   bool get isComplete => _complete;
 
+  void pause(Duration time) {
+    if (time.isNegative || (_lastTime != null && time < _lastTime!)) {
+      throw ArgumentError('Invalid exposure clock.');
+    }
+    _lastTime = time;
+    _visible = [];
+  }
+
+  Duration? get untilNextQualification {
+    if (_complete || _visible.isEmpty || _lastTime == null) return null;
+    final oldest = _visible
+        .map((slice) => slice.since)
+        .reduce((a, b) => a < b ? a : b);
+    final remaining = minimumExposure - (_lastTime! - oldest);
+    return remaining > Duration.zero ? remaining : Duration.zero;
+  }
+
   /// Coordinates are relative to the entire relevant content, never viewport
   /// percentages. One layout key denotes one text/font/width arrangement.
   bool observe({

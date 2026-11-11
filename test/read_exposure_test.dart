@@ -2,6 +2,52 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/read_exposure.dart';
 
 void main() {
+  test(
+    'pausing preserves qualified portions but discards the pending dwell frontier',
+    () {
+      final tracker = FullContentExposure();
+      tracker.observe(
+        time: Duration.zero,
+        layout: 'same',
+        extent: 100,
+        visible: const [ContentSlice(0, 50)],
+        active: true,
+        fullContentRendered: true,
+      );
+      tracker.observe(
+        time: const Duration(seconds: 1),
+        layout: 'same',
+        extent: 100,
+        visible: const [ContentSlice(0, 50)],
+        active: true,
+        fullContentRendered: true,
+      );
+      tracker.pause(const Duration(seconds: 5));
+      expect(tracker.untilNextQualification, isNull);
+      expect(
+        tracker.observe(
+          time: const Duration(seconds: 6),
+          layout: 'same',
+          extent: 100,
+          visible: const [ContentSlice(50, 100)],
+          active: true,
+          fullContentRendered: true,
+        ),
+        isFalse,
+      );
+      expect(
+        tracker.observe(
+          time: const Duration(seconds: 7),
+          layout: 'same',
+          extent: 100,
+          visible: const [ContentSlice(50, 100)],
+          active: true,
+          fullContentRendered: true,
+        ),
+        isTrue,
+      );
+    },
+  );
   bool show(
     FullContentExposure tracker,
     int millis,

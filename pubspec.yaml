@@ -52,6 +52,7 @@ dependencies:
   web: ^1.1.1
 
 dev_dependencies:
+  test: ^1.31.0
   flutter_test:
     sdk: flutter
   firebase_core_platform_interface: ^8.1.0

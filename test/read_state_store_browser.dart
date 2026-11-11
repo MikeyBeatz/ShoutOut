@@ -1,0 +1,240 @@
+// Explicit Chrome suite; excluded from the native *_test.dart discovery.
+import 'dart:async';
+import 'dart:convert';
+import 'dart:js_interop';
+
+import 'package:test/test.dart';
+import 'package:web/web.dart' as web;
+import 'package:shoutout/indexed_read_state_store.dart';
+import 'package:shoutout/read_state_store.dart';
+
+Future<web.IDBDatabase> open(String name) {
+  final done = Completer<web.IDBDatabase>(),
+      request = web.window.indexedDB.open(name, 1);
+  request.onsuccess = ((web.Event _) {
+    done.complete(request.result as web.IDBDatabase);
+  }).toJS;
+  request.onerror = ((web.Event _) {
+    done.completeError(StateError('Test database open'));
+  }).toJS;
+  return done.future;
+}
+
+Future<void> mutate(
+  String name,
+  void Function(web.IDBObjectStore) action,
+) async {
+  final db = await open(name),
+      tx = db.transaction('records'.toJS, 'readwrite'),
+      done = Completer<void>();
+  tx.oncomplete = ((web.Event _) {
+    done.complete();
+  }).toJS;
+  tx.onabort = ((web.Event _) {
+    if (!done.isCompleted) done.completeError(StateError('Test transaction'));
+  }).toJS;
+  action(tx.objectStore('records'));
+  await done.future;
+  db.close();
+}
+
+Future<void> drop(String name) async {
+  final done = Completer<void>(),
+      request = web.window.indexedDB.deleteDatabase(name);
+  request.onsuccess = ((web.Event _) {
+    done.complete();
+  }).toJS;
+  request.onerror = ((web.Event _) {
+    done.completeError(StateError('Test database cleanup'));
+  }).toJS;
+  await done.future;
+}
+
+void main() {
+  var serial = 0;
+  final now = DateTime.utc(2030, 1, 1),
+      scope = ReadScope('local-test', 'reader');
+  ReadContent item(int i) => ReadContent(
+    shoutId: 'synthetic-$i',
+    title: 'Title $i',
+    text: 'Body',
+    expiresAt: now.add(const Duration(days: 1)),
+  );
+  IndexedReadStateStore store({ReadScope? owner, String? prefix}) {
+    final s = IndexedReadStateStore(
+      owner ?? scope,
+      prefix:
+          prefix ??
+          'b1-test-${DateTime.now().microsecondsSinceEpoch}-${serial++}',
+    );
+    addTearDown(() async {
+      await s.close();
+      await drop(s.name);
+    });
+    return s;
+  }
+
+  test(
+    'IndexedDB persists completed markers across a closed and reopened connection',
+    () async {
+      final first = store();
+      await first.put(item(0), now);
+      await first.close();
+      final second = IndexedReadStateStore(
+        scope,
+        prefix: first.name.substring(
+          0,
+          first.name.length - scope.databaseSuffix.length - 1,
+        ),
+      );
+      addTearDown(second.close);
+      expect(await second.contains(item(0), now), isTrue);
+      expect(
+        await second.contains(
+          ReadContent(
+            shoutId: 'synthetic-0',
+            title: 'Changed',
+            text: 'Body',
+            expiresAt: item(0).expiresAt,
+          ),
+          now,
+        ),
+        isFalse,
+      );
+    },
+  );
+  test(
+    'two IndexedDB connections merge concurrent marks and cannot write past an erasure fence',
+    () async {
+      final first = store(),
+          prefix = first.name.substring(
+            0,
+            first.name.length - scope.databaseSuffix.length - 1,
+          );
+      final second = IndexedReadStateStore(scope, prefix: prefix);
+      addTearDown(second.close);
+      await Future.wait([
+        first.put(item(0), now),
+        second.put(item(1), now),
+        first.put(item(1), now),
+      ]);
+      expect(await first.contains(item(1), now), isTrue);
+      expect(await second.contains(item(0), now), isTrue);
+      await Future.wait([
+        first.erase(),
+        second.put(item(2), now).catchError((_) {}),
+      ]);
+      await expectLater(second.put(item(3), now), throwsStateError);
+      await first.erase(); // Idempotent even after the persistent fence.
+    },
+  );
+  test(
+    'UID/project namespaces remain independent even with the same source ID',
+    () async {
+      final prefix = 'b1-scope-${DateTime.now().microsecondsSinceEpoch}';
+      final alice = store(prefix: prefix),
+          bob = store(prefix: prefix, owner: ReadScope('local-test', 'bob'));
+      final prod = store(
+        prefix: prefix,
+        owner: ReadScope('other-project', 'reader'),
+      );
+      await alice.put(item(0), now);
+      expect(await bob.contains(item(0), now), isFalse);
+      expect(await prod.contains(item(0), now), isFalse);
+      await bob.erase();
+      expect(await alice.contains(item(0), now), isTrue);
+    },
+  );
+  test(
+    'retention is logical at the deadline and physical cleanup uses bounded transactions',
+    () async {
+      final s = store();
+      await Future.wait([s.put(item(0), now), s.put(item(1), now)]);
+      final end = item(0).retainUntil;
+      expect(
+        await s.contains(
+          item(0),
+          end.subtract(const Duration(milliseconds: 1)),
+        ),
+        isTrue,
+      );
+      expect(await s.contains(item(0), end), isFalse);
+      expect(await s.prune(end, limit: 1), 1);
+      expect(await s.prune(end, limit: 1), 1);
+      expect(await s.prune(end), 0);
+    },
+  );
+  test(
+    'a corrupt browser record is a miss and completion replaces it with a valid marker',
+    () async {
+      final s = store();
+      await s.put(item(0), now);
+      await mutate(
+        s.name,
+        (records) => records.put(
+          {
+            ...ReadMarker(scope, item(0), now).toJson(),
+            'userId': 'wrong',
+          }.jsify()!,
+        ),
+      );
+      expect(await s.contains(item(0), now), isFalse);
+      await s.put(item(0), now);
+      expect(await s.contains(item(0), now), isTrue);
+    },
+  );
+  test(
+    'closing during database open cannot create an acknowledged late write',
+    () async {
+      final s = store(), pending = s.put(item(0), now);
+      final rejection = expectLater(pending, throwsStateError);
+      await s.close();
+      await rejection;
+    },
+  );
+  test(
+    'local-only metadata measurements at 100, 1000 and 10000 rows',
+    () async {
+      final measurements = <Map<String, Object>>[];
+      for (final count in [100, 1000, 10000]) {
+        final s = store();
+        await s.prune(now);
+        final rows = List.generate(
+          count,
+          (i) => ReadMarker(scope, item(i), now).toJson(),
+        );
+        final watch = Stopwatch()..start();
+        await mutate(s.name, (records) {
+          for (final row in rows) {
+            records.put(row.jsify()!);
+          }
+        });
+        final writeMs = watch.elapsedMilliseconds;
+        watch.reset();
+        expect(await s.contains(item(0), now), isTrue);
+        expect(await s.contains(item(count - 1), now), isTrue);
+        final lookupMs = watch.elapsedMilliseconds;
+        watch.reset();
+        var removed = 0, batch = 0;
+        do {
+          batch = await s.prune(item(0).retainUntil);
+          removed += batch;
+        } while (batch == 100);
+        expect(removed, count);
+        measurements.add({
+          'rows': count,
+          'jsonBytes': utf8.encode(jsonEncode(rows)).length,
+          'seedMs': writeMs,
+          'twoLookupsMs': lookupMs,
+          'boundedPruneMs': watch.elapsedMilliseconds,
+          'firestoreReads': 0,
+          'firestoreWrites': 0,
+        });
+      }
+      // Reproducible local evidence; not a cloud price estimate or disk-size guarantee.
+      // ignore: avoid_print
+      print('B1_LOCAL_METADATA ${jsonEncode(measurements)}');
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+}

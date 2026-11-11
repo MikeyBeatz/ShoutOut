@@ -40,16 +40,20 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
    živá UI akceptace opravených Uložených; lokální regrese čekání/chyb,
    pokračování a změny účtu už prošly. Původní fixture jsou odstraněné,
-   novější dva jsou také uklizené. Potom uzavřít společnou
+   novější dva jsou také uklizené. Čerstvý průchod je nyní schválený spolu
+   s B1: právě dva 24hodinové syntetické Shouty pod stávajícími účty a úklid.
+   Potom uzavřít společnou
    akceptaci A2/A3 a přejít na B.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
    a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální
    unread-first v Nejblíž; B4: oddělený počet novinek. Konkrétní úložiště,
-   retence read stavu a polling vyžadují schválení; konkrétní
-   [webový návrh B1](plans/feed/FEED_READING_POLICY.md#b1-proposal) je připravený
-   (IndexedDB, místní značky a návrh expiresAt + 7 dní, bez cloudových operací).
-   Implementace B1 zatím schválená není. Další závislosti jsou podle
+   [webové B1](plans/feed/FEED_READING_POLICY.md#b1-proposal) je schválené
+   (IndexedDB, místní značky a expiresAt + 7 dní, bez cloudových operací).
+   Implementace a lokální testy probíhají; nasazení zatím není provedeno.
+   [Checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).
+   Cloudová retence/synchronizace a polling zůstávají rozhodnutím pro B2/B4.
+   Další závislosti jsou podle
    [etap](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav). Celé A0–A3
    i B1–B4 zůstává před MVP; dílčí rollout neuzavírá celý milník.
 3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní

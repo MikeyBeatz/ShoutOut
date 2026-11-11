@@ -40,8 +40,9 @@ a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 [Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
-11. listopadu je připravený [konkrétní návrh webového B1](FEED_READING_POLICY.md#b1-proposal),
-dosud bez souhlasu s novou retencí a implementací.
+11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
+i retenci expiresAt + 7 dní. Implementace a testy probíhají;
+[checkpoint](FEED_READING_POLICY.md#b1-implementation). Nasazení B1 zatím není provedeno.
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené
 5. listopadu 2026. Lokální dávková příprava 1ba2b4a má success CI 42053726540

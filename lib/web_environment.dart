@@ -13,6 +13,11 @@ class WebEnvironment {
       throw StateError('Choose a configured dev or prod web environment.');
     }
     final key = json['appCheckSiteKey'];
+    if (json.containsKey('localReadTracking') &&
+        json['localReadTracking'] is! bool) {
+      throw StateError('localReadTracking must be a boolean.');
+    }
+    localReadTracking = json['localReadTracking'] == true;
     final gateway = json['serverShoutCreation'];
     final commentsGateway = json['serverCommentCreation'];
     final privateRepliesGateway = json['serverPrivateReplyCreation'];
@@ -220,6 +225,7 @@ class WebEnvironment {
   final String hostingSite;
   final Map<String, dynamic> firebase;
   late final String? appCheckSiteKey;
+  late final bool localReadTracking;
   late final bool serverShoutCreation;
   late final bool serverSpatialFeed;
   late final bool serverCommentCreation;

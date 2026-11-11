@@ -10,6 +10,7 @@ import 'account_deletion_progress.dart';
 import 'deletion_write_policy.dart';
 import 'l10n/text.dart';
 import 'timed_operation_gateway.dart';
+import 'read_tracking_controller.dart';
 
 final _deletionRuns = <String, Future<AccountDeletionOutcome?>>{};
 void _logAccountDeletionFailure(String stage, Object error) => debugPrint(
@@ -168,6 +169,7 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         auth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
         user: user,
+        onIntentConfirmed: () => readSessions.eraseAccount(user.uid),
         finalizeIntent: policy.finalization
             ? () async =>
                   (await FirebaseFunctions.instanceFor(region: 'europe-west3')

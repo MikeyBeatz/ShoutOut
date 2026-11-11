@@ -82,6 +82,19 @@ class ShoutCard extends StatelessWidget {
 
   Widget _buildCard(BuildContext context, bool open) {
     final theme = Theme.of(context);
+    final titleText = Text(
+      shout.title,
+      maxLines: showFullContent ? null : 2,
+      overflow: showFullContent ? TextOverflow.clip : TextOverflow.ellipsis,
+      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+    );
+    final bodyText = Text(
+      shout.text,
+      key: const Key('shout-card-body'),
+      maxLines: showFullContent ? null : 3,
+      overflow: showFullContent ? TextOverflow.clip : TextOverflow.ellipsis,
+      style: theme.textTheme.bodyLarge,
+    );
     Future<void> openComments() async {
       completeInteractiveTutorialAction(1);
       await Navigator.push(
@@ -246,26 +259,22 @@ class ShoutCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              Text(
-                shout.title,
-                maxLines: showFullContent ? null : 2,
-                overflow: showFullContent
-                    ? TextOverflow.clip
-                    : TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                shout.text,
-                key: const Key('shout-card-body'),
-                maxLines: showFullContent ? null : 3,
-                overflow: showFullContent
-                    ? TextOverflow.clip
-                    : TextOverflow.ellipsis,
-                style: theme.textTheme.bodyLarge,
-              ),
+              if (ReadTrackingScope.maybeOf(context) != null)
+                ReadTrackedContent(
+                  content: ReadContent(
+                    shoutId: shout.id,
+                    title: shout.title,
+                    text: shout.text,
+                    expiresAt: shout.expiresAt,
+                  ),
+                  title: titleText,
+                  body: bodyText,
+                )
+              else ...[
+                titleText,
+                const SizedBox(height: 6),
+                bodyText,
+              ],
               const SizedBox(height: 12),
               Wrap(
                 spacing: 6,

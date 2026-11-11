@@ -12,6 +12,14 @@ const actualDev = loadConfig('dev');
 // dependencies. The complete actual DEV configuration is checked separately.
 const dev = { ...actualDev, serverSpatialFeed: false };
 
+test('local read tracking is a typed optional flag with production left disabled', () => {
+  assert.equal(actualDev.localReadTracking, true);
+  assert.notEqual(loadConfig('prod').localReadTracking, true);
+  const without = { ...dev }; delete without.localReadTracking;
+  assert.doesNotThrow(() => validateConfig(without, 'dev'));
+  for (const value of [null, 'true', 1, {}]) assert.throws(() => validateConfig({ ...dev, localReadTracking: value }, 'dev'));
+});
+
 test('spatial feed defaults off and requires server gateways and App Check', () => {
   assert.equal(actualDev.serverSpatialFeed, true);
   assert.doesNotThrow(() => validateConfig(actualDev, 'dev'));

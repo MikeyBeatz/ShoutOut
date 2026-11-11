@@ -12,6 +12,32 @@ Map<String, dynamic> gatewayFixture() => {
 
 void main() {
   test(
+    'local reading is explicit in DEV, defaults off and rejects invalid configuration',
+    () {
+      final dev = gatewayFixture();
+      expect(WebEnvironment.fromJson(dev).localReadTracking, isTrue);
+      expect(
+        WebEnvironment.fromJson(
+          {...dev}..remove('localReadTracking'),
+        ).localReadTracking,
+        isFalse,
+      );
+      for (final value in [null, 1, 'true']) {
+        expect(
+          () => WebEnvironment.fromJson({...dev, 'localReadTracking': value}),
+          throwsStateError,
+        );
+      }
+      expect(
+        WebEnvironment.fromJson(
+          jsonDecode(File('config/prod.json').readAsStringSync())
+              as Map<String, dynamic>,
+        ).localReadTracking,
+        isFalse,
+      );
+    },
+  );
+  test(
     'spatial feed defaults off, requires server gateways and rejects invalid flags',
     () {
       expect(

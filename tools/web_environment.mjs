@@ -13,6 +13,9 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.localReadTracking !== undefined && typeof config.localReadTracking !== 'boolean') {
+    throw new Error('localReadTracking must be a boolean.');
+  }
   if (config.serverSpatialFeed !== undefined && typeof config.serverSpatialFeed !== 'boolean') {
     throw new Error('serverSpatialFeed must be a boolean.');
   }

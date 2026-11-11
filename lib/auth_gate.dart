@@ -1,6 +1,7 @@
 import 'live_data.dart';
 import 'account_deletion.dart';
 import 'account_deletion_attempt.dart';
+import 'read_tracking_controller.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -32,6 +33,7 @@ class AuthGate extends StatelessWidget {
       ('auth', FirebaseAuth.instance),
       () => FirebaseAuth.instance.userChanges().map((user) {
         liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
+        readSessions.retainViewer(user?.uid);
         return user;
       }),
     ),
@@ -1069,6 +1071,9 @@ class _DeletionRequestGateState extends State<DeletionRequestGate> {
       if (mounted && widget.user.uid == uid && document.userId == uid) {
         if (document.data != null) {
           _pending = document.data;
+          if (!document.isFromCache && !document.hasPendingWrites) {
+            unawaited(readSessions.eraseAccount(uid));
+          }
         } else if (!document.isFromCache && !document.hasPendingWrites) {
           _pending = null;
         }

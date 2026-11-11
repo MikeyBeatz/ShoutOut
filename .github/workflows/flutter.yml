@@ -69,6 +69,10 @@ jobs:
         timeout-minutes: 5
         run: flutter test
 
+      - name: Test browser read-state persistence
+        timeout-minutes: 3
+        run: dart test --platform chrome test/read_state_store_browser.dart
+
       - name: Install Firestore Rules test dependencies
         timeout-minutes: 4
         working-directory: tools

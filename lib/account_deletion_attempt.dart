@@ -148,12 +148,14 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
     required this.user,
     this.prepareBeforeIntent,
     this.finalizeIntent,
+    this.onIntentConfirmed,
   });
   final FirebaseAuth auth;
   final FirebaseFirestore firestore;
   final User user;
   final Future<void> Function()? prepareBeforeIntent;
   final Future<Object?> Function()? finalizeIntent;
+  final Future<void> Function()? onIntentConfirmed;
 
   @override
   String? get currentUserId => auth.currentUser?.uid;
@@ -218,15 +220,17 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
 
     final finalize = finalizeIntent;
     if (finalize != null) {
-      return ensureServerAccountDeletionIntent(
+      final intent = await ensureServerAccountDeletionIntent(
         userId: user.uid,
         readExisting: readExisting,
         prepare: prepare,
         finalize: finalize,
         guardIdentity: _guardIdentity,
       );
+      await onIntentConfirmed?.call();
+      return intent;
     }
-    return ensurePreparedAccountDeletionIntent(
+    final intent = await ensurePreparedAccountDeletionIntent(
       guardIdentity: _guardIdentity,
       readExisting: readExisting,
       prepare: prepare,
@@ -249,6 +253,8 @@ class FirebaseAccountDeletionTransport implements AccountDeletionTransport {
         return AccountDeletionIntent(userId: user.uid, confirmed: false);
       }),
     );
+    await onIntentConfirmed?.call();
+    return intent;
   }
 
   @override
