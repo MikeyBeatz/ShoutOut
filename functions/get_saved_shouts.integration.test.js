@@ -53,3 +53,22 @@ test('deleted, expired, blocked and erased-author sources are not returned; pend
   const request = db.doc(`accountDeletionRequests/${f.uid}`); f.roots.push(request); await request.set({ status: 'pending' });
   await assert.rejects(page(f.request(), db), { code: 'failed-precondition' });
 });
+
+test('removing the page anchor bookmark does not lose the following saved page', { skip: !enabled }, async t => {
+  const f = await fixture(t), first = await page(f.request(), db);
+  await db.doc(first.next).delete();
+  const second = await page(f.request(first.next), db);
+  assert.deepEqual(second.items.map(item => item.id), f.refs.slice(50).map(ref => ref.id));
+  assert.equal(second.next, null);
+});
+
+test('a fully filtered first page keeps its continuation to available later bookmarks', { skip: !enabled }, async t => {
+  const f = await fixture(t), batch = db.batch();
+  for (const ref of f.refs.slice(0, 50)) batch.update(ref, { expiresAt: Timestamp.fromMillis(0) });
+  await batch.commit();
+  const first = await page(f.request(), db);
+  assert.deepEqual(first.items, []); assert(first.next);
+  const second = await page(f.request(first.next), db);
+  assert.deepEqual(second.items.map(item => item.id), f.refs.slice(50).map(ref => ref.id));
+  assert.equal(second.next, null);
+});

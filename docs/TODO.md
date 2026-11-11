@@ -25,6 +25,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 ## Nejbližší práce
 
 1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
+   Konkrétní oprava je schválená a lokálně připravená na
+   `fix/saved-shouts-pagination`; po přesném CI následuje pouze DEV web,
+   dva nové aktivní fixture pod stávajícími účty a úklid.
+   [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
    Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
    zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
    vlastníkem. Zdroj 14b7885 prošel CI 42902048239 a je nasazený: tři Functions,
@@ -34,7 +38,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
    chování Uložených při síťovém čekání/chybě, připojení další dávky a změně
    účtu; je tam nalezený podobný loading/Expanded vzor. Nové zdrojové změny
-   či čerstvé živé fixture předložit konkrétním rozsahem, původní fixture
+   či čerstvé živé fixture jsou nyní schválené výše uvedeným rozsahem; původní fixture
    jsou už odstraněné. Potom uzavřít společnou akceptaci A2/A3 a přejít na B.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice

@@ -5,6 +5,34 @@ import 'package:shoutout/live_shout_state.dart';
 
 void main() {
   test(
+    'initial bookmark state waits for confirmation before publishing availability',
+    () async {
+      final documents = StreamController<Map<String, dynamic>?>();
+      final reactions = StreamController<Map<String, dynamic>?>();
+      final saves = StreamController<bool>();
+      final events = <LiveShoutState>[];
+      final subscription = watchLiveShoutState(
+        documents.stream,
+        reactions.stream,
+        ownSave: saves.stream,
+      ).listen(events.add);
+      documents.add({'savesCount': 1});
+      reactions.add(null);
+      await Future<void>.delayed(Duration.zero);
+      expect(events, isEmpty);
+      saves.add(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(events.single.saved, isTrue);
+      saves.add(false);
+      await Future<void>.delayed(Duration.zero);
+      expect(events.last.saved, isFalse);
+      await subscription.cancel();
+      await documents.close();
+      await reactions.close();
+      await saves.close();
+    },
+  );
+  test(
     'a purge marker or confirmed disappearance clears an already open detail',
     () async {
       final events = await watchLiveShoutState(

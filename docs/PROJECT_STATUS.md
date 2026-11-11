@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Právě schválený úsek: oprava Uložených na `fix/saved-shouts-pagination`.**
+Vlastník 11. listopadu schválil zachování seznamu/scrollu při čekání a chybě,
+opakování stejné stránky, návrat nahoru až po úspěšné obnově, kompaktní
+pokračování za kartami a ochranu opožděných odpovědí/odebrání záložky.
+Klientské jádro a testy jsou připravené; 11 nových klientských regresí a 5/5
+serverových testů Uložených prošlo lokálně. Nasazená verze je zatím stále
+14b7885, oprava ještě není živá. Následuje přesné CI, čistý release a pouze DEV
+Hosting; schválené jsou dva nové aktivní syntetické Shouty pod stávajícími
+testovacími účty a jejich úklid přes indexový writer. Bez nových Auth účtů,
+Functions/Rules/retence, produkce nebo main.
+[Rozsah a checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+
 **Pokračovat zbývající klientskou regresí Uložených před uzavřením A2/A3.**
 Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí
 po expiraci jsou uzavřené v DEV. Zdroj `14b7885b35b89f62633a3d7496e10483fa91a739`

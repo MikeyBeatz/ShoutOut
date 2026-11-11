@@ -55,6 +55,7 @@ import 'live_shout_state.dart';
 import 'feed_session.dart';
 import 'feed_page_gateway.dart';
 import 'own_shouts_gateway.dart';
+import 'saved_shouts_gateway.dart';
 import 'shout_interaction_gate.dart';
 
 part 'src/create_shout.dart';
@@ -64,6 +65,7 @@ part 'src/business.dart';
 part 'src/feed.dart';
 part 'src/spatial_feed.dart';
 part 'src/own_shouts.dart';
+part 'src/saved_shouts.dart';
 part 'src/following.dart';
 part 'src/firestore_security.dart';
 part 'src/home.dart';

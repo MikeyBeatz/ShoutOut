@@ -72,7 +72,10 @@ class _FollowedPageState extends State<FollowedPage> {
       Expanded(
         child: _section == _FollowedSection.shouts
             ? widget.pagedSavedShouts
-                  ? _SavedShoutsLibrary(
+                  ? SavedShoutsLibrary(
+                      key: ValueKey(
+                        'saved-${FirebaseAuth.instance.currentUser?.uid}',
+                      ),
                       onSave: widget.onSave,
                       onReaction: widget.onReaction,
                       position: widget.savedPosition,

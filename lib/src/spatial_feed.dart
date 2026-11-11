@@ -1,139 +1,5 @@
 part of '../main.dart';
 
-/// Bookmarks are loaded by their owner, independently of any nearby/recent
-/// feed window. Only explicit navigation, refresh and next-page load call the
-/// server. The visible card retains the existing live detail/interactions.
-class _SavedShoutsLibrary extends StatefulWidget {
-  const _SavedShoutsLibrary({
-    required this.onSave,
-    required this.onReaction,
-    this.position,
-    this.blockedUserIds = const {},
-  });
-  final ValueChanged<Shout> onSave;
-  final Future<void> Function(Shout shout, {required bool like}) onReaction;
-  final Position? position;
-  final Set<String> blockedUserIds;
-  @override
-  State<_SavedShoutsLibrary> createState() => _SavedShoutsLibraryState();
-}
-
-class _SavedShoutsLibraryState extends State<_SavedShoutsLibrary> {
-  final List<Shout> _items = [];
-  final Map<String, double> _heights = {};
-  late final String? _uid;
-  String? _next;
-  bool _loading = false, _failed = false;
-  @override
-  void initState() {
-    super.initState();
-    _uid = FirebaseAuth.instance.currentUser?.uid;
-    unawaited(_load(refresh: true));
-  }
-
-  Future<void> _load({bool refresh = false}) async {
-    if (_loading ||
-        _uid == null ||
-        FirebaseAuth.instance.currentUser?.uid != _uid) {
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failed = false;
-    });
-    try {
-      final response =
-          await FirebaseFunctions.instanceFor(
-            region: 'europe-west3',
-          ).httpsCallable('getSavedShouts').call<Map<String, dynamic>>({
-            'expectedUserId': _uid,
-            if (widget.position case final position?)
-              'point': {
-                'latitude': position.latitude,
-                'longitude': position.longitude,
-              },
-            if (!refresh && _next != null) 'after': _next,
-          });
-      if (!mounted || FirebaseAuth.instance.currentUser?.uid != _uid) return;
-      final data = response.data, rows = data['items'], next = data['next'];
-      if (data['version'] != 1 ||
-          rows is! List ||
-          rows.length > 50 ||
-          !(next == null || next is String) ||
-          !refresh && next != null && next == _next) {
-        throw StateError('Invalid saved Shout page');
-      }
-      final items = rows
-          .map(
-            (item) =>
-                decodeSpatialFeedItem(Map<String, dynamic>.from(item as Map)),
-          )
-          .toList();
-      setState(() {
-        if (refresh) {
-          _items.clear();
-          _heights.clear();
-        }
-        final ids = _items.map((item) => item.id).toSet();
-        _items.addAll(items.where((item) => ids.add(item.id)));
-        _next = next as String?;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _failed = true);
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Align(
-        alignment: Alignment.centerRight,
-        child: TextButton.icon(
-          onPressed: _loading ? null : () => unawaited(_load(refresh: true)),
-          icon: const Icon(Icons.refresh),
-          label: Text(tr(context, 'Obnovit')),
-        ),
-      ),
-      if (_loading) const LinearProgressIndicator(),
-      if (_failed)
-        Text(tr(context, 'Feed se nepodařilo načíst. Zkus to znovu.')),
-      Expanded(
-        child: _loading && _items.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : _items.isEmpty
-            ? EmptyState(
-                icon: Icons.bookmark_border,
-                title: tr(context, 'Zatím nemáš uložené žádné shouty.'),
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                itemCount: _items.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (_, index) {
-                  final shout = _items[index];
-                  return _SpatialShoutCard(
-                    key: ValueKey(shout.id),
-                    shout: shout,
-                    blocked: widget.blockedUserIds.contains(shout.authorId),
-                    onSave: () => widget.onSave(shout),
-                    onReaction: (like) => widget.onReaction(shout, like: like),
-                    heightOf: () => _heights[shout.id],
-                    recordHeight: (height) => _heights[shout.id] = height,
-                  );
-                },
-              ),
-      ),
-      if (_next != null)
-        TextButton(
-          onPressed: _loading ? null : () => unawaited(_load()),
-          child: Text(tr(context, 'Načíst další')),
-        ),
-    ],
-  );
-}
-
 class FeedRefreshOverlay extends StatelessWidget {
   const FeedRefreshOverlay({
     super.key,
@@ -257,6 +123,7 @@ class _SpatialShoutCard extends StatefulWidget {
     this.ownSection,
     this.onDelete,
     this.onUnavailable,
+    this.requireSaved = false,
   });
   final Shout shout;
   final bool blocked;
@@ -267,6 +134,7 @@ class _SpatialShoutCard extends StatefulWidget {
   final OwnShoutsSection? ownSection;
   final Future<void> Function()? onDelete;
   final VoidCallback? onUnavailable;
+  final bool requireSaved;
   @override
   State<_SpatialShoutCard> createState() => _SpatialShoutCardState();
 }
@@ -315,7 +183,13 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
         watchLiveShoutState(
           ref
               .liveSnapshots(includeMetadataChanges: true)
-              .where((doc) => doc.exists || !doc.metadata.isFromCache)
+              .where(
+                (doc) =>
+                    (doc.exists || !doc.metadata.isFromCache) &&
+                    (!widget.requireSaved ||
+                        (!doc.metadata.isFromCache &&
+                            !doc.metadata.hasPendingWrites)),
+              )
               .map((doc) {
                 final data = doc.data();
                 if (data == null || !_accepts(data)) {
@@ -331,13 +205,20 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
           ownSave: ref
               .collection('saves')
               .doc(uid)
-              .liveSnapshots()
+              .liveSnapshots(includeMetadataChanges: widget.requireSaved)
+              .where(
+                (doc) =>
+                    !widget.requireSaved ||
+                    (!doc.metadata.isFromCache &&
+                        !doc.metadata.hasPendingWrites),
+              )
               .map((doc) => doc.exists),
         ).listen(
           (value) {
             if (!mounted) return;
             setState(() {
-              _unavailable = value.contentPurged;
+              _unavailable =
+                  value.contentPurged || (widget.requireSaved && !value.saved);
               widget.shout
                 ..likes = value.likes
                 ..dislikes = value.dislikes
@@ -375,6 +256,23 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.requireSaved) {
+      return ShoutInteractionGate(
+        expiresAt: widget.shout.expiresAt,
+        enabled: widget.shout.status == ShoutStatus.active,
+        builder: (context, open) {
+          if (!open || widget.blocked) {
+            _notifyUnavailable();
+            return const SizedBox.shrink();
+          }
+          return _buildCard(context);
+        },
+      );
+    }
+    return _buildCard(context);
+  }
+
+  Widget _buildCard(BuildContext context) {
     if (_unavailable || widget.blocked || !_visible) {
       return SizedBox(
         height: widget.heightOf(),

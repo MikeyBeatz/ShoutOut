@@ -635,3 +635,33 @@ Důkazy: `build/expired-interactions-{ci,hosting,function,deployed-source}-proof
 Vlastní knihovna, obě UI připomínky i tyto testy/úklidy jsou uzavřené.
 Před uzavřením celého A2/A3 zbývá klientská regrese Uložených, včetně tam
 nalezeného loading/Expanded vzoru; B1–B4 zůstávají otevřené.
+
+<a id="saved-client-regression"></a>
+
+### Klientská regrese Uložených — 11. listopadu 2026
+
+Vlastník schválil celý konkrétní úsek: zachovat seznam a scroll během
+načítání/chyby, opakovat tutéž stránku, vracet nahoru až po úspěšné obnově,
+přesunout menší pokračování za poslední kartu, odmítnout opožděné odpovědi
+po změně účtu/zániku obrazovky a odstraňovat karty až po potvrzeném odebrání
+záložky či ztrátě dostupnosti. Povolený je následný DEV Hosting po přesném CI
+a dva nové aktivní syntetické Shouty pod stávajícími testovacími identitami,
+včetně úklidu přes indexový writer. Žádné nové Auth účty, změny Functions,
+Rules, retence, produkce nebo main.
+
+Na `fix/saved-shouts-pagination` je připravený samostatný vlastnický gateway,
+stabilní ScrollPosition a klíč obsahu, retry stejného kurzoru i polohového
+bodu, deduplikace a ochrana odpovědí podle účtu/požadavku/generace seznamu.
+Odebrání záložky není optimistické: čeká na potvrzenou serverovou nepřítomnost,
+nikoli cache miss či lokální pending write. Potvrzeně odebraná karta se nevrací
+z opožděné mezistránky ani obnovy; starý callback nesmaže novou generaci.
+Expiraci sleduje existující zrušitelný deadline timer bez pollingu. Změna
+sdílené karty je zapnutá jen pro Uložené; Home i vlastní seznam zachovávají
+dosavadní chování. Souběžné obnovení sdílí jeden probíhající požadavek.
+
+Lokálně prošlo 11 nových klientských testů a 5/5 serverových regresí Uložených
+v emulátoru, včetně 50 + 5, smazaného hraničního bookmarku a zcela odfiltrované
+nefinální stránky. Celá první Flutter sada 327/327; následně doplněný test
+čekání na první potvrzení záložky bude ověřen také v CI. Analýza, přesné CI,
+release, živé ověření a úklid se teprve dokončují; dosavadní živý web je 14b7885.
+Důkazy: `build/saved-shouts-{targeted,flutter,analyze,server}.log`.
