@@ -159,6 +159,10 @@ Oprava Uložených dbf2aad je po success CI 42932603771 na DEV webu;
 před uzavřením A2/A3 zbývá její ruční UI potvrzení. Dva nové fixture mezitím
 vypršely a byly uklizené včetně záložek/receipt i aktuálního indexu.
 [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+Novější B1 zdroj 503eea6 má success CI 43056516730 a je nasazený pouze
+na DEV web 47268ed17fd2eebd. Vlastník na nové dvojici 24hodinových fixture
+potvrdil zmizení odebrané karty; poobnovovací kontrola a místní B1/restart
+jsou ještě otevřené, nový úklid zbývá. Functions/Rules beze změny.
 B1–B4 i ostatní požadavky serverové brány zůstávají otevřené.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.

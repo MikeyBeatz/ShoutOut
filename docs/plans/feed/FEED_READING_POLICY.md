@@ -257,7 +257,9 @@ neuzavírá A2/A3 ani B1 bez doložených výsledků.
 ### Implementační checkpoint 11. listopadu
 
 Práce probíhá na `feature/feed-read-tracking`, od dokumentovaného návrhu
-f1c380d; zdrojové změny jsou připravené k commitu a CI, zatím nejsou nasazené. Připravené jsou
+f1c380d. Finální zdroj 503eea672db85fb06200115488a4e313cd751d48
+je po success CI 43056516730 nasazený pouze na DEV Hosting
+47268ed17fd2eebd (11. listopadu 17:26 SEČ). Připravené jsou
 model značek, IndexedDB transakce, místní controller/fronta, scope podle UID,
 vymazání s trvalou lokální zábranou proti souběžnému obnovení, widgetové
 měření skutečné geometrie textu, route/lifecycle a překrytí. DEV přepínač
@@ -267,8 +269,7 @@ Firebase operace ani změny původních Auth/retencí.
 
 První cílená sada prošla 22/22, rozšířený průchod expozice/store/controller/
 widgetů/konfigurace/účtového opakování 55/55 a navazující přesné ořezy i
-skutečná Material karta 12/12 widget testů. Plná sada a finální analýza se
-ještě dokončují. Test zachytil cyklickou Future v úklidu mapy pending operací;
+skutečná Material karta 12/12 widget testů. Plná sada a finální analýza již prošly, výsledky jsou níže. Test zachytil cyklickou Future v úklidu mapy pending operací;
 callbacky load/erase nyní vracejí void a průchod již doběhl. Ořezy kontrolují
 skutečný ClipRect a známé konvexní Material tvary, ne jen jejich přibližný
 obdélník. Neznámý vlastní ClipPath není důkaz viditelnosti a nezapočítá se.
@@ -306,10 +307,38 @@ Celá místní Flutter sada prošla 350/350, cílené nástroje konfigurace 20/2
 finální analýza je čistá a formát 145 souborů souhlasí.
 Přidána je samostatná Chrome sada do CI; všechny nové testovací závislosti
 jsou pouze dev a lockfile přidal 28 položek bez změny existujících verzí.
-Základ 82d54a0 má běžící CI 43054545920, ale ještě nebyl nasazený. Doplnění
-úklidu dřívějších účtů vyžaduje navazující přesný source commit a vlastní CI;
-starší úspěch by finální zdroj nepokrýval. Následuje finální commit/push a CI, čistý release
-a pouze DEV Hosting. Nové živé fixture dosud nevznikly. Nevydávat B1 ani
-chybějící UI Uložených za uzavřené. Důkazy rozpracování:
-`build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
+Základ 82d54a0 prošel CI 43054545920, ale nebyl nasazený. Finální doplnění
+úklidu značek dřívějších účtů pokrývá vlastní
+[success CI 43056516730](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43056516730):
+350 Flutter, 8 Chrome/IndexedDB, 51 tools, 119 Functions unit, 436 Rules/server,
+116 purge, 15 Storage a formát/analýza/lint/build. Čistý release a otisky čtyř
+souborů na obou DEV originech souhlasí se zdrojem 503eea6. API potvrzuje
+18 nezměněných Functions i Firestore ruleset d5193d0b. Návrat webu de78cfc631c1acc1.
+
+Živé ověření má právě dvě nové syntetické karty `mvp-read-20261111-short`
+a `mvp-read-20261111-long` pod schválenými existujícími identitami, platnost
+24 hodin od přípravy kolem 17:27 SEČ. Dlouhý text má 40 krátkých řádků,
+aby i při dodržení dosavadního limitu 220 znaků vyžadoval posouvání.
+Živé jádro ověřilo oběma účtům záložky, odebrání/obnovení i replay bez změny;
+jde o Admin SDK core, nikoli HTTP/Auth/App Check nebo UI důkaz.
+Vlastník potvrdil zmizení krátké karty bez ruční obnovy a databáze potvrzuje
+odebrání pod Bright_Otter_182. Nepřítomnost po obnově ještě není výslovně doložená.
+Read-only lokální check čte jen dva známé testovací klíče a vrací stav i čas
+značky; shodný čas před/po restartu má doložit zachování bez nového přečtení.
+Browser host není dostupný, proto je tento krok předaný vlastníkovi.
+Živé místní značky/restart ani B1 zatím neoznačovat za hotové; fixture a jejich
+vedlejší data ještě zbývá uklidit přes indexový writer. B2–B4 se tím neuzavírají.
+
+První uživatelovo odebrání záložky mělo v logu start instance asi 3,3 s a
+vlastní volání 0,685 s, Auth/App Check VALID. Stejný vzor prvního startu je
+u getSavedShouts (asi 2,8 s + 0,713 s). Latence je doložená na serveru,
+není to přesný součet celého času browseru. Nezměnily se prostředky ani UX.
+Dodatečný opakovaný dotaz na log dostal HTTP 429; původní uložený log je
+zachovaný, neprovádět opakované pollingové dotazy.
+
+Důkazy: `build/read-tracking-{ci,deploy,build}.log`,
+`build/read-tracking-hosting-proof.json`, `build/read-tracking-environment-proof.json`,
+`build/read-tracking-live-{state,proof}.json`,
+`build/read-tracking-save-latency-proof.json`, `build/read-tracking-check.js`.
+Lokální testy: `build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
 `build/read-store-browser.log`, `build/read-store-browser-verbose.log`.

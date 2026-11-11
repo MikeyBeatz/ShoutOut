@@ -706,3 +706,15 @@ rate buckety zůstaly zachované a historické uzly podléhají běžnému GC.
 `build/saved-shouts-live-proof.json` a stav mají phase cleaned,
 `build/saved-shouts-cleanup.log` dokládá provedení. Tento úklid není náhradou
 chybějícího UI potvrzení. Pro nový živý průchod vymezit čerstvé testovací údaje.
+
+
+**Navazující živá kontrola při B1, 11. listopadu:** novější zdroj 503eea6 /
+CI 43056516730 / DEV Hosting 47268ed17fd2eebd zachovává tuto opravu. Nové,
+samostatně schválené 24hodinové fixture `mvp-read-20261111-{short,long}`
+umožnily opakovat UI za aktivního stavu. Vlastník potvrdil zmizení odebrané
+krátké karty bez ruční obnovy; databáze potvrzuje odebranou záložku Bright_Otter_182.
+Nepřítomnost po obnově ještě není výslovně doložená. První akce čekala na
+novou instanci Function (asi 3,3 s), vlastní volání 0,69 s, Auth/App Check VALID.
+Žádná změna prostředků. Nová dvojice zatím není uklizená, předchozí skupiny
+zůstávají uklizené. Pokračovat kontrolou B1 a poté vymezeným úklidem;
+[aktuální checkpoint](FEED_READING_POLICY.md#b1-implementation).

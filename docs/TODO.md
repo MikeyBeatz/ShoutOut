@@ -25,11 +25,11 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 ## Nejbližší práce
 
 1. **Dokončit zbývající klientskou regresi Uložených před uzavřením A2/A3.**
-   Konkrétní oprava `dbf2aad` má success CI 42932603771 a je nasazená pouze
-   na DEV web `de78cfc631c1acc1`; Functions/Rules beze změny. Živé jádro
-   prošlo pod oběma stávajícími testovacími účty. Výsledek ručního UI průchodu
-   zatím není potvrzený; dva mezitím vypršelé fixture `mvp-saved-20261111-*`
-   jsou uklizené včetně 4 záložek a 8 receipt. Čerstvý test předem vymezit.
+   Oprava `dbf2aad` prošla CI 42932603771 a je součástí novějšího DEV webu
+   503eea6 / `47268ed17fd2eebd`; Functions/Rules beze změny. Živé jádro
+   prošlo pod oběma stávajícími testovacími účty. Dva starší vypršelé fixture
+   `mvp-saved-20261111-*` jsou uklizené včetně 4 záložek a 8 receipt.
+   Nové UI ověření běží na dvojici schválené spolu s B1, viz níže.
    [Checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
    Vlastní Aktivní/Expirované, kompaktní pokračování za poslední kartou,
    zachování scrollu a zámek expired interakcí jsou v DEV ověřené a potvrzené
@@ -40,17 +40,22 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Tuto hotovou část znovu neotevírat jako čekající rollout/úklid. Zbývá
    živá UI akceptace opravených Uložených; lokální regrese čekání/chyb,
    pokračování a změny účtu už prošly. Původní fixture jsou odstraněné,
-   novější dva jsou také uklizené. Čerstvý průchod je nyní schválený spolu
+   dva ze starší regrese Uložených jsou také uklizené. Nový průchod je schválený spolu
    s B1: právě dva 24hodinové syntetické Shouty pod stávajícími účty a úklid.
-   Potom uzavřít společnou
-   akceptaci A2/A3 a přejít na B.
+   V tomto novém testu vlastník již potvrdil zmizení krátké karty bez ruční
+   obnovy; databáze potvrzuje odebrání pod Bright_Otter_182. Nepřítomnost
+   po obnově ještě není výslovně doložená. Potom uzavřít společnou
+   akceptaci A2/A3; B1 už běží souběžně podle bodu 2.
 
 2. **Dokončit osobní přečtení a indikátor novinek.** B1: skutečná expozice
    a trvalé osobní ukládání; B2: synchronizace zařízení; B3: globální
    unread-first v Nejblíž; B4: oddělený počet novinek. Konkrétní úložiště,
    [webové B1](plans/feed/FEED_READING_POLICY.md#b1-proposal) je schválené
    (IndexedDB, místní značky a expiresAt + 7 dní, bez cloudových operací).
-   Implementace a lokální testy probíhají; nasazení zatím není provedeno.
+   B1 je po success CI 43056516730 (350 Flutter / 8 Chrome) nasazené pouze
+   na DEV Hosting 47268ed17fd2eebd ze zdroje 503eea6. Živé místní značky
+   a restart čekají na read-only kontrolu. Dva nové schválené 24hodinové
+   fixture jsou aktivní; úklid po ověření ještě zbývá.
    [Checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).
    Cloudová retence/synchronizace a polling zůstávají rozhodnutím pro B2/B4.
    Další závislosti jsou podle

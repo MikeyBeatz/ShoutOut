@@ -41,8 +41,12 @@ a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 B1 má lokální jádro
 expozice, nikoli úplné označování/synchronizaci přečtení. B2–B4 nejsou hotové.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
-i retenci expiresAt + 7 dní. Implementace a testy probíhají;
-[checkpoint](FEED_READING_POLICY.md#b1-implementation). Nasazení B1 zatím není provedeno.
+i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
+(350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu
+47268ed17fd2eebd. Functions/Rules beze změny. Na dvou nových schválených
+24hodinových fixture vlastník potvrdil zmizení odebrané karty; nepřítomnost
+po obnově a místní B1 značky/restart ještě čekají na read-only kontrolu.
+Úklid této nové dvojice zbývá; [checkpoint](FEED_READING_POLICY.md#b1-implementation).
 
 Účtový DEV klientský přechod, Rules cutover a závěrečný pilot jsou uzavřené
 5. listopadu 2026. Lokální dávková příprava 1ba2b4a má success CI 42053726540

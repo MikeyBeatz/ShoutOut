@@ -6,41 +6,43 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit schválenou implementaci B1 a při jejím živém testu doplnit Uložené.**
-Oprava na `fix/saved-shouts-pagination`, zdroj
-`dbf2aad2b5d5ab7490fa716318625ea1d0705697`, má
-[success CI 42932603771](https://github.com/MikeyBeatz/ShoutOut/actions/runs/42932603771):
-328 Flutter, 50 tools, 119 Functions unit, 436 Rules/server, 116 purge a 15 Storage,
-formát/analýza/lint/build. Nasazený je pouze DEV Hosting `de78cfc631c1acc1`
-z čistého releasu; otisky čtyř souborů obou originů souhlasí. Všech 18 Functions
-a Firestore Rules se podle API nezměnilo. Oba existující testovací účty mají
-přes živé jádro ověřené uložení, odebrání/obnovení i idempotentní replay bez zápisu;
-nejde o HTTP Auth/App Check ani UI důkaz. Dva nové aktivní Shouty
-`mvp-saved-20261111-{user,business}` mezitím vypršely a jsou od 16:11 SEČ
-uklizené přes indexový writer: 2 kořeny, 4 záložky a 8 receipt, nulový zůstatek
-v aktuálním indexu. Původních 37 zdrojů má stejné updateTime, Auth se neměnil.
-Browser host není dostupný; náhradní ovládání PWA automatická kontrola odmítla
-kvůli neověřitelné URL. Dotaz vlastníkovi je odeslaný: pod TestBusiness nebo
-Bright_Otter_182 odebrat jednu testovací záložku a ověřit zmizení karty i po obnově.
-Odpověď s výsledkem UI zatím není zaznamenaná. Původní expired fixture již
-nepoužívat pro nové ověření ukládání; čerstvý test vyžaduje konkrétní rozsah.
-Živá UI akceptace A2/A3 zůstává otevřená, úklid je dokončený.
-Návrat webu je `831e3baaea8a8df3`. Produkce, main, retence a Auth beze změn.
-[Rozsah a checkpoint](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+**Dokončit živé ověření B1 a při něm doplnit Uložené.**
+Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na
+`feature/feed-read-tracking` má
+[success CI 43056516730](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43056516730):
+350 Flutter, 8 skutečných Chrome/IndexedDB, 51 tools, 119 Functions unit,
+436 Rules/server, 116 purge a 15 Storage; formát/analýza/lint/build prošly.
+Z čistého releasu byl 11. listopadu v 17:26 SEČ nasazen pouze DEV Hosting
+`47268ed17fd2eebd` na projekt/site `shoutout-dev-46c81`. Čtyři soubory obou
+originů souhlasí s manifestem. API porovnání před/po potvrzuje stejných
+18 Functions i Firestore ruleset `d5193d0b-e957-4c76-ab46-54b0f9a8beac`.
+Produkce, main, Auth, Rules a prostředky Functions se neměnily.
+Návratová verze webu je `de78cfc631c1acc1`.
 
-Na `feature/feed-reading-proposal` je připravený
-[konkrétní návrh B1](plans/feed/FEED_READING_POLICY.md#b1-proposal): webové
-IndexedDB podle projektu/UID, skutečná expozice nadpisu/textu a místní fronta
-bez nových Firebase operací. Vlastník 11. listopadu potvrdil uchování do
-expiresAt + 7 dní a celý implementační úsek včetně dvou čerstvých 24hodinových
-fixture a úklidu. Na `feature/feed-read-tracking` je rozpracovaný kód a testy,
-dosud bez nasazení. Celá lokální sada 350/350 Flutter, 8/8 skutečných
-browserových IndexedDB včetně úklidu dřívějších účtů a 20/20 cílených
-nástrojových testů prošla. Analýza
-a formát jsou čisté. Následuje source commit/CI a čistý release; živé UI
-potvrzení zůstává otevřené.
-[Přesný checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).
-Živý web zůstává dbf2aad; nové fixture zatím nevznikly. B1–B4 nejsou uzavřené.
+B1 měří úplnou expozici nadpisu/textu a ukládá místní značky do IndexedDB
+podle projektu/UID; při běžném odhlášení je zachová do expiresAt + 7 dní,
+při potvrzené žádosti o smazání účtu je odstraní. Zahrnuje úklid prošlých
+značek dřívějších účtů; nové Firebase operace samotná evidence nepřidává.
+Produkční přepínač se neměnil. Přes indexový writer vznikly právě dva
+schválené 24hodinové Shouty `mvp-read-20261111-{short,long}`, po jednom pod
+existujícími Bright_Otter_182/TestBusiness. Živé jádro oběma účtům ověřilo
+záložky, odebrání/obnovení a idempotentní replay; nejde o HTTP/UI důkaz.
+Vlastník potvrdil zmizení krátké karty bez ruční obnovy; databáze potvrzuje
+odebranou záložku Bright_Otter_182. Nepřítomnost po obnově a místní značky
+včetně restartu zatím čekají na kontrolu. Browser host je nedostupný;
+vlastník má připravený read-only check dvou testovacích značek.
+Fixture ještě nejsou uklizené; původních 37 zdrojů zůstává zachovaných.
+Log první akce ukazuje start instance asi 3,3 s a vlastní volání 0,69 s,
+Auth/App Check VALID. Jde o diagnózu latence, žádná změna prostředků nebyla provedena.
+[Podrobnosti B1](plans/feed/FEED_READING_POLICY.md#b1-implementation).
+B1 ani společná akceptace A2/A3 nejsou dosud uzavřené; B2–B4 zůstávají otevřené.
+
+Předchozí oprava Uložených dbf2aad / CI 42932603771 / web de78cfc631c1acc1
+je základem této verze. Její dva starší `mvp-saved-20261111-*` fixture jsou
+od 16:11 SEČ uklizené: 2 kořeny, 4 záložky a 8 receipt; aktuální index bez
+jejich metadat, původních 37 zdrojů se stejným updateTime. Dřívější chybějící
+UI důkaz nyní doplňuje výše uvedený nový test, nikoli další opakování starých dat.
+[Checkpoint Uložených](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 
 **Předchozí uzavřená část: vlastní seznam a expired interakce.**
 Vlastní stránky, menší pokračování až za poslední kartou a zámek interakcí
@@ -62,7 +64,9 @@ vedlejších záznamů jsou uklizené. Po UI potvrzení je uklizených také pů
 Původních 37 Shoutů má shodné updateTime; Auth účty se nevytvářely ani nemazaly.
 Výjimky pro vlastní mazání, moderaci a účtový úklid platí; retence se nemění.
 Chování Uložených při čekání/chybě/pokračování řeší novější úsek výše;
-jeho živé UI potvrzení zatím zbývá, úklid je hotový. B1–B4 ani celý milník hotové nejsou.
+jeho živé UI potvrzení je částečné podle aktuálního checkpointu výše. Starší
+fixture jsou uklizené, nová dvojice B1 ještě čeká na dokončení testu a úklid.
+B1–B4 ani celý milník hotové nejsou.
 [Pravidlo, hranice a testy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
 Dosavadní nasazené vlastní stránky: vlastník schválil konkrétní opravu
@@ -387,7 +391,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `dbf2aad2b5d5ab7490fa716318625ea1d0705697` / `de78cfc631c1acc1`; navíc stabilní Uložené, retry, potvrzené odebrání; CI 42932603771 success. Živé UI potvrzení čeká, dvě fixture jsou uklizené. |
+| Webový zdroj / Hosting verze | `503eea672db85fb06200115488a4e313cd751d48` / `47268ed17fd2eebd`; B1 místní přečtení, CI 43056516730 success. Zmizení odebrané karty potvrzené; obnova a B1/restart čekají. Dvě nové B1 fixture dosud aktivní, starší skupiny uklizené. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
