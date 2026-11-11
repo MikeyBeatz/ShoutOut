@@ -155,6 +155,7 @@ class _ReadTrackingRootState extends State<ReadTrackingRoot>
     if (state == AppLifecycleState.resumed) {
       unawaited(_observed?.retry());
       unawaited(_observed?.prune());
+      unawaited(maintainReadNamespaces().catchError((_) {}));
     }
   }
 

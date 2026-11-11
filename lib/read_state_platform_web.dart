@@ -8,6 +8,10 @@ export 'indexed_read_state_store.dart';
 
 ReadStateStore createReadStateStore(ReadScope scope) =>
     IndexedReadStateStore(scope);
+Future<void> maintainReadNamespaces() async {
+  await pruneIndexedReadNamespaces(DateTime.now());
+}
+
 ValueListenable<bool> get browserReadActivity =>
     _activity ??= _createActivity();
 ValueNotifier<bool>? _activity;

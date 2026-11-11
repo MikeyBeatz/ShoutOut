@@ -126,6 +126,13 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
   void configure(String? projectId) {
     retainViewer(null);
     _project = projectId;
+    if (projectId != null) {
+      unawaited(
+        maintainReadNamespaces().catchError((_) {
+          debugPrint('Local read-state maintenance unavailable.');
+        }),
+      );
+    }
   }
 
   void retainViewer(String? uid) {

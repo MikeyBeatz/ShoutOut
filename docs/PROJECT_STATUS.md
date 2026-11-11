@@ -34,8 +34,9 @@ IndexedDB podle projektu/UID, skutečná expozice nadpisu/textu a místní front
 bez nových Firebase operací. Vlastník 11. listopadu potvrdil uchování do
 expiresAt + 7 dní a celý implementační úsek včetně dvou čerstvých 24hodinových
 fixture a úklidu. Na `feature/feed-read-tracking` je rozpracovaný kód a testy,
-dosud bez nasazení. Celá lokální sada 350/350 Flutter, 7/7 skutečných
-browserových IndexedDB a 20/20 cílených nástrojových testů prošla. Analýza
+dosud bez nasazení. Celá lokální sada 350/350 Flutter, 8/8 skutečných
+browserových IndexedDB včetně úklidu dřívějších účtů a 20/20 cílených
+nástrojových testů prošla. Analýza
 a formát jsou čisté. Následuje source commit/CI a čistý release; živé UI
 potvrzení zůstává otevřené.
 [Přesný checkpoint](plans/feed/FEED_READING_POLICY.md#b1-implementation).

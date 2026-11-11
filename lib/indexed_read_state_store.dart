@@ -3,6 +3,73 @@ import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 import 'read_state_store.dart';
 
+/// Expired metadata also needs cleanup when its former owner does not log in
+/// again. Never return another namespace's rows to the active viewer.
+Future<int> pruneIndexedReadNamespaces(DateTime now) async {
+  final names = await web.window.indexedDB.databases().toDart;
+  var total = 0;
+  for (final info in names.toDart) {
+    final name = info.name;
+    if (!RegExp(r'^shoutout-read-v1-[a-f0-9]{64}$').hasMatch(name)) {
+      continue;
+    }
+    final opened = Completer<web.IDBDatabase>();
+    final request = web.window.indexedDB.open(name, 1);
+    request.onupgradeneeded = ((web.Event _) {
+      request.transaction?.abort();
+    }).toJS;
+    request.onsuccess = ((web.Event _) {
+      opened.complete(request.result as web.IDBDatabase);
+    }).toJS;
+    request.onerror = ((web.Event _) {
+      opened.completeError(StateError('Read maintenance open failed'));
+    }).toJS;
+    web.IDBDatabase? db;
+    try {
+      db = await opened.future;
+      if (!db.objectStoreNames.contains('records')) continue;
+      int removed;
+      do {
+        removed = 0;
+        final tx = db.transaction('records'.toJS, 'readwrite'),
+            done = Completer<void>();
+        tx.oncomplete = ((web.Event _) {
+          done.complete();
+        }).toJS;
+        void failed(web.Event _) {
+          if (!done.isCompleted) {
+            done.completeError(StateError('Read maintenance failed'));
+          }
+        }
+
+        tx.onabort = failed.toJS;
+        tx.onerror = failed.toJS;
+        final cursor = tx
+            .objectStore('records')
+            .index('retainUntil')
+            .openCursor(
+              web.IDBKeyRange.upperBound(now.millisecondsSinceEpoch.toJS),
+            );
+        cursor.onsuccess = ((web.Event _) {
+          if (cursor.result == null || removed >= 100) return;
+          final row = cursor.result as web.IDBCursorWithValue;
+          row.delete();
+          removed++;
+          if (removed < 100) row.continue_();
+        }).toJS;
+        await done.future;
+        total += removed;
+        if (removed == 100) await Future<void>.delayed(Duration.zero);
+      } while (removed == 100);
+    } catch (_) {
+      // A concurrently removed/upgraded namespace must not block startup.
+    } finally {
+      db?.close();
+    }
+  }
+  return total;
+}
+
 class IndexedReadStateStore implements ReadStateStore {
   IndexedReadStateStore(this.scope, {String prefix = 'shoutout-read-v1'})
     : name = '$prefix-${scope.databaseSuffix}';
@@ -174,8 +241,8 @@ class IndexedReadStateStore implements ReadStateStore {
         done.completeError(StateError('Read erasure failed'));
       }
     }).toJS;
-    tx.objectStore('meta').put(true.toJS, 'erased'.toJS);
     tx.objectStore('records').clear();
+    tx.objectStore('meta').put(true.toJS, 'erased'.toJS);
     await done.future;
   }
 

@@ -193,6 +193,45 @@ void main() {
     },
   );
   test(
+    'startup cleans signed-out namespaces but preserves live data and erasure fences',
+    () async {
+      final suffix = '${DateTime.now().microsecondsSinceEpoch}';
+      final firstScope = ReadScope('maintenance-test', 'expired-$suffix');
+      final first = IndexedReadStateStore(firstScope);
+      final second = IndexedReadStateStore(
+        ReadScope('maintenance-test', 'active-$suffix'),
+      );
+      final erased = IndexedReadStateStore(
+        ReadScope('maintenance-test', 'erased-$suffix'),
+      );
+      for (final s in [first, second, erased]) {
+        addTearDown(() async {
+          await s.close();
+          await drop(s.name);
+        });
+      }
+      final active = ReadContent(
+        shoutId: 'active',
+        title: 'Title',
+        text: 'Body',
+        expiresAt: now.add(const Duration(days: 4)),
+      );
+      await first.put(item(0), now);
+      await second.put(active, now);
+      await erased.put(item(0), now);
+      await erased.erase();
+      await first.close();
+      final at = now.add(const Duration(days: 9));
+      expect(await pruneIndexedReadNamespaces(at), 1);
+      expect(await second.contains(active, at), isTrue);
+      await expectLater(erased.put(active, now), throwsStateError);
+      final reopened = IndexedReadStateStore(firstScope);
+      addTearDown(reopened.close);
+      expect(await reopened.prune(at), 0);
+    },
+  );
+
+  test(
     'local-only metadata measurements at 100, 1000 and 10000 rows',
     () async {
       final measurements = <Map<String, Object>>[];

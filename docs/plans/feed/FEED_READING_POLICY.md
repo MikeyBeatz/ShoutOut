@@ -154,7 +154,9 @@ Nejde o změnu stávající serverové
 60denní retence obsahu. Návrh se týká pouze osobních lokálních značek.
 
 Po termínu záznam logicky nepoužít; fyzický úklid provést průběžně při otevření
-úložiště a práci s ním, po malých dávkách kurzoru. Zavřený prohlížeč nemůže
+aplikace, návratu do popředí a práci s úložištěm, po malých dávkách kurzoru.
+Startup/resume uklidí pouze prošlé záznamy také v namespaces dřívějších účtů,
+aniž by je načítal do osobního stavu aktuálního uživatele. Zavřený prohlížeč nemůže
 garantovat fyzické smazání přesně v danou sekundu. Vymazání dat prohlížeče,
 anonymní režim nebo nedostupná kapacita mohou značky odstranit; B2 později
 doplní jejich obnovu z cloudu. B1 samotné nezaručí synchronizaci ani zálohu.
@@ -271,10 +273,12 @@ callbacky load/erase nyní vracejí void a průchod již doběhl. Ořezy kontrol
 skutečný ClipRect a známé konvexní Material tvary, ne jen jejich přibližný
 obdélník. Neznámý vlastní ClipPath není důkaz viditelnosti a nezapočítá se.
 
-Webová sada `test/read_state_store_browser.dart` prošla **7/7** ve skutečné
+Webová sada `test/read_state_store_browser.dart` prošla **8/8** ve skutečné
 IndexedDB izolovaného headless Chrome: restart, dvě souběžná spojení, hranice
 retence, oddělení UID/projektu, poškozený záznam, zavření během otevírání
-a vymazání s trvalou lokální zábranou. Je to lokální browserový test úložiště,
+a vymazání s trvalou lokální zábranou. Navazující osmý test dokládá fyzický
+úklid prošlých značek odhlášeného účtu, zachování platné cizí značky a lokální
+zábrany smazaného účtu. Je to lokální browserový test úložiště,
 nikoli živá aplikace/Auth/App Check. Původní `flutter test --platform chrome`
 uvízl ve startu suite i po přesunu souboru do test/; přesnou příčinu startu
 Flutter rendereru jsme nepotvrdili. Samotný transakční adaptér je proto
@@ -288,9 +292,9 @@ Naměřené místní hodnoty ve Windows Chrome (nejde o SLA ani diskovou/cloudov
 
 | Značky | Velikost JSON vzorku | Hromadná příprava testu | Dva bodové dotazy | Úklid po 100 položkách |
 |---|---|---|---|---|
-| 100 | 36 581 B | 17 ms | 1 ms | 28 ms |
-| 1 000 | 367 781 B | 71 ms | 2 ms | 470 ms |
-| 10 000 | 3 697 781 B | 795 ms | 1 ms | 7 987 ms |
+| 100 | 36 581 B | 16 ms | 1 ms | 24 ms |
+| 1 000 | 367 781 B | 74 ms | 1 ms | 426 ms |
+| 10 000 | 3 697 781 B | 818 ms | 1 ms | 8 245 ms |
 
 Příprava vzorku používá jednu testovací transakci, neměří jednotlivé produkční
 upserty. Úklid je asynchronní po malých transakcích a běží na pozadí,
@@ -302,7 +306,9 @@ Celá místní Flutter sada prošla 350/350, cílené nástroje konfigurace 20/2
 finální analýza je čistá a formát 145 souborů souhlasí.
 Přidána je samostatná Chrome sada do CI; všechny nové testovací závislosti
 jsou pouze dev a lockfile přidal 28 položek bez změny existujících verzí.
-Následuje source commit/push a přesné CI, čistý release
+Základ 82d54a0 má běžící CI 43054545920, ale ještě nebyl nasazený. Doplnění
+úklidu dřívějších účtů vyžaduje navazující přesný source commit a vlastní CI;
+starší úspěch by finální zdroj nepokrýval. Následuje finální commit/push a CI, čistý release
 a pouze DEV Hosting. Nové živé fixture dosud nevznikly. Nevydávat B1 ani
 chybějící UI Uložených za uzavřené. Důkazy rozpracování:
 `build/read-tracking-tests.log`, `build/read-tracking-analyze.log`,
