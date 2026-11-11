@@ -6,17 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončit přesné CI lokálního B2 a připravit jeho provozní DEV bránu.**
+**Lokální úsek B2 je uzavřený po CI; další je konkrétní provozní DEV plán.**
 Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
 stránkovaný snapshot/delta, IndexedDB v2 outbox a připravené klientské napojení.
 360 Flutter, 10 Chrome/IndexedDB, 49 cílených emulátorových regresí, 124 Functions
 unit a 51 tools prošlo; přidaný test slučování souběžných požadavků prochází
 v 11 cílených testech. Analýza/lint čisté, debug web sestavený a otisky ověřené.
-Přesné CI finálního commitu ještě následuje. B2 nemá exportované Functions,
+Zdroj `693663d0c25c7106a7bfbb8efcc9bdc947b955cc` má
+[success CI 43119749520](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43119749520):
+361 Flutter, 10 Chrome, 51 tools, 124 Functions unit (417 integračních testů
+se v neemulátorové fázi přeskakuje), 444 Rules/server, 116 purge, 15 Storage
+a formát/analýza/lint/build. B2 nemá exportované Functions,
 syncFactory je v aplikaci null a účtový readSyncEnabled je false. Nic nebylo
 nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
 [B2 checkpointu](plans/feed/FEED_READING_POLICY.md#b2-local-results).
-Další po CI: konkrétní transport/runtime, denní fyzický úklid, indexace,
+Další: konkrétní transport/runtime, denní fyzický úklid, indexace,
 kompatibilní návrat pro IndexedDB v2 a schválení nové živé vrstvy/DEV pilotu.
 
 **Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**

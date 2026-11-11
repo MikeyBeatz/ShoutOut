@@ -24,7 +24,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Dokončit přesné CI lokálního B2 a připravit provozní DEV bránu.**
+1. **Připravit konkrétní provozní DEV plán B2.**
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
@@ -41,7 +41,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Ta je připravená na feature/feed-read-sync: transakční bloky a snapshot/delta,
    IndexedDB v2 fronta, retry/ack a soukromý účtový úklid za vypnutým zapojením.
    [Výsledky a hranice](plans/feed/FEED_READING_POLICY.md#b2-local-results).
-   Přesné CI finálního zdroje následuje. Před živou aktivací ještě runtime/
+   Lokální úsek je uzavřený: zdroj 693663d má success CI 43119749520,
+   361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
+   Před živou aktivací ještě runtime/
    limity, denní fyzický úklid, indexace, kompatibilní rollback a konkrétní
    DEV pilot k předložení. Implementace B2 není nasazené B2; nic živého se neměnilo.
 

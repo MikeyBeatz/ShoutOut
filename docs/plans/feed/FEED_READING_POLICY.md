@@ -553,11 +553,20 @@ regresí včetně 42 stávajících účtových případů, 51 tools a analýza/
 Debug web byl sestavený a manifest/konfigurace/otisky samostatně ověřené.
 PowerShell zachytil informativní Wasm stderr jako NativeCommandError;
 samotné sestavení vytvořilo manifest i web, následná kontrola prošla.
-Přesné CI finálního source commitu ještě následuje; starší CI B1 změnu nepokrývá.
+Přesný source `693663d0c25c7106a7bfbb8efcc9bdc947b955cc` má
+[success CI 43119749520](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43119749520):
+361 Flutter, 10 Chrome/IndexedDB, 51 tools, 124 Functions unit (417 integračních
+případů se v této neemulátorové fázi přeskočí), 444 Rules/server, 116 purge,
+15 Storage, formát/analýza/lint/build. **Schválený první lokální úsek B2 je
+uzavřený, B2 jako celek ani živá aktivace hotové nejsou.**
 Důkazy: `build/read-sync-{client,flutter,browser,analyze,emulator,functions-unit,tools,build,layout}.log`
-a `build/read-sync-layout-proof.json`. Navazující finální emulátorová sada
+a `build/read-sync-layout-proof.json`, `build/read-sync-ci-proof.json`,
+`build/read-sync-ci.log`. Navazující finální emulátorová sada
 ověřuje také odpovědi bez hashového oracle pro skrytý/chybějící/blokovaný zdroj
 a upload po expiraci při offline návratu. Živé UI, nové Auth účty ani Shouty se netestovaly.
+Samostatná místní kontrola ověřila shodu pěti JS/Dart contentHash vektorů
+(čeština, emoji, escapování, oddělovače i neúplné surrogates):
+`build/read-sync-hash-check.log`.
 
 **Před živým B2 zbývá:** callable transport/runtime/limity, indexace, denní
 omezený fyzický úklid, kapacita/retry a vymezený DEV pilot. Kvůli IndexedDB v2
