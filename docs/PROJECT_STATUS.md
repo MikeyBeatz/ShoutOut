@@ -6,13 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Vlastník upřesnil kapacitní cíl MVP: **100 000 registrovaných účtů a
-5 000 současně aktivních uživatelů**. [Akceptace a kontrola kódu](LAUNCH_READINESS.md#capacity-target)
-rozlišují schválený cíl od neověřeného výkonu. [Další lokální úsek](LAUNCH_READINESS.md#capacity-local-proposal)
-čeká na schválení: model provozu, operace/úklidový dluh a cílené regrese.
-Potom revidovat B2 runtime a potřebné změny celé kritické cesty;
-dosavadní max. 1 / concurrency 1 není ověřená produkční kapacita.
-Zapsání cíle nemění kód, živé nastavení ani rozpočet a neprokazuje jeho splnění.
+**Kapacitní lokální úsek je připravený a ověřený, čeká na přesné CI.**
+Vlastník schválil model/testy pro 100 000 účtů / 5 000 aktivních uživatelů
+a [upřesnil synchronizaci](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy):
+pouze při spuštění/skutečné obnově feedu; nahrazuje 10s upload/resume pull.
+Přečtení místně zůstává ihned, číselný indikátor obnovy B4 není hotový.
+Na feature/capacity-model je offline nástroj a čtyři nové emulátorové testy:
+4 modelové regrese, 4/4 cílené emulátorové průchody, 55 tools a lint prošly.
+[Výsledky a návrh škálování](operations/CAPACITY_AND_SCALING.md) rozlišují
+model, skutečné SDK pokusy a neověřenou cloudovou kapacitu. Souběžné zápisy
+jsou správné, opakování transakcí stojí operace; pevný úklid 500 receipt/den
+neodpovídá modelové zátěži. Další je konkrétní revize runtime B2/úklidu
+podle výsledků; bez implementace B4 nebo nové provozní datové vrstvy.
+Aplikační chování, konfigurace a živá prostředí zůstaly beze změny.
 
 **Lokální úsek B2 je uzavřený; provozní návrh čeká na schválení další implementace.**
 Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
@@ -31,9 +37,10 @@ nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
 [Provozní návrh B2](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
 je připravený: ochrana četnosti, trvalé pokračování downloadu, denní úklid
 ve stávající úloze, indexace a kompatibilní vypnutý web pro návrat.
-Jde o dosavadní návrh k revizi podle nové kapacitní akceptace, nikoli nové
-nastavení aplikace. Konkrétní živý DEV plán vznikne po ověření a CI
-navazující implementace. Zdrojový kód ani živé prostředí se při přípravě návrhu neměnily.
+Jde o dosavadní návrh k revizi podle nové kapacitní akceptace a trigger politiky,
+nikoli nové nastavení aplikace. Konkrétní živý DEV plán vznikne po ověření a CI
+navazující runtime implementace. Nynější změny jsou model/testy/dokumentace;
+aplikační runtime se neměnil.
 
 **Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na

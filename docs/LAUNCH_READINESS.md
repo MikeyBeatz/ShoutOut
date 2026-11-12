@@ -86,14 +86,16 @@ Potvrzené hranice na zdroji 693663d, nikoli nový živý audit:
   zapisovaný read dokument. Samostatně prověřit návraty více zařízení téhož
   účtu. Navržený globální přepínač B2 je čtený guard, ne čítač všech požadavků.
 
-Ilustrační výpočet: pokud všech 5 000 klientů má co odeslat každých 10 s,
+Starší ilustrační výpočet (nově není cílovou politikou): pokud všech 5 000 klientů má co odeslat každých 10 s,
 vzniká průměrně 500 B2 uploadů/s, ne 5 000 požadavků za sekundu. Synchronní
 návrat klientů může být výrazně prudší; interval bez rozložení nezaručuje
 rovnoměrnou zátěž. Toto není naměřená aktivita uživatelů ani cena.
+Vlastník následně zvolil sync jen při spuštění/obnově; platí
+[nová politika](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy).
 
 <a id="capacity-local-proposal"></a>
 
-### Další lokální úsek — návrh ke schválení
+### Schválený lokální kapacitní úsek
 
 Před implementací dosavadního B2 runtime připravit jeden místní kapacitní
 podklad pro schválený cíl: reprodukovatelný model 100 000 profilových identit
@@ -112,8 +114,10 @@ Výstup: konkrétní profil, návrh podmínek odezvy/chybovosti, kapacitní tabu
 pro jednotlivé cesty, varianty automatického škálování a úklidu s omezeními,
 revize B2 runtime návrhu, dokumentace, commit/push a CI. Teprve podle výsledků
 předložit nezbytné zdrojové změny a samostatný nákladově omezený cloudový test.
-Tento lokální úsek zatím není schválený. Bez nasazení, změn živých kvót,
+Vlastník tento lokální úsek schválil po vysvětlení; současně upřesnil spouštěče
+obnovy/synchronizace a požadavek na úsporný, škálovatelný systém. Bez nasazení, změn živých kvót,
 placeného zátěžového testu, nových služeb, migrací nebo Auth účtů.
+[Model, lokální výsledky a revize dalšího postupu](operations/CAPACITY_AND_SCALING.md).
 
 ## 1. Produkční prostředí a bezpečné nasazení
 

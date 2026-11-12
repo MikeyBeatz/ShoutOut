@@ -4,6 +4,41 @@
 a upřesnil, že negativní hodnocení mimo Top mění sbalení, nikoli časové/prostorové
 místo Shoutu. Navazuje na [etapy](FEED_IMPLEMENTATION_STAGES.md).
 
+<a id="refresh-boundary-policy"></a>
+
+## Aktuální upřesnění obnovy a synchronizace — 12. listopadu 2026
+
+Vlastník upřesnil cílové chování: feed obnovovat při spuštění a výslovnou
+obnovou; při skutečné obnově současně synchronizovat přečtení. Místní značky
+vznikají ihned, trvalá fronta zůstává oddělená podle účtu. Synchronizace mezi
+zařízeními nastává při spuštění/obnově, ne průběžně během scrollování.
+Toto nahrazuje dříve schválený desetisekundový automatický upload i samostatný
+pull při pouhém návratu do popředí, pokud se feed neobnovuje. Rozpracovaný
+přenos spuštěný obnovou může pokračovat po dávkách/opakování; není to nový
+periodický přenos každé nově vzniklé značky. Dávka nejvýše 32, retence
+expiresAt + 7 dní a erasure pravidla se nemění.
+
+Obnova zůstává plovoucí ikonou s budoucím číselným indikátorem nových Shoutů
+podle B4. Zjišťování novinek nemění otevřené pořadí ani nesmí přenačítat celé
+Shouty jen kvůli číslu. Frekvence a konkrétní indexový/delta protokol zůstávají
+návrhem B4; neoznačovat je za implementované ani považovat jejich cenu za nulovou.
+Změněný kořen oblasti sám neznamená nový Shout: mění se také při reakcích či
+mazání. Počet musí odpovídat relevantním novinkám pro daný feed.
+
+**Ověřený současný stav:** DEV B1 ukládá přečtení místně. B2 na zdroji 693663d
+nemá živý transport; controller má dosavadní timer a resume hook. Tyto zdroje
+se nynějším lokálním kapacitním úsekem nemění. Home volá synchronize bez čekání
+na úplný read snapshot; bariéru pro globální B3 je třeba teprve dokončit.
+Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
+vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
+Číselný indikátor B4 ani inkrementální obnova celého feedu hotové nejsou.
+
+Vlastník preferuje detailní optimalizace. Dokládat úsporu čtení, zápisů,
+přenosů, počtu odběrů a retry; zachovat kontrolu oprávnění, dostupnosti,
+atomické čítače a bezpečnost. Nezvyšovat složitost bez měřitelného přínosu.
+Lokální kapacitní model/testy jsou schválené; změny živého prostředí, B4 nebo
+provozního datového modelu tímto schválené nejsou.
+
 ## Připravené chování
 
 `orderedFeedShouts` zachovává negativně hodnocené položky v běžném pořadí
@@ -31,8 +66,8 @@ pokrytí; inactive/occlusion a nerozbalený či oříznutý obsah ruší čekaj�
 Jde o otestované transportně nezávislé jádro. Od B1 z 11. listopadu je na DEV
 webu připojené ke skutečné geometrii widgetů, ořezům, aktivitě/překrytí a
 trvalé IndexedDB. Místní značky prokazatelně přežily znovuotevření aplikace.
-Cloudová synchronizace ani nové read kolekce ještě nejsou implementované;
-to je další B2. [Důkazy B1](#b1-implementation).
+Cloudová synchronizace ani nové read kolekce ještě nejsou živě zapojené;
+B2 má lokálně připravené jádro podle checkpointu níže. [Důkazy B1](#b1-implementation).
 
 ## Hodinová relace i na klientovi
 
@@ -360,6 +395,8 @@ Lokální testy: `build/read-tracking-tests.log`, `build/read-tracking-analyze.l
 
 11. listopadu 2026. **Vlastník schválil retenci, přenos při přihlášení/návratu/
 obnově a celý první lokální úsek; výsledky jsou níže.**
+Jde o historický rozsah B2a. Spouštěče synchronizace nyní nahrazuje
+[upřesnění z 12. listopadu](#refresh-boundary-policy); kód B2a ještě změněný není.
 B1 a klientská regrese Uložených jsou uzavřené; další závislost je B2 před
 globálním unread-first B3. Návrh není důkaz nasazení; živé prostředí se tímto úsekem nemění.
 Read-only kontrola potvrdila DEV `(default)`, Standard / FIRESTORE_NATIVE,
@@ -583,6 +620,8 @@ přečtený obsah. Tyto navazující živé/provozní kroky se nyní neprovádě
 ## Provozní návrh B2 — k rozhodnutí, 12. listopadu 2026
 
 **Stav: připravený rozsah další lokální implementace, zatím neschválený.**
+Spouštěče/kapacitu tohoto staršího návrhu před implementací revidovat podle
+[aktuálního rozhodnutí](#refresh-boundary-policy) a kapacitního modelu.
 Základ 693663d má úspěšné CI 43119749520. Tento návrh nemění kód ani živé
 prostředí. Hodnoty níže jsou navržené pro DEV `shoutout-dev-46c81`; produkční
 kapacita se nepřebírá automaticky. Algoritmus zůstane společný a konfigurovatelný.

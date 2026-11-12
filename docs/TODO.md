@@ -24,13 +24,16 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Ověřit kapacitní model a revidovat další provozní úsek B2.**
+1. **Uzavřít CI kapacitního úseku a navrhnout runtime B2 podle výsledků.**
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
    Současný výkon a cena pro tento profil nejsou prokázané; žádné živé změny.
-   [Model a cílené lokální testy](LAUNCH_READINESS.md#capacity-local-proposal)
-   jsou připravené ke schválení; dosavadní B2 runtime vyžaduje revizi.
+   [Model a cílené lokální testy](operations/CAPACITY_AND_SCALING.md)
+   jsou schválené a připravené: 4 modelové regrese / 4 emulátorové testy,
+   55 tools a lint prošly; zbývá přesné CI. Nové rozhodnutí nahrazuje 10s upload:
+   [sync při spuštění/obnově](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy).
+   Dosavadní B2 runtime a kapacita úklidu vyžadují revizi.
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
@@ -42,8 +45,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    rovněž uklizené; neotvírat je znovu jako čekající rollout/test.
    [B1 a důkazy](plans/feed/FEED_READING_POLICY.md#b1-implementation),
    [Uložené](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
-   Vlastník schválil B2 retenci expiresAt + 7 dní, upload 32 / 10 s a přenos
-   při loginu/návratu/obnově bez prázdného pollingu i první lokální implementaci.
+   Vlastník původně schválil B2 retenci expiresAt + 7 dní, upload 32 / 10 s
+   i první lokální implementaci; následně spouštěče změnil podle odkazu výše.
    Ta je připravená na feature/feed-read-sync: transakční bloky a snapshot/delta,
    IndexedDB v2 fronta, retry/ack a soukromý účtový úklid za vypnutým zapojením.
    [Výsledky a hranice](plans/feed/FEED_READING_POLICY.md#b2-local-results).
@@ -57,7 +60,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
    první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
-   pořadí. B2 má schválený přenos při loginu/návratu/obnově; polling B4 je otevřený.
+   pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
    Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění
    automaticky celý serverový milník ani procentní metriku.

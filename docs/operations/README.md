@@ -8,6 +8,7 @@ Provedení postupu vyžaduje oprávnění podle RELEASING. Datované staré roll
 - [Firebase Storage – Business loga a obrázky k hlášením chyb](FIREBASE_STORAGE_SETUP.md)
 - [Prezentační web ShoutOut](PRESENTATION_SITE.md)
 - [Audit načítání a nákladů](READ_COST_AUDIT.md)
+- [Kapacitní model, škálování a jeho neověřené hranice](CAPACITY_AND_SCALING.md)
 - [Výběr změn a publikování ShoutOut](RELEASING.md)
 - [Vývojové prostředí, služby a nasazení](SETUP_AND_OPERATIONS.md)
 - [Testovací strategie a regresní matice](TESTING.md)
