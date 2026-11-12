@@ -160,10 +160,11 @@ restart/erasure přečtení. Úspěch pro jednu oblast není důkaz celé kapaci
 
 ### Konkrétní první úsek B2: hranice fronty a trvalé pokračování
 
-**Připravený lokální rozsah k rozhodnutí, dosud bez zdrojových změn.**
-Průzkum potvrdil timer v `read_sync_controller.dart`, samostatný resume pull
-v `ReadSessions` a pouze paměťový download kurzor. Provozní adapter/kvóty ani
-úklid teď nelze označit za hotové; tento krok nejprve opraví klientský kontrakt.
+**Vlastník tento konkrétní lokální úsek schválil; implementace a místní
+kontroly jsou hotové, zbývá přesné CI.** Výchozí průzkum našel timer v
+`read_sync_controller.dart`, samostatný resume pull v `ReadSessions` a pouze
+paměťový kurzor. Níže je zachovaný schválený rozsah; výsledky následují.
+Provozní transport/admission a serverový úklid jsou nadále navazující práce.
 
 - V `read_sync_controller.dart` a `read_tracking_controller.dart` zrušit
   automatický 10s upload a pull při pouhém návratu do popředí. Synchronizaci
@@ -203,8 +204,52 @@ změn Rules, serverových limitů, Scheduleru, retence, B3 pořadí či B4 čís
 Navazující runtime návrh musí zvlášť vyřešit admission pro velkou frontu,
 propojení s obnovou feedu a nákladově omezenou kapacitu úklidu.
 
-Schválený je směr a jeho zařazení do existujícího plánu. Nejbližší práce zůstává
-konkrétní revize runtime B2/úklidu; před zdrojovými změnami uvést přesný rozsah,
+<a id="b2-client-results"></a>
+
+### Výsledky klientského základu B2
+
+- `ReadSyncCheckpoint` a oba store adaptéry mají lokální epoch/CAS ochranu,
+  pořadový outbox a omezené pokračování. Shodné či vracející se hodiny nemění
+  zachycenou hranici; pozdější značky čekají na další výslovnou obnovu.
+- `ReadSessions` čeká na zápis již zaznamenaných RAM značek, ale ne na
+  nekonečný přísun nového čtení. Chyba disku zastaví hranici před sítí.
+  Startup odložený skrytou aplikací proběhne jednou při prvním zobrazení;
+  běžný návrat do popředí žádné cloudové operace nespouští.
+- Upload pokračuje bez 10s timeru po dávkách nejvýše 32; pracovní odmítnutí
+  může dávku půlit, ostatní chyby nevytvářejí automatický nekonečný retry.
+  `uploadComplete`, `snapshotComplete` a `synchronizationComplete` odlišují
+  odložené značky, úplný cloudový snapshot a dokončení zachycené hranice.
+- Import a download checkpoint jsou jedna místní transakce. Nový epoch
+  jiné karty odmítne starý import/ack bez částečného zápisu. Po cold restartu
+  se dokončí konzistentní snapshot a jedním delta průchodem dorovná jeho novější
+  stav. Po nových místních značkách se nepoužije neodpovídající starý kurzor.
+  Odmítnutý propadlý kurzor umožní jeden bezpečný restart, ne opakující se smyčku.
+- Dokončený checkpoint se maže; známá úplná revize dál zůstává pouze v paměti
+  relace. Místní technické sequence/epoch chrání proti starým operacím. Erase
+  vyčistí records/outbox i veškerá meta a ponechá jen příznak erased.
+- IndexedDB v3 zachovává v1/v2 značky, potvrzený stav, cooldown a erasure fence;
+  odstraní osiřelé queue položky. Chrome test chyby během backfillu prokázal
+  rollback dříve vyžádaných clear operací i zachování v2 a původních dat.
+
+Místní kontroly: **369 Flutter / 16 skutečných Chrome/IndexedDB**, cílená
+klientská sada 39 testů. V3 fronta 1 025 položek: 33 dávek, 1 025 zpracovaných
+řádků, pozdější značka zůstala pending. Poslední Chrome průchod trval 593 ms
+bez seedování; nejde o SLA, velikost disku ani cloudovou latenci. Oba typy
+časového posunu, souběh účtů/karet, síťový výpadek, restart, změna UID,
+zánik a erase jsou pokryté. Důkazy: build/b2-client-full-final.log,
+build/b2-boundary-browser-complete.log a build/b2-boundary-targets-final.log.
+Přesný konečný CI výsledek se doplní po commitu; živé testy nejsou součástí.
+
+**Hranice:** syncFactory zůstává null, žádný transport/backend/feature flag
+nebyl zapnutý. Home stále synchronizaci nečeká jako bariéru B3; serverový
+potvrzený read kontext, jeho propojení s obnovou, admission a úklid zbývají.
+Nenazývat tento krok dokončeným B2 nebo ověřením 5 000 cloudových uživatelů.
+V3 migrace se v budoucím webovém buildu týká i lokálního B1, nezávisle na
+vypnutém cloudovém transportu: pro první rollout připravit přesný kompatibilní
+neaktivní v3 artefakt a rollback, nezaměňovat CI debug build za hotové vydání.
+
+Schválený je směr, plán a výše vymezená lokální implementace. Nejbližší práce
+po jejím CI zůstává konkrétní runtime B2/úklidu; pro další změny uvést rozsah,
 testy a provozní dopady. Samotné zapsání tohoto dokumentu nepovoluje živý
 backfill, novou placenou službu, změnu retence, oprávnění nebo cloudový test.
 Žádné nové číselné limity ani kolekce se tímto nezavádějí.

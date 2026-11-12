@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'read_state_store.dart';
 
-/// The future callable adapter maps resource-exhausted to this local signal.
+/// The future callable adapter distinguishes work budget from rate limiting.
 class ReadSyncBatchTooLarge implements Exception {}
 
-/// Prepared local B2 coordinator. No global instance or live Firebase binding.
-/// Foreground/login/manual-refresh call synchronize(); marks call dirty().
+/// Only a rejected continuation maps here, never an Auth/App Check failure.
+class ReadSyncSnapshotExpired implements Exception {}
+
+/// Local B2 coordinator. Only startup/manual refresh initiates network work.
+/// Continuations belong to that captured boundary; there is no dirty timer.
 class ReadSyncController {
   ReadSyncController({
     required this.scope,
@@ -15,7 +18,6 @@ class ReadSyncController {
     required this.download,
     DateTime Function()? clock,
     this.onMerged,
-    this.scheduleDelay = const Duration(seconds: 10),
   }) : clock = clock ?? DateTime.now;
   final ReadScope scope;
   final ReadSyncStore store;
@@ -23,13 +25,11 @@ class ReadSyncController {
   final Future<Object?> Function(Map<String, Object?>) upload, download;
   final DateTime Function() clock;
   final void Function(List<ReadUpload>)? onMerged;
-  final Duration scheduleDelay;
-  Timer? _timer;
-  Future<void>? _flight;
-  Future<void>? _queuedPull;
+  Future<void>? _flight, _queuedRefresh;
   var _active = false, _disposed = false, _generation = 0;
   Object? lastError;
-  bool snapshotComplete = false;
+  bool snapshotComplete = false, uploadComplete = false;
+  bool get synchronizationComplete => snapshotComplete && uploadComplete;
   int? _confirmedRevision;
   int _batchLimit = 32;
   bool _scopeAlive(int generation) =>
@@ -42,122 +42,73 @@ class ReadSyncController {
 
   void setActive(bool active) {
     _active = active;
-    if (!active) {
-      _timer?.cancel();
-      _timer = null;
-    }
   }
 
-  void dirty() {
-    if (!_active || _disposed || _timer != null) return;
-    _timer = Timer(scheduleDelay, () {
-      _timer = null;
-      unawaited(synchronize(pull: false));
-    });
-  }
-
-  Future<void> synchronize({bool pull = true}) {
+  Future<void> synchronize({Future<void> Function()? beforeCapture}) {
     if (_disposed || !_active) return Future.value();
     if (_flight != null) {
-      // A refresh arriving during an upload still needs its own download.
-      if (!pull) return _flight!;
-      return _queuedPull ??= _flight!.then((_) {
-        _queuedPull = null;
-        return synchronize();
+      // At most one follow-up, capturing marks added after the first boundary.
+      return _queuedRefresh ??= _flight!.then((_) {
+        _queuedRefresh = null;
+        return synchronize(beforeCapture: beforeCapture);
       });
     }
-    _timer?.cancel();
-    _timer = null;
     final generation = _generation;
-    return _flight = _run(generation, pull).whenComplete(() {
+    return _flight = _run(generation, beforeCapture).whenComplete(() {
       _flight = null;
     });
   }
 
-  Future<void> _run(int generation, bool pull) async {
+  Future<void> _run(
+    int generation,
+    Future<void> Function()? beforeCapture,
+  ) async {
+    snapshotComplete = false;
+    uploadComplete = false;
+    lastError = null;
     try {
-      if (pull) snapshotComplete = false;
       _guard(generation);
-      final batch = await store.pending(clock(), limit: _batchLimit);
+      if (beforeCapture != null) await beforeCapture();
       _guard(generation);
-      if (batch.isNotEmpty) {
-        final response = await upload({
-          'expectedUserId': scope.userId,
-          'items': batch.map((r) => r.toPayload()).toList(),
-        });
+      var checkpoint = await store.beginSync(knownRevision: _confirmedRevision);
+      _guard(generation);
+      while (_active && checkpoint.uploading) {
+        final page = await store.queuePage(
+          checkpoint,
+          clock(),
+          limit: _batchLimit,
+        );
         _guard(generation);
-        final body = _body(response), results = body['items'];
-        if (results is! List || results.length != batch.length) {
-          throw StateError('Invalid read acknowledgement');
+        if (!page.done && page.scanned == 0) {
+          throw StateError('Read queue did not advance');
         }
-        final accepted = <ReadUpload>[],
-            deferred = <ReadUpload>[],
-            seen = <String>{};
-        for (final raw in results) {
-          if (raw is! Map) throw StateError('Invalid read acknowledgement');
-          final matching = batch
-              .where(
-                (row) =>
-                    row.content.shoutId == raw['shoutId'] &&
-                    row.content.contentHash == raw['contentHash'] &&
-                    row.content.expiresAt.millisecondsSinceEpoch ==
-                        raw['expiresAt'],
-              )
-              .toList();
-          if (matching.length != 1 || !seen.add(matching.single.content.key)) {
+        final accepted = <ReadUpload>[], deferred = <ReadUpload>[];
+        if (page.items.isNotEmpty) {
+          Object? response;
+          try {
+            response = await upload({
+              'expectedUserId': scope.userId,
+              'items': page.items.map((row) => row.toPayload()).toList(),
+            });
+          } on ReadSyncBatchTooLarge {
+            _guard(generation);
+            if (_batchLimit == 1) rethrow;
+            _batchLimit = (_batchLimit / 2).ceil();
+            continue;
+          }
+          _guard(generation);
+          final body = _body(response), results = body['items'];
+          if (results is! List || results.length != page.items.length) {
             throw StateError('Invalid read acknowledgement');
           }
-          switch (raw['status']) {
-            case 'accepted':
-            case 'obsolete':
-              accepted.add(matching.single);
-            case 'deferred':
-              deferred.add(matching.single);
-            default:
-              throw StateError('Invalid read acknowledgement');
-          }
-        }
-        // Full validation precedes the first local acknowledgement.
-        await store.acknowledge(accepted, clock());
-        _guard(generation);
-        if (deferred.isNotEmpty) {
-          // Local laboratory retry cooldown, not a new polling scheduler.
-          await store.defer(deferred, clock().add(const Duration(minutes: 1)));
-          _guard(generation);
-        }
-      }
-      if (pull && _active) {
-        String? cursor;
-        final seen = <String>{};
-        int? revision;
-        do {
-          final response = await download({
-            'expectedUserId': scope.userId,
-            'cursor': ?cursor,
-            if (cursor == null && _confirmedRevision != null)
-              'knownRevision': _confirmedRevision,
-          });
-          _guard(generation);
-          final body = _body(response),
-              rawItems = body['items'],
-              next = body['next'];
-          if (rawItems is! List ||
-              rawItems.length > 4096 ||
-              !(next == null || next is String && next.isNotEmpty) ||
-              revision != null && revision != body['revision']) {
-            throw StateError('Invalid read page');
-          }
-          revision = body['revision'] as int;
-          final rows = <ReadUpload>[];
-          for (final raw in rawItems) {
+          final byKey = {for (final row in page.items) row.content.key: row},
+              seen = <String>{};
+          for (final raw in results) {
             if (raw is! Map ||
                 raw['shoutId'] is! String ||
                 raw['contentHash'] is! String ||
-                raw['expiresAt'] is! int ||
-                raw['confirmedAt'] is! int ||
-                (raw['confirmedAt'] as int) < 0 ||
-                raw['retainUntil'] is! int) {
-              throw StateError('Invalid read record');
+                raw['expiresAt'] is! int) {
+              throw StateError('Invalid read acknowledgement');
             }
             final content = ReadContent.fromHash(
               shoutId: raw['shoutId'] as String,
@@ -166,50 +117,126 @@ class ReadSyncController {
                 raw['expiresAt'] as int,
               ),
             );
-            if (raw['retainUntil'] !=
-                content.retainUntil.millisecondsSinceEpoch) {
-              throw StateError('Invalid read retention');
+            final row = byKey[content.key];
+            if (row == null ||
+                row.content.expiresAt != content.expiresAt ||
+                !seen.add(content.key)) {
+              throw StateError('Invalid read acknowledgement');
             }
-            if (clock().isBefore(content.retainUntil)) {
-              rows.add(ReadUpload(content, raw['confirmedAt'] as int));
+            switch (raw['status']) {
+              case 'accepted':
+              case 'obsolete':
+                accepted.add(row);
+              case 'deferred':
+                deferred.add(row);
+              default:
+                throw StateError('Invalid read acknowledgement');
             }
           }
-          await store.merge(rows, clock());
+        }
+        final next = checkpoint.advanceUpload(
+          ReadQueuePage(
+            page.items,
+            after: page.after,
+            done: page.done,
+            deferred: page.deferred || deferred.isNotEmpty,
+            scanned: page.scanned,
+          ),
+        );
+        await store.commitSync(
+          checkpoint,
+          next,
+          clock(),
+          acknowledged: accepted,
+          deferred: deferred,
+        );
+        _guard(generation);
+        checkpoint = next;
+      }
+      uploadComplete = !checkpoint.uploading && !checkpoint.deferred;
+      var restarted = false;
+      final seen = <String>{if (checkpoint.cursor != null) checkpoint.cursor!};
+      while (_active && !checkpoint.uploading && !checkpoint.finished) {
+        Object? response;
+        try {
+          response = await download({
+            'expectedUserId': scope.userId,
+            if (checkpoint.cursor != null) 'cursor': checkpoint.cursor,
+            if (checkpoint.cursor == null && checkpoint.fromRevision != null)
+              'knownRevision': checkpoint.fromRevision,
+          });
+        } on ReadSyncSnapshotExpired {
           _guard(generation);
-          onMerged?.call(rows);
-          if (next is String && !seen.add(next)) {
-            throw StateError('Repeated read cursor');
+          if (checkpoint.cursor == null || restarted) rethrow;
+          final next = checkpoint.restartDownload();
+          await store.commitSync(checkpoint, next, clock());
+          _guard(generation);
+          checkpoint = next;
+          restarted = true;
+          seen.clear();
+          continue;
+        }
+        _guard(generation);
+        final body = _body(response),
+            rawItems = body['items'],
+            next = body['next'];
+        final revision = body['revision'] as int;
+        if (rawItems is! List ||
+            rawItems.length > 4096 ||
+            !(next == null || next is String && next.isNotEmpty) ||
+            checkpoint.revision != null && checkpoint.revision != revision ||
+            checkpoint.fromRevision != null &&
+                revision < checkpoint.fromRevision! ||
+            next is String && !seen.add(next)) {
+          throw StateError('Invalid read page');
+        }
+        final rows = <ReadUpload>[];
+        for (final raw in rawItems) {
+          if (raw is! Map ||
+              raw['shoutId'] is! String ||
+              raw['contentHash'] is! String ||
+              raw['expiresAt'] is! int ||
+              !validReadSequence(raw['confirmedAt']) ||
+              raw['retainUntil'] is! int) {
+            throw StateError('Invalid read record');
           }
-          cursor = next as String?;
-          // Empty non-final pages are progress, not an exhausted snapshot.
-        } while (cursor != null && _active);
-        snapshotComplete = cursor == null;
-        if (snapshotComplete) _confirmedRevision = revision;
+          final content = ReadContent.fromHash(
+            shoutId: raw['shoutId'] as String,
+            contentHash: raw['contentHash'] as String,
+            expiresAt: DateTime.fromMillisecondsSinceEpoch(
+              raw['expiresAt'] as int,
+            ),
+          );
+          if (raw['retainUntil'] !=
+                  content.retainUntil.millisecondsSinceEpoch ||
+              (raw['confirmedAt'] as int) >=
+                  content.retainUntil.millisecondsSinceEpoch) {
+            throw StateError('Invalid read retention');
+          }
+          if (clock().isBefore(content.retainUntil)) {
+            rows.add(ReadUpload(content, raw['confirmedAt'] as int));
+          }
+        }
+        final progress = checkpoint.page(next as String?, revision);
+        await store.commitSync(checkpoint, progress, clock(), imported: rows);
+        _guard(generation);
+        checkpoint = progress;
+        onMerged?.call(rows);
+        if (next == null && !progress.finished) seen.clear();
       }
       _guard(generation);
-      lastError = null;
-      // Continue full queues without a timer polling an empty cloud state.
-      if (_active && (await store.pending(clock())).isNotEmpty) {
-        dirty();
-      }
+      snapshotComplete = checkpoint.finished;
+      if (snapshotComplete) _confirmedRevision = checkpoint.revision;
     } catch (error) {
       if (_scopeAlive(generation)) lastError = error;
-      if (_scopeAlive(generation) &&
-          error is ReadSyncBatchTooLarge &&
-          _batchLimit > 1) {
-        _batchLimit = (_batchLimit / 2).ceil();
-        dirty();
-      }
-      // Durable queue remains. Retry on next login/resume/refresh/new mark;
-      // a failing network must not create an endless billable polling loop.
+      // Queue/checkpoint remain durable. Only the next explicit trigger retries.
     }
   }
 
   Map _body(Object? response) {
     if (response is! Map ||
         response['version'] != 1 ||
-        response['revision'] is! int ||
-        (response['revision'] as int) < 0) {
+        !validReadSequence(response['revision'])) {
       throw StateError('Invalid read response');
     }
     return response;
@@ -219,7 +246,5 @@ class ReadSyncController {
     _disposed = true;
     _active = false;
     _generation++;
-    _timer?.cancel();
-    _timer = null;
   }
 }

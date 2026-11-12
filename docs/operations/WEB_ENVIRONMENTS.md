@@ -1,5 +1,11 @@
 # Vývojový a produkční web
 
+Připravený [klientský základ B2](../plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results)
+obsahuje místní IndexedDB v3, zatím bez nasazení. Její upgrade při budoucím
+načtení nového webu není podmíněný zapnutím cloudové synchronizace. Pro první
+rollout připravit kompatibilní neaktivní v3 artefakt i návratovou verzi;
+staré v1/v2 buildy nejsou po upgradu automaticky použitelný rollback.
+
 Pro poslední ověřený zdroj/revize použít [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
 Tento dokument uchovává technické postupy a datované rollouty. Staré revize,
 probes a tehdejší vypnuté přepínače níže nejsou současnou konfigurací.

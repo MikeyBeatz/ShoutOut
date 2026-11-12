@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:web/web.dart' as web;
 import 'package:shoutout/indexed_read_state_store.dart';
 import 'package:shoutout/read_state_store.dart';
+import 'package:shoutout/read_sync_controller.dart';
 
 Future<web.IDBDatabase> open(String name) {
   final done = Completer<web.IDBDatabase>(),
@@ -48,6 +49,25 @@ Future<void> drop(String name) async {
     done.completeError(StateError('Test database cleanup'));
   }).toJS;
   await done.future;
+}
+
+Future<Object?> readMeta(String name, String key) async {
+  final db = await open(name), done = Completer<Object?>();
+  final request = db
+      .transaction('meta'.toJS, 'readonly')
+      .objectStore('meta')
+      .get(key.toJS);
+  request.onsuccess = ((web.Event _) {
+    done.complete(request.result?.dartify());
+  }).toJS;
+  request.onerror = ((web.Event _) {
+    done.completeError(StateError('Metadata read failed'));
+  }).toJS;
+  try {
+    return await done.future;
+  } finally {
+    db.close();
+  }
 }
 
 void main() {
@@ -344,6 +364,343 @@ void main() {
       await expectLater(s.merge(batch, now), throwsStateError);
       await expectLater(s.pending(now), throwsStateError);
       expect(await other.contains(batch.first.content, now), isTrue);
+    },
+  );
+
+  test(
+    'v3 migration preserves v2 confirmed/deferred records, drops orphan queue rows and preserves erased scopes',
+    () async {
+      for (final erased in [false, true]) {
+        final prefix = 'v2-upgrade-${serial++}',
+            name = '$prefix-${scope.databaseSuffix}';
+        final ready = Completer<web.IDBDatabase>(),
+            request = web.window.indexedDB.open(name, 2);
+        request.onupgradeneeded = ((web.Event _) {
+          final db = request.result as web.IDBDatabase;
+          db.createObjectStore('meta');
+          db
+              .createObjectStore(
+                'records',
+                web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+              )
+              .createIndex('retainUntil', 'retainUntil'.toJS);
+          db
+              .createObjectStore(
+                'outbox',
+                web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+              )
+              .createIndex('nextAttemptAt', 'nextAttemptAt'.toJS);
+        }).toJS;
+        request.onsuccess = ((web.Event _) {
+          ready.complete(request.result as web.IDBDatabase);
+        }).toJS;
+        final original = await ready.future,
+            tx = original.transaction(
+              ['records', 'outbox', 'meta'].jsify()!,
+              'readwrite',
+            ),
+            saved = Completer<void>();
+        tx.oncomplete = ((web.Event _) {
+          saved.complete();
+        }).toJS;
+        final pending = ReadMarker(scope, item(1), now).toJson();
+        tx.objectStore('records').put(pending.jsify()!);
+        tx
+            .objectStore('records')
+            .put(
+              {
+                ...ReadMarker(scope, item(2), now).toJson(),
+                'pendingSync': false,
+              }.jsify()!,
+            );
+        tx
+            .objectStore('outbox')
+            .put(
+              {
+                ...pending,
+                'nextAttemptAt': now
+                    .add(const Duration(minutes: 1))
+                    .millisecondsSinceEpoch,
+              }.jsify()!,
+            );
+        tx
+            .objectStore('outbox')
+            .put(
+              {
+                ...ReadMarker(scope, item(99), now).toJson(),
+                'nextAttemptAt': 0,
+              }.jsify()!,
+            );
+        if (erased) tx.objectStore('meta').put(true.toJS, 'erased'.toJS);
+        await saved.future;
+        original.close();
+        final s = store(prefix: prefix);
+        if (erased) {
+          await expectLater(s.beginSync(), throwsStateError);
+          await expectLater(s.put(item(3), now), throwsStateError);
+        } else {
+          expect(await s.contains(item(2), now), isTrue);
+          final checkpoint = await s.beginSync(),
+              delayed = await s.queuePage(checkpoint, now);
+          expect(checkpoint.boundary, 1);
+          expect(delayed.items, isEmpty);
+          expect(delayed.deferred, isTrue);
+          final due = await s.queuePage(
+            checkpoint,
+            now.add(const Duration(minutes: 1)),
+          );
+          expect(due.items.single.content.shoutId, item(1).shoutId);
+          expect(due.items.single.sequence, 1);
+        }
+      }
+    },
+  );
+
+  test(
+    'failed v3 backfill rolls back queue clears, metadata and the database version',
+    () async {
+      final prefix = 'failed-upgrade-${serial++}',
+          name = '$prefix-${scope.databaseSuffix}';
+      final ready = Completer<web.IDBDatabase>(),
+          request = web.window.indexedDB.open(name, 2);
+      request.onupgradeneeded = ((web.Event _) {
+        final db = request.result as web.IDBDatabase;
+        db.createObjectStore('meta');
+        db
+            .createObjectStore(
+              'records',
+              web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+            )
+            .createIndex('retainUntil', 'retainUntil'.toJS);
+        // An incompatible old key path fails only when the backfill writes,
+        // after clear requests were already made in the upgrade transaction.
+        db
+            .createObjectStore(
+              'outbox',
+              web.IDBObjectStoreParameters(keyPath: 'legacyKey'.toJS),
+            )
+            .createIndex('nextAttemptAt', 'nextAttemptAt'.toJS);
+      }).toJS;
+      request.onsuccess = ((web.Event _) {
+        ready.complete(request.result as web.IDBDatabase);
+      }).toJS;
+      final old = await ready.future,
+          tx = old.transaction(
+            ['meta', 'records', 'outbox'].jsify()!,
+            'readwrite',
+          ),
+          saved = Completer<void>();
+      tx.oncomplete = ((web.Event _) {
+        saved.complete();
+      }).toJS;
+      final row = ReadMarker(scope, item(1), now).toJson();
+      tx.objectStore('records').put(row.jsify()!);
+      tx
+          .objectStore('outbox')
+          .put({...row, 'legacyKey': 'original', 'nextAttemptAt': 0}.jsify()!);
+      tx.objectStore('meta').put('preserved'.toJS, 'sentinel'.toJS);
+      await saved.future;
+      old.close();
+      final migrated = store(prefix: prefix);
+      await expectLater(migrated.beginSync(), throwsStateError);
+      final original = await open(name);
+      expect(original.version, 2);
+      original.close();
+      expect(await readMeta(name, 'sentinel'), 'preserved');
+      final raw = await open(name), result = Completer<Object?>();
+      final get = raw
+          .transaction('outbox'.toJS, 'readonly')
+          .objectStore('outbox')
+          .get('original'.toJS);
+      get.onsuccess = ((web.Event _) {
+        result.complete(get.result?.dartify());
+      }).toJS;
+      expect((await result.future as Map)['key'], item(1).key);
+      raw.close();
+    },
+  );
+
+  test(
+    'v3 indexed boundary scans 1025 rows once and leaves a backwards-clock late mark pending',
+    () async {
+      final s = store();
+      for (var i = 0; i < 1025; i++) {
+        await s.put(item(i), now);
+      }
+      var checkpoint = await s.beginSync(), scanned = 0, pages = 0;
+      final watch = Stopwatch()..start();
+      while (checkpoint.uploading) {
+        final page = await s.queuePage(checkpoint, now);
+        scanned += page.scanned;
+        pages++;
+        if (pages == 1) {
+          await s.put(item(9999), now.subtract(const Duration(hours: 1)));
+        }
+        final next = checkpoint.advanceUpload(page);
+        await s.commitSync(checkpoint, next, now, acknowledged: page.items);
+        checkpoint = next;
+      }
+      expect(scanned, 1025);
+      expect(pages, 33);
+      expect((await s.pending(now)).single.content.shoutId, item(9999).shoutId);
+      // ignore: avoid_print
+      print(
+        'B2_BOUNDARY_LOCAL ${jsonEncode({'rows': 1025, 'scanned': scanned, 'pages': pages, 'elapsedMs': watch.elapsedMilliseconds, 'firestoreReads': 0, 'firestoreWrites': 0})}',
+      );
+    },
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
+
+  test(
+    'v3 cold restart resumes a committed page then catches up without importing into another account',
+    () async {
+      final s = store(),
+          prefix = s.name.substring(
+            0,
+            s.name.length - scope.databaseSuffix.length - 1,
+          );
+      Map<String, Object?> page(
+        int revision, {
+        String? next,
+        List<ReadContent> rows = const [],
+      }) => {
+        'version': 1,
+        'revision': revision,
+        'next': next,
+        'items': rows
+            .map(
+              (r) => {
+                ...ReadUpload(r, now.millisecondsSinceEpoch).toPayload(),
+                'retainUntil': r.retainUntil.millisecondsSinceEpoch,
+                'confirmedAt': now.millisecondsSinceEpoch,
+              },
+            )
+            .toList(),
+      };
+      final first = ReadSyncController(
+        scope: scope,
+        store: s,
+        currentScope: () => scope,
+        clock: () => now,
+        upload: (_) async => throw StateError('No upload expected'),
+        download: (r) async {
+          if (r['cursor'] != null) throw StateError('offline');
+          return page(1, next: 'continue', rows: [item(1)]);
+        },
+      )..setActive(true);
+      await first.synchronize();
+      expect(first.snapshotComplete, isFalse);
+      first.dispose();
+      await s.close();
+      final reopened = IndexedReadStateStore(scope, prefix: prefix),
+          payloads = <Map<String, Object?>>[];
+      final second = ReadSyncController(
+        scope: scope,
+        store: reopened,
+        currentScope: () => scope,
+        clock: () => now,
+        upload: (_) async =>
+            throw StateError('Downloaded rows must remain clean'),
+        download: (r) async {
+          payloads.add(r);
+          return r['cursor'] != null
+              ? page(1, rows: [item(2)])
+              : page(2, rows: [item(3)]);
+        },
+      )..setActive(true);
+      try {
+        await second.synchronize();
+        expect(second.lastError, isNull);
+        expect(second.synchronizationComplete, isTrue);
+        expect(payloads.first['cursor'], 'continue');
+        expect(payloads.last['knownRevision'], 1);
+        expect(payloads.length, 2);
+        expect(await readMeta(reopened.name, 'syncCheckpoint'), isNull);
+        for (var i = 1; i <= 3; i++) {
+          expect(await reopened.contains(item(i), now), isTrue);
+        }
+        expect(await reopened.pending(now), isEmpty);
+        final other = store(owner: ReadScope('local-test', 'other'));
+        expect(await other.contains(item(1), now), isFalse);
+      } finally {
+        second.dispose();
+        await reopened.close();
+      }
+    },
+  );
+
+  test(
+    'v3 two connections reject stale page/ack atomically and erase removes all progress metadata',
+    () async {
+      final first = store(),
+          prefix = first.name.substring(
+            0,
+            first.name.length - scope.databaseSuffix.length - 1,
+          );
+      final second = IndexedReadStateStore(scope, prefix: prefix);
+      try {
+        await first.put(item(1), now);
+        final old = await first.beginSync(),
+            queued = await first.queuePage(old, now),
+            current = await second.beginSync();
+        await expectLater(
+          first.commitSync(
+            old,
+            old.advanceUpload(queued),
+            now,
+            acknowledged: queued.items,
+            imported: [ReadUpload(item(2), now.millisecondsSinceEpoch)],
+          ),
+          throwsA(isA<ReadSyncConflict>()),
+        );
+        expect(await second.contains(item(2), now), isFalse);
+        expect((await second.pending(now)).length, 1);
+        expect((await second.queuePage(current, now)).items.length, 1);
+        await first.erase();
+        await expectLater(
+          second.commitSync(
+            current,
+            current.advanceUpload(queued),
+            now,
+            acknowledged: queued.items,
+          ),
+          throwsStateError,
+        );
+        final raw = await open(first.name),
+            tx = raw.transaction('meta'.toJS, 'readonly'),
+            get = tx.objectStore('meta').getAllKeys(),
+            keys = Completer<Object?>();
+        get.onsuccess = ((web.Event _) {
+          keys.complete(get.result.dartify());
+        }).toJS;
+        expect(await keys.future, ['erased']);
+        raw.close();
+      } finally {
+        await second.close();
+      }
+    },
+  );
+
+  test(
+    'v3 late ack cannot clear a new incarnation with identical content and device timestamp',
+    () async {
+      final s = store();
+      await s.put(item(1), now);
+      final old = await s.beginSync(), page = await s.queuePage(old, now);
+      await s.prune(item(1).retainUntil);
+      await s.put(item(1), now);
+      await s.commitSync(
+        old,
+        old.advanceUpload(page),
+        now,
+        acknowledged: page.items,
+      );
+      expect((await s.pending(now)).length, 1);
+      final next = await s.beginSync(), newPage = await s.queuePage(next, now);
+      expect(
+        newPage.items.single.sequence,
+        greaterThan(page.items.single.sequence!),
+      );
     },
   );
 }

@@ -188,6 +188,9 @@ sync při spuštění/skutečné obnově feedu, bez automatického 10s uploadu.
 Retence expiresAt + 7 dní a dávka nejvýše 32 zůstávají.
 První lokální úsek je připravený, [výsledky](FEED_READING_POLICY.md#b2-local-results);
 source 693663d má success CI 43119749520, lokální úsek je uzavřený.
+Následný výslovně schválený [klientský základ v3](FEED_DELTA_REFRESH_PLAN.md#b2-client-results)
+je lokálně implementovaný (369 Flutter / 16 Chrome), čeká na přesné CI.
+Odstraňuje starý timer/resume pull a doplňuje trvalé pokračování; není nasazený.
 Navazující [provozní návrh B2](FEED_READING_POLICY.md#b2-runtime-proposal)
 je starší podklad k revizi podle kapacitních výsledků a společného kontraktu;
 další konkrétní runtime implementace ještě není schválená.

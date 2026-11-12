@@ -24,14 +24,16 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Schválit a ověřit klientský základ B2 pro obnovu a bezpečné pokračování.**
+1. **Uzavřít přesné CI klientského B2 a připravit navazující runtime/úklid.**
    [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
-   je připravený: hranice outboxu, odstranění starých automatických spouštěčů,
-   IndexedDB v3 a atomický download checkpoint. Zatím bez zdrojových změn;
-   serverový runtime/admission a kapacita úklidu navazují po tomto ověření.
+   byl schválený a je implementovaný: hranice outboxu, odstranění automatických
+   spouštěčů, IndexedDB v3 a atomický checkpoint. 369 Flutter / 16 Chrome / 39
+   cílených regresí prošlo; zbývá přesné CI. [Výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
+   Transport není zapnutý a nic není nasazené. Serverový runtime/admission
+   a kapacita úklidu navazují po tomto ověření; znovu neschvalovat hotový úsek.
    [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
    je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
-   nikoli hotovou implementaci. Zdrojový rozsah B2 ještě předložit konkrétně.
+   nikoli dokončené B2/B3/B4. Další runtime rozsah B2 ještě předložit konkrétně.
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.

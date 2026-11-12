@@ -92,35 +92,99 @@ class IndexedReadStateStore implements ReadSyncStore {
 
   Future<web.IDBDatabase> _openDatabase() {
     final done = Completer<web.IDBDatabase>();
-    final request = web.window.indexedDB.open(name, 2);
+    final request = web.window.indexedDB.open(name, 3);
     request.onupgradeneeded = ((web.Event _) {
-      final db = request.result as web.IDBDatabase;
-      if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
-      if (!db.objectStoreNames.contains('records')) {
-        db
-            .createObjectStore(
-              'records',
-              web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
-            )
-            .createIndex('retainUntil', 'retainUntil'.toJS);
-      }
-      final queue = db.createObjectStore(
-        'outbox',
-        web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
-      );
-      queue.createIndex('nextAttemptAt', 'nextAttemptAt'.toJS);
-      // The upgrade and backfill are one transaction; interrupted upgrades
-      // cannot leave v1 pending records without their persistent queue.
-      final cursor = request.transaction!.objectStore('records').openCursor();
-      cursor.onsuccess = ((web.Event _) {
-        if (cursor.result == null) return;
-        final row = cursor.result as web.IDBCursorWithValue;
-        final data = row.value.dartify();
-        if (data is Map && data['pendingSync'] == true) {
-          queue.put({...data, 'nextAttemptAt': 0}.jsify()!);
+      try {
+        final db = request.result as web.IDBDatabase;
+        if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
+        if (!db.objectStoreNames.contains('records')) {
+          db
+              .createObjectStore(
+                'records',
+                web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+              )
+              .createIndex('retainUntil', 'retainUntil'.toJS);
         }
-        row.continue_();
-      }).toJS;
+        final tx = request.transaction!;
+        final queue = db.objectStoreNames.contains('outbox')
+            ? tx.objectStore('outbox')
+            : db.createObjectStore(
+                'outbox',
+                web.IDBObjectStoreParameters(keyPath: 'key'.toJS),
+              );
+        if (!queue.indexNames.contains('nextAttemptAt')) {
+          queue.createIndex('nextAttemptAt', 'nextAttemptAt'.toJS);
+        }
+        queue.createIndex(
+          'sequence',
+          'sequence'.toJS,
+          web.IDBIndexParameters(unique: true),
+        );
+        // Every migration write is in this version-change transaction. Preserve
+        // old deferred times, rebuild the queue from canonical pending records.
+        void guard(void Function() action) {
+          try {
+            action();
+          } catch (_) {
+            tx.abort();
+          }
+        }
+
+        final meta = tx.objectStore('meta'),
+            records = tx.objectStore('records');
+        final erased = meta.get('erased'.toJS);
+        _success(erased, guard, () {
+          if (erased.result?.dartify() == true) {
+            records.clear();
+            queue.clear();
+            meta.clear();
+            meta.put(true.toJS, 'erased'.toJS);
+            return;
+          }
+          final oldQueue = queue.getAll();
+          _success(oldQueue, guard, () {
+            final deferred = <String, int>{};
+            final old = oldQueue.result.dartify();
+            if (old is List) {
+              for (final raw in old) {
+                if (raw is Map &&
+                    raw['key'] is String &&
+                    validReadSequence(raw['nextAttemptAt'])) {
+                  deferred[raw['key'] as String] = raw['nextAttemptAt'] as int;
+                }
+              }
+            }
+            queue.clear();
+            meta.clear();
+            var sequence = 0;
+            final cursor = records.openCursor();
+            _success(cursor, guard, () {
+              if (cursor.result == null) {
+                meta.put(sequence.toJS, 'sequence'.toJS);
+                meta.put(0.toJS, 'syncEpoch'.toJS);
+                return;
+              }
+              final row = cursor.result as web.IDBCursorWithValue;
+              final data = row.value.dartify();
+              if (data is Map && data['pendingSync'] == true) {
+                if (sequence >= readSequenceMaximum) {
+                  throw StateError('Read sequence exhausted');
+                }
+                queue.put(
+                  {
+                    ...data,
+                    'sequence': ++sequence,
+                    'nextAttemptAt': deferred[data['key']] ?? 0,
+                  }.jsify()!,
+                );
+              }
+              row.continue_();
+            });
+          });
+        });
+      } catch (_) {
+        request.transaction?.abort();
+      }
     }).toJS;
     request.onsuccess = ((web.Event _) {
       final db = request.result as web.IDBDatabase;
@@ -139,8 +203,8 @@ class IndexedReadStateStore implements ReadSyncStore {
       done.completeError(StateError('Read database open failed'));
     }).toJS;
     request.onblocked = ((web.Event _) {
-      // No schema migration is currently requested. Existing connections close
-      // on versionchange; the request remains pending rather than corrupting data.
+      // Older connections must close on versionchange. Never drop their data
+      // merely because an upgrade is temporarily blocked.
     }).toJS;
     return done.future;
   }
@@ -148,6 +212,22 @@ class IndexedReadStateStore implements ReadSyncStore {
   Future<void> _transaction(
     String mode,
     void Function(web.IDBTransaction tx) body,
+  ) => _guardedTransaction(mode, (tx, _) => body(tx));
+
+  static void _success(
+    web.IDBRequest request,
+    void Function(void Function()) guard,
+    void Function() body,
+  ) {
+    request.onsuccess = ((web.Event _) {
+      guard(body);
+    }).toJS;
+  }
+
+  Future<void> _guardedTransaction(
+    String mode,
+    void Function(web.IDBTransaction tx, void Function(void Function()) guard)
+    body,
   ) async {
     final db = await _open();
     if (_closed) throw StateError('Read store closed');
@@ -182,7 +262,7 @@ class IndexedReadStateStore implements ReadSyncStore {
         if (meta.result?.dartify() == true) {
           throw StateError('Read scope erased');
         }
-        body(tx);
+        body(tx, guarded);
       });
     }).toJS;
     await done.future;
@@ -208,28 +288,37 @@ class IndexedReadStateStore implements ReadSyncStore {
   @override
   Future<void> put(ReadContent content, DateTime now) async {
     if (!now.isBefore(content.retainUntil)) return;
-    await _transaction('readwrite', (tx) {
+    await _guardedTransaction('readwrite', (tx, guard) {
       final store = tx.objectStore('records'),
           request = store.get(content.key.toJS);
-      request.onsuccess = ((web.Event _) {
+      _success(request, guard, () {
         if (!ReadMarker.matches(
           request.result?.dartify(),
           scope,
           content,
           now,
         )) {
-          final row = ReadMarker(scope, content, now).toJson().jsify()!;
-          store.put(row);
-          tx
-              .objectStore('outbox')
-              .put(
-                {
-                  ...ReadMarker(scope, content, now).toJson(),
-                  'nextAttemptAt': 0,
-                }.jsify()!,
-              );
+          final meta = tx.objectStore('meta'), get = meta.get('sequence'.toJS);
+          _success(get, guard, () {
+            final sequence = _counter(get.result.dartify());
+            if (sequence >= readSequenceMaximum) {
+              throw StateError('Read sequence exhausted');
+            }
+            final row = ReadMarker(scope, content, now).toJson();
+            store.put(row.jsify()!);
+            tx
+                .objectStore('outbox')
+                .put(
+                  {
+                    ...row,
+                    'nextAttemptAt': 0,
+                    'sequence': sequence + 1,
+                  }.jsify()!,
+                );
+            meta.put((sequence + 1).toJS, 'sequence'.toJS);
+          });
         }
-      }).toJS;
+      });
     });
   }
 
@@ -383,6 +472,7 @@ class IndexedReadStateStore implements ReadSyncStore {
     }).toJS;
     tx.objectStore('records').clear();
     tx.objectStore('outbox').clear();
+    tx.objectStore('meta').clear();
     tx.objectStore('meta').put(true.toJS, 'erased'.toJS);
     await done.future;
   }
@@ -395,5 +485,211 @@ class IndexedReadStateStore implements ReadSyncStore {
         (await _opening!).close();
       } catch (_) {}
     }
+  }
+
+  static int _counter(Object? raw) {
+    if (!validReadSequence(raw)) throw StateError('Invalid local read counter');
+    return raw as int;
+  }
+
+  @override
+  Future<ReadSyncCheckpoint> beginSync({int? knownRevision}) async {
+    late ReadSyncCheckpoint result;
+    await _guardedTransaction('readwrite', (tx, guard) {
+      final meta = tx.objectStore('meta'), sequence = meta.get('sequence'.toJS);
+      _success(sequence, guard, () {
+        final boundary = _counter(sequence.result.dartify()),
+            epoch = meta.get('syncEpoch'.toJS);
+        _success(epoch, guard, () {
+          final version = _counter(epoch.result.dartify()),
+              get = meta.get('syncCheckpoint'.toJS);
+          _success(get, guard, () {
+            final previous = ReadSyncCheckpoint.parse(
+              get.result?.dartify(),
+              scope,
+            );
+            result = nextReadSync(previous, version, boundary, knownRevision);
+            meta.put(result.epoch.toJS, 'syncEpoch'.toJS);
+            meta.put(result.toJson(scope).jsify()!, 'syncCheckpoint'.toJS);
+          });
+        });
+      });
+    });
+    return result;
+  }
+
+  void _checkCheckpoint(
+    web.IDBTransaction tx,
+    void Function(void Function()) guard,
+    ReadSyncCheckpoint expected,
+    void Function() body,
+  ) {
+    final request = tx.objectStore('meta').get('syncCheckpoint'.toJS);
+    _success(request, guard, () {
+      if (!expected.same(
+        ReadSyncCheckpoint.parse(request.result?.dartify(), scope),
+      )) {
+        throw ReadSyncConflict();
+      }
+      body();
+    });
+  }
+
+  @override
+  Future<ReadQueuePage> queuePage(
+    ReadSyncCheckpoint checkpoint,
+    DateTime now, {
+    int limit = 32,
+  }) async {
+    if (limit < 1 || limit > 32) throw ArgumentError('Read batch limit');
+    final items = <ReadUpload>[];
+    var after = checkpoint.after, scanned = 0, deferred = false, done = false;
+    await _guardedTransaction('readwrite', (tx, guard) {
+      _checkCheckpoint(tx, guard, checkpoint, () {
+        if (after >= checkpoint.boundary) {
+          done = true;
+          return;
+        }
+        final request = tx
+            .objectStore('outbox')
+            .index('sequence')
+            .openCursor(
+              web.IDBKeyRange.bound(after.toJS, checkpoint.boundary.toJS, true),
+            );
+        _success(request, guard, () {
+          if (request.result == null) {
+            done = true;
+            after = checkpoint.boundary;
+            return;
+          }
+          if (scanned >= limit) return;
+          final cursor = request.result as web.IDBCursorWithValue;
+          final raw = cursor.value.dartify();
+          if (raw is! Map ||
+              !validReadSequence(raw['sequence']) ||
+              raw['sequence'] == 0) {
+            throw StateError('Invalid read outbox sequence');
+          }
+          after = raw['sequence'] as int;
+          scanned++;
+          final get = tx.objectStore('records').get(cursor.primaryKey);
+          _success(get, guard, () {
+            final data = get.result?.dartify(),
+                row = ReadUpload.parse(data, scope, now);
+            if (row == null || data is! Map || data['pendingSync'] != true) {
+              cursor.delete();
+            } else if (!validReadSequence(raw['nextAttemptAt'])) {
+              throw StateError('Invalid read outbox delay');
+            } else if (now.millisecondsSinceEpoch <
+                (raw['nextAttemptAt'] as int)) {
+              deferred = true;
+            } else {
+              items.add(
+                ReadUpload(row.content, row.readAtLocal, sequence: after),
+              );
+            }
+            if (scanned < limit) {
+              cursor.continue_();
+            } else if (after == checkpoint.boundary) {
+              done = true;
+            }
+          });
+        });
+      });
+    });
+    return ReadQueuePage(
+      items,
+      after: after,
+      done: done,
+      deferred: deferred,
+      scanned: scanned,
+    );
+  }
+
+  @override
+  Future<void> commitSync(
+    ReadSyncCheckpoint expected,
+    ReadSyncCheckpoint next,
+    DateTime now, {
+    List<ReadUpload> acknowledged = const [],
+    List<ReadUpload> deferred = const [],
+    List<ReadUpload> imported = const [],
+  }) async {
+    if (next.epoch != expected.epoch ||
+        next.boundary != expected.boundary ||
+        next.after < expected.after ||
+        ReadSyncCheckpoint.parse(next.toJson(scope), scope) == null) {
+      throw ReadSyncConflict();
+    }
+    await _guardedTransaction('readwrite', (tx, guard) {
+      _checkCheckpoint(tx, guard, expected, () {
+        final records = tx.objectStore('records'),
+            queue = tx.objectStore('outbox');
+        for (final row in acknowledged) {
+          final get = queue.get(row.content.key.toJS);
+          _success(get, guard, () {
+            final queued = get.result?.dartify();
+            if (queued is! Map || queued['sequence'] != row.sequence) return;
+            final read = records.get(row.content.key.toJS);
+            _success(read, guard, () {
+              final data = read.result?.dartify();
+              if (ReadMarker.matches(data, scope, row.content, now) &&
+                  (data as Map)['readAtLocal'] == row.readAtLocal) {
+                records.put({...data, 'pendingSync': false}.jsify()!);
+                queue.delete(row.content.key.toJS);
+              }
+            });
+          });
+        }
+        for (final row in deferred) {
+          final get = queue.get(row.content.key.toJS);
+          _success(get, guard, () {
+            final data = get.result?.dartify();
+            if (data is Map && data['sequence'] == row.sequence) {
+              queue.put(
+                {
+                  ...data,
+                  'nextAttemptAt': now
+                      .add(const Duration(minutes: 1))
+                      .millisecondsSinceEpoch,
+                }.jsify()!,
+              );
+            }
+          });
+        }
+        for (final row in imported) {
+          if (!now.isBefore(row.content.retainUntil)) continue;
+          final get = records.get(row.content.key.toJS);
+          _success(get, guard, () {
+            if (ReadMarker.matches(
+              get.result?.dartify(),
+              scope,
+              row.content,
+              now,
+            )) {
+              return;
+            }
+            records.put(
+              {
+                ...ReadMarker(
+                  scope,
+                  row.content,
+                  DateTime.fromMillisecondsSinceEpoch(row.readAtLocal),
+                ).toJson(),
+                'pendingSync': false,
+              }.jsify()!,
+            );
+            queue.delete(row.content.key.toJS);
+          });
+        }
+        if (next.finished) {
+          tx.objectStore('meta').delete('syncCheckpoint'.toJS);
+        } else {
+          tx
+              .objectStore('meta')
+              .put(next.toJson(scope).jsify()!, 'syncCheckpoint'.toJS);
+        }
+      });
+    });
   }
 }

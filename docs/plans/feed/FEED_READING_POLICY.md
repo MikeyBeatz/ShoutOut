@@ -25,9 +25,10 @@ návrhem B4; neoznačovat je za implementované ani považovat jejich cenu za nu
 Změněný kořen oblasti sám neznamená nový Shout: mění se také při reakcích či
 mazání. Počet musí odpovídat relevantním novinkám pro daný feed.
 
-**Ověřený současný stav:** DEV B1 ukládá přečtení místně. B2 na zdroji 693663d
-nemá živý transport; controller má dosavadní timer a resume hook. Tyto zdroje
-se nynějším lokálním kapacitním úsekem nemění. Home volá synchronize bez čekání
+**Ověřený současný stav:** DEV B1 ukládá přečtení místně. Starší B2 na zdroji
+693663d mělo timer/resume hook; [nový klientský základ](FEED_DELTA_REFRESH_PLAN.md#b2-client-results)
+je lokálně nahradil hranicí obnovy, IndexedDB v3 a trvalým checkpointem.
+Ani jedna B2 verze nemá živý transport. Home volá synchronize bez čekání
 na úplný read snapshot; bariéru pro globální B3 je třeba teprve dokončit.
 Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
 vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
@@ -624,6 +625,9 @@ přečtený obsah. Tyto navazující živé/provozní kroky se nyní neprovádě
 ## Provozní návrh B2 — k rozhodnutí, 12. listopadu 2026
 
 **Stav: připravený rozsah další lokální implementace, zatím neschválený.**
+Tabulka níže je starší návrh. Novější klientský základ je v3 podle
+[výsledků](FEED_DELTA_REFRESH_PLAN.md#b2-client-results); návratový web musí
+rozumět v3 a jeho erase metadatům. Staré v1/v2 verze nejsou automatický rollback.
 Spouštěče/kapacitu tohoto staršího návrhu před implementací revidovat podle
 [aktuálního rozhodnutí](#refresh-boundary-policy) a kapacitního modelu.
 Základ 693663d má úspěšné CI 43119749520. Tento návrh nemění kód ani živé

@@ -18,6 +18,7 @@ class ReadTrackingController extends ChangeNotifier {
   final DateTime Function() clock;
   final _read = <String, ReadContent>{}, _pending = <String, ReadContent>{};
   final _loading = <String, Future<void>>{};
+  final _persisted = <String, Completer<bool>>{};
   bool _disposed = false, _erased = false, _writing = false, _pruning = false;
   bool storageFailed = false;
   bool get enabled => !_disposed && !_erased;
@@ -52,6 +53,7 @@ class ReadTrackingController extends ChangeNotifier {
     }
     _read[content.key] = content;
     _pending[content.key] = content;
+    _prepareWrite(content.key);
     unawaited(retry());
   }
 
@@ -65,12 +67,21 @@ class ReadTrackingController extends ChangeNotifier {
     if (!enabled || _writing) return;
     _writing = true;
     try {
+      for (final key in _pending.keys) {
+        _prepareWrite(key);
+      }
       while (enabled && _pending.isNotEmpty) {
         final content = _pending.values.first;
+        final persisted = _persisted[content.key];
         await store.put(content, clock()).timeout(const Duration(seconds: 10));
-        if (enabled) {
+        if (enabled &&
+            identical(_pending[content.key], content) &&
+            identical(_persisted[content.key], persisted)) {
           _pending.remove(content.key);
-          sync?.dirty();
+          _persisted.remove(content.key);
+          if (persisted != null && !persisted.isCompleted) {
+            persisted.complete(true);
+          }
         }
       }
       if (enabled && storageFailed) {
@@ -78,10 +89,41 @@ class ReadTrackingController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (_) {
+      for (final pending in _persisted.values) {
+        if (!pending.isCompleted) pending.complete(false);
+      }
       _failure();
     } finally {
       _writing = false;
     }
+  }
+
+  void _prepareWrite(String key) {
+    if (_persisted[key] == null || _persisted[key]!.isCompleted) {
+      _persisted[key] = Completer<bool>();
+    }
+  }
+
+  /// Wait only for marks already in RAM at this boundary, not future reading.
+  Future<void> flushBoundary() async {
+    if (!enabled) throw StateError('Read controller unavailable');
+    final waits = <Future<bool>>[];
+    for (final key in _pending.keys) {
+      _prepareWrite(key);
+      waits.add(_persisted[key]!.future);
+    }
+    unawaited(retry());
+    final saved = await Future.wait(waits).timeout(const Duration(seconds: 10));
+    if (!enabled || saved.any((value) => !value)) {
+      throw StateError('Local read persistence failed');
+    }
+  }
+
+  void _cancelWrites() {
+    for (final pending in _persisted.values) {
+      if (!pending.isCompleted) pending.complete(false);
+    }
+    _persisted.clear();
   }
 
   Future<void> prune() async {
@@ -97,9 +139,17 @@ class ReadTrackingController extends ChangeNotifier {
         _read.removeWhere(
           (_, content) => !clock().isBefore(content.retainUntil),
         );
-        _pending.removeWhere(
-          (_, content) => !clock().isBefore(content.retainUntil),
-        );
+        final expired = _pending.entries
+            .where((entry) => !clock().isBefore(entry.value.retainUntil))
+            .map((entry) => entry.key)
+            .toList();
+        for (final key in expired) {
+          _pending.remove(key);
+          final persisted = _persisted.remove(key);
+          if (persisted != null && !persisted.isCompleted) {
+            persisted.complete(true);
+          }
+        }
       }
     } catch (_) {
       _failure();
@@ -114,6 +164,7 @@ class ReadTrackingController extends ChangeNotifier {
     sync?.dispose();
     _read.clear();
     _pending.clear();
+    _cancelWrites();
     await store.erase().timeout(const Duration(seconds: 10));
   }
 
@@ -123,6 +174,7 @@ class ReadTrackingController extends ChangeNotifier {
     sync?.dispose();
     _read.clear();
     _pending.clear();
+    _cancelWrites();
     unawaited(store.close().catchError((_) {}));
     super.dispose();
   }
@@ -149,6 +201,7 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
   )?
   syncFactory;
   bool _foreground = true;
+  bool _startupPending = false;
   String? _project;
   bool get configured => _project != null;
   final _erasing = <String, Future<void>>{}, _erased = <String>{};
@@ -166,6 +219,7 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
 
   void retainViewer(String? uid) {
     if (_project == null || uid == null) {
+      _startupPending = false;
       final old = value;
       value = null;
       old?.dispose();
@@ -179,10 +233,11 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
         ? null
         : _createController(scope);
     old?.dispose();
+    _startupPending = value != null;
     if (value case final controller?) {
       unawaited(controller.prune());
       controller.sync?.setActive(_foreground);
-      if (_foreground) unawaited(controller.sync?.synchronize());
+      _startViewerSync();
     }
   }
 
@@ -200,14 +255,26 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
   }
 
   void setForeground(bool active) {
-    final resumed = active && !_foreground;
     _foreground = active;
     value?.sync?.setActive(active);
-    if (resumed) unawaited(value?.sync?.synchronize());
+    if (active) _startViewerSync();
+  }
+
+  void _startViewerSync() {
+    if (!_foreground || !_startupPending) return;
+    _startupPending = false;
+    unawaited(synchronize());
   }
 
   Future<void> synchronize() async {
-    await value?.sync?.synchronize();
+    if (!_foreground) return;
+    _startupPending = false;
+    final controller = value;
+    if (controller != null) {
+      await controller.sync?.synchronize(
+        beforeCapture: controller.flushBoundary,
+      );
+    }
   }
 
   Future<void> eraseAccount(String uid) async {

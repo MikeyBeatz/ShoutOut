@@ -78,10 +78,10 @@ void main() {
       )..setActive(true);
       addTearDown(sync.dispose);
       await sync.synchronize();
-      expect((await store.pending(now)).length, 32);
-      await sync.synchronize();
-      expect(sizes, [32, 16]);
-      expect((await store.pending(now)).length, 16);
+      expect(sync.lastError, isNull);
+      expect(sizes, [32, 16, 16]);
+      expect(await store.pending(now), isEmpty);
+      expect(sync.synchronizationComplete, isTrue);
     },
   );
 
@@ -124,7 +124,7 @@ void main() {
   );
 
   test(
-    'prepared session binding stays dormant by default and wires login, local marks and resume only when injected',
+    'prepared session binding stays dormant by default; injected sync runs at startup or refresh, not resume',
     () async {
       final dormant = ReadSessions(storeFactory: MemoryReadStateStore.new)
         ..configure('dev');
@@ -168,6 +168,8 @@ void main() {
       await sessions.synchronize();
       expect(downloads, oldCount);
       sessions.setForeground(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(downloads, oldCount);
       await sessions.synchronize();
       expect(downloads, greaterThan(oldCount));
     },
@@ -293,7 +295,23 @@ void main() {
         clock: () => now,
         upload: (request) async => broken
             ? {...ack(request), 'items': []}
-            : ack(request, status: 'deferred'),
+            : {
+                ...ack(request),
+                'items': (request['items'] as List)
+                    .map(
+                      (raw) => {
+                        ...raw as Map,
+                        'status':
+                            int.parse(
+                                  (raw['shoutId'] as String).split('-').last,
+                                ) <
+                                32
+                            ? 'deferred'
+                            : 'accepted',
+                      },
+                    )
+                    .toList(),
+              },
         download: (_) async => empty,
       )..setActive(true);
       addTearDown(sync.dispose);
@@ -301,11 +319,10 @@ void main() {
       expect((await store.pending(now)).length, 32);
       broken = false;
       await sync.synchronize();
-      expect((await store.pending(now)).map((r) => r.content.shoutId), [
-        'item-32',
-        'item-33',
-        'item-34',
-      ]);
+      expect(await store.pending(now), isEmpty);
+      expect(sync.uploadComplete, isFalse);
+      expect(sync.snapshotComplete, isTrue);
+      expect(sync.synchronizationComplete, isFalse);
       expect(
         (await store.pending(now.add(const Duration(minutes: 1)))).length,
         32,
@@ -361,7 +378,7 @@ void main() {
     },
   );
   testWidgets(
-    'first dirty mark schedules ten seconds; continuous marks do not postpone it or poll empty state',
+    'local marks and foreground changes never initiate network synchronization',
     (tester) async {
       final store = MemoryReadStateStore(scope);
       await store.put(item(1), now);
@@ -378,15 +395,19 @@ void main() {
         download: (_) async => empty,
       )..setActive(true);
       addTearDown(sync.dispose);
-      sync.dirty();
       await tester.pump(const Duration(seconds: 9));
-      sync.dirty();
       expect(uploads, 0);
       await tester.pump(const Duration(seconds: 1));
-      await tester.pump();
+      expect(uploads, 0);
+      await sync.synchronize();
       expect(uploads, 1);
+      await store.put(item(2), now);
+      sync.setActive(false);
+      sync.setActive(true);
       await tester.pump(const Duration(minutes: 2));
       expect(uploads, 1);
+      await sync.synchronize();
+      expect(uploads, 2);
     },
   );
 }

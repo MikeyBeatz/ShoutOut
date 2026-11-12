@@ -6,11 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**První konkrétní klientský úsek B2 je připravený ke schválení.**
-[Rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation) zahrnuje
-spouštěče jen na hranici obnovy, pořadí outboxu, IndexedDB v3 migraci a trvalý
-download checkpoint s regresními testy. Kód zatím není změněný; živý transport,
-serverové kvóty a úklid jsou navazující úsek. Nezavádí se nové produktové pravidlo.
+**Schválený klientský úsek B2 je implementovaný lokálně; zbývá přesné CI.**
+Na feature/read-sync-boundaries je hranice outboxu a sync při startupu/obnově,
+IndexedDB v3 s atomickou migrací v1/v2, import/checkpoint s CAS a cold restart.
+369 Flutter / 16 Chrome, 39 cílených regresí prošlo; fronta 1 025 značek má
+33 dávek bez skenování od začátku, pozdější značka čeká. Selhání migrace,
+souběžné karty, disková chyba i erase jsou ověřené.
+[Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
+Transport je stále null; Functions/Rules/konfigurace ani živá data se neměnily.
+V3 zatím není nasazené a návratový artefakt musí v3 podporovat. Po CI navazuje
+konkrétní runtime/admission/úklid a propojení obnovy; B2–B4 zůstávají otevřené.
 
 **Společný plán úsporné obnovy je zapsaný.**
 Vlastník schválil připravit kontrakt nyní a realizovat jej v pořadí B2 → B3 → B4.
