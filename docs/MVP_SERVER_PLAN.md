@@ -169,6 +169,9 @@ B1 uzavřené; nová dvojice je uklizená přes writer (2 zdroje, 3 záložky,
 B2–B4 i ostatní požadavky serverové brány zůstávají otevřené. B2 má schválený
 první lokální úsek, retenci a načasování; připravené bloky/IndexedDB/fronta
 nejsou živá aktivace. [Checkpoint](plans/feed/FEED_READING_POLICY.md#b2-local-results).
+Vlastník 12. listopadu začlenil [úspornou obnovu, verze, cache a přenos rozdílů](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
+do navazujících B2–B4 před MVP. Nejprve společný kontrakt, potom B2, B3 a B4;
+samotné zapsání plánu nedokládá dostupnou deltu, číslovku ani cloudovou kapacitu.
 Osobní přečtení je soukromé klientské nastavení, nikoli důvěryhodná veřejná
 metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají platná.
 

@@ -7,6 +7,9 @@ Tento dokument dokládá model a omezené emulátorové testy, ne cloudovou
 propustnost, cenu nebo nové nasazení. Aplikační runtime, Rules a živá data
 se tímto úsekem nemění. [Aktuální politika obnovy/přečtení](../plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy)
 má přednost před starším automatickým desetisekundovým uploadem.
+Navazující [schválené začlenění úsporné obnovy do B2–B4](../plans/feed/FEED_DELTA_REFRESH_PLAN.md)
+určuje pořadí verzování/cache/delta/signálů. Model níže zůstává měřeným výchozím
+scénářem bez zapojeného reuse, ne odhadem již dosažené úspory nového návrhu.
 
 ## Reprodukovatelný model
 

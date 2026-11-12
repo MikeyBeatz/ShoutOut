@@ -45,6 +45,7 @@ Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, s
 - [Provozní návrh indexu – náklady, plánování a migrace](plans/feed/FEED_RUNTIME_PROPOSAL.md)
 - [Trvalá instalace indexu a zapojení API/klienta](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)
 - [Feed – implementační etapy a návrhy ke schválení](plans/feed/FEED_IMPLEMENTATION_STAGES.md)
+- [Úsporná obnova – verze, přenos rozdílů, cache a novinky v B2–B4](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
 - [Retence prostorového indexu – lokální ověření R4](plans/feed/FEED_INDEX_RETENTION.md)
 - [Migrační připravenost feedu a zbývající brány](plans/feed/FEED_MIGRATION_READINESS.md)
 - [Přenositelný kurzor a omezený výběr stránky – lokální stav](plans/feed/FEED_PORTABLE_CURSOR.md)

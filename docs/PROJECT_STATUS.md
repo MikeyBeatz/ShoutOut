@@ -6,7 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Kapacitní lokální úsek je uzavřený po přesném CI; další je revize runtime B2.**
+**Společný plán úsporné obnovy je zapsaný; další je konkrétní revize runtime B2.**
+Vlastník schválil připravit kontrakt nyní a realizovat jej v pořadí B2 → B3 → B4.
+[Kontrakt](plans/feed/FEED_DELTA_REFRESH_PLAN.md) odděluje verze obsahu/čítačů,
+bloková metadata, cache, dostupnost a baseline novinek. Do B4 patří přenos
+rozdílů a úsporná detekce s číslovkou; další cache podle měřeného přínosu.
+Tento dokumentační krok nemění implementaci, nasazení ani stav milníků.
+
+**Kapacitní lokální úsek je uzavřený po přesném CI.**
 Vlastník schválil model/testy pro 100 000 účtů / 5 000 aktivních uživatelů
 a [upřesnil synchronizaci](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy):
 pouze při spuštění/skutečné obnově feedu; nahrazuje 10s upload/resume pull.

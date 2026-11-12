@@ -66,6 +66,15 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     počítadla. Volby budoucího B nesmějí zbytečně blokovat samostatné A0/A1.
   - Změřit náklady celého hledání a synchronizace, nejen počet vrácených karet;
     nepsat každý read automaticky zvlášť ani nepředstírat, že batch snižuje počet dokumentových zápisů.
+  - Upřesnění 12. listopadu: připravit společný kontrakt nyní, implementovat
+    B2 → B3 → B4 před MVP. V B4 porovnat verze bloků a omezené manifesty ID/verzí
+    před čtením celých těl; přenášet potřebné změny, znovu používat ověřenou
+    cache a bezpečně vyřadit nedostupné položky. Čítače nevyvolávají přenos
+    celého textu. [Kontrakt a akceptace](plans/feed/FEED_DELTA_REFRESH_PLAN.md).
+  - Číslovku novinek řešit úspornými změnovými signály/slučováním a ověřit
+    náklady v klidné i rušné oblasti; sekundový polling není zvolený výchozí
+    postup. Konkrétní čerstvost, mechanismus a případná trvalá cache ještě
+    vyžadují rozhodnutí před příslušnou implementací.
   - Integrační kontrola 7. listopadu: uložené Shouty mají připravený samostatný
     zdroj stránek. Před MVP ověřit také **Mé shouty → Aktivní/Expirované**:
     dosavadní Home bere pouze posledních 50 globálních `status=active`, což
@@ -75,8 +84,14 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - [Etapový návrh a schvalovací brány](plans/feed/FEED_IMPLEMENTATION_STAGES.md).
     [Analýza, otevřené volby a akceptace cílového rozšíření](plans/feed/FEED_READ_REFRESH_PLAN.md).
     [Úplné nezměněné zadání](requests/FEED_READ_REFRESH_2026-10-31.md).
-  - A0/A1 hotové ([měření](plans/feed/FEED_A1_RESULTS.md)); [progresivní jádro](plans/feed/FEED_PROGRESSIVE_PLAN.md), [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), API a klient jsou v DEV živě zapojené od 7. listopadu. Před uzavřením A2/A3 zbývají klientská regrese, úplné vlastní Shouty a úklid fixture. B1–B4 ještě nejsou hotové, celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace). [Důkazy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results). Nezaměňovat
-    osobní přečtení s veřejnými statistikami zobrazení, které zůstávají po MVP.
+  - A0/A1 hotové ([měření](plans/feed/FEED_A1_RESULTS.md)); [progresivní jádro](plans/feed/FEED_PROGRESSIVE_PLAN.md),
+    [sdílený index](plans/feed/FEED_BLOCK_INDEX_PLAN.md), API a klient jsou v DEV
+    zapojené od 7. listopadu. Tehdy zbývaly regrese A2/A3, úplné vlastní Shouty
+    a úklid fixture; nyní jsou uzavřené včetně B1 a regrese Uložených.
+    B2 má lokální jádro a kapacitní testy, živé B2–B4 ještě nejsou hotové,
+    celý úkol zůstává otevřený. R2 schválené (poslední bod otevřené aplikace).
+    [Aktuální stav](PROJECT_STATUS.md), [důkazy integrace](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
+    Osobní přečtení není veřejnou statistikou zobrazení; ta zůstává po MVP.
 
 - [x] **Navrhnout sdílenou profilovou vizitku.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).

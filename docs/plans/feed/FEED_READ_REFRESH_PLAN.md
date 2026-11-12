@@ -3,6 +3,10 @@
 **Následné rozhodnutí vlastníka:** první stránka se nesmí připravovat úplným
 průchodem okolí. Platí [progresivní směr a nové výsledky](FEED_PROGRESSIVE_PLAN.md).
 Původní srovnání níže zůstává referencí, ne zvoleným živým algoritmem.
+Pro navazující úspornou obnovu platí [společný plán B2–B4 z 12. listopadu](FEED_DELTA_REFRESH_PLAN.md):
+porovnání verzí před načítáním těl, přenos rozdílů, cache a změnové signály pro
+číslovku. Ověřený aktuální stav je v PROJECT_STATUS; tabulka níže popisuje
+původní analýzu z 31. října, nikoli současný nasazený klient.
 
 Zapsáno 31. října 2026. Stav: požadavek zařazený do plánu, předběžná technická
 analýza; vlastník následně rozhodl o celém rozsahu před MVP a unread-first

@@ -38,6 +38,10 @@ přenosů, počtu odběrů a retry; zachovat kontrolu oprávnění, dostupnosti,
 atomické čítače a bezpečnost. Nezvyšovat složitost bez měřitelného přínosu.
 Lokální kapacitní model/testy jsou schválené; změny živého prostředí, B4 nebo
 provozního datového modelu tímto schválené nejsou.
+V navazující diskusi vlastník schválil zapsat [společný návrh verzí, cache,
+přenosu rozdílů a signálů](FEED_DELTA_REFRESH_PLAN.md) nyní a implementovat jej
+v pořadí B2 → B3 → B4 před MVP. Jde o schválení směru/plánu, nikoli již hotový
+transport nebo konkrétní nové kolekce/retence.
 
 ## Připravené chování
 

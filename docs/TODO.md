@@ -24,7 +24,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní runtime B2/úklidu podle nových pravidel a kapacitních výsledků.**
+1. **Připravit konkrétní runtime B2/úklidu podle společného kontraktu obnovy.**
+   [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
+   je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
+   nikoli hotovou implementaci. Zdrojový rozsah B2 ještě předložit konkrétně.
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
@@ -61,8 +64,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    následuje až po jejich implementaci a CI.
    Implementace B2 není nasazené B2; nic živého se neměnilo.
 
-2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
-   první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
+2. **Po B2 dokončit B3 a úspornou obnovu s novinkami v B4.** B3: nepřečtené
+   první jen v Nejblíž; B4: verze/metadatové porovnání, přenos rozdílů a cache,
+   úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
    Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění

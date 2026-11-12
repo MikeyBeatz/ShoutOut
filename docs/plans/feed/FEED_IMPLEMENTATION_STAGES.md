@@ -165,12 +165,18 @@ read metadata musí mít vlastní soukromá oprávnění. Veřejné MVP na dokon
 
 ## B – personalizace a novinky, rovněž před MVP
 
+Vlastník 12. listopadu schválil připravit [společný kontrakt úsporné obnovy](FEED_DELTA_REFRESH_PLAN.md)
+nyní a provádět jej v následujících etapách B2 → B3 → B4. Zahrnuje verze obsahu
+a bloků, přenos rozdílů, cache, odstranění nedostupného obsahu a detekci novinek.
+Kontrakt je zapsaný; konkrétní schéma/mechanismus signálů ani živé zapojení
+tím nejsou automaticky zvolené. Neodkládat potřebné části až po veřejném MVP.
+
 | Etapa | Obsah | Podmínka zahájení |
 |---|---|---|
 | B1: trvalé osobní přečtení | Lokální store podle projektu/UID, skutečná viditelnost celého obsahu v kartě/detailu, fronta změn, bez změny pořadí. | Schválená definice relevantního obsahu, doba expozice a přístupnost; volba úložiště a retence. |
 | B2: synchronizace zařízení | Soukromé omezené buckety, slučování značek a offline retry, obnova na jiném zařízení. | Měření bucketingu proti záznamu na Shout, bezpečná Rules, smazání účtu a indexy. |
 | B3: pořadí nepřečtené/přečtené | Snapshot read stavu celé relace a správné globální pořadí napříč stránkami. | Konzistentní read stav dostupný při přípravě relace; backendové rozšíření znovu ověřené proti referenci a nákladům. |
-| B4: indikátor novinek | Oddělené inkrementální zjišťování dostupných novinek, 1–99/99+, atomický reset baseline. | Schválená čerstvost a polling/index strategie s nákladovým rozpočtem. |
+| B4: úsporná obnova a indikátor novinek | Porovnání verzí/metadat před čtením těl, přenos rozdílů a reuse cache; inkrementální detekce, 1–99/99+, atomický reset baseline. | Konkrétní verze/schéma a bezpečnost cache, čerstvost/slučování signálů, nákladové měření a společná regrese. |
 
 B1 může nejprve sloužit pouze na jednom zařízení. Tím ještě nebude dokončené
 celé původní zadání. B3 nesmí používat pouze částečnou lokální historii a tvrdit
@@ -183,7 +189,8 @@ Retence expiresAt + 7 dní a dávka nejvýše 32 zůstávají.
 První lokální úsek je připravený, [výsledky](FEED_READING_POLICY.md#b2-local-results);
 source 693663d má success CI 43119749520, lokální úsek je uzavřený.
 Navazující [provozní návrh B2](FEED_READING_POLICY.md#b2-runtime-proposal)
-je připravený k rozhodnutí; další lokální implementace ještě není schválená.
+je starší podklad k revizi podle kapacitních výsledků a společného kontraktu;
+další konkrétní runtime implementace ještě není schválená.
 Živá brána/pilot následují po jejím CI. B2 není nasazené.
 
 ### Schválený směr a zbývající produktové volby
