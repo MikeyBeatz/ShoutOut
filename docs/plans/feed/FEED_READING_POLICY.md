@@ -589,6 +589,12 @@ kapacita se nepřebírá automaticky. Algoritmus zůstane společný a konfiguro
 Retence expiresAt + 7 dní, dávka nejvýše 32 a přenos při loginu/návratu/obnově
 bez pravidelného prázdného pollingu jsou už schválené.
 
+**Navazující kapacitní požadavek:** vlastník upřesnil cíl 100 000 registrovaných
+účtů. [Souběžná zátěž a akceptace celé aplikace](../../LAUNCH_READINESS.md#capacity-target)
+se stanoví zvlášť. Níže uvedené DEV instance, četnost a denní rozpočet úklidu
+nejsou důkaz produkční kapacity pro tento cíl; před implementací provozní části
+návrh sladit s dohodnutým profilem. Dosavadní návrh tím není schválený.
+
 ### Navržené parametry a dopad
 
 | Část | Návrh pro DEV | Chování při dosažení |

@@ -6,6 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+Vlastník upřesnil kapacitní cíl MVP: **100 000 registrovaných účtů**.
+[Návrh souběžné zátěže a akceptace](LAUNCH_READINESS.md#capacity-target)
+je připravený: 1 000 současně aktivních relací je zatím ke schválení.
+Nejprve sladit tento profil s provozním návrhem B2 a celou kritickou cestou;
+dosavadní max. 1 / concurrency 1 není ověřená produkční kapacita.
+Zapsání cíle nemění kód, živé nastavení ani rozpočet a neprokazuje jeho splnění.
+
 **Lokální úsek B2 je uzavřený; provozní návrh čeká na schválení další implementace.**
 Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
 stránkovaný snapshot/delta, IndexedDB v2 outbox a připravené klientské napojení.

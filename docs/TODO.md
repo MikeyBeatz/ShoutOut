@@ -24,7 +24,11 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Schválit a implementovat provozní ochrany a úklid B2 lokálně.**
+1. **Sladit kapacitní profil MVP a schválit další provozní úsek B2.**
+   Cíl 100 000 registrovaných účtů je schválený; návrh 1 000 současně
+   aktivních relací ještě ne. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
+   zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
+   Současný výkon a cena pro tento profil nejsou prokázané; žádné živé změny.
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
@@ -60,6 +64,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
 
 ## Hranice MVP
+
+Kapacitní cíl je 100 000 registrovaných účtů; souběžná špička a měřitelné
+výkonové podmínky se schvalují zvlášť podle [startovní brány](LAUNCH_READINESS.md#capacity-target).
 
 MVP je pro tento projekt **produkčně provozovatelná veřejná webová aplikace
 ShoutOut pro běžné uživatele a Business účty**. Obě části stávajícího webového

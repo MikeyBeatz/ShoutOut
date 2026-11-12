@@ -23,6 +23,48 @@ monetizace** ani produktové metriky v části 7 neblokují webové vydání.
 Pořadí práce: produkční webový základ → bezpečnost a právní kontrola → ruční
 testy běžných a Business toků → provozní připravenost → startovní brána.
 
+<a id="capacity-target"></a>
+
+## Kapacitní cíl MVP
+
+**Schválené upřesnění vlastníka, 12. listopadu 2026:** MVP i navazující
+aplikace mají podporovat 100 000 registrovaných účtů. Jde o celkový počet
+účtů; počet denně aktivních a současně aktivních uživatelů z něj neodvozovat
+jako potvrzený provozní údaj. Současná kapacita pro tento cíl není prokázaná.
+
+**Návrh k rozhodnutí:** ověřovat špičku 1 000 současně aktivních uživatelů,
+postupně přes 100 / 500 / 1 000. Je to navržený zátěžový cíl, nikoli odhad
+skutečné návštěvnosti nebo garantovaná kapacita současného releasu.
+Počítat aktivní relace provádějící dohodnuté akce, ne pouze otevřená nečinná okna.
+
+Před tvrzením o splnění kapacity:
+
+- Popsat zátěžový profil: četnost otevření/stránkování/obnovy feedu, čtení,
+  publikování, komentářů, reakcí a synchronizace; běžný provoz i nárazový návrat
+  klientů. Rozlišit geograficky rozloženou zátěž a hustou aktivitu jedné oblasti.
+- Ověřit datovou velikost pro 100 000 profilů včetně souvisejících dat.
+  Samotný počet účtů neurčuje objem Shoutů, historie, soukromých dat ani retence;
+  tyto objemy a aktivitu zvlášť uvést v reprodukovatelném scénáři.
+- Prověřit celý kritický řetězec, nejen synchronizaci B2: uživatelské Functions,
+  společné indexové zápisy, čítače, listenery, plánované úlohy, Auth/App Check
+  a závislé služby. Návrh musí mít kapacitu i pro průběžný úklid bez rostoucího dluhu.
+- Připravit oddělené DEV/produkční parametry automatického škálování, souběhu
+  a front. Konkrétní hodnoty určit měřením a kontrolou sdíleného stavu; nepřebírat
+  max. 1 / concurrency 1 jako ověřenou produkční kapacitu. Limity jednoho účtu
+  a celková kapacita služby jsou samostatné věci.
+- Před živým zátěžovým testem schválit cíle odezvy/chybovosti a scénář, délku,
+  prostředí, prostředky a nákladový rozpočet. Měřit p95/p99, studené starty,
+  fronty, odmítnutí, transakční konflikty/retry, obnovu po špičce a operace
+  na jednu akci. Emulátor dokládá správnost, ne kapacitu cloudové infrastruktury.
+- Doložit přesný commit, konfiguraci a výsledky. Dosavadní rozpočet
+  5 000 Kč/měsíc není potvrzení ceny pro tento provozní profil; požadavek na
+  100 000 účtů sám neopravňuje zvýšit výdaje nebo spustit placený zátěžový test.
+
+Tato část rozšiřuje provozní akceptaci existující startovní brány; samotný
+zápis nezavírá milník. Nezakládat 100 000 skutečných Auth účtů pro pouhou
+simulaci velikosti. Implementace, živé testy a případné změny infrastruktury
+se předloží s konkrétním rozsahem. Nyní se žádné nastavení ani živá data nemění.
+
 ## 1. Produkční prostředí a bezpečné nasazení
 
 - [ ] Připravit existující produkční projekt `shoutout-production-a1b34`
