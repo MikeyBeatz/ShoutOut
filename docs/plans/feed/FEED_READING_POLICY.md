@@ -793,7 +793,7 @@ trvale; nová živá vrstva a uvedený pilot zatím schválené nejsou.
 
 <a id="b2-runtime-implementation"></a>
 
-## Serverová obsluha B2 — schválený lokální úsek, 12. listopadu 2026
+## Serverová obsluha B2 — uzavřený lokální úsek, 12. listopadu 2026
 
 Vlastník výslovně schválil runtime uploadu/downloadu s Auth/App Check,
 off/active/paused řízením a společnou kvótou zařízení jednoho UID: pro každý
@@ -854,7 +854,7 @@ Lokálně prošlo **375 Flutter**, 5 nových gateway regresí, 3 Functions unit 
 24 cílených nástrojových testů; plná Functions sada má 127 unit průchodů a
 431 integračních testů přeskočených mimo emulátor. Analýza a lint jsou čisté.
 Emulátor: první sada 8/8 včetně 10 000 značek, následných 9/9 ověřilo navíc
-smazání po přijetí a skutečný historický kurzor. CI spustí všech 10 dohromady.
+smazání po přijetí a skutečný historický kurzor. Přesné CI ověřilo všech 10 dohromady.
 
 | Scénář | Změřené SDK operace bez přípravy/úklidu fixture |
 |---|---|
@@ -863,7 +863,9 @@ smazání po přijetí a skutečný historický kurzor. CI spustí všech 10 doh
 | 10 000 značek, replay a úplný download | 314 přijatých uploadů, 274 quota odmítnutí, 8 stránek; 37 329 reads / 7 687 potvrzených mutací. |
 
 Čísla zahrnují account/control/rate/source/author/blocklist/meta/block kontroly
-i pokusy v transakcích; query počítá nejméně 1 read. Nejde o fakturační indexové
+i pokusy v transakcích; query počítá nejméně 1 read. Scénáře mají jednoho autora
+a prázdný blocklist; více různých autorů/blokovaných účtů přidává čtení.
+Nejde o fakturační indexové
 položky, síť, cloudový výpočet nebo cloudovou latenci. 274 odmítnutí kvóty
 neoznačovat jako konfliktní retry. Test posouvá laboratorní hodiny podle
 retryAfterMs, nespí 274 sekund kvůli kvótě. Celý první emulátorový běh zabral
@@ -880,6 +882,13 @@ uživatelů vyžaduje samostatnou kapacitní akceptaci, ne jen tuto kvótu.
 Důkazy: build/b2-runtime-emulator.log, build/b2-runtime-emulator-regressions.log,
 build/b2-runtime-client-full-final.log, build/b2-runtime-analyze-final.log,
 build/b2-runtime-functions-unit.log a build/b2-runtime-tools.log.
-Přesné CI se doplní po zdrojovém commitu. Nic nebylo nasazené. Před aktivací
-zbývá omezený pokračující retenční úklid, jeho kapacitní návrh, potřebná indexace,
+Zdroj `cce1e7d49f12b8a79374cb3117bd1dbc2f10b6a9` má
+[success CI 43284395332](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43284395332):
+375 Flutter / 16 Chrome / 57 tools / 127 Functions unit (431 integračních
+přeskočeno mimo emulátor) / 448 Rules/server / 10 runtime / 116 purge / 15 Storage
+a formát/analýza/lint/build. Samostatný runtime krok v CI trval přibližně 2 min
+včetně úklidu; potvrdil stejné operace z tabulky včetně 274 kvótových odmítnutí.
+Důkaz: build/b2-runtime-ci.log. Lokální úsek je uzavřený, nic nebylo nasazené. Před aktivací
+zbývá omezený pokračující retenční úklid, jeho kapacitní návrh, zapojení
+readSyncEnabled do existující soukromé účtové fáze, potřebná indexace,
 kompatibilní neaktivní v3 návratový artefakt a konkrétní živý DEV test.

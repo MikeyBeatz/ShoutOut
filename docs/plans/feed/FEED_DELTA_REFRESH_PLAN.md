@@ -164,7 +164,8 @@ restart/erasure přečtení. Úspěch pro jednu oblast není důkaz celé kapaci
 kontroly i přesné CI jsou hotové.** Výchozí průzkum našel timer v
 `read_sync_controller.dart`, samostatný resume pull v `ReadSessions` a pouze
 paměťový kurzor. Níže je zachovaný schválený rozsah; výsledky následují.
-Provozní transport/admission a serverový úklid jsou nadále navazující práce.
+Navazující [transport/admission](FEED_READING_POLICY.md#b2-runtime-implementation)
+je nově připravený lokálně, serverový úklid a aktivace nadále zbývají.
 
 - V `read_sync_controller.dart` a `read_tracking_controller.dart` zrušit
   automatický 10s upload a pull při pouhém návratu do popředí. Synchronizaci
@@ -249,7 +250,7 @@ Tento lokální úsek je uzavřený; živé testy nebyly jeho součástí.
 
 **Hranice:** syncFactory zůstává null, žádný transport/backend/feature flag
 nebyl zapnutý. Home stále synchronizaci nečeká jako bariéru B3; serverový
-potvrzený read kontext, jeho propojení s obnovou, admission a úklid zbývají.
+potvrzený read kontext, jeho propojení s obnovou, aktivace admission a úklid zbývají.
 Nenazývat tento krok dokončeným B2 nebo ověřením 5 000 cloudových uživatelů.
 V3 migrace se v budoucím webovém buildu týká i lokálního B1, nezávisle na
 vypnutém cloudovém transportu: pro první rollout připravit přesný kompatibilní

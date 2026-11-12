@@ -6,16 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválená serverová obsluha B2 je připravená lokálně; zbývá přesné CI.**
+**Schválená serverová obsluha B2 je uzavřená po přesném CI; není nasazená.**
 Na feature/read-sync-runtime jsou izolované callable obálky, control
 off/active/paused, kvóta 40 + 1/s pro každý směr/UID a klientský adaptér za false
 v DEV i produkční konfiguraci. 375 Flutter / 127 Functions unit, 10 různých
 emulátorových scénářů napříč dvěma běhy a 24 cílených tools prošlo; analýza/lint čisté.
 Test 1 000 značek prošel bez quota čekání, 10 000 zachoval všechna data přes
 přerušení/restart; obnova beze změn má 14 reads + 1 rate write.
+Zdroj `cce1e7d49f12b8a79374cb3117bd1dbc2f10b6a9` má
+[success CI 43284395332](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43284395332):
+375 Flutter / 16 Chrome / 57 tools / 127 Functions unit (431 integračních
+přeskočeno mimo emulátor) / 448 Rules/server / 10 runtime / 116 purge / 15 Storage
+a formát/analýza/lint/build. CI zopakovalo stejné SDK počty obou velkých front.
 [Konkrétní rozsah, počty a omezení](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation).
 Současné živé artefakty nový host neimportují; žádné Functions, Rules,
-Scheduler ani živá data se neměnily. Následuje konečné CI a kapacitně navržený
+Scheduler ani živá data se neměnily. Následuje kapacitně navržený
 retenční úklid před aktivací. B2–B4 ani celá kapacitní brána nejsou uzavřené.
 
 **Schválený klientský úsek B2 je uzavřený po přesném CI; není nasazený.**
@@ -60,7 +65,7 @@ neodpovídá modelové zátěži. Další je konkrétní revize runtime B2/úkli
 podle výsledků; bez implementace B4 nebo nové provozní datové vrstvy.
 Aplikační chování, konfigurace a živá prostředí zůstaly beze změny.
 
-**Lokální úsek B2 je uzavřený; provozní návrh čeká na schválení další implementace.**
+**Starší základ B2a je uzavřený; novější klient/runtime jsou popsané výše.**
 Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
 stránkovaný snapshot/delta, IndexedDB v2 outbox a připravené klientské napojení.
 360 Flutter, 10 Chrome/IndexedDB, 49 cílených emulátorových regresí, 124 Functions
@@ -75,12 +80,10 @@ syncFactory je v aplikaci null a účtový readSyncEnabled je false. Nic nebylo
 nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
 [B2 checkpointu](plans/feed/FEED_READING_POLICY.md#b2-local-results).
 [Provozní návrh B2](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
-je připravený: ochrana četnosti, trvalé pokračování downloadu, denní úklid
-ve stávající úloze, indexace a kompatibilní vypnutý web pro návrat.
-Jde o dosavadní návrh k revizi podle nové kapacitní akceptace a trigger politiky,
-nikoli nové nastavení aplikace. Konkrétní živý DEV plán vznikne po ověření a CI
-navazující runtime implementace. Nynější změny jsou model/testy/dokumentace;
-aplikační runtime se neměnil.
+uchovává starší podklad k četnosti, pokračování, dennímu úklidu, indexaci a návratu.
+Novější trigger politika, klient v3 a schválená serverová obsluha jej nahrazují
+v rozsahu svých výše uvedených výsledků. Fyzický úklid a konkrétní živý DEV plán
+nadále zbývají; staré limity nebo tehdejší stav runtime nepřebírat jako aktuální.
 
 **Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na

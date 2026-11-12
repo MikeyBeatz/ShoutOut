@@ -24,11 +24,13 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Uzavřít CI serverové obsluhy B2 a připravit kapacitu retenčního úklidu.**
+1. **Připravit pokračující retenční úklid B2 před DEV aktivací.**
    [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
    je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
    každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
-   Functions unit a 10 různých emulátorových scénářů prošlo, přesné CI zbývá.
+   Functions unit a 10 různých emulátorových scénářů prošlo. Úsek je uzavřený:
+   zdroj cce1e7d má success CI 43284395332 (375 Flutter / 16 Chrome / 448
+   Rules/server / 10 runtime, včetně obou velkých front). Znovu jej neschvalovat.
    Nic nebylo nasazené. Před aktivací zbývá fyzický retenční úklid a jeho kapacita,
    potřebná indexace, kompatibilní v3 návrat a konkrétní živý DEV průchod.
    [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
@@ -73,9 +75,9 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
    [Provozní návrh](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
    je starší podklad k revizi: ochrany četnosti, pokračování přenosu,
-   fyzický úklid, indexace a kompatibilní návrat. Kapacitní model/testy znovu
-   neschvalovat; konkrétní runtime změny se předloží zvlášť. Živý DEV pilot
-   následuje až po jejich implementaci a CI.
+   fyzický úklid, indexace a kompatibilní návrat. Novější schválený runtime je
+   uvedený na začátku bodu; jeho ani model/testy znovu neschvalovat.
+   Živý DEV pilot následuje po dokončení úklidu, zbývajících bran a přesném CI.
    Implementace B2 není nasazené B2; nic živého se neměnilo.
 
 2. **Po B2 dokončit B3 a úspornou obnovu s novinkami v B4.** B3: nepřečtené

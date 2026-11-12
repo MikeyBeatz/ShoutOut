@@ -195,8 +195,8 @@ Odstraňuje starý timer/resume pull a doplňuje trvalé pokračování; není n
 Navazující [provozní návrh B2](FEED_READING_POLICY.md#b2-runtime-proposal)
 je starší podklad k revizi podle kapacitních výsledků a společného kontraktu;
 navazující [runtime obsluha](FEED_READING_POLICY.md#b2-runtime-implementation)
-je nově výslovně schválená a připravená lokálně, zatím čeká na přesné CI.
-375 Flutter / 127 Functions unit a 10 různých emulátorových scénářů prošlo.
+je výslovně schválená a uzavřená po success CI 43284395332 pro zdroj cce1e7d:
+375 Flutter / 16 Chrome / 127 Functions unit / 448 Rules/server / 10 runtime.
 Fyzický úklid, potřebná indexace a živá brána/pilot zbývají; B2 není nasazené.
 
 ### Schválený směr a zbývající produktové volby
