@@ -24,18 +24,24 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní navazující runtime B2 a kapacitu úklidu.**
+1. **Uzavřít CI serverové obsluhy B2 a připravit kapacitu retenčního úklidu.**
+   [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
+   je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
+   každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
+   Functions unit a 10 různých emulátorových scénářů prošlo, přesné CI zbývá.
+   Nic nebylo nasazené. Před aktivací zbývá fyzický retenční úklid a jeho kapacita,
+   potřebná indexace, kompatibilní v3 návrat a konkrétní živý DEV průchod.
    [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
    byl schválený a je implementovaný: hranice outboxu, odstranění automatických
    spouštěčů, IndexedDB v3 a atomický checkpoint. Klientský úsek je uzavřený:
    zdroj 049cedc má success CI 43270732252 (369 Flutter / 16 Chrome / 448
    Rules/server), lokálně i 39 cílených regresí.
    [Výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
-   Transport není zapnutý a nic není nasazené. Serverový runtime/admission
-   a kapacita úklidu jsou další práce; znovu neschvalovat hotový klientský úsek.
+   Transport není zapnutý a nic není nasazené. Serverový runtime je připravený
+   výše, kapacita úklidu je další práce; znovu neschvalovat hotový klientský úsek.
    [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
    je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
-   nikoli dokončené B2/B3/B4. Další runtime rozsah B2 ještě předložit konkrétně.
+   nikoli dokončené B2/B3/B4. Další rozsah úklidu ještě předložit konkrétně.
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.

@@ -18,6 +18,17 @@ class WebEnvironment {
       throw StateError('localReadTracking must be a boolean.');
     }
     localReadTracking = json['localReadTracking'] == true;
+    if (json.containsKey('serverReadSynchronization') &&
+        json['serverReadSynchronization'] is! bool) {
+      throw StateError('serverReadSynchronization must be a boolean.');
+    }
+    serverReadSynchronization = json['serverReadSynchronization'] == true;
+    if (serverReadSynchronization &&
+        (name != 'dev' || !localReadTracking || key == null)) {
+      throw StateError(
+        'Read synchronization requires DEV local tracking and App Check.',
+      );
+    }
     final gateway = json['serverShoutCreation'];
     final commentsGateway = json['serverCommentCreation'];
     final privateRepliesGateway = json['serverPrivateReplyCreation'];
@@ -227,6 +238,7 @@ class WebEnvironment {
   late final String? appCheckSiteKey;
   late final bool localReadTracking;
   late final bool serverShoutCreation;
+  late final bool serverReadSynchronization;
   late final bool serverSpatialFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;

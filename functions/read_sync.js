@@ -23,17 +23,19 @@ function inputOf(request, fields) {
   return { uid, data };
 }
 
-export async function syncReadBatchOperation(request, db, { clock = () => new Date(), beforeCommit, onMetrics } = {}) {
+export async function syncReadBatchOperation(request, db, { clock = () => new Date(), beforeCommit, onMetrics, access } = {}) {
   assertFeedRuntimeTarget(db);
   const { uid, data } = inputOf(request, ['items']);
   if (!Array.isArray(data.items) || !data.items.length || data.items.length > 32 || data.items.some(row => !plain(row) ||
       Object.keys(row).sort().join(',') !== 'contentHash,expiresAt,shoutId' || !validReadId(row.shoutId) ||
       !/^[a-f0-9]{64}$/.test(row.contentHash) || !Number.isSafeInteger(row.expiresAt) || row.expiresAt < 0) ||
       new Set(data.items.map(r => readKey(r.shoutId, r.contentHash))).size !== data.items.length) fail('invalid-argument', 'Invalid read batch.');
+  const admission = access ? await access.admit(request, 'upload') : null;
   const user = db.doc(`users/${uid}`), metaRef = user.collection('readState').doc('current');
   return db.runTransaction(async tx => {
     const now = clock();
     await requireEligibleActor({ request, db, reader: tx, now });
+    if (access) await access.guard(tx, admission);
     const sources = await tx.getAll(...data.items.map(row => db.doc(`shouts/${row.shoutId}`)));
     const authors = [...new Set(sources.map(s => s.get('authorId')).filter(validReadId))];
     const authorDocs = authors.length ? await tx.getAll(...authors.map(id => db.doc(`publicProfiles/${id}`))) : [];
@@ -57,7 +59,7 @@ export async function syncReadBatchOperation(request, db, { clock = () => new Da
     let plan;
     try { plan = await planReadBlocks(rows, async id => (await tx.get(user.collection('readBuckets').doc(id))).data(), { revision: oldRevision + 1 }); }
     catch (error) {
-      if (error.message === 'read-block-work-budget') fail('resource-exhausted', 'Read batch requires a smaller work slice.');
+      if (error.message === 'read-block-work-budget') throw new HttpsError('resource-exhausted', 'Read batch requires a smaller work slice.', { reason: 'read-sync-work-budget' });
       throw error;
     }
     if (beforeCommit) await beforeCommit({ tx, outcomes });
@@ -71,7 +73,7 @@ export async function syncReadBatchOperation(request, db, { clock = () => new Da
 
 // Whole snapshot is paginated, not silently capped. Historical reads let later
 // B3 pin read state without placing private history in the signed cursor.
-export async function getReadStatePageOperation(request, db, { key, clock = () => new Date(), pageSize = 8, afterRead } = {}) {
+export async function getReadStatePageOperation(request, db, { key, clock = () => new Date(), pageSize = 8, afterRead, access } = {}) {
   assertFeedRuntimeTarget(db);
   const { uid, data } = inputOf(request, ['cursor', 'knownRevision']);
   if (!(data.cursor == null || typeof data.cursor === 'string') ||
@@ -80,13 +82,13 @@ export async function getReadStatePageOperation(request, db, { key, clock = () =
   const codec = feedCursorCodec({ key, maximumBytes: 4096 }), scope = () => ({ uid, project: db.projectId, now: clock().getTime() });
   let pinned = null;
   if (data.cursor) {
-    try { pinned = codec.decode(data.cursor, scope()); } catch { fail('failed-precondition', 'Read snapshot expired or invalid.'); }
+    try { pinned = codec.decode(data.cursor, scope()); } catch { throw new HttpsError('failed-precondition', 'Read snapshot expired or invalid.', { reason: 'read-sync-snapshot-expired' }); }
     if (pinned.context?.kind !== 'read-sync-v1' || !Number.isSafeInteger(pinned.context.revision) ||
         !Number.isSafeInteger(pinned.context.fromRevision) || pinned.context.fromRevision < 0 ||
         !Number.isSafeInteger(pinned.position.afterRevision) || pinned.position.afterRevision < 1 ||
         !bucketId(pinned.position.after)) fail('invalid-argument', 'Invalid read cursor.');
   }
-  await requireEligibleActor({ request, db, now: clock() });
+  const admission = access ? await access.admit(request, 'download') : await requireEligibleActor({ request, db, now: clock() });
   const user = db.doc(`users/${uid}`);
   const result = await db.runTransaction(async tx => {
     const meta = await tx.get(user.collection('readState').doc('current'));
@@ -112,8 +114,9 @@ export async function getReadStatePageOperation(request, db, { key, clock = () =
       next: page.size === pageSize ? codec.advance(token, { after: page.docs.at(-1).id, afterRevision: page.docs.at(-1).get('revision') }, scope()) : null };
   }, { readOnly: true, ...(pinned ? { readTime: new Timestamp(pinned.readTime.seconds, pinned.readTime.nanoseconds) } : {}) });
   if (afterRead) await afterRead();
-  await requireEligibleActor({ request, db, now: clock() });
+  if (access) await access.confirm(request, admission);
+  else await requireEligibleActor({ request, db, now: clock() });
   // A delayed reply cannot keep an expired snapshot alive.
-  if (data.cursor) try { codec.decode(data.cursor, scope()); } catch { fail('failed-precondition', 'Read snapshot expired.'); }
+  if (data.cursor) try { codec.decode(data.cursor, scope()); } catch { throw new HttpsError('failed-precondition', 'Read snapshot expired.', { reason: 'read-sync-snapshot-expired' }); }
   return result;
 }

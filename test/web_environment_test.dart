@@ -12,6 +12,56 @@ Map<String, dynamic> gatewayFixture() => {
 
 void main() {
   test(
+    'read synchronization is disabled in both environments and requires DEV, local tracking and App Check',
+    () {
+      final dev = gatewayFixture();
+      expect(WebEnvironment.fromJson(dev).serverReadSynchronization, isFalse);
+      expect(
+        WebEnvironment.fromJson(
+          {...dev}..remove('serverReadSynchronization'),
+        ).serverReadSynchronization,
+        isFalse,
+      );
+      expect(
+        WebEnvironment.fromJson({
+          ...dev,
+          'serverReadSynchronization': true,
+        }).serverReadSynchronization,
+        isTrue,
+      );
+      for (final value in [null, 'true', 1]) {
+        expect(
+          () => WebEnvironment.fromJson({
+            ...dev,
+            'serverReadSynchronization': value,
+          }),
+          throwsStateError,
+        );
+      }
+      expect(
+        () => WebEnvironment.fromJson({
+          ...dev,
+          'serverReadSynchronization': true,
+          'localReadTracking': false,
+        }),
+        throwsStateError,
+      );
+      final prod =
+          jsonDecode(File('config/prod.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(WebEnvironment.fromJson(prod).serverReadSynchronization, isFalse);
+      expect(
+        () => WebEnvironment.fromJson({
+          ...prod,
+          'serverReadSynchronization': true,
+          'localReadTracking': true,
+          'appCheckSiteKey': 'x' * 40,
+        }),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'local reading is explicit in DEV, defaults off and rejects invalid configuration',
     () {
       final dev = gatewayFixture();

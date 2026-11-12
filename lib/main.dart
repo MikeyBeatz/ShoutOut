@@ -32,6 +32,8 @@ import 'app_theme.dart';
 import 'avatar_style.dart';
 import 'firebase_options.dart';
 import 'web_environment.dart';
+import 'read_sync_gateway.dart';
+import 'read_sync_controller.dart';
 import 'easter_egg_game.dart';
 import 'legal.dart';
 import 'public_profile.dart';
@@ -136,6 +138,32 @@ Future<void> main() async {
   readSessions.configure(
     kIsWeb && WebEnvironment.current.localReadTracking
         ? Firebase.app().options.projectId
+        : null,
+    transport: kIsWeb && WebEnvironment.current.serverReadSynchronization
+        ? (scope, store, onMerged) {
+            final gateway = ReadSyncGateway(
+              scope: scope,
+              currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+              invoke: (name, data) async =>
+                  (await FirebaseFunctions.instanceFor(region: 'europe-west3')
+                          .httpsCallable(
+                            name,
+                            options: HttpsCallableOptions(
+                              timeout: const Duration(seconds: 45),
+                            ),
+                          )
+                          .call<Object?>(data))
+                      .data,
+            );
+            return ReadSyncController(
+              scope: scope,
+              store: store,
+              currentScope: () => readSessions.value?.scope,
+              upload: gateway.upload,
+              download: gateway.download,
+              onMerged: onMerged,
+            );
+          }
         : null,
   );
   runApp(const ShoutOutApp());

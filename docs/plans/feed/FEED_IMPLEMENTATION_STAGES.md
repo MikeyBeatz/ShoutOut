@@ -194,8 +194,10 @@ je uzavřený: zdroj 049cedc má success CI 43270732252
 Odstraňuje starý timer/resume pull a doplňuje trvalé pokračování; není nasazený.
 Navazující [provozní návrh B2](FEED_READING_POLICY.md#b2-runtime-proposal)
 je starší podklad k revizi podle kapacitních výsledků a společného kontraktu;
-další konkrétní runtime implementace ještě není schválená.
-Živá brána/pilot následují po jejím CI. B2 není nasazené.
+navazující [runtime obsluha](FEED_READING_POLICY.md#b2-runtime-implementation)
+je nově výslovně schválená a připravená lokálně, zatím čeká na přesné CI.
+375 Flutter / 127 Functions unit a 10 různých emulátorových scénářů prošlo.
+Fyzický úklid, potřebná indexace a živá brána/pilot zbývají; B2 není nasazené.
 
 ### Schválený směr a zbývající produktové volby
 

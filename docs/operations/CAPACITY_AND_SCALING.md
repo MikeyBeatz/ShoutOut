@@ -60,6 +60,12 @@ doplnění 1 za 5 s je nemůže všechny přijmout během první minuty. Nejkrat
 požadavků téhož účtu a bez latence obsluhy. Nelze tím blokovat rychlou obnovu
 a zároveň slibovat okamžitý úplný read snapshot. Před implementací B2 revidovat
 admission/burst i průchod velkou frontou; tento limit zatím není živě zapnutý.
+Novější [schválený lokální runtime](../plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
+má burst 40 + 1/s pro každý směr/UID a skutečné průchody 1 000/10 000 značek.
+Obnovu beze změn ověřil na 14 reads + 1 rate write; tabulka modelu výše
+zachovává výchozí odhad 20 reads, nevydávat ji za nové měření backendu.
+10 000 čekajících značek stále vyžaduje nejméně 273 s pouze na tokeny bez replay;
+kvóta proto není důkaz rychlé úplné obnovy ani cílové kapacity celé aplikace.
 Starý 10s upload je jen srovnávací ilustrace (300 000 požadavků, kdyby každý
 tick měl nové značky); má jinou čerstvost serverových dat. Nevydávat rozdíl
 za univerzální procento úspory při stejné službě.

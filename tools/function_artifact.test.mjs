@@ -54,3 +54,10 @@ test('artifact preparation rejects fixture imports and removes obsolete root mod
   assert.throws(() => prepareFunctionArtifact(temporary, 'artifact', 'entry.js'), /unsafe-functions-artifact-import/);
   assert.throws(() => prepareFunctionArtifact(temporary, '../../outside', 'entry.js'), /unsafe-functions-artifact-directory/);
 });
+
+test('separate prepared B2 host has a complete package without joining current live artifacts', () => {
+  const artifact = prepareFunctionArtifact(root, 'functions-read-sync', 'read_sync_host.js');
+  for (const name of ['read_sync_host.js', 'read_sync_runtime.js', 'read_sync.js', 'read_sync_blocks.js', 'callable_security.js']) assert(artifact.files.includes(name));
+  assert(!artifact.files.includes('content.js')); assert(!artifact.files.includes('index.js'));
+  assert(artifact.files.every(name => !/(?:_lab|\.test)\.js$/.test(name)));
+});

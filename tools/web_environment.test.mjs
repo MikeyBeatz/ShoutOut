@@ -12,6 +12,16 @@ const actualDev = loadConfig('dev');
 // dependencies. The complete actual DEV configuration is checked separately.
 const dev = { ...actualDev, serverSpatialFeed: false };
 
+test('read synchronization is disabled and activation requires DEV, local tracking and App Check', () => {
+  assert.equal(actualDev.serverReadSynchronization, false);
+  const prod = loadConfig('prod'); assert.equal(prod.serverReadSynchronization, false);
+  for (const value of [null, 'true', 1]) assert.throws(() => validateConfig({ ...dev, serverReadSynchronization: value }, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...dev, serverReadSynchronization: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverReadSynchronization: true, localReadTracking: false }, 'dev'));
+  assert.throws(() => validateConfig({ ...dev, serverReadSynchronization: true, appCheckSiteKey: undefined }, 'dev'));
+  assert.throws(() => validateConfig({ ...prod, serverReadSynchronization: true, localReadTracking: true, appCheckSiteKey: 'x'.repeat(40) }, 'prod'));
+});
+
 test('local read tracking is a typed optional flag with production left disabled', () => {
   assert.equal(actualDev.localReadTracking, true);
   assert.notEqual(loadConfig('prod').localReadTracking, true);

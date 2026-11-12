@@ -1,6 +1,7 @@
 {
   "environment": "dev",
   "localReadTracking": true,
+  "serverReadSynchronization": false,
   "serverSpatialFeed": true,
   "appCheckSiteKey": "6LfVIAAuAAAAAL4qhDiIlyWoI5Mp1Q1GJBmEJe7e",
   "serverShoutCreation": true,

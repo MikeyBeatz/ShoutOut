@@ -13,6 +13,13 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverReadSynchronization !== undefined && typeof config.serverReadSynchronization !== 'boolean') {
+    throw new Error('serverReadSynchronization must be a boolean.');
+  }
+  if (config.serverReadSynchronization === true && (environment !== 'dev' ||
+      config.localReadTracking !== true || !config.appCheckSiteKey)) {
+    throw new Error('Read synchronization requires DEV local tracking and App Check.');
+  }
   if (config.localReadTracking !== undefined && typeof config.localReadTracking !== 'boolean') {
     throw new Error('localReadTracking must be a boolean.');
   }

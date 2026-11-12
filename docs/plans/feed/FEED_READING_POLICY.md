@@ -30,6 +30,8 @@ mazání. Počet musí odpovídat relevantním novinkám pro daný feed.
 je lokálně nahradil hranicí obnovy, IndexedDB v3 a trvalým checkpointem.
 Ani jedna B2 verze nemá živý transport. Home volá synchronize bez čekání
 na úplný read snapshot; bariéru pro globální B3 je třeba teprve dokončit.
+Navazující [serverová obsluha B2](#b2-runtime-implementation) je připravená
+lokálně za vypnutým přepínačem; její stav a ověření jsou uvedené níže.
 Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
 vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
 Číselný indikátor B4 ani inkrementální obnova celého feedu hotové nejsou.
@@ -624,7 +626,11 @@ přečtený obsah. Tyto navazující živé/provozní kroky se nyní neprovádě
 
 ## Provozní návrh B2 — k rozhodnutí, 12. listopadu 2026
 
-**Stav: připravený rozsah další lokální implementace, zatím neschválený.**
+**Historický návrh k revizi, nikoli platná provozní konfigurace.** Novější
+výslovně schválený lokální úsek a jeho výsledky jsou
+[níže](#b2-runtime-implementation). Původní denní úklid není tímto schválený;
+jeho kapacita musí odpovídat naměřenému přírůstku. Staré 10s/resume spouštěče,
+upload 12/min a odhad 20 pevných reads nahrazuje nový klient a runtime níže.
 Tabulka níže je starší návrh. Novější klientský základ je v3 podle
 [výsledků](FEED_DELTA_REFRESH_PLAN.md#b2-client-results); návratový web musí
 rozumět v3 a jeho erase metadatům. Staré v1/v2 verze nejsou automatický rollback.
@@ -784,3 +790,96 @@ Zatím bez živých kolekcí/control dokumentu, migrací, nasazení, nových Sch
 jobů nebo Auth účtů. Živý DEV podklad se předloží hotový s konkrétním commitem,
 CI, artefaktem, cílem, datovým plánem a návratem. Rutinní rollouty mají souhlas
 trvale; nová živá vrstva a uvedený pilot zatím schválené nejsou.
+
+<a id="b2-runtime-implementation"></a>
+
+## Serverová obsluha B2 — schválený lokální úsek, 12. listopadu 2026
+
+Vlastník výslovně schválil runtime uploadu/downloadu s Auth/App Check,
+off/active/paused řízením a společnou kvótou zařízení jednoho UID: pro každý
+směr rezerva 40 požadavků a doplnění jednoho za sekundu. Dávka je nadále 32.
+Součástí jsou fronty 1 000/10 000 značek, souběh zařízení, pozastavení a mazání,
+rozlišení kvóty/pracovního rozpočtu, skutečné SDK počty, vypnutý klientský
+adaptér, dokumentace, commit/push a přesné CI. Retence, Rules, Scheduler,
+produkční prostředky ani živá data se tím nemění. Fyzický retenční úklid je
+poslední navazující část před aktivací, tento úsek jej neimplementuje ani nezapíná.
+
+### Připravený kód a bezpečnostní hranice
+
+- `functions/read_sync_host.js` je samostatný připravený vstup se dvěma
+  callables; `index.js`, `content.js` ani současné účtové artefakty jej
+  neimportují. App Check je vynucený, existující ověření e-mailu, právního
+  souhlasu, zákazu a probíhajícího mazání se zachovává. Připravené DEV obálky
+  mají europe-west3 / min. 0 / max. 1 / concurrency 1 / 256 MiB / 15 s;
+  nejde o konfiguraci nebo důkaz kapacity pro 5 000 aktivních uživatelů.
+- `read_sync_runtime.js` používá soukromý `maintenanceState/readSyncControl`
+  přesně `{v:1, revision: kladné celé číslo, mode: off|active|paused}`.
+  Chybějící/neplatný dokument znamená vypnuto. Upload čte control ve stejné
+  transakci jako účet a zápis značek. Download má aktuální přijímací i
+  závěrečnou kontrolu; závěrečná není historická jako stránkovaný snapshot.
+  Inkarnace požadavku kontroluje revizi i updateTime, takže pause→active
+  mezi přijetím a zpracováním nepovolí starou rozpracovanou operaci.
+- Vstupní transakce ověří účet/control a spotřebuje token pod
+  `rateLimits/UID/actions/readSyncUpload|readSyncDownload`. Kvóta je oddělená
+  pro oba směry, společná přes zařízení. Celočíselné milisekundové kredity
+  brání zaokrouhlovacímu driftu; posun serverového času zpět nepřidá tokeny.
+  Odmítnutí kvůli kvótě nic nezapisuje. Přijatý neúspěšný drahý požadavek
+  token nevrací; probíhající mazání blokuje už přijímací transakci.
+- Read kurzor dostává účelově odvozený HMAC klíč z projektového feed klíče,
+  bez nového secretu. UID/projekt, typ kurzoru a původní hodinový termín se
+  nemění. Feed/read kurzory nejsou zaměnitelné. Invalidní pokračování se
+  ověří před databázovou prací/kvótou, ale až po Auth/App Check kontrole.
+- Typované `details.reason` rozlišuje `read-sync-rate-limit` s retryAfterMs,
+  `read-sync-work-budget`, `read-sync-snapshot-expired` a vypnutí/pozastavení.
+  Jen work budget půlí dávku a jen odmítnuté pokračování restartuje snapshot.
+  Auth, síťová nebo neznámá chyba nesmí spouštět ani jeden mechanismus.
+- `ReadSyncGateway` hlídá účet před/po odpovědi a respektuje dobu opakování.
+  V již zachycené obnově může controller jednou počkat a zopakovat tutéž dávku;
+  druhé odmítnutí ji odloží s trvalým checkpointem. Skrytí aplikace/dispose
+  čekání přeruší a zakáže další RPC. Nové čtení mimo hranici se tím neodesílá,
+  žádný samostatný periodický sync, resume pull nebo nekonečný retry nevzniká.
+- `serverReadSynchronization` je false v obou konfiguracích; aktivní hodnota
+  je klientem i build nástrojem přípustná jen pro DEV s místním B1 a App Check.
+  `ReadSessions.configure` umí dostat adaptér, při vypnuté volbě zůstane bez něj.
+  Funkční propojení obnovy s úplným read snapshotem pro B3 zatím není hotové.
+
+### Místní ověření a skutečné operace
+
+DEV databáze byla read-only ověřena jako `(default)`, STANDARD / native /
+europe-west3. Veškeré mutační testy používají pouze emulátor
+127.0.0.1:8080 a projekt shoutout-rules-test, bez Auth účtů či živého přístupu.
+Datové fixture zdrojů jsou oddělené pod readRuntimeFixtures, po běhu se uklidí.
+
+Lokálně prošlo **375 Flutter**, 5 nových gateway regresí, 3 Functions unit a
+24 cílených nástrojových testů; plná Functions sada má 127 unit průchodů a
+431 integračních testů přeskočených mimo emulátor. Analýza a lint jsou čisté.
+Emulátor: první sada 8/8 včetně 10 000 značek, následných 9/9 ověřilo navíc
+smazání po přijetí a skutečný historický kurzor. CI spustí všech 10 dohromady.
+
+| Scénář | Změřené SDK operace bez přípravy/úklidu fixture |
+|---|---|
+| Obnova beze změny | 14 reads, 1 quota write, 3 dokončené transakce. Oproti starému odhadu 20 je sloučená vstupní kontrola účtu; nic se necachuje z oprávnění. |
+| 1 000 značek, replay první dávky a úplný download | 33 přijatých uploadů, 0 quota odmítnutí, 1 stránka; 1 926 reads / 254 potvrzených mutací. |
+| 10 000 značek, replay a úplný download | 314 přijatých uploadů, 274 quota odmítnutí, 8 stránek; 37 329 reads / 7 687 potvrzených mutací. |
+
+Čísla zahrnují account/control/rate/source/author/blocklist/meta/block kontroly
+i pokusy v transakcích; query počítá nejméně 1 read. Nejde o fakturační indexové
+položky, síť, cloudový výpočet nebo cloudovou latenci. 274 odmítnutí kvóty
+neoznačovat jako konfliktní retry. Test posouvá laboratorní hodiny podle
+retryAfterMs, nespí 274 sekund kvůli kvótě. Celý první emulátorový běh zabral
+asi 6,7 min včetně fixture/úklidu; 10 000 uploadů je dražší správnostní test,
+proto má vlastní CI krok s průběžnými počty a časovým limitem.
+
+Samotná kvóta znamená při 10 000 čekajících značkách nejméně 273 s čekání
+na 313. upload od plného bucketu, bez replay, dalších zařízení a skutečné
+obsluhy. 1 000 značek se vejde do rezervy. Nelze proto slibovat okamžitou
+úplnou obnovu desetitisícové fronty nebo jí blokovat zobrazení celého feedu.
+Pro B3 zbývá korektní zacházení s neúplným read kontextem; 5 000 současných
+uživatelů vyžaduje samostatnou kapacitní akceptaci, ne jen tuto kvótu.
+
+Důkazy: build/b2-runtime-emulator.log, build/b2-runtime-emulator-regressions.log,
+build/b2-runtime-client-full-final.log, build/b2-runtime-analyze-final.log,
+build/b2-runtime-functions-unit.log a build/b2-runtime-tools.log.
+Přesné CI se doplní po zdrojovém commitu. Nic nebylo nasazené. Před aktivací
+zbývá omezený pokračující retenční úklid, jeho kapacitní návrh, potřebná indexace,
+kompatibilní neaktivní v3 návratový artefakt a konkrétní živý DEV test.

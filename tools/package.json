@@ -6,6 +6,7 @@
     "node": "22.x"
   },
   "scripts": {
+    "test:read-runtime": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/read_sync_runtime.integration.test.js\"",
     "check:docs": "node check_docs.mjs",
     "test:storage": "firebase emulators:exec --config ../firebase.storage-test.json --only firestore,storage --project shoutout-rules-test \"node --test --test-concurrency=1 rules/storage.rules.test.mjs ../functions/account_logo_revocation.integration.test.js\"",
     "firebase": "firebase",

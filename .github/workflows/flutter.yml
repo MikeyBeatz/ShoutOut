@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -112,6 +112,12 @@ jobs:
         env:
           DEBUG: 'true'
         run: npm run test:rules
+
+      - name: Test prepared B2 runtime
+        # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.
+        timeout-minutes: 10
+        working-directory: tools
+        run: npm run test:read-runtime
 
       - name: Test final account retention cleanup
         # Keep the bounded retention suite independent of the existing Rules timeout.

@@ -7,6 +7,11 @@ class ReadSyncBatchTooLarge implements Exception {}
 /// Only a rejected continuation maps here, never an Auth/App Check failure.
 class ReadSyncSnapshotExpired implements Exception {}
 
+class ReadSyncRateLimited implements Exception {
+  const ReadSyncRateLimited(this.retryAfter);
+  final Duration retryAfter;
+}
+
 /// Local B2 coordinator. Only startup/manual refresh initiates network work.
 /// Continuations belong to that captured boundary; there is no dirty timer.
 class ReadSyncController {
@@ -17,13 +22,16 @@ class ReadSyncController {
     required this.upload,
     required this.download,
     DateTime Function()? clock,
+    Future<void> Function(Duration)? wait,
     this.onMerged,
-  }) : clock = clock ?? DateTime.now;
+  }) : clock = clock ?? DateTime.now,
+       wait = wait ?? Future<void>.delayed;
   final ReadScope scope;
   final ReadSyncStore store;
   final ReadScope? Function() currentScope;
   final Future<Object?> Function(Map<String, Object?>) upload, download;
   final DateTime Function() clock;
+  final Future<void> Function(Duration) wait;
   final void Function(List<ReadUpload>)? onMerged;
   Future<void>? _flight, _queuedRefresh;
   var _active = false, _disposed = false, _generation = 0;
@@ -32,6 +40,7 @@ class ReadSyncController {
   bool get synchronizationComplete => snapshotComplete && uploadComplete;
   int? _confirmedRevision;
   int _batchLimit = 32;
+  Completer<void>? _quotaWait;
   bool _scopeAlive(int generation) =>
       !_disposed &&
       generation == _generation &&
@@ -42,6 +51,40 @@ class ReadSyncController {
 
   void setActive(bool active) {
     _active = active;
+    if (!active) _interruptWait();
+  }
+
+  void _interruptWait() {
+    final pending = _quotaWait;
+    _quotaWait = null;
+    if (pending != null && !pending.isCompleted) pending.complete();
+  }
+
+  Future<Object?> _send(
+    Future<Object?> Function(Map<String, Object?>) operation,
+    Map<String, Object?> payload,
+    int generation,
+  ) async {
+    _guard(generation);
+    if (!_active) throw StateError('Read synchronization paused');
+    try {
+      return await operation(payload);
+    } on ReadSyncRateLimited catch (error) {
+      // Backpressure belongs to this already captured boundary, not a new
+      // periodic sync. A second denial of the same batch stops safely instead
+      // of competing forever with another device of the account.
+      if (!_active || error.retryAfter <= Duration.zero) rethrow;
+      final interrupted = Completer<void>();
+      _quotaWait = interrupted;
+      try {
+        await Future.any([wait(error.retryAfter), interrupted.future]);
+      } finally {
+        if (identical(_quotaWait, interrupted)) _quotaWait = null;
+      }
+      _guard(generation);
+      if (!_active) throw StateError('Read synchronization paused');
+      return operation(payload);
+    }
   }
 
   Future<void> synchronize({Future<void> Function()? beforeCapture}) {
@@ -86,10 +129,10 @@ class ReadSyncController {
         if (page.items.isNotEmpty) {
           Object? response;
           try {
-            response = await upload({
+            response = await _send(upload, {
               'expectedUserId': scope.userId,
               'items': page.items.map((row) => row.toPayload()).toList(),
-            });
+            }, generation);
           } on ReadSyncBatchTooLarge {
             _guard(generation);
             if (_batchLimit == 1) rethrow;
@@ -159,12 +202,12 @@ class ReadSyncController {
       while (_active && !checkpoint.uploading && !checkpoint.finished) {
         Object? response;
         try {
-          response = await download({
+          response = await _send(download, {
             'expectedUserId': scope.userId,
             if (checkpoint.cursor != null) 'cursor': checkpoint.cursor,
             if (checkpoint.cursor == null && checkpoint.fromRevision != null)
               'knownRevision': checkpoint.fromRevision,
-          });
+          }, generation);
         } on ReadSyncSnapshotExpired {
           _guard(generation);
           if (checkpoint.cursor == null || restarted) rethrow;
@@ -243,6 +286,7 @@ class ReadSyncController {
   }
 
   void dispose() {
+    _interruptWait();
     _disposed = true;
     _active = false;
     _generation++;

@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválená serverová obsluha B2 je připravená lokálně; zbývá přesné CI.**
+Na feature/read-sync-runtime jsou izolované callable obálky, control
+off/active/paused, kvóta 40 + 1/s pro každý směr/UID a klientský adaptér za false
+v DEV i produkční konfiguraci. 375 Flutter / 127 Functions unit, 10 různých
+emulátorových scénářů napříč dvěma běhy a 24 cílených tools prošlo; analýza/lint čisté.
+Test 1 000 značek prošel bez quota čekání, 10 000 zachoval všechna data přes
+přerušení/restart; obnova beze změn má 14 reads + 1 rate write.
+[Konkrétní rozsah, počty a omezení](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation).
+Současné živé artefakty nový host neimportují; žádné Functions, Rules,
+Scheduler ani živá data se neměnily. Následuje konečné CI a kapacitně navržený
+retenční úklid před aktivací. B2–B4 ani celá kapacitní brána nejsou uzavřené.
+
 **Schválený klientský úsek B2 je uzavřený po přesném CI; není nasazený.**
 Na feature/read-sync-boundaries je hranice outboxu a sync při startupu/obnově,
 IndexedDB v3 s atomickou migrací v1/v2, import/checkpoint s CAS a cold restart.
@@ -19,8 +31,8 @@ přeskočeno mimo emulátor), 448 Rules/server, 116 purge, 15 Storage
 a formát/analýza/lint/build. CI fronta 1 025 značek: 33 dávek, 655 ms lokálně.
 [Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
 Transport je stále null; Functions/Rules/konfigurace ani živá data se neměnily.
-V3 zatím není nasazené a návratový artefakt musí v3 podporovat. Nyní navazuje
-konkrétní runtime/admission/úklid a propojení obnovy; B2–B4 zůstávají otevřené.
+V3 zatím není nasazené a návratový artefakt musí v3 podporovat. Runtime navazuje
+ve výše uvedeném úseku, úklid a propojení obnovy zbývají; B2–B4 jsou otevřené.
 
 **Společný plán úsporné obnovy je zapsaný.**
 Vlastník schválil připravit kontrakt nyní a realizovat jej v pořadí B2 → B3 → B4.

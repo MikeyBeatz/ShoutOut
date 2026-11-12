@@ -256,7 +256,8 @@ vypnutém cloudovém transportu: pro první rollout připravit přesný kompatib
 neaktivní v3 artefakt a rollback, nezaměňovat CI debug build za hotové vydání.
 
 Schválený je směr, plán a výše vymezená lokální implementace. Nejbližší práce
-po jejím dokončeném CI zůstává konkrétní runtime B2/úklidu; pro další změny uvést rozsah,
+po jejím dokončeném CI navazuje [schválená serverová obsluha](FEED_READING_POLICY.md#b2-runtime-implementation)
+a dosud nepřipravený fyzický úklid; pro další změny uvést rozsah,
 testy a provozní dopady. Samotné zapsání tohoto dokumentu nepovoluje živý
 backfill, novou placenou službu, změnu retence, oprávnění nebo cloudový test.
 Žádné nové číselné limity ani kolekce se tímto nezavádějí.

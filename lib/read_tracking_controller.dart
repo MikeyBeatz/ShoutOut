@@ -189,24 +189,28 @@ class ReadTrackingController extends ChangeNotifier {
   }
 }
 
+typedef ReadSyncFactory =
+    ReadSyncController Function(
+      ReadScope,
+      ReadSyncStore,
+      void Function(List<ReadUpload>),
+    );
+
 class ReadSessions extends ValueNotifier<ReadTrackingController?> {
   ReadSessions({this.storeFactory = createReadStateStore, this.syncFactory})
     : super(null);
   final ReadStateStore Function(ReadScope) storeFactory;
   // Null until a separately approved live transport/rollout is installed.
-  final ReadSyncController Function(
-    ReadScope,
-    ReadSyncStore,
-    void Function(List<ReadUpload>),
-  )?
-  syncFactory;
+  final ReadSyncFactory? syncFactory;
+  ReadSyncFactory? _configuredTransport;
   bool _foreground = true;
   bool _startupPending = false;
   String? _project;
   bool get configured => _project != null;
   final _erasing = <String, Future<void>>{}, _erased = <String>{};
-  void configure(String? projectId) {
+  void configure(String? projectId, {ReadSyncFactory? transport}) {
     retainViewer(null);
+    _configuredTransport = transport;
     _project = projectId;
     if (projectId != null) {
       unawaited(
@@ -245,7 +249,7 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
     final store = storeFactory(scope);
     ReadTrackingController? controller;
     final sync = store is ReadSyncStore
-        ? syncFactory?.call(
+        ? (_configuredTransport ?? syncFactory)?.call(
             scope,
             store,
             (rows) => controller?.acceptRemote(rows),
