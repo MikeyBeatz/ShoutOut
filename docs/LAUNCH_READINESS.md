@@ -117,7 +117,9 @@ předložit nezbytné zdrojové změny a samostatný nákladově omezený cloudo
 Vlastník tento lokální úsek schválil po vysvětlení; současně upřesnil spouštěče
 obnovy/synchronizace a požadavek na úsporný, škálovatelný systém. Bez nasazení, změn živých kvót,
 placeného zátěžového testu, nových služeb, migrací nebo Auth účtů.
+Lokální úsek je uzavřený po success CI zdroje 4024e49 (43254458838).
 [Model, lokální výsledky a revize dalšího postupu](operations/CAPACITY_AND_SCALING.md).
+Kapacita veřejného cloudu tím doložená není.
 
 ## 1. Produkční prostředí a bezpečné nasazení
 

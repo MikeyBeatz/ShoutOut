@@ -24,14 +24,16 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Uzavřít CI kapacitního úseku a navrhnout runtime B2 podle výsledků.**
+1. **Připravit konkrétní runtime B2/úklidu podle nových pravidel a kapacitních výsledků.**
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
    Současný výkon a cena pro tento profil nejsou prokázané; žádné živé změny.
    [Model a cílené lokální testy](operations/CAPACITY_AND_SCALING.md)
    jsou schválené a připravené: 4 modelové regrese / 4 emulátorové testy,
-   55 tools a lint prošly; zbývá přesné CI. Nové rozhodnutí nahrazuje 10s upload:
+   55 tools a lint prošly. Úsek je uzavřený: zdroj 4024e49 má success CI
+   43254458838 (361 Flutter / 10 Chrome / 55 tools / 448 Rules/server).
+   Nové rozhodnutí nahrazuje 10s upload:
    [sync při spuštění/obnově](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy).
    Dosavadní B2 runtime a kapacita úklidu vyžadují revizi.
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
@@ -53,9 +55,10 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    Lokální úsek je uzavřený: zdroj 693663d má success CI 43119749520,
    361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
    [Provozní návrh](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
-   je připravený k rozhodnutí: ochrany četnosti, pokračování přenosu,
-   denní fyzický úklid, indexace a kompatibilní návrat. Další lokální úsek
-   čeká na souhlas; živý DEV pilot se předloží po implementaci a CI.
+   je starší podklad k revizi: ochrany četnosti, pokračování přenosu,
+   fyzický úklid, indexace a kompatibilní návrat. Kapacitní model/testy znovu
+   neschvalovat; konkrétní runtime změny se předloží zvlášť. Živý DEV pilot
+   následuje až po jejich implementaci a CI.
    Implementace B2 není nasazené B2; nic živého se neměnilo.
 
 2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené

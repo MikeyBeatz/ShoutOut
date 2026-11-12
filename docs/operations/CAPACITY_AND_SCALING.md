@@ -49,6 +49,14 @@ nikoli měření dotazů nad takto velkou databází. Nových Auth účtů je nu
 Výstup obsahuje i variantu s 1 000 čekajícími značkami na účet, návrat všech
 klientů během jedné sekundy a nulovou uživatelskou zátěž. Kontroluje zachování
 počtu značek mezi původní frontou, novým čtením, uploadem a zbývající frontou.
+Četnosti představují nabídnutou práci při uvedeném rozložení; model nesimuluje
+časovou osu token bucketu, front serveru, backoff ani zpětný tlak. Například
+1 000 čekajících značek potřebuje 32 uploadů na účet; starší návrh burst 6 /
+doplnění 1 za 5 s je nemůže všechny přijmout během první minuty. Nejkratší
+čekání na 32. token je 130 s od plného počátečního bucketu, bez dalších
+požadavků téhož účtu a bez latence obsluhy. Nelze tím blokovat rychlou obnovu
+a zároveň slibovat okamžitý úplný read snapshot. Před implementací B2 revidovat
+admission/burst i průchod velkou frontou; tento limit zatím není živě zapnutý.
 Starý 10s upload je jen srovnávací ilustrace (300 000 požadavků, kdyby každý
 tick měl nové značky); má jinou čerstvost serverových dat. Nevydávat rozdíl
 za univerzální procento úspory při stejné službě.
@@ -90,7 +98,15 @@ nesladěný fixture clock s historickým readTime; opravený test používá ča
 emulátoru pro kurzor, aplikační kód se kvůli tomu neměnil.
 Lokální důkazy: build/capacity-emulator-final.log a výstup modelu;
 čtyři modelové regrese a 55 tools testů prošly, Functions lint čistý.
-Úplné CI zdrojového commitu se před uzavřením úseku ověří zvlášť.
+Zdroj `4024e496d017ebd6705b9ccd4d5dc697ac26b3c8` má
+[úspěšné CI 43254458838](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43254458838):
+361 Flutter, 10 skutečných Chrome/IndexedDB, 55 tools, 124 Functions unit
+(421 integračních přeskočeno v neemulátorové fázi), 448 Rules/server,
+116 purge a 15 Storage; formát, analýza, lint i webový build prošly.
+Lokální úsek je tím uzavřený, bez nasazení a bez tvrzení o cloudové kapacitě.
+CI potvrdilo stejnou správnost s jiným počtem retry: publikace 77 reads /
+7 pokusů / 4 commity, reakce+replay 136 reads / 11 pokusů / 8 commitů.
+To podporuje nutnost započítat proměnlivou konfliktní práci, ne slib fixní ceny.
 
 ## Revize škálování a B2 — konkrétní směr, zatím bez aktivace
 

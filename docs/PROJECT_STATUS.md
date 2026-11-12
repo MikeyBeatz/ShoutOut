@@ -6,13 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Kapacitní lokální úsek je připravený a ověřený, čeká na přesné CI.**
+**Kapacitní lokální úsek je uzavřený po přesném CI; další je revize runtime B2.**
 Vlastník schválil model/testy pro 100 000 účtů / 5 000 aktivních uživatelů
 a [upřesnil synchronizaci](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy):
 pouze při spuštění/skutečné obnově feedu; nahrazuje 10s upload/resume pull.
 Přečtení místně zůstává ihned, číselný indikátor obnovy B4 není hotový.
 Na feature/capacity-model je offline nástroj a čtyři nové emulátorové testy:
 4 modelové regrese, 4/4 cílené emulátorové průchody, 55 tools a lint prošly.
+Zdroj `4024e496d017ebd6705b9ccd4d5dc697ac26b3c8` má
+[success CI 43254458838](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43254458838):
+361 Flutter, 10 Chrome, 55 tools, 124 Functions unit (421 integračních
+testů přeskočeno mimo emulátor), 448 Rules/server, 116 purge, 15 Storage
+a formát/analýza/lint/build. Nejde o cloudový test 5 000 uživatelů.
 [Výsledky a návrh škálování](operations/CAPACITY_AND_SCALING.md) rozlišují
 model, skutečné SDK pokusy a neověřenou cloudovou kapacitu. Souběžné zápisy
 jsou správné, opakování transakcí stojí operace; pevný úklid 500 receipt/den
