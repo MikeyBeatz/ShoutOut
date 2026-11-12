@@ -180,7 +180,9 @@ Konkrétní [návrh B2](FEED_READING_POLICY.md#b2-proposal) vlastník schválil:
 expiresAt + 7 dní, 32 / 10 s a přenos při loginu/návratu/obnově bez pollingu.
 První lokální úsek je připravený, [výsledky](FEED_READING_POLICY.md#b2-local-results);
 source 693663d má success CI 43119749520, lokální úsek je uzavřený.
-Navazující živá/provozní brána zbývá. B2 není nasazené.
+Navazující [provozní návrh B2](FEED_READING_POLICY.md#b2-runtime-proposal)
+je připravený k rozhodnutí; další lokální implementace ještě není schválená.
+Živá brána/pilot následují po jejím CI. B2 není nasazené.
 
 ### Schválený směr a zbývající produktové volby
 
@@ -193,8 +195,9 @@ Navazující živá/provozní brána zbývá. B2 není nasazené.
   Vlastník 31. října schválil odstranění odsouvání mimo Top; hodnocení tam mění jen sbalení.
 - Relevantní obsah: vlastní plný nadpis/text Shoutu, nikoli komentáře či
   soukromé odpovědi. Pro případné další přílohy stanovit vlastní pravidlo.
-- Doba expozice je schválená: 1 s na každou část. Interval synchronizace, polling
-  a retence zůstávají samostatnými návrhy B2/B4 založenými na měření.
+- Doba expozice je schválená: 1 s na každou část. B2 má schválenou retenci
+  expiresAt + 7 dní a přenos při loginu/návratu/obnově, upload nejvýše 32
+  s prvním termínem 10 s. Polling B4 zůstává otevřený.
 - Počet novinek nebude počet všech nepřečtených. Před B4 rozhodnout zvlášť,
   zda počítat i starší příspěvky nově zpřístupněné moderací či změnou dostupnosti.
 

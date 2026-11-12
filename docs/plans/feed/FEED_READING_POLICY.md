@@ -577,3 +577,155 @@ Neslibovat návrat na 503eea6 bez tohoto omezení. Root readState drží technic
 revizi, nikoli historii textů; jeho odstranění je svázané s účtem.
 B3 musí respektovat contentHash a nezaměnit starou verzi Shout ID za současný
 přečtený obsah. Tyto navazující živé/provozní kroky se nyní neprovádějí.
+
+<a id="b2-runtime-proposal"></a>
+
+## Provozní návrh B2 — k rozhodnutí, 12. listopadu 2026
+
+**Stav: připravený rozsah další lokální implementace, zatím neschválený.**
+Základ 693663d má úspěšné CI 43119749520. Tento návrh nemění kód ani živé
+prostředí. Hodnoty níže jsou navržené pro DEV `shoutout-dev-46c81`; produkční
+kapacita se nepřebírá automaticky. Algoritmus zůstane společný a konfigurovatelný.
+Retence expiresAt + 7 dní, dávka nejvýše 32 a přenos při loginu/návratu/obnově
+bez pravidelného prázdného pollingu jsou už schválené.
+
+### Navržené parametry a dopad
+
+| Část | Návrh pro DEV | Chování při dosažení |
+|---|---|---|
+| Upload na UID přes všechna jeho zařízení | Token bucket: kapacita 6 požadavků, doplnění 1 za 5 s (dlouhodobě 12/min). | Server vrátí čas opakování; místní značky zůstanou a fronta pokračuje později. |
+| Download na UID | Kapacita 40 požadavků, doplnění 1 za 1 s (60/min). | Pokračovat uloženým kurzorem; nezačínat celou historii znovu. |
+| Dávka uploadu | Nejvýše 32 značek, první termín 10 s; plnou frontu dále dokončovat dle kvóty. | Menší dávka při překročení pracovního rozpočtu. Žádný strop celého počtu přečtených Shoutů. |
+| Stránka downloadu | 32 blokových dokumentů, nejvýše 4 096 značek. | Další podepsaná stránka, včetně prázdné nefinální stránky. |
+| Jedna bloková transakce | Převzít ověřených 200 blokových reads / 128 writes plus revizi; blok 128 značek / 64 KiB. | Celá transakce se odmítne, klient zmenší dávku. Žádný částečný zápis. |
+| Každá ze 2 nových callables | europe-west3, min. 0 / max. 1 instance, concurrency 1, 256 MiB, timeout 15 s, klientský timeout 45 s. | Bezpečné opakování a zachování místního stavu; min. 0 ponechává možnost studeného startu. |
+| Úklid čtení | Denně se stávající úlohou 02:15 UTC; nejvýše 5 000 prohlédnutých bloků, stránky 50, měkký rozpočet 40 s mezi kroky. | Uložit pokračování; jde o maximum, nikoli záruku výkonu. |
+| Celá denní Function | Stávajících 60 s / 256 MiB / min. 0 / max. 1 / concurrency 1 / bez Scheduler retry. | Dokončené dávky a checkpoint přežijí timeout. Nepřidávat nový Scheduler job. |
+
+Token bucket dovolí krátkou špičku, ne pevný zákaz po N přečtených kartách.
+Jedna povolená dávka může nést až 32 značek. Model dvou zařízení odesílajících
+každých 10 s prošel 120 požadavky za 10 minut bez omezení. Na vzorku 10 000
+značek / 253 bloků znamená stránka 32 celkem 8 požadavků; vejde se do burstu 40.
+Tyto modely nejsou měření cloudové latence ani automatický peněžní strop.
+
+### Ochrana požadavků a pokračování
+
+1. `syncReadBatch` a `getReadStatePage` dostanou existující Auth, ověřený e-mail,
+   právní/účtové kontroly a vynucený App Check. Role ani oprávnění se nerozšiřují.
+   Pro podpis použít účelově odvozený klíč ze stávajícího projektového
+   SHOUTOUT_FEED_CURSOR_KEY; nepřidávat nový uložený secret. Feed a read kurzor
+   se nesmějí navzájem přijímat. Podpis neznamená šifrování, token neobsahuje historii.
+2. Přidat soukromý `maintenanceState/readSyncControl`, v1 / revision / mode
+   off-active-paused. Chybějící či neplatný dokument znamená vypnuto. Inicializace
+   off a aktivace jsou až součást připraveného živého plánu s precondition.
+   Stav ověřit v přijímací transakci, v zapisující transakci a před/po downloadu.
+   Vypnutí obsluhy nesmí vypnout soukromý účtový ani retenční úklid.
+3. Přijetí požadavku má samostatnou transakci: kontrola režimu, účtu a token
+   bucketu pod `rateLimits/{uid}/actions/readSyncUpload|readSyncDownload`.
+   Token spotřebovat před dražší prací, aby neúspěšné drahé požadavky neobcházely
+   limit. Odepřený požadavek nepřepisuje bucket při každém opakování. Současná
+   žádost o smazání musí zablokovat i vytvoření technického rate záznamu.
+4. Resource-exhausted rozlišit v details: pracovní rozpočet znamená zmenšit
+   dávku; četnost znamená počkat podle retryAfter. Nesnižovat dávku kvůli čekání
+   na token. Síťové chyby opakovat jen při skutečné rozpracované práci, s backoffem
+   2/4/8/16/32/60 s a jitterem do 20 %. Pozastavený režim a Auth/App Check chyby
+   automaticky netočit; čekat na změnu stavu nebo výslovné opakování.
+5. Doplnit transakční místní download checkpoint v existujícím IndexedDB meta:
+   správný projekt/UID, revize, kurzor a jeho deadline, současně s importem stránky.
+   Při odložení nebo restartu pokračovat platným checkpointem. Po expiraci kurzoru
+   začít nový snapshot, zachovat místní značky. Po dokončení checkpoint odstranit;
+   známou úplnou revizi dál držet pouze v otevřené relaci. Částečný stav není úplný.
+   Erase odstraní checkpoint i outbox a ponechá jen schválenou erasure fence.
+6. Runtime napojení bude pod novou DEV volbou serverReadSynchronization,
+   výchozí false v obou prostředích. Před aktivací false i na serveru; produkční
+   aktivaci tento plán nepovoluje. B2 chyby neblokují otevřený feed ani místní
+   čtení a nevyvolávají popup po každé kartě. B3 pořadí se tímto úsekem nezapíná.
+
+### Denní fyzický úklid a sledování dluhu
+
+- Rozšířit `cleanupOperationReceipts` o samostatnou omezenou read fázi; zachovat
+  její dosavadní limit 500 receipt a průběh. Selhání jedné fáze nesmí bez pokusu
+  přeskočit druhou. Běhy nevynucují nové Scheduler retry ani novou minutovou úlohu.
+- Query přes collectionGroup readBuckets: day <= UTC den (cutoff - 7 dní),
+  orderBy day + document ID. Rozpoznat pouze přesnou cestu users/UID/readBuckets/ID
+  a v1 schéma; žádná rekurzivní práce se Shouty nebo jinými soukromými daty.
+- Pevný cutoff jednoho scan epochu a trvalý kurzor brání přeskočení dat po
+  částečném běhu. Po dokončení další den začít nový epoch i přes dříve ponechané
+  platné položky. Lease 120 s a kontrola vlastnictví ochrání souběh/restart.
+- Starší plně prošlé dny odstranit; u právě dobíhajícího dne vyjmout jen značky
+  s retainUntil <= cutoff. Platné značky zůstanou. V tomto dni zachovat prázdné
+  směrovací listy/větve, aby další legální upload nenarazil na chybějící dítě.
+  Odstranění už logicky prošlých značek nemění revizi platného stavu; snapshot
+  i klient musí přesný termín dál kontrolovat. Celé staré dny se další běh dočistí.
+- Každá změna má lastUpdateTime precondition. Neplatná data nebo neočekávané
+  potomky nesmazat; omezeně označit needsReview a pokračovat na ostatní bloky.
+  Konflikt nesmí posunout checkpoint přes neprovedenou práci. Kontroly potomků
+  musí být omezené; neprocházet neznámý strom rekurzivně.
+- Kapacita je v dokumentech, ne v lidech: 5 000 scanů po 50 je nejvýše 100 stránek.
+  Platné části dobíhajícího dne a větve také spotřebují tento rozpočet. Fyzické
+  mazání proběhne v dalším úklidu, ne přesně v sekundě expirace; backlog může čekání
+  prodloužit, logická platnost se neprodlužuje. Nepřislíbit absolutní čas při poruše.
+- Log/checkpoint obsahuje počty scanned/pruned/deleted/skipped, dobu, epoch,
+  needsContinuation/needsReview a stáří rozpracovaného epochu, bez obsahu a UID
+  v provozních zprávách. Dva po sobě jdoucí nedokončené denní běhy nebo epoch
+  starší 48 h vyžadují provozní kontrolu; skipped > 0 je needsReview hned.
+  Zde jde o strojově čitelnou diagnostiku. Nové e-mailové alerty ani placené
+  monitorovací nastavení se tímto lokálním úsekem nezakládají.
+
+### Indexy a transparentní nákladový model
+
+Připravit čtyři fieldOverrides: readBuckets `*` bez indexů, revision ASC
+COLLECTION, day ASC COLLECTION_GROUP; readState `*` bez indexů. Mapy entries
+tak zůstanou bez indexace; dokumentové názvy se použijí pro stabilní pořadí.
+Bez TTL a bez odstranění cizích definic. Potřebu indexů ověřit plánem dotazů,
+živé Query Explain až v připraveném schváleném pilotu.
+
+Přijímací ochrana také stojí operace. Model s navrženými kontrolami: download
+má 20 pevných dokumentových reads na požadavek plus vybrané bloky a 1 rate write.
+Obnova 253 bloků po 32 tedy přibližně 413 dokumentových reads + 8 rate writes;
+beze změn 20 reads + 1 rate write. Replay dvou značek z dosavadního měření by
+měl 19 reads + 1 rate write, přestože samotné značky/revize zůstanou bez zápisu.
+Po implementaci tyto počty ověřit včetně retry. Nezahrnují indexové položky,
+Functions, přenosy, úložiště ani cleanup; nejde o cenu v Kč nebo fakturu.
+
+Firestore může účtovat indexové položky pro revision/day + document ID;
+collection-group index se nevytváří automaticky. Max. 1 instance také není
+absolutní finanční strop. Rozpočet vlastníka 5 000 Kč tím nově nezastropujeme.
+[Účtování](https://firebase.google.com/docs/firestore/pricing),
+[indexace](https://firebase.google.com/docs/firestore/query-data/index-overview),
+[max. instance](https://docs.cloud.google.com/functions/docs/reference/rest/v2/projects.locations.functions#ServiceConfig).
+
+### Nasazovací pořadí a návrat — až po lokálním dokončení
+
+1. Nejprve čistý kompatibilní DEV web se synchronizací false, stejnou IndexedDB v2
+   a úplným mazáním nových checkpointů. Vyžaduje vlastní přesné CI a otisky.
+   Tento artefakt uložit jako návratovou verzi; ne 503eea6 ani automaticky 693663d.
+2. Připravit cílené indexové změny, soukromý control v off a dvě nové callables
+   syncReadBatch/getReadStatePage. Z existujících Functions aktualizovat jen
+   accountDeletionRequestCreatedDev, resumeAccountDeletionJobsDev (read úklid true)
+   a cleanupOperationReceipts (denní fáze). Prostředky starých workerů nezvyšovat.
+   Žádná migrace starých jobů, nový Auth účet, změna Rules či produkce.
+3. Po ověření backendu a indexů aktivovat control a DEV klientský přepínač z
+   otestovaného aktivačního commitu. Úklid musí být připravený před prvními zápisy.
+   Staré B1 karty vyžadují obnovu; v2 nevracet na původní v1 implementaci.
+4. Připravit pilot na stávajících Bright_Otter_182/TestBusiness: dva nové aktivní
+   syntetické Shouty přes index writer, přenos mezi dvěma oddělenými relacemi,
+   opakování, pozastavení/retry a vymezený syntetický prošlý read blok pro úklid.
+   Přesná ID, počty vedlejších dat a baseline/digest vzniknou před žádostí o
+   živé provedení. Ověřit zachování cizích značek, původních Shoutů i Auth a
+   uklidit jen vymezené fixture. U neúspěchu control paused a kompatibilní web;
+   worker a retenční úklid pokračují, cloudové údaje se kvůli návratu nemažou.
+
+### Rozsah dalšího souhlasu
+
+Navržen je **jeden lokální úsek**: admission/rate/control a callable host,
+klientský adaptér/checkpoint/retry/DEV přepínač, omezený denní úklid, indexový
+konfigurační diff, kompatibilní vypnutý build a příslušné emulátorové/browserové
+testy, počty všech operací, dokumentace, commit/push a přesné CI.
+Zahrnout pauzu během transakce, dva souběžné klienty, plné fronty a velký
+download přes kvótu, rozlišení rate/work budget, změnu UID, smazání účtu,
+cutoff/hranice dne, částečné bloky, konflikt/lease/restart a rollback v2.
+Zatím bez živých kolekcí/control dokumentu, migrací, nasazení, nových Scheduler
+jobů nebo Auth účtů. Živý DEV podklad se předloží hotový s konkrétním commitem,
+CI, artefaktem, cílem, datovým plánem a návratem. Rutinní rollouty mají souhlas
+trvale; nová živá vrstva a uvedený pilot zatím schválené nejsou.

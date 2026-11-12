@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Lokální úsek B2 je uzavřený po CI; další je konkrétní provozní DEV plán.**
+**Lokální úsek B2 je uzavřený; provozní návrh čeká na schválení další implementace.**
 Schválený lokální úsek je na `feature/feed-read-sync`: transakční bloky,
 stránkovaný snapshot/delta, IndexedDB v2 outbox a připravené klientské napojení.
 360 Flutter, 10 Chrome/IndexedDB, 49 cílených emulátorových regresí, 124 Functions
@@ -20,8 +20,12 @@ a formát/analýza/lint/build. B2 nemá exportované Functions,
 syncFactory je v aplikaci null a účtový readSyncEnabled je false. Nic nebylo
 nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
 [B2 checkpointu](plans/feed/FEED_READING_POLICY.md#b2-local-results).
-Další: konkrétní transport/runtime, denní fyzický úklid, indexace,
-kompatibilní návrat pro IndexedDB v2 a schválení nové živé vrstvy/DEV pilotu.
+[Provozní návrh B2](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
+je připravený: ochrana četnosti, trvalé pokračování downloadu, denní úklid
+ve stávající úloze, indexace a kompatibilní vypnutý web pro návrat.
+Jde o návrh, nikoli nové nastavení aplikace. Další krok je schválení jednoho
+lokálního implementačního/testovacího úseku; konkrétní živý DEV plán vznikne
+po jeho CI. Zdrojový kód ani živé prostředí se při přípravě návrhu neměnily.
 
 **Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na

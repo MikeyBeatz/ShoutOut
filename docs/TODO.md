@@ -24,7 +24,7 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní provozní DEV plán B2.**
+1. **Schválit a implementovat provozní ochrany a úklid B2 lokálně.**
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
@@ -43,9 +43,11 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    [Výsledky a hranice](plans/feed/FEED_READING_POLICY.md#b2-local-results).
    Lokální úsek je uzavřený: zdroj 693663d má success CI 43119749520,
    361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
-   Před živou aktivací ještě runtime/
-   limity, denní fyzický úklid, indexace, kompatibilní rollback a konkrétní
-   DEV pilot k předložení. Implementace B2 není nasazené B2; nic živého se neměnilo.
+   [Provozní návrh](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
+   je připravený k rozhodnutí: ochrany četnosti, pokračování přenosu,
+   denní fyzický úklid, indexace a kompatibilní návrat. Další lokální úsek
+   čeká na souhlas; živý DEV pilot se předloží po implementaci a CI.
+   Implementace B2 není nasazené B2; nic živého se neměnilo.
 
 2. **Po B2 dokončit globální unread-first a indikátor novinek.** B3: nepřečtené
    první jen v Nejblíž; B4: oddělený počet novinek, který nemění rozpracované
