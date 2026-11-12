@@ -160,8 +160,8 @@ restart/erasure přečtení. Úspěch pro jednu oblast není důkaz celé kapaci
 
 ### Konkrétní první úsek B2: hranice fronty a trvalé pokračování
 
-**Vlastník tento konkrétní lokální úsek schválil; implementace a místní
-kontroly jsou hotové, zbývá přesné CI.** Výchozí průzkum našel timer v
+**Vlastník tento konkrétní lokální úsek schválil; implementace, místní
+kontroly i přesné CI jsou hotové.** Výchozí průzkum našel timer v
 `read_sync_controller.dart`, samostatný resume pull v `ReadSessions` a pouze
 paměťový kurzor. Níže je zachovaný schválený rozsah; výsledky následují.
 Provozní transport/admission a serverový úklid jsou nadále navazující práce.
@@ -238,7 +238,14 @@ bez seedování; nejde o SLA, velikost disku ani cloudovou latenci. Oba typy
 časového posunu, souběh účtů/karet, síťový výpadek, restart, změna UID,
 zánik a erase jsou pokryté. Důkazy: build/b2-client-full-final.log,
 build/b2-boundary-browser-complete.log a build/b2-boundary-targets-final.log.
-Přesný konečný CI výsledek se doplní po commitu; živé testy nejsou součástí.
+Zdroj `049cedc4cb4ec01b8a24ac93b04e8b9399205290` má
+[success CI 43270732252](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43270732252):
+369 Flutter, 16 Chrome, 55 tools, 124 Functions unit (421 integračních testů
+přeskočeno mimo emulátor), 448 Rules/server, 116 purge, 15 Storage
+a formát/analýza/lint/build. CI zopakovalo průchod 1 025 řádků / 33 dávek
+za 655 ms bez Firebase čtení či zápisů; jde o lokální IndexedDB měření,
+nikoli cloudovou kapacitu. Log: build/b2-client-ci.log.
+Tento lokální úsek je uzavřený; živé testy nebyly jeho součástí.
 
 **Hranice:** syncFactory zůstává null, žádný transport/backend/feature flag
 nebyl zapnutý. Home stále synchronizaci nečeká jako bariéru B3; serverový
@@ -249,7 +256,7 @@ vypnutém cloudovém transportu: pro první rollout připravit přesný kompatib
 neaktivní v3 artefakt a rollback, nezaměňovat CI debug build za hotové vydání.
 
 Schválený je směr, plán a výše vymezená lokální implementace. Nejbližší práce
-po jejím CI zůstává konkrétní runtime B2/úklidu; pro další změny uvést rozsah,
+po jejím dokončeném CI zůstává konkrétní runtime B2/úklidu; pro další změny uvést rozsah,
 testy a provozní dopady. Samotné zapsání tohoto dokumentu nepovoluje živý
 backfill, novou placenou službu, změnu retence, oprávnění nebo cloudový test.
 Žádné nové číselné limity ani kolekce se tímto nezavádějí.

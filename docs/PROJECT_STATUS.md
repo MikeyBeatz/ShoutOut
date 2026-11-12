@@ -6,15 +6,20 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválený klientský úsek B2 je implementovaný lokálně; zbývá přesné CI.**
+**Schválený klientský úsek B2 je uzavřený po přesném CI; není nasazený.**
 Na feature/read-sync-boundaries je hranice outboxu a sync při startupu/obnově,
 IndexedDB v3 s atomickou migrací v1/v2, import/checkpoint s CAS a cold restart.
 369 Flutter / 16 Chrome, 39 cílených regresí prošlo; fronta 1 025 značek má
 33 dávek bez skenování od začátku, pozdější značka čeká. Selhání migrace,
-souběžné karty, disková chyba i erase jsou ověřené.
+souběžné karty, disková chyba i erase jsou ověřené. Zdroj
+`049cedc4cb4ec01b8a24ac93b04e8b9399205290` má
+[success CI 43270732252](https://github.com/MikeyBeatz/ShoutOut/actions/runs/43270732252):
+369 Flutter, 16 Chrome, 55 tools, 124 Functions unit (421 integračních testů
+přeskočeno mimo emulátor), 448 Rules/server, 116 purge, 15 Storage
+a formát/analýza/lint/build. CI fronta 1 025 značek: 33 dávek, 655 ms lokálně.
 [Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
 Transport je stále null; Functions/Rules/konfigurace ani živá data se neměnily.
-V3 zatím není nasazené a návratový artefakt musí v3 podporovat. Po CI navazuje
+V3 zatím není nasazené a návratový artefakt musí v3 podporovat. Nyní navazuje
 konkrétní runtime/admission/úklid a propojení obnovy; B2–B4 zůstávají otevřené.
 
 **Společný plán úsporné obnovy je zapsaný.**

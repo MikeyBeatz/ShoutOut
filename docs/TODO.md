@@ -24,13 +24,15 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Uzavřít přesné CI klientského B2 a připravit navazující runtime/úklid.**
+1. **Připravit konkrétní navazující runtime B2 a kapacitu úklidu.**
    [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
    byl schválený a je implementovaný: hranice outboxu, odstranění automatických
-   spouštěčů, IndexedDB v3 a atomický checkpoint. 369 Flutter / 16 Chrome / 39
-   cílených regresí prošlo; zbývá přesné CI. [Výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
+   spouštěčů, IndexedDB v3 a atomický checkpoint. Klientský úsek je uzavřený:
+   zdroj 049cedc má success CI 43270732252 (369 Flutter / 16 Chrome / 448
+   Rules/server), lokálně i 39 cílených regresí.
+   [Výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
    Transport není zapnutý a nic není nasazené. Serverový runtime/admission
-   a kapacita úklidu navazují po tomto ověření; znovu neschvalovat hotový úsek.
+   a kapacita úklidu jsou další práce; znovu neschvalovat hotový klientský úsek.
    [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
    je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
    nikoli dokončené B2/B3/B4. Další runtime rozsah B2 ještě předložit konkrétně.
