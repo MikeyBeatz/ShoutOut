@@ -308,7 +308,7 @@ Firestore podkolekce automaticky nemaže.
 
 - doložit kapacitu pro schválený cíl 100 000 registrovaných účtů podle
   [kapacitní akceptace](LAUNCH_READINESS.md#capacity-target); souběžná špička
-  1 000 aktivních relací je zatím návrh, ne schválený či ověřený výkon,
+  5 000 aktivních uživatelů je schválený cíl, dosud neprokázaný výkon,
 - zapnout hlášení pádů a serverových chyb bez úniku citlivých dat,
 - alertovat na nárůst registrací, zamítnuté App Check požadavky, zápisy,
   hlášení, náklady a chyby automatizací,

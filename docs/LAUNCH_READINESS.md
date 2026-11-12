@@ -29,12 +29,14 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 
 **Schválené upřesnění vlastníka, 12. listopadu 2026:** MVP i navazující
 aplikace mají podporovat 100 000 registrovaných účtů. Jde o celkový počet
-účtů; počet denně aktivních a současně aktivních uživatelů z něj neodvozovat
-jako potvrzený provozní údaj. Současná kapacita pro tento cíl není prokázaná.
+účtů. V navazující odpovědi vlastník zvolil **5 000 současně aktivních
+uživatelů** jako kapacitní špičku. Počet denně aktivních z toho neodvozovat.
+Současná kapacita pro tento cíl není prokázaná.
 
-**Návrh k rozhodnutí:** ověřovat špičku 1 000 současně aktivních uživatelů,
-postupně přes 100 / 500 / 1 000. Je to navržený zátěžový cíl, nikoli odhad
-skutečné návštěvnosti nebo garantovaná kapacita současného releasu.
+**Schválený cíl:** 5 000 současně aktivních uživatelů. Postupné ověření
+navrhnout přes 100 / 500 / 1 000 / 2 500 / 5 000. Volba 5 000 nahrazuje
+předchozí návrh špičky 1 000; není odhadem skutečné návštěvnosti ani zárukou
+kapacity současného releasu. Délka a konkrétní akce testu zbývají k určení.
 Počítat aktivní relace provádějící dohodnuté akce, ne pouze otevřená nečinná okna.
 
 Před tvrzením o splnění kapacity:
@@ -64,6 +66,54 @@ Tato část rozšiřuje provozní akceptaci existující startovní brány; samo
 zápis nezavírá milník. Nezakládat 100 000 skutečných Auth účtů pro pouhou
 simulaci velikosti. Implementace, živé testy a případné změny infrastruktury
 se předloží s konkrétním rozsahem. Nyní se žádné nastavení ani živá data nemění.
+
+### Předběžná kontrola kódu, 12. listopadu 2026
+
+Potvrzené hranice na zdroji 693663d, nikoli nový živý audit:
+
+- Uživatelské callables v `functions/content.js` mají maxInstances 1 a
+  concurrency 1. Jedna funkce tedy nemá povolené paralelní obsluhování více
+  požadavků; výkon pro schválenou špičku se dosud neměřil.
+- `functions/feed_block_index_store.js` transakčně mění společný kořen
+  `cells/{cell}` dotčené oblasti. Také Shout reakce používají index writer.
+  Riziko souběžného zápisu v husté oblasti je třeba změřit; z kódu nelze
+  samotného určit maximální propustnost nebo nutnost rozdělení těchto zápisů.
+- `cleanup_operation_receipts.js` připouští nejvýše 500 prohlédnutých potvrzení
+  na běh, `receipt_cleanup_schedule.js` jej volá jednou denně. Účtový worker
+  má maxJobs 1 a pageSize 50; indexová údržba má úsek 32 kroků / 10 s.
+  Jde o skutečné pevné meze práce, ne ověřenou kapacitu většího provozu.
+- B2 záznamy a revize jsou oddělené podle UID; nevytvářejí jeden globální
+  zapisovaný read dokument. Samostatně prověřit návraty více zařízení téhož
+  účtu. Navržený globální přepínač B2 je čtený guard, ne čítač všech požadavků.
+
+Ilustrační výpočet: pokud všech 5 000 klientů má co odeslat každých 10 s,
+vzniká průměrně 500 B2 uploadů/s, ne 5 000 požadavků za sekundu. Synchronní
+návrat klientů může být výrazně prudší; interval bez rozložení nezaručuje
+rovnoměrnou zátěž. Toto není naměřená aktivita uživatelů ani cena.
+
+<a id="capacity-local-proposal"></a>
+
+### Další lokální úsek — návrh ke schválení
+
+Před implementací dosavadního B2 runtime připravit jeden místní kapacitní
+podklad pro schválený cíl: reprodukovatelný model 100 000 profilových identit
+a 5 000 aktivních relací s výslovnými četnostmi akcí, potřebným počtem operací
+a přírůstkem úklidového dluhu. Nezakládat pro model skutečné Auth účty.
+
+Přidat lokální měřicí nástroj a cílené emulátorové regrese existujících jader:
+více UID, společná geografická oblast, reakce na stejný Shout, oddělení B2
+účtů, restart a bezpečné pokračování úklidu. Souběžnost místního generátoru
+omezit podle prostředí; 5 000 simulovaných relací nemusí být 5 000 OS procesů.
+Lokální výsledky označit jako důkaz správnosti/model operací, nikdy jako
+cloudový test 5 000 současných uživatelů. Zatím neměnit produkční datový model
+ani způsob zápisu jen na základě teoretického rizika.
+
+Výstup: konkrétní profil, návrh podmínek odezvy/chybovosti, kapacitní tabulka
+pro jednotlivé cesty, varianty automatického škálování a úklidu s omezeními,
+revize B2 runtime návrhu, dokumentace, commit/push a CI. Teprve podle výsledků
+předložit nezbytné zdrojové změny a samostatný nákladově omezený cloudový test.
+Tento lokální úsek zatím není schválený. Bez nasazení, změn živých kvót,
+placeného zátěžového testu, nových služeb, migrací nebo Auth účtů.
 
 ## 1. Produkční prostředí a bezpečné nasazení
 

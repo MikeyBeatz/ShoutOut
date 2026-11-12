@@ -590,10 +590,12 @@ Retence expiresAt + 7 dní, dávka nejvýše 32 a přenos při loginu/návratu/o
 bez pravidelného prázdného pollingu jsou už schválené.
 
 **Navazující kapacitní požadavek:** vlastník upřesnil cíl 100 000 registrovaných
-účtů. [Souběžná zátěž a akceptace celé aplikace](../../LAUNCH_READINESS.md#capacity-target)
-se stanoví zvlášť. Níže uvedené DEV instance, četnost a denní rozpočet úklidu
+účtů a 5 000 současně aktivních uživatelů. [Akceptace celé aplikace](../../LAUNCH_READINESS.md#capacity-target)
+zbývá doložit; [lokální kapacitní úsek](../../LAUNCH_READINESS.md#capacity-local-proposal)
+je předložený ke schválení. Níže uvedené DEV instance, četnost a denní rozpočet úklidu
 nejsou důkaz produkční kapacity pro tento cíl; před implementací provozní části
-návrh sladit s dohodnutým profilem. Dosavadní návrh tím není schválený.
+návrh revidovat podle dohodnutého profilu. Dosavadní návrh tím není schválený
+a neprovádět jej jako potvrzenou produkční konfiguraci.
 
 ### Navržené parametry a dopad
 

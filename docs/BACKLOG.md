@@ -240,8 +240,9 @@ požadavky v MVP_SERVER_PLAN.md. Samotné zapsání bodu neznamená implementaci
   Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní
   předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou
   samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu.
-  Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů;
-  [souběžná zátěž a její ověření](LAUNCH_READINESS.md#capacity-target)
+  Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů
+  a 5 000 současně aktivních uživatelů;
+  [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target)
   se musí určit zvlášť. Kapacita zatím není prokázaná.
 - [ ] **Po MVP** — Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
   samostatným plánem `docs/local/ShoutOut_marketingovy_plan_spusteni.docx`.

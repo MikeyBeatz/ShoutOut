@@ -6,10 +6,11 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-Vlastník upřesnil kapacitní cíl MVP: **100 000 registrovaných účtů**.
-[Návrh souběžné zátěže a akceptace](LAUNCH_READINESS.md#capacity-target)
-je připravený: 1 000 současně aktivních relací je zatím ke schválení.
-Nejprve sladit tento profil s provozním návrhem B2 a celou kritickou cestou;
+Vlastník upřesnil kapacitní cíl MVP: **100 000 registrovaných účtů a
+5 000 současně aktivních uživatelů**. [Akceptace a kontrola kódu](LAUNCH_READINESS.md#capacity-target)
+rozlišují schválený cíl od neověřeného výkonu. [Další lokální úsek](LAUNCH_READINESS.md#capacity-local-proposal)
+čeká na schválení: model provozu, operace/úklidový dluh a cílené regrese.
+Potom revidovat B2 runtime a potřebné změny celé kritické cesty;
 dosavadní max. 1 / concurrency 1 není ověřená produkční kapacita.
 Zapsání cíle nemění kód, živé nastavení ani rozpočet a neprokazuje jeho splnění.
 
@@ -30,9 +31,9 @@ nasazené ani zapsané do živého prostředí. Výsledky a omezení jsou v
 [Provozní návrh B2](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
 je připravený: ochrana četnosti, trvalé pokračování downloadu, denní úklid
 ve stávající úloze, indexace a kompatibilní vypnutý web pro návrat.
-Jde o návrh, nikoli nové nastavení aplikace. Další krok je schválení jednoho
-lokálního implementačního/testovacího úseku; konkrétní živý DEV plán vznikne
-po jeho CI. Zdrojový kód ani živé prostředí se při přípravě návrhu neměnily.
+Jde o dosavadní návrh k revizi podle nové kapacitní akceptace, nikoli nové
+nastavení aplikace. Konkrétní živý DEV plán vznikne po ověření a CI
+navazující implementace. Zdrojový kód ani živé prostředí se při přípravě návrhu neměnily.
 
 **Poslední živé nasazení — B1 a regrese Uložených, uzavřené v DEV.**
 Aktuální zdroj `503eea672db85fb06200115488a4e313cd751d48` na
