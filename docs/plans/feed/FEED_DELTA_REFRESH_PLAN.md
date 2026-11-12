@@ -156,6 +156,53 @@ restart/erasure přečtení. Úspěch pro jednu oblast není důkaz celé kapaci
 
 ## Schválení a nejbližší implementační krok
 
+<a id="b2-client-foundation"></a>
+
+### Konkrétní první úsek B2: hranice fronty a trvalé pokračování
+
+**Připravený lokální rozsah k rozhodnutí, dosud bez zdrojových změn.**
+Průzkum potvrdil timer v `read_sync_controller.dart`, samostatný resume pull
+v `ReadSessions` a pouze paměťový download kurzor. Provozní adapter/kvóty ani
+úklid teď nelze označit za hotové; tento krok nejprve opraví klientský kontrakt.
+
+- V `read_sync_controller.dart` a `read_tracking_controller.dart` zrušit
+  automatický 10s upload a pull při pouhém návratu do popředí. Synchronizaci
+  spouštět při založení přihlášené relace/spuštění a výslovně při skutečné
+  obnově feedu. Průběžné místní značky jen plní trvalou frontu. Hotový transport
+  se nezapíná, globální syncFactory zůstane null.
+- V `read_state_store.dart` a `indexed_read_state_store.dart` připravit atomicky
+  zachycené pořadí outboxu: serveru dál odchází nejvýše 32 značek, ale klient
+  zpracovává jen frontu do zachycené hranice. Pozdější čtení zůstane na příště.
+  Pro stabilní pořadí použít technické rostoucí sequence místo samotného času
+  zařízení, aby stejné milisekundy nebo posun hodin neporušily hranici.
+- IndexedDB posunout na v3 s pořadovým indexem outboxu a metadaty průběhu.
+  Upgrade z v1 i v2 musí být atomický a zachovat značky, pending stav i erasure
+  fence. Nejde o novou retenci, veřejná data nebo ukládání celých Shoutů.
+- Import download stránky a její checkpoint uložit v jedné místní transakci.
+  Uchovat projekt/UID, inkarnaci synchronizace, hranici fronty, revizi a kurzor;
+  bránit přepsání novějšího postupu jinou kartou či opožděnou odpovědí.
+  Při restartu pokračovat použitelným checkpointem, při odmítnutém/propadlém
+  začít bezpečný snapshot při zachování přečtení. Nové uploady nesmějí vést
+  k označení neodpovídajícího starého snapshotu za úplný pro novou obnovu.
+- Odlišit dokončení zachycené fronty, odložené značky, úplný download a chybu.
+  Slučovat souběžné požadavky bez ztráty nově požadované hranice obnovy;
+  po zániku obrazovky, změně UID nebo erase nedovolit pozdní import/ack.
+  Nezavádět nekonečný retry či skrytý periodický polling. Síťová chyba zachová
+  postup; úplnost pro budoucí B3 se nesmí tvrdit při odložené části.
+- Memory adapter, cílené Flutter regrese a skutečné Chrome/IndexedDB testy
+  musí pokrýt více než 32 / 1 000 čekajících značek, nové značky během běhu,
+  souběžné karty, stejný/vracející se čas zařízení, upgrade v1/v2, cold restart,
+  ztracenou odpověď, opakování, prázdnou nefinální stránku, erase a změnu účtu.
+  Změřit lokální průchod frontou a doložit, že další dávky nezačínají sken od
+  prvního záznamu pokaždé. Zahrnout dokumentaci, commit/push a přesné CI.
+
+Návratový web pro budoucí rollout musí umět v3 a smazat i nové checkpointy;
+staré v1/v2 buildy po upgradu nejsou automaticky kompatibilní rollback.
+Zatím bez nasazení, živých dat/účtů, nových Functions nebo zapnutí transportu,
+změn Rules, serverových limitů, Scheduleru, retence, B3 pořadí či B4 číslovky.
+Navazující runtime návrh musí zvlášť vyřešit admission pro velkou frontu,
+propojení s obnovou feedu a nákladově omezenou kapacitu úklidu.
+
 Schválený je směr a jeho zařazení do existujícího plánu. Nejbližší práce zůstává
 konkrétní revize runtime B2/úklidu; před zdrojovými změnami uvést přesný rozsah,
 testy a provozní dopady. Samotné zapsání tohoto dokumentu nepovoluje živý

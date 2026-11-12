@@ -24,7 +24,11 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
 
 ## Nejbližší práce
 
-1. **Připravit konkrétní runtime B2/úklidu podle společného kontraktu obnovy.**
+1. **Schválit a ověřit klientský základ B2 pro obnovu a bezpečné pokračování.**
+   [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
+   je připravený: hranice outboxu, odstranění starých automatických spouštěčů,
+   IndexedDB v3 a atomický download checkpoint. Zatím bez zdrojových změn;
+   serverový runtime/admission a kapacita úklidu navazují po tomto ověření.
    [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
    je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
    nikoli hotovou implementaci. Zdrojový rozsah B2 ještě předložit konkrétně.

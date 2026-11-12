@@ -635,7 +635,7 @@ bez pravidelného prázdného pollingu jsou už schválené.
 **Navazující kapacitní požadavek:** vlastník upřesnil cíl 100 000 registrovaných
 účtů a 5 000 současně aktivních uživatelů. [Akceptace celé aplikace](../../LAUNCH_READINESS.md#capacity-target)
 zbývá doložit; [lokální kapacitní úsek](../../LAUNCH_READINESS.md#capacity-local-proposal)
-je předložený ke schválení. Níže uvedené DEV instance, četnost a denní rozpočet úklidu
+je uzavřený po CI 43254458838. Níže uvedené DEV instance, četnost a denní rozpočet úklidu
 nejsou důkaz produkční kapacity pro tento cíl; před implementací provozní části
 návrh revidovat podle dohodnutého profilu. Dosavadní návrh tím není schválený
 a neprovádět jej jako potvrzenou produkční konfiguraci.

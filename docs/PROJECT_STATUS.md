@@ -6,7 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Společný plán úsporné obnovy je zapsaný; další je konkrétní revize runtime B2.**
+**První konkrétní klientský úsek B2 je připravený ke schválení.**
+[Rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation) zahrnuje
+spouštěče jen na hranici obnovy, pořadí outboxu, IndexedDB v3 migraci a trvalý
+download checkpoint s regresními testy. Kód zatím není změněný; živý transport,
+serverové kvóty a úklid jsou navazující úsek. Nezavádí se nové produktové pravidlo.
+
+**Společný plán úsporné obnovy je zapsaný.**
 Vlastník schválil připravit kontrakt nyní a realizovat jej v pořadí B2 → B3 → B4.
 [Kontrakt](plans/feed/FEED_DELTA_REFRESH_PLAN.md) odděluje verze obsahu/čítačů,
 bloková metadata, cache, dostupnost a baseline novinek. Do B4 patří přenos
