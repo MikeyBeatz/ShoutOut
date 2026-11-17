@@ -6,22 +6,23 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dočasná priorita vlastníka: konzole před pokračováním B2.**
-Na fix/category-font-warning je připravená schválená oprava: odstranění U+FE0F
-jen ze dvou pevných symbolů kategorií Nabídka/Varování!. Sedm rendererových
-scénářů potvrzuje 0 varování aktuálních kategorií a funkční pozitivní kontroly;
-existující Shout testy prošly. [Důkazy](operations/CONSOLE_WARNINGS.md#category-font-fix).
-Další je přesné úplné CI, čistý release a jen DEV Hosting shoutout-dev-46c81.
-Oprava zatím není nasazená; Functions, data a Rules se nemění.
-CSP se nepodařilo reprodukovat ani při funkční pozitivní
-kontrole a vlastník potvrdil jeho vymizení po obnově. Přesný původ není potvrzený.
-Nově nahlášený QUIC Listen transport je evidovaný zvlášť; obnovení spojení zatím
-není doložené. Níže uvedená B2 akceptace je pozastavená, její data zachovat.
+**Fontová oprava je uzavřená v DEV; další je závěrečná B2 akceptace.**
+Zdroj 9e3828dd37bd8ce68713f87cedb956db0a135124 má success úplné CI 44178308912
+(375 Flutter / 17 + 2 Chrome / 81 tools / 134 unit / 450 Rules-server / 34 B2 /
+116 purge / 15 Storage a build). Sedm místních rendererových scénářů potvrzuje
+0 varování aktuálních kategorií a funkční pozitivní kontroly; 26 Shout testů prošlo.
+Pouze DEV Hosting shoutout-dev-46c81, verze 74d0c3756884ac19, release
+2026-11-17T21:32:45.315Z. Nový JavaScript a index/config mají na obou doménách
+shodné bajty s čistým releasem; změnil se jen main.dart.js. Celý předchozí
+release bc4a6e1 je ověřený pro návrat. [Důkazy a meze](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout).
+CSP/QUIC mají oddělenou evidenci; jejich oprava se netvrdí. B2 fixture zachovat.
+Původní B2 live helper kvůli novým souborům i fontové změně odmítne aktuální HEAD;
+navázat přes čistý ověřený B2 checkout nebo doložit shodu modulů, ne obejít guard.
 
 **B2 je aktivní v DEV; zbývá živá offline/restart akceptace a úklid.**
-Zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
+Backendový zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
 Čtyři field výjimky jsou READY, pět Functions ACTIVE se shodnými skutečnými
-zdrojovými ZIP a web a5edfc1f8a96c6e7 odpovídá release. Read sync i účtový úklid
+zdrojovými ZIP. Web má navazující fontovou opravu uvedenou výše. Read sync i účtový úklid
 jsou zapnuté; minutová retence uklidila prošlé fixture a dokončila checkpointy
 s 24h klidem. Původní pending žádost a 38 původních zdrojů jsou zachované.
 [Revize, živé důkazy a diagnostická historie](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
@@ -581,7 +582,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a` / `a5edfc1f8a96c6e7`; CI 44099715617 success, B2 aktivní, bajty release shodné. Živý průchod dvěma klienty a úklid nových A/B fixture čekají. |
+| Webový zdroj / Hosting verze | `9e3828dd37bd8ce68713f87cedb956db0a135124` / `74d0c3756884ac19`; úplné CI 44178308912 success, fontová oprava, B2 aktivní. JavaScript/index/config na obou doménách shodné s releasem; živá offline/restart B2 akceptace a úklid A/B fixture čekají. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |

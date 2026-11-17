@@ -34,15 +34,13 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
-**Dočasná priorita vlastníka – vyřešit konzoli před B2:**
-[Lokální diagnostika](operations/CONSOLE_WARNINGS.md) je dokončená ve 12
-izolovaných Chrome scénářích. Příčinou Noto varování našich pevných kategorií
-je U+FE0F; [schválená úprava dvou hodnot](operations/CONSOLE_WARNINGS.md#category-font-fix)
-je lokálně ověřená v sedmi rendererových scénářích a existujících Shout testech.
-Další je přesné úplné CI a pouze DEV web; zatím není nasazeno. CSP se znovu neobjevilo
-ani vlastníkovi po obnově; přesný původ původního výpisu není potvrzený.
-Nový QUIC transport evidovat odděleně, automaticky neměnit síťovou konfiguraci.
-Nejde o dokončený rollout, celý vizuální audit ani B2 akceptaci; metriky zachovány.
+**Odbočka ke konzoli – fontová oprava dokončená v DEV:**
+[Důkazy](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout): 9e3828d má
+success úplné CI 44178308912, verze 74d0c3756884ac19 je nasazená a ověřená
+na obou doménách. Sedm místních fontových scénářů, 26 Shout testů a celý CI
+průchod prošly. Odstraněné jsou jen dva selektory pevných symbolů; CSP/QUIC
+zůstávají samostatnou evidencí a jejich oprava se netvrdí. Celý vizuální audit
+ani B2 akceptace tím hotové nejsou; metriky a jejich pevné váhy jsou zachované.
 
 1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
    [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
@@ -55,8 +53,9 @@ Nejde o dokončený rollout, celý vizuální audit ani B2 akceptaci; metriky za
    restart úložiště/controlleru a následné dokončení. Zdroj 808a734 má success
    úplné CI 44157663737; testovací úsek je uzavřený. Nejde o živý Firebase/
    App Check ani cold-tab restart DEV aplikace.
-   Živá offline/restart akceptace a úklid zůstávají otevřené; nyní mají počkat
-   na vyřešení výše uvedené konzolové priority podle nového pokynu vlastníka.
+   Živá offline/restart akceptace a úklid zůstávají otevřené; po výše uzavřené
+   fontové opravě lze navázat. Staré live helpery spouštět z ověřeného čistého
+   B2 checkoutu nebo doložit kompatibilitu modulů; jejich source guard neobcházet.
    Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku
    přepínání ani queue fixture neopakovat. Oba pilotní Shouty A/B a záložky
    zachovat do akceptace, pak uklidit přes writer; žádné nové Auth účty.

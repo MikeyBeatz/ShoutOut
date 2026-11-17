@@ -57,8 +57,8 @@ oba negativní kontrolní vzorky. Čtyři syntetické vzorky s původním selekt
 mají nadále každý 1 varování; sběr hlášek tedy zůstává funkční.
 Log build/category-font-fix-browser.log a fonts-proof.json v diagnostickém
 výstupu. Existující test/shout_test.dart prošel. Data, názvy, zbývající symboly,
-zabezpečení a síťová konfigurace se nemění. Před DEV rolloutem ještě zbývá
-přesné úplné CI, čistý release a ověření skutečných nasazených souborů.
+zabezpečení a síťová konfigurace se nemění. Navazující přesné úplné CI,
+čistý release a ověření skutečných nasazených souborů dokládá výsledek rolloutu níže.
 
 ## CSP report-only
 
@@ -114,7 +114,47 @@ Konečný místní běh v Chrome/157.0.8103.79 dokončil 12 scénářů: 7 fonto
 Firebase backend požadavky: 0 povolených / 0 pokusů zachycených guardem.
 Samostatný debug build cílového font probe, finální flutter analyze (bez nálezů),
 formát, Node syntax a kontrola dokumentace/metrik prošly. Starší samostatný
-build i původní šestice zůstávají jen dílčími podklady. Úplné CI ani rollout se
-pro tento lokální diagnostický checkpoint nespouštějí; při schválené opravě
-se seskupí s aplikační změnou. Žádná z těchto změn není oprava nasazené
-aplikace ani nový release.
+build i původní šestice zůstávají jen dílčími podklady. Pro samotný diagnostický
+checkpoint 80d7466 neběželo úplné CI ani rollout; seskupily se s následnou
+schválenou aplikační opravou níže. Diagnostické nástroje samy nemění nasazenou aplikaci.
+
+<a id="category-font-dev-rollout"></a>
+
+## Ověřený DEV rollout fontové opravy
+
+Vlastník schválil úpravu dvou pevných symbolů, testy a pouze DEV web po CI.
+Zdroj `9e3828dd37bd8ce68713f87cedb956db0a135124` má
+[success úplné CI 44178308912](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44178308912),
+13 min 51 s: 375 Flutter, 17 + 2 Chrome, 81 tools, 134 Functions unit
+(457 integračních skip mimo emulátor), 450 Rules/server, 34 B2 runtime/retention,
+116 purge, 15 Storage a formát/analýzu/lint/build. Lokálně navíc prošlo 26
+Shout testů a 7 izolovaných fontových scénářů; aktuální kategorie jsou bez
+Noto varování a čtyři staré syntetické vzorky nadále varování zachytí.
+
+Čistý release má 68 manifestových souborů; proti předchozí verzi se změnil
+jen main.dart.js. Manifest SHA-256:
+`ca882666f1bf3593237b4d2fa37adda8b7d738c7657c2703efb82c1bbe6fe75d`.
+Před nasazením byla ověřena původní živá verze i kopie celého releasu bc4a6e1
+v build/category-font-rollback-bc4a6e1 pro případný návrat se stejnou IndexedDB v3.
+
+Pouze projekt/site shoutout-dev-46c81: Hosting verze **74d0c3756884ac19**,
+release **2026-11-17T21:32:45.315Z**. Po nasazení ověřeno nové metadata verze a
+bajty index.html/main.dart.js/app-config.json na web.app i firebaseapp.com.
+main.dart.js SHA-256:
+`a748a2aa1687178dc43f161c93a73ecdf240ec0e6d9473af748fe976358f1ac9`.
+Nezměněný app-config SHA-256:
+`6ffed0edd82d141b5f3a7cb85aae40ffb18eee78f692f8bc908c56e50afde8a1`.
+To ověřuje publikovaný artefakt; nezaměňovat to s živým přihlášeným UI průchodem.
+
+Functions, Rules, Scheduler, Firebase data, Auth a produkce se tímto rolloutem
+neměnily. CSP/QUIC nejsou označené za opravené; jejich podklady a nejistoty
+zůstávají výše. Oprava pevných kategorií neodstraňuje variation selectors z
+uživatelského obsahu a nezaručuje absenci obecné chyby Flutteru pro každý emoji.
+
+Lokální důkazy: build/category-font-release-proof.json,
+category-font-hosting-before.json, category-font-hosting-after.json,
+category-font-fix-ci.log a category-font-fix-deploy.log.
+Pro další B2 práci pozor na starší build/b2-rollout-source-guard.mjs: správně
+odmítá nové změny po bc4a6e1, nejen funkční změny. Použít čistý checkout
+ověřeného B2 zdroje nebo zvlášť doložit shodu jeho modulů; guard neoslabovat
+jen kvůli fontové opravě. Živá B2 akceptace a úklid fixture zůstávají otevřené.

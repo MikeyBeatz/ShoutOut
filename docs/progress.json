@@ -370,7 +370,7 @@
     {"id":"business-authority-final","title":"Úplná serverová oprávnění a produkční akceptace bezplatných funkcí","phase":"acceptance","complete":false,"evidence":[]},
     {"id":"translation-full-audit","title":"Audit všech sedmi jazyků a všech obrazovek","phase":"verification","complete":false,"evidence":[]},
     {"id":"accessibility-audit","title":"Audit přístupnosti webu","phase":"verification","complete":false,"evidence":[]},
-    {"id":"web-layout-accept","title":"Mobilní/desktopové rozložení a vizuální regrese","phase":"acceptance","complete":false,"evidence":["docs/operations/CONSOLE_WARNINGS.md#category-font-fix","tools/diagnostics/font_warning_probe.dart"]},
+    {"id":"web-layout-accept","title":"Mobilní/desktopové rozložení a vizuální regrese","phase":"acceptance","complete":false,"evidence":["docs/operations/CONSOLE_WARNINGS.md#category-font-dev-rollout","tools/diagnostics/font_warning_probe.dart"]},
     {"id":"translation-accept","title":"Finální kontrola přetečení, diakritiky a plurálů","phase":"acceptance","complete":false,"evidence":[]},
     {"id":"regression-general","title":"Závěrečná ruční regrese běžného účtu","phase":"acceptance","complete":false,"evidence":["docs/operations/CONSOLE_WARNINGS.md"]},
     {"id":"regression-business","title":"Závěrečná ruční regrese Business účtu","phase":"acceptance","complete":false,"evidence":[]},

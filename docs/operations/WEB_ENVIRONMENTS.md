@@ -1,11 +1,17 @@
 # Vývojový a produkční web
 
-[B2 je od 17. listopadu nasazené v DEV](../plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results):
-web ze zdroje bc4a6e1 má IndexedDB v3 a aktivní cloudovou synchronizaci;
+[B2 je od 17. listopadu nasazené v DEV](../plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results)
+původně ze zdroje bc4a6e1. Klient používá IndexedDB v3 a aktivní cloudovou synchronizaci;
 dvě klientské relace/offline akceptace ještě čekají. Upgrade místní DB není
 podmíněný cloudovým přepínačem. Návratový neaktivní v3 artefakt 405be7d je
 ověřený; staré v1/v2 buildy po upgradu automaticky nevracet. Při návratu
 zachovat účtový i retenční read úklid a místní fronty podle plánu.
+
+Web od 17. listopadu obsahuje také [fontovou opravu](CONSOLE_WARNINGS.md#category-font-dev-rollout):
+zdroj 9e3828d, success úplné CI 44178308912, Hosting 74d0c3756884ac19.
+Proti předchozímu releasu se změnil pouze main.dart.js; index/config i assety
+zůstávají shodné. B2 synchronizace je zapnutá. Kopie předchozího aktivního v3
+webu bc4a6e1 je ověřená v build/category-font-rollback-bc4a6e1.
 
 Pro poslední ověřený zdroj/revize použít [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
 Tento dokument uchovává technické postupy a datované rollouty. Staré revize,

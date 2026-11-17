@@ -15,6 +15,10 @@ průběžné cílené lokální kontroly, seskupený push/úplné CI pro hotový
 [Izolovaná diagnostika fontů a CSP](CONSOLE_WARNINGS.md) má vlastní Flutter
 entrypoint a čistý headless Chrome. Potvrzuje U+FE0F ve dvou pevných kategoriích;
 neuzavírá CSP, přihlášený DEV průchod ani následně hlášený QUIC transport.
+[Navazující fontová oprava](CONSOLE_WARNINGS.md#category-font-dev-rollout) je
+ověřená v sedmi rendererových scénářích (aktuální kategorie 0 varování,
+staré syntetické kontroly stále varují), 26 Shout testech a úplném CI 44178308912
+pro 9e3828d. DEV artefakt je po nasazení bajtově ověřený na obou doménách.
 
 <a id="dva-rezimy-ci"></a>
 
