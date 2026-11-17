@@ -109,10 +109,28 @@ queued=false a žádný checkpoint; server jeho přijetí potvrdil před uveden�
 síťovými chybami. Zachování neodeslané fronty tím prokázané není. Konzolový
 SyntaxError u prvního vložení nenastal při následném úspěšném B2_READ_CHECK;
 není to doložená chyba aplikace. Důkaz: build/b2-offline-first-observation.json.
-Navazuje dosud otevřená anonymní relace: přečíst B, rovnou přepnout Network
-Offline bez návratu na feed/obnovy a nejprve zkontrolovat frontu. Až po jejím
-potvrzení zkusit neúspěšnou obnovu a restart s návratem online. Žádná nová
-fixture ani reset přečtení nejsou potřeba nebo provedené.
+Také další dodaný výpis měl B už potvrzené a stejný místní čas; tentýž postup
+neopakovat. Ze samotného výpisu nelze určit, zda šlo o stejnou relaci nebo
+dříve synchronizovanou značku. Nová neodeslaná značka při offline čtení tím
+není prokázaná.
+
+Pro zbývající recovery je připravený samostatný místní testovací skript
+build/b2-offline-queue-fixture.js. Jen v DEV, v existující v3 DB Bright_Otter_182
+a při navigator.onLine=false zařadí již přečtenou syntetickou B znovu do outboxu.
+Přesně ověřuje projekt/UID/ID/hash/retenci/schéma, zachová readAtLocal a ostatní
+data; odmítne rozpracovaný checkpoint či neplatnou frontu. Zápis markeru,
+nové unikátní sekvence a outboxu je jediná IndexedDB transakce, opakování je
+idempotentní. Nemá síťové/Auth operace; stará read-only kontrola je nezměněná.
+Generátor vychází ze schválené fixture a v3 schématu produkčního klienta;
+node --check prošlo. Skript zatím v prohlížeči není prokázaně spuštěný.
+
+Vlastník dostal tento výslovně označený místní zápis místo dalšího stejného
+pokusu čtení. Po B2_QUEUE_FIXTURE nejprve ověřit neúspěšnou obnovu při Offline
+a zachovanou frontu, pak návrat online/restart/ack a stejný serverový confirmedAt
+bez nové revize. Jde o kontrolované vložení dočasné testovací fronty, nikoli
+důkaz přirozeného vytvoření nové značky offline. První uživatelský přenos a
+import druhého klienta jsou ověřené samostatně. Nevzniká nový Shout/Auth účet,
+žádné přečtení se nemaže ani neposouvá jeho retence.
 Do té doby netvrdit dokončené B2 ani mazat testovací obsah. Produkce, main,
 Rules a původní pending žádost jsou zachované; kapacitní brána zůstává otevřená.
 

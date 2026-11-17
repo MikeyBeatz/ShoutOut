@@ -41,8 +41,9 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
    Jádrový live test TestBusiness, první klientský přenos A pod Bright_Otter_182
    i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka.
-   První offline pokus měl B už synchronizované; recovery neuzavírat. Další je
-   kontrola nové fronty v existující anonymní relaci bez předchozí obnovy. Oba 24h testovací
+   Oba offline výpisy měly B už synchronizované; recovery neuzavírat ani stejně
+   neopakovat. Další je kontrolovaná místní fronta jediné existující značky B
+   podle plánu, poté neúspěšná obnova offline a online restart/ack. Oba 24h testovací
    Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
    další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
    Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;

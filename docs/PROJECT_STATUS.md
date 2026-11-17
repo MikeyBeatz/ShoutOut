@@ -17,14 +17,19 @@ zachycených zdrojů jsou beze změny. Účtový read úklid a oba controls jsou
 Jádrový live test TestBusiness prokázal upload/replay/full/delta ve skutečné DB;
 HTTP anonymní příjem je odmítnut 401. První uživatelská relace Bright_Otter_182
 má na serveru ověřené přečtení A; nová anonymní relace je stáhla s přesným
-serverovým časem, bez pending/fronty a bez rozpracovaného checkpointu. B je
-na druhém klientu stále nepřečtené. Offline/restart a úklid zatím čekají.
+serverovým časem, bez pending/fronty a bez rozpracovaného checkpointu. B při
+tomto prvním importu bylo nepřečtené; další výpisy už mají B potvrzené.
+Offline/restart a úklid zatím čekají.
 Cloudové INFO logy dokládají následné checked/idle ticky bez skenování či mazání.
 Browser host je nedostupný a nativní nástroj zastavil ovládání kvůli neurčené
 URL. První offline pokus v běžném okně už měl B potvrzené a prázdnou frontu,
-takže recovery neprokazuje. Vlastník nyní kontroluje novou frontu B v dosud
-otevřené anonymní relaci, bez obnovy před přepnutím Offline. Nic neresetovat
-ani nově nezakládat; vyčkat na B2_READ_CHECK.
+takže recovery neprokazuje. Druhý výpis je včetně času B stejný; stejné kroky
+neopakovat. Vlastník dostal samostatný offline-only skript
+build/b2-offline-queue-fixture.js pro místní opakované zařazení jediné testovací
+značky B do fronty, beze změny přečtení/času/retence a bez síťového zápisu.
+Vyčkat na B2_QUEUE_FIXTURE; pak neúspěšná obnova offline a online restart/ack.
+Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
+kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
 Auth účty. B2 akceptace i následné B3/B4 zůstávají otevřené. Produkce/main/Rules
 se neměnily. Starší přípravné stavy níže nejsou současný stav nasazení.
