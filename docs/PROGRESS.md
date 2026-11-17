@@ -67,6 +67,12 @@ kvůli návaznostem; o aktuálním stavu rozhodují generované ikony a souhrn.
 
 ## Automaticky odvozený přehled
 
+Implementace metodiky je uzavřená 17. listopadu 2026: zdroj
+`dad4ecd4ebaceecf09a0349e15c0e8f668f72e34` má
+[úspěšné CI 44044929954](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44044929954).
+Prošlo 68 nástrojových testů včetně 11 cílených regresí metrik a celá dosavadní
+aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
+
 <!-- progress:details:start -->
 ### MVP podle hlavních milníků
 

@@ -6,14 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nová metodika stupnic je implementovaná lokálně; zbývá přesné CI.**
+**Nová metodika stupnic je uzavřená po přesném CI; další je B2 úklid.**
 Feature/progress-substeps zachovává 24 MVP milníků a 157 backlogových položek,
 ale eviduje jejich podúseky s pevnými vahami. Registry, podklady a generátor
 jsou v [PROGRESS](PROGRESS.md); aktuální procenta se odvozují jen do TODO/BACKLOG.
-11 cílených regresí výpočtu a celá sada 68 nástrojových testů prošly.
-Kontrola dokumentace a šesti snímků je čistá. Původní checkboxy a kritéria jsou zachované,
-přesné výchozí snímky 12. listopadu chrání SHA-256. Nic aplikačního ani živého
-se neměnilo. Po uzavření této dokumentační práce se vrátit k B2 úklidu níže.
+Zdroj `dad4ecd4ebaceecf09a0349e15c0e8f668f72e34` má
+[success CI 44044929954](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44044929954):
+68 tools včetně 11 cílených regresí výpočtu, 375 Flutter / 16 Chrome /
+127 Functions unit (431 integračních přeskočeno mimo emulátor) / 448 Rules/server /
+10 B2 runtime / 116 purge / 15 Storage a formát/analýza/lint/build.
+Dokumentace a šest snímků jsou bez chyb; všech 157 checkboxů a 24 kritérií je
+zachovaných. Nové procento zachycuje i již doložené podúseky, ne další hotové
+milníky. Nic aplikačního ani živého se neměnilo. Vrátit se k B2 úklidu níže.
 
 **Schválená serverová obsluha B2 je uzavřená po přesném CI; není nasazená.**
 Na feature/read-sync-runtime jsou izolované callable obálky, control
