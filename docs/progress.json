@@ -245,7 +245,7 @@
     {"id":"feed-b2-v3-check","title":"Hranice fronty, migrace v3 a checkpoint – automatické ověření","phase":"verification","complete":true,"evidence":["docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results"],"requires":["feed-b2-v3-code"]},
     {"id":"feed-b2-runtime-code","title":"B2 serverová obsluha, kvóta a vypnutý adaptér – implementace","phase":"implementation","complete":true,"evidence":["docs/plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation"]},
     {"id":"feed-b2-runtime-check","title":"B2 serverová obsluha, kvóta a vypnutý adaptér – automatické ověření","phase":"verification","complete":true,"evidence":["docs/plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation"],"requires":["feed-b2-runtime-code"]},
-    {"id":"feed-b2-cleanup-code","title":"Pokračující retenční úklid B2 – implementace","phase":"implementation","complete":false,"evidence":[]},
+    {"id":"feed-b2-cleanup-code","title":"Pokračující retenční úklid B2 – implementace","phase":"implementation","complete":true,"evidence":["functions/retention_cleanup.js","docs/plans/feed/FEED_READING_POLICY.md#b2-retention-implementation"]},
     {"id":"feed-b2-cleanup-check","title":"Pokračující retenční úklid B2 – automatické ověření","phase":"verification","complete":false,"evidence":[],"requires":["feed-b2-cleanup-code"]},
     {"id":"feed-b2-indexes","title":"Potřebná indexace a zapojení účtového read úklidu","phase":"implementation","complete":false,"evidence":[]},
     {"id":"feed-b2-rollback","title":"Kompatibilní neaktivní v3 artefakt a ověřený návrat","phase":"verification","complete":false,"evidence":[]},

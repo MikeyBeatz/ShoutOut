@@ -1,0 +1,26 @@
+{
+  "environment": "local STANDARD Firestore emulator, project shoutout-rules-test",
+  "scope": "synthetic read markers and operation receipts; no Auth accounts or live deployment",
+  "receipts": {
+    "expiredDocuments": 650,
+    "pageSize": 50,
+    "maximumPagesPerSlice": 3,
+    "invocations": 5,
+    "deleted": 650,
+    "sdkDocumentReadUnits": 674,
+    "acknowledgedCheckpointWrites": 23,
+    "metadataProbeRequests": 650
+  },
+  "readMarkers": {
+    "markers": 1000,
+    "blocks": 19,
+    "pages": 1,
+    "sdkDocumentReadUnits": 21,
+    "acknowledgedCheckpointWrites": 2,
+    "acknowledgedDeletes": 19,
+    "metadataProbeRequests": 19
+  },
+  "cooldownInvocation": { "sdkDocumentReadUnits": 1, "writes": 0, "metadataProbeRequests": 0 },
+  "excludes": ["fixture setup/cleanup", "index-entry billing", "cloud/network/CPU costs", "paid load testing"],
+  "evidence": "functions/retention_cleanup.integration.test.js; B2_RETENTION_BENCH in build/b2-retention-regression-final.log and exact CI"
+}

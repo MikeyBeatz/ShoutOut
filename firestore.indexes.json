@@ -83,6 +83,10 @@
     }
   ],
   "fieldOverrides": [
+    { "collectionGroup": "readBuckets", "fieldPath": "*", "indexes": [] },
+    { "collectionGroup": "readBuckets", "fieldPath": "revision", "indexes": [{ "order": "ASCENDING", "queryScope": "COLLECTION" }] },
+    { "collectionGroup": "readBuckets", "fieldPath": "day", "indexes": [{ "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }] },
+    { "collectionGroup": "readState", "fieldPath": "*", "indexes": [] },
     { "collectionGroup": "nodes", "fieldPath": "rows", "indexes": [] },
     { "collectionGroup": "nodes", "fieldPath": "children", "indexes": [] },
     { "collectionGroup": "nodes", "fieldPath": "summary", "indexes": [] },

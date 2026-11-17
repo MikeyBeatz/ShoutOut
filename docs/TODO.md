@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,72 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,76 %** — vážené dokončení podúseků
 
-Hotové úseky: **139/209**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **140/209**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,11 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,12 %** — vážené dokončení podúseků
 
-Hotové úseky: **170/287**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **171/287**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -34,7 +34,11 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
-1. **Připravit pokračující retenční úklid B2 před DEV aktivací.**
+1. **Dokončit ověření a provozní plán úklidu B2 před DEV aktivací.**
+   [Schválený pokračující úklid](plans/feed/FEED_READING_POLICY.md#b2-retention-implementation)
+   je lokálně připravený: 28 cílených emulátorových testů, 129 Functions unit,
+   79 tools a lint prošlo; přesné CI ještě čeká. Provozní spouštění a rozpočet
+   zůstávají k rozhodnutí podle měření. Nový modul žádný živý vstup neimportuje.
    [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
    je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
    každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
@@ -53,7 +57,8 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    výše, kapacita úklidu je další práce; znovu neschvalovat hotový klientský úsek.
    [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
    je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
-   nikoli dokončené B2/B3/B4. Další rozsah úklidu ještě předložit konkrétně.
+   nikoli dokončené B2/B3/B4. Lokální úklid je nově schválený a připravený výše;
+   jeho rozsah znovu neschvalovat. Provozní zapojení předložit hotové zvlášť.
    Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
    je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
    zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
@@ -64,7 +69,7 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    43254458838 (361 Flutter / 10 Chrome / 55 tools / 448 Rules/server).
    Nové rozhodnutí nahrazuje 10s upload:
    [sync při spuštění/obnově](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy).
-   Dosavadní B2 runtime a kapacita úklidu vyžadují revizi.
+   Serverový runtime je revidovaný; provozní kapacita úklidu ještě vyžaduje rozhodnutí.
    Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
    web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
    Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy

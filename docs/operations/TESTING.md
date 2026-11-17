@@ -50,6 +50,14 @@ instalace npm, emulátory a build mají v tomto běhu výsledek skipped.
 mimo emulátor), 448 Rules/server, 10 B2 runtime, 116 purge, 15 Storage a původní
 Flutter/browser/formát/analýzu/lint/build. Nejde o nasazení ani cloudový benchmark.
 
+## Pokračující retenční úklid B2 – 17. listopadu
+
+Lokální sada B2 úklidu je součástí test:read-runtime, se stejným pevným
+emulátorovým projektem a bez živých Auth účtů. Samostatně:
+`node --test functions/retention_cleanup.test.js`; pod emulátorem
+`node --test --test-concurrency=1 functions/retention_cleanup.integration.test.js`.
+[Rozsah, lokální výsledky a meze](../plans/feed/FEED_READING_POLICY.md#b2-retention-implementation).
+
 ## Moderační mazání s indexem R5 – 5. listopadu
 
 feed_moderation_index.integration.test.js přidává 11 případů do test:purge.

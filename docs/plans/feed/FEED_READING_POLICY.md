@@ -32,6 +32,8 @@ Ani jedna B2 verze nemá živý transport. Home volá synchronize bez čekání
 na úplný read snapshot; bariéru pro globální B3 je třeba teprve dokončit.
 Navazující [serverová obsluha B2](#b2-runtime-implementation) je připravená
 lokálně za vypnutým přepínačem; její stav a ověření jsou uvedené níže.
+Navazující [pokračující retenční úklid](#b2-retention-implementation) je schválený
+lokální úsek; žádná jeho část zatím není zapojená do živého plánovače.
 Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
 vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
 Číselný indikátor B4 ani inkrementální obnova celého feedu hotové nejsou.
@@ -892,3 +894,105 @@ Důkaz: build/b2-runtime-ci.log. Lokální úsek je uzavřený, nic nebylo nasaz
 zbývá omezený pokračující retenční úklid, jeho kapacitní návrh, zapojení
 readSyncEnabled do existující soukromé účtové fáze, potřebná indexace,
 kompatibilní neaktivní v3 návratový artefakt a konkrétní živý DEV test.
+
+<a id="b2-retention-implementation"></a>
+
+## Pokračující retenční úklid B2 — 17. listopadu 2026
+
+Vlastník schválil jeden lokální úsek: fyzický úklid značek po expiresAt + 7 dní,
+trvalé pokračování a ochranu souběhu; současně ověřit dohánění technických
+potvrzení nad dosavadní pevný denní limit. Součástí jsou měření SDK operací,
+regrese, návrh indexů, dokumentace/metriky a společný commit/push s CI.
+Bez živých dat, nasazení, aktivace transportu, změn Scheduleru/Rules či Auth účtů.
+
+### Připravené jádro a laboratorní rozpočty
+
+- `functions/retention_cleanup.js` obsahuje samostatné čtecí a receipt fáze
+  a společný koordinátor, který i po selhání jedné zkusí druhou. Žádný živý
+  vstup jej neimportuje; `receipt_cleanup_schedule.js` zůstává beze změny.
+- Každá fáze má vlastní checkpoint/lease v maintenanceState: readRetentionCleanup
+  a continuingReceiptCleanup. Odlišný název receipt checkpointu zachovává živý
+  operationReceiptCleanup; při budoucím přechodu nesmí oba receipt runnery běžet
+  současně. Nový začne bezpečně od začátku, stávající záznam nemigruje.
+- Laboratorní mez jednoho úseku je 10 stránek po nejvýše 50 dokumentech a
+  10 s mezi transakcemi. To je až 500 prohlédnutých dokumentů na fázi, nikoli
+  denní strop. Volající může po yielded ihned pokračovat. Lease 120 s a
+  60s čekání po chybě/dokončení jsou laboratorní parametry, ne schválený provoz.
+  Dvě fáze mají oddělený časový rozpočet. Rozpočet není tvrdý timeout RPC.
+- Cutoff a začátek epochu se připnou při claimu. Každá transakce ověřuje lease
+  a ukládá změnu zdrojů i další kurzor společně. Kontrola času se opakuje po
+  metadata RPC; ztracená odpověď nemůže posunout kurzor bez provedené změny.
+  Restart pokračuje uloženým bodem, po konci začne novou epochu. Zpětný čas,
+  neplatný checkpoint nebo ztracené vlastnictví nemají právo mazat.
+- Read dotaz používá collectionGroup readBuckets, omezení day podle pevného
+  cutoffu a pořadí day + document ID. Uzná jen users/UID/readBuckets/ID a v1
+  kontrakt. Staré celé dny odstraňuje, v hraničním dni vyjme jen prošlé entries
+  a ponechá i prázdné listy/větve pro legitimní upload. Platnou revizi nemění.
+  Shouty, jejich obsah, účtový profil a readState tímto retenčním průchodem nemaže.
+- Neznámé/vadné dokumenty zachová a označí needsReview. Kurzorem je obejde,
+  aby neblokovaly ostatní; další epocha je zkontroluje znovu. Neprovádí automatickou
+  opravu. Záznamy bez dotazovaného day/createdAt a day mimo nezáporný číselný
+  rozsah nelze tímto dotazem objevit;
+  potřebují samostatný audit, ne rekurzivní mazání.
+- `retention_child_probe.js` kontroluje nejvýše jednu metadata stránku potomků
+  s pageSize 1 a bez auto-paginace. Neočekávané podkolekce zachová. Kontrola
+  není transakčním zámkem na svévolný zásah privilegovaného Admin klienta do
+  podkolekcí; podporovaní writeři takové potomky netvoří a klientské Rules je
+  nepovolují. Selhání sondy neposune zpracovávanou stránku.
+- Report obsahuje scanned/deleted/pruned/skipped, needsContinuation/needsReview,
+  stáří epochu, čas a SDK počty včetně opakovaných transakcí. Neobsahuje UID,
+  obsah ani kurzor. Potvrzené a pouze pokusné writes/deletes jsou oddělené;
+  chybějící potvrzení není důkaz rollbacku. Metadata RPC se vykazují zvlášť.
+
+### Indexace a ověření
+
+V místní firestore.indexes.json jsou připravené čtyři dříve navržené výjimky:
+readBuckets `*` bez indexace, revision ASC COLLECTION, day ASC COLLECTION_GROUP
+a readState `*` bez indexace. Žádná TTL ani stávající definice se nemění.
+Emulátor neprokazuje dostupnost indexů v cloudu; cílený plán změn a živé ověření
+dotazů je brána před aktivací. Zapojení readSyncEnabled do účtového workeru
+zůstává vypnuté a samostatný podúsek feed-b2-indexes ještě není hotový.
+
+Cílené testy ověřují přesnou expiraci, platné cizí značky, rozdělené bloky a
+skutečný upload/download po prořezání, hranici dalšího dne, pevný cutoff přes
+restart, vadné/cizí cesty a podkolekce, selhání sondy, rollback, lease timeout,
+dva workery, ztracené potvrzení, souběh se synchronizací i soukromým účtovým
+úklidem. Receipt test překračuje původních 500 záznamů a ověřuje nezávislost fází.
+Nová sada je součástí test:read-runtime spolu s původními 10 runtime scénáři.
+Jednotkové testy navíc kontrolují rozpočty/projekt a skutečně omezený metadata RPC.
+Lokálně prošlo 28 emulátorových regresí: 16 nových + 7 read-sync + 5 původních
+receipt. Prošlo 129 Functions unit (444 integračních tehdy přeskočeno mimo
+emulátor; dvě nové regrese byly doplněny následně), 79 tools a lint.
+Konečný výsledek CI ještě čeká. Logy jsou build/b2-retention-regression-final.log,
+build/b2-retention-functions-unit.log, build/b2-retention-tools.log a
+build/b2-retention-lint.log. Měření je stejné ve třech lokálních průchodech.
+
+### Měření a návrh provozu k rozhodnutí
+
+[Naměřené počty](../../benchmarks/B2_RETENTION_2026-11-17.json) pocházejí ze SDK
+emulátoru, bez přípravy/úklidu fixture. Nejde o cloudový zátěžový test, cenu
+v Kč nebo důkaz 5 000 uživatelů. Metadata RPC, indexová účtování a síť/CPU
+nelze zaměnit za vykázané dokumentové reads.
+
+650 prošlých receipt se odčerpalo v 5 navazujících úsecích (v testu 3 stránky
+na úsek): 674 dokumentových read jednotek, 23 potvrzených checkpoint writes,
+650 deletes a 650 metadata sond. Žádná položka nečeká na další den jen kvůli
+dávkové mezi. 1 000 značek se uložilo do 19 bloků a ty se uklidily v jedné
+stránce: 21 read jednotek, 2 checkpoint writes, 19 deletes a 19 sond.
+Opakovaný běh v cooldownu stojí 1 read bez zápisu/sondy; úplný prázdný epoch
+stojí 3 read jednotky a 2 checkpoint writes na fázi. Přeskočená vadná data a
+konflikty zvyšují potřebu práce a mohou vyžadovat ruční nápravu.
+
+Provozní směr doporučený po měření: řízené opakování úseků při skutečném dluhu,
+delší klid mezi prázdnými epochami a diagnostika stáří/rychlosti odčerpání.
+Konkrétní spouštěč, perioda, počet úseků, instance/concurrency a finanční rozpočet
+zůstávají k rozhodnutí před živým plánem; současný denní Scheduler se nemění.
+Pevný denní strop 5 000 read bloků nepřebíráme jako produkční kapacitu.
+
+Čistě početní citlivost: při naplněných stránkách je 500 dokumentů za minutu
+720 000/den. Model 15 600 receipt / 10 minut by při nepřetržité stejné zátěži
+znamenal 2 246 400/den; samotná tato kapacita by tedy nestačila. Čtyři plné
+úseky za minutu dávají horní početní mez 2 880 000/den, bez rezervy na read fázi,
+konflikty, časové meze a poruchy. To není doporučené nastavení ani ověřená
+cloudová propustnost. Před výběrem prostředků potřebujeme délku reálných špiček,
+denní aktivitu a živé měření ceny/latence ve zvlášť schváleném průchodu.
