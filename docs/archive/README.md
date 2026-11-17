@@ -31,6 +31,12 @@ souboru v docs/. Snímky chrání `.gitattributes`; jejich obsah nepřepisovat.
 
 ## Aktuální umístění informací z původního TODO
 
+Před změnou metodiky stupnic 12. listopadu 2026 byly uloženy přesné snímky
+[TODO](TODO_2026-11-12.txt) a [BACKLOG](BACKLOG_2026-11-12.txt) ze zdroje
+`e8c835e496d0ae5c5ce8917f2cdb122690180c3a`. Zachovávají výchozích 9/24 a
+107/157 i všechny tehdejší texty. Jejich bajty chrání registr snapshots.json;
+nová metodika je v [PROGRESS](../PROGRESS.md), staré procento není aktuální stav.
+
 | Původní oblast | Aktuální umístění |
 |---|---|
 | Pořadí práce, hranice MVP a 24 milníků | [TODO](../TODO.md) |
@@ -61,5 +67,6 @@ Relativní archivní odkaz na mobilní plán zachovává pomocný rozcestník
 - **Po MVP**: zůstává plánovaná, ale neblokuje webové MVP.
 - Dokončené položky se zpětně neštítkují. Nový otevřený checkbox musí mít
   zařazení; chybějící štítek je chyba evidence.
-- Celkové procento evidovaného backlogu se odvozuje pouze z kanonického
-  BACKLOG.md. Archivní kopie a souhrny milníků se znovu nezapočítávají.
+- Požadavky backlogu zůstávají v BACKLOG.md, jeho aktuální stav a procento
+  generuje [jednotná evidence podúseků](../PROGRESS.md). Archivní kopie
+  ani souhrny milníků se znovu nezapočítávají.

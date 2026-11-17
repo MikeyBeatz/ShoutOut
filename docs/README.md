@@ -4,7 +4,8 @@
 
 1. [PROJECT_STATUS](PROJECT_STATUS.md) – jeden aktuální stav, poslední ověřené nasazení a další krok.
 2. [TODO](TODO.md) – priority, souhrn 24 milníků a metriky.
-3. [BACKLOG](BACKLOG.md) – jediná podrobná checkboxová evidence.
+   [Výpočet a evidence podúseků](PROGRESS.md) – pevné váhy a automatický přepočet.
+3. [BACKLOG](BACKLOG.md) – požadavky a odvozené stavy hlavních položek.
 4. [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md) – serverové podmínky dokončení;
    [LAUNCH_READINESS](LAUNCH_READINESS.md) – samostatná povinná brána veřejného vydání.
 

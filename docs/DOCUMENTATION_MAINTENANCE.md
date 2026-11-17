@@ -8,7 +8,8 @@ data, schválené produktové volby ani stavy milníků pouhým přeskládáním
 | Dokument | Účel | Co do něj nepatří |
 |---|---|---|
 | [TODO](TODO.md) | Priority, metriky, nejbližší otevřená práce a souhrn milníků. | Chronologie testů/rolloutů, seznam všech dokončených podkroků. |
-| [BACKLOG](BACKLOG.md) | Jediná checkboxová evidence požadavků, zachované akceptační podmínky. | Kopie metrik z jiných checklistů nebo automatické zaškrtnutí podle nového textu. |
+| [BACKLOG](BACKLOG.md) | Kanonická evidence požadavků a akceptačních podmínek; checkboxy jsou projekce podúseků. | Kopie stavu z jiných checklistů nebo automatické zaškrtnutí podle nového textu. |
+| [PROGRESS](PROGRESS.md) / [progress.json](progress.json) | Jednotný stav podúseků, pevné váhy, podklady a generované stupnice. | Odhad času nebo prohlášení o připravenosti k vydání jen podle procenta. |
 | [PROJECT_STATUS](PROJECT_STATUS.md) | Jeden další krok, aktuální implementace a poslední ověřené nasazení s hranicemi důkazů. | Několik současných „dalších kroků“ z různých dnů, dlouhá historie. |
 | [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md) | Serverové požadavky a kritéria dokončení. | Dočasný pracovní příkaz vydávaný za povinný další krok. |
 | Specializovaný plán | Rozhodnutí, závislosti, otevřené části a důkazy dané oblasti. | Nerozlišený původní návrh a pozdější schválené řešení. |
@@ -54,6 +55,9 @@ nejde o nové ověření živých služeb ani cen/právních podmínek externíc
 - Připravený kód: uvést odděleně od výsledků kontrol a živého nasazení.
 - Dokončený podkrok: v TODO nahradit dalším otevřeným úkolem; důkazy zachovat
   v plánu/testovací dokumentaci. Použít věcný název, nikoli „bod 1“ z chatu.
+- Současně upravit příslušný úsek a důkazy v progress.json, spustit
+  `node tools/project_progress.mjs --write` a kontrolu dokumentace. Podúsek
+  implementace, testů, nasazení a živé akceptace se uzavírá samostatně.
 - Dokončený milník: zkontrolovat celé kritérium, upravit jeho stav i odvozené
   metriky. Lokální příprava není dokončená cloudová funkce.
 - Historie: před odstraněním unikátní informace uložit odkazovaný snímek nebo
@@ -68,7 +72,8 @@ Audit s úplnou inventurou: `node tools/check_docs.mjs --audit --json`.
 
 Kontrola ověřuje interní Markdown odkazy, velikost písmen cest, kotvy nadpisů
 a HTML ID, dohledatelnost z README/AGENTS/hlavního rozcestníku, počty úkolů
-a milníků a SHA-256 registrovaných snímků. Pracuje s verzovanými a novými
+a milníků, pevné váhy podúseků, závislosti, podklady a čerstvost generovaných
+souhrnů i SHA-256 registrovaných snímků. Pracuje s verzovanými a novými
 neignorovanými soubory. Neprochází docs/local, tajemství, externí webové URL
 ani obsah historických plaintext snímků. Neumí sama potvrdit pravdivost
 produktového tvrzení, nasazení ani právní aktuálnost; to vyžaduje věcnou kontrolu.

@@ -3,6 +3,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { synchronizeProgress } from './project_progress.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const files = [...new Set(execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
@@ -67,19 +68,12 @@ function reachFrom(seeds) {
 }
 const reachable = reachFrom(['README.md', 'AGENTS.md', 'docs/README.md']), indexed = reachFrom(['docs/README.md']);
 const orphanDocs = markdown.filter(path => path.startsWith('docs/') && !indexed.has(path));
-const backlog = sources.get('docs/BACKLOG.md') ?? '', todo = sources.get('docs/TODO.md') ?? '';
-const checked = [...withoutCode(backlog).matchAll(/^\s*- \[x\] /gmi)].length;
-const open = [...withoutCode(backlog).matchAll(/^\s*- \[ \] /gm)].length;
-const completeMilestones = [...todo.matchAll(/^\d+\. ✅ /gm)].length, openMilestones = [...todo.matchAll(/^\d+\. ⬜ /gm)].length;
-const metrics = { backlog: { complete: checked, open, total: checked + open, percent: Math.round(100 * checked / (checked + open)) },
-  mvp: { complete: completeMilestones, open: openMilestones, total: completeMilestones + openMilestones, percent: Math.round(100 * completeMilestones / (completeMilestones + openMilestones)) } };
-for (const [path, text] of [['docs/TODO.md', todo], ['docs/BACKLOG.md', backlog]]) {
-  if (!text.includes(`${checked} ze ${checked + open}`)) issues.push({ source: path, problem: 'backlog-count-summary', expected: `${checked} ze ${checked + open}` });
-}
-if (!todo.includes(`${completeMilestones} z ${completeMilestones + openMilestones}`)) issues.push({ source: 'docs/TODO.md', problem: 'mvp-count-summary' });
-for (const [path, text, percent] of [['docs/TODO.md', todo, metrics.mvp.percent], ['docs/TODO.md', todo, metrics.backlog.percent], ['docs/BACKLOG.md', backlog, metrics.backlog.percent]]) {
-  if (!text.includes(`**${percent} %**`)) issues.push({ source: path, problem: 'percentage-summary', expected: percent });
-}
+let metrics = {};
+try {
+  const progress = synchronizeProgress(root);
+  metrics = progress.metrics;
+  for (const path of progress.stale) issues.push({ source: path, problem: 'progress-stale', fix: 'node tools/project_progress.mjs --write' });
+} catch (error) { issues.push({ source: 'docs/progress.json', problem: 'progress-invalid', message: error.message }); }
 const snapshotsPath = resolve(root, 'docs/archive/snapshots.json'), snapshots = [];
 if (existsSync(snapshotsPath)) for (const row of JSON.parse(readFileSync(snapshotsPath, 'utf8')).snapshots) {
   const path = resolve(root, row.path), actual = existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex') : null;

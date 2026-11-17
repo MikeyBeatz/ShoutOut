@@ -2,15 +2,17 @@
 
 Aktuální priority a milníky: [TODO](TODO.md). Poslední ověřený stav: [PROJECT_STATUS](PROJECT_STATUS.md).
 
-Tento soubor je kanonická checkboxová evidence. Původních 155 úkolů
+Tento soubor je kanonická evidence požadavků. Původních 155 úkolů
 (107 hotových, 48 otevřených) zůstává zachovaných. Dne 31. října 2026 přibyl
 nový požadavek na feed a 1. listopadu přístup k retenčnímu archivu v administraci;
-aktuálně je zde 157 úkolů: 107 hotových a 50 otevřených.
+Před změnou metrik 12. listopadu zde bylo 157 úkolů: 107 hotových a 50 otevřených.
+Aktuální souhrn podle podúseků se generuje níže.
 Při reorganizaci se žádný checkbox ani jeho stav nezměnil. Hotové bloky jsou zkrácené na názvy;
 jejich úplné požadavky, rozhodnutí a ověření jsou v odkazovaném nezměněném archivu.
 Bloky s otevřeným podúkolem zůstávají celé, včetně kontextu a již hotových podúkolů.
 Serverové požadavky a podmínky dokončení jsou v [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md).
-Počet se odvozuje jen z tohoto souboru, nikoli z kopií checkboxů v archivu nebo přehledů milníků.
+Hlavní položky mají stálá ID; jejich checkboxy a souhrny generuje evidence
+[progress.json](progress.json). Podúseky a pravidla jsou v [PROGRESS](PROGRESS.md).
 
 Poslední kontrola 3. listopadu 2026 potvrzuje 107 hotových a 50 otevřených
 položek. Reorganizace nemění žádný checkbox. Souhrnná serverová/životní
@@ -25,20 +27,20 @@ přihlášení, registraci, Business ani moderátorské rozhraní a nebude odkaz
 obchodů s aplikacemi. Úplný záznam rozhodnutí, cílového Hostingu a pořadí
 zprovoznění je v `operations/PRESENTATION_SITE.md`.
 
-- [x] **Před MVP, samostatná etapa** — vytvořit oddělený produkční Firebase
+- [x] <a id="bl-001"></a> **Před MVP, samostatná etapa** — vytvořit oddělený produkční Firebase
   projekt pro prezentaci: `shoutout-production-a1b34`; doména není připojená k
   `shoutout-dev-46c81`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#prezentační-web-před-mvp).
 
-- [x] **Před MVP, samostatná etapa** — připravit a nasadit statický prezentační
+- [x] <a id="bl-002"></a> **Před MVP, samostatná etapa** — připravit a nasadit statický prezentační
   obsah na Firebase Hosting v projektu `shoutout-production-a1b34`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#prezentační-web-před-mvp).
 
-- [x] **Před MVP, samostatná etapa** — připojit `shoutout-app.eu` k Firebase
+- [x] <a id="bl-003"></a> **Před MVP, samostatná etapa** — připojit `shoutout-app.eu` k Firebase
   Hosting a ověřit HTTPS.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#prezentační-web-před-mvp).
 
-- [ ] **Před MVP, samostatná etapa** — připojit a přesměrovat
+- [ ] <a id="bl-004"></a> **Před MVP, samostatná etapa** — připojit a přesměrovat
   `www.shoutout-app.eu` na hlavní doménu.
 
 Tyto položky se nezapočítávají do procent MVP: neaktivují veřejnou aplikaci ani
@@ -49,7 +51,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 <a id="feed-read-refresh"></a>
 
-- [ ] **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
+- [ ] <a id="bl-005"></a> **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
   **MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.**
   - Nový požadavek vlastníka z 31. října 2026; rozšiřuje původní rozsah, nejde
     o přepsání historického dokončení základního feedu ani o další milník MVP.
@@ -93,31 +95,31 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
     [Aktuální stav](PROJECT_STATUS.md), [důkazy integrace](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#dev-rollout-results).
     Osobní přečtení není veřejnou statistikou zobrazení; ta zůstává po MVP.
 
-- [x] **Navrhnout sdílenou profilovou vizitku.**
+- [x] <a id="bl-006"></a> **Navrhnout sdílenou profilovou vizitku.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [ ] **Rozhodnout o případném větším dosahu v rámci předplatného.** **Po MVP**
+- [ ] <a id="bl-007"></a> **Rozhodnout o případném větším dosahu v rámci předplatného.** **Po MVP**
   - Běžný Business Shout zachová standardní místní dosah. Zda předplatné
     nabídne větší poloměr, není rozhodnuto; samostatné dokupování za tokeny
     bylo zrušeno.
   - Před případnou implementací určit geografické limity, dobu platnosti,
     serverové oprávnění a ochranu proti překryvu či zneužití oblastí.
-- [x] **Prověřit API pro události v okolí.**
+- [x] <a id="bl-008"></a> **Prověřit API pro události v okolí.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Opravit tlačítko „Zrušit registraci a začít znovu“.**
+- [x] <a id="bl-009"></a> **Opravit tlačítko „Zrušit registraci a začít znovu“.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [ ] **Prověřit nedoručený ověřovací e-mail na Email.cz.** **MVP**
+- [ ] <a id="bl-010"></a> **Prověřit nedoručený ověřovací e-mail na Email.cz.** **MVP**
   - Google/Gmail při testu fungoval, ale zpráva na Email.cz nedorazila; rozlišit
     chybu odeslání, zpoždění, spam a odmítnutí či reputaci odesílací domény.
   - Doplnit srozumitelný stav, opakované odeslání a diagnostiku bez ukládání
     plné e-mailové adresy do technických logů.
-  - [x] Klient nabízí opakované odeslání, po úspěchu ponechá na obrazovce viditelný
+  - [x] <a id="bl-011"></a> Klient nabízí opakované odeslání, po úspěchu ponechá na obrazovce viditelný
     stav a při chybě diagnostikuje pouze bezpečný Firebase kód bez adresy a odkazu.
-  - [ ] **MVP** — Doručitelnost na Email.cz ověřit mimo klienta podle Firebase/Auth provozu,
+  - [ ] <a id="bl-012"></a> **MVP** — Doručitelnost na Email.cz ověřit mimo klienta podle Firebase/Auth provozu,
     spamu a případného odmítnutí příjemcem; bez poštovních logů ji nelze potvrdit.
-- [ ] **Přidat postupné ověření telefonního čísla přes Firebase Phone Auth.** **Po MVP**
+- [ ] <a id="bl-013"></a> **Přidat postupné ověření telefonního čísla přes Firebase Phone Auth.** **Po MVP**
   - Telefon nevyžadovat při založení účtu. Vyžádat jej až při první chráněné
     akci a po úspěšném ověření stav bezpečně svázat s účtem.
   - Bez SMS ověření povolit prohlížení feedu, otevření Shoutu a komentářů,
@@ -127,21 +129,21 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - Před zapnutím vyřešit podporované země, kvóty a náklady, ochranu proti
     zneužití SMS, změnu či ztrátu čísla, obnovu účtu a minimalizaci osobních dat.
 
-- [x] **Nahradit původní kategorie Shoutů novou sadou.**
+- [x] <a id="bl-014"></a> **Nahradit původní kategorie Shoutů novou sadou.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Umožnit otevřít veřejný profil autora z komentáře.**
+- [x] <a id="bl-015"></a> **Umožnit otevřít veřejný profil autora z komentáře.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Přidat veřejné flairy rolí.**
-  - [x] Doplnit klientské zobrazení flairů na Shoutech, komentářích, soukromých
+- [x] <a id="bl-016"></a> **Přidat veřejné flairy rolí.**
+  - [x] <a id="bl-017"></a> Doplnit klientské zobrazení flairů na Shoutech, komentářích, soukromých
     odpovědích, veřejném profilu a seznamu sledovaných profilů včetně lokalizace
     `Moderátor` a mapování `seniorModerator` na stejný veřejný štítek.
-  - [x] Nasadit upravená Firestore Rules a důvěryhodně doplnit `publicRole` do
+  - [x] <a id="bl-018"></a> Nasadit upravená Firestore Rules a důvěryhodně doplnit `publicRole` do
     existujících veřejných profilů skriptem `npm run backfill:public-profiles`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [ ] **Přepracovat onboarding na interaktivní tutorial.** **Po MVP** *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*
+- [ ] <a id="bl-019"></a> **Přepracovat onboarding na interaktivní tutorial.** **Po MVP** *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*
   - Nahradit dlouhé úvodní rady krátkými kontextovými kroky typu „klikni sem“,
     „udělej toto“ a „pokračuj tady“ přímo nad skutečným rozhraním.
   - Umožnit přeskočení, pozdější opakování a pokračování po přerušení; měřit
@@ -149,40 +151,40 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
   - První průchod vede uživatele přes skutečný výběr kategorie, otevření a zavření
     detailu Shoutu, otevření formuláře a profilu. Postup je uložený u účtu;
     dokončení nebo potvrzené přeskočení automatické spuštění trvale vypne.
-- [ ] **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.** **Po MVP**
+- [ ] <a id="bl-020"></a> **Doplnit uživatelskou zpětnou vazbu a metriky obsahu.** **Po MVP**
   - Navrhnout důvěryhodné počítání zobrazení Shoutu a zobrazit autorovi počet
     zobrazení, uložení a dalších relevantních interakcí.
   - Vyřešit unikátní versus celková zobrazení, ochranu proti farmení, soukromí,
     retenci a serverové počítání před použitím metrik pro karmu.
-- [x] **Provést cílenou kontrolu překladů hlášení chyb a průvodce aplikací.**
+- [x] <a id="bl-021"></a> **Provést cílenou kontrolu překladů hlášení chyb a průvodce aplikací.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Opravit ciferník platnosti v dialogu Nový Shout.**
+- [x] <a id="bl-022"></a> **Opravit ciferník platnosti v dialogu Nový Shout.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Přepracovat rozložení společné Shout karty.**
+- [x] <a id="bl-023"></a> **Přepracovat rozložení společné Shout karty.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Navrhnout zásady karmy, achievementů a kosmetických odměn.**
+- [x] <a id="bl-024"></a> **Navrhnout zásady karmy, achievementů a kosmetických odměn.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [ ] **Rozhodnout, zda vůbec zavést kosmetické coiny nebo obchod.** **Po MVP**
+- [ ] <a id="bl-025"></a> **Rozhodnout, zda vůbec zavést kosmetické coiny nebo obchod.** **Po MVP**
   - Pokud vzniknou, nesmějí být Business tokeny ani prostředkem k získání
     předplatného, dosahu, moderátorských pravomocí nebo jiné funkční výhody.
-- [ ] **Omezit Business promo na nejvýše dva současně aktivní Shouty na firmu.** **MVP**
+- [ ] <a id="bl-026"></a> **Omezit Business promo na nejvýše dva současně aktivní Shouty na firmu.** **MVP**
   - Limit vynucovat serverově napříč všemi pobočkami a typy propagace; určit,
     zda kombinované zvýraznění s okénkem spotřebuje jeden aktivní promo slot.
-- [ ] **Navrhnout Founder balíček pro nové podniky.** **Po MVP**
+- [ ] <a id="bl-027"></a> **Navrhnout Founder balíček pro nové podniky.** **Po MVP**
   - Founder entitlement vést odděleně od veřejné role a flairu; oprávněný účet
     může mít zvláštní zvýhodnění vůči budoucímu předplatnému, jehož podobu je
     teprve nutné rozhodnout.
   - Určit podmínky přidělení a odebrání, rozsah zvýhodnění, audit a ochranu
     proti duplicitním firmám a zneužití. Business tokeny se nezavádějí;
     případné kosmetické coiny jsou oddělené produktové rozhodnutí.
-- [x] **Zvýrazněné Business Shouty a propagační okénko jsou implementované.**
+- [x] <a id="bl-028"></a> **Zvýrazněné Business Shouty a propagační okénko jsou implementované.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
-- [x] **Naplánovat pořízení evropské ochranné známky ShoutOut.**
+- [x] <a id="bl-029"></a> **Naplánovat pořízení evropské ochranné známky ShoutOut.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#nové-podněty-z-uživatelského-testování).
 
 Interní pravidla rolí, pravomocí a postihů jsou vedena v
@@ -193,11 +195,14 @@ dokument, pravidla, testy a případně veřejné právní texty.
 
 Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — pokročilá fáze
+<!-- progress:backlog:start -->
+`████████████████████████████░░░░░░░░░░░░` **70,11 %** — vážené dokončení podúseků
 
-Hotovo je 107 ze 157 evidovaných úkolů. Procento počítá každý řádek s checkboxem
-`[x]` nebo `[ ]` jako jednu stejně váženou položku, včetně vnořených podúkolů.
-Při přidání nebo uzavření úkolu se musí přepočítat počet hotových i celkový počet.
+Hotové úseky: **170/287**. Celé položky: **107/157**; rozpracované: 7.
+<!-- progress:backlog:end -->
+
+Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.
+Samotné přidání podúseku není dokončená práce. [Metodika a důkazy](PROGRESS.md).
 
 | Rozsah | Orientační stav |
 |---:|---|
@@ -214,16 +219,16 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
 
 ## Geografie a globální moderace
 
-- [x] Geohash nových shoutů a model `geography`.
+- [x] <a id="bl-030"></a> Geohash nových shoutů a model `geography`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#geografie-a-globální-moderace).
 
-- [x] Google reverse-geocoding trigger s tajným serverovým API klíčem.
+- [x] <a id="bl-031"></a> Google reverse-geocoding trigger s tajným serverovým API klíčem.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#geografie-a-globální-moderace).
 
-- [x] ISO země/oblasti, moderátorské rozsahy, webový filtr a kontrola postihu.
+- [x] <a id="bl-032"></a> ISO země/oblasti, moderátorské rozsahy, webový filtr a kontrola postihu.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#geografie-a-globální-moderace).
 
-- [x] Migrační nástroj pro existující shouty.
+- [x] <a id="bl-033"></a> Migrační nástroj pro existující shouty.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#geografie-a-globální-moderace).
 
 - Lokálně byly 25. října odstraněné opakované GETy interakcí, restartování
@@ -232,18 +237,18 @@ blokující body nelze vyvážit dokončením většího počtu méně kritický
   nákladových pojistek ani serverového prostorového feedu. Vývojový build byl
   25. října nasazený na Hosting `shoutout-dev-46c81` a prošel základním
   průchodem v přihlášené relaci.
-- [ ] **MVP** — Před prvním nasazením Functions nastavit a prakticky otestovat
+- [ ] <a id="bl-034"></a> **MVP** — Před prvním nasazením Functions nastavit a prakticky otestovat
   nákladové pojistky podle `docs/operations/COST_SAFETY.md`: servisní kvóty, Functions
   spend cap, rozpočtová upozornění, Pub/Sub nouzovou reakci a odpovědnou osobu.
   Po splnění pokračovat oddělenými kontrolovanými kroky: nasadit
   `enrichShoutGeography`, provést dávkový geografický backfill, aktivovat po
   cenové kontrole TTL a poté implementovat serverovou expiraci Shoutů a mazání
   účtů. Přesná výstupní kritéria jsou v `docs/operations/COST_SAFETY.md`.
-- [ ] **MVP** — Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
+- [ ] <a id="bl-035"></a> **MVP** — Zapnout Geocoding API, nastavit `GOOGLE_MAPS_API_KEY` jako Functions secret
   a nasadit Functions, pravidla a indexy.
-- [ ] **MVP** — Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
+- [ ] <a id="bl-036"></a> **MVP** — Spustit backfill a zkontrolovat země, kde Google neposkytne ISO 3166-2;
   případné mapování udržovat v serverové vrstvě.
-- [x] Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
+- [x] <a id="bl-037"></a> Po migraci rolí odstranit výjimku pro staré role bez `moderationScope`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#geografie-a-globální-moderace).
 
 Toto je podrobná checkboxová evidence. Priority jsou v TODO.md a serverové
@@ -251,7 +256,7 @@ požadavky v MVP_SERVER_PLAN.md. Samotné zapsání bodu neznamená implementaci
 
 ## Brána před veřejným spuštěním
 
-- [ ] **MVP** — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`.
+- [ ] <a id="bl-038"></a> **MVP** — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`.
   Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní
   předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou
   samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu.
@@ -259,7 +264,7 @@ požadavky v MVP_SERVER_PLAN.md. Samotné zapsání bodu neznamená implementaci
   a 5 000 současně aktivních uživatelů;
   [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target)
   se musí určit zvlášť. Kapacita zatím není prokázaná.
-- [ ] **Po MVP** — Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
+- [ ] <a id="bl-039"></a> **Po MVP** — Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
   samostatným plánem `docs/local/ShoutOut_marketingovy_plan_spusteni.docx`.
 
 ## Aktuální produktové úpravy
@@ -270,27 +275,27 @@ odložené nápady až za hlavními uživatelskými cestami.
 
 ### Etapa 1 – stabilita, poloha a základní chování
 
-- [x] **Zjistit, proč mimo Litoměřice nešlo vytvořit Shout.**
+- [x] <a id="bl-040"></a> **Zjistit, proč mimo Litoměřice nešlo vytvořit Shout.**
   - Reprodukovat na fyzickém zařízení i emulátoru s polohou uvnitř a mimo
     Litoměřice a rozlišit oprávnění, nedostupnou/nepřesnou polohu, validaci
     geohashe, rate limit a zamítnutí Firestore Rules.
   - Zobrazit uživateli konkrétní a lokalizovanou příčinu místo obecné chyby.
   - Zachovat skutečnou polohu zařízení také na Hosting preview kanálu; pevnou
     demo polohu nezavádět.
-  - [x] Automaticky ověřit geohash a veřejné zaokrouhlení pro Litoměřice,
+  - [x] <a id="bl-041"></a> Automaticky ověřit geohash a veřejné zaokrouhlení pro Litoměřice,
     Lovosice, Ústí nad Labem, Prahu, Bratislavu, Varšavu, Berlín a Řím včetně
     světových hranic a odmítnutí neplatných souřadnic.
-  - [x] Doplnit testy pravidel pro běžný účet mimo Litoměřice, výběr pobočky
+  - [x] <a id="bl-042"></a> Doplnit testy pravidel pro běžný účet mimo Litoměřice, výběr pobočky
     odlišné od sídla a odmítnutí pozastavené, smazané nebo neověřené pobočky.
-  - [ ] **Po MVP** — Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
+  - [ ] <a id="bl-043"></a> **Po MVP** — Dokončit ruční kontrolu na fyzickém zařízení s běžným účtem mimo
     Litoměřice; dosavadní opakované pokusy uživateli procházejí.
-  - [ ] **MVP** — Ověřit polohu a publikování běžným účtem mimo Litoměřice v
+  - [ ] <a id="bl-044"></a> **MVP** — Ověřit polohu a publikování běžným účtem mimo Litoměřice v
     mobilním i desktopovém prohlížeči.
   - V kódu ani pravidlech není omezení na Litoměřice. Automatické testy potvrzují
     publikaci z více českých i zahraničních míst a uživatelské pokusy procházejí.
     Mobilní a desktopový prohlížeč jsou předstartovní kontrola webového MVP;
     fyzické zařízení je krok pozdějšího mobilního vydání.
-- [x] **Dokončit interní evidenci technických chyb.**
+- [x] <a id="bl-045"></a> **Dokončit interní evidenci technických chyb.**
   - Ukládat bezpečný diagnostický záznam neúspěšné akce, důvod zamítnutí,
     čas, verzi aplikace a nezbytný technický kontext bez hesel, tokenů a
     nadbytečných osobních údajů.
@@ -299,29 +304,29 @@ odložené nápady až za hlavními uživatelskými cestami.
     uživatelů a nahlášený obsah, nikoli provoz aplikace.
   - Doplnit retenci, stránkování, filtrování, audit přístupu a upravit Firestore
     Rules tak, aby kolekci nebylo možné číst rolím 1–4.
-  - [x] Omezit čtení ve Firestore Rules na role 5–6 a zobrazit posledních
+  - [x] <a id="bl-046"></a> Omezit čtení ve Firestore Rules na role 5–6 a zobrazit posledních
     50 záznamů v systémovém dohledu administrátora a ownera.
-  - [x] Doplnit stránkování po 25, filtrování načtených záznamů, přesný čas,
+  - [x] <a id="bl-047"></a> Doplnit stránkování po 25, filtrování načtených záznamů, přesný čas,
     neměnný audit otevření a 60denní hranici čtení.
-  - [ ] **MVP** — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace
+  - [ ] <a id="bl-048"></a> **MVP** — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace
     pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit
     objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby
     jsou starší záznamy bezpečně nečitelné.
-- [x] **Umožnit moderátorským a vyšším rolím nastavit polohu pro náhled území.**
+- [x] <a id="bl-049"></a> **Umožnit moderátorským a vyšším rolím nastavit polohu pro náhled území.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
 
-- [x] **Změřit a zkrátit dlouhé načítání při registraci.**
-  - [x] Měřit samostatně vytvoření účtu, odeslání a kontrolu ověřovacího e-mailu,
+- [x] <a id="bl-050"></a> **Změřit a zkrátit dlouhé načítání při registraci.**
+  - [x] <a id="bl-051"></a> Měřit samostatně vytvoření účtu, odeslání a kontrolu ověřovacího e-mailu,
     obnovení ID tokenu a u business účtu také zápis žádosti.
-  - [x] Zobrazovat aktuální krok registrace a u business účtu po vytvoření účtu
+  - [x] <a id="bl-052"></a> Zobrazovat aktuální krok registrace a u business účtu po vytvoření účtu
     souběžně uložit žádost a odeslat ověřovací e-mail.
-  - [x] U neaktivní Business žádosti zobrazit známý stav bez čekání na roli a
+  - [x] <a id="bl-053"></a> U neaktivní Business žádosti zobrazit známý stav bez čekání na roli a
     Business profil a pro onboarding znovu použít již načtená data profilu.
-  - [x] Odeslání prvního ověřovacího e-mailu spouštět po vytvoření účtu na pozadí,
+  - [x] <a id="bl-054"></a> Odeslání prvního ověřovacího e-mailu spouštět po vytvoření účtu na pozadí,
     aby neblokovalo přechod na ověřovací obrazovku; opakované odeslání zůstává
     dostupné. Debug měření propojuje vytvoření účtu, ověření, profil a první
     obrazovku bez ukládání UID, e-mailu nebo jiných osobních údajů.
-  - [x] Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
+  - [x] <a id="bl-055"></a> Porovnat naměřené časy na rychlém a omezeném mobilním připojení.
     Android Emulator API 35: profil `full` bez latence vytvořil účet za 2 424 ms
     a odeslal ověřovací e-mail na pozadí za 496 ms; profil `edge` (473,6 kbit/s,
     latence 80–400 ms) vytvořil účet za 2 140 ms a e-mail odeslal za 601 ms.
@@ -331,67 +336,67 @@ odložené nápady až za hlavními uživatelskými cestami.
     reálně zvýšila z 246 ms na profilu `full` na 446 ms na profilu `edge`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
 
-- [x] **Ověřit reset hesla přes registrační e-mail.**
+- [x] <a id="bl-056"></a> **Ověřit reset hesla přes registrační e-mail.**
   - Pokrýt existující i neexistující adresu, neplatný a expirovaný odkaz,
     opakované použití odkazu a přihlášení novým heslem.
   - Zachovat neutrální odpověď, která neprozradí, zda je e-mail registrovaný.
-  - [x] Na doručitelném vývojovém účtu ověřeno doručení e-mailu, změna hesla,
+  - [x] <a id="bl-057"></a> Na doručitelném vývojovém účtu ověřeno doručení e-mailu, změna hesla,
     přihlášení novým heslem a odmítnutí opakovaně použitého odkazu; konkrétní
     adresa zůstává pouze v ignorovaném lokálním seznamu testovacích účtů.
-  - [ ] **MVP** — Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho
+  - [ ] <a id="bl-058"></a> **MVP** — Samostatně ověřit přirozeně expirovaný odkaz po uplynutí jeho
     platnosti ve webovém toku obnovy hesla.
-  - [ ] **MVP** — Po připojení `go.shoutout-app.eu` k produkčnímu
+  - [ ] <a id="bl-059"></a> **MVP** — Po připojení `go.shoutout-app.eu` k produkčnímu
     projektu `shoutout-production-a1b34` přepnout jeho globální Firebase Authentication Action URL
     na připravený `/auth/action`. Handler už bezpečně obsluhuje ověření e-mailu,
     reset hesla i obnovení změněné adresy; výchozí domény projektu Firebase při
     ukládání vlastní Action URL odmítá. Prezentační projekt není cílem této změny.
-- [x] **Zachovat filtr při přepínání karet.**
+- [x] <a id="bl-060"></a> **Zachovat filtr při přepínání karet.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
 
-- [x] **Upravit časové údaje na Shoutu.**
+- [x] <a id="bl-061"></a> **Upravit časové údaje na Shoutu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
 
-- [x] **Normalizovat nadpis Shoutu na počáteční velké písmeno.**
+- [x] <a id="bl-062"></a> **Normalizovat nadpis Shoutu na počáteční velké písmeno.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-1--stabilita-poloha-a-základní-chování).
 
 ### Etapa 2 – společný profil a identita autora
 
-- [x] **Sjednotit avatarová data ve všech typech obsahu.**
+- [x] <a id="bl-063"></a> **Sjednotit avatarová data ve všech typech obsahu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-2--společný-profil-a-identita-autora).
 
-- [x] Nasadit nová Firestore Rules a jednorázově spustit
+- [x] <a id="bl-064"></a> Nasadit nová Firestore Rules a jednorázově spustit
   `npm run backfill:public-profiles` pro existující účty ve vývojovém projektu.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-2--společný-profil-a-identita-autora).
 
-- [x] **Přidat na kartu profilu datum vzniku účtu pod přezdívku.**
+- [x] <a id="bl-065"></a> **Přidat na kartu profilu datum vzniku účtu pod přezdívku.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-2--společný-profil-a-identita-autora).
 
 ### Etapa 3 – první použití, nastavení a zpětná vazba
 
-- [x] **Přidat úvodní nápovědu po založení účtu.**
+- [x] <a id="bl-066"></a> **Přidat úvodní nápovědu po založení účtu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-3--první-použití-nastavení-a-zpětná-vazba).
 
-- [x] **Přidat noční režim.**
+- [x] <a id="bl-067"></a> **Přidat noční režim.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-3--první-použití-nastavení-a-zpětná-vazba).
 
-- [x] **Přepracovat dlaždici Nápověda.**
+- [x] <a id="bl-068"></a> **Přepracovat dlaždici Nápověda.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-3--první-použití-nastavení-a-zpětná-vazba).
 
-- [x] **Přesunout Nahlásit chybu přímo na kartu Profil.**
+- [x] <a id="bl-069"></a> **Přesunout Nahlásit chybu přímo na kartu Profil.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-3--první-použití-nastavení-a-zpětná-vazba).
 
-- [x] **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
+- [x] <a id="bl-070"></a> **Napojit připravené obrázky v „Nahlásit chybu“ po přechodu na placený plán.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-3--první-použití-nastavení-a-zpětná-vazba).
 
 ### Etapa 4 – životnost obsahu a business účty
 
-- [x] **Rozhodnout pravidla životnosti Shoutu před změnou expirace.**
+- [x] <a id="bl-071"></a> **Rozhodnout pravidla životnosti Shoutu před změnou expirace.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-4--životnost-obsahu-a-business-účty).
   - Upřesnění schválené 10. listopadu: po expiraci běžné interakce jen ke čtení,
     včetně palců komentářů a přidání/odebrání uložení; vlastní mazání, moderace
     a účtový úklid zůstávají možné a mohou změnit počty. [Realizace a důkazy](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions).
 
-- [ ] **Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web.** **MVP**
+- [ ] <a id="bl-072"></a> **Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web.** **MVP**
   - Současný postup a otevřená kritéria ruční kontroly jsou v
     `docs/reference/BUSINESS_VERIFICATION.md`; napojení na firemní registry bylo z plánu
     vyřazeno.
@@ -399,9 +404,9 @@ odložené nápady až za hlavními uživatelskými cestami.
     při změně adresy; souřadnice odvozovat důvěryhodně a chránit proti podvržení.
   - Jeden účet může mít více poboček pod stejným registračním číslem. V první
     verzi neimplementovat správce ani pozvánky; účet má jedno přihlášení.
-  - [x] Přidat pouze business účtům dlaždici Business se schválenými profilovými
+  - [x] <a id="bl-073"></a> Přidat pouze business účtům dlaždici Business se schválenými profilovými
     a monetizačními sekcemi podle `docs/plans/roadmap/BUSINESS_MONETIZATION.md`.
-  - [x] Přidat klientskou správu poboček: seznam, název, adresa, pozastavení,
+  - [x] <a id="bl-074"></a> Přidat klientskou správu poboček: seznam, název, adresa, pozastavení,
     bezpečné skrytí a opětovné předání změněné adresy k serverovému geocodingu.
   - Oddělit oficiální název firmy od veřejného názvu. Při vytvoření Shoutu vybrat
     pobočku a autora zobrazit jako `Veřejný název – Pobočka`.
@@ -410,41 +415,41 @@ odložené nápady až za hlavními uživatelskými cestami.
     účtu. Potvrzený kontaktní e-mail sám neprokazuje oprávnění jednat za firmu.
   - Zachovat důvěryhodné přidělení a odebrání Business role, stav žádosti a
     audit zásahů; klient si roli nesmí přidělit sám.
-  - [x] Přidat samostatnou business registraci s údaji firmy, fakturační adresou,
+  - [x] <a id="bl-075"></a> Přidat samostatnou business registraci s údaji firmy, fakturační adresou,
     kontaktním e-mailem a žádostí ve stavu `pending_email`; klient si business
     roli nepřiděluje.
-  - [x] Po povinném potvrzení e-mailu držet žadatele na samostatné stavové
+  - [x] <a id="bl-076"></a> Po povinném potvrzení e-mailu držet žadatele na samostatné stavové
     obrazovce a nepustit ho do běžného profilu, dokud důvěryhodný proces
     nevytvoří aktivní Business profil a nepřidělí roli 2.
-  - [x] Přidat do registrace samostatnou povinnou část **Pobočka/provozovna** s
+  - [x] <a id="bl-077"></a> Přidat do registrace samostatnou povinnou část **Pobočka/provozovna** s
     veřejným názvem a adresou první provozovny. Provozovnu nikdy automaticky
     nevytvářet ze sídla ani fakturační adresy; shodné adresy jsou však povolené.
     Adresu vybrat přes našeptávač a uložit ověřené souřadnice a geohash, protože
     tato poloha určuje oblast Shoutů.
-  - [x] Při důvěryhodné aktivaci business žádosti atomicky převést údaje
+  - [x] <a id="bl-078"></a> Při důvěryhodné aktivaci business žádosti atomicky převést údaje
     první provozovny do `businessProfiles/{uid}/locations/{locationId}`; bez
     úspěšného vytvoření provozovny účet neoznačit jako aktivní.
     Administrátorské schválení používá atomický batch pro roli, profil, první
     pobočku, stav žádosti a audit. Vývojový Admin SDK nástroj používá transakci
     pro aktivaci, ale auditní záznam nevytváří a přijímá jen stav `pending_email`.
-  - [x] Pro vývojové ruční scénáře přidat Admin SDK nástroj
+  - [x] <a id="bl-079"></a> Pro vývojové ruční scénáře přidat Admin SDK nástroj
     s dry-runem a explicitním potvrzením, který po ověření e-mailu a ruční
     kontrole atomicky vytvoří roli 2, Business profil a první pobočku.
-  - [x] Přidat administrátorům a ownerovi frontu ověřených Business žádostí;
+  - [x] <a id="bl-080"></a> Přidat administrátorům a ownerovi frontu ověřených Business žádostí;
     ruční schválení atomicky vytvoří roli, profil, pobočku a audit.
-  - [ ] **MVP** — Doplnit kontrolované zamítnutí a pozastavení Business žádosti
+  - [ ] <a id="bl-081"></a> **MVP** — Doplnit kontrolované zamítnutí a pozastavení Business žádosti
     nebo aktivního účtu, včetně bezpečných stavových přechodů v Rules, odebrání
     oprávnění, odůvodnění, auditu a odpovídajícího stavu v klientovi.
-  - [x] Při zamítnutém přidání, úpravě nebo smazání pobočky zachovat obrazovku,
+  - [x] <a id="bl-082"></a> Při zamítnutém přidání, úpravě nebo smazání pobočky zachovat obrazovku,
     zobrazit lokalizovanou chybu a diagnostikovat pouze bezpečný Firebase kód.
-  - [x] Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
+  - [x] <a id="bl-083"></a> Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;
     Česko, Německo, Polsko, Slovensko a další prioritní evropské země řadit nahoru.
-  - [x] Doplnit překlady všech business obrazovek a validačních/chybových textů
+  - [x] <a id="bl-084"></a> Doplnit překlady všech business obrazovek a validačních/chybových textů
     do všech sedmi jazyků aplikace (čeština, angličtina, němčina, polština,
     slovenština, ukrajinština a vietnamština); názvy zemí přebírat lokalizovaně
     z udržovaného ISO seznamu.
-  - [x] Přidat aktivním Business účtům vlastní logo místo systémového avatara.
-    - [x] Připravit lokální editor s posunem a zoomem, kruhovým náhledem,
+  - [x] <a id="bl-085"></a> Přidat aktivním Business účtům vlastní logo místo systémového avatara.
+    - [x] <a id="bl-086"></a> Připravit lokální editor s posunem a zoomem, kruhovým náhledem,
       kontrolou formátu, 10MB limitem a minimálním rozlišením 512 × 512 px.
       Ukládaný výsledek je nový 512 × 512 PNG bez původních metadat a částí
       mimo výřez; všechny texty jsou dostupné v sedmi jazycích. Běžné webové
@@ -460,19 +465,19 @@ odložené nápady až za hlavními uživatelskými cestami.
       Při opětovném otevření editoru je úvodním náhledem aktivní Business logo,
       nikoli dříve uložený záložní systémový avatar; ten se zobrazí až po nové
       volbě uživatele.
-    - [x] V úpravě avatara zobrazit funkční tlačítko **Nahrát vlastní logo** pouze
+    - [x] <a id="bl-087"></a> V úpravě avatara zobrazit funkční tlačítko **Nahrát vlastní logo** pouze
       aktivním Business účtům. Běžné účty tuto volbu nevidí.
-    - [x] Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
+    - [x] <a id="bl-088"></a> Po zapnutí Firebase Storage doplnit pravidla, cestu souboru, cache
       invalidaci a bezpečné odstranění předchozí verze a tlačítku předat hotovou
       ukládací callback funkci. Výběr, editor a 512px převod už jsou zapojené.
-  - [x] Přidat Business checkbox **Na více než 24 hodin**, po jehož zapnutí
+  - [x] <a id="bl-089"></a> Přidat Business checkbox **Na více než 24 hodin**, po jehož zapnutí
     pokračuje výběr po celých dnech až na 7 dní; server dovolí delší expiraci
     pouze Business účtu.
-  - [x] Implementovat schválené Business premium funkce bez platby:
+  - [x] <a id="bl-090"></a> Implementovat schválené Business premium funkce bez platby:
     platnost až 7 dní zachovat zdarma, doplnit zvýrazněný Shout a propagační
     okénko. Nárok a použití ukládat odděleně od budoucí platby, aby pozdější
     předplatné změnilo jen serverové oprávnění, nikoli základní uživatelský tok.
-  - [x] Odstranit nefunkční položku **Tokeny** a skrýt **Nákupy a
+  - [x] <a id="bl-091"></a> Odstranit nefunkční položku **Tokeny** a skrýt **Nákupy a
     faktury** i prázdné metriky v **Propagaci**. Sekce bezplatné propagace
     zůstane funkční; odstranit také neplatné tokenové texty z nápovědy a
     lokalizace a ověřit webové rozhraní testy. Tokenová sekce se nevrátí.
@@ -482,7 +487,7 @@ odložené nápady až za hlavními uživatelskými cestami.
     - Ověření: 66 widgetových a lokalizačních testů, `flutter analyze` a
       `flutter build web --debug` prošly. Ruční kontrola v prohlížeči ani
       nasazení nebyly součástí této změny.
-  - [ ] **Po MVP** — Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
+  - [ ] <a id="bl-092"></a> **Po MVP** — Po zapojení důvěryhodného serveru měřit unikátní dosah, celková
     zobrazení a rozkliknutí propagačních okének; v Business → Propagace zobrazit
     také vypočtenou míru prokliku. Vzdálenostní pásma se nesledují.
 
@@ -492,63 +497,63 @@ Následující úkoly nejsou bránou webového MVP. Bezplatné Business funkce m
 zůstat použitelné a bezpečné; placené kroky se přidají podle
 `plans/roadmap/BUSINESS_MONETIZATION.md` bez zásadní změny Business účtů.
 
-- [ ] **Po MVP** — Schválit model předplatného: rozsah plánů, cenu, období,
+- [ ] <a id="bl-093"></a> **Po MVP** — Schválit model předplatného: rozsah plánů, cenu, období,
   placená oprávnění, změnu a ukončení plánu, Founder zvýhodnění a případný
   větší dosah. Žádné Business tokeny ani jejich balíčky neplánovat.
-- [ ] **Po MVP** — Zavést serverově řízený stav předplatného, auditovaná
+- [ ] <a id="bl-094"></a> **Po MVP** — Zavést serverově řízený stav předplatného, auditovaná
   oprávnění a idempotentní změny stavu; klient si nesmí nárok přiznat sám.
-- [ ] **Po MVP** — Navrhnout a zapojit důvěryhodný platební tok předplatného;
+- [ ] <a id="bl-095"></a> **Po MVP** — Navrhnout a zapojit důvěryhodný platební tok předplatného;
   dosavadní volbu Stripe, kartu, Apple Pay a Google Pay ověřit pro zvolený model
   a platformy. Řešit serverové potvrzení, duplicity, selhání a chargebacky;
   případný SetupIntent posoudit zvlášť.
-- [ ] **Po MVP** — Dokončit DPH/VAT, měny, doklady a fakturaci na firmu,
+- [ ] <a id="bl-096"></a> **Po MVP** — Dokončit DPH/VAT, měny, doklady a fakturaci na firmu,
   účetní retenci a bezpečné refundace bez zpětné změny vystavených dokladů.
-- [ ] **Po MVP** — Navrhnout a dokončit správu předplatného a firemních dokladů
+- [ ] <a id="bl-097"></a> **Po MVP** — Navrhnout a dokončit správu předplatného a firemních dokladů
   v Business rozhraní; placený nárok navázat na stávající bezplatný tok
   propagace bez tokenové sekce.
 
 ### Etapa 5 – sociální vazby a oznámení
 
-- [x] **Navrhnout a přidat Follow.**
-  - [x] Přejmenovat kartu Uložené na Sledované a rozdělit ji na uložené Shouty
+- [x] <a id="bl-098"></a> **Navrhnout a přidat Follow.**
+  - [x] <a id="bl-099"></a> Přejmenovat kartu Uložené na Sledované a rozdělit ji na uložené Shouty
     a sledované profily, aniž by se měnila karta Mé Shouty.
-  - [x] Otevřít profil kliknutím na autora, zobrazit aktivní Shouty a nabídnout
+  - [x] <a id="bl-100"></a> Otevřít profil kliknutím na autora, zobrazit aktivní Shouty a nabídnout
     sledování, zrušení sledování, blokaci a nahlášení účtu.
-  - [x] Řadit lokální Shouty sledovaných účtů před ostatními a uvnitř obou skupin
+  - [x] <a id="bl-101"></a> Řadit lokální Shouty sledovaných účtů před ostatními a uvnitř obou skupin
     zachovat zvolené řazení; blokace současně ukončí sledování.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-5--sociální-vazby-a-oznámení).
 
-- [ ] **Napojit Follow a uživatelské preference na oznámení.** **Po MVP**
+- [ ] <a id="bl-102"></a> **Napojit Follow a uživatelské preference na oznámení.** **Po MVP**
   - Zahrnout reakce na vlastní Shout, komentáře a odpovědi, soukromé odpovědi,
     relevantní nebo zajímavé Shouty a nový obsah sledovaných profilů/oblastí.
   - Definovat, co znamená „zajímavý“, omezit četnost a umožnit každou kategorii
     samostatně vypnout; serverovou realizaci vést v části 8 níže.
-  - [x] Připravit centrum oznámení uvnitř aplikace, živý seznam posledních 50,
+  - [x] <a id="bl-103"></a> Připravit centrum oznámení uvnitř aplikace, živý seznam posledních 50,
     stav přečtení a samostatné preference pro reakce, komentáře/odpovědi,
     soukromé odpovědi, sledované profily a okolní Shouty.
-  - [x] Vytvářet oznámení o like/dislike ve stejné atomické transakci jako
+  - [x] <a id="bl-104"></a> Vytvářet oznámení o like/dislike ve stejné atomické transakci jako
     reakci; pravidla ověřují příjemce, autora, Shout, typ reakce i rate limit.
-  - [x] Atomicky vytvářet oznámení pro komentář na vlastním Shoutu, odpověď na
+  - [x] <a id="bl-105"></a> Atomicky vytvářet oznámení pro komentář na vlastním Shoutu, odpověď na
     komentář, soukromou odpověď a like/dislike komentáře. Zápis je povolen jen
     společně s ověřenou zdrojovou událostí a respektuje preference příjemce.
-  - [x] Slučovat opakované události stejného typu u stejného Shoutu nebo
+  - [x] <a id="bl-106"></a> Slučovat opakované události stejného typu u stejného Shoutu nebo
     komentáře, zvyšovat počet, zobrazit zkrácený nadpis a každou další událostí
     vrátit oznámení mezi nejnovější a nepřečtená.
-  - [x] Kliknutím na oznámení otevřít živý detail cílového Shoutu, u komentářů
+  - [x] <a id="bl-107"></a> Kliknutím na oznámení otevřít živý detail cílového Shoutu, u komentářů
     posunout a zvýraznit konkrétní komentář; nedostupný, smazaný nebo expirovaný
     obsah nahradit srozumitelnou hláškou.
-  - [ ] **Po MVP** — Přes Cloud Functions rozesílat nový Shout sledovaného profilu a později
+  - [ ] <a id="bl-108"></a> **Po MVP** — Přes Cloud Functions rozesílat nový Shout sledovaného profilu a později
     relevantní Shouty v okolí; tyto události mají více příjemců a klient je
     nesmí rozesílat sám.
-  - [ ] **Po MVP** — Přidat FCM push mimo otevřenou aplikaci, systémová/moderátorská
+  - [ ] <a id="bl-109"></a> **Po MVP** — Přidat FCM push mimo otevřenou aplikaci, systémová/moderátorská
     oznámení a omezení četnosti.
 
 ### Etapa 6 – gamifikace a odložené nápady
 
-- [x] **Navrhnout karmu, achievementy a kosmetické odměny.**
+- [x] <a id="bl-110"></a> **Navrhnout karmu, achievementy a kosmetické odměny.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#etapa-6--gamifikace-a-odložené-nápady).
 
-- [x] **Přidat minihru Shout Flight.**
+- [x] <a id="bl-111"></a> **Přidat minihru Shout Flight.**
   - Offline klikací hra používá megafon aplikace, který se klepnutím nadzvedne a
     roztočí; bez dalšího klepnutí rotace postupně zpomaluje.
   - Překážky tvoří tematické mrakodrapy zdola, shora nebo v páru. Skóre roste s
@@ -564,56 +569,56 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
     nevstupuje do kolizí.
   - Po výsledku vyžadovat samostatný vstup pro návrat na úvodní kartu a teprve
     další vstup pro spuštění nového pokusu.
-  - [ ] **Po MVP** — Volitelně později zvážit žebříček pouze mezi sledovanými profily; před
+  - [ ] <a id="bl-112"></a> **Po MVP** — Volitelně později zvážit žebříček pouze mezi sledovanými profily; před
     implementací vyřešit soukromí, ochranu výsledků a náklady Firestore.
 
 ### Vzhled a grafika
 
-- [x] **Odstranit světlý proužek kolem ikony na ploše Androidu.**
+- [x] <a id="bl-113"></a> **Odstranit světlý proužek kolem ikony na ploše Androidu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#vzhled-a-grafika).
 
-- [x] **Sjednotit logo na přihlašovací a registrační obrazovce se záhlavím
+- [x] <a id="bl-114"></a> **Sjednotit logo na přihlašovací a registrační obrazovce se záhlavím
   feedu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#vzhled-a-grafika).
 
-- [x] **Navrhnout nový font záhlaví karet Uloženo, Mé Shouty a Profil.**
+- [x] <a id="bl-115"></a> **Navrhnout nový font záhlaví karet Uloženo, Mé Shouty a Profil.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#vzhled-a-grafika).
 
 ### Profil a avatary
 
-- [x] **Přestavět akce na kartě Profil.**
-  - [x] **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
-  - [x] **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
+- [x] <a id="bl-116"></a> **Přestavět akce na kartě Profil.**
+  - [x] <a id="bl-117"></a> **Upravit profil** přesunout z tlačítka v záhlaví na samostatnou dlaždici.
+  - [x] <a id="bl-118"></a> **Změnit heslo** přesunout ze Systémových nastavení dovnitř obrazovky
     **Upravit profil**; zachovat stávající validaci a lokalizace.
-  - [x] Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
+  - [x] <a id="bl-119"></a> Dlaždice rozmisťovat po řádcích maximálně po třech. Jeden prvek je uprostřed;
     po přidání druhého se první posune doleva a nový je uprostřed; třetí obsadí
     pravou pozici. Další řádek začne znovu uprostřed stejným pravidlem.
-  - [x] Rozložení odvozovat z pořadí skutečně viditelných dlaždic včetně Business a
+  - [x] <a id="bl-120"></a> Rozložení odvozovat z pořadí skutečně viditelných dlaždic včetně Business a
     staff rolí, bez prázdných klikacích míst a se stabilní šířkou na mobilu i webu.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
-- [x] **Zobrazovat avatar autora na kartách Shoutů.**
+- [x] <a id="bl-121"></a> **Zobrazovat avatar autora na kartách Shoutů.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
-- [x] Doplnit avatary komentářů, soukromých odpovědí a migraci historického
+- [x] <a id="bl-122"></a> Doplnit avatary komentářů, soukromých odpovědí a migraci historického
   obsahu podle úkolu **Sjednotit avatarová data ve všech typech obsahu** v etapě 2.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
-- [x] **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
+- [x] <a id="bl-123"></a> **Odstranit krátké zobrazení lišky před načtením uloženého avatara.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
-- [x] **Vytvořit a přidat více avatarů.**
+- [x] <a id="bl-124"></a> **Vytvořit a přidat více avatarů.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
-- [x] **Doplnit validaci a zobrazení hesel na obrazovce změny hesla.**
+- [x] <a id="bl-125"></a> **Doplnit validaci a zobrazení hesel na obrazovce změny hesla.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#profil-a-avatary).
 
 ### Lokalizace
 
-- [x] **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
+- [x] <a id="bl-126"></a> **Přidat slovenštinu, ukrajinštinu a vietnamštinu.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#lokalizace).
 
-- [ ] **Provést kompletní audit překladů.** **MVP**
+- [ ] <a id="bl-127"></a> **Provést kompletní audit překladů.** **MVP**
   - Najít texty zapsané přímo ve widgetech a přesunout je do lokalizace.
   - Porovnat úplnost všech klíčů pro češtinu, angličtinu, němčinu, polštinu,
     slovenštinu, ukrajinštinu a vietnamštinu.
@@ -626,21 +631,21 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
 
 ### Business účty a webová správa
 
-- [x] **Vytvořit business účet.**
+- [x] <a id="bl-128"></a> **Vytvořit business účet.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#business-účty-a-webová-správa).
 
-- [x] **Přidat zvýrazněné Shouty.**
+- [x] <a id="bl-129"></a> **Přidat zvýrazněné Shouty.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#business-účty-a-webová-správa).
 
-- [x] **Přidat propagační okénko.**
+- [x] <a id="bl-130"></a> **Přidat propagační okénko.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#business-účty-a-webová-správa).
 
-- [x] **Vytvořit webové rozhraní pro administrátory a moderátory.**
+- [x] <a id="bl-131"></a> **Vytvořit webové rozhraní pro administrátory a moderátory.**
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#business-účty-a-webová-správa).
 
 <a id="archive-administration"></a>
 
-- [ ] **Později, termín k rozhodnutí** — Navrhnout a implementovat správu
+- [ ] <a id="bl-132"></a> **Později, termín k rozhodnutí** — Navrhnout a implementovat správu
   neveřejného 60denního archivu zpráv/komentářů smazaných účtů.
   - Požadavek vlastníka 1. listopadu: přístup k celému uchovanému obsahu a
     případná práce s daty v administrátorském rozhraní.
@@ -649,7 +654,7 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
     celé moderační roli přímé klientské čtení všech soukromých zpráv.
   - [Rozsah uchování a návaznosti](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
 
-- [ ] **MVP** — Ověřit produkční web pro běžné i Business účty včetně přístupu
+- [ ] <a id="bl-133"></a> **MVP** — Ověřit produkční web pro běžné i Business účty včetně přístupu
   běžného uživatele k feedu a publikování. Moderátorské trasy `/admin` dál
   vyžadují odpovídající roli v klientovi, pravidlech a testech. Dřívější plán
   omezit celý web pouze na Business a moderaci byl 20. října 2026 nahrazen
@@ -662,37 +667,37 @@ veřejným obchodům je zapsaný v plánu
 [mobilního testování a distribuce](plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md) včetně nákladů,
 podmínek testovacích účtů a požadavků na fyzická zařízení.
 
-- [x] Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
+- [x] <a id="bl-134"></a> Nakonfigurovat Firebase Hosting a nasadit dočasný preview kanál `demo`.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#demo-a-distribuce).
 
-- [x] Ověřit přihlášení na preview doméně a nasadit aktuální Firestore Rules.
+- [x] <a id="bl-135"></a> Ověřit přihlášení na preview doméně a nasadit aktuální Firestore Rules.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#demo-a-distribuce).
 
-- [x] Hosting preview kanál `demo` používá běžný release web a skutečnou polohu
+- [x] <a id="bl-136"></a> Hosting preview kanál `demo` používá běžný release web a skutečnou polohu
   zařízení po udělení oprávnění. Samostatný DEMO build ani pevnou polohu
   Litoměřice nezavádět; test mimo Litoměřice musí odpovídat reálnému chování.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#demo-a-distribuce).
 
-- [x] Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
+- [x] <a id="bl-137"></a> Před veřejným sdílením mimo uzavřený test rozhodnout o omezení registrace,
   App Check enforcement, rozpočtových alertech a odstranění testovacích účtů.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#demo-a-distribuce).
 
-- [x] Optimalizovat webové assety, zejména avatary; 24 transparentních runtime
+- [x] <a id="bl-138"></a> Optimalizovat webové assety, zejména avatary; 24 transparentních runtime
   avatarů je odvozených v rozměru 512 × 512 px, zatímco vysoké zdroje v
   `design/` a `promo/` zůstávají beze změny pro budoucí grafickou a promo práci.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#demo-a-distribuce).
 
-- [x] Připravit vývojovou iOS variantu bez Macu a placeného Apple účtu.
+- [x] <a id="bl-139"></a> Připravit vývojovou iOS variantu bez Macu a placeného Apple účtu.
   - Ve Firebase projektu je registrované bundle ID `cz.shoutout.app.dev`; projekt
     obsahuje iOS Firebase konfiguraci, Google OAuth URL schéma, oprávnění k poloze
     a fotografiím a debug/release App Check providery.
   - Výchozí Flutter ikonu a startovní obrazovku nahradily existující značkové
     podklady ShoutOut ve všech požadovaných iOS rozměrech.
-  - [ ] **Po MVP** — Na Macu sestavit nepodepsaný iOS build a odstranit případné chyby nativních
+  - [ ] <a id="bl-140"></a> **Po MVP** — Na Macu sestavit nepodepsaný iOS build a odstranit případné chyby nativních
     závislostí; ve Windows tento krok nelze spolehlivě provést.
-  - [ ] **Po MVP** — Přes Xcode s Apple Personal Team nainstalovat debug build na vlastní
+  - [ ] <a id="bl-141"></a> **Po MVP** — Přes Xcode s Apple Personal Team nainstalovat debug build na vlastní
     iPhone, zaregistrovat App Check debug token a projít hlavní uživatelské cesty.
-  - [ ] **Po MVP** — Pro distribuci zaregistrovat iOS aplikaci v produkčním
+  - [ ] <a id="bl-142"></a> **Po MVP** — Pro distribuci zaregistrovat iOS aplikaci v produkčním
     Firebase projektu aplikace, vytvořit produkční Apple identitu, podpisy a
     App Store konfiguraci; vývojovou konfiguraci nepoužít veřejně.
 
@@ -702,38 +707,38 @@ Mobilní klienti se po webovém MVP registrují ve stejném produkčním Firebas
 projektu aplikace; distribuční a nákladové podrobnosti zůstávají v
 `plans/roadmap/MOBILE_DISTRIBUTION_PLAN.md`.
 
-- [ ] **Po MVP** — Připravit produkční Android/iOS Firebase aplikace, bezpečné
+- [ ] <a id="bl-143"></a> **Po MVP** — Připravit produkční Android/iOS Firebase aplikace, bezpečné
   build varianty a mobilní konfigurace bez přístupu k vývojovým datům.
-- [ ] **Po MVP** — Dokončit podepsaný Android release, bezpečnou správu klíče,
+- [ ] <a id="bl-144"></a> **Po MVP** — Dokončit podepsaný Android release, bezpečnou správu klíče,
   Play Integrity a produkční App Check; ověřit hlavní cesty na fyzickém zařízení.
-- [ ] **Po MVP** — Připravit Google Play záznam, zásady ochrany dat, věkové
+- [ ] <a id="bl-145"></a> **Po MVP** — Připravit Google Play záznam, zásady ochrany dat, věkové
   hodnocení, testovací kanál a vydání Androidu pro běžné i privilegované role.
-- [ ] **Po MVP** — Dokončit produkční iOS podpis, App Attest a fyzickou regresi,
+- [ ] <a id="bl-146"></a> **Po MVP** — Dokončit produkční iOS podpis, App Attest a fyzickou regresi,
   připravit TestFlight, App Store Connect a veřejné vydání iOS.
 
 ### Navazující ruční test moderace
 
-- [ ] **MVP** — Udělit varování běžnému uživateli a ověřit záznam v historii postihů.
-- [ ] **MVP** — Udělit dočasné omezení tvorby a ověřit blokaci Shoutů i komentářů.
-- [ ] **MVP** — Skrýt závadný komentář a ověřit jeho stav ve vlákně.
-- [ ] **MVP** — Eskalovat případ senior moderátorovi a ověřit oddělení obou front.
-- [ ] **MVP** — Senior rolí ověřit 90denní a trvalý ban.
-- [ ] **MVP** — Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
-- [ ] **MVP** — Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
-- [x] Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
+- [ ] <a id="bl-147"></a> **MVP** — Udělit varování běžnému uživateli a ověřit záznam v historii postihů.
+- [ ] <a id="bl-148"></a> **MVP** — Udělit dočasné omezení tvorby a ověřit blokaci Shoutů i komentářů.
+- [ ] <a id="bl-149"></a> **MVP** — Skrýt závadný komentář a ověřit jeho stav ve vlákně.
+- [ ] <a id="bl-150"></a> **MVP** — Eskalovat případ senior moderátorovi a ověřit oddělení obou front.
+- [ ] <a id="bl-151"></a> **MVP** — Senior rolí ověřit 90denní a trvalý ban.
+- [ ] <a id="bl-152"></a> **MVP** — Označit obsah jako v pořádku a ověřit nemožnost dalšího hlášení.
+- [ ] <a id="bl-153"></a> **MVP** — Ověřit zrušení dočasného postihu a zachování neměnné auditní historie.
+- [x] <a id="bl-154"></a> Upravit generátor testovací fronty tak, aby závadný demonstrační obsah
   standardně nevytvářely účty moderátora, seniora, administrátora ani ownera.
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#navazující-ruční-test-moderace).
 
 
 ## 8. Push notifikace a centrum oznámení — Po MVP
 
-- [x] schválený model Follow, centrum oznámení a kategorie uživatelských
+- [x] <a id="bl-155"></a> schválený model Follow, centrum oznámení a kategorie uživatelských
   preferencí,
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#8-push-notifikace-a-centrum-oznámení--po-mvp).
 
-- [x] oznámení uvnitř aplikace pro reakci na Shout, komentář na Shout,
+- [x] <a id="bl-156"></a> oznámení uvnitř aplikace pro reakci na Shout, komentář na Shout,
   odpověď na komentář, soukromou odpověď a reakci na komentář,
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#8-push-notifikace-a-centrum-oznámení--po-mvp).
 
-- [x] respektovat preference v `users/{uid}/settings/notifications`,
+- [x] <a id="bl-157"></a> respektovat preference v `users/{uid}/settings/notifications`,
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#8-push-notifikace-a-centrum-oznámení--po-mvp).

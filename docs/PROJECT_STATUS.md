@@ -1,10 +1,19 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 12. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 17. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
+
+**Nová metodika stupnic je implementovaná lokálně; zbývá přesné CI.**
+Feature/progress-substeps zachovává 24 MVP milníků a 157 backlogových položek,
+ale eviduje jejich podúseky s pevnými vahami. Registry, podklady a generátor
+jsou v [PROGRESS](PROGRESS.md); aktuální procenta se odvozují jen do TODO/BACKLOG.
+11 cílených regresí výpočtu a celá sada 68 nástrojových testů prošly.
+Kontrola dokumentace a šesti snímků je čistá. Původní checkboxy a kritéria jsou zachované,
+přesné výchozí snímky 12. listopadu chrání SHA-256. Nic aplikačního ani živého
+se neměnilo. Po uzavření této dokumentační práce se vrátit k B2 úklidu níže.
 
 **Schválená serverová obsluha B2 je uzavřená po přesném CI; není nasazená.**
 Na feature/read-sync-runtime jsou izolované callable obálky, control
@@ -527,8 +536,9 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka jsou nasazené; vlastní knihovna a úklid fixture ověřené. | Cloudová synchronizace, unread-first a novinky B2–B4. Regrese Uložených a místní B1 uzavřené v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
-MVP zůstává 9/24 milníků (38 %), backlog 107/157 (68 %). Konečný account
-purge sám neuzavírá souhrnný milník životního cyklu ani serverové brány.
+Aktuální stupnice jsou generované v [TODO](TODO.md#postup) z
+[evidence podúseků](PROGRESS.md). Dílčí dokončení posouvá vážené procento;
+konečný account purge sám neuzavírá celý životní cyklus ani serverovou bránu.
 [Kritéria serveru](MVP_SERVER_PLAN.md), [etapy feedu](plans/feed/FEED_IMPLEMENTATION_STAGES.md),
 [startovní brána](LAUNCH_READINESS.md).
 

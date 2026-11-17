@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 12. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 17. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -9,18 +9,25 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 
 ### Postup do MVP
 
-`███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░` **38 %** — 9 z 24 milníků
+<!-- progress:mvp:start -->
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,72 %** — vážené dokončení podúseků
 
-Počítají se celé milníky níže. Dílčí dokončení serverového úklidu nezavírá
-celý milník životního cyklu ani serverové brány.
+Hotové úseky: **139/209**. Celé milníky: **9/24**; rozpracované: 11.
+<!-- progress:mvp:end -->
+
+Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
+startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 
 ### Postup celého backlogu
 
-`███████████████████████████░░░░░░░░░░░░░` **68 %** — 107 ze 157 úkolů
+<!-- progress:backlog:start -->
+`████████████████████████████░░░░░░░░░░░░` **70,11 %** — vážené dokončení podúseků
 
-Jedinou checkboxovou evidencí pro tuto metriku je BACKLOG. Původní základ měl
-155 položek; přibylo nové chování feedu a pozdější správa retenčního archivu.
-Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
+Hotové úseky: **170/287**. Celé položky: **107/157**; rozpracované: 7.
+<!-- progress:backlog:end -->
+
+Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
+váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP.
 
 ## Nejbližší práce
 
@@ -86,7 +93,8 @@ Reorganizace dokumentů nemění jejich stavy ani rozsah MVP.
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
    Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění
-   automaticky celý serverový milník ani procentní metriku.
+   automaticky celý serverový milník. Doložené podúseky posouvají váženou stupnici
+   podle [nové metodiky](PROGRESS.md).
 3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
@@ -119,51 +127,51 @@ pozdější předplatné, platby a fakturace nevyžadovaly zásadní změnu úč
 vydání webu nadále vyžaduje produkční, bezpečnostní, právní, testovací a
 provozní minimum v `docs/LAUNCH_READINESS.md`.
 
-### Hotové milníky MVP (9)
+### Původní základ MVP (9 milníků)
 
-1. ✅ Základní registrace, ověření e-mailu, právní souhlas a profil.
-2. ✅ Lokální feed, vytvoření a životní stav Shoutu.
-3. ✅ Komentáře, odpovědi, reakce, ukládání, blokace a hlášení.
-4. ✅ Veřejné profily, Follow a oznámení uvnitř aplikace.
-5. ✅ Business registrace, pobočky a důvěryhodná ruční aktivace s auditem.
-6. ✅ Moderátorské rozhraní, role, regionální rozsahy a základní Rules ochrana.
-7. ✅ Web jako funkční vývojový cíl se sedmi jazyky.
-8. ✅ Automatické Flutter a Firestore Rules testy zapojené do CI.
-9. ✅ Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
+1. ✅ <a id="mvp-01"></a> Základní registrace, ověření e-mailu, právní souhlas a profil.
+2. ✅ <a id="mvp-02"></a> Lokální feed, vytvoření a životní stav Shoutu.
+3. ✅ <a id="mvp-03"></a> Komentáře, odpovědi, reakce, ukládání, blokace a hlášení.
+4. ✅ <a id="mvp-04"></a> Veřejné profily, Follow a oznámení uvnitř aplikace.
+5. ✅ <a id="mvp-05"></a> Business registrace, pobočky a důvěryhodná ruční aktivace s auditem.
+6. ✅ <a id="mvp-06"></a> Moderátorské rozhraní, role, regionální rozsahy a základní Rules ochrana.
+7. ✅ <a id="mvp-07"></a> Web jako funkční vývojový cíl se sedmi jazyky.
+8. ✅ <a id="mvp-08"></a> Automatické Flutter a Firestore Rules testy zapojené do CI.
+9. ✅ <a id="mvp-09"></a> Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od
    stávající prezentace. Ověřeno 25. října 2026: samostatný site, propojená
    webová aplikace, DNS a aktivní HTTPS. Produkční release patří do navazujících
    milníků a zatím není nasazený.
 
-### Zbývající milníky před MVP (15)
+### Navazující milníky před MVP (15)
 
-1. ⬜ Nakonfigurovat aplikaci ve stávajícím projektu `shoutout-production-a1b34`,
+1. ⬜ <a id="mvp-10"></a> Nakonfigurovat aplikaci ve stávajícím projektu `shoutout-production-a1b34`,
    oddělit její Hosting site od vstupní stránky a bezpečně oddělit vývojová
    a produkční data i nástroje.
-2. ⬜ Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.
-3. ⬜ Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči
+2. ⬜ <a id="mvp-11"></a> Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.
+3. ⬜ <a id="mvp-12"></a> Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči
    mimo Litoměřice.
-4. ⬜ Nasadit geografické obohacení, provést backfill a ověřit regionální data
+4. ⬜ <a id="mvp-13"></a> Nasadit geografické obohacení, provést backfill a ověřit regionální data
    potřebná pro stávající moderaci.
-5. ⬜ Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní
+5. ⬜ <a id="mvp-14"></a> Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní
    retence účtu.
-6. ⬜ Dokončit webový App Check a ochranu registrace; vynucení zapnout až po
+6. ⬜ <a id="mvp-15"></a> Dokončit webový App Check a ochranu registrace; vynucení zapnout až po
    ověření metrik.
-7. ⬜ Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu,
+7. ⬜ <a id="mvp-16"></a> Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu,
    idempotenci a limity proti spamu.
-8. ⬜ Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web,
+8. ⬜ <a id="mvp-17"></a> Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web,
    včetně zamítnutí a pozastavení Business účtů.
-9. ⬜ Serverově vynutit pravidla současných bezplatných Business funkcí a
+9. ⬜ <a id="mvp-18"></a> Serverově vynutit pravidla současných bezplatných Business funkcí a
     zachovat oddělení oprávnění od budoucí ceny.
-10. ⬜ Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i
+10. ⬜ <a id="mvp-19"></a> Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i
     desktopové šířce pro všech sedm jazyků.
-11. ⬜ Projít všechny webové ruční regresní scénáře běžného, Business i
+11. ⬜ <a id="mvp-20"></a> Projít všechny webové ruční regresní scénáře běžného, Business i
     moderačního účtu včetně pomalé nebo přerušované sítě.
-12. ⬜ Doplnit skutečného provozovatele, podporu, právní kontrolu a proces práv
+12. ⬜ <a id="mvp-21"></a> Doplnit skutečného provozovatele, podporu, právní kontrolu a proces práv
     subjektů údajů.
-13. ⬜ Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
+13. ⬜ <a id="mvp-22"></a> Nastavit monitoring, rozpočty, kvóty, zálohy, obnovu, rollback a
     minimální provozní metriky bez nadbytečných osobních údajů.
-14. ⬜ Spustit CI a produkční webový build a odstranit blokující vady.
-15. ⬜ Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
+14. ⬜ <a id="mvp-23"></a> Spustit CI a produkční webový build a odstranit blokující vady.
+15. ⬜ <a id="mvp-24"></a> Splnit webovou rozhodovací bránu v `docs/LAUNCH_READINESS.md` a výslovně
     přijmout nebo odstranit zbývající rizika.
 
 ### Práce po MVP

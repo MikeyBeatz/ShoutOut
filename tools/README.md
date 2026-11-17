@@ -8,6 +8,12 @@ index reachability, progress summaries and registered archive hashes. It also
 runs in CI. It does not crawl ignored local credentials or external URLs.
 [Documentation conventions](../docs/DOCUMENTATION_MAINTENANCE.md).
 
+Progress is derived from [the shared registry](../docs/progress.json).
+After recording a verified completed section run
+`node tools/project_progress.mjs --write`, then `node tools/check_docs.mjs`.
+`node tools/project_progress.mjs --check` rejects stale generated output;
+it never grants deployment approval. [Methodology](../docs/PROGRESS.md).
+
 ## Development utilities
 
 The [permanent feed installation plan](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)

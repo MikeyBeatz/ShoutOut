@@ -27,6 +27,20 @@
       "sourceCommit": "cc62831c5fe999721b39a0ce9c1a2fe0a28ded5d",
       "bytes": 97962,
       "sha256": "3b0b96e495e7622f0487c907a8c37204061a6add65804dc8295319aaef0553ba"
+    },
+    {
+      "path": "docs/archive/TODO_2026-11-12.txt",
+      "source": "docs/TODO.md",
+      "sourceCommit": "e8c835e496d0ae5c5ce8917f2cdb122690180c3a",
+      "bytes": 13230,
+      "sha256": "0acfbf022f17bce7cb20b00eb6f14842fd7084b51ba60263b180ed30b05c3072"
+    },
+    {
+      "path": "docs/archive/BACKLOG_2026-11-12.txt",
+      "source": "docs/BACKLOG.md",
+      "sourceCommit": "e8c835e496d0ae5c5ce8917f2cdb122690180c3a",
+      "bytes": 50569,
+      "sha256": "a505871ed59dcdfc25ba3d991154ce7206ba67cf440560f1511c1bc8aa694430"
     }
   ]
 }

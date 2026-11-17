@@ -35,6 +35,11 @@
   rozlišuj v `docs/PROJECT_STATUS.md`; dlouhou historii do přehledů nepřidávej.
 - Změnu ověř přiměřeným testem, analyzátorem nebo sestavením a uveď, co bylo a
   nebylo ověřeno. Úspěch netvrď bez důkazu.
+- Po každém dokončeném úseku aktualizuj stav a důkazy v `docs/progress.json`
+  podle [metodiky stupnic](docs/PROGRESS.md). Spusť
+  `node tools/project_progress.mjs --write` a `node tools/check_docs.mjs`.
+  Při dělení úkolu zachovej pevnou váhu rodiče; připravený kód, ověření,
+  nasazení a živou akceptaci nezaměňuj. Ručně nepřepisuj generované metriky.
 - Firebase Hosting, pravidla, Functions, data ani jiné externí prostředí
   nenasazuj bez výslovného souhlasu uživatele. Vždy uveď přesný cíl nasazení.
 - Od 30. října 2026 uživatel předem schvaluje další rollouty do vývoje
