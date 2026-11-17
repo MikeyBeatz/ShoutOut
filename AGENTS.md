@@ -35,6 +35,12 @@
   rozlišuj v `docs/PROJECT_STATUS.md`; dlouhou historii do přehledů nepřidávej.
 - Změnu ověř přiměřeným testem, analyzátorem nebo sestavením a uveď, co bylo a
   nebylo ověřeno. Úspěch netvrď bez důkazu.
+- Související drobné změny spojuj do větších samostatně ověřitelných úseků.
+  Průběžně dělej cílené lokální kontroly a v autorizovaném rozsahu malé lokální
+  commity; push a úplné CI seskup k dokončení uceleného úseku před nasazením.
+  Bezpečnostní a datové přechody zachovávají samostatné potřebné kontroly;
+  ověření neodkládej až na konec celého milníku. Podrobnosti jsou v
+  [pravidlech kontrolních bodů](docs/operations/RELEASING.md#development-checkpoints).
 - Po každém dokončeném úseku aktualizuj stav a důkazy v `docs/progress.json`
   podle [metodiky stupnic](docs/PROGRESS.md). Spusť
   `node tools/project_progress.mjs --write` a `node tools/check_docs.mjs`.

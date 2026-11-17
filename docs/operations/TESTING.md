@@ -8,6 +8,10 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+Velikost implementačního úseku určuje [schválený postup kontrolních bodů](RELEASING.md#development-checkpoints):
+průběžné cílené lokální kontroly, seskupený push/úplné CI pro hotový funkční
+úsek a živé ověření po DEV nasazení. Rizikové přechody mají potřebné vlastní brány.
+
 <a id="dva-rezimy-ci"></a>
 
 ## Dva režimy CI

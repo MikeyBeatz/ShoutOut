@@ -31,6 +31,9 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 
 ## Nejbližší práce
 
+Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
+průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
+
 1. **Připravit pokračující retenční úklid B2 před DEV aktivací.**
    [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
    je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro

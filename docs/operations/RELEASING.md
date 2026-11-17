@@ -58,6 +58,27 @@ podstatná rozhodnutí. Rutinní rollout podle schválených pravidel po úspě�
 kontrolách znovu schvalovat netřeba; nové produktové či provozní volby se
 předkládají vlastníkovi. Úspěšné CI není důkaz absolutní bezchybnosti aplikace.
 
+<a id="development-checkpoints"></a>
+
+### Velikost úseků a kontrolní body
+
+Vlastník 17. listopadu 2026 schválil seskupování souvisejících drobných změn
+do větších, samostatně ověřitelných funkčních úseků:
+
+- Během práce průběžně spouštět cílené lokální testy a kontroly podle změny.
+  V autorizovaném rozsahu ukládat malé srozumitelné lokální commity.
+- Push více souvisejících commitů a úplné CI soustředit na dokončení uceleného
+  úseku. CI reaguje na push/PR, nikoli na každou místní úpravu nebo commit;
+  dokumentační změny používají lehký režim podle [TESTING](TESTING.md#dva-rezimy-ci).
+- Před nasazením musí projít úplné CI přesného nasazovaného commitu a pravidla
+  vydání; po DEV nasazení ověřit celý funkční průchod daného úseku.
+- Bezpečnostní a datové přechody, migrace a změny oprávnění ponechat rozdělené
+  tam, kde je to nutné pro ověření kompatibility či návratu. Nesouvisející
+  úkoly nespojovat a kontroly neodkládat až na konec celého milníku.
+
+Tento postup nemění rozsah schválené implementace ani oprávnění ke Git
+operacím, zásahům do dat, sloučení do main či produkčnímu vydání.
+
 ### Jednotlivé kroky
 
 1. Ověřit kód, backlog, aktuální větev a pracovní strom. Před úpravami

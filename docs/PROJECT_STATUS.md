@@ -6,6 +6,11 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+Vlastník schválil [větší funkční úseky a seskupené push/CI](operations/RELEASING.md#development-checkpoints).
+Průběžné lokální kontroly a samostatné brány rizikových přechodů zůstávají;
+implementační priorita je nadále B2 úklid. Jde o pracovní pravidlo, ne nové
+dokončení produktového úseku nebo změnu nasazení.
+
 **Údržba CI je uzavřená po ověření obou režimů; další je B2 úklid.**
 Na fix/selective-ci má zdroj `27f46e8cd98c195471e68cc6bdedb592a75fc819`
 [úspěšné úplné CI 44053527899](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053527899)
