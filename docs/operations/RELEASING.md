@@ -81,6 +81,12 @@ opakovat potvrzení pro již schválený konkrétní krok a cíl.
 
 ## Produkční vydání
 
+CI [rozlišuje dokumentační a úplný režim](TESTING.md#dva-rezimy-ci).
+Zelený dokumentační `verify` potvrzuje jen odkazy, metriky a jejich nástroje;
+nenahrazuje aplikační testy ani sestavení pro rollout přesného commitu.
+Pro čistě dokumentační commit určený k vydání nejprve spustit úplné kontroly
+ručním workflow_dispatch nebo tagem v souladu s pravidly níže.
+
 1. Vybrat schválený commit v historii `main`, zkontrolovat všechny změny od
    předchozí produkční verze a určit verzi `vX.Y.Z`, například `v0.1.0`.
    Označení verze je příklad, zatím nejde o existující vydání.
@@ -121,8 +127,9 @@ produkční aplikace, prezentace, Rules, Functions ani k zásahům do dat.
 shodu konfigurace a SHA-256 otisky souborů buildu. Nasazení má predeploy
 kontrolu a bez `--apply` jde pouze o místní náhled cíle.
 
-GitHub Actions spouštějí testy, analýzu, kontrolu formátu a vývojový webový
-build. Automatické nasazování není nakonfigurované.
+GitHub Actions v úplném režimu spouštějí testy, analýzu, kontrolu formátu a
+vývojový webový build. Dokumentační režim prověřuje jen dokumentaci a nástroje
+metrik podle odkazu výše. Automatické nasazování není nakonfigurované.
 
 Vazba buildu na Git commit, čistá pracovní kopie, schválení změn, release tag
 a ochrana `main` nejsou tímto skriptem automaticky vynucované. Do doplnění

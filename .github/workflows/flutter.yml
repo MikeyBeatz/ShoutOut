@@ -3,6 +3,7 @@ name: Flutter checks
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,29 +17,47 @@ jobs:
       - name: Check out repository
         timeout-minutes: 2
         uses: actions/checkout@v7
-
-      - name: Set up Java for Firestore Emulator
-        timeout-minutes: 3
-        uses: actions/setup-java@v5
         with:
-          distribution: temurin
-          java-version: '21'
+          fetch-depth: 2
 
       - name: Set up Node.js
         timeout-minutes: 3
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          cache: npm
-          cache-dependency-path: |
-            tools/package-lock.json
-            functions/package-lock.json
+
+      - name: Select CI checks
+        id: scope
+        timeout-minutes: 2
+        run: node tools/ci_scope.mjs
+
+      - name: Test CI selection and progress tools
+        timeout-minutes: 1
+        run: node --test tools/ci_scope.test.mjs tools/project_progress.test.mjs
 
       - name: Check documentation links and metrics
         timeout-minutes: 1
         run: node tools/check_docs.mjs
 
+      - name: Set up Java for Firestore Emulator
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 3
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache npm dependencies
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 2
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-npm-${{ hashFiles('.nvmrc', 'tools/package-lock.json', 'functions/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-npm-
+
       - name: Cache Firestore and Storage Emulators
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
         uses: actions/cache@v6
         with:
@@ -46,6 +65,7 @@ jobs:
           key: ${{ runner.os }}-firestore-storage-v1-${{ hashFiles('tools/package-lock.json') }}
 
       - name: Set up Flutter
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 5
         uses: subosito/flutter-action@v2
         with:
@@ -54,36 +74,44 @@ jobs:
           cache: true
 
       - name: Install dependencies
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
         run: flutter pub get --enforce-lockfile
 
       - name: Verify formatting
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 2
         run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
         run: flutter analyze
 
       - name: Test
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 5
         run: flutter test
 
       - name: Test browser read-state persistence
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
         run: dart test --platform chrome test/read_state_store_browser.dart
 
       - name: Install Firestore Rules test dependencies
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 4
         working-directory: tools
         run: npm ci
 
       - name: Test development tools
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 2
         working-directory: tools
         run: npm run test:tools
 
       - name: Show test tool versions
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 2
         run: |
           node --version
@@ -91,21 +119,25 @@ jobs:
           npm --prefix tools run firebase -- --version
 
       - name: Install Cloud Functions dependencies
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 4
         working-directory: functions
         run: npm ci
 
       - name: Lint Cloud Functions
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 2
         working-directory: functions
         run: npm run lint
 
       - name: Test Cloud Functions
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
         working-directory: functions
         run: npm test
 
       - name: Test Firestore Rules and server transactions
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 5
         working-directory: tools
         # Debug output is kept in firebase-debug.log for failure diagnostics.
@@ -114,12 +146,14 @@ jobs:
         run: npm run test:rules
 
       - name: Test prepared B2 runtime
+        if: steps.scope.outputs.full != 'false'
         # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.
         timeout-minutes: 10
         working-directory: tools
         run: npm run test:read-runtime
 
       - name: Test final account retention cleanup
+        if: steps.scope.outputs.full != 'false'
         # Keep the bounded retention suite independent of the existing Rules timeout.
         # Each emulator is stopped by emulators:exec before the next step starts.
         timeout-minutes: 4
@@ -127,16 +161,18 @@ jobs:
         run: npm run test:purge
 
       - name: Test Storage Rules and cross-service identity access
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 4
         working-directory: tools
         run: npm run test:storage
 
       - name: Build web
+        if: steps.scope.outputs.full != 'false'
         timeout-minutes: 5
         run: node tools/web_environment.mjs build dev --debug
 
       - name: Upload emulator failure logs
-        if: ${{ failure() || cancelled() }}
+        if: ${{ steps.scope.outputs.full != 'false' && (failure() || cancelled()) }}
         timeout-minutes: 2
         uses: actions/upload-artifact@v7
         with:

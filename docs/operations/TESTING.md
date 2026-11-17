@@ -8,6 +8,34 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+<a id="dva-rezimy-ci"></a>
+
+## Dva režimy CI
+
+Dokumentace a místní počítadlo spouštějí jen Node, testy výběru/výpočtu a kontrolu
+dokumentace. Zachovává se workflow Flutter checks a job `verify`; Flutter,
+Java, npm závislosti, emulátory a build se v lehkém režimu vůbec nespouštějí.
+
+Lehký seznam obsahuje Markdown/text pod docs, README, kořenový AGENTS,
+docs/progress.json, docs/archive/snapshots.json a přesně nástroje check_docs.mjs,
+project_progress.mjs a project_progress.test.mjs. Jiné JSON podklady,
+konfigurace, závislosti, workflow a neznámé soubory spouštějí úplné CI.
+Odstranění či přesun kontrolního nástroje také spouští úplné CI.
+
+[Výběr](../../tools/ci_scope.mjs) porovnává celý rozsah push před/po; u PR
+skutečný merge checkout proti jeho základně. U první publikace větve lze
+použít jediného rodiče, pokud je doloženým tipem jiné vzdálené větve. Nejasný
+rozsah, chyba Git, neobvyklý checkout, tag a ruční workflow_dispatch znamenají
+úplnou kontrolu. Summary běhu výslovně uvádí vybraný režim a důvod.
+
+Lokální regrese bez instalace závislostí:
+`node --test tools/ci_scope.test.mjs tools/project_progress.test.mjs`.
+Pokrývají více commitů, přejmenování přes hranici dokumentace, první push,
+PR merge, shallow historii, chybové návraty a podmínky všech těžkých kroků.
+Úspěšné lehké CI nedokládá aplikační testy ani build daného commitu; před
+vydáním získat úplné CI ručním spuštěním nebo tagem podle
+[pravidel vydání](RELEASING.md).
+
 ## Moderační mazání s indexem R5 – 5. listopadu
 
 feed_moderation_index.integration.test.js přidává 11 případů do test:purge.

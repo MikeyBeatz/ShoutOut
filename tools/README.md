@@ -14,6 +14,13 @@ After recording a verified completed section run
 `node tools/project_progress.mjs --check` rejects stale generated output;
 it never grants deployment approval. [Methodology](../docs/PROGRESS.md).
 
+Documentation/progress-only pushes use Node, documentation validation and
+`node --test tools/ci_scope.test.mjs tools/project_progress.test.mjs` without
+Flutter, npm installs or emulators. Application/infrastructure changes and
+unknown ranges keep full checks. Manual workflow_dispatch and tag pushes
+always select full checks; a green lightweight run is not release build proof.
+[CI selection policy](../docs/operations/TESTING.md#dva-rezimy-ci).
+
 ## Development utilities
 
 The [permanent feed installation plan](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)

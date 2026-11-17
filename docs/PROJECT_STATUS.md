@@ -6,6 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválená údržba CI je připravená, ověření obou režimů ještě zbývá.**
+Na fix/selective-ci je výběr lehkého/úplného režimu. Lokálně prošlo 22 cílených
+regresí, celých 79 tools a kontrola dokumentace včetně snímků; přesné CI ještě
+zbývá. Následný čistě dokumentační push ověří rychlou cestu.
+[Režimy a hranice](operations/TESTING.md#dva-rezimy-ci).
+Nic se nenasazuje a další produktový úkol zůstává retenční úklid B2 níže.
+
 **Nová metodika stupnic je uzavřená po přesném CI; další je B2 úklid.**
 Feature/progress-substeps zachovává 24 MVP milníků a 157 backlogových položek,
 ale eviduje jejich podúseky s pevnými vahami. Registry, podklady a generátor
