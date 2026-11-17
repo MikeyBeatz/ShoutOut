@@ -12,4 +12,5 @@ Provedení postupu vyžaduje oprávnění podle RELEASING. Datované staré roll
 - [Výběr změn a publikování ShoutOut](RELEASING.md)
 - [Vývojové prostředí, služby a nasazení](SETUP_AND_OPERATIONS.md)
 - [Testovací strategie a regresní matice](TESTING.md)
+- [Diagnostika konzole – fonty, CSP a Firestore](CONSOLE_WARNINGS.md)
 - [Vývojový a produkční web](WEB_ENVIRONMENTS.md)

@@ -23,6 +23,11 @@ always select full checks; a green lightweight run is not release build proof.
 
 ## Development utilities
 
+Local, isolated [console-warning diagnostics](diagnostics/README.md) reproduce
+Flutter font warnings and inspect reCAPTCHA/CSP without modifying the app,
+connecting to user browser profiles, or writing Firebase data. They are opt-in,
+not part of normal CI and not a deployment tool.
+
 The [permanent feed installation plan](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)
 describes `feed_empty_bootstrap.mjs` (`plan/status` are read-only; all other
 commands require explicit project/digest approval and exact successful CI).

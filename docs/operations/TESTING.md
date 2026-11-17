@@ -12,6 +12,10 @@ Velikost implementačního úseku určuje [schválený postup kontrolních bodů
 průběžné cílené lokální kontroly, seskupený push/úplné CI pro hotový funkční
 úsek a živé ověření po DEV nasazení. Rizikové přechody mají potřebné vlastní brány.
 
+[Izolovaná diagnostika fontů a CSP](CONSOLE_WARNINGS.md) má vlastní Flutter
+entrypoint a čistý headless Chrome. Potvrzuje U+FE0F ve dvou pevných kategoriích;
+neuzavírá CSP, přihlášený DEV průchod ani následně hlášený QUIC transport.
+
 <a id="dva-rezimy-ci"></a>
 
 ## Dva režimy CI

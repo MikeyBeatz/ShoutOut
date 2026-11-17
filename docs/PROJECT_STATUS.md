@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Dočasná priorita vlastníka: konzole před pokračováním B2.**
+Na feature/console-warning-diagnostics je dokončená lokální reprodukce:
+U+FE0F u pevných kategorií Nabídka/Varování! vyvolá Noto varování bez Firebase;
+stejné texty bez selektoru jsou čisté a vizuálně zkontrolované. Ze skutečných
+konstant se problém reprodukuje také. 12 izolovaných Chrome scénářů, samostatný
+Flutter build a jejich [důkazy/návrh](operations/CONSOLE_WARNINGS.md) oddělují
+diagnostiku od opravy. Aplikace ani nasazení se nemění; cílená úprava dvou
+hodnot čeká na souhlas. CSP se nepodařilo reprodukovat ani při funkční pozitivní
+kontrole a vlastník potvrdil jeho vymizení po obnově. Přesný původ není potvrzený.
+Nově nahlášený QUIC Listen transport je evidovaný zvlášť; obnovení spojení zatím
+není doložené. Níže uvedená B2 akceptace je pozastavená, její data zachovat.
+
 **B2 je aktivní v DEV; zbývá živá offline/restart akceptace a úklid.**
 Zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
 Čtyři field výjimky jsou READY, pět Functions ACTIVE se shodnými skutečnými

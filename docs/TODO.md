@@ -34,6 +34,14 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
+**Dočasná priorita vlastníka – vyřešit konzoli před B2:**
+[Lokální diagnostika](operations/CONSOLE_WARNINGS.md) je dokončená ve 12
+izolovaných Chrome scénářích. Příčinou Noto varování našich pevných kategorií
+je U+FE0F; cílená úprava dvou hodnot čeká na schválení. CSP se znovu neobjevilo
+ani vlastníkovi po obnově; přesný původ původního výpisu není potvrzený.
+Nový QUIC transport evidovat odděleně, automaticky neměnit síťovou konfiguraci.
+Nejde o dokončenou opravu, celý vizuální audit ani B2 akceptaci; metriky zachovány.
+
 1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
    [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
    success úplné CI 44099715617, pět Functions ACTIVE se shodnými zdroji,
@@ -45,8 +53,8 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    restart úložiště/controlleru a následné dokončení. Zdroj 808a734 má success
    úplné CI 44157663737; testovací úsek je uzavřený. Nejde o živý Firebase/
    App Check ani cold-tab restart DEV aplikace.
-   Živá offline/restart akceptace a úklid zůstávají otevřené. Vlastník je na
-   meetingu; pokračovat automatizovaně bez jeho oken a dalších ručních zadání.
+   Živá offline/restart akceptace a úklid zůstávají otevřené; nyní mají počkat
+   na vyřešení výše uvedené konzolové priority podle nového pokynu vlastníka.
    Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku
    přepínání ani queue fixture neopakovat. Oba pilotní Shouty A/B a záložky
    zachovat do akceptace, pak uklidit přes writer; žádné nové Auth účty.
