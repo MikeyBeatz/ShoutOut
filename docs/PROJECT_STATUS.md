@@ -32,9 +32,12 @@ stejný readAtLocal=1794926818455 a cloudWrites=0. Po požadované offline obnov
 je však fronta prázdná. Cloud v testovací době potvrzuje HTTP 200 a VALID Auth/
 App Check; serverový stav má stejnou revizi 2, jedinou B a nezměněný čas/retenci.
 To prokazuje idempotentní příjem, nikoli výpadek či cold restart. Nevkládat další
-frontu ani neopakovat stejný test. Vlastník dostal aktualizovaný read-only probe
-s checkedAt/online/pageStartedAt; nyní čekat na čerstvý výpis bez změn v aplikaci
-a určit stav připojení/kontext. Přesnou kartu nelze ze serverových logů odvodit.
+frontu ani neopakovat stejný test. Čerstvý probe vlastníka z 15:24:23.432Z
+má online=true, stejný čas B a prázdnou frontu. Nyní pouze nastavit Network
+Offline v téže kartě a ověřit online=false čerstvým read-only probe; bez obnovy
+a vložení fronty. DevTools ponechat otevřené po celý další test. Důkaz je
+build/b2-connection-state-client-proof.json. Historický stav Offline ani přesnou
+odesílající kartu nelze zpětně odvodit ze serverových logů.
 Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
 kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové

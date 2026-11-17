@@ -148,6 +148,14 @@ neprovádí síťové operace ani místní zápisy. Vlastník dostal nové načt
 téhož souboru, bez obnovy/přepínání/vkládání fronty. Nejdřív vyhodnotit tyto
 údaje; uživatele neposílat znovu do stejného nekontrolovaného postupu.
 
+Čerstvý výpis vlastníka z 2026-11-17T15:24:23.432Z má online=true a
+pageStartedAt=1794926461766.7, B potvrzené a žádnou frontu/checkpoint. Aktuální
+stránka tedy hlásí připojení, což odpovídá pozorovaným úspěšným požadavkům;
+není to důkaz offline ztráty fronty. Důkaz: build/b2-connection-state-client-proof.json.
+Další je jen Network → Offline v téže kartě a čerstvá read-only kontrola
+online=false, bez obnovy či vkládání fronty. DevTools ponechat otevřené i při
+následném ovládání aplikace. Teprve po této kontrole pokračovat frontou.
+
 Vlastník dostal tento výslovně označený místní zápis místo dalšího stejného
 pokusu čtení. Po B2_QUEUE_FIXTURE nejprve ověřit neúspěšnou obnovu při Offline
 a zachovanou frontu, pak návrat online/restart/ack a stejný serverový confirmedAt

@@ -42,11 +42,12 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    Jádrový live test TestBusiness, první klientský přenos A pod Bright_Otter_182
    i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka.
    Oba offline výpisy měly B už synchronizované; recovery neuzavírat ani stejně
-   neopakovat. Další je kontrolovaná místní fronta jediné existující značky B
-   je doložená jako pending/queued, čas zachovaný. Po další obnově se vyprázdnila;
+   neopakovat. Kontrolovaná místní fronta jediné existující značky B byla
+   doložená jako pending/queued, čas zachovaný. Po další obnově se vyprázdnila;
    cloud potvrzuje úspěšný příjem bez duplikace či prodloužení. Offline/cold
-   restart neuzavírat. Další je pouze čerstvý read-only výpis s nově přidaným
-   časem a stavem online; stejný pokus ani vložení fronty neopakovat. Oba 24h testovací
+   restart neuzavírat. Nový čerstvý výpis má online=true. Další je pouze
+   Network → Offline v téže kartě a čerstvý read-only výpis online=false;
+   DevTools ponechat otevřené, zatím bez obnovy a nové fronty. Oba 24h testovací
    Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
    další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
    Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;
