@@ -6,10 +6,12 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválená údržba CI je připravená, ověření obou režimů ještě zbývá.**
+**Schválená údržba CI má rozběhnuté úplné ověření; nyní ověřit lehkou cestu.**
 Na fix/selective-ci je výběr lehkého/úplného režimu. Lokálně prošlo 22 cílených
-regresí, celých 79 tools a kontrola dokumentace včetně snímků; přesné CI ještě
-zbývá. Následný čistě dokumentační push ověří rychlou cestu.
+regresí, celých 79 tools a kontrola dokumentace včetně snímků. Zdroj
+`27f46e8cd98c195471e68cc6bdedb592a75fc819` spustil správně úplný
+[běh 44053527899](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053527899);
+výsledek zatím čeká. Tento čistě dokumentační push ověří lehkou cestu.
 [Režimy a hranice](operations/TESTING.md#dva-rezimy-ci).
 Nic se nenasazuje a další produktový úkol zůstává retenční úklid B2 níže.
 
