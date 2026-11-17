@@ -122,7 +122,12 @@ data; odmítne rozpracovaný checkpoint či neplatnou frontu. Zápis markeru,
 nové unikátní sekvence a outboxu je jediná IndexedDB transakce, opakování je
 idempotentní. Nemá síťové/Auth operace; stará read-only kontrola je nezměněná.
 Generátor vychází ze schválené fixture a v3 schématu produkčního klienta;
-node --check prošlo. Skript zatím v prohlížeči není prokázaně spuštěný.
+node --check prošlo. Vlastník následně doložil B2_QUEUE_FIXTURE: changed=true,
+pendingSync=true, queued=true, zachovaný readAtLocal=1794926818455 a
+cloudWrites=0. Místní transakce je ověřená; důkaz je
+build/b2-queue-fixture-client-proof.json. Vlastník nyní při stále zapnutém
+Offline zkouší jedinou obnovu feedu a poté původní read-only B2_READ_CHECK;
+neúspěšné odeslání a cold restart ještě nejsou doložené.
 
 Vlastník dostal tento výslovně označený místní zápis místo dalšího stejného
 pokusu čtení. Po B2_QUEUE_FIXTURE nejprve ověřit neúspěšnou obnovu při Offline

@@ -27,7 +27,9 @@ takže recovery neprokazuje. Druhý výpis je včetně času B stejný; stejné 
 neopakovat. Vlastník dostal samostatný offline-only skript
 build/b2-offline-queue-fixture.js pro místní opakované zařazení jediné testovací
 značky B do fronty, beze změny přečtení/času/retence a bez síťového zápisu.
-Vyčkat na B2_QUEUE_FIXTURE; pak neúspěšná obnova offline a online restart/ack.
+Vlastník doložil B2_QUEUE_FIXTURE changed=true/pendingSync=true/queued=true,
+stejný readAtLocal=1794926818455 a cloudWrites=0. Nyní vyčkat na B2_READ_CHECK
+po jediné obnově feedu stále offline; pak cold restart a online ack.
 Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
 kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
