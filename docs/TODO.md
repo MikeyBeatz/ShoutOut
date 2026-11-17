@@ -43,8 +43,10 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka.
    Oba offline výpisy měly B už synchronizované; recovery neuzavírat ani stejně
    neopakovat. Další je kontrolovaná místní fronta jediné existující značky B
-   podle plánu je doložená jako pending/queued, čas zachovaný. Zbývá neúspěšná
-   obnova offline a cold restart s online ack. Oba 24h testovací
+   je doložená jako pending/queued, čas zachovaný. Po další obnově se vyprázdnila;
+   cloud potvrzuje úspěšný příjem bez duplikace či prodloužení. Offline/cold
+   restart neuzavírat. Další je pouze čerstvý read-only výpis s nově přidaným
+   časem a stavem online; stejný pokus ani vložení fronty neopakovat. Oba 24h testovací
    Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
    další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
    Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;

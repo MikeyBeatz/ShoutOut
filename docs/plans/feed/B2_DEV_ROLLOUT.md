@@ -129,6 +129,25 @@ build/b2-queue-fixture-client-proof.json. Vlastník nyní při stále zapnutém
 Offline zkouší jedinou obnovu feedu a poté původní read-only B2_READ_CHECK;
 neúspěšné odeslání a cold restart ještě nejsou doložené.
 
+Po požadované offline obnově dodal vlastník opět pendingSync=false/queued=false
+a žádný checkpoint (build/b2-offline-after-refresh-client-proof.json). Offline
+recovery tím neuzavírat a nevkládat další frontu bez diagnostiky. Cloudové logy
+v testovací době potvrzují syncreadbatch HTTP 200 s Auth/App Check VALID
+(2026-11-17T15:15:43.473408Z) a getreadstatepage HTTP 200. UID-scoped admission
+záznam potvrzuje příjem pro Bright_Otter_182, přesnou prohlížečovou kartu z těchto
+podkladů určit nelze. Srovnání před/po ověřilo revizi 2, jedinou B, stejný
+confirmedAt=1794927003716 i retainUntil a nezměněné ostatní značky. Opakované
+přijetí bez duplikace/prodloužení je ověřené samostatně, výpadek ani cold restart
+nejsou. Důkazy: build/b2-sync-request-observation.json a b2-retry-after.json.
+
+Kontrola aktuálního klienta při chybě uploadu končí v catch bez potvrzení
+fronty; z dostupných podkladů není prokázaná ztráta neodeslané značky. Původní
+výpis neobsahoval čas ani stav připojení. Read-only probe je nyní doplněný o
+checkedAt, navigator.onLine, performance.timeOrigin a visibilityState;
+neprovádí síťové operace ani místní zápisy. Vlastník dostal nové načtení obsahu
+téhož souboru, bez obnovy/přepínání/vkládání fronty. Nejdřív vyhodnotit tyto
+údaje; uživatele neposílat znovu do stejného nekontrolovaného postupu.
+
 Vlastník dostal tento výslovně označený místní zápis místo dalšího stejného
 pokusu čtení. Po B2_QUEUE_FIXTURE nejprve ověřit neúspěšnou obnovu při Offline
 a zachovanou frontu, pak návrat online/restart/ack a stejný serverový confirmedAt

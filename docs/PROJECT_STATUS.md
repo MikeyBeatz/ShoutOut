@@ -28,8 +28,13 @@ neopakovat. Vlastník dostal samostatný offline-only skript
 build/b2-offline-queue-fixture.js pro místní opakované zařazení jediné testovací
 značky B do fronty, beze změny přečtení/času/retence a bez síťového zápisu.
 Vlastník doložil B2_QUEUE_FIXTURE changed=true/pendingSync=true/queued=true,
-stejný readAtLocal=1794926818455 a cloudWrites=0. Nyní vyčkat na B2_READ_CHECK
-po jediné obnově feedu stále offline; pak cold restart a online ack.
+stejný readAtLocal=1794926818455 a cloudWrites=0. Po požadované offline obnově
+je však fronta prázdná. Cloud v testovací době potvrzuje HTTP 200 a VALID Auth/
+App Check; serverový stav má stejnou revizi 2, jedinou B a nezměněný čas/retenci.
+To prokazuje idempotentní příjem, nikoli výpadek či cold restart. Nevkládat další
+frontu ani neopakovat stejný test. Vlastník dostal aktualizovaný read-only probe
+s checkedAt/online/pageStartedAt; nyní čekat na čerstvý výpis bez změn v aplikaci
+a určit stav připojení/kontext. Přesnou kartu nelze ze serverových logů odvodit.
 Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
 kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
