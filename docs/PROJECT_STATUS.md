@@ -6,6 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**DEV zapojení a pilot B2 jsou schválené; probíhá ověření před rolloutem.**
+Na feature/b2-dev-rollout je připravené nahrazení denní receipt úlohy minutovou
+údržbou se stejnými prostředky, zapojení účtového read úklidu a oddělený
+read-sync balíček. DEV web má synchronizaci zapnutou, produkční flag zůstává false.
+[Přesný schválený rozsah a pořadí](plans/feed/B2_DEV_ROLLOUT.md#schválený-živý-rozsah).
+Lokální kontroly/CI a skutečné revize budou doložené po dokončení; zatím není
+nové zapojení nasazené. Nepožadovat znovu schválení tohoto pilotu. Předchozí
+lokální výsledky níže zůstávají podkladem, jejich někdejší zákaz živých změn
+byl pro tento konkrétní rozsah nahrazen souhlasem vlastníka.
+
 **Příprava DEV B2 je uzavřená po CI; skutečné spouštění a pilot čekají.**
 Na feature/b2-dev-preparation je vypnutý retenční adaptér s 24h klidem,
 odděleným controlem a transakční ochranou. Účtový read úklid je explicitně false;

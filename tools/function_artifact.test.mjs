@@ -10,13 +10,15 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 test('both real artifacts include runtime dependency closure and exclude all lab/test modules', () => {
   for (const [directory, entry] of [['functions-content', 'content.js'], ['functions-account-deletion', 'account_deletion_dev.js']]) {
     const artifact = prepareFunctionArtifact(root, directory, entry);
-    assert(!artifact.files.includes('retention_runtime.js'), 'Prepared retention adapter must not join a live codebase yet');
+    assert.equal(artifact.files.includes('retention_runtime.js'), entry === 'content.js');
     for (const required of ['feed_runtime.js', 'feed_index_paths.js', 'feed_early_erasure_queue.js', 'feed_account_retention_runner.js',
       'feed_block_index_store.js', 'feed_account_retention_store.js', 'feed_index_gc_store.js']) assert(artifact.files.includes(required), required);
     const actual = readdirSync(artifact.target).filter(file => file.endsWith('.js')).sort();
-    // B2 is approved only locally. A later rollout must explicitly install its host.
+    // The scheduled content cleanup needs the block codec, never the callable host.
     assert(!actual.includes('read_sync.js'));
-    assert(!actual.includes('read_sync_blocks.js'));
+    assert.equal(actual.includes('read_sync_blocks.js'), entry === 'content.js');
+    assert(!actual.includes('read_sync_host.js'));
+    assert(!actual.includes('read_sync_runtime.js'));
     assert.deepEqual(actual, artifact.files);
     const manifest = JSON.parse(readFileSync(resolve(artifact.target, 'package.json')));
     assert.equal(manifest.main, entry); assert.equal(manifest.scripts, undefined);

@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { accountDeletionDevProposal, assertAccountDeletionDevTarget } from './account_deletion_dev.js';
 
-test('B2 private read cleanup remains explicitly disabled in the live DEV wrapper', () => {
-  assert.equal(accountDeletionDevProposal.readSyncEnabled, false);
+test('B2 private read cleanup is enabled before the DEV cloud transport', () => {
+  assert.equal(accountDeletionDevProposal.readSyncEnabled, true);
   assert.equal(accountDeletionDevProposal.privateCleanupEnabled, true);
 });
 

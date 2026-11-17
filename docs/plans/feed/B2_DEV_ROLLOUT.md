@@ -1,11 +1,50 @@
-# B2 – příprava DEV zapojení a návratové verze
+# B2 – DEV zapojení, pilot a návratová verze
 
-17. listopadu 2026. Schválený je pouze lokální přípravný úsek s testy, dokumentací
-a commit/push/CI. Bez nasazení, živých dat, aktivace přepínačů, změn Scheduleru,
-Rules nebo Auth účtů. Budoucí pilot cílí výhradně na projekt/site
-shoutout-dev-46c81; produkce, main a původní pending žádost zůstávají mimo něj.
+17. listopadu 2026. Lokální příprava je uzavřená a vlastník následně výslovně
+schválil navazující DEV zapojení a pilot níže. Cílem je výhradně projekt/site
+shoutout-dev-46c81; produkce, main, Rules, Auth účty a původní pending žádost
+zůstávají mimo něj. Připravený kód není důkaz nasazení či živé akceptace.
 
-## Připravené zapojení
+## Schválený živý rozsah
+
+- Čtyři cílené field změny bez TTL; živá metadata byla načtena jen pro čtení.
+  Schválený digest je
+  `39562e1f24114992c9590d55897a1240021caf299634510b9f123dcbc2808eaa`.
+- Dvě nové Functions syncReadBatch/getReadStatePage v samostatném read-sync
+  codebase: europe-west3, min 0 / max 1, concurrency 1, 256 MiB, 15 s,
+  existující SHOUTOUT_FEED_CURSOR_KEY. Žádný nový podpisový klíč.
+- readSyncEnabled=true ve dvou existujících účtových Functions; jejich
+  prostředky ani 60denní retence se nemění. Musí být nasazené před příjmem značek.
+- Existující cleanupOperationReceipts nahradí původní runner pokračujícím
+  read/receipt runnerem, každou minutu místo denně. Zachová 0–1 instanci,
+  concurrency 1, 256 MiB, 60 s a retry 0. Nevzniká nový Scheduler job.
+  Nejvýše 500 dokumentů / měkkých 10 s na každou ze dvou fází, po dokončení
+  24h klid; neporuchový klidový tick má naměřené 3 reads. Stále jde o
+  1 440 volání Function denně plus skutečnou práci a související účtování.
+- readSyncControl a retentionControl určují aktivaci odděleně. Před výměnou
+  runneru pozastavit původní job, nechat doběhnout jeho maximálně 60s běh a
+  ověřit novou revizi před aktivací retence. Starý a nový runner nesmějí běžet
+  současně; nový checkpoint začíná od začátku. Chybějící control je off,
+  nedochází k návratu na starý runner.
+- Po přesném úplném CI zapnout DEV synchronizaci a web. Živý test zahrne
+  dvě nové 24h syntetické Shouty pod existujícími Bright_Otter_182/TestBusiness,
+  dva klienty, offline/restart a jeden vymezený prošlý read blok a receipt.
+  Uklidit testovací obsah přes writer; neodstraňovat žádný Auth účet.
+  Retenční runner smí uklidit všechny způsobilé prošlé technické záznamy.
+
+Zdrojové zapojení je na feature/b2-dev-rollout. Přípravu artefaktu provede
+tools/prepare_read_sync_functions.mjs; sama nic nenasazuje. Ověřit přesné SHA,
+úspěšné úplné CI, čistý strom a shodu balíčků před každým rolloutem. DEV profil
+neurčuje produkční kapacitu 100 000 účtů / 5 000 aktivních relací.
+
+Lokálně prošlo 134 Functions unit testů (457 integračních mimo emulátor skip),
+81 tools, lint a 17 skutečných Chrome/IndexedDB testů. Nové regrese ověřují
+odmítnutí produkce před DB přístupem, chybějící control bez legacy fallbacku
+a odstranění identifikátorů/kurzorů z logů. Balíčková kontrola potvrzuje, že
+content přibírá retenční jádro a codec, nikoli read callable host; nový host
+je izolovaný. Rozšířený emulátorový běh a přesné úplné CI se ověřují samostatně.
+
+## Původní přípravné zapojení
 
 - retention_runtime.js nemá cloudový trigger ani živý import. Enabled=false
   znamená nulové DB operace. Enabled=true vyžaduje soukromý
@@ -66,7 +105,7 @@ checkpointem. Otevření bez transportu zachová přečtení/import, outbox i ch
 další místní čtení a erase fungují. Toto spolu s release buildem ověřuje místní
 kompatibilitu, nikoli živý návrat mezi nasazenými weby.
 
-## Přesné pořadí budoucího DEV pilotu
+## Pořadí DEV pilotu
 
 1. Ověřit kandidátní SHA/úplné CI, čistý strom, skutečné nasazené revize a uložený
    kompatibilní neaktivní v3 artefakt. Jeho Hosting rollout patří až do pilotu.
@@ -76,13 +115,13 @@ kompatibilitu, nikoli živý návrat mezi nasazenými weby.
    SHOUTOUT_FEED_CURSOR_KEY. Dokud control chybí/off, data se nesmějí zapisovat.
 4. Po vlastním CI aktivace zapojit readSyncEnabled do dvou stávajících účtových
    Functions bez změny prostředků/retence. Musí fungovat před prvním uploadem.
-5. Samostatně schválit skutečné spouštění retence a nahradit starou receipt
+5. V rámci výše schváleného spouštění retence nahradit starou receipt
    cestu. Oba receipt runnery nesmějí běžet současně; nový checkpoint bezpečně
    začne od začátku. Bez funkčního provozního úklidu B2 neaktivovat.
 6. Teprve potom readSyncControl active a aktivační DEV web s vlastním CI.
-   Navržený test: dva nové 24h syntetické Shouty pod Bright_Otter_182/TestBusiness,
-   dvě zařízení, offline/restart/retry a úklid přes writer. Tento návrh samotný
-   test nepovoluje. Živý test účtového mazání vyžaduje zvlášť vymezený dočasný
+   Schválený test: dva nové 24h syntetické Shouty pod Bright_Otter_182/TestBusiness,
+   dvě zařízení, offline/restart/retry a úklid přes writer. Živý test účtového
+   mazání není součástí pilotu a vyžadoval by zvlášť vymezený dočasný
    Auth účet; existující účty ani původní pending žádost se nemažou.
 
 Při potížích pozastavit readSyncControl a vrátit ověřený neaktivní v3 web.
@@ -90,12 +129,12 @@ Zachovat místní fronty, cloudová data a funkční účtový/retenční úklid
 již potřebného readSyncEnabled. Nevracet automaticky indexy. Zaznamenat revize,
 chybu a výsledek živého ověření.
 
-## Provozní kandidát k dalšímu rozhodnutí
+## Podklad provozní volby
 
 Pro malý DEV pilot doporučuji údržbu mimo účtový worker: navrhnout nahrazení
 runneru a změnu existující cleanupOperationReceipts z denního na minutové
-spouštění. Nový Scheduler job by nevznikl; tato změna nyní není schválená ani
-implementovaná. Nejprve ověřit možnost ponechat min 0 / max 1 / concurrency 1 /
+spouštění. Vlastník tuto variantu následně schválil v rozsahu nahoře.
+Nový Scheduler job nevznikne. Zachovat min 0 / max 1 / concurrency 1 /
 256 MiB / 60 s. Rozpočty zůstávají až 500 dokumentů / 10 s mezi transakcemi na
 fázi, celkem dvě; měkká mez nezastropuje latenci jednotlivého RPC.
 

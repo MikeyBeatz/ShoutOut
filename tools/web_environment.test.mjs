@@ -10,10 +10,10 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 const actualDev = loadConfig('dev');
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverSpatialFeed: false };
+const dev = { ...actualDev, serverSpatialFeed: false, serverReadSynchronization: false };
 
-test('read synchronization is disabled and activation requires DEV, local tracking and App Check', () => {
-  assert.equal(actualDev.serverReadSynchronization, false);
+test('read synchronization is enabled only in DEV and requires local tracking and App Check', () => {
+  assert.equal(actualDev.serverReadSynchronization, true);
   const prod = loadConfig('prod'); assert.equal(prod.serverReadSynchronization, false);
   for (const value of [null, 'true', 1]) assert.throws(() => validateConfig({ ...dev, serverReadSynchronization: value }, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...dev, serverReadSynchronization: true }, 'dev'));

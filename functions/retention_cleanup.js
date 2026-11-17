@@ -1,4 +1,4 @@
-// Prepared bounded runners only. No live entry point imports this module.
+// Bounded runners; the DEV schedule admits work through retention_runtime.
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';

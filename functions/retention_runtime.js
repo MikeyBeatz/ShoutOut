@@ -1,4 +1,4 @@
-// Prepared adapter only; no Scheduler/callable/trigger export or live import.
+// Controlled adapter shared by the approved DEV schedule and emulator tests.
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { runRetentionMaintenance } from './retention_cleanup.js';
 
