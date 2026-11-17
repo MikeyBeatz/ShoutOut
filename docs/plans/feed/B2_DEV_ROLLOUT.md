@@ -294,7 +294,17 @@ Lokálně **2/2 pass**, v obou případech navigatorOnline=true, 2 zahozena spoj
 3 upload pokusy a 1 výsledný efekt. Opakování v síťovém zásobníku není zaměněné
 za další uloženou značku. Testy vyhodnocují skutečnou ClientException a stav
 serveru, nikoli online boolean. Log build/b2-http-recovery-browser.log;
-flutter analyze je čisté. CI obsahuje nové dva testy vedle dosavadní sady 17.
+flutter analyze je čisté. Lokální souhrn build/b2-http-recovery-proof.json
+odděluje tento test od živého Firebase a úplného restartu browseru.
+
+Zdroj `808a7348ee1e7235a066e30a1ca3138bf6af4ed8` má
+[úspěšné úplné CI 44157663737](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44157663737),
+11 min 41 s: 375 Flutter, 17 původních + 2 nové Chrome testy, 81 tools,
+134 Functions unit (457 integračních skip mimo emulátor), 450 Rules/server,
+34 B2 runtime/retention, 116 purge, 15 Storage a formát/analýzu/lint/build.
+Obě HTTP regrese mají v CI stejné doložené počty jako lokálně; testovací úsek
+je uzavřený. Log build/b2-http-recovery-ci.log. Stupnice zůstávají 59,90 % MVP /
+70,16 % backlog; již započtené ověření B2 se nepřidává znovu.
 
 Produkční jsou klientské úložiště a controller, nikoli paměťový server: jde o
 kontraktní fixture, ne Firebase SDK/Auth/App Check ani restart celého browseru

@@ -42,8 +42,9 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    Přenos a import A druhým klientem i živý retry B bez duplikace prošly.
    [Nové izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests)
    lokálně prokazují zachování fronty při ztrátě socketu před/po zpracování,
-   restart úložiště/controlleru a následné dokončení. Přesné CI ještě zbývá;
-   nejde o živý Firebase/App Check ani cold-tab restart DEV aplikace.
+   restart úložiště/controlleru a následné dokončení. Zdroj 808a734 má success
+   úplné CI 44157663737; testovací úsek je uzavřený. Nejde o živý Firebase/
+   App Check ani cold-tab restart DEV aplikace.
    Živá offline/restart akceptace a úklid zůstávají otevřené. Vlastník je na
    meetingu; pokračovat automatizovaně bez jeho oken a dalších ručních zadání.
    Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku

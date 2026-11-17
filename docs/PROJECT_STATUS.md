@@ -24,9 +24,14 @@ Přesná příčina rozdílu mezi kartami a přenosem není potvrzená.
 Na žádost pokračovat bez asistence vznikly [dva izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests).
 Oba lokálně prošly: skutečné zahození socketu před/po zpracování, zachování
 produkční IndexedDB fronty/checkpointu, nové otevření úložiště/controlleru,
-dokončení bez duplikace a oddělení účtů. Analýza je čistá; společné přesné CI
-nových testů/workflow ještě zbývá. Paměťový server není Firebase/Auth/App Check
-ani živý DEV restart. Uživatelská okna nebyla ovládána; žádné nové nasazení.
+dokončení bez duplikace a oddělení účtů. Zdroj
+`808a7348ee1e7235a066e30a1ca3138bf6af4ed8` má
+[success úplné CI 44157663737](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44157663737):
+375 Flutter, 17 + 2 Chrome, 81 tools, 134 Functions unit (457 skip),
+450 Rules/server, 34 B2 runtime/retention, 116 purge, 15 Storage a
+formát/analýzu/lint/build. Testovací úsek je uzavřený. Paměťový server není
+Firebase/Auth/App Check ani živý DEV restart. Uživatelská okna nebyla ovládána;
+žádné nové nasazení.
 
 Oba pilotní Shouty A/B a čtyři záložky zachovat do akceptace, pak uklidit přes
 writer. Žádné nové/mazané Auth účty; produkce, main a Rules se nemění. B2 accept,

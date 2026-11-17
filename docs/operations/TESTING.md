@@ -64,6 +64,8 @@ bez duplicit. Navigator.onLine=true přitom nebránilo prokázanému HTTP výpad
 není podmínkou úspěchu. Nejde o Firebase SDK/Auth/App Check ani restart celého
 DEV webu. [Podrobné důkazy a meze](../plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests).
 CI spouští tuto sadu po dosavadních 17 Chrome/IndexedDB testech.
+Zdroj 808a734 má [success úplné CI 44157663737](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44157663737),
+včetně 375 Flutter, 17 + 2 Chrome a všech serverových/emulátorových sad i buildu.
 
 ## Pokračující retenční úklid B2 – 17. listopadu
 
