@@ -33,11 +33,16 @@ je však fronta prázdná. Cloud v testovací době potvrzuje HTTP 200 a VALID A
 App Check; serverový stav má stejnou revizi 2, jedinou B a nezměněný čas/retenci.
 To prokazuje idempotentní příjem, nikoli výpadek či cold restart. Nevkládat další
 frontu ani neopakovat stejný test. Čerstvý probe vlastníka z 15:24:23.432Z
-má online=true, stejný čas B a prázdnou frontu. Nyní pouze nastavit Network
-Offline v téže kartě a ověřit online=false čerstvým read-only probe; bez obnovy
-a vložení fronty. DevTools ponechat otevřené po celý další test. Důkaz je
-build/b2-connection-state-client-proof.json. Historický stav Offline ani přesnou
-odesílající kartu nelze zpětně odvodit ze serverových logů.
+má online=true, stejný čas B a prázdnou frontu; vlastník současně potvrzuje
+Network nastavené Offline. Navigator.onLine je dle ověřené dokumentace
+nespolehlivý indikátor; podmínka „musí být false“ byla chybná. Nepožadovat další
+stejné přepínání, nevkládat frontu ani měnit aplikaci na základě tohoto booleanu.
+Další ověření připravit podle skutečného selhání konkrétního síťového požadavku
+a zachování fronty. Přesná příčina rozdílu v dané relaci není potvrzená.
+Read-only pokus o DevTools nástroj opět zastavil kvůli neurčené URL; browser
+host nedostupný a Companion page_id=null. Podrobnosti/zdroje v plánu výše.
+Historický stav Offline ani přesnou odesílající kartu nelze zpětně odvodit
+ze serverových logů. Důkaz výpisu: build/b2-connection-state-client-proof.json.
 Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
 kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové

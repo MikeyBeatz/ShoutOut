@@ -152,9 +152,23 @@ téhož souboru, bez obnovy/přepínání/vkládání fronty. Nejdřív vyhodnot
 pageStartedAt=1794926461766.7, B potvrzené a žádnou frontu/checkpoint. Aktuální
 stránka tedy hlásí připojení, což odpovídá pozorovaným úspěšným požadavkům;
 není to důkaz offline ztráty fronty. Důkaz: build/b2-connection-state-client-proof.json.
-Další je jen Network → Offline v téže kartě a čerstvá read-only kontrola
-online=false, bez obnovy či vkládání fronty. DevTools ponechat otevřené i při
-následném ovládání aplikace. Teprve po této kontrole pokračovat frontou.
+Vlastník výslovně potvrdil, že Network má nastavené Offline. Předchozí podmínka
+„nejprve musí být online=false“ je nevhodná a další stejné přepínání neopakovat.
+Podle [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/onLine)
+a [HTML standardu](https://html.spec.whatwg.org/multipage/system-state.html#browser-state)
+je navigator.onLine nespolehlivý indikátor dostupnosti sítě. Hodnota true sama
+nevyvrací nastavení Offline a neprokazuje, že konkrétní požadavek může projít.
+Ani pomocný queue fixture s touto bránou zatím znovu nespouštět; neodstraňovat
+z něj ochranu bez připraveného náhradního ověření skutečného přenosu.
+
+Přesná příčina rozdílu v této relaci není potvrzená. Opětovná inventura má
+browser access host nedostupný; pokus o read-only otevření existujícího
+DevTools okna nástroj zastavil kvůli nemožnosti spolehlivě určit URL. Companion
+snapshot page_id=null neumožňuje navázat browser tab. Další ověření musí stát
+na selhání konkrétního síťového požadavku a zachování fronty; samotný boolean
+nebude rozhodující podmínkou. V tomto diagnostickém úseku nebyla změněna
+aplikace, helper pro místní zápis ani živé prostředí a uživateli nebyl zadán
+další stejný pokus. Offline/restart i konečný úklid zůstávají otevřené.
 
 Vlastník dostal tento výslovně označený místní zápis místo dalšího stejného
 pokusu čtení. Po B2_QUEUE_FIXTURE nejprve ověřit neúspěšnou obnovu při Offline
