@@ -8,12 +8,20 @@ Map<String, dynamic> gatewayFixture() => {
   ...jsonDecode(File('config/dev.json').readAsStringSync())
       as Map<String, dynamic>,
   'serverSpatialFeed': false,
+  'serverReadSynchronization': false,
 };
 
 void main() {
   test(
-    'read synchronization is disabled in both environments and requires DEV, local tracking and App Check',
+    'read synchronization is enabled only in DEV and requires local tracking and App Check',
     () {
+      expect(
+        WebEnvironment.fromJson(
+          jsonDecode(File('config/dev.json').readAsStringSync())
+              as Map<String, dynamic>,
+        ).serverReadSynchronization,
+        isTrue,
+      );
       final dev = gatewayFixture();
       expect(WebEnvironment.fromJson(dev).serverReadSynchronization, isFalse);
       expect(
