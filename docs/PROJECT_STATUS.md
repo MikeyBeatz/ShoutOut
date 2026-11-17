@@ -21,7 +21,10 @@ serverovým časem, bez pending/fronty a bez rozpracovaného checkpointu. B je
 na druhém klientu stále nepřečtené. Offline/restart a úklid zatím čekají.
 Cloudové INFO logy dokládají následné checked/idle ticky bez skenování či mazání.
 Browser host je nedostupný a nativní nástroj zastavil ovládání kvůli neurčené
-URL; vlastník nyní ověřuje frontu B v běžném okně s Network Offline.
+URL. První offline pokus v běžném okně už měl B potvrzené a prázdnou frontu,
+takže recovery neprokazuje. Vlastník nyní kontroluje novou frontu B v dosud
+otevřené anonymní relaci, bez obnovy před přepnutím Offline. Nic neresetovat
+ani nově nezakládat; vyčkat na B2_READ_CHECK.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
 Auth účty. B2 akceptace i následné B3/B4 zůstávají otevřené. Produkce/main/Rules
 se neměnily. Starší přípravné stavy níže nejsou současný stav nasazení.

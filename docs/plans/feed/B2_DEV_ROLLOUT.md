@@ -103,9 +103,16 @@ je tím ověřený; důkaz je build/b2-client-second-proof.json.
 **Živá klientská akceptace a úklid obou Shoutů zůstávají otevřené.** Browser host
 není dostupný; náhradní nativní ovládání skončilo, protože nástroj nedokázal
 spolehlivě určit URL. První přenos i import odděleného klienta jsou ověřené;
-zbývá offline/restart/retry a úklid přes writer. Vlastník dostal test B v běžné
-relaci: přečíst bez obnovy, zapnout Network Offline, zkusit obnovu feedu a
-read-only kontrolou ověřit zachovanou frontu před návratem online.
+zbývá offline/restart/retry a úklid přes writer. První offline pokus v běžném
+okně doložil ERR_INTERNET_DISCONNECTED, ale B už mělo pendingSync=false,
+queued=false a žádný checkpoint; server jeho přijetí potvrdil před uvedenými
+síťovými chybami. Zachování neodeslané fronty tím prokázané není. Konzolový
+SyntaxError u prvního vložení nenastal při následném úspěšném B2_READ_CHECK;
+není to doložená chyba aplikace. Důkaz: build/b2-offline-first-observation.json.
+Navazuje dosud otevřená anonymní relace: přečíst B, rovnou přepnout Network
+Offline bez návratu na feed/obnovy a nejprve zkontrolovat frontu. Až po jejím
+potvrzení zkusit neúspěšnou obnovu a restart s návratem online. Žádná nová
+fixture ani reset přečtení nejsou potřeba nebo provedené.
 Do té doby netvrdit dokončené B2 ani mazat testovací obsah. Produkce, main,
 Rules a původní pending žádost jsou zachované; kapacitní brána zůstává otevřená.
 

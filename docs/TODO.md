@@ -40,7 +40,9 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
    čtyři indexy READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila prošlé
    fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
    Jádrový live test TestBusiness, první klientský přenos A pod Bright_Otter_182
-   i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka. Oba 24h testovací
+   i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka.
+   První offline pokus měl B už synchronizované; recovery neuzavírat. Další je
+   kontrola nové fronty v existující anonymní relaci bez předchozí obnovy. Oba 24h testovací
    Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
    další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
    Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;
