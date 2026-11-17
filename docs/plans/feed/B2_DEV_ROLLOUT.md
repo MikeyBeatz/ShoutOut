@@ -94,12 +94,18 @@ nebyl tímto jádrovým testem označen jako přečtený.
 
 První uživatelská relace Bright_Otter_182 má na serveru ověřenou značku A;
 jeho „Mé shouty“ správně obsahují jen vlastní A, protože B patří TestBusiness.
-Vlastník nyní ověřuje oddělenou anonymní relaci a read-only místní kontrolu.
+Vlastník doložil také novou anonymní relaci před otevřením obsahu: IndexedDB v3,
+A read=true/pendingSync=false/queued=false s readAtLocal=1794926106840, což je
+přesný confirmedAt serverové značky. B zůstává nepřečtené, checkpoint není
+rozpracovaný a TestBusiness DB v této relaci neexistuje. Import druhého klienta
+je tím ověřený; důkaz je build/b2-client-second-proof.json.
 
 **Živá klientská akceptace a úklid obou Shoutů zůstávají otevřené.** Browser host
 není dostupný; náhradní nativní ovládání skončilo, protože nástroj nedokázal
-spolehlivě určit URL. Vlastník dostal první průchod pod Bright_Otter_182;
-následuje import na odděleném klientu, offline/restart/retry a úklid přes writer.
+spolehlivě určit URL. První přenos i import odděleného klienta jsou ověřené;
+zbývá offline/restart/retry a úklid přes writer. Vlastník dostal test B v běžné
+relaci: přečíst bez obnovy, zapnout Network Offline, zkusit obnovu feedu a
+read-only kontrolou ověřit zachovanou frontu před návratem online.
 Do té doby netvrdit dokončené B2 ani mazat testovací obsah. Produkce, main,
 Rules a původní pending žádost jsou zachované; kapacitní brána zůstává otevřená.
 

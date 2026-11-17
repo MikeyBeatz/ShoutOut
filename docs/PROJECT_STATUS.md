@@ -16,10 +16,12 @@ zachycených zdrojů jsou beze změny. Účtový read úklid a oba controls jsou
 [Rozsah, revize a důkazy](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
 Jádrový live test TestBusiness prokázal upload/replay/full/delta ve skutečné DB;
 HTTP anonymní příjem je odmítnut 401. První uživatelská relace Bright_Otter_182
-má na serveru ověřené přečtení A; druhá relace a offline/restart zatím čekají.
+má na serveru ověřené přečtení A; nová anonymní relace je stáhla s přesným
+serverovým časem, bez pending/fronty a bez rozpracovaného checkpointu. B je
+na druhém klientu stále nepřečtené. Offline/restart a úklid zatím čekají.
 Cloudové INFO logy dokládají následné checked/idle ticky bez skenování či mazání.
 Browser host je nedostupný a nativní nástroj zastavil ovládání kvůli neurčené
-URL; vlastník dostal read-only kontrolu oddělené anonymní relace.
+URL; vlastník nyní ověřuje frontu B v běžném okně s Network Offline.
 Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
 Auth účty. B2 akceptace i následné B3/B4 zůstávají otevřené. Produkce/main/Rules
 se neměnily. Starší přípravné stavy níže nejsou současný stav nasazení.
