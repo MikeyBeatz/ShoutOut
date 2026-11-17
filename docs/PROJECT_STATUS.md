@@ -6,19 +6,23 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Pokračující retenční úklid B2 je lokálně připravený; čeká přesné CI.**
+**Lokální retenční úklid B2 je uzavřený po přesném CI; není nasazený.**
 Na feature/b2-retention-cleanup jsou oddělené read/receipt runnery s atomickým
 kurzorem a lease, měřením a čtyřmi připravenými indexovými výjimkami bez TTL.
 28 cílených emulátorových regresí, 129 Functions unit, 79 tools a lint prošlo.
+Zdroj `5f3ed5ce014ef303ae163d9034fd1ae6a23e03a3` má
+[success CI 44060619655](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44060619655):
+129 Functions unit (447 integračních přeskočeno mimo emulátor), 448 Rules/server,
+26 B2 runtime/retention, 116 purge, 15 Storage a Flutter/browser/formát/analýzu/build.
 650 receipt se odčerpalo v 5 úsecích, 1 000 značek bylo 19 bloků.
 [Rozsah, důkazy a návrh kapacity](plans/feed/FEED_READING_POLICY.md#b2-retention-implementation).
-Živý plánovač, Rules, Auth, přepínače ani data se nemění. Automatické ověření
-v metrice zatím čeká na CI; kód je započtený samostatně. Potom vybrat provozní
-spouštění/rozpočet a dokončit indexaci, účtové zapojení, v3 návrat a DEV pilot.
+Živý plánovač, Rules, Auth, přepínače ani data se nemění. Implementace i
+automatické ověření jsou v metrice uzavřené. Další je provozní spouštění/rozpočet,
+dokončení indexace, účtové zapojení, v3 návrat a konkrétní DEV pilot.
 
 Vlastník schválil [větší funkční úseky a seskupené push/CI](operations/RELEASING.md#development-checkpoints).
 Průběžné lokální kontroly a samostatné brány rizikových přechodů zůstávají;
-implementační priorita je nadále B2 úklid. Jde o pracovní pravidlo, ne nové
+implementační priorita je nadále provozní dokončení B2. Jde o pracovní pravidlo, ne nové
 dokončení produktového úseku nebo změnu nasazení.
 
 **Údržba CI je uzavřená po ověření obou režimů; další je B2 úklid.**

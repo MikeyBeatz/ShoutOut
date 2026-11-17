@@ -961,9 +961,16 @@ dva workery, ztracené potvrzení, souběh se synchronizací i soukromým účto
 Nová sada je součástí test:read-runtime spolu s původními 10 runtime scénáři.
 Jednotkové testy navíc kontrolují rozpočty/projekt a skutečně omezený metadata RPC.
 Lokálně prošlo 28 emulátorových regresí: 16 nových + 7 read-sync + 5 původních
-receipt. Prošlo 129 Functions unit (444 integračních tehdy přeskočeno mimo
-emulátor; dvě nové regrese byly doplněny následně), 79 tools a lint.
-Konečný výsledek CI ještě čeká. Logy jsou build/b2-retention-regression-final.log,
+receipt. Prošlo 129 Functions unit (integrační testy se mimo emulátor
+přeskakují), 79 tools a lint.
+Zdroj `5f3ed5ce014ef303ae163d9034fd1ae6a23e03a3` má
+[success CI 44060619655](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44060619655):
+129 Functions unit (447 integračních přeskočeno mimo emulátor), 79 tools,
+448 Rules/server, 26 runtime/retention (10 původních runtime + 16 nových),
+116 purge, 15 Storage a Flutter/browser/formát/analýzu/lint/build. CI zopakovalo
+přesně stejné počty read/write/delete i metadata sond jako lokálně. Lokální
+úsek je uzavřený; nasazení, účtové zapojení a v3 návratový artefakt zůstávají otevřené.
+Logy jsou build/b2-retention-regression-final.log, build/b2-retention-targeted-final.log,
 build/b2-retention-functions-unit.log, build/b2-retention-tools.log a
 build/b2-retention-lint.log. Měření je stejné ve třech lokálních průchodech.
 

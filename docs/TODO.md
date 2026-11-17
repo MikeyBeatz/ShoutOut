@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,76 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,79 %** — vážené dokončení podúseků
 
-Hotové úseky: **140/209**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **141/209**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,12 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,13 %** — vážené dokončení podúseků
 
-Hotové úseky: **171/287**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **172/287**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -34,18 +34,21 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
-1. **Dokončit ověření a provozní plán úklidu B2 před DEV aktivací.**
+1. **Připravit provozní zapojení B2 a zbývající podmínky DEV pilotu.**
    [Schválený pokračující úklid](plans/feed/FEED_READING_POLICY.md#b2-retention-implementation)
-   je lokálně připravený: 28 cílených emulátorových testů, 129 Functions unit,
-   79 tools a lint prošlo; přesné CI ještě čeká. Provozní spouštění a rozpočet
-   zůstávají k rozhodnutí podle měření. Nový modul žádný živý vstup neimportuje.
+   je lokálně uzavřený: zdroj 5f3ed5c má success CI 44060619655, včetně 26 B2
+   runtime/retention testů a celé předchozí sady. Implementaci ani lokální
+   testy znovu neschvalovat. Žádné nasazení; zbývá konkrétní provozní rozpočet
+   a spouštění, účtové zapojení, indexace, v3 návrat a vymezený DEV pilot.
+   Lokálně prošlo i 28 cílených emulátorových testů, 129 Functions unit,
+   79 tools a lint. Nový modul žádný živý vstup neimportuje.
    [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
    je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
    každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
    Functions unit a 10 různých emulátorových scénářů prošlo. Úsek je uzavřený:
    zdroj cce1e7d má success CI 43284395332 (375 Flutter / 16 Chrome / 448
    Rules/server / 10 runtime, včetně obou velkých front). Znovu jej neschvalovat.
-   Nic nebylo nasazené. Před aktivací zbývá fyzický retenční úklid a jeho kapacita,
+   Nic nebylo nasazené. Před aktivací zbývá živé zapojení připraveného úklidu a jeho kapacita,
    potřebná indexace, kompatibilní v3 návrat a konkrétní živý DEV průchod.
    [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
    byl schválený a je implementovaný: hranice outboxu, odstranění automatických
