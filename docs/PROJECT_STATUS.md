@@ -6,48 +6,32 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**B2 je nasazené a aktivní v DEV; další je klientská akceptace a úklid.**
+**B2 je aktivní v DEV; zbývá živá offline/restart akceptace a úklid.**
 Zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
-Čtyři indexové výjimky jsou READY, všech pět vymezených Functions ACTIVE
-a jejich skutečné zdrojové ZIP odpovídají balíčkům. Nový web a5edfc1f8a96c6e7
-je ověřený proti release. Minutový runner uklidil po jednom prošlém testovacím
-read bloku a receipt, dokončil checkpointy s 24h klidem; původní žádost i 38
-zachycených zdrojů jsou beze změny. Účtový read úklid a oba controls jsou aktivní.
-[Rozsah, revize a důkazy](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
-Jádrový live test TestBusiness prokázal upload/replay/full/delta ve skutečné DB;
-HTTP anonymní příjem je odmítnut 401. První uživatelská relace Bright_Otter_182
-má na serveru ověřené přečtení A; nová anonymní relace je stáhla s přesným
-serverovým časem, bez pending/fronty a bez rozpracovaného checkpointu. B při
-tomto prvním importu bylo nepřečtené; další výpisy už mají B potvrzené.
-Offline/restart a úklid zatím čekají.
-Cloudové INFO logy dokládají následné checked/idle ticky bez skenování či mazání.
-Browser host je nedostupný a nativní nástroj zastavil ovládání kvůli neurčené
-URL. První offline pokus v běžném okně už měl B potvrzené a prázdnou frontu,
-takže recovery neprokazuje. Druhý výpis je včetně času B stejný; stejné kroky
-neopakovat. Vlastník dostal samostatný offline-only skript
-build/b2-offline-queue-fixture.js pro místní opakované zařazení jediné testovací
-značky B do fronty, beze změny přečtení/času/retence a bez síťového zápisu.
-Vlastník doložil B2_QUEUE_FIXTURE changed=true/pendingSync=true/queued=true,
-stejný readAtLocal=1794926818455 a cloudWrites=0. Po požadované offline obnově
-je však fronta prázdná. Cloud v testovací době potvrzuje HTTP 200 a VALID Auth/
-App Check; serverový stav má stejnou revizi 2, jedinou B a nezměněný čas/retenci.
-To prokazuje idempotentní příjem, nikoli výpadek či cold restart. Nevkládat další
-frontu ani neopakovat stejný test. Čerstvý probe vlastníka z 15:24:23.432Z
-má online=true, stejný čas B a prázdnou frontu; vlastník současně potvrzuje
-Network nastavené Offline. Navigator.onLine je dle ověřené dokumentace
-nespolehlivý indikátor; podmínka „musí být false“ byla chybná. Nepožadovat další
-stejné přepínání, nevkládat frontu ani měnit aplikaci na základě tohoto booleanu.
-Další ověření připravit podle skutečného selhání konkrétního síťového požadavku
-a zachování fronty. Přesná příčina rozdílu v dané relaci není potvrzená.
-Read-only pokus o DevTools nástroj opět zastavil kvůli neurčené URL; browser
-host nedostupný a Companion page_id=null. Podrobnosti/zdroje v plánu výše.
-Historický stav Offline ani přesnou odesílající kartu nelze zpětně odvodit
-ze serverových logů. Důkaz výpisu: build/b2-connection-state-client-proof.json.
-Omezení kontrolovaně vložené fronty zaznamenat při akceptaci. Stará čtecí
-kontrola zůstává read-only; nevytvářet nové Shouty/účty ani neresetovat značky.
-Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
-Auth účty. B2 akceptace i následné B3/B4 zůstávají otevřené. Produkce/main/Rules
-se neměnily. Starší přípravné stavy níže nejsou současný stav nasazení.
+Čtyři field výjimky jsou READY, pět Functions ACTIVE se shodnými skutečnými
+zdrojovými ZIP a web a5edfc1f8a96c6e7 odpovídá release. Read sync i účtový úklid
+jsou zapnuté; minutová retence uklidila prošlé fixture a dokončila checkpointy
+s 24h klidem. Původní pending žádost a 38 původních zdrojů jsou zachované.
+[Revize, živé důkazy a diagnostická historie](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
+
+Skutečný přenos A a import do druhé anonymní relace Bright_Otter_182 jsou
+ověřené. Následné živé opakování B nezměnilo revizi, čas potvrzení ani retenci.
+Offline/cold-tab restart zatím doložené nejsou. Vlastník potvrdil Network Offline;
+navigator.onLine=true to nevyvrací a nesmí být branou testu. Neopakovat stejnou
+smyčku ani znovu vkládat frontu bez měření skutečného selhání požadavku.
+Přesná příčina rozdílu mezi kartami a přenosem není potvrzená.
+
+Na žádost pokračovat bez asistence vznikly [dva izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests).
+Oba lokálně prošly: skutečné zahození socketu před/po zpracování, zachování
+produkční IndexedDB fronty/checkpointu, nové otevření úložiště/controlleru,
+dokončení bez duplikace a oddělení účtů. Analýza je čistá; společné přesné CI
+nových testů/workflow ještě zbývá. Paměťový server není Firebase/Auth/App Check
+ani živý DEV restart. Uživatelská okna nebyla ovládána; žádné nové nasazení.
+
+Oba pilotní Shouty A/B a čtyři záložky zachovat do akceptace, pak uklidit přes
+writer. Žádné nové/mazané Auth účty; produkce, main a Rules se nemění. B2 accept,
+B3/B4 a produkční kapacita zůstávají otevřené. Následující datované přípravy jsou
+historické podklady, jejich vypnuté flags nejsou stavem dnešního DEV.
 
 **Příprava DEV B2 je uzavřená po CI; skutečné spouštění a pilot čekají.**
 Na feature/b2-dev-preparation je vypnutý retenční adaptér s 24h klidem,

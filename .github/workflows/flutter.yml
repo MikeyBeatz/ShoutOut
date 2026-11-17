@@ -96,7 +96,9 @@ jobs:
       - name: Test browser read-state persistence
         if: steps.scope.outputs.full != 'false'
         timeout-minutes: 3
-        run: dart test --platform chrome test/read_state_store_browser.dart
+        run: |
+          dart test --platform chrome test/read_state_store_browser.dart
+          node tools/run_read_sync_transport_tests.mjs
 
       - name: Install Firestore Rules test dependencies
         if: steps.scope.outputs.full != 'false'

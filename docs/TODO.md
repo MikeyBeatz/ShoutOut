@@ -36,23 +36,22 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
 
 1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
    [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
-   success úplné CI 44099715617, pět Functions je ACTIVE se shodnými zdroji,
-   čtyři indexy READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila prošlé
-   fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
-   Jádrový live test TestBusiness, první klientský přenos A pod Bright_Otter_182
-   i import nové anonymní relace prošly; offline/restart ještě čekají na vlastníka.
-   Oba offline výpisy měly B už synchronizované; recovery neuzavírat ani stejně
-   neopakovat. Kontrolovaná místní fronta jediné existující značky B byla
-   doložená jako pending/queued, čas zachovaný. Po další obnově se vyprázdnila;
-   cloud potvrzuje úspěšný příjem bez duplikace či prodloužení. Offline/cold
-   restart neuzavírat. Vlastník potvrzuje Network Offline navzdory online=true;
-   navigator.onLine není spolehlivá brána. Stejné přepínání ani queue fixture
-   neopakovat. Další je připravit ověření skutečného selhání konkrétního požadavku
-   a zachování fronty; přesná příčina rozdílu zatím není potvrzená. Oba 24h testovací
-   Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
-   další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
-   Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;
-   jejich tehdejší vypnuté flags a zákazy živých změn už nepopisují tento rollout.
+   success úplné CI 44099715617, pět Functions ACTIVE se shodnými zdroji,
+   čtyři field výjimky READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila
+   prošlé fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
+   Přenos a import A druhým klientem i živý retry B bez duplikace prošly.
+   [Nové izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests)
+   lokálně prokazují zachování fronty při ztrátě socketu před/po zpracování,
+   restart úložiště/controlleru a následné dokončení. Přesné CI ještě zbývá;
+   nejde o živý Firebase/App Check ani cold-tab restart DEV aplikace.
+   Živá offline/restart akceptace a úklid zůstávají otevřené. Vlastník je na
+   meetingu; pokračovat automatizovaně bez jeho oken a dalších ručních zadání.
+   Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku
+   přepínání ani queue fixture neopakovat. Oba pilotní Shouty A/B a záložky
+   zachovat do akceptace, pak uklidit přes writer; žádné nové Auth účty.
+   Hotové implementace ani rollout neopakovat. Produkční kapacita je samostatná.
+   Níže jsou podklady dřívějších příprav; jejich vypnuté flags a zákazy živých
+   změn už nepopisují současný rollout.
    [Schválený přípravný úsek](plans/feed/B2_DEV_ROLLOUT.md) je uzavřený na
    feature/b2-dev-preparation: adaptér false s 24h klidem, účtový read flag false,
    čtyři cílené indexy a neaktivní v3 návrat. 68 emulátorových / 17 Chrome prošlo;

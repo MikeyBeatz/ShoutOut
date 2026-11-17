@@ -25,17 +25,17 @@ návrhem B4; neoznačovat je za implementované ani považovat jejich cenu za nu
 Změněný kořen oblasti sám neznamená nový Shout: mění se také při reakcích či
 mazání. Počet musí odpovídat relevantním novinkám pro daný feed.
 
-**Ověřený současný stav:** DEV B1 ukládá přečtení místně. Starší B2 na zdroji
-693663d mělo timer/resume hook; [nový klientský základ](FEED_DELTA_REFRESH_PLAN.md#b2-client-results)
-je lokálně nahradil hranicí obnovy, IndexedDB v3 a trvalým checkpointem.
-Ani jedna B2 verze nemá živý transport. Home volá synchronize bez čekání
-na úplný read snapshot; bariéru pro globální B3 je třeba teprve dokončit.
-Navazující [serverová obsluha B2](#b2-runtime-implementation) je připravená
-lokálně za vypnutým přepínačem; její stav a ověření jsou uvedené níže.
-Navazující [pokračující retenční úklid](#b2-retention-implementation) je schválený
-lokální úsek; žádná jeho část zatím není zapojená do živého plánovače.
-[Příprava DEV zapojení, indexů a návratu](B2_DEV_ROLLOUT.md) navazuje samostatně
-schváleným lokálním úsekem; neznamená souhlas se skutečným spouštěním či pilotem.
+**Ověřený současný stav k 17. listopadu:** B2 je aktivní pouze v DEV ze zdroje
+bc4a6e1: IndexedDB v3, synchronizace při spuštění/obnově, obě čtecí Functions,
+účtový read úklid a pokračující read/receipt retence jsou nasazené.
+[Revize a důkazy](B2_DEV_ROLLOUT.md#dev-rollout-results) zahrnují skutečný přenos
+i import druhého klienta; živý offline/restart a konečný úklid pilotu ještě nejsou
+uzavřené. [Izolované HTTP regrese](B2_DEV_ROLLOUT.md#http-recovery-tests) ověřují
+skutečnou ztrátu spojení a restart úložiště/controlleru bez Firebase; nenahrazují
+živou akceptaci celé aplikace. Starší datované lokální výsledky níže zachovávají
+historii a jejich tehdejší vypnuté přepínače nepopisují dnešní DEV.
+Home volá synchronize bez čekání na úplný read snapshot; bariéru pro globální
+B3 je třeba teprve dokončit.
 Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
 vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
 Číselný indikátor B4 ani inkrementální obnova celého feedu hotové nejsou.
@@ -77,8 +77,9 @@ pokrytí; inactive/occlusion a nerozbalený či oříznutý obsah ruší čekaj�
 Jde o otestované transportně nezávislé jádro. Od B1 z 11. listopadu je na DEV
 webu připojené ke skutečné geometrii widgetů, ořezům, aktivitě/překrytí a
 trvalé IndexedDB. Místní značky prokazatelně přežily znovuotevření aplikace.
-Cloudová synchronizace ani nové read kolekce ještě nejsou živě zapojené;
-B2 má lokálně připravené jádro podle checkpointu níže. [Důkazy B1](#b1-implementation).
+Cloudová synchronizace a read kolekce jsou od 17. listopadu zapojené v DEV;
+jejich otevřené akceptační kroky shrnuje aktuální stav výše.
+[Důkazy B1](#b1-implementation).
 
 ## Hodinová relace i na klientovi
 

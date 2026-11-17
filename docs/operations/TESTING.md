@@ -50,6 +50,21 @@ instalace npm, emulátory a build mají v tomto běhu výsledek skipped.
 mimo emulátor), 448 Rules/server, 10 B2 runtime, 116 purge, 15 Storage a původní
 Flutter/browser/formát/analýzu/lint/build. Nejde o nasazení ani cloudový benchmark.
 
+## Skutečný HTTP výpadek B2 – 17. listopadu
+
+`node tools/run_read_sync_transport_tests.mjs` spustí vlastní server pouze na
+127.0.0.1:49327 a izolovanou Chrome sadu test/read_sync_transport_browser.dart.
+Na Windows lze nastavit DART_BIN na dart.exe. Žádný Firebase přístup, tokeny,
+Auth účty ani uživatelská okna. Server zahodí skutečný socket před zpracováním
+nebo po jediném potvrzeném zápisu do paměti před odesláním odpovědi.
+
+Oba testy prošly: produkční IndexedDB adaptér a ReadSyncController zachovaly
+frontu/checkpoint, po uzavření a novém otevření pokračovaly a dokončily ack
+bez duplicit. Navigator.onLine=true přitom nebránilo prokázanému HTTP výpadku;
+není podmínkou úspěchu. Nejde o Firebase SDK/Auth/App Check ani restart celého
+DEV webu. [Podrobné důkazy a meze](../plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests).
+CI spouští tuto sadu po dosavadních 17 Chrome/IndexedDB testech.
+
 ## Pokračující retenční úklid B2 – 17. listopadu
 
 Navazující retention_runtime.integration.test.js je také v test:read-runtime;

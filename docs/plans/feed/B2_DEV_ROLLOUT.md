@@ -273,6 +273,37 @@ Zachovat místní fronty, cloudová data a funkční účtový/retenční úklid
 již potřebného readSyncEnabled. Nevracet automaticky indexy. Zaznamenat revize,
 chybu a výsledek živého ověření.
 
+<a id="http-recovery-tests"></a>
+
+## Izolované ověření skutečného HTTP výpadku
+
+17. listopadu vlastník požádal pokračovat samostatně během meetingu bez dalších
+ručních testů. Jeho otevřená okna nebyla ovládána. Nové reprodukovatelné testy
+jsou v test/read_sync_transport_browser.dart; spouští je
+`node tools/run_read_sync_transport_tests.mjs`. Vlastní Node server běží pouze
+na 127.0.0.1:49327, s nejvýše dvěma malými syntetickými fixture v paměti.
+Nepoužívá Firebase, Auth, hesla ani tokeny a po testu se zastaví.
+
+| Skutečná chyba HTTP spojení | Ověřený výsledek |
+|---|---|
+| Socket zahozen před zpracováním uploadu | ClientException, žádný serverový efekt; produkční IndexedDB zachová readAtLocal, outbox i checkpoint. |
+| Socket zahozen po zpracování, před odpovědí | ClientException, právě jeden efekt; klient zachová neacknutou frontu a checkpoint. |
+| Nová instance úložiště/controlleru a zdravé spojení | Oba případy dokončí ack, vyprázdní outbox/checkpoint a zachovají přečtení; jediný efekt/revize a při opakování stejný confirmedAt. Jiný účet značku nemá. |
+
+Lokálně **2/2 pass**, v obou případech navigatorOnline=true, 2 zahozena spojení,
+3 upload pokusy a 1 výsledný efekt. Opakování v síťovém zásobníku není zaměněné
+za další uloženou značku. Testy vyhodnocují skutečnou ClientException a stav
+serveru, nikoli online boolean. Log build/b2-http-recovery-browser.log;
+flutter analyze je čisté. CI obsahuje nové dva testy vedle dosavadní sady 17.
+
+Produkční jsou klientské úložiště a controller, nikoli paměťový server: jde o
+kontraktní fixture, ne Firebase SDK/Auth/App Check ani restart celého browseru
+či živé DEV aplikace. Nemění aplikaci, Functions, konfiguraci, Rules nebo živá
+data a nevyžaduje nové nasazení. Živý offline/cold-tab restart a úklid dvou
+pilotních Shoutů zůstávají otevřené; tímto se feed-b2-accept neuzavírá.
+Další živý pokus musí měřit selhání konkrétního požadavku a zachování fronty;
+neopakovat požadavek na navigator.onLine=false ani předchozí neřízenou smyčku.
+
 ## Podklad provozní volby
 
 Pro malý DEV pilot doporučuji údržbu mimo účtový worker: navrhnout nahrazení
