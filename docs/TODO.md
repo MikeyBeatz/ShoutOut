@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,81 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,85 %** — vážené dokončení podúseků
 
-Hotové úseky: **142/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **144/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,13 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,15 %** — vážené dokončení podúseků
 
-Hotové úseky: **173/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **175/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -35,10 +35,11 @@ Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#developme
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
 1. **Připravit provozní zapojení B2 a zbývající podmínky DEV pilotu.**
-   [Schválený přípravný úsek](plans/feed/B2_DEV_ROLLOUT.md) je rozpracovaný na
+   [Schválený přípravný úsek](plans/feed/B2_DEV_ROLLOUT.md) je uzavřený na
    feature/b2-dev-preparation: adaptér false s 24h klidem, účtový read flag false,
    čtyři cílené indexy a neaktivní v3 návrat. 68 emulátorových / 17 Chrome prošlo;
-   čeká přesné CI a release artefakt. Tento rozsah znovu neschvalovat; živý
+   zdroj 405be7d má success CI 44077124957 a ověřený neaktivní release/kopii 68
+   souborů pro v3 návrat. Tento rozsah znovu neschvalovat; živý
    spouštěč, kapacita, aktivace a pilot vyžadují připravený samostatný plán.
    [Schválený pokračující úklid](plans/feed/FEED_READING_POLICY.md#b2-retention-implementation)
    je lokálně uzavřený: zdroj 5f3ed5c má success CI 44060619655, včetně 26 B2

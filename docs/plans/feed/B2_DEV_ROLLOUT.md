@@ -110,14 +110,27 @@ relací. Budget živého měření, skutečné latence, práce při dluhu a prod
 
 ## Výsledky
 
-Konečné CI a důkaz release artefaktu se doplní před uzavřením přípravy.
-Žádné živé změny nejsou provedené.
+Příprava je uzavřená. Zdroj `405be7d8218d628a85a93d529cdf391d7085bf3c` má
+[úspěšné úplné CI 44077124957](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44077124957):
+81 tools, 131 Functions unit (457 integračních mimo emulátor přeskočeno),
+450 Rules/server, 34 B2 runtime/retention, 116 purge, 15 Storage a
+Flutter/browser/formát/analýzu/lint/build. Žádné živé změny nejsou provedené.
 
 Lokálně prošlo 68 emulátorových testů (8 adaptéru, 16 jádra, 44 účtových),
 17 skutečných Chrome/IndexedDB, 131 Functions unit (457 integračních se mimo
 emulátor přeskočilo), 81 tools a lint. Logy:
 build/b2-preparation-emulator-final.log, build/b2-preparation-functions-unit.log,
 build/b2-preparation-tools.log a build/b2-preparation-browser.log.
+
+Čistý release ze stejného SHA prošel web_environment check pro DEV. Kopie
+68 souborů je v build/b2-v3-rollback-405be7d8/web; vedle ní jsou manifest.json
+a proof.json. Otisky kopie byly znovu ověřené stávajícím verifyBuild.
+Manifest SHA-256: `6bf3665671f14f514c8cfad666fb9001451b2d318ec716a1149f7d33274283b7`.
+main.dart.js SHA-256: `14b7b460ca21516ee7885a162be1594cb92ffc80a35772b0a7a1c1f52485b600`.
+LocalReadTracking je true, serverReadSynchronization false; 17 Chrome testů
+prošlo i v CI. Release log: build/b2-preparation-release-build.log. Artefakt je
+lokální/ignorovaný a před budoucím rolloutem znovu ověřit jeho existenci/otisky;
+není nasazený. Živý rollback a celá DEV akceptace B2 zůstávají otevřené.
 
 Metriky rozdělují pouze původní nedokončený podíl feed-b2-indexes: v MVP
 88 bodů na 29 implementace / 29 ověření / 30 živé indexace a účtové aktivace,

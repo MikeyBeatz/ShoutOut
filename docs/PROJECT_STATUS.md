@@ -6,13 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválená příprava DEV B2 je lokálně ověřená; čeká společné CI a release artefakt.**
+**Příprava DEV B2 je uzavřená po CI; skutečné spouštění a pilot čekají.**
 Na feature/b2-dev-preparation je vypnutý retenční adaptér s 24h klidem,
 odděleným controlem a transakční ochranou. Účtový read úklid je explicitně false;
 čistý plánovač pokrývá jen čtyři DEV field výjimky bez TTL. 68 emulátorových
 regresí a 17 Chrome/IndexedDB testů prošlo včetně neaktivního v3 návratu.
+Zdroj `405be7d8218d628a85a93d529cdf391d7085bf3c` má
+[success CI 44077124957](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44077124957):
+81 tools / 131 Functions unit (457 skip mimo emulátor) / 450 Rules/server /
+34 B2 runtime/retention / 116 purge / 15 Storage a Flutter/browser/formát/analýzu/build.
+Čistý neaktivní release ze stejného SHA má ověřenou kopii 68 souborů v
+build/b2-v3-rollback-405be7d8, s manifestem/proofem a kontrolovanými SHA-256.
 [Rozsah a pořadí DEV pilotu](plans/feed/B2_DEV_ROLLOUT.md). Skutečné spouštění,
 aktivace a živá ověření nejsou tímto úsekem povolené. Žádné nasazení či živé zápisy.
+Další je rozhodnutí o spouštění úklidu a konkrétní vymezený DEV pilot podle plánu;
+lokální přípravu neopakovat. Produkční kapacita a živá akceptace nejsou prokázané.
 
 **Lokální retenční úklid B2 je uzavřený po přesném CI; není nasazený.**
 Na feature/b2-retention-cleanup jsou oddělené read/receipt runnery s atomickým
