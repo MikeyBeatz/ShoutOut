@@ -6,15 +6,23 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**DEV zapojení a pilot B2 jsou schválené; probíhá ověření před rolloutem.**
-Na feature/b2-dev-rollout je připravené nahrazení denní receipt úlohy minutovou
-údržbou se stejnými prostředky, zapojení účtového read úklidu a oddělený
-read-sync balíček. DEV web má synchronizaci zapnutou, produkční flag zůstává false.
-[Přesný schválený rozsah a pořadí](plans/feed/B2_DEV_ROLLOUT.md#schválený-živý-rozsah).
-Lokální kontroly/CI a skutečné revize budou doložené po dokončení; zatím není
-nové zapojení nasazené. Nepožadovat znovu schválení tohoto pilotu. Předchozí
-lokální výsledky níže zůstávají podkladem, jejich někdejší zákaz živých změn
-byl pro tento konkrétní rozsah nahrazen souhlasem vlastníka.
+**B2 je nasazené a aktivní v DEV; další je klientská akceptace a úklid.**
+Zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
+Čtyři indexové výjimky jsou READY, všech pět vymezených Functions ACTIVE
+a jejich skutečné zdrojové ZIP odpovídají balíčkům. Nový web a5edfc1f8a96c6e7
+je ověřený proti release. Minutový runner uklidil po jednom prošlém testovacím
+read bloku a receipt, dokončil checkpointy s 24h klidem; původní žádost i 38
+zachycených zdrojů jsou beze změny. Účtový read úklid a oba controls jsou aktivní.
+[Rozsah, revize a důkazy](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
+Jádrový live test TestBusiness prokázal upload/replay/full/delta ve skutečné DB;
+HTTP anonymní příjem je odmítnut 401. První uživatelská relace Bright_Otter_182
+má na serveru ověřené přečtení A; druhá relace a offline/restart zatím čekají.
+Cloudové INFO logy dokládají následné checked/idle ticky bez skenování či mazání.
+Browser host je nedostupný a nativní nástroj zastavil ovládání kvůli neurčené
+URL; vlastník dostal read-only kontrolu oddělené anonymní relace.
+Oba nové Shouty A/B a čtyři záložky zachovat do dokončení testu; nečinit nové
+Auth účty. B2 akceptace i následné B3/B4 zůstávají otevřené. Produkce/main/Rules
+se neměnily. Starší přípravné stavy níže nejsou současný stav nasazení.
 
 **Příprava DEV B2 je uzavřená po CI; skutečné spouštění a pilot čekají.**
 Na feature/b2-dev-preparation je vypnutý retenční adaptér s 24h klidem,
@@ -547,11 +555,12 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `503eea672db85fb06200115488a4e313cd751d48` / `47268ed17fd2eebd`; B1 místní přečtení, CI 43056516730 success. Odebrání karty i nepřítomnost po znovuotevření potvrzené, stejně jako B1/restart pod Bright_Otter_182. Všechny testovací skupiny uklizené. |
+| Webový zdroj / Hosting verze | `bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a` / `a5edfc1f8a96c6e7`; CI 44099715617 success, B2 aktivní, bajty release shodné. Živý průchod dvěma klienty a úklid nových A/B fixture čekají. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
-| Receipt cleanup | Beze změny ze zdroje `a57ae9b46767a7491a743a20c6da93f9407afa7a`, ACTIVE `cleanupoperationreceipts-00003-qig`; hash `bdd5b6b8aaa3f4673d7a66fba89f76d936a71e06` |
-| Účtové Functions | `ccc879f`, obě ACTIVE; request `00011-kob`, recovery `00011-lad`; hash `3cf911bd6ef4eb7350ef68068ed9a231ab347fa5` |
+| Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
+| Účtové Functions | `bc4a6e1`, obě ACTIVE; request `00012-tiw`, recovery `00012-rud`; readSyncEnabled=true, oba ZIP shodné se 39 soubory balíčku. |
+| B2 čtecí Functions | `bc4a6e1`, ACTIVE `syncreadbatch-00001-fox` / `getreadstatepage-00001-xub`, klíč v1, min0/max1/concurrency1/256 MiB/15 s, oba HTTP 401 bez identity/attestace; ZIP shodné s 10 soubory balíčku. |
 | Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav`; `4e7e5bd`: ACTIVE `getownshouts-00001-fik`, 42 modulů shodných, anonymní HTTP 401, max1/min0, concurrency1, 256 MiB/15 s |
 | Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`; `14b7885`: ACTIVE `toggleshoutreaction-00008-zek`; společný indexový writer |
 | Ostatní obsahové Functions | `14b7885`: ACTIVE `togglecommentreaction-00007-rir`, `toggleshoutsave-00006-roq`; všechny tři nové revize mají max1/min0, concurrency1, 256 MiB/15 s a shodu 42 modulů. `deleteComment` a `createContentReport` zůstávají ze zdroje f81eaf4 |
@@ -560,23 +569,18 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 | Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
-Další Functions tímto rolloutem aktualizované nebyly; neoznačovat všechny
-za jeden nový společný artefakt. Čtyři veřejné soubory na obou DEV originech
-odpovídají release manifestu (`build/expired-interactions-hosting-proof.json`).
-Návrat posledního webu: Hosting `fa0a450ecbce236e` (ce6b07a, původní široké
-tlačítko). Serverové zámky a nové Rules zachovat; jejich samostatný návrat
-by znovu povolil schválením zakázané interakce. Reader a index se neměnily.
-Při problému celého prostorového feedu lze pozastavit reader a vrátit
-kompatibilní Hosting `f5c7ef14f1b5e04b` (zdroj 7ab60c8);
-společné writery, generaci a ochranné Rules zachovat. Příprava má timeout 15 s,
-receipt cleanup 60 s.
-Limity účtových Functions: Node22, europe-west3, min0/max1, concurrency1,
-256 MiB/60 s. Obsahové a čtecí callable mají 15 s. Minutový Scheduler zůstal
-stejný; worker dostal schválený indexový úsek 32 kroků / 10 s. Firebase CLI
-přidělilo pouze přístup runtime service account k novému podpisovému tajemství.
-Storage Rules se při tomto rolloutu neměnily. Firestore Rules byly cíleně
-zpřísněné výše. Důkazy revizí/zdrojů: `build/feed-functions-after.json`,
-`build/feed-deployed-source-proof.json`; běh workeru: `build/feed-worker-live-proof.json`.
+Ostatní Functions tímto B2 rolloutem aktualizované nebyly; neoznačovat je za
+jeden společný nový artefakt. Release ověřuje build/b2-hosting-proof.json,
+zdroje a revize build/b2-deployed-source-proof.json a b2-rollout-live-infra-check.json.
+Návrat B2: pozastavit readSyncControl a použít ověřený neaktivní v3 artefakt
+405be7d podle [plánu](plans/feed/B2_DEV_ROLLOUT.md#neaktivní-web-a-návrat).
+Starší v1/v2 weby, včetně historických ce6b07a/7ab60c8, po upgradu IndexedDB
+automaticky nevracet. Zachovat místní fronty, nové indexy, read úklid, obsahové
+writery, generaci a ochranné Rules. Účtové a cleanup Functions mají 60 s,
+obsahové/čtecí callable 15 s; všechny uvedené DEV prostředky jsou min0/max1,
+concurrency1, 256 MiB, Node22, europe-west3. Účtový minutový job je zachovaný;
+původní receipt job nově běží také každou minutu. Další Scheduler job nevznikl.
+Rules a Storage se touto fází neměnily. Podpisový klíč zůstává existující v1.
 
 Produkční aplikace na `go.shoutout-app.eu` dosud nemá první release.
 Projekt `shoutout-production-a1b34` sdílí s prezentací, app site je
@@ -590,10 +594,10 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Oblast | Potvrzené dokončení | Co ještě zbývá |
 |---|---|---|
 | Obsahové operace | DEV klient používá serverovou tvorbu, reakce, ukládání, hlášení i mazání; přepínače v config/dev.json jsou zapnuté. | Závěrečné uzavření přímých Rules zápisů a celý milník serverové brány. |
-| Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a denní DEV cleanup 02:15 UTC, max. 500 záznamů/běh. | Produkční nastavení a společná vydávací brána. |
+| Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a pokračující DEV cleanup každou minutu, max. 500 dokumentů / 10 s na fázi, po dokončení 24h klid. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
-| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka jsou nasazené; vlastní knihovna a úklid fixture ověřené. | Cloudová synchronizace, unread-first a novinky B2–B4. Regrese Uložených a místní B1 uzavřené v DEV. |
+| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka; B1 uzavřené a B2 synchronizace/úklid nasazené. | Živá klientská akceptace a úklid B2, unread-first B3 a novinky B4. Regrese Uložených uzavřená v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 Aktuální stupnice jsou generované v [TODO](TODO.md#postup) z

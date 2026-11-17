@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,85 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,90 %** — vážené dokončení podúseků
 
-Hotové úseky: **144/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **146/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,15 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,16 %** — vážené dokončení podúseků
 
-Hotové úseky: **175/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **177/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -34,14 +34,17 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
-1. **Dokončit schválené DEV zapojení a pilot B2.**
-   Vlastník schválil [živý rozsah](plans/feed/B2_DEV_ROLLOUT.md#schválený-živý-rozsah):
-   čtyři indexy, dva callable endpointy, účtový úklid, výměnu stávajícího runneru
-   za minutovou údržbu, DEV synchronizaci a vymezené testy. Na feature/b2-dev-rollout
-   probíhají společné kontroly před rolloutem; nic z tohoto zapojení zatím není
-   nasazené. Další brána je přesné úplné CI, potom postupný rollout a živá akceptace.
-   Dřívější požadavky na samostatný souhlas níže jsou tím pro tento pilot splněné;
-   hotové části ani schválení neopakovat. Produkční kapacita zůstává samostatná.
+1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
+   [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
+   success úplné CI 44099715617, pět Functions je ACTIVE se shodnými zdroji,
+   čtyři indexy READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila prošlé
+   fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
+   Jádrový live test TestBusiness i první klientský přenos A pod Bright_Otter_182
+   prošly; druhá relace/offline/restart ještě čekají na vlastníka. Oba 24h testovací
+   Shouty A/B a záložky zachovat do akceptace, pak uklidit přes writer. Nevytvářet
+   další Auth účty. Hotové implementace, rollout ani schválení neopakovat.
+   Produkční kapacita zůstává samostatná. Níže jsou podklady dřívějších příprav;
+   jejich tehdejší vypnuté flags a zákazy živých změn už nepopisují tento rollout.
    [Schválený přípravný úsek](plans/feed/B2_DEV_ROLLOUT.md) je uzavřený na
    feature/b2-dev-preparation: adaptér false s 24h klidem, účtový read flag false,
    čtyři cílené indexy a neaktivní v3 návrat. 68 emulátorových / 17 Chrome prošlo;

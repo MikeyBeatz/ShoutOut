@@ -50,6 +50,67 @@ explicitně vypnutý. Celá fronta 10 000 značek v původním emulátorovém b�
 prošla; jeho jediná chyba byla opravená historická fixture. Přesné úplné CI
 finálního kandidáta zůstává podmínkou nasazení.
 
+<a id="dev-rollout-results"></a>
+
+## Ověřené DEV nasazení
+
+Zdroj `bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a` má
+[úspěšné úplné CI 44099715617](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44099715617):
+375 Flutter, 17 Chrome, 81 tools, 134 Functions unit (457 skip mimo emulátor),
+450 Rules/server, 34 B2 runtime/retention, 116 purge a 15 Storage, formát,
+analýzu/lint/build. První neúspěšný a zrušený mezikandidát se nenasazovaly.
+
+17. listopadu 2026 je nasazený jen DEV:
+
+| Vrstva | Ověřený výsledek |
+|---|---|
+| Čtyři field výjimky | Přesný schválený digest, všechny READY; žádné další akce ani TTL změny. Živé full/delta i retenční dotazy prošly. |
+| syncReadBatch / getReadStatePage | ACTIVE, revize syncreadbatch-00001-fox / getreadstatepage-00001-xub; min0/max1, concurrency1, 256 MiB/15 s, stávající klíč v1. Anonymní požadavky oba HTTP 401. |
+| Účtový read úklid | ACTIVE request 00012-tiw / recovery 00012-rud; readSyncEnabled=true, dosavadní 256 MiB/60 s/max1/concurrency1. |
+| Retence | ACTIVE cleanupoperationreceipts-00004-zel, stávající Scheduler job ENABLED každou minutu UTC, stejných 256 MiB/60 s/max1/concurrency1. |
+| Web | Hosting a5edfc1f8a96c6e7, release 2026-11-17T14:26:57.539Z; index.html, main.dart.js a app-config.json na web.app mají shodné bajty s release. |
+
+Před nahrazením runneru byl starý job pozastavený; před aktivací nového již
+uplynulo přes 65 s a nová revize byla ACTIVE. Obě controls jsou active/v1/revision1.
+Stažené skutečné zdrojové ZIP všech pěti Functions odpovídají připraveným
+balíčkům: 10 souborů pro každou read Function, 39 pro každou účtovou a 49 pro
+cleanup. Nejde jen o odvození z Git nebo metadata deploy příkazu.
+
+První živý retenční průchod odstranil právě jeden vymezený prošlý read blok
+a jeden receipt; oba checkpointy jsou dokončené, bez lease/skipped a mají
+nextRunAt +24 h. Následná kontrola zachovala jejich stav i termín; cloudové
+INFO logy následných ticků dokládají checked/idle bez dalšího skenování/mazání
+a bez needsReview. První dvě čtení Logging API narazila na dočasnou kvótu 429;
+po odkladu stejná kontrola prošla. Nešlo o chybu údržbové Function.
+Původní pending žádost je beze změny. Všech 38 zdrojů zachycených před pilotem
+má stejné updateTime. Žádný Auth účet nevznikl ani nebyl smazán.
+
+Dva nové 24h Shouty „MVP B2 A 17.11.“ / „MVP B2 B 17.11.“ byly vytvořeny
+atomicky přes writer a oba jsou uložené pod oběma testovacími účty. Důvěryhodný
+Admin SDK průchod pod TestBusiness ověřil upload obou značek, opakování bez
+zvýšení revize a full/unchanged-delta dotazy ve skutečné DB. Tento průchod
+nenahrazuje HTTP Auth/App Check ani dvě uživatelské relace. Bright_Otter_182
+nebyl tímto jádrovým testem označen jako přečtený.
+
+První uživatelská relace Bright_Otter_182 má na serveru ověřenou značku A;
+jeho „Mé shouty“ správně obsahují jen vlastní A, protože B patří TestBusiness.
+Vlastník nyní ověřuje oddělenou anonymní relaci a read-only místní kontrolu.
+
+**Živá klientská akceptace a úklid obou Shoutů zůstávají otevřené.** Browser host
+není dostupný; náhradní nativní ovládání skončilo, protože nástroj nedokázal
+spolehlivě určit URL. Vlastník dostal první průchod pod Bright_Otter_182;
+následuje import na odděleném klientu, offline/restart/retry a úklid přes writer.
+Do té doby netvrdit dokončené B2 ani mazat testovací obsah. Produkce, main,
+Rules a původní pending žádost jsou zachované; kapacitní brána zůstává otevřená.
+
+Lokální důkazy jsou v ignorovaném build: b2-deployed-source-proof.json,
+b2-rollout-live-infra-check.json, b2-hosting-proof.json, b2-live-pilot-proof.json,
+b2-live-pilot-state.json, b2-maintenance-live-log-proof.json a
+b2-rollout-control-proof.json. Read-only kontrola
+dvou místních testovacích značek je build/b2-read-check.js; nečte Auth ani tokeny.
+Návratový neaktivní v3 artefakt 405be7d byl před rolloutem znovu ověřený (68
+souborů). Při návratu zachovat read úklid, indexy i místní fronty podle postupu.
+
 ## Původní přípravné zapojení
 
 - retention_runtime.js nemá cloudový trigger ani živý import. Enabled=false

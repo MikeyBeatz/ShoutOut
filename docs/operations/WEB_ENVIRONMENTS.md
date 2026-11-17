@@ -1,10 +1,11 @@
 # Vývojový a produkční web
 
-Připravený [klientský základ B2](../plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results)
-obsahuje místní IndexedDB v3, zatím bez nasazení. Její upgrade při budoucím
-načtení nového webu není podmíněný zapnutím cloudové synchronizace. Pro první
-rollout připravit kompatibilní neaktivní v3 artefakt i návratovou verzi;
-staré v1/v2 buildy nejsou po upgradu automaticky použitelný rollback.
+[B2 je od 17. listopadu nasazené v DEV](../plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results):
+web ze zdroje bc4a6e1 má IndexedDB v3 a aktivní cloudovou synchronizaci;
+dvě klientské relace/offline akceptace ještě čekají. Upgrade místní DB není
+podmíněný cloudovým přepínačem. Návratový neaktivní v3 artefakt 405be7d je
+ověřený; staré v1/v2 buildy po upgradu automaticky nevracet. Při návratu
+zachovat účtový i retenční read úklid a místní fronty podle plánu.
 
 Pro poslední ověřený zdroj/revize použít [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
 Tento dokument uchovává technické postupy a datované rollouty. Staré revize,
