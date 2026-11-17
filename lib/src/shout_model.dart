@@ -263,13 +263,13 @@ const shoutCategories = <String>[
 const shoutCategoryEmoji = <String, String>{
   'Událost': '🎉',
   'Dotaz': '❓',
-  'Nabídka': '🏷️',
+  'Nabídka': '🏷',
   'Pomoc': '🤝',
   'Ztráty a nálezy': '🔑',
   'Tip': '💡',
   'Doprava': '🚗',
   'Diskuze': '💬',
-  'Varování!': '⚠️',
+  'Varování!': '⚠',
   'Ostatní': '•••',
 };
 

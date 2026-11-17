@@ -370,7 +370,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | business-authority-final: Úplná serverová oprávnění a produkční akceptace bezplatných funkcí | acceptance | ⬜ | — |
 | translation-full-audit: Audit všech sedmi jazyků a všech obrazovek | verification | ⬜ | — |
 | accessibility-audit: Audit přístupnosti webu | verification | ⬜ | — |
-| web-layout-accept: Mobilní/desktopové rozložení a vizuální regrese | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md), [2](../tools/diagnostics/font_warning_probe.dart) |
+| web-layout-accept: Mobilní/desktopové rozložení a vizuální regrese | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md#category-font-fix), [2](../tools/diagnostics/font_warning_probe.dart) |
 | translation-accept: Finální kontrola přetečení, diakritiky a plurálů | acceptance | ⬜ | — |
 | regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md) |
 | regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | — |

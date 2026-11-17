@@ -1,8 +1,9 @@
 # Diagnostika konzole – fonty, CSP a Firestore
 
 17. listopadu 2026. Vlastník pozastavil B2 a schválil lokální reprodukci dvou
-varování a přípravu konkrétní opravy. Zatím bez změn aplikace, zabezpečení,
-nasazení či živých dat. [Nástroj a spuštění](../../tools/diagnostics/README.md).
+varování a následně cílenou fontovou opravu s ověřením a DEV webem po CI.
+Diagnostický checkpoint 80d7466 neobsahoval změnu aplikace; schválená oprava
+níže mění pouze dva pevné symboly. [Nástroj a spuštění](../../tools/diagnostics/README.md).
 
 ## Potvrzené fontové varování
 
@@ -32,7 +33,7 @@ stejný viditelný výsledek. Není tím garantována stejná prezentace na vše
 Přidání velkého fontového balíku tedy není doloženou nutnou opravou.
 [Dokumentace fontů a fallbacků](https://api.flutter.dev/flutter/painting/TextStyle/fontFamilyFallback.html).
 
-### Konkrétní návrh opravy, zatím neprovedeno
+### Schválený rozsah opravy
 
 Odstranit pouze U+FE0F ze dvou pevných hodnot shoutCategoryEmoji. Zachovat
 samotné symboly, názvy kategorií a ostatní emoji. Neprovádět plošnou úpravu
@@ -42,6 +43,22 @@ kódu, srovnávací vzorky, existující kategoriové testy a vzhled menu/karty.
 Po příslušném CI může následovat pouze DEV web podle pravidel vydání.
 Tato oprava pevného UI neřeší obecnou chybu Flutteru při libovolných emoji
 v uživatelském textu; tu nesmí skrývat ani měnit uživatelský obsah.
+
+<a id="category-font-fix"></a>
+
+### Provedení a lokální ověření
+
+Na fix/category-font-warning jsou odstraněné pouze dva selektory U+FE0F
+z pevných hodnot shoutCategoryEmoji. Aktuální hodnoty jsou znovu načtené
+diagnostickým serverem přímo ze zdroje, nejde o ručně opravený vzorek.
+Sedm izolovaných rendererových scénářů dokončilo vykreslení bez runtime
+výjimky či síťové chyby: current-categories má 0 Noto varování, stejně jako
+oba negativní kontrolní vzorky. Čtyři syntetické vzorky s původním selektorem
+mají nadále každý 1 varování; sběr hlášek tedy zůstává funkční.
+Log build/category-font-fix-browser.log a fonts-proof.json v diagnostickém
+výstupu. Existující test/shout_test.dart prošel. Data, názvy, zbývající symboly,
+zabezpečení a síťová konfigurace se nemění. Před DEV rolloutem ještě zbývá
+přesné úplné CI, čistý release a ověření skutečných nasazených souborů.
 
 ## CSP report-only
 

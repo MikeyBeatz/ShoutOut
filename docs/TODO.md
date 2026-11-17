@@ -37,10 +37,12 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
 **Dočasná priorita vlastníka – vyřešit konzoli před B2:**
 [Lokální diagnostika](operations/CONSOLE_WARNINGS.md) je dokončená ve 12
 izolovaných Chrome scénářích. Příčinou Noto varování našich pevných kategorií
-je U+FE0F; cílená úprava dvou hodnot čeká na schválení. CSP se znovu neobjevilo
+je U+FE0F; [schválená úprava dvou hodnot](operations/CONSOLE_WARNINGS.md#category-font-fix)
+je lokálně ověřená v sedmi rendererových scénářích a existujících Shout testech.
+Další je přesné úplné CI a pouze DEV web; zatím není nasazeno. CSP se znovu neobjevilo
 ani vlastníkovi po obnově; přesný původ původního výpisu není potvrzený.
 Nový QUIC transport evidovat odděleně, automaticky neměnit síťovou konfiguraci.
-Nejde o dokončenou opravu, celý vizuální audit ani B2 akceptaci; metriky zachovány.
+Nejde o dokončený rollout, celý vizuální audit ani B2 akceptaci; metriky zachovány.
 
 1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
    [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
