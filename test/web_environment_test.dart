@@ -442,6 +442,7 @@ void main() {
   Map<String, dynamic> production() {
     final config = development();
     config['environment'] = 'prod';
+    config['serverReadSynchronization'] = false;
     config['appUrl'] = 'https://go.shoutout-app.eu';
     config['hostingSite'] = 'example-shoutout-live';
     config['firebase']['projectId'] = 'shoutout-production-a1b34';

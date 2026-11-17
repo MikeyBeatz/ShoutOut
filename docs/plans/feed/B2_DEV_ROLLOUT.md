@@ -42,7 +42,13 @@ Lokálně prošlo 134 Functions unit testů (457 integračních mimo emulátor s
 odmítnutí produkce před DB přístupem, chybějící control bez legacy fallbacku
 a odstranění identifikátorů/kurzorů z logů. Balíčková kontrola potvrzuje, že
 content přibírá retenční jádro a codec, nikoli read callable host; nový host
-je izolovaný. Rozšířený emulátorový běh a přesné úplné CI se ověřují samostatně.
+je izolovaný. Dále prošlo 375 Flutter a 68 společných emulátorových regresí
+(44 účtových, 16 retenčního jádra, 8 adaptéru). První úplné CI skončilo na
+starém očekávání vypnutého DEV flagu; navazující běh byl zrušen při doplnění
+zbývajících testovacích konfigurací. Produkční/historické fixture mají flag
+explicitně vypnutý. Celá fronta 10 000 značek v původním emulátorovém běhu
+prošla; jeho jediná chyba byla opravená historická fixture. Přesné úplné CI
+finálního kandidáta zůstává podmínkou nasazení.
 
 ## Původní přípravné zapojení
 
