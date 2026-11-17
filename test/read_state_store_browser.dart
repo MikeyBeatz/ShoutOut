@@ -124,6 +124,48 @@ void main() {
     },
   );
   test(
+    'inactive v3 rollback preserves imported marks, outbox and an interrupted checkpoint',
+    () async {
+      final first = store();
+      await first.put(item(1), now);
+      final checkpoint = await first.beginSync(),
+          page = await first.queuePage(checkpoint, now);
+      await first.commitSync(
+        checkpoint,
+        checkpoint.advanceUpload(page),
+        now,
+        acknowledged: page.items,
+        imported: [ReadUpload(item(2), now.millisecondsSinceEpoch)],
+      );
+      await first.put(item(3), now);
+      final before = await readMeta(first.name, 'syncCheckpoint');
+      expect(before, isNotNull);
+      await first.close();
+      final rollback = IndexedReadStateStore(
+        scope,
+        prefix: first.name.substring(
+          0,
+          first.name.length - scope.databaseSuffix.length - 1,
+        ),
+      );
+      addTearDown(rollback.close);
+      for (var i = 1; i <= 3; i++) {
+        expect(await rollback.contains(item(i), now), isTrue);
+      }
+      expect((await rollback.pending(now)).map((r) => r.content.shoutId), [
+        item(3).shoutId,
+      ]);
+      expect(await readMeta(first.name, 'syncCheckpoint'), before);
+      // No transport/controller exists in this simulated inactive application.
+      await rollback.put(item(4), now);
+      expect((await rollback.pending(now)).length, 2);
+      expect(await readMeta(first.name, 'syncCheckpoint'), before);
+      await rollback.erase();
+      expect(await readMeta(first.name, 'syncCheckpoint'), isNull);
+      expect(await readMeta(first.name, 'erased'), isTrue);
+    },
+  );
+  test(
     'two IndexedDB connections merge concurrent marks and cannot write past an erasure fence',
     () async {
       final first = store(),

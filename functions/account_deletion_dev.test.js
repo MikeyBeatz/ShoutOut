@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assertAccountDeletionDevTarget } from './account_deletion_dev.js';
+import { accountDeletionDevProposal, assertAccountDeletionDevTarget } from './account_deletion_dev.js';
+
+test('B2 private read cleanup remains explicitly disabled in the live DEV wrapper', () => {
+  assert.equal(accountDeletionDevProposal.readSyncEnabled, false);
+  assert.equal(accountDeletionDevProposal.privateCleanupEnabled, true);
+});
 
 test('proposed account worker rejects production and arbitrary projects before database operations', () => {
   assert.doesNotThrow(() => assertAccountDeletionDevTarget('shoutout-dev-46c81'));

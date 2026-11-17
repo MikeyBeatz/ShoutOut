@@ -10,6 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 test('both real artifacts include runtime dependency closure and exclude all lab/test modules', () => {
   for (const [directory, entry] of [['functions-content', 'content.js'], ['functions-account-deletion', 'account_deletion_dev.js']]) {
     const artifact = prepareFunctionArtifact(root, directory, entry);
+    assert(!artifact.files.includes('retention_runtime.js'), 'Prepared retention adapter must not join a live codebase yet');
     for (const required of ['feed_runtime.js', 'feed_index_paths.js', 'feed_early_erasure_queue.js', 'feed_account_retention_runner.js',
       'feed_block_index_store.js', 'feed_account_retention_store.js', 'feed_index_gc_store.js']) assert(artifact.files.includes(required), required);
     const actual = readdirSync(artifact.target).filter(file => file.endsWith('.js')).sort();

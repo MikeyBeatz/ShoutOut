@@ -6,6 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválená příprava DEV B2 je lokálně ověřená; čeká společné CI a release artefakt.**
+Na feature/b2-dev-preparation je vypnutý retenční adaptér s 24h klidem,
+odděleným controlem a transakční ochranou. Účtový read úklid je explicitně false;
+čistý plánovač pokrývá jen čtyři DEV field výjimky bez TTL. 68 emulátorových
+regresí a 17 Chrome/IndexedDB testů prošlo včetně neaktivního v3 návratu.
+[Rozsah a pořadí DEV pilotu](plans/feed/B2_DEV_ROLLOUT.md). Skutečné spouštění,
+aktivace a živá ověření nejsou tímto úsekem povolené. Žádné nasazení či živé zápisy.
+
 **Lokální retenční úklid B2 je uzavřený po přesném CI; není nasazený.**
 Na feature/b2-retention-cleanup jsou oddělené read/receipt runnery s atomickým
 kurzorem a lease, měřením a čtyřmi připravenými indexovými výjimkami bez TTL.

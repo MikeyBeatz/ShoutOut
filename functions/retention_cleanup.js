@@ -91,13 +91,16 @@ function readDecision(doc, cutoff) {
 async function runCleanup(kind, db, {
   clock = () => new Date(), elapsedClock = () => performance.now(), pageSize = 50,
   maxPages = 10, maxMillis = 10000, childProbe = null, beforeCommit,
+  completedCooldownMillis = retryMillis, transactionGuard,
 } = {}) {
   assertFeedRuntimeTarget(db);
   if (kind === 'receipts' && legacyOperationKeysAccepted) throw new Error('retention-timed-clients-required');
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       !Number.isInteger(maxPages) || maxPages < 1 || maxPages > 10 ||
       !Number.isInteger(maxMillis) || maxMillis < 1 || maxMillis > 10000 ||
+      !Number.isSafeInteger(completedCooldownMillis) || completedCooldownMillis < retryMillis || completedCooldownMillis > dayMillis ||
       typeof clock !== 'function' || typeof elapsedClock !== 'function' ||
+      !(transactionGuard === undefined || typeof transactionGuard === 'function') ||
       !(beforeCommit === undefined || typeof beforeCommit === 'function')) throw new Error('invalid-retention-options');
   const now = () => { const value = Timestamp.fromDate(clock()); if (!stamp(value)) throw new Error('invalid-retention-clock'); return value; };
   let previousElapsed = -Infinity;
@@ -114,6 +117,7 @@ async function runCleanup(kind, db, {
     epochAgeMillis: lastState?.epochStartedAt ? Math.max(0, now().toMillis() - lastState.epochStartedAt.toMillis()) : 0,
     elapsedMillis: elapsed() - started, metrics: { ...metrics } });
   const guard = async tx => {
+    if (transactionGuard) await transactionGuard(tx);
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) throw new RetentionLeaseLost();
     const data = validateState(snapshot.data(), kind);
@@ -126,6 +130,9 @@ async function runCleanup(kind, db, {
       const snapshot = await tx.get(ref), time = now();
       const old = snapshot.exists ? validateState(snapshot.data(), kind) : null; lastState = old;
       if (old && (old.leaseUntil?.toMillis() > time.toMillis() || old.nextRunAt.toMillis() > time.toMillis())) return null;
+      // Cooldown/busy checks never mutate data. Only an actual claim needs a
+      // second control read inside the transaction after runtime admission.
+      if (transactionGuard) await transactionGuard(tx);
       const continuing = old?.cutoff !== null && old?.cutoff !== undefined;
       if (continuing && old.cutoff.toMillis() > time.toMillis()) throw new Error('invalid-retention-clock');
       const next = { v: 1, kind, version: (old?.version ?? 0) + 1,
@@ -166,7 +173,7 @@ async function runCleanup(kind, db, {
         const next = { ...state, version: state.version + 1, counts: addCounts(state.counts, delta),
           cursor: complete ? null : { path: last.ref.path, ...(kind === 'reads' ? { day: last.get('day') } : { createdAt: last.get('createdAt') }) },
           cutoff: complete ? null : cutoff, epochStartedAt: complete ? null : state.epochStartedAt,
-          ...(complete ? { leaseToken: null, leaseUntil: null, nextRunAt: Timestamp.fromMillis(now().toMillis() + retryMillis) } : {}) };
+          ...(complete ? { leaseToken: null, leaseUntil: null, nextRunAt: Timestamp.fromMillis(now().toMillis() + completedCooldownMillis) } : {}) };
         tx.set(ref, next); return { next, delta, complete };
       });
       pages++; counts = addCounts(counts, result.delta); lastState = result.next;
@@ -186,7 +193,7 @@ async function runCleanup(kind, db, {
         tx.update(ref, { leaseToken: null, leaseUntil: null, nextRunAt: Timestamp.fromMillis(now().toMillis() + retryMillis), version: snapshot.get('version') + 1 });
       }); } catch { /* The next owner can recover after the bounded lease. */ }
     }
-    const code = ['invalid-retention-checkpoint', 'invalid-retention-cursor', 'invalid-retention-clock'].includes(error.message) ? error.message : 'retention-work-failed';
+    const code = ['invalid-retention-checkpoint', 'invalid-retention-cursor', 'invalid-retention-clock', 'retention-control-changed'].includes(error.message) ? error.message : 'retention-work-failed';
     return report(error instanceof RetentionLeaseLost ? 'lease-lost' : 'failed', code);
   } finally { if (!childProbe) await probe.close(); }
 }

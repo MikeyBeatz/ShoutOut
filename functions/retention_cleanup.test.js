@@ -6,7 +6,8 @@ import { createRetentionChildProbe } from './retention_child_probe.js';
 test('retention work bounds and project are rejected before database access', async () => {
   for (const run of [runReadRetentionCleanup, runContinuingReceiptCleanup]) {
     await assert.rejects(run({ projectId: 'unapproved' }), /project-required/);
-    for (const options of [{ maxPages: 11 }, { pageSize: 51 }, { maxMillis: 10001 }, { maxPages: 0 }, { pageSize: 1.5 }]) {
+    for (const options of [{ maxPages: 11 }, { pageSize: 51 }, { maxMillis: 10001 }, { maxPages: 0 }, { pageSize: 1.5 },
+      { completedCooldownMillis: 59999 }, { completedCooldownMillis: 86400001 }, { transactionGuard: true }]) {
       await assert.rejects(run({ projectId: 'shoutout-dev-46c81' }, options), /invalid-retention-options/);
     }
   }

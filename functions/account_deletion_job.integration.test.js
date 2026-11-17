@@ -396,6 +396,19 @@ test('v2 resumes private pages, counts deletes atomically and preserves identity
   assert.equal((await f.lab.audit()).activeMetadata, 2);
 });
 
+for (const readSyncEnabled of [false, true]) test(`prepared account options readSyncEnabled=${readSyncEnabled} preserve the retention deadline`, { skip: !enabled }, async () => {
+  const f = await privateJobFixture(), options = { ...f.options, pageSize: 50, readSyncEnabled };
+  await f.user.collection('readBuckets').doc('fixture').set({ private: true });
+  await f.user.collection('readState').doc('current').set({ private: true });
+  const before = (await f.jobRef.get()).get('retainUntil');
+  const result = await run(f.event, f.db, missingAuth, options);
+  assert.equal(result.state, 'private-leaves-cleaned');
+  assert.equal((await f.user.collection('readBuckets').doc('fixture').get()).exists, !readSyncEnabled);
+  assert.equal((await f.user.collection('readState').doc('current').get()).exists, !readSyncEnabled);
+  assert((await f.jobRef.get()).get('retainUntil').isEqual(before));
+  assert((await f.user.collection('legal').doc('acceptance').get()).exists);
+});
+
 test('enabling v2 never migrates completed or in-progress v1 jobs', { skip: !enabled }, async () => {
   const f = await fixture();
   await run(f.event, f.db, missingAuth, f.options);

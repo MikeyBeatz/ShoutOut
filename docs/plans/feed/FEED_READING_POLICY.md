@@ -34,6 +34,8 @@ Navazující [serverová obsluha B2](#b2-runtime-implementation) je připravená
 lokálně za vypnutým přepínačem; její stav a ověření jsou uvedené níže.
 Navazující [pokračující retenční úklid](#b2-retention-implementation) je schválený
 lokální úsek; žádná jeho část zatím není zapojená do živého plánovače.
+[Příprava DEV zapojení, indexů a návratu](B2_DEV_ROLLOUT.md) navazuje samostatně
+schváleným lokálním úsekem; neznamená souhlas se skutečným spouštěním či pilotem.
 Feed už čte prostorový index a celé zdroje pro vybranou stránku. Refresh nyní
 vytváří nový výběr/snapshot; klient neposílá obsahovou cache pro reuse beze změn.
 Číselný indikátor B4 ani inkrementální obnova celého feedu hotové nejsou.

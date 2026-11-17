@@ -15,5 +15,6 @@ A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální labora
 - [Přenositelný kurzor a omezený výběr stránky – lokální stav](FEED_PORTABLE_CURSOR.md)
 - [Progresivní feed – schválený směr a doložená implementace](FEED_PROGRESSIVE_PLAN.md)
 - [Přečtení, hodnocení a platnost klientské relace](FEED_READING_POLICY.md)
+- [B2 – příprava DEV zapojení, indexů a návratové verze](B2_DEV_ROLLOUT.md)
 - [Feed: přečtení, stabilní stránky a ruční obnovení](FEED_READ_REFRESH_PLAN.md)
 - [Zápisové cesty před připojením prostorového indexu](FEED_WRITER_INTEGRATION.md)

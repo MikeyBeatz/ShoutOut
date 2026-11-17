@@ -52,6 +52,13 @@ Flutter/browser/formát/analýzu/lint/build. Nejde o nasazení ani cloudový ben
 
 ## Pokračující retenční úklid B2 – 17. listopadu
 
+Navazující retention_runtime.integration.test.js je také v test:read-runtime;
+ověřuje default off, invalid/off/paused control, pause/active ABA i přepis stejné
+revize, pokračování po pauze, cold restart, souběžné adaptéry, oddělení sync
+controlu a chybu jedné fáze. Účtová sada ověřuje readSyncEnabled false/true
+přes skutečný job. Chrome sada navíc ověřuje neaktivní v3 návrat s importem,
+outboxem, checkpointem a erase. [Příprava DEV](../plans/feed/B2_DEV_ROLLOUT.md).
+
 Lokální sada B2 úklidu je součástí test:read-runtime, se stejným pevným
 emulátorovým projektem a bez živých Auth účtů. Samostatně:
 `node --test functions/retention_cleanup.test.js`; pod emulátorem

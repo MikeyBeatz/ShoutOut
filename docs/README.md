@@ -52,6 +52,7 @@ Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, s
 - [Přenositelný kurzor a omezený výběr stránky – lokální stav](plans/feed/FEED_PORTABLE_CURSOR.md)
 - [Progresivní feed – schválený směr a doložená implementace](plans/feed/FEED_PROGRESSIVE_PLAN.md)
 - [Přečtení, hodnocení a platnost klientské relace](plans/feed/FEED_READING_POLICY.md)
+- [B2 – příprava DEV zapojení, indexů a návratové verze](plans/feed/B2_DEV_ROLLOUT.md)
 - [Feed: přečtení, stabilní stránky a ruční obnovení](plans/feed/FEED_READ_REFRESH_PLAN.md)
 - [Zápisové cesty před připojením prostorového indexu](plans/feed/FEED_WRITER_INTEGRATION.md)
 
