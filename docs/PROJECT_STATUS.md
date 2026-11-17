@@ -6,14 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválená údržba CI má rozběhnuté úplné ověření; nyní ověřit lehkou cestu.**
-Na fix/selective-ci je výběr lehkého/úplného režimu. Lokálně prošlo 22 cílených
-regresí, celých 79 tools a kontrola dokumentace včetně snímků. Zdroj
-`27f46e8cd98c195471e68cc6bdedb592a75fc819` spustil správně úplný
-[běh 44053527899](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053527899);
-výsledek zatím čeká. Tento čistě dokumentační push ověří lehkou cestu.
-[Režimy a hranice](operations/TESTING.md#dva-rezimy-ci).
-Nic se nenasazuje a další produktový úkol zůstává retenční úklid B2 níže.
+**Údržba CI je uzavřená po ověření obou režimů; další je B2 úklid.**
+Na fix/selective-ci má zdroj `27f46e8cd98c195471e68cc6bdedb592a75fc819`
+[úspěšné úplné CI 44053527899](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053527899)
+za 13 min 7 s: 22 cílených regresí, 79 tools a všechny původní aplikační,
+serverové, emulátorové kontroly i webový build. Dokumentační commit
+`fe50d95e5c7280a1680970693961275adc189575` má
+[úspěšné lehké CI 44053648299](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053648299)
+za 11 s, s 22 testy, čistou dokumentací a skutečně přeskočenými těžkými kroky.
+[Režimy a hranice](operations/TESTING.md#dva-rezimy-ci). Aplikace, Firebase ani
+procenta se neměnily; nic se nenasazovalo. Další produktový úkol je B2 úklid níže.
 
 **Nová metodika stupnic je uzavřená po přesném CI; další je B2 úklid.**
 Feature/progress-substeps zachovává 24 MVP milníků a 157 backlogových položek,

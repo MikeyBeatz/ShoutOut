@@ -31,12 +31,6 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 
 ## Nejbližší práce
 
-Schválená údržba před návratem k B2: [odlehčit CI](operations/TESTING.md#dva-rezimy-ci)
-pro dokumentaci a počítadlo při zachování úplných kontrol aplikace. Připravené
-na fix/selective-ci; úplné CI 44053527899 běží pro zdroj 27f46e8, tento
-dokumentační push ověří lehké CI. Samotná tato údržba nemění dokončení
-produktových podúseků ani procenta.
-
 1. **Připravit pokračující retenční úklid B2 před DEV aktivací.**
    [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
    je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro

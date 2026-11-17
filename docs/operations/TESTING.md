@@ -36,6 +36,16 @@ PR merge, shallow historii, chybové návraty a podmínky všech těžkých krok
 vydáním získat úplné CI ručním spuštěním nebo tagem podle
 [pravidel vydání](RELEASING.md).
 
+Ověřeno 17. listopadu 2026: zdroj 27f46e8 má úplné
+[success CI 44053527899](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053527899),
+13 min 7 s. Následný pouze dokumentační fe50d95 má lehké
+[success CI 44053648299](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44053648299),
+11 s, 22/22 regresí a čisté odkazy/metriky/snímky. Kroky Java, Flutter,
+instalace npm, emulátory a build mají v tomto běhu výsledek skipped.
+Úplný běh má navíc 79 tools, 127 Functions unit (431 integračních přeskočených
+mimo emulátor), 448 Rules/server, 10 B2 runtime, 116 purge, 15 Storage a původní
+Flutter/browser/formát/analýzu/lint/build. Nejde o nasazení ani cloudový benchmark.
+
 ## Moderační mazání s indexem R5 – 5. listopadu
 
 feed_moderation_index.integration.test.js přidává 11 případů do test:purge.
