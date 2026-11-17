@@ -154,7 +154,35 @@ uživatelského obsahu a nezaručuje absenci obecné chyby Flutteru pro každý 
 Lokální důkazy: build/category-font-release-proof.json,
 category-font-hosting-before.json, category-font-hosting-after.json,
 category-font-fix-ci.log a category-font-fix-deploy.log.
+Vlastník po nasazení potvrdil, že původní Noto hláška zmizela. Nově doložil
+jen deprecation upozornění Intl.v8BreakIterator, rozebrané níže. Toto potvrzení
+neuzavírá celé B2 ani celkový vizuální audit.
 Pro další B2 práci pozor na starší build/b2-rollout-source-guard.mjs: správně
 odmítá nové změny po bc4a6e1, nejen funkční změny. Použít čistý checkout
 ověřeného B2 zdroje nebo zvlášť doložit shodu jeho modulů; guard neoslabovat
 jen kvůli fontové opravě. Živá B2 akceptace a úklid fixture zůstávají otevřené.
+
+<a id="intl-break-iterator"></a>
+
+## Intl.v8BreakIterator – následná diagnóza
+
+Vlastník po obnově doložil deprecation hlášku s odkazem na main.dart.js:7653.
+Naše lib/web tento symbol nevolají. Nainstalovaný Flutter 3.44.8 jej má v
+engine dom.dart:createV8BreakIterator s type=line a text_fragmenter.dart.
+Stejná větev je přítomná v nasazeném release main.dart.js. Řádek 7653 je obecné
+JS konstruktorové volání, není to určení vlastní aplikační funkce.
+
+[Flutter #189938](https://github.com/flutter/flutter/issues/189938) obsahuje
+shodnou hlášku a potvrzení maintainera, že Intl.Segmenter nepokrývá UAX #14
+(zalamování řádků), takže nejde o přímou záměnu API. Issue je při ověření
+otevřené; jeho konkrétní scope je wimp. Neodvozovat z něj hotovou opravu pro
+náš CanvasKit ani bez měření slibovat, že prostý upgrade Flutteru warning odstraní.
+V našem SDK vyvolá lehký Chromium CanvasKit injekci client ICU a segmentText,
+které vedle Intl.Segmenter používá pro řádky V8 iterator.
+
+Oficiální [konfigurace Flutter loaderu](https://docs.flutter.dev/platform-integration/web/initialization)
+podporuje canvasKitVariant auto/full/chromium. Možná cesta je lokálně porovnat
+auto s full, která má vlastní ICU; očekávaný přínos a vliv na start, velikost
+a zalamování zatím nejsou v této aplikaci změřené. Změna konfigurace rendereru,
+SDK ani bootstrapu není součástí předchozí dvouznakové fontové opravy a zatím
+nebyla schválená ani provedená. Konzolové hlášky se nepřepisují/nepotlačují.

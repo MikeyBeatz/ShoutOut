@@ -41,6 +41,10 @@ na obou doménách. Sedm místních fontových scénářů, 26 Shout testů a ce
 průchod prošly. Odstraněné jsou jen dva selektory pevných symbolů; CSP/QUIC
 zůstávají samostatnou evidencí a jejich oprava se netvrdí. Celý vizuální audit
 ani B2 akceptace tím hotové nejsou; metriky a jejich pevné váhy jsou zachované.
+Vlastník potvrdil odstranění fontové hlášky; zbývající
+[Intl.v8BreakIterator deprecation](operations/CONSOLE_WARNINGS.md#intl-break-iterator)
+je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
+čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
 1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
    [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má

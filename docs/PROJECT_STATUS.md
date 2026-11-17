@@ -16,6 +16,10 @@ Pouze DEV Hosting shoutout-dev-46c81, verze 74d0c3756884ac19, release
 shodné bajty s čistým releasem; změnil se jen main.dart.js. Celý předchozí
 release bc4a6e1 je ověřený pro návrat. [Důkazy a meze](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout).
 CSP/QUIC mají oddělenou evidenci; jejich oprava se netvrdí. B2 fixture zachovat.
+Vlastník potvrdil vymizení původního fontového varování. Zbývající
+Intl.v8BreakIterator deprecation je dohledaná ve Flutter engine, ne ve vlastním
+kódu. [Diagnóza a návrh porovnání rendererů](operations/CONSOLE_WARNINGS.md#intl-break-iterator)
+zatím nepovolují změnu bootstrapu/SDK ani další rollout.
 Původní B2 live helper kvůli novým souborům i fontové změně odmítne aktuální HEAD;
 navázat přes čistý ověřený B2 checkout nebo doložit shodu modulů, ne obejít guard.
 
