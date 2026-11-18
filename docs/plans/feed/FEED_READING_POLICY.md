@@ -25,12 +25,13 @@ návrhem B4; neoznačovat je za implementované ani považovat jejich cenu za nu
 Změněný kořen oblasti sám neznamená nový Shout: mění se také při reakcích či
 mazání. Počet musí odpovídat relevantním novinkám pro daný feed.
 
-**Ověřený současný stav k 17. listopadu:** B2 je aktivní pouze v DEV ze zdroje
+**Ověřený současný stav k 18. listopadu:** B2 je aktivní pouze v DEV ze zdroje
 bc4a6e1: IndexedDB v3, synchronizace při spuštění/obnově, obě čtecí Functions,
 účtový read úklid a pokračující read/receipt retence jsou nasazené.
 [Revize a důkazy](B2_DEV_ROLLOUT.md#dev-rollout-results) zahrnují skutečný přenos
-i import druhého klienta; živý offline/restart a konečný úklid pilotu ještě nejsou
-uzavřené. [Izolované HTTP regrese](B2_DEV_ROLLOUT.md#http-recovery-tests) ověřují
+i import druhého klienta. [Závěrečná akceptace](B2_DEV_ROLLOUT.md#b2-acceptance-complete)
+uzavírá také řízené selhání callable, restart aplikace, online potvrzení a úklid.
+[Izolované HTTP regrese](B2_DEV_ROLLOUT.md#http-recovery-tests) ověřují
 skutečnou ztrátu spojení a restart úložiště/controlleru bez Firebase; nenahrazují
 živou akceptaci celé aplikace. Starší datované lokální výsledky níže zachovávají
 historii a jejich tehdejší vypnuté přepínače nepopisují dnešní DEV.

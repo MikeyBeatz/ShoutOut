@@ -1,58 +1,43 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 17. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 18. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**Fontová oprava je uzavřená v DEV; další je závěrečná B2 akceptace.**
-Zdroj 9e3828dd37bd8ce68713f87cedb956db0a135124 má success úplné CI 44178308912
-(375 Flutter / 17 + 2 Chrome / 81 tools / 134 unit / 450 Rules-server / 34 B2 /
-116 purge / 15 Storage a build). Sedm místních rendererových scénářů potvrzuje
-0 varování aktuálních kategorií a funkční pozitivní kontroly; 26 Shout testů prošlo.
-Pouze DEV Hosting shoutout-dev-46c81, verze 74d0c3756884ac19, release
-2026-11-17T21:32:45.315Z. Nový JavaScript a index/config mají na obou doménách
-shodné bajty s čistým releasem; změnil se jen main.dart.js. Celý předchozí
-release bc4a6e1 je ověřený pro návrat. [Důkazy a meze](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout).
-CSP/QUIC mají oddělenou evidenci; jejich oprava se netvrdí. B2 fixture zachovat.
-Vlastník potvrdil vymizení původního fontového varování. Zbývající
-Intl.v8BreakIterator deprecation je dohledaná ve Flutter engine, ne ve vlastním
-kódu. [Diagnóza a návrh porovnání rendererů](operations/CONSOLE_WARNINGS.md#intl-break-iterator)
-zatím nepovolují změnu bootstrapu/SDK ani další rollout.
-Původní B2 live helper kvůli novým souborům i fontové změně odmítne aktuální HEAD;
-navázat přes čistý ověřený B2 checkout nebo doložit shodu modulů, ne obejít guard.
+**B2 je uzavřené v DEV; další konkrétní úsek je B3 — nepřečtené první v Nejblíž.**
+[Závěrečná akceptace a úklid](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete)
+dokládají přenos/import mezi dvěma klientskými relacemi, zachování fronty při
+zablokovaném callable a úplném znovunačtení aplikace, potom skutečný HTTP 200
+s platným Auth/App Check. Opakování zachovalo serverovou revizi, confirmedAt
+i retenci. Původní pilotní helper z čistého bc4a6e1 přes indexový writer
+uklidil oba Shouty, čtyři záložky, související potvrzení a testovací cloudové
+read záznamy. Následná verify má phase=cleaned; 38 původních zdrojů je beze změny,
+žádná Auth mutace. Dočasný checkout je odstraněný. Místní potvrzené testovací
+značky mají původní expiraci +7 dní; žádná neodeslaná fronta nezůstala.
 
-**B2 je aktivní v DEV; zbývá živá offline/restart akceptace a úklid.**
-Backendový zdroj bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617.
-Čtyři field výjimky jsou READY, pět Functions ACTIVE se shodnými skutečnými
-zdrojovými ZIP. Web má navazující fontovou opravu uvedenou výše. Read sync i účtový úklid
-jsou zapnuté; minutová retence uklidila prošlé fixture a dokončila checkpointy
-s 24h klidem. Původní pending žádost a 38 původních zdrojů jsou zachované.
-[Revize, živé důkazy a diagnostická historie](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
+Backend bc4a6e1d38f7d46c2144fe31521c1cdbe91e507a má success úplné CI 44099715617;
+nasazení i čtyři field výjimky jsou doložené v [rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results).
+DEV read sync, účtový read úklid i minutová retence zůstávají aktivní. Dnes se
+nenasazovalo; produkce, main, Rules a původní pending žádost se neměnily.
+[Izolované HTTP regrese](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests) mají
+success úplné CI 44157663737 a doplňují živý průchod. Ověřený restart znamená
+nový dokument/Flutter aplikaci přes Ctrl+R, nikoli celý proces Chrome nebo
+odpojení operačního systému. Nevytvářet znovu fixture ani neopakovat hotové B2.
 
-Skutečný přenos A a import do druhé anonymní relace Bright_Otter_182 jsou
-ověřené. Následné živé opakování B nezměnilo revizi, čas potvrzení ani retenci.
-Offline/cold-tab restart zatím doložené nejsou. Vlastník potvrdil Network Offline;
-navigator.onLine=true to nevyvrací a nesmí být branou testu. Neopakovat stejnou
-smyčku ani znovu vkládat frontu bez měření skutečného selhání požadavku.
-Přesná příčina rozdílu mezi kartami a přenosem není potvrzená.
+Pro B3 nejprve ověřit a předložit konkrétní rozsah podle
+[společného plánu](plans/feed/FEED_DELTA_REFRESH_PLAN.md): úplný potvrzený read
+snapshot, stabilní globální pořadí napříč stránkami, pouze v Nejblíž.
+B3/B4 ani produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové nejsou.
 
-Na žádost pokračovat bez asistence vznikly [dva izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests).
-Oba lokálně prošly: skutečné zahození socketu před/po zpracování, zachování
-produkční IndexedDB fronty/checkpointu, nové otevření úložiště/controlleru,
-dokončení bez duplikace a oddělení účtů. Zdroj
-`808a7348ee1e7235a066e30a1ca3138bf6af4ed8` má
-[success úplné CI 44157663737](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44157663737):
-375 Flutter, 17 + 2 Chrome, 81 tools, 134 Functions unit (457 skip),
-450 Rules/server, 34 B2 runtime/retention, 116 purge, 15 Storage a
-formát/analýzu/lint/build. Testovací úsek je uzavřený. Paměťový server není
-Firebase/Auth/App Check ani živý DEV restart. Uživatelská okna nebyla ovládána;
-žádné nové nasazení.
-
-Oba pilotní Shouty A/B a čtyři záložky zachovat do akceptace, pak uklidit přes
-writer. Žádné nové/mazané Auth účty; produkce, main a Rules se nemění. B2 accept,
-B3/B4 a produkční kapacita zůstávají otevřené. Následující datované přípravy jsou
+Fontová oprava je také uzavřená v DEV: zdroj
+9e3828dd37bd8ce68713f87cedb956db0a135124, success úplné CI 44178308912,
+Hosting 74d0c3756884ac19. Vlastník potvrdil zmizení Noto hlášky;
+[důkazy a oba v3 návraty](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout)
+zůstávají platné. Intl.v8BreakIterator je [diagnostikovaný ve Flutter engine](operations/CONSOLE_WARNINGS.md#intl-break-iterator);
+SDK/bootstrap se nemění. CSP/QUIC a pozdější Listen 400 mají samostatnou
+evidenci a jejich oprava se netvrdí. Následující datované přípravy jsou
 historické podklady, jejich vypnuté flags nejsou stavem dnešního DEV.
 
 **Příprava DEV B2 je uzavřená po CI; skutečné spouštění a pilot čekají.**

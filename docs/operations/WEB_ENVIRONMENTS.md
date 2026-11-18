@@ -2,7 +2,9 @@
 
 [B2 je od 17. listopadu nasazené v DEV](../plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results)
 původně ze zdroje bc4a6e1. Klient používá IndexedDB v3 a aktivní cloudovou synchronizaci;
-dvě klientské relace/offline akceptace ještě čekají. Upgrade místní DB není
+[DEV akceptace a úklid jsou od 18. listopadu uzavřené](../plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
+Ověřený výpadek znamená cílenou blokaci callable a restart dokumentu/aplikace.
+Upgrade místní DB není
 podmíněný cloudovým přepínačem. Návratový neaktivní v3 artefakt 405be7d je
 ověřený; staré v1/v2 buildy po upgradu automaticky nevracet. Při návratu
 zachovat účtový i retenční read úklid a místní fronty podle plánu.

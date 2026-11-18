@@ -93,7 +93,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
-| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 87,68 % | 101/115 |
+| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 88,56 % | 102/115 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
@@ -107,7 +107,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 
 | Položka | Dokončení | Úseky |
 |---|---:|---:|
-| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 83,15 % | 61/73 |
+| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 84,56 % | 62/73 |
 | [bl-019: Přepracovat onboarding na interaktivní tutorial. Po MVP *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*](BACKLOG.md#bl-019) | 25,00 % | 1/4 |
 | [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
 | [bl-048: MVP — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby jsou starší záznamy bezpečně nečitelné.](BACKLOG.md#bl-048) | 33,34 % | 1/3 |
@@ -252,7 +252,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | feed-b2-indexes: Živá indexace a aktivace účtového read úklidu | deployment | ✅ | [1](../docs/plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results) |
 | feed-b2-rollback: Kompatibilní neaktivní v3 artefakt a ověřený návrat | verification | ✅ | [1](../test/read_state_store_browser.dart), [2](../docs/plans/feed/B2_DEV_ROLLOUT.md#preparation-results) |
 | feed-b2-dev: Nasazení a zapnutí celého B2 do DEV | deployment | ✅ | [1](../docs/plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results) |
-| feed-b2-accept: Živá synchronizace zařízení, recovery a úklid testu | acceptance | ⬜ | — |
+| feed-b2-accept: Živá synchronizace zařízení, recovery a úklid testu | acceptance | ✅ | [1](../docs/plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete) |
 | feed-b3-code: Globální unread-first pouze v Nejblíž – implementace | implementation | ⬜ | — |
 | feed-b3-check: Globální unread-first pouze v Nejblíž – automatické ověření | verification | ⬜ | — |
 | feed-b3-dev: Globální unread-first pouze v Nejblíž – nasazení DEV | deployment | ⬜ | — |

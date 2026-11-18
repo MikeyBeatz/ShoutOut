@@ -39,7 +39,8 @@ navazující ruční UI průchod při B1 je potvrzený níže. Dva starší `mvp
 a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 [Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 Webové B1 má skutečnou expozici i místní trvalé označování a je uzavřené
-v DEV; synchronizace B2 a navazující B3–B4 nejsou hotové.
+v DEV. Synchronizace B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete);
+navazující B3–B4 nejsou hotové.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu
@@ -58,7 +59,7 @@ lokální protokol s 61/61 cílenými testy a success CI 42076107087. Navazujíc
 moderační regrese a opravy jsou lokálně uzavřené: 35/35 cílených testů a success CI 42107616925.
 Navazující R6a–R6e, provozní měření, instalace a query API jsou doložené
 v přechodovém plánu; jejich živý DEV výsledek je uveden výše. Po uzavřeném
-A2/A3 a B1 následuje synchronizace B2, osobní pořadí B3 a indikátor B4
+A2/A3, B1 a B2 následuje osobní pořadí B3 a indikátor B4
 se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.
 [Progresivní směr](FEED_PROGRESSIVE_PLAN.md), [writeři](FEED_WRITER_INTEGRATION.md),

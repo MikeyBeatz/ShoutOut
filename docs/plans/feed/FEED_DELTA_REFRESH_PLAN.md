@@ -26,8 +26,9 @@ Ověřené v kódu při přípravě tohoto plánu:
   verzí celého obsahu karty. Kořen se mění také při reakcích a mazání.
 - Klient drží načtené karty, deduplikuje ID, připravuje další stránku a při
   úspěšné obnově atomicky mění relaci. Porovnání klientské cache není zapojené.
-- B1 a od 17. listopadu také B2 jsou zapojené v DEV; B2 má ještě otevřenou
-  živou offline/restart akceptaci a úklid. [Ověřené nasazení](B2_DEV_ROLLOUT.md#dev-rollout-results)
+- B1 a od 17. listopadu také B2 jsou zapojené v DEV; B2 má od 18. listopadu
+  [uzavřenou živou akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
+  [Ověřené nasazení](B2_DEV_ROLLOUT.md#dev-rollout-results)
   nahrazuje původní výchozí stav lokálního jádra. B3/B4 hotové nejsou, číslo
   novinek není připojené k živému backendu. Přesné zdroje/CI/nasazení určuje
   [PROJECT_STATUS](../../PROJECT_STATUS.md), ne existence tohoto návrhu.

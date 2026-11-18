@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 17. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 18. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,90 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,94 %** — vážené dokončení podúseků
 
-Hotové úseky: **146/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **147/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,16 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,17 %** — vážené dokončení podúseků
 
-Hotové úseky: **177/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **178/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -46,101 +46,26 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
-   [Výsledky rolloutu](plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
-   success úplné CI 44099715617, pět Functions ACTIVE se shodnými zdroji,
-   čtyři field výjimky READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila
-   prošlé fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
-   Přenos a import A druhým klientem i živý retry B bez duplikace prošly.
-   [Nové izolované HTTP testy](plans/feed/B2_DEV_ROLLOUT.md#http-recovery-tests)
-   lokálně prokazují zachování fronty při ztrátě socketu před/po zpracování,
-   restart úložiště/controlleru a následné dokončení. Zdroj 808a734 má success
-   úplné CI 44157663737; testovací úsek je uzavřený. Nejde o živý Firebase/
-   App Check ani cold-tab restart DEV aplikace.
-   Živá offline/restart akceptace a úklid zůstávají otevřené; po výše uzavřené
-   fontové opravě lze navázat. Staré live helpery spouštět z ověřeného čistého
-   B2 checkoutu nebo doložit kompatibilitu modulů; jejich source guard neobcházet.
-   Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku
-   přepínání ani queue fixture neopakovat. Oba pilotní Shouty A/B a záložky
-   zachovat do akceptace, pak uklidit přes writer; žádné nové Auth účty.
-   Hotové implementace ani rollout neopakovat. Produkční kapacita je samostatná.
-   Níže jsou podklady dřívějších příprav; jejich vypnuté flags a zákazy živých
-   změn už nepopisují současný rollout.
-   [Schválený přípravný úsek](plans/feed/B2_DEV_ROLLOUT.md) je uzavřený na
-   feature/b2-dev-preparation: adaptér false s 24h klidem, účtový read flag false,
-   čtyři cílené indexy a neaktivní v3 návrat. 68 emulátorových / 17 Chrome prošlo;
-   zdroj 405be7d má success CI 44077124957 a ověřený neaktivní release/kopii 68
-   souborů pro v3 návrat. Tento rozsah znovu neschvalovat; živý
-   spouštěč, kapacita, aktivace a pilot vyžadují připravený samostatný plán.
-   [Schválený pokračující úklid](plans/feed/FEED_READING_POLICY.md#b2-retention-implementation)
-   je lokálně uzavřený: zdroj 5f3ed5c má success CI 44060619655, včetně 26 B2
-   runtime/retention testů a celé předchozí sady. Implementaci ani lokální
-   testy znovu neschvalovat. Žádné nasazení; zbývá konkrétní provozní rozpočet
-   a spouštění, účtové zapojení, indexace, v3 návrat a vymezený DEV pilot.
-   Lokálně prošlo i 28 cílených emulátorových testů, 129 Functions unit,
-   79 tools a lint. Nový modul žádný živý vstup neimportuje.
-   [Konkrétní runtime úsek](plans/feed/FEED_READING_POLICY.md#b2-runtime-implementation)
-   je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
-   každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
-   Functions unit a 10 různých emulátorových scénářů prošlo. Úsek je uzavřený:
-   zdroj cce1e7d má success CI 43284395332 (375 Flutter / 16 Chrome / 448
-   Rules/server / 10 runtime, včetně obou velkých front). Znovu jej neschvalovat.
-   Nic nebylo nasazené. Před aktivací zbývá živé zapojení připraveného úklidu a jeho kapacita,
-   potřebná indexace, kompatibilní v3 návrat a konkrétní živý DEV průchod.
-   [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
-   byl schválený a je implementovaný: hranice outboxu, odstranění automatických
-   spouštěčů, IndexedDB v3 a atomický checkpoint. Klientský úsek je uzavřený:
-   zdroj 049cedc má success CI 43270732252 (369 Flutter / 16 Chrome / 448
-   Rules/server), lokálně i 39 cílených regresí.
-   [Výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
-   Transport není zapnutý a nic není nasazené. Serverový runtime je připravený
-   výše, kapacita úklidu je další práce; znovu neschvalovat hotový klientský úsek.
-   [Návrh verzí, rozdílů, cache a novinek](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
-   je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
-   nikoli dokončené B2/B3/B4. Lokální úklid je nově schválený a připravený výše;
-   jeho rozsah znovu neschvalovat. Provozní zapojení předložit hotové zvlášť.
-   Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
-   je schválený. [Kapacitní akceptace](LAUNCH_READINESS.md#capacity-target)
-   zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
-   Současný výkon a cena pro tento profil nejsou prokázané; žádné živé změny.
-   [Model a cílené lokální testy](operations/CAPACITY_AND_SCALING.md)
-   jsou schválené a připravené: 4 modelové regrese / 4 emulátorové testy,
-   55 tools a lint prošly. Úsek je uzavřený: zdroj 4024e49 má success CI
-   43254458838 (361 Flutter / 10 Chrome / 55 tools / 448 Rules/server).
-   Nové rozhodnutí nahrazuje 10s upload:
-   [sync při spuštění/obnově](plans/feed/FEED_READING_POLICY.md#refresh-boundary-policy).
-   Serverový runtime je revidovaný; provozní kapacita úklidu ještě vyžaduje rozhodnutí.
-   Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
-   web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
-   Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
-   před/po znovuotevření. Regrese Uložených je také uzavřená: potvrzené zmizení
-   odebrané karty bez obnovy a její nepřítomnost po restartu. Tím je doplněná
-   poslední otevřená kontrola společné DEV akceptace A2/A3. Oba nové 24hodinové
-   testovací Shouty jsou uklizené přes writer včetně 3 záložek a 9 receipt;
-   37 původních zdrojů i Auth zůstaly zachované. Starší testovací skupiny jsou
-   rovněž uklizené; neotvírat je znovu jako čekající rollout/test.
-   [B1 a důkazy](plans/feed/FEED_READING_POLICY.md#b1-implementation),
-   [Uložené](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
-   Vlastník původně schválil B2 retenci expiresAt + 7 dní, upload 32 / 10 s
-   i první lokální implementaci; následně spouštěče změnil podle odkazu výše.
-   Ta je připravená na feature/feed-read-sync: transakční bloky a snapshot/delta,
-   IndexedDB v2 fronta, retry/ack a soukromý účtový úklid za vypnutým zapojením.
-   [Výsledky a hranice](plans/feed/FEED_READING_POLICY.md#b2-local-results).
-   Lokální úsek je uzavřený: zdroj 693663d má success CI 43119749520,
-   361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
-   [Provozní návrh](plans/feed/FEED_READING_POLICY.md#b2-runtime-proposal)
-   je starší podklad k revizi: ochrany četnosti, pokračování přenosu,
-   fyzický úklid, indexace a kompatibilní návrat. Novější schválený runtime je
-   uvedený na začátku bodu; jeho ani model/testy znovu neschvalovat.
-   Živý DEV pilot následuje po dokončení úklidu, zbývajících bran a přesném CI.
-   Implementace B2 není nasazené B2; nic živého se neměnilo.
+1. **Připravit konkrétní B3 — nepřečtené první pouze v Nejblíž.**
+   B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
+   výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
+   [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
+   Další rozsah před zdrojovými změnami ověřit a předložit ke schválení:
+   úplný potvrzený read snapshot při založení relace, globální řazení napříč
+   stránkami a stabilita otevřeného seznamu. Top/Končící/Sledované zachovat.
+   [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
+   [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
+   Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy
+   jsou zachované v [historii etap](plans/feed/B2_DEV_ROLLOUT.md#todo-pre-acceptance-history).
+   Produkční kapacita 100 000 účtů / 5 000 současně aktivních relací zůstává
+   samostatnou otevřenou branou; DEV profil ji neprokazuje.
 
-2. **Po B2 dokončit B3 a úspornou obnovu s novinkami v B4.** B3: nepřečtené
-   první jen v Nejblíž; B4: verze/metadatové porovnání, přenos rozdílů a cache,
+2. **Po B3 dokončit úspornou obnovu s novinkami v B4.** Verze/metadatové
+   porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
-   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1 v DEV nemění
+   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3, B1 a B2 v DEV nemění
    automaticky celý serverový milník. Doložené podúseky posouvají váženou stupnici
    podle [nové metodiky](PROGRESS.md).
 3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní

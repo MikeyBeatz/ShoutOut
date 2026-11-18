@@ -160,7 +160,9 @@ neuzavírá celé B2 ani celkový vizuální audit.
 Pro další B2 práci pozor na starší build/b2-rollout-source-guard.mjs: správně
 odmítá nové změny po bc4a6e1, nejen funkční změny. Použít čistý checkout
 ověřeného B2 zdroje nebo zvlášť doložit shodu jeho modulů; guard neoslabovat
-jen kvůli fontové opravě. Živá B2 akceptace a úklid fixture zůstávají otevřené.
+jen kvůli fontové opravě. B2 má následně od 18. listopadu
+[uzavřenou živou akceptaci a úklid](../plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete);
+úklid použil čistý původní checkout a nezměněný guard.
 
 <a id="intl-break-iterator"></a>
 

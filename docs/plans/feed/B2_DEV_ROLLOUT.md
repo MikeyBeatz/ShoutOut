@@ -5,6 +5,10 @@ schválil navazující DEV zapojení a pilot níže. Cílem je výhradně projek
 shoutout-dev-46c81; produkce, main, Rules, Auth účty a původní pending žádost
 zůstávají mimo něj. Připravený kód není důkaz nasazení či živé akceptace.
 
+**Aktuální výsledek k 18. listopadu: B2 je uzavřené v DEV, včetně klientské
+akceptace a úklidu.** [Závěrečný checkpoint](#b2-acceptance-complete) nahrazuje
+níže popsané průběžné čekání. Další je B3; produkční kapacita zůstává otevřená.
+
 ## Schválený živý rozsah
 
 - Čtyři cílené field změny bez TTL; živá metadata byla načtena jen pro čtení.
@@ -100,7 +104,7 @@ přesný confirmedAt serverové značky. B zůstává nepřečtené, checkpoint 
 rozpracovaný a TestBusiness DB v této relaci neexistuje. Import druhého klienta
 je tím ověřený; důkaz je build/b2-client-second-proof.json.
 
-**Živá klientská akceptace a úklid obou Shoutů zůstávají otevřené.** Browser host
+**Historický průběh před závěrečnou akceptací 18. listopadu:** Browser host
 není dostupný; náhradní nativní ovládání skončilo, protože nástroj nedokázal
 spolehlivě určit URL. První přenos i import odděleného klienta jsou ověřené;
 zbývá offline/restart/retry a úklid přes writer. První offline pokus v běžném
@@ -187,6 +191,98 @@ b2-rollout-control-proof.json. Read-only kontrola
 dvou místních testovacích značek je build/b2-read-check.js; nečte Auth ani tokeny.
 Návratový neaktivní v3 artefakt 405be7d byl před rolloutem znovu ověřený (68
 souborů). Při návratu zachovat read úklid, indexy i místní fronty podle postupu.
+
+<a id="selective-block-recovery"></a>
+
+## Řízený výpadek přenosu — 18. listopadu
+
+Živá čtecí kontrola potvrdila obě původní fixture ve stavu expired, správné
+hashe a platnou read retenci do 25. listopadu. Read sync i retention control
+jsou active/revision 1 a všech 38 původních zdrojů má stejné updateTime.
+Read moduly a jejich package/lock soubory odpovídají Git blobům schváleného
+bc4a6e1; rozdíly nového webu nepovolují obejít původní source guard.
+Důkaz: build/b2-resume-readonly-proof.json, bez cloudových zápisů.
+
+Místo dalšího přepínání obecného Offline je v DevTools blokovaný přesný
+syncReadBatch endpoint. Vlastník doložil „Request was blocked by DevTools“
+a B2_TRANSPORT_CHECK: requestFailed=true, sameOriginReachable=true,
+httpStatus=null. Kontrolní požadavek je prázdný a bez Auth/App Check tokenů;
+jeho případné doručení nemůže změnit read stav. Blokace není odvozovaná z
+navigator.onLine. Samotné TypeError bez potvrzení DevTools není univerzální
+důkaz blokování; zde je výstup prohlížeče potvrzený vlastníkem.
+
+Nový místní helper build/b2-blocked-queue-fixture.js před zápisem znovu ověří
+nedostupnost callable i dostupnost app-config.json a zachovává původní kontroly
+projektu/UID/ID/hash/retence/v3/sekvence/checkpointu. Původní helper zůstává
+nezměněný a nepoužije se jeho navigator.onLine brána. Čtyři lokální kontroly
+nové brány i syntaxe prošly; žádná změna aplikace ani nasazení. Helper znovu
+zařazuje již přečtenou B, netestuje přirozené vytvoření nové značky.
+
+Debugger byl pozastavený na breakpointu, proto Promise zůstával pending a
+aplikace nebyla ovladatelná. Po pokračování vlastník dodal první zápis
+changed=true a druhý changed=false, oba s pendingSync=true/queued=true
+a readAtLocal=1794927003716. Opakování nepřidalo další položku. Po obnovení
+feedu je doložen B2_READ_CHECK z 2026-11-18T22:13:49.492Z:
+stejný pageStartedAt=1795038650376.1, IndexedDB v3, checkpointPresent=true,
+A potvrzené bez fronty a B stále pendingSync=true/queued=true se stejným časem.
+Tím je doložené zachování fronty po neúspěšném přenosu v tomto kontextu.
+
+V této fázi následoval restart aplikace při stále zapnuté blokaci, čtecí kontrola
+nového pageStartedAt, potom uvolnění blokace a skutečné potvrzení serverem.
+Nezapínat znovu breakpoint a neopakovat zapisovací helper. Zavření DevTools
+ruší blokování; při testu je ponechat otevřené. Tehdy zůstávala akceptace otevřená;
+následující checkpoint dokládá její dokončení a úklid. Důkazní soubor:
+build/b2-selective-block-client-proof.json. Samostatný Listen transport error
+HTTP 400 má uložený jen čas/typ/status bez session parametrů; příčina a
+úspěšné obnovení tohoto listeneru zatím nejsou potvrzené.
+
+<a id="b2-acceptance-complete"></a>
+
+## Závěrečná DEV akceptace a úklid — 18. listopadu
+
+Vlastník doložil po Ctrl+R nový dokument/Flutter aplikaci:
+pageStartedAt=1795040269185.7 místo 1795038650376.1. Výpis z
+2026-11-18T22:18:04.986Z má stále checkpointPresent=true a B
+pendingSync=true/queued=true, readAtLocal=1794927003716. A je potvrzené
+a nemá frontu. Kontrolované selhání transportu a restart aplikace tedy
+neztratily čekající záznam ani jeho čas. DevTools zůstaly otevřené a blokace
+se zachovala; breakpoint byl vypnutý, aby debugger nezastavoval aplikaci.
+
+Po uvolnění blokace a ruční obnově dodal vlastník výpis
+2026-11-18T22:22:02.032Z ze stejného nového dokumentu: B
+pendingSync=false/queued=false, checkpointPresent=false a stejný čas přečtení.
+Cloud Logging nezávisle potvrzuje syncReadBatch POST HTTP 200 v
+22:21:47.243723Z a Auth/App Check VALID; následný getReadStatePage má také
+HTTP 200 a VALID. Čtecí porovnání serveru zachovalo revizi 2 pro běžný účet,
+jediný záznam B, původní confirmedAt i retainUntil; žádná duplicita ani
+prodloužení retence. Všech 38 původních zdrojů má stejné updateTime.
+
+Úklid použil nezměněný původní pilotní helper z čistého dočasného checkoutu
+bc4a6e1 s opětovně ověřeným success úplného CI 44099715617. Jeho source guard
+nebyl oslabený; příznak clients-complete byl použit až po klientském i
+serverovém důkazu. Původní indexový writer odstranil oba syntetické zdroje,
+jejich čtyři záložky a související potvrzení ukládání. Čtyři testovací cloudové
+read záznamy byly odebrány při zachování ostatních dat a monotónních revizí.
+Následná původní verify cesta má phase=cleaned, fixturesRemaining=0,
+žádné cloudové A/B markery obou účtů a všech 38 původních zdrojů zachovaných.
+Aktuální index nemá žádné uzly ani testovací řádky. Obě prošlé retenční
+fixture zůstávají odstraněné, checkpointy jsou bez lease. Žádná Auth mutace.
+Dočasný checkout byl poté odstraněn; aktuální web a oba v3 rollbacky zůstaly.
+
+**Rozsah důkazu:** dvě oddělené klientské relace, skutečný přenos/import,
+bezpečné opakování, cílený výpadek callable a úplné znovunačtení aplikace
+s trvalou IndexedDB. Nejde o restart celého procesu Chrome ani o odpojení
+celého operačního systému. Recovery použilo již existující syntetickou B;
+nevzniklo nové přirozené přečtení během offline provozu. Místní potvrzené
+testovací značky mají původní automatickou retenci do 25. listopadu; čekající
+fronta je prázdná. Firestore Listen 400 ani Intl deprecation tím nejsou
+označené za opravené. B3, B4 a produkční kapacita zůstávají otevřené.
+
+Lokální důkazy: build/b2-selective-block-client-proof.json,
+b2-final-transport-proof.json, b2-before-final-retry-proof.json,
+b2-resume-readonly-proof.json, b2-original-source-pre-cleanup-proof.json,
+b2-final-cleanup-proof.json a b2-acceptance-execution-proof.json.
+Přípravu, rollout ani tento již uzavřený živý průchod neopakovat.
 
 ## Původní přípravné zapojení
 
@@ -360,3 +456,106 @@ Metriky rozdělují pouze původní nedokončený podíl feed-b2-indexes: v MVP
 88 bodů na 29 implementace / 29 ověření / 30 živé indexace a účtové aktivace,
 v backlogu 141 na 47/47/47. Váhy rodičů ani dokončená práce se nemění.
 Návratový v3 artefakt má vlastní dosavadní podúsek; žádné nasazení tím nezíská kredit.
+
+<a id="todo-pre-acceptance-history"></a>
+
+## Historický přehled etap před uzavřením B2
+
+Původní checkpoint z TODO je zachovaný beze ztráty textu. Jeho průběžné stavy
+jsou historické; aktuální výsledek určuje závěrečná akceptace výše.
+
+<details>
+<summary>Původní podrobný checkpoint</summary>
+
+1. **Dokončit klientskou akceptaci a úklid již nasazeného B2 v DEV.**
+   [Výsledky rolloutu](B2_DEV_ROLLOUT.md#dev-rollout-results): bc4a6e1 má
+   success úplné CI 44099715617, pět Functions ACTIVE se shodnými zdroji,
+   čtyři field výjimky READY a web a5edfc1f8a96c6e7 aktivní. Retence uklidila
+   prošlé fixture a drží 24h klid; žádost/38 původních zdrojů jsou zachované.
+   Přenos a import A druhým klientem i živý retry B bez duplikace prošly.
+   [Nové izolované HTTP testy](B2_DEV_ROLLOUT.md#http-recovery-tests)
+   lokálně prokazují zachování fronty při ztrátě socketu před/po zpracování,
+   restart úložiště/controlleru a následné dokončení. Zdroj 808a734 má success
+   úplné CI 44157663737; testovací úsek je uzavřený. Nejde o živý Firebase/
+   App Check ani cold-tab restart DEV aplikace.
+   [Řízené selhání přenosu](B2_DEV_ROLLOUT.md#selective-block-recovery)
+   zachovalo B ve frontě i checkpoint; další je restart při blokaci, online
+   potvrzení a úklid. Akceptace zůstává otevřená. Staré live helpery spouštět z ověřeného čistého
+   B2 checkoutu nebo doložit kompatibilitu modulů; jejich source guard neobcházet.
+   Navigator.onLine nepoužívat jako důkaz síťové dostupnosti; stejnou smyčku
+   přepínání ani queue fixture neopakovat. Oba pilotní Shouty A/B a záložky
+   zachovat do akceptace, pak uklidit přes writer; žádné nové Auth účty.
+   Hotové implementace ani rollout neopakovat. Produkční kapacita je samostatná.
+   Níže jsou podklady dřívějších příprav; jejich vypnuté flags a zákazy živých
+   změn už nepopisují současný rollout.
+   [Schválený přípravný úsek](B2_DEV_ROLLOUT.md) je uzavřený na
+   feature/b2-dev-preparation: adaptér false s 24h klidem, účtový read flag false,
+   čtyři cílené indexy a neaktivní v3 návrat. 68 emulátorových / 17 Chrome prošlo;
+   zdroj 405be7d má success CI 44077124957 a ověřený neaktivní release/kopii 68
+   souborů pro v3 návrat. Tento rozsah znovu neschvalovat; živý
+   spouštěč, kapacita, aktivace a pilot vyžadují připravený samostatný plán.
+   [Schválený pokračující úklid](FEED_READING_POLICY.md#b2-retention-implementation)
+   je lokálně uzavřený: zdroj 5f3ed5c má success CI 44060619655, včetně 26 B2
+   runtime/retention testů a celé předchozí sady. Implementaci ani lokální
+   testy znovu neschvalovat. Žádné nasazení; zbývá konkrétní provozní rozpočet
+   a spouštění, účtové zapojení, indexace, v3 návrat a vymezený DEV pilot.
+   Lokálně prošlo i 28 cílených emulátorových testů, 129 Functions unit,
+   79 tools a lint. Nový modul žádný živý vstup neimportuje.
+   [Konkrétní runtime úsek](FEED_READING_POLICY.md#b2-runtime-implementation)
+   je výslovně schválený a lokálně připravený: control, kvóta 40 + 1/s pro
+   každý směr/UID, samostatný host a adaptér za false. 375 Flutter, 127
+   Functions unit a 10 různých emulátorových scénářů prošlo. Úsek je uzavřený:
+   zdroj cce1e7d má success CI 43284395332 (375 Flutter / 16 Chrome / 448
+   Rules/server / 10 runtime, včetně obou velkých front). Znovu jej neschvalovat.
+   Nic nebylo nasazené. Před aktivací zbývá živé zapojení připraveného úklidu a jeho kapacita,
+   potřebná indexace, kompatibilní v3 návrat a konkrétní živý DEV průchod.
+   [Konkrétní rozsah](FEED_DELTA_REFRESH_PLAN.md#b2-client-foundation)
+   byl schválený a je implementovaný: hranice outboxu, odstranění automatických
+   spouštěčů, IndexedDB v3 a atomický checkpoint. Klientský úsek je uzavřený:
+   zdroj 049cedc má success CI 43270732252 (369 Flutter / 16 Chrome / 448
+   Rules/server), lokálně i 39 cílených regresí.
+   [Výsledky](FEED_DELTA_REFRESH_PLAN.md#b2-client-results).
+   Transport není zapnutý a nic není nasazené. Serverový runtime je připravený
+   výše, kapacita úklidu je další práce; znovu neschvalovat hotový klientský úsek.
+   [Návrh verzí, rozdílů, cache a novinek](FEED_DELTA_REFRESH_PLAN.md)
+   je zapsaný na základě schválení vlastníka. Určuje návaznosti B2 → B3 → B4,
+   nikoli dokončené B2/B3/B4. Lokální úklid je nově schválený a připravený výše;
+   jeho rozsah znovu neschvalovat. Provozní zapojení předložit hotové zvlášť.
+   Cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů
+   je schválený. [Kapacitní akceptace](../../LAUNCH_READINESS.md#capacity-target)
+   zahrnuje celou kritickou cestu, automatické škálování i průběžný úklid.
+   Současný výkon a cena pro tento profil nejsou prokázané; žádné živé změny.
+   [Model a cílené lokální testy](../../operations/CAPACITY_AND_SCALING.md)
+   jsou schválené a připravené: 4 modelové regrese / 4 emulátorové testy,
+   55 tools a lint prošly. Úsek je uzavřený: zdroj 4024e49 má success CI
+   43254458838 (361 Flutter / 10 Chrome / 55 tools / 448 Rules/server).
+   Nové rozhodnutí nahrazuje 10s upload:
+   [sync při spuštění/obnově](FEED_READING_POLICY.md#refresh-boundary-policy).
+   Serverový runtime je revidovaný; provozní kapacita úklidu ještě vyžaduje rozhodnutí.
+   Místní webové B1 je uzavřené v DEV: zdroj 503eea6, success CI 43056516730,
+   web 47268ed17fd2eebd; 350 Flutter / 8 skutečných Chrome/IndexedDB.
+   Vlastník pod Bright_Otter_182 doložil short/long přečtení se stejnými časy
+   před/po znovuotevření. Regrese Uložených je také uzavřená: potvrzené zmizení
+   odebrané karty bez obnovy a její nepřítomnost po restartu. Tím je doplněná
+   poslední otevřená kontrola společné DEV akceptace A2/A3. Oba nové 24hodinové
+   testovací Shouty jsou uklizené přes writer včetně 3 záložek a 9 receipt;
+   37 původních zdrojů i Auth zůstaly zachované. Starší testovací skupiny jsou
+   rovněž uklizené; neotvírat je znovu jako čekající rollout/test.
+   [B1 a důkazy](FEED_READING_POLICY.md#b1-implementation),
+   [Uložené](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
+   Vlastník původně schválil B2 retenci expiresAt + 7 dní, upload 32 / 10 s
+   i první lokální implementaci; následně spouštěče změnil podle odkazu výše.
+   Ta je připravená na feature/feed-read-sync: transakční bloky a snapshot/delta,
+   IndexedDB v2 fronta, retry/ack a soukromý účtový úklid za vypnutým zapojením.
+   [Výsledky a hranice](FEED_READING_POLICY.md#b2-local-results).
+   Lokální úsek je uzavřený: zdroj 693663d má success CI 43119749520,
+   361 Flutter / 10 Chrome / 444 Rules/server / 116 purge / 15 Storage.
+   [Provozní návrh](FEED_READING_POLICY.md#b2-runtime-proposal)
+   je starší podklad k revizi: ochrany četnosti, pokračování přenosu,
+   fyzický úklid, indexace a kompatibilní návrat. Novější schválený runtime je
+   uvedený na začátku bodu; jeho ani model/testy znovu neschvalovat.
+   Živý DEV pilot následuje po dokončení úklidu, zbývajících bran a přesném CI.
+   Implementace B2 není nasazené B2; nic živého se neměnilo.
+
+
+</details>
