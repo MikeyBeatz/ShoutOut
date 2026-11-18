@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,98 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,01 %** — vážené dokončení podúseků
 
-Hotové úseky: **148/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **149/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,18 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,19 %** — vážené dokončení podúseků
 
-Hotové úseky: **179/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **180/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -40,21 +40,25 @@ success úplné CI 44178308912, verze 74d0c3756884ac19 je nasazená a ověřená
 na obou doménách. Sedm místních fontových scénářů, 26 Shout testů a celý CI
 průchod prošly. Odstraněné jsou jen dva selektory pevných symbolů; CSP/QUIC
 zůstávají samostatnou evidencí a jejich oprava se netvrdí. Celý vizuální audit
-ani B2 akceptace tím hotové nejsou; metriky a jejich pevné váhy jsou zachované.
+není tím hotový; B2 má samostatnou uzavřenou akceptaci níže. Metriky a jejich pevné váhy jsou zachované.
 Vlastník potvrdil odstranění fontové hlášky; zbývající
 [Intl.v8BreakIterator deprecation](operations/CONSOLE_WARNINGS.md#intl-break-iterator)
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-1. **Dokončit schválené lokální B3 — nepřečtené první pouze v Nejblíž.**
+1. **Připravit řízené DEV zapnutí B3 — nepřečtené první pouze v Nejblíž.**
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
    [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
    [Konkrétní rozsah je schválený](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
    úplná synchronizační bariéra, globální řazení napříč stránkami a stabilita
    otevřeného seznamu. Nepřečtené i přečtené řadit podle vzdálenosti, mezi
-   skupinami oddělovač. Top/Končící/Sledované zachovat. Dokončit testy/měření,
-   dokumentaci a společné CI; živý přechod generace předložit až s výsledky.
+   skupinami oddělovač. Top/Končící/Sledované zachovat. Lokální implementace
+   i automatické ověření jsou hotové: c2cdb48 má success úplné CI 44419427913.
+   [Výsledky a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
+   ukazují úsporu cache i dražší studenou cestu. Další je konkrétní návrh
+   přechodu generace/writerů a živého ověření; pouhé zapnutí webového flag
+   nestačí. Tento přechod zatím není povolený lokálním souhlasem.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
    Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy

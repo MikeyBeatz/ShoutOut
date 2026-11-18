@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**B2 je uzavřené v DEV; probíhá schválené lokální B3 — nepřečtené první v Nejblíž.**
+**B2 je uzavřené v DEV; lokální implementace a automatické ověření B3 jsou uzavřené po CI.**
 [Rozsah a upřesnění vlastníka](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
 zmrazené globální pořadí, dvě skupiny podle vzdálenosti a oddělovač Přečtené.
 Číslovka nově příchozích Shoutů patří do navazujícího B4. Na feature/feed-b3
@@ -14,10 +14,14 @@ je opt-in propojení skutečných B2 bloků s historickým prostorovým snapshot
 a bariéra úplné synchronizace v klientu. Živé flag/wrappery se nezměnily;
 nový režim vyžaduje označenou generaci s otiskem obsahu. Prošlo 62 širších
 emulátorových a po poslední změně 17 cílených API/cache testů, 80 Flutter,
-23 unit/tools, ESLint a analyzátor. První CI 44418757494 selhalo v kontrole
-modulového grafu účtového artefaktu; čistý hash helper je oddělený od B2
-kodeku a všech 82 tools testů nyní prošlo lokálně. Opakované úplné CI čeká;
-nejde o nasazení.
+23 cílených unit/tools, ESLint a analyzátor. Celý lokální balíček má 82 tools
+a 135 Functions unit (464 integračních mimo emulátor přeskočeno).
+Zdroj **c2cdb48aedcd0584eeb675935b4694af8b46701e** má
+[success úplné CI 44419427913](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44419427913)
+včetně Flutter/browser, Rules/server, B2 runtime, purge, Storage a webového
+sestavení. Dřívější chyba modulového grafu účtového artefaktu z CI 44418757494
+je opravená oddělením čistého otisku od B2 kodeku; kontrola balíčků zůstala.
+Pracovní strom je po zdrojových commitech čistý; nejde o nasazení.
 [Lokální výsledky a naměřené náklady](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
 odlišují studenou cestu od opakovaných stránek s cache. Před DEV aktivací
 zbývá posoudit studený náklad a připravit společný přechod generace/writerů.
@@ -41,8 +45,8 @@ success úplné CI 44157663737 a doplňují živý průchod. Ověřený restart 
 nový dokument/Flutter aplikaci přes Ctrl+R, nikoli celý proces Chrome nebo
 odpojení operačního systému. Nevytvářet znovu fixture ani neopakovat hotové B2.
 
-Schválený lokální rozsah B3 znovu nepředkládat; dokončit jeho kontroly a CI.
-Teprve potom připravit konkrétní přechod generace a živé ověření. B3/B4 ani
+Hotový lokální rozsah B3 ani B2 neopakovat. Další je konkrétní přechod
+generace/writerů, posouzení studené cesty a plán živého ověření. B3/B4 ani
 produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové v DEV nejsou.
 
 Fontová oprava je také uzavřená v DEV: zdroj

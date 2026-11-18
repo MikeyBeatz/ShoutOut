@@ -78,9 +78,18 @@ rozpočtu. Klient má 80 cílených Flutter testů; analyzátor bez nálezů, ES
 bez nálezů, 23 cílených unit/tools testů a 82 testů celého nástrojového balíčku.
 První CI 44418757494 správně zastavila změna modulového grafu v testu
 balení Functions; oddělení čistého otisku od read-block kodeku je opravené
-a lokální kontrola obou skutečných artefaktů prošla. Opakované úplné CI čeká.
+a lokální kontrola obou skutečných artefaktů prošla. Celé místní Functions unit
+má 135 úspěšných testů a 464 integračních přeskočených mimo emulátor.
 Tyto skupiny se mohou překrývat;
-nejde o součet unikátních scénářů celé aplikace. Úplné CI zatím čeká.
+nejde o součet unikátních scénářů celé aplikace.
+
+Zdroj **c2cdb48aedcd0584eeb675935b4694af8b46701e** má
+[success úplné CI 44419427913](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44419427913).
+Ověřené jsou všechny aplikační kroky včetně browserových testů, serverových
+transakcí a Rules, B2 runtime, účtového purge, Storage a sestavení webu.
+Lokální kód a automatické ověření B3 jsou tím uzavřené; skutečná aktivace
+a živá akceptace B3 zůstávají otevřené. Commit e7acea0 obsahuje jádro,
+c2cdb48 navazující opravu modulového grafu; oba jsou ve feature/feed-b3.
 
 | Laboratorní scénář | Celá těla stránky | Soukromé blokové reads | Poznámka |
 |---|---:|---:|---|
