@@ -55,6 +55,61 @@ Widget harness(
 );
 
 void main() {
+  testWidgets('B3 renders one frozen read separator at a page boundary', (
+    tester,
+  ) async {
+    final scroll = ScrollController();
+    addTearDown(scroll.dispose);
+    final shouts = [
+      decodeSpatialFeedItem({...item(1), 'read': false}),
+    ];
+    Widget view() => harness(
+      FeedPage(
+        shouts: List.of(shouts),
+        isLoading: false,
+        onSave: (_) {},
+        onReaction: (_, {required bool like}) async {},
+        onNotifications: () {},
+        filters: FeedFilters(),
+        followedUserIds: {},
+        spatial: SpatialFeedPresentation(
+          scrollController: scroll,
+          refresh: () {},
+          changeFilters: (_) {},
+          prefetch: () {},
+          loadMore: () {},
+          hasMore: false,
+          loadingMore: false,
+          refreshing: false,
+          card: (shout) => SizedBox(height: 40, child: Text(shout.title)),
+        ),
+      ),
+    );
+    await tester.pumpWidget(view());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('feed-read-separator')), findsNothing);
+    shouts.addAll([
+      decodeSpatialFeedItem({...item(2), 'read': true}),
+      decodeSpatialFeedItem({...item(3), 'read': true}),
+    ]);
+    await tester.pumpWidget(view());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('feed-read-separator')), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Card 1')).dy,
+      lessThan(tester.getTopLeft(find.text('Přečtené')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Přečtené')).dy,
+      lessThan(tester.getTopLeft(find.text('Card 2')).dy),
+    );
+    shouts.first.likes = 999;
+    await tester.pumpWidget(view());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('feed-read-separator')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   test(
     'server DTO carries full content and timestamps into the existing Shout model',
     () {

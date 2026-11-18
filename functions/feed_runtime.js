@@ -34,9 +34,9 @@ function budgetDatabase(db) {
   } });
 }
 
-export function createFeedGenerationStore(db, generationId) {
+export function createFeedGenerationStore(db, generationId, { contentIdentity = false } = {}) {
   const binding = runtimeIndexBinding(db, generationId);
-  const store = createBlockIndexStore(db, { binding, accountRetention: true });
+  const store = createBlockIndexStore(db, { binding, accountRetention: true, contentIdentity });
   // No seed, arbitrary source mutation, fake GC time, or fixture hooks. Runtime
   // generation creation/backfill/GC orchestration is a separate migration gate.
   return Object.freeze({ base: store.base, prepare: store.prepare, prepareBatch: store.prepareBatch,
@@ -44,8 +44,8 @@ export function createFeedGenerationStore(db, generationId) {
     purgeAccountIndex: store.purgeAccountIndex, prepareAccountIndexFinish: store.prepareAccountIndexFinish });
 }
 
-export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date() } = {}) {
-  if (typeof enabled !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
+export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date(), contentIdentity = false } = {}) {
+  if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
   // Disabled wrappers keep the exact legacy database and do not even inspect
   // control/registry/queue documents or require a new Auth capability.
   if (!enabled) return Object.freeze({ enabled: false, database: db, indexWriter: null, earlyErasureQueue: null, indexErasureCoordinator: null, indexMaintenance: null });
@@ -55,7 +55,7 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   const binding = {
     base: database.doc('feedIndexMaintenance/erasureQueue'),
     indexFor: id => runtimeIndexBinding(database, id).base,
-    createIndex: (measured, id) => createFeedGenerationStore(measured, id),
+    createIndex: (measured, id) => createFeedGenerationStore(measured, id, { contentIdentity }),
   };
   const earlyErasureQueue = createEarlyErasureQueueStore(database, auth, { binding, clock });
 
@@ -73,7 +73,7 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
     // concurrent activation, pause and generation replacement transactions.
     const plans = [];
     for (const id of state.writeGenerationIds) {
-      const store = createFeedGenerationStore(database, id);
+      const store = createFeedGenerationStore(database, id, { contentIdentity });
       plans.push(await store.prepareBatch(tx, changes, options));
     }
     const sum = key => plans.reduce((count, plan) => count + plan[key], 0);

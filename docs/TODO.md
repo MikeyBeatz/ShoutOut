@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 18. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 19. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`███████████████████████░░░░░░░░░░░░░░░░░` **59,94 %** — vážené dokončení podúseků
+`███████████████████████░░░░░░░░░░░░░░░░░` **59,98 %** — vážené dokončení podúseků
 
-Hotové úseky: **147/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **148/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,17 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,18 %** — vážené dokončení podúseků
 
-Hotové úseky: **178/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **179/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -46,13 +46,15 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-1. **Připravit konkrétní B3 — nepřečtené první pouze v Nejblíž.**
+1. **Dokončit schválené lokální B3 — nepřečtené první pouze v Nejblíž.**
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
    [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
-   Další rozsah před zdrojovými změnami ověřit a předložit ke schválení:
-   úplný potvrzený read snapshot při založení relace, globální řazení napříč
-   stránkami a stabilita otevřeného seznamu. Top/Končící/Sledované zachovat.
+   [Konkrétní rozsah je schválený](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
+   úplná synchronizační bariéra, globální řazení napříč stránkami a stabilita
+   otevřeného seznamu. Nepřečtené i přečtené řadit podle vzdálenosti, mezi
+   skupinami oddělovač. Top/Končící/Sledované zachovat. Dokončit testy/měření,
+   dokumentaci a společné CI; živý přechod generace předložit až s výsledky.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
    Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy

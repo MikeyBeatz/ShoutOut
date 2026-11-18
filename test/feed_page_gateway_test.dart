@@ -32,6 +32,58 @@ Map<String, Object?> reply(
 
 void main() {
   test(
+    'B3 rejects an unread row after the read group even on a later page',
+    () async {
+      final gateway = FeedPageGateway<String>(
+        unreadFirst: true,
+        currentUserId: () => 'reader',
+        decodeItem: (r) => r['id'] as String,
+        send: (request) async => {
+          ...reply([
+            'one',
+          ], next: request.containsKey('cursor') ? null : 'next'),
+          'readOrdering': 'unread-first',
+          'items': [
+            {'id': 'one', 'read': !request.containsKey('cursor')},
+          ],
+        },
+      );
+      final first = await gateway.load(near, null);
+      await expectLater(gateway.load(near, first.next), throwsStateError);
+      gateway.dispose();
+    },
+  );
+
+  test(
+    'B3 requires server confirmation of frozen groups, with old list preserved on failure',
+    () async {
+      var valid = true;
+      final gateway = FeedPageGateway<String>(
+        unreadFirst: true,
+        currentUserId: () => 'reader',
+        decodeItem: (r) => r['id'] as String,
+        send: (_) async => {
+          ...reply(['one']),
+          if (valid) 'readOrdering': 'unread-first',
+          'items': [
+            {'id': 'one', 'read': false},
+          ],
+        },
+      );
+      final session = FeedSessionController<String, SpatialFeedContext>(
+        load: gateway.load,
+        idOf: (id) => id,
+      );
+      await session.refresh(near);
+      valid = false;
+      await expectLater(session.refresh(near), throwsStateError);
+      expect(session.items, ['one']);
+      gateway.dispose();
+      session.dispose();
+    },
+  );
+
+  test(
     'preparation stays internal and 50 + 50 + 20 uses one prefetched batch without duplicates',
     () async {
       final sent = <Map<String, Object?>>[];

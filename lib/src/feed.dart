@@ -546,7 +546,33 @@ class _FeedPageState extends State<FeedPage> {
                     if (widget.spatial case final spatial?) {
                       return KeyedSubtree(
                         key: ValueKey(shout.id),
-                        child: spatial.card(shout),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (shout.feedRead == true &&
+                                (index == 0 ||
+                                    shouts[index ~/ 2 - 1].feedRead != true))
+                              Padding(
+                                key: const ValueKey('feed-read-separator'),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Expanded(child: Divider()),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Text(tr(context, 'Přečtené')),
+                                    ),
+                                    const Expanded(child: Divider()),
+                                  ],
+                                ),
+                              ),
+                            spatial.card(shout),
+                          ],
+                        ),
                       );
                     }
                     return RatedShoutCard(

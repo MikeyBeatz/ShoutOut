@@ -1,12 +1,24 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 18. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 19. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**B2 je uzavřené v DEV; další konkrétní úsek je B3 — nepřečtené první v Nejblíž.**
+**B2 je uzavřené v DEV; probíhá schválené lokální B3 — nepřečtené první v Nejblíž.**
+[Rozsah a upřesnění vlastníka](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
+zmrazené globální pořadí, dvě skupiny podle vzdálenosti a oddělovač Přečtené.
+Číslovka nově příchozích Shoutů patří do navazujícího B4. Na feature/feed-b3
+je opt-in propojení skutečných B2 bloků s historickým prostorovým snapshotem
+a bariéra úplné synchronizace v klientu. Živé flag/wrappery se nezměnily;
+nový režim vyžaduje označenou generaci s otiskem obsahu. Prošlo 62 širších
+emulátorových a po poslední změně 17 cílených API/cache testů, 80 Flutter,
+23 unit/tools, ESLint a analyzátor. Úplné CI čeká; nejde o nasazení.
+[Lokální výsledky a naměřené náklady](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
+odlišují studenou cestu od opakovaných stránek s cache. Před DEV aktivací
+zbývá posoudit studený náklad a připravit společný přechod generace/writerů.
+
 [Závěrečná akceptace a úklid](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete)
 dokládají přenos/import mezi dvěma klientskými relacemi, zachování fronty při
 zablokovaném callable a úplném znovunačtení aplikace, potom skutečný HTTP 200
@@ -26,10 +38,9 @@ success úplné CI 44157663737 a doplňují živý průchod. Ověřený restart 
 nový dokument/Flutter aplikaci přes Ctrl+R, nikoli celý proces Chrome nebo
 odpojení operačního systému. Nevytvářet znovu fixture ani neopakovat hotové B2.
 
-Pro B3 nejprve ověřit a předložit konkrétní rozsah podle
-[společného plánu](plans/feed/FEED_DELTA_REFRESH_PLAN.md): úplný potvrzený read
-snapshot, stabilní globální pořadí napříč stránkami, pouze v Nejblíž.
-B3/B4 ani produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové nejsou.
+Schválený lokální rozsah B3 znovu nepředkládat; dokončit jeho kontroly a CI.
+Teprve potom připravit konkrétní přechod generace a živé ověření. B3/B4 ani
+produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové v DEV nejsou.
 
 Fontová oprava je také uzavřená v DEV: zdroj
 9e3828dd37bd8ce68713f87cedb956db0a135124, success úplné CI 44178308912,

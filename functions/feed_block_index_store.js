@@ -144,16 +144,20 @@ function nodeKey(summary, c) {
 
 // Internal engine. Public entry points validate and bind fixed storage paths.
 export function createBlockIndexStore(db, { binding, cache = blockCache(), elapsedClock = () => performance.now(),
-  accountRetention = false, ...blockOptions }) {
+  accountRetention = false, contentIdentity = false, ...blockOptions }) {
   assertIndexBinding(db, binding);
-  if (typeof accountRetention !== 'boolean') throw new Error('invalid-account-retention-mode');
+  if (typeof accountRetention !== 'boolean' || typeof contentIdentity !== 'boolean') throw new Error('invalid-account-retention-mode');
+  const sourceMetadata = value => metadataOf(value, { contentIdentity });
   const { base, source, namespace } = binding;
   const cells = base.collection('cells'), nodes = base.collection('nodes');
   const reconcile = Symbol('reconcile-current-source');
   const erasureCapability = Symbol('trusted-account-erasure');
   const fences = base.collection('cellRetention');
   let cacheRevision = null;
-  const mode = marker => { if ((marker.accountRetention === true) !== accountRetention) throw new Error('index-retention-mode-mismatch'); };
+  const mode = marker => {
+    if ((marker.accountRetention === true) !== accountRetention) throw new Error('index-retention-mode-mismatch');
+    if ((marker.readIdentity === 1) !== contentIdentity) throw new Error('index-content-identity-mode-mismatch');
+  };
   async function retentionFence(tx, marker, roots, expected = null, metrics = null) {
     mode(marker);
     if (!accountRetention) return null;
@@ -234,8 +238,8 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       assertId(id);
       if (ids.has(id)) throw new Error('duplicate-index-id');
       ids.add(id);
-      const old = before === null ? null : metadataOf({ ...before, id });
-      const next = after === null ? null : metadataOf({ ...after, id });
+      const old = before === null ? null : sourceMetadata({ ...before, id });
+      const next = after === null ? null : sourceMetadata({ ...after, id });
       return { old, next, changed: canonical(old) !== canonical(next) };
     });
     let reads = 1;
@@ -328,14 +332,14 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
 
   async function mutate(id, value, { beforeCommit } = {}) {
     assertId(id);
-    const requested = value === reconcile || value === null ? null : metadataOf(value);
+    const requested = value === reconcile || value === null ? null : sourceMetadata(value);
     if (requested && requested.id !== id) throw new Error('invalid-index-id');
     const operationId = randomUUID();
     let attempts = 0, reads = 0;
     const committed = await db.runTransaction(async tx => {
       attempts++;
       const original = await tx.get(source.doc(id)); reads++;
-      const old = original.exists ? metadataOf({ ...original.data(), id }) : null;
+      const old = original.exists ? sourceMetadata({ ...original.data(), id }) : null;
       const next = value === reconcile ? old : requested;
       const plan = await prepare(tx, id, old, next, { operationId, reconcileExpired: value === reconcile });
       reads += plan.reads;
@@ -459,7 +463,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const profiles = authors.length ? await db.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
     const erasedAuthors = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
     return { sourceReads: docs.length, ...(accountRetention ? { retentionReadUnits: profiles.length } : {}), items: docs.map(doc => {
-      const row = doc.exists && !isPurgedShoutContext(doc.data()) ? metadataOf({ ...doc.data(), id: doc.id }) : null;
+      const row = doc.exists && !isPurgedShoutContext(doc.data()) ? sourceMetadata({ ...doc.data(), id: doc.id }) : null;
       return row && !erasedAuthors.has(row.authorId) && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
     }) };
   }
@@ -573,9 +577,10 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
         unreadFirst: c.unreadFirst, blocked: [...c.blocked], followed: [...c.followed], category: c.category,
         readDigest: readDigest(readIds) } });
   }
-  async function portablePage(snapshot, position, { uid, readIds = [], assertSessionAlive, nodes: workNodes = 32 } = {}) {
+  async function portablePage(snapshot, position, { uid, readIds = [], classifyRead, assertSessionAlive, nodes: workNodes = 32 } = {}) {
     if (snapshot?.v !== 1 || snapshot.project !== db.projectId || snapshot.namespace !== namespace ||
-        uid !== snapshot.context?.uid || readDigest(readIds) !== snapshot.context?.readDigest) throw new Error('incompatible-portable-context');
+        uid !== snapshot.context?.uid || (classifyRead ? !contentIdentity || snapshot.context.readPolicy !== 'content-v1' :
+          readDigest(readIds) !== snapshot.context?.readDigest)) throw new Error('incompatible-portable-context');
     const c = context({ ...snapshot.context, readIds });
     if (accountRetention && (!snapshot.retention || typeof snapshot.retention !== 'object')) throw new Error('invalid-retention-snapshot');
     const metrics = { nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0 };
@@ -583,7 +588,9 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const result = await portableIndexPage({ roots: snapshot.roots, position,
       readNode: key => loadBlock(key, metrics), eligible: row => available(row, c),
       mayContainRows: summary => minimumDistance(c.point, summary) <= c.radiusKm,
-      rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c), assertSessionAlive }, { nodes: workNodes });
+      rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c),
+      prepareRows: classifyRead ? async rows => { await classifyRead(rows); c.readIds = new Set(readIds); } : undefined,
+      assertSessionAlive }, { nodes: workNodes });
     // Preparing cursors carry buffered metadata too. A signature does not
     // encrypt it: apply the same deleted-author fence before returning it.
     const exposed = [...result.rows, ...(result.position?.pending ?? []), ...(result.position?.candidates ?? [])];
@@ -603,7 +610,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
     const items = docs.flatMap(doc => {
       if (!doc.exists || isPurgedShoutContext(doc.data())) return [];
-      const row = metadataOf({ ...doc.data(), id: doc.id });
+      const row = sourceMetadata({ ...doc.data(), id: doc.id });
       return available(row, c, now) ? [{ id: doc.id, row, data: doc.data() }] : [];
     });
     await checkRetention(snapshot, items.map(item => item.row), metrics);
@@ -638,7 +645,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
         if (blocks.get(header.hash).summary.minExpiry !== header.minExpiry) throw new Error('invalid-index-directory');
       }
       const expected = sourceDocs.docs.filter(doc => !isPurgedShoutContext(doc.data()))
-        .map(doc => metadataOf({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
+        .map(doc => sourceMetadata({ ...doc.data(), id: doc.id })).filter(row => row.status === 'active');
       if (accountRetention) {
         const authors = [...new Set(expected.map(row => row.authorId))];
         const profiles = authors.length ? await db.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];

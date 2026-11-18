@@ -13,6 +13,13 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverUnreadFeed !== undefined && typeof config.serverUnreadFeed !== 'boolean') {
+    throw new Error('serverUnreadFeed must be a boolean.');
+  }
+  if (config.serverUnreadFeed === true && (environment !== 'dev' ||
+      config.serverSpatialFeed !== true || config.serverReadSynchronization !== true)) {
+    throw new Error('Unread feed requires DEV spatial feed and read sync.');
+  }
   if (config.serverReadSynchronization !== undefined && typeof config.serverReadSynchronization !== 'boolean') {
     throw new Error('serverReadSynchronization must be a boolean.');
   }

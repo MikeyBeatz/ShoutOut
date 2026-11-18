@@ -37,19 +37,26 @@ class SpatialFeedContext {
 }
 
 class FeedPageCursor {
-  const FeedPageCursor._(this.token, this.uid, this.context);
+  const FeedPageCursor._(
+    this.token,
+    this.uid,
+    this.context,
+    this.readGroupStarted,
+  );
   final String token;
   final String uid;
   final SpatialFeedContext context;
+  final bool readGroupStarted;
 
   @override
   bool operator ==(Object other) =>
       other is FeedPageCursor &&
       token == other.token &&
       uid == other.uid &&
-      context == other.context;
+      context == other.context &&
+      readGroupStarted == other.readGroupStarted;
   @override
-  int get hashCode => Object.hash(token, uid, context);
+  int get hashCode => Object.hash(token, uid, context, readGroupStarted);
 }
 
 /// Bounded transport for the existing session controller. Preparing checkpoints
@@ -60,6 +67,7 @@ class FeedPageGateway<T> {
     required this.send,
     required this.decodeItem,
     this.maxPreparationRequests = 32,
+    this.unreadFirst = false,
   }) {
     if (maxPreparationRequests < 1) {
       throw ArgumentError('Invalid feed work budget');
@@ -72,6 +80,7 @@ class FeedPageGateway<T> {
   // Local integration safety budget. Live activation must validate costs and
   // latency for the whole preparation, not merely one callable request.
   final int maxPreparationRequests;
+  final bool unreadFirst;
   int _generation = 0;
   bool _disposed = false;
 
@@ -98,6 +107,7 @@ class FeedPageGateway<T> {
     }
 
     var token = (cursor as FeedPageCursor?)?.token;
+    var readGroupStarted = cursor?.readGroupStarted ?? false;
     String? baseline;
     for (var work = 0; work < maxPreparationRequests; work++) {
       guard();
@@ -108,6 +118,15 @@ class FeedPageGateway<T> {
       guard();
       if (response is! Map) throw StateError('Invalid feed response');
       final value = Map<String, dynamic>.from(response);
+      final grouped = unreadFirst && context.order == 'nearest';
+      if (grouped &&
+          (value['readOrdering'] != 'unread-first' ||
+              value['items'] is! List ||
+              (value['items'] as List).any(
+                (item) => item is! Map || item['read'] is! bool,
+              ))) {
+        throw StateError('Unconfirmed feed reading order');
+      }
       final items = value['items'],
           next = value['next'],
           state = value['state'];
@@ -134,6 +153,12 @@ class FeedPageGateway<T> {
       }
       final decoded = items.map((item) {
         if (item is! Map) throw StateError('Invalid feed item');
+        if (grouped) {
+          if (readGroupStarted && item['read'] == false) {
+            throw StateError('Feed reading groups changed across pages');
+          }
+          readGroupStarted |= item['read'] == true;
+        }
         return decodeItem(Map<String, dynamic>.from(item));
       }).toList();
       return FeedBatch(
@@ -141,7 +166,7 @@ class FeedPageGateway<T> {
         baseline: baseline,
         next: next == null
             ? null
-            : FeedPageCursor._(next as String, uid, context),
+            : FeedPageCursor._(next as String, uid, context, readGroupStarted),
       );
     }
     throw StateError('Feed preparation work budget exhausted');

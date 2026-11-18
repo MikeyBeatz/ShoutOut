@@ -80,6 +80,47 @@ void main() {
   )..setActive(true);
 
   test(
+    'B3 barrier waits for complete sync and rejects offline or changed viewers',
+    () async {
+      var fail = false;
+      ReadScope? sessionsScope;
+      Completer<void>? wait;
+      final sessions = ReadSessions(
+        storeFactory: MemoryReadStateStore.new,
+        syncFactory: (scope, store, accept) => ReadSyncController(
+          scope: scope,
+          store: store,
+          currentScope: () => sessionsScope,
+          clock: () => now,
+          upload: (r) async => ack(r),
+          download: (_) async {
+            await wait?.future;
+            if (fail) throw StateError('Offline');
+            return page(1);
+          },
+          onMerged: accept,
+        ),
+      );
+      sessions.configure('dev');
+      sessionsScope = scope;
+      sessions.retainViewer('alice');
+      await sessions.synchronizeForFeed('alice');
+      fail = true;
+      await expectLater(sessions.synchronizeForFeed('alice'), throwsStateError);
+      fail = false;
+      wait = Completer<void>();
+      final running = sessions.synchronizeForFeed('alice');
+      final rejected = expectLater(running, throwsStateError);
+      await Future<void>.delayed(Duration.zero);
+      sessions.retainViewer(null);
+      wait.complete();
+      await rejected;
+      await expectLater(sessions.synchronizeForFeed('alice'), throwsStateError);
+      sessions.dispose();
+    },
+  );
+
+  test(
     'capture waits for already observed RAM marks, and disk failure stops the boundary before network work',
     () async {
       for (final fail in [false, true]) {

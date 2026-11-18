@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { geohashBounds } from './feed_spatial.js';
+import { readContentHash } from './read_sync_blocks.js';
 
 export const blockDefaults = Object.freeze({ entries: 64, bytes: 65536 });
 export const clone = value => JSON.parse(JSON.stringify(value));
@@ -19,7 +20,7 @@ export function canonical(value) {
 export const encodedBytes = value => Buffer.byteLength(canonical(value));
 export const nodeHash = node => hash(canonical(node));
 
-export function metadataOf(source) {
+export function metadataOf(source, { contentIdentity = false } = {}) {
   if (!source || !identifier(source.id) || typeof source.authorId !== 'string' ||
       !source.authorId.length || source.authorId.length > 128 ||
       typeof source.geohash !== 'string' || !/^[0123456789bcdefghjkmnpqrstuvwxyz]{7}$/.test(source.geohash) ||
@@ -36,11 +37,16 @@ export function metadataOf(source) {
   if (![createdAt, expiresAt].every(value => Number.isFinite(value) && Math.abs(value) <= Number.MAX_SAFE_INTEGER) ||
     ![likesCount, dislikesCount].every(Number.isSafeInteger) || createdAt < 0 ||
     expiresAt < createdAt || likesCount < 0 || dislikesCount < 0) throw new Error('invalid-index-metadata');
+  const contentHash = contentIdentity && typeof source.title === 'string' && typeof source.text === 'string'
+    ? readContentHash(source.title, source.text) : source.contentHash;
+  if (contentHash !== undefined && !/^[a-f0-9]{64}$/.test(contentHash)) throw new Error('invalid-index-content-identity');
+  if (contentIdentity && contentHash === undefined) throw new Error('missing-index-content-identity');
   return { id: source.id, authorId: source.authorId, geohash: source.geohash,
     location: { latitude: source.location.latitude, longitude: source.location.longitude },
     createdAt, expiresAt, likesCount, dislikesCount, status: source.status,
     categories: [...new Set(source.categories)].sort(),
-    businessHighlighted: source.businessHighlighted === true, businessSpotlight: source.businessSpotlight === true };
+    businessHighlighted: source.businessHighlighted === true, businessSpotlight: source.businessSpotlight === true,
+    ...(contentHash === undefined ? {} : { contentHash }) };
 }
 
 export function lowRated(row) {

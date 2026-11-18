@@ -1,5 +1,6 @@
 // Generated draft translations. Review context and wording before release.
 const slovakTranslations = <String, String>{
+  'Přečtené': 'Prečítané',
   'Obnovit': 'Obnoviť',
   'Načíst další': 'Načítať ďalšie',
   'Pro zobrazení okolí povol polohu.': 'Na zobrazenie okolia povoľ polohu.',

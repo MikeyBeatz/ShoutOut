@@ -12,6 +12,27 @@ Map<String, dynamic> gatewayFixture() => {
 };
 
 void main() {
+  test('B3 flag defaults off and needs DEV feed/read synchronization', () {
+    final dev =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(dev).serverUnreadFeed, isFalse);
+    expect(
+      WebEnvironment.fromJson({
+        ...dev,
+        'serverUnreadFeed': true,
+      }).serverUnreadFeed,
+      isTrue,
+    );
+    for (final broken in [
+      {...dev, 'serverUnreadFeed': 'true'},
+      {...dev, 'serverUnreadFeed': true, 'serverReadSynchronization': false},
+      {...dev, 'serverUnreadFeed': true, 'serverSpatialFeed': false},
+    ]) {
+      expect(() => WebEnvironment.fromJson(broken), throwsStateError);
+    }
+  });
+
   test(
     'read synchronization is enabled only in DEV and requires local tracking and App Check',
     () {

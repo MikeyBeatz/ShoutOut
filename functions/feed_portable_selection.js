@@ -8,7 +8,7 @@ const compare = (a, b) => {
 };
 
 export async function portableIndexPage({ roots, position = {}, readNode, eligible, rowKey, nodeKey,
-  mayContainRows = () => true, assertSessionAlive }, { nodes = 32 } = {}) {
+  mayContainRows = () => true, prepareRows = async () => {}, assertSessionAlive }, { nodes = 32 } = {}) {
   if (!Array.isArray(roots) || typeof assertSessionAlive !== 'function' || typeof readNode !== 'function' ||
       typeof eligible !== 'function' || typeof rowKey !== 'function' || typeof nodeKey !== 'function' ||
       !Number.isInteger(nodes) || nodes < 1 || nodes > 128) throw new Error('invalid-portable-selection');
@@ -23,6 +23,8 @@ export async function portableIndexPage({ roots, position = {}, readNode, eligib
     frontier.push({ ...item, key: nodeKey(item.summary) });
   }
   const pending = (state.pending ?? []).map(metadataOf);
+  await prepareRows([...pending, ...(state.candidates ?? []).map(metadataOf)]);
+  assertSessionAlive();
   const candidates = (state.candidates ?? []).map(row => ({ row: metadataOf(row), key: rowKey(row) }));
   if (pending.length >= 50 || candidates.length + pending.length > 50) throw new Error('invalid-portable-position');
   candidates.sort((a, b) => compare(a.key, b.key));
@@ -51,6 +53,8 @@ export async function portableIndexPage({ roots, position = {}, readNode, eligib
       }
     } else {
       metrics.metadataExamined += node.rows.length;
+      await prepareRows(node.rows.filter(eligible));
+      assertSessionAlive();
       for (const row of node.rows) {
         const key = rowKey(row);
         if (!eligible(row) || (after && compare(key, after) <= 0)) continue;

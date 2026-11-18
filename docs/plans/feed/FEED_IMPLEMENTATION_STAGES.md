@@ -40,7 +40,9 @@ a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 [Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 Webové B1 má skutečnou expozici i místní trvalé označování a je uzavřené
 v DEV. Synchronizace B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete);
-navazující B3–B4 nejsou hotové.
+navazující B3–B4 nejsou hotové v DEV. Od 19. listopadu je schválené a lokálně
+ověřené [jádro B3 s oddělovačem a potvrzeným read snapshotem](FEED_DELTA_REFRESH_PLAN.md#b3-local-results);
+úplné CI a řízený živý přechod zůstávají samostatné kroky.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu

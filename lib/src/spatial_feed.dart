@@ -110,7 +110,15 @@ Shout decodeSpatialFeedItem(Map<String, dynamic> item) {
     }
     data[field] = Timestamp.fromMillisecondsSinceEpoch(millis.toInt());
   }
-  return Shout.fromData(id, data, distanceKm: distance.toDouble());
+  if (item.containsKey('read') && item['read'] is! bool) {
+    throw StateError('Invalid feed read group');
+  }
+  return Shout.fromData(
+    id,
+    data,
+    distanceKm: distance.toDouble(),
+    feedRead: item['read'] as bool?,
+  );
 }
 
 class _SpatialShoutCard extends StatefulWidget {

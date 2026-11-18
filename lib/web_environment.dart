@@ -132,6 +132,15 @@ class WebEnvironment {
       throw StateError('serverSpatialFeed must be a boolean.');
     }
     serverSpatialFeed = spatial == true;
+    if (json.containsKey('serverUnreadFeed') &&
+        json['serverUnreadFeed'] is! bool) {
+      throw StateError('serverUnreadFeed must be a boolean.');
+    }
+    serverUnreadFeed = json['serverUnreadFeed'] == true;
+    if (serverUnreadFeed &&
+        (name != 'dev' || !serverSpatialFeed || !serverReadSynchronization)) {
+      throw StateError('Unread feed requires DEV spatial feed and read sync.');
+    }
     if (serverSpatialFeed &&
         (appCheckSiteKey == null ||
             !serverShoutCreation ||
@@ -240,6 +249,7 @@ class WebEnvironment {
   late final bool serverShoutCreation;
   late final bool serverReadSynchronization;
   late final bool serverSpatialFeed;
+  late final bool serverUnreadFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;
   late final bool serverShoutReactions;

@@ -37,6 +37,7 @@ List<T> shuffledPromotionCycle<T>(List<T> values, int cycle, int seed) {
 class Shout {
   Shout({
     required this.id,
+    this.feedRead,
     this.authorId = '',
     required this.author,
     required this.title,
@@ -74,6 +75,7 @@ class Shout {
     String id,
     Map<String, dynamic> data, {
     double distanceKm = 0,
+    bool? feedRead,
   }) {
     if (data['schemaVersion'] == 1 &&
         data['contentPurged'] == true &&
@@ -93,6 +95,7 @@ class Shout {
     }
     return Shout(
       id: id,
+      feedRead: feedRead,
       authorId: data['authorId'] as String,
       author: data['authorNickname'] as String,
       title: data['title'] as String,
@@ -127,6 +130,8 @@ class Shout {
     );
   }
   final String id;
+  // Frozen server selection group, independent of live reading.
+  final bool? feedRead;
   final String authorId;
   final String author;
   final String title;

@@ -4,11 +4,12 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore, Timestamp, GeoPoint } from 'firebase-admin/firestore';
 import { getFeedPageOperation } from './get_feed_page.js';
-import { createFeedRuntime } from './feed_runtime.js';
+import { createFeedRuntime, createFeedGenerationStore } from './feed_runtime.js';
 import { metadataOf, treeBuilder } from './feed_block_index.js';
-import { cellGrid } from './feed_block_index_store.js';
+import { cellGrid, blockCache } from './feed_block_index_store.js';
 import { encodeGeohash } from './geohash.js';
 import { feedCursorCodec } from './feed_cursor.js';
+import { planReadBlocks, readContentHash, readRetentionMillis } from './read_sync_blocks.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'feed-page-tests') : null;
@@ -17,7 +18,7 @@ after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const point = { latitude: 50.08, longitude: 14.44 };
 const context = { point, radiusKm: 5, order: 'nearest', category: null };
 
-async function fixture(t, count = 120) {
+async function fixture(t, count = 120, readOrdering = null) {
   const uid = randomUUID(), generation = `page-${uid.slice(0, 8)}`, roots = [], key = randomBytes(32);
   const control = db.doc('feedIndexControl/current'), base = db.doc(`feedIndexGenerations/${generation}`);
   assert.equal((await control.get()).exists, false); assert.equal((await db.collection('feedIndexGenerations').limit(1).get()).size, 0);
@@ -37,10 +38,11 @@ async function fixture(t, count = 120) {
     const ref = db.doc(`shouts/${row.id}`); roots.push(ref);
     batch.set(ref, { ...row, location: new GeoPoint(row.location.latitude, row.location.longitude),
       createdAt: Timestamp.fromMillis(row.createdAt), expiresAt: Timestamp.fromMillis(row.expiresAt) });
-    const metadata = metadataOf(row), cell = row.geohash.slice(0, 4);
+    const metadata = metadataOf(row, { contentIdentity: readOrdering !== null }), cell = row.geohash.slice(0, 4);
     if (!regions.has(cell)) regions.set(cell, []); regions.get(cell).push(metadata);
   }
-  batch.create(base, { schemaVersion: 1, v: 1, accountRetention: true, erasureRevision: 0, prunedThrough: -1 });
+  batch.create(base, { schemaVersion: 1, v: 1, accountRetention: true, erasureRevision: 0, prunedThrough: -1,
+    ...(readOrdering ? { readIdentity: 1 } : {}) });
   for (const [cell, items] of regions) {
     const descriptor = builder.build(items, cell);
     batch.create(base.collection('cells').doc(cell), { v: 1, hash: descriptor.hash, minExpiry: descriptor.minExpiry, revision: 1, ...cellGrid(cell) });
@@ -52,7 +54,7 @@ async function fixture(t, count = 120) {
   f.request = data => ({ auth: { uid, token: { email: 'page@example.test', email_verified: true } }, app: { appId: 'fixture' },
     data: { expectedUserId: uid, ...data } });
   f.step = (data = { context }, options = {}) => getFeedPageOperation(f.request(data), db,
-    { key, clock: () => new Date(f.now), ...options });
+    { key, clock: () => new Date(f.now), readOrdering, ...options });
   f.page = async (data = { context }, options = {}) => {
     for (let i = 0; i < 32; i++) {
       const result = await f.step(data, options);
@@ -63,6 +65,160 @@ async function fixture(t, count = 120) {
   };
   return f;
 }
+
+async function confirmReads(f, rows) {
+  await db.runTransaction(async tx => {
+    const meta = f.profile.collection('readState').doc('current'), current = await tx.get(meta);
+    const revision = (current.get('revision') ?? 0) + 1;
+    const records = rows.map(row => ({ shoutId: row.id, contentHash: readContentHash(row.title, row.text),
+      expiresAt: row.expiresAt, retainUntil: row.expiresAt + readRetentionMillis, confirmedAt: f.now - 1 }));
+    const plan = await planReadBlocks(records, async id => (await tx.get(f.profile.collection('readBuckets').doc(id))).data(),
+      { revision, maxReads: 2000, maxWrites: 400 });
+    for (const [id, value] of plan.writes) tx.set(f.profile.collection('readBuckets').doc(id), value);
+    tx.set(meta, { v: 1, revision });
+  });
+}
+
+// Fixture construction is offline; only the final bounded blocks are seeded
+// into the emulator. Benchmark costs below exclude this setup work.
+async function seedReadHistory(f, count, dayOffset) {
+  const expiry = f.rows[0].expiresAt + dayOffset * 86400000;
+  const records = Array.from({ length: count }, (_, i) => ({ shoutId: `unrelated-${i}`,
+    contentHash: readContentHash('History', `Body ${i}`), expiresAt: expiry,
+    retainUntil: expiry + readRetentionMillis, confirmedAt: f.now - 1 }));
+  const plan = await planReadBlocks(records, async () => undefined, { maxReads: 2000, maxWrites: 1000 });
+  const writes = [...plan.writes];
+  for (let start = 0; start < writes.length; start += 400) {
+    const batch = db.batch();
+    for (const [id, value] of writes.slice(start, start + 400)) batch.set(f.profile.collection('readBuckets').doc(id), value);
+    await batch.commit();
+  }
+  await f.profile.collection('readState').doc('current').set({ v: 1, revision: 1 });
+  return writes.length;
+}
+
+test('B3 groups all distant unread rows before nearby read rows across 50/50/20 pages', { skip: !enabled }, async t => {
+  const cache = blockCache(); t.after(() => cache.clear());
+  const f = await fixture(t, 120, { maxBlockReads: 256, cache });
+  await confirmReads(f, f.rows.slice(0, 70));
+  const result = [], costs = []; let next;
+  for (const size of [50, 50, 20]) {
+    const page = await f.page(next ? { cursor: next } : { context }, { observeMetrics: m => costs.push(m) });
+    assert.equal(page.items.length, size); assert.equal(page.readOrdering, 'unread-first');
+    result.push(...page.items); next = page.next;
+  }
+  assert.equal(next, null);
+  assert.deepEqual(result.map(row => row.id), [...f.rows.slice(70), ...f.rows.slice(0, 70)].map(row => row.id));
+  assert(result.slice(0, 50).every(row => row.read === false));
+  assert(result.slice(50).every(row => row.read === true));
+  assert.equal(costs.reduce((sum, m) => sum + (m.sourceReads ?? 0), 0), 120);
+  // Same expiry bucket, fewer than 128 markers: one shared private block per request.
+  assert(costs.every(m => m.readBlockReads <= 1));
+  assert.deepEqual(costs.map(m => m.readBlockReads), [1, 0, 0]);
+  assert(costs.slice(1).every(m => m.readBlockCacheHits === 1));
+  t.diagnostic(JSON.stringify({ scenario: 'B3-120', costs }));
+});
+
+test('B3 cold preparing/page replay pins reading while a fresh session sees new confirmations', { skip: !enabled }, async t => {
+  const f = await fixture(t, 120, { maxBlockReads: 256 });
+  await confirmReads(f, f.rows.slice(100));
+  const first = await f.page();
+  await confirmReads(f, f.rows.slice(50, 60));
+  const after = await f.page({ cursor: first.next }, { workNodes: 1 });
+  const replay = await f.page({ cursor: first.next }, { workNodes: 1 });
+  assert.deepEqual(after, replay);
+  assert.deepEqual(after.items.map(row => row.id), f.rows.slice(50, 100).map(row => row.id));
+  assert(after.items.every(row => row.read === false));
+  const fresh = await f.page();
+  const second = await f.page({ cursor: fresh.next });
+  assert.deepEqual(second.items.slice(0, 40).map(row => row.id), f.rows.slice(60, 100).map(row => row.id));
+  assert(second.items.slice(40).every(row => row.read));
+});
+
+test('B3 content edits are unread after refresh and cannot inherit old group during hydration', { skip: !enabled }, async t => {
+  const f = await fixture(t, 60, { maxBlockReads: 256 });
+  await confirmReads(f, f.rows);
+  const first = await f.page(), row = f.rows[55], changed = { ...row, title: 'Edited relevant content' };
+  await db.runTransaction(async tx => {
+    const ref = db.doc(`shouts/${row.id}`), source = await tx.get(ref);
+    const store = createFeedGenerationStore(db, f.generation, { contentIdentity: true });
+    const plan = await store.prepare(tx, row.id, source.data(), { ...source.data(), title: changed.title });
+    plan.apply(); tx.update(ref, { title: changed.title });
+  });
+  const old = await f.page({ cursor: first.next });
+  assert(!old.items.some(item => item.id === row.id));
+  const fresh = await f.page();
+  assert.equal(fresh.items[0].id, row.id); assert.equal(fresh.items[0].read, false);
+  assert(fresh.items.slice(1).every(item => item.read));
+});
+
+test('B3 writer keeps read identity through counters, hiding and rollback', { skip: !enabled }, async t => {
+  const f = await fixture(t, 4, { maxBlockReads: 256 });
+  await confirmReads(f, f.rows);
+  const runtime = createFeedRuntime(db, { getUser: async () => ({}) }, { contentIdentity: true });
+  async function patch(row, values, rollback = false) {
+    return runtime.database.runTransaction(async tx => {
+      const ref = db.doc(`shouts/${row.id}`), original = (await tx.get(ref)).data();
+      const plan = await runtime.indexWriter.prepare(tx, row.id, original, { ...original, ...values });
+      plan.apply(); tx.update(ref, values);
+      if (rollback) throw new Error('fixture-rollback');
+    });
+  }
+  await patch(f.rows[0], { likesCount: 20 });
+  assert((await f.page()).items.every(item => item.read));
+  await assert.rejects(patch(f.rows[1], { title: 'Never committed' }, true), /fixture-rollback/);
+  assert((await f.page()).items.every(item => item.read));
+  await patch(f.rows[2], { status: 'deleted' });
+  const page = await f.page();
+  assert.equal(page.items.length, 3); assert(page.items.every(item => item.read));
+  assert(!page.items.some(item => item.id === f.rows[2].id));
+});
+
+test('B3 leaves other modes ungrouped and rejects incompatible old/new generations', { skip: !enabled }, async t => {
+  const f = await fixture(t, 60, { maxBlockReads: 256 });
+  await confirmReads(f, f.rows);
+  for (const order of ['popular', 'endingSoon', 'followed']) {
+    const page = await f.page({ context: { ...context, order } });
+    assert.equal(page.readOrdering, undefined); assert(page.items.every(item => item.read === undefined));
+  }
+  await assert.rejects(f.page({ context }, { readOrdering: null }), { code: 'failed-precondition' });
+  const legacy = createFeedRuntime(db, { getUser: async () => ({}) });
+  await assert.rejects(legacy.database.runTransaction(tx => legacy.indexWriter.prepare(tx, f.rows[0].id, f.rows[0], f.rows[0])),
+    /index-content-identity-mode-mismatch/);
+});
+
+test('B3 looks up only relevant private hash routes, not 10000 unrelated markers', { skip: !enabled }, async t => {
+  const f = await fixture(t, 50, { maxBlockReads: 256 });
+  // Large history in another expiry bucket, without any source body reads.
+  await seedReadHistory(f, 10000, 1);
+  await confirmReads(f, f.rows.slice(0, 25));
+  const costs = [], page = await f.page({ context }, { observeMetrics: m => costs.push(m) });
+  assert.equal(page.items.length, 50);
+  assert.deepEqual(page.items.map(item => item.id), [...f.rows.slice(25), ...f.rows.slice(0, 25)].map(row => row.id));
+  assert.equal(costs.reduce((sum, m) => sum + (m.readBlockReads ?? 0), 0), 1);
+  assert.equal(costs.reduce((sum, m) => sum + (m.sourceReads ?? 0), 0), 50);
+  t.diagnostic(JSON.stringify({ scenario: 'B3-10000-unrelated', costs }));
+});
+
+test('B3 same-day 10000 history follows bounded routes and budget failure is atomic', { skip: !enabled }, async t => {
+  const cache = blockCache(); t.after(() => cache.clear());
+  const f = await fixture(t, 120, { maxBlockReads: 256, cache });
+  const historyBlocks = await seedReadHistory(f, 10000, 0);
+  await confirmReads(f, f.rows.slice(0, 25));
+  const before = await f.profile.collection('readState').doc('current').get(), costs = [];
+  await assert.rejects(f.page({ context }, { readOrdering: { maxBlockReads: 1 } }), { code: 'resource-exhausted' });
+  assert.equal((await f.profile.collection('readState').doc('current').get()).updateTime.isEqual(before.updateTime), true);
+  const page = await f.page({ context }, { observeMetrics: m => costs.push(m) });
+  assert.equal(page.items.length, 50);
+  assert.equal(page.items.filter(item => item.read).length, 0);
+  assert(costs.every(m => m.readBlockReads < historyBlocks && m.readBlockReads <= 256));
+  assert.equal(costs.reduce((sum, m) => sum + (m.sourceReads ?? 0), 0), 50);
+  const cold = [...costs]; costs.length = 0;
+  const next = await f.page({ cursor: page.next }, { readOrdering: { maxBlockReads: 1, cache }, observeMetrics: m => costs.push(m) });
+  assert.equal(next.items.length, 50); assert.equal(next.items.filter(item => item.read).length, 5);
+  assert(costs.every(m => m.readBlockReads === 0 && m.readBlockCacheHits > 0));
+  t.diagnostic(JSON.stringify({ scenario: 'B3-10000-same-day', historyBlocks, cold, warm: costs }));
+});
 
 test('page operation rejects missing Auth/App Check before accessing data', async () => {
   const database = { projectId: 'shoutout-dev-46c81', doc() { assert.fail('Unexpected database access'); } };

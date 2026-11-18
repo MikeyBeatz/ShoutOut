@@ -22,6 +22,7 @@ String tr(BuildContext context, String czech) {
 }
 
 const _english = <String, String>{
+  'Přečtené': 'Read',
   'Obnovit': 'Refresh',
   'Načíst další': 'Load more',
   'Pro zobrazení okolí povol polohu.':
@@ -387,6 +388,7 @@ const _english = <String, String>{
 };
 
 const _german = <String, String>{
+  'Přečtené': 'Gelesen',
   'Obnovit': 'Aktualisieren',
   'Načíst další': 'Mehr laden',
   'Pro zobrazení okolí povol polohu.':
@@ -765,6 +767,7 @@ const _german = <String, String>{
 };
 
 const _polish = <String, String>{
+  'Přečtené': 'Przeczytane',
   'Obnovit': 'Odśwież',
   'Načíst další': 'Wczytaj kolejne',
   'Pro zobrazení okolí povol polohu.':

@@ -12,6 +12,16 @@ const actualDev = loadConfig('dev');
 // dependencies. The complete actual DEV configuration is checked separately.
 const dev = { ...actualDev, serverSpatialFeed: false, serverReadSynchronization: false };
 
+test('B3 remains off and requires the DEV spatial/read pair', () => {
+  assert.notEqual(actualDev.serverUnreadFeed, true);
+  assert.doesNotThrow(() => validateConfig({ ...actualDev, serverUnreadFeed: true }, 'dev'));
+  for (const options of [{ serverUnreadFeed: 'true' }, { serverUnreadFeed: true, serverReadSynchronization: false },
+    { serverUnreadFeed: true, serverSpatialFeed: false }]) {
+    assert.throws(() => validateConfig({ ...actualDev, ...options }, 'dev'));
+  }
+  assert.throws(() => validateConfig({ ...actualDev, serverUnreadFeed: true }, 'prod'));
+});
+
 test('read synchronization is enabled only in DEV and requires local tracking and App Check', () => {
   assert.equal(actualDev.serverReadSynchronization, true);
   const prod = loadConfig('prod'); assert.equal(prod.serverReadSynchronization, false);

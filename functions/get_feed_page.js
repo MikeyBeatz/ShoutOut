@@ -8,6 +8,7 @@ import { createFeedGenerationStore } from './feed_runtime.js';
 import { feedCursorCodec, InvalidFeedCursor } from './feed_cursor.js';
 import { FeedSessionExpired } from './feed_session_policy.js';
 import { distanceKm } from './feed_spatial.js';
+import { captureFeedReadRevision, feedReadClassifier } from './feed_read_snapshot.js';
 
 const fail = (code, message, details) => { throw new HttpsError(code, message, details); };
 const plain = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -46,13 +47,17 @@ export function publicFeedBody(data) {
 
 // Internal operation: limits/key must be supplied by its trusted host. No
 // environment key/default signing secret, collection creation or writes here.
-export async function getFeedPageOperation(request, db, { key, workNodes = 32, clock = () => new Date() } = {}) {
+export async function getFeedPageOperation(request, db, { key, workNodes = 32, clock = () => new Date(),
+  readOrdering = null, observeMetrics = () => {} } = {}) {
   assertFeedRuntimeTarget(db);
   const identity = requireCallableIdentity(request), input = request?.data;
   if (!plain(input) || Object.keys(input).some(key => !['expectedUserId', 'context', 'cursor'].includes(key)) ||
       input.expectedUserId !== identity.uid || !(input.cursor === undefined || input.cursor === null || typeof input.cursor === 'string') ||
       input.cursor && input.context !== undefined) fail('invalid-argument', 'Invalid feed request.');
   if (!Number.isInteger(workNodes) || workNodes < 1 || workNodes > 128 || typeof clock !== 'function') throw new Error('invalid-feed-host-options');
+  if (readOrdering !== null && (!Number.isSafeInteger(readOrdering.maxBlockReads) || readOrdering.maxBlockReads < 1)) {
+    throw new Error('invalid-feed-read-options');
+  }
   const now = () => {
     const value = clock()?.getTime(); if (!Number.isSafeInteger(value) || value < 0) throw new Error('invalid-feed-clock'); return value;
   };
@@ -70,6 +75,9 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       if (!state || !['active', 'building'].includes(state.mode) || !state.readGenerationId) fail('unavailable', 'Feed index is not available.');
       const generation = id ?? state.readGenerationId, marker = await tx.get(db.doc(`feedIndexGenerations/${generation}`));
       if (marker.get('schemaVersion') !== 1 || marker.get('v') !== 1 || marker.get('accountRetention') !== true) throw new FeedSessionExpired();
+      if ((marker.get('readIdentity') === 1) !== (readOrdering !== null)) {
+        fail('failed-precondition', 'Incompatible feed reading generation.');
+      }
       if (expected && JSON.stringify(stamp(marker.createTime)) !== JSON.stringify(expected)) throw new FeedSessionExpired();
       return { generation, incarnation: stamp(marker.createTime) };
     }, { readOnly: true });
@@ -92,8 +100,12 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       await generationState(binding.generation, binding.incarnation);
     } else {
       binding = await generationState();
-      const store = createFeedGenerationStore(db, binding.generation);
-      snapshot = await store.capturePortable({ ...requested, uid: identity.uid, now: now(), unreadFirst: false });
+      const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: readOrdering !== null });
+      snapshot = await store.capturePortable({ ...requested, uid: identity.uid, now: now(), unreadFirst: readOrdering !== null && requested.order === 'nearest' });
+      if (snapshot.context.unreadFirst) {
+        snapshot.context.readPolicy = 'content-v1';
+        snapshot.context.readRevision = await captureFeedReadRevision(db, identity.uid, snapshot.readTime);
+      }
       const privateState = await privateIds(new Timestamp(snapshot.readTime.seconds, snapshot.readTime.nanoseconds), true);
       snapshot.context.blocked = privateState.blocked; snapshot.context.followed = privateState.followed;
       baseline = createHash('sha256').update(JSON.stringify([binding, snapshot])).digest('hex');
@@ -102,21 +114,30 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       decoded = codec.decode(cursor, { uid: identity.uid, project: db.projectId, now: now() });
     }
     const alive = () => { if (now() >= decoded.expiresAt) throw new FeedSessionExpired(); };
-    const store = createFeedGenerationStore(db, binding.generation);
-    const page = await store.portablePage(snapshot, decoded.position, { uid: identity.uid, assertSessionAlive: alive, nodes: workNodes });
+    const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: readOrdering !== null });
+    const reading = snapshot.context.unreadFirst ? feedReadClassifier(db, identity.uid, snapshot, readOrdering) : null;
+    const page = await store.portablePage(snapshot, decoded.position, { uid: identity.uid, assertSessionAlive: alive, nodes: workNodes,
+      ...(reading ? { readIds: reading.readIds, classifyRead: reading.classify } : {}) });
     let items = [];
     const current = await privateIds();
     if (page.state === 'preparing' && [...(page.position?.pending ?? []), ...(page.position?.candidates ?? [])]
       .some(row => current.blocked.includes(row.authorId))) throw new FeedSessionExpired();
     if (page.state !== 'preparing') {
       const hydrated = await store.hydratePortable(snapshot, page.rows.map(row => row.id), now(), { blocked: current.blocked });
-      items = hydrated.items.map(item => ({ id: item.id, distanceKm: distanceKm(snapshot.context.point, item.row.location), data: publicFeedBody(item.data) }));
+      const selected = new Map(page.rows.map(row => [row.id, row]));
+      // Never label a changed body with the old version's frozen read group.
+      items = hydrated.items.filter(item => !reading || item.row.contentHash === selected.get(item.id).contentHash)
+        .map(item => ({ id: item.id, distanceKm: distanceKm(snapshot.context.point, item.row.location), data: publicFeedBody(item.data),
+          ...(reading ? { read: reading.readIds.has(item.id) } : {}) }));
+      observeMetrics({ ...page.metrics, ...hydrated.metrics, ...reading?.metrics });
     }
+    if (page.state === 'preparing') observeMetrics({ ...page.metrics, ...reading?.metrics });
     await generationState(binding.generation, binding.incarnation);
     // Recheck caller eligibility after network waits too; account deletion or
     // a ban during page assembly must not return newly selected full bodies.
     await requireEligibleActor({ request, db, now: new Date(now()) }); alive();
     return { version: 1, state: page.state === 'preparing' ? 'preparing' : 'ready', baseline,
+      ...(reading ? { readOrdering: 'unread-first' } : {}),
       expiresAt: decoded.expiresAt, items,
       next: page.position ? codec.advance(cursor, page.position, { uid: identity.uid, project: db.projectId, now: now() }) : null };
   } catch (error) { rethrowFeedError(error); }

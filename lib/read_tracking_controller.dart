@@ -281,6 +281,25 @@ class ReadSessions extends ValueNotifier<ReadTrackingController?> {
     }
   }
 
+  /// A partial/offline transfer must never become a fresh ordering baseline.
+  Future<void> synchronizeForFeed(String uid) async {
+    final controller = value, project = _project;
+    if (!_foreground ||
+        controller?.scope.userId != uid ||
+        controller?.sync == null) {
+      throw StateError('Confirmed feed reading state is unavailable');
+    }
+    await controller!.sync!.synchronize(
+      beforeCapture: controller.flushBoundary,
+    );
+    if (!_foreground ||
+        value != controller ||
+        _project != project ||
+        !controller.sync!.synchronizationComplete) {
+      throw StateError('Feed reading synchronization did not complete');
+    }
+  }
+
   Future<void> eraseAccount(String uid) async {
     if (_project == null) return;
     final scope = ReadScope(_project!, uid), key = scope.databaseSuffix;

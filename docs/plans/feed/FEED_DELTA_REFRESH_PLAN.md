@@ -11,6 +11,91 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 ## Cíl a ověřený výchozí stav
 
+<a id="b3-local"></a>
+
+### B3 — schválený lokální úsek, 19. listopadu 2026
+
+Vlastník schválil lokální serverovou a klientskou implementaci, testy,
+dokumentaci, společný commit/push a CI. Následně upřesnil výsledné chování:
+v Nejblíž nejprve nepřečtené podle vzdálenosti, potom viditelný oddělovač
+**Přečtené** a dosud platné přečtené opět podle vzdálenosti. Během scrollování
+se již připravené pořadí nemění. Teprve úspěšná obnova založí nový výběr
+a vrátí scroll nahoru; selhání zachová původní seznam i jeho pozici.
+Top, Končící a Sledované přečtení nepoužívají jako řadicí klíč.
+
+Číslovka na plovoucí obnově znamená **nově příchozí relevantní Shouty v okolí**,
+nikoli počet všech nepřečtených. Její detekce a přenos rozdílů patří do B4;
+tento úsek číslovku ani polling nezapíná.
+
+Lokální implementace:
+
+- Klientská volba `serverUnreadFeed` chybí v obou provozních konfiguracích,
+  tedy zůstává false. Při budoucím zapnutí vyžaduje DEV prostorový feed a B2.
+  Obnova v Nejblíž čeká na úplné dokončení zachycené B2 hranice; neúplný
+  upload/download, pozastavení nebo změna účtu nevytvoří novou baseline.
+- Interní `getFeedPageOperation` přijímá pouze od důvěryhodného hostitele
+  volbu `readOrdering`; výchozí hodnota je null a živý wrapper ji nemění.
+  Klient nemůže posílat vlastní seznam read ID ani zapnout toto řazení.
+- Volitelná indexová projekce přidává `contentHash` relevantního nadpisu/textu.
+  Generace musí mít serverový marker `readIdentity: 1`; starý a nový režim
+  se nesmějí míchat. Každý odpovídající writer počítá otisk ze zdroje ve stejné
+  transakci jako ostatní metadata. Dosavadní generace a writery zůstávají
+  beze změny za výchozí false. Samotný tento kód nemigruje živý index.
+- `feed_read_snapshot.js` zachytí revizi B2 ve stejném historickém readTime
+  jako prostorový index. U prostorově relevantních metadat dohledá pouze
+  jejich hashové cesty v již existujících soukromých blocích B2. Neprochází
+  celou historii účtu, nepřidává kolekci relací, nečte texty všech kandidátů
+  a nic nezapisuje. V rámci jednoho požadavku sdílí načtené bloky a dávkuje
+  společné cesty. Historický stav dovolí bezpečné opakování i cold restart.
+- Hostitel může předat stávající omezenou cache neměnných bloků. Klíč obsahuje
+  projekt, UID a přesné readTime, takže cizí účet ani nová obnova nedostanou
+  starý osobní stav. Laboratorně je použitý existující profil 4 MiB / 1 024
+  položek / nejvýše 1 hodina. Evikce, jiná instance či restart znamenají nové
+  historické čtení, nikoli změnu výsledku. Živý wrapper cache nezapíná.
+- Podepsaný kurzor obsahuje revizi/politiku, nikoli kompletní osobní historii.
+  Skupina vybraných karet je zmrazená. Změna nadpisu/textu při hydrataci
+  odstraní tuto kartu ze staré stránky; nový snapshot ji zařadí podle nového
+  otisku. Palce otisk ani značku přečtení nemění.
+- Laboratorní budget je explicitních nejvýše 256 read bloků na požadavek;
+  není to schválený produkční limit. Překročení vrátí rozpoznatelnou chybu
+  `feed-read-work-budget` bez částečné stránky nebo zápisu. Dosavadní limity
+  prostorových kroků, maximálně 50 karet a hodinové relace zůstávají.
+
+Před živou aktivací zbývá doložit výsledky a navrhnout společný přechod
+generace/writerů/čtecího hostitele i návrat. Nejde o pouhé zapnutí webového
+flag. Tento lokální souhlas nepovoluje backfill, novou živou generaci,
+testovací obsah, Auth účty ani nasazení. Kapacita 5 000 aktivních relací
+není emulátorovými výsledky prokázaná.
+
+<a id="b3-local-results"></a>
+
+Lokální kontroly prošly: 62 širších emulátorových regresí prostorového indexu,
+writerů, runtime, B2 a stránek; po poslední úpravě dalších 17 cílených testů
+API/cache včetně opakování, obsahové změny, rollbacku, skrytí a pracovního
+rozpočtu. Klient má 80 cílených Flutter testů; analyzátor bez nálezů, ESLint
+bez nálezů, 23 cílených unit/tools testů. Tyto skupiny se mohou překrývat;
+nejde o součet unikátních scénářů celé aplikace. Úplné CI zatím čeká.
+
+| Laboratorní scénář | Celá těla stránky | Soukromé blokové reads | Poznámka |
+|---|---:|---:|---|
+| 120 Shoutů / 70 přečtených, stránky 50 + 50 + 20 | 50 / 50 / 20 | 1 / 0 / 0 | Vzdálených 50 nepřečtených před všemi blízkými přečtenými. |
+| 10 000 značek v jiném dni expirace, 50 kandidátů | 50 | 1 | Cizí časový blok historie se vůbec neprochází. |
+| 10 000 značek ve stejném dni, 120 kandidátů, první stránka | 50 | 190 | Studené dohledání v 16 dávkách; historie má 255 bloků. |
+| Další stránka téhož snapshotu ve stejné cache | 50 | 0 | 190 cache hitů; jiná instance by měla studenou cestu. |
+
+Jde o komponentové počty SDK dokumentových operací, **nikoli celkovou fakturu**:
+nezahrnují veškerá Auth/actor/control čtení, účtované indexové položky, provoz
+Functions, síť ani jiné služby. Prostorové metadata se v uvedených stránkách
+stále vyhodnocují; B4 delta/reuse indexů není touto cache hotové. Poslední
+scénář ukazuje dražší studenou cestu a závislost úspory na dostupnosti cache;
+nelze z něj odvodit splnění cíle 5 000 aktivních relací. Před rolloutem vyhodnotit
+tento náklad a návrh přechodu generace. Lokální logy a JSON shrnutí jsou společně
+v `build/b3-local/`; trvalé reprodukovatelné regrese jsou ve zdrojových testech.
+
+Živé B3 ani B4 není nasazené a tato část je neoznačuje za hotové v DEV.
+
+### Výchozí stav před lokálním B3
+
 Cíl je přenášet celé Shouty jen tehdy, když je klient potřebuje a ještě nemá
 jejich platnou verzi. Nejprve porovnat omezená metadata/verze bloků, potom
 načíst potřebná těla. Zachovat všechny čtyři režimy, stabilitu relace,

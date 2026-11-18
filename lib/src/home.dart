@@ -75,6 +75,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     super.initState();
     _useSpatialFeed = kIsWeb && WebEnvironment.current.serverSpatialFeed;
     _spatialGateway = FeedPageGateway(
+      unreadFirst: kIsWeb && WebEnvironment.current.serverUnreadFeed,
       currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
       decodeItem: decodeSpatialFeedItem,
       send: (payload) async {
@@ -264,10 +265,12 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   Future<void> _refreshSpatialFeed([FeedFilters? requested]) async {
-    // B2 remains dormant without an installed ReadSessions.syncFactory. B3
-    // will separately bind a confirmed read snapshot to its ordering barrier.
-    unawaited(readSessions.synchronize());
+    final unreadFirst =
+        WebEnvironment.current.serverUnreadFeed &&
+        (requested ?? _feedFilters).order == FeedOrder.nearest;
+    if (!unreadFirst) unawaited(readSessions.synchronize());
     final attempt = ++_spatialRequest;
+    final viewer = FirebaseAuth.instance.currentUser?.uid;
     final nextFilters = requested ?? _feedFilters;
     setState(() {
       _spatialLoading = true;
@@ -275,6 +278,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       _spatialMessage = null;
     });
     try {
+      if (unreadFirst) {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        if (uid == null) throw StateError('No active feed account');
+        await readSessions.synchronizeForFeed(uid);
+      }
       _LocationRefreshResult? result;
       if (requested == null || _currentPosition == null) {
         result = await _refreshLocation();
@@ -293,6 +301,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         order: nextFilters.order.name,
         category: nextFilters.selectedCategory,
       );
+      if (FirebaseAuth.instance.currentUser?.uid != viewer) {
+        throw StateError('Feed viewer changed during refresh');
+      }
       await _spatialSession.refresh(context);
       if (!mounted || attempt != _spatialRequest) return;
       setState(() {
