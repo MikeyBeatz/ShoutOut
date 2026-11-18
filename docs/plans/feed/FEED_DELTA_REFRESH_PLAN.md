@@ -41,6 +41,8 @@ Lokální implementace:
   se nesmějí míchat. Každý odpovídající writer počítá otisk ze zdroje ve stejné
   transakci jako ostatní metadata. Dosavadní generace a writery zůstávají
   beze změny za výchozí false. Samotný tento kód nemigruje živý index.
+  Společný otisk je v `read_content_identity.js`; účtový balíček tím nezískává
+  závislost na soukromém read-block kodeku ani callable hostiteli.
 - `feed_read_snapshot.js` zachytí revizi B2 ve stejném historickém readTime
   jako prostorový index. U prostorově relevantních metadat dohledá pouze
   jejich hashové cesty v již existujících soukromých blocích B2. Neprochází
@@ -73,7 +75,11 @@ Lokální kontroly prošly: 62 širších emulátorových regresí prostorového
 writerů, runtime, B2 a stránek; po poslední úpravě dalších 17 cílených testů
 API/cache včetně opakování, obsahové změny, rollbacku, skrytí a pracovního
 rozpočtu. Klient má 80 cílených Flutter testů; analyzátor bez nálezů, ESLint
-bez nálezů, 23 cílených unit/tools testů. Tyto skupiny se mohou překrývat;
+bez nálezů, 23 cílených unit/tools testů a 82 testů celého nástrojového balíčku.
+První CI 44418757494 správně zastavila změna modulového grafu v testu
+balení Functions; oddělení čistého otisku od read-block kodeku je opravené
+a lokální kontrola obou skutečných artefaktů prošla. Opakované úplné CI čeká.
+Tyto skupiny se mohou překrývat;
 nejde o součet unikátních scénářů celé aplikace. Úplné CI zatím čeká.
 
 | Laboratorní scénář | Celá těla stránky | Soukromé blokové reads | Poznámka |

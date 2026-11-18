@@ -2,7 +2,7 @@
 import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { geohashBounds } from './feed_spatial.js';
-import { readContentHash } from './read_sync_blocks.js';
+import { readContentHash } from './read_content_identity.js';
 
 export const blockDefaults = Object.freeze({ entries: 64, bytes: 65536 });
 export const clone = value => JSON.parse(JSON.stringify(value));

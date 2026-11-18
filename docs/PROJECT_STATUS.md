@@ -14,7 +14,10 @@ je opt-in propojení skutečných B2 bloků s historickým prostorovým snapshot
 a bariéra úplné synchronizace v klientu. Živé flag/wrappery se nezměnily;
 nový režim vyžaduje označenou generaci s otiskem obsahu. Prošlo 62 širších
 emulátorových a po poslední změně 17 cílených API/cache testů, 80 Flutter,
-23 unit/tools, ESLint a analyzátor. Úplné CI čeká; nejde o nasazení.
+23 unit/tools, ESLint a analyzátor. První CI 44418757494 selhalo v kontrole
+modulového grafu účtového artefaktu; čistý hash helper je oddělený od B2
+kodeku a všech 82 tools testů nyní prošlo lokálně. Opakované úplné CI čeká;
+nejde o nasazení.
 [Lokální výsledky a naměřené náklady](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
 odlišují studenou cestu od opakovaných stránek s cache. Před DEV aktivací
 zbývá posoudit studený náklad a připravit společný přechod generace/writerů.

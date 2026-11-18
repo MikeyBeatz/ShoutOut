@@ -6,7 +6,7 @@ export const readRetentionMillis = 7 * 86400000;
 export const readBlockEntries = 128;
 export const readBlockBytes = 65536;
 export const readKey = (shoutId, contentHash) => createHash('sha256').update(JSON.stringify([shoutId, contentHash])).digest('hex');
-export const readContentHash = (title, text) => createHash('sha256').update(JSON.stringify([title, text])).digest('hex');
+export { readContentHash } from './read_content_identity.js';
 const hex = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export const validReadId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const integer = value => Number.isSafeInteger(value) && value >= 0;
