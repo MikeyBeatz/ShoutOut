@@ -63,8 +63,8 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    je schválený lokálně: dva formáty, bezpečný doplňovací writer,
    obnovitelný backfill, audit pokrytí a kompatibilní reader/rollback.
    [Implementace a výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results):
-   132 společných regresí a 18 cílených přechodových testů prošlo; následuje
-   společné CI. Potom připravit řízený provozní vstup a přesný živý plán
+   přechod 7191502 má success úplné CI 44565313452, včetně 134 purge/runtime
+   regresí se všemi 18 přechodovými testy. Připravit řízený provozní vstup a přesný živý plán
    s digestem, pilotem a návratem. Živý index zatím neměnit.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.

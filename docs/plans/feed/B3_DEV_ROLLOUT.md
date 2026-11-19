@@ -71,14 +71,22 @@ Schválení samo nepovoluje živou migraci ani aktivaci provozních flags.
   tak nezakládají další hodinové cache držené časovači. Retenční fence platí
   dál; limit označuje uložené bloky, nikoli celkovou paměť Node procesu.
 
-Prošlo 132 společných emulátorových purge/runtime regresí. Po posledních
+Lokálně prošlo 133 společných emulátorových purge/runtime regresí. Po posledních
 drobných změnách prošlo všech 18 cílených přechodových testů: 130 neprázdných
 zdrojů, starý klient/kurzor, skutečné publikování/reakce/mazání, dávka 50 při
 přípravě mazání účtu, restart/ztracená odpověď, souběh auditů, rollback/resume,
 chybná metadata i R5/R6 během doplňování a po přepnutí. Také 35 cílených
 Flutter testů, 82 tools, kontrola obou Functions artefaktů, ESLint,
-formát a analyzátor. Připravený zdroj čeká na společný push a úplné CI;
-žádné nasazení ani cloudové mutace.
+formát a analyzátor.
+
+**Lokální úsek je uzavřený po přesném úplném CI.** Zdroj
+`7191502b29b57c063c1e40f714df1ee9f98d4e78` je pushnutý na feature/feed-b3-transition
+a má [success CI 44565313452](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44565313452).
+Prošlo 381 Flutter, 17 browserových + 2 transportní, 82 tools, 135 Functions
+unit (482 integračních mimo emulátor přeskočeno), 457 Rules/server, 34 B2 runtime,
+134 purge/runtime včetně všech 18 přechodových a 15 Storage testů, formát,
+analyzátor, lint a webový build. Interní přechodové jádro se do Functions
+artefaktů nebalí. Žádné nasazení ani cloudové mutace neproběhly.
 
 Pro budoucí živé provedení ještě zbývá kontrolovaný operátorský vstup se
 schváleným digestem a přesným úplným CI, aktuální inventura a výslovně
@@ -147,6 +155,8 @@ oprávnění či produktová retence. Rules a produkce se nyní nemění.
 Lokální měření přechodu 25 zdrojů s dávkou 10, ztracenou odpovědí a dvěma
 souběžnými auditními pokusy: 149 čtení (z toho 7 veřejných profilů), 24
 pokusů o zápis a 22 potvrzených zápisů, nejvýše 4 zápisy v jedné transakci.
+Při stejném scénáři v CI bylo 141 čtení a 22 pokusů / 22 potvrzených zápisů;
+rozdíl tvoří počet opakovaných transakčních pokusů při souběhu auditů.
 Žádný pokus o změnu zdrojového Shoutu. Zahrnuje řízení přechodu a audit;
 nejde o účet za celý životní cyklus feedu. Regrese společného writeru ověřuje
 jediné čtení autorova profilu pro obě generace v témže transakčním pokusu.

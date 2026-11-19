@@ -44,6 +44,10 @@ navazující B3–B4 nejsou hotové v DEV. Od 19. listopadu je schválené a lok
 ověřené [jádro B3 s oddělovačem a potvrzeným read snapshotem](FEED_DELTA_REFRESH_PLAN.md#b3-local-results);
 zdroj c2cdb48 má success úplné CI 44419427913. Řízený živý přechod a DEV
 akceptace zůstávají samostatné kroky; živé konfigurace se nezměnily.
+Navazující [lokální přechod obou formátů](B3_DEV_ROLLOUT.md#local-transition-results)
+je také uzavřený: 7191502 má success úplné CI 44565313452. Připravený je
+obnovitelný backfill, audit, kompatibilita a rollback; zbývá řízený provozní
+vstup, konkrétní živý plán a DEV akceptace.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu

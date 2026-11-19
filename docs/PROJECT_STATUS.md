@@ -12,9 +12,12 @@ Předchozí lokální B3 bylo dokončené. Vlastník následně schválil
 [lokální přechod obou formátů](plans/feed/B3_DEV_ROLLOUT.md#local-transition-proposal).
 Na feature/feed-b3-transition je kompatibilní writer, obnovitelné doplnění,
 audit úplných projekcí, přepnutí/návrat a kompatibilita starých kurzorů.
-Prošlo 132 společných purge/runtime regresí a po posledních drobných změnách
-všech 18 cílených přechodových testů; také 35 cílených Flutter testů,
-82 tools, ESLint, formát a analyzátor. Následuje společný push a úplné CI.
+Zdroj **7191502b29b57c063c1e40f714df1ee9f98d4e78** má
+[success úplné CI 44565313452](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44565313452):
+381 Flutter, 17 browserových + 2 transportní, 82 tools, 135 Functions unit
+(482 integračních mimo emulátor přeskočeno), 457 Rules/server, 34 B2 runtime,
+134 purge/runtime včetně všech 18 přechodových a 15 Storage testů;
+také formát, analyzátor, lint a webový build.
 [Podrobné výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results)
 rozlišují lokální důkazy a provozní meze. Nové B3 flags zůstávají vypnuté;
 žádné nasazení ani živá migrace neproběhly.
@@ -24,7 +27,7 @@ s aktuální inventurou, digestem, prostředky, pilotem a návratem. Interní j�
 není součástí nasazovaných Functions. Tento živý rozsah vyžaduje zvláštní souhlas;
 hotové lokální implementace ani B2 testy neopakovat.
 
-**B2 je uzavřené v DEV; lokální implementace a automatické ověření B3 jsou uzavřené po CI.**
+**Předchozí základ B3 — lokální implementace a automatické ověření uzavřené po CI.**
 [Rozsah a upřesnění vlastníka](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
 zmrazené globální pořadí, dvě skupiny podle vzdálenosti a oddělovač Přečtené.
 Číslovka nově příchozích Shoutů patří do navazujícího B4. Na feature/feed-b3
