@@ -6,6 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**DEV pilot B3 je nově výslovně schválený, nečeká na další souhlas.**
+Vlastník povolil celý [vymezený přechod a pilot](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
+včetně helperu/testů, přesných CI aktivačních commitů, sedmi stávajících
+Functions, feed-v1 → feed-v2, B3 readeru a DEV webu, 120 nových 24h fixture
+pod oběma existujícími testovacími účty, fixture přečtení 70/20 a úklidu.
+Na feature/feed-b3-dev připravit nejprve kompatibilní release s B3 čtením
+false a jeho návratový web. Až po jeho úplném CI a nasazení všech writerů
+provést schválený digest; potom aktivační reader/web s vlastním úplným CI.
+[Živý průběh](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results) je zatím bez
+nasazení a mutací. Produkce/main/Rules/Auth účty/Scheduler se nemění.
+
+**Předchozí provozní příprava — uzavřená:**
+
 Na feature/feed-b3-operator je schválená
 [provozní příprava B3](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation):
 řízený CLI s digestem, kontrolou přesného úplného CI a zdrojové inkarnace,
@@ -31,7 +44,7 @@ je ACTIVE; žádné cloudové zápisy. Je připravený
 [konkrétní živý DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
 feed-v1 → feed-v2 s digestem 6db86498…b329347c, sedmi kompatibilními Functions,
 návratem a pilotem na 120 nových 24h syntetických Shoutech. Živý rozsah
-ještě vyžaduje souhlas. Nové B3 přepínače zůstávají false; main/produkce/Rules,
+je již schválený výše. Nové B3 přepínače zatím zůstávají false; main/produkce/Rules,
 Auth účty a Scheduler se nemění. Dnešní lokální příprava nic nenasazuje.
 
 **Předchozí přechodové jádro — uzavřené po CI:**

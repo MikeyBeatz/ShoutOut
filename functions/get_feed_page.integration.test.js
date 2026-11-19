@@ -182,7 +182,7 @@ test('B3 leaves other modes ungrouped and rejects incompatible old/new generatio
     assert.equal(page.readOrdering, undefined); assert(page.items.every(item => item.read === undefined));
   }
   await assert.rejects(f.page({ context }, { readOrdering: null }), { code: 'failed-precondition' });
-  const legacy = createFeedRuntime(db, { getUser: async () => ({}) });
+  const legacy = createFeedRuntime(db, { getUser: async () => ({}) }, { compatibleGenerations: false });
   await assert.rejects(legacy.database.runTransaction(tx => legacy.indexWriter.prepare(tx, f.rows[0].id, f.rows[0], f.rows[0])),
     /index-content-identity-mode-mismatch/);
 });

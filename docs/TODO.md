@@ -70,7 +70,11 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    22 emulátorových + 6 unit regresí a 35 rozlišených měřených výběrů.
    Příprava 16e2ea5 má success úplné CI 44607375041. Další je předložit
    [připravený DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
-   feed-v1 → feed-v2 s pilotem a návratem ke schválení. Živý index zatím neměnit.
+   feed-v1 → feed-v2 s pilotem a návratem vlastník již schválil.
+   [Probíhající rollout](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results):
+   připravený helper a kompatibilní fáze čekají na přesné úplné CI; potom
+   sedm schválených Functions, přechod/audit a následný B3 reader/web s vlastním CI.
+   Nežádat znovu o stejný pilot. Produkce/main/Rules/Auth účty zůstávají mimo něj.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
    Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy

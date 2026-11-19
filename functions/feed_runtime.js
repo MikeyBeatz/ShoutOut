@@ -5,7 +5,7 @@ import { assertFeedRuntimeTarget, runtimeIndexBinding } from './feed_index_paths
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { indexMaintenance } from './feed_index_maintenance.js';
 
-export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: false,
+export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: true,
   unreadFirst: false, maxReadBlockReads: 256 }); // Prepared laboratory/DEV candidate, not production capacity.
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();

@@ -25,7 +25,7 @@ function command(binary, args) {
   if (result.status !== 0) throw new Error('feed-transition-verification-command-failed');
   return result.stdout.trim();
 }
-function release(options) {
+export function inspectTransitionRelease(options) {
   const tag = options['--tag'];
   return { commit: command('git', ['rev-parse', 'HEAD']), branch: command('git', ['branch', '--show-current']),
     dirty: command('git', ['status', '--porcelain', '--untracked-files=all']), tag,
@@ -57,7 +57,7 @@ export function parseTransitionArguments(argv) {
   return { action, projectId, options, mutating: mutators.includes(action) };
 }
 // Dependencies are injectable for offline contract tests, never CLI arguments.
-export async function main(argv, { openDatabase = feedAdminDatabase, inspectRelease = release,
+export async function main(argv, { openDatabase = feedAdminDatabase, inspectRelease = inspectTransitionRelease,
   configuration = feedRuntimeConfiguration } = {}) {
   const { action, projectId, options, mutating } = parseTransitionArguments(argv);
   const plan = action === 'plan' ? null : JSON.parse(readFileSync(workspacePath(options['--plan']), 'utf8'));

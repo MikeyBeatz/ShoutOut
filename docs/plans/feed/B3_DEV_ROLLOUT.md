@@ -2,8 +2,8 @@
 
 19. listopadu 2026. **Vlastník schválil lokální přechod a testy; nejde o živé nasazení.**
 Následně schválil celý [přípravný provozní úsek](#operator-preparation).
-[Konkrétní návrh živého DEV přechodu](#dev-pilot-proposal) je oddělený;
-jeho provedení dosud schválené není.
+[Konkrétní živý DEV přechod](#dev-pilot-proposal) a uvedený pilot vlastník
+následně výslovně schválil. [Průběh](#dev-rollout-results) odlišuje přípravu a skutečné provedení.
 [Lokální jádro a měření](FEED_DELTA_REFRESH_PLAN.md#b3-local-results) jsou uzavřené.
 Zdroj c2cdb48aedcd0584eeb675935b4694af8b46701e má
 [success úplné CI 44419427913](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44419427913),
@@ -250,7 +250,7 @@ Při následném ověření skutečného CI dokladu odmítl CLI vstup mutaci chy
 feed-compatible-writer-release-required ještě před otevřením databáze.
 Test databázovou factory zároveň nepodmíněně blokoval; počet jejích volání
 byl 0. Žádná mutace ani nasazení se tím neprováděly. Živé přepínače jsou vypnuté.
-Další je schválení a provedení vymezeného DEV pilotu níže; obecnou přípravu neopakovat.
+Další je provedení již schváleného DEV pilotu níže; obecnou přípravu neopakovat.
 
 ### Rozlišené měření studené cesty
 
@@ -291,7 +291,7 @@ výsledky tohoto úseku jsou společně v build/b3-operator.
 
 <a id="dev-pilot-proposal"></a>
 
-## Konkrétní návrh následného DEV přechodu — čeká na schválení
+## Schválený rozsah následného DEV přechodu
 
 Read-only inventura 19. listopadu: Standard Firestore v europe-west3,
 `feed-v1`, control active / revision 1 / writers `[feed-v1]`, 38 zdrojových
@@ -359,3 +359,29 @@ pro aktuální čistý commit. Operátorské názvy akcí nejsou automatický so
 uživatele. Aktivační SHA/run ID se doplní až po konkrétních commitech; dnešní
 vypnutý zdroj se za kompatibilní živý release nevydává. Tento návrh neprovádí
 produkční nasazení, nemění main a nezavírá B4 ani kapacitní bránu.
+
+<a id="dev-rollout-results"></a>
+
+## DEV rollout — zahájená příprava, zatím bez nasazení
+
+Vlastník odpověděl „Schvaluji DEV přechod a uvedený pilot“ pro celý rozsah
+výše: helper/testy, přesné úplné CI aktivačních commitů, sedm stávajících
+Functions, přechod feed-v1 → feed-v2 se schváleným digestem, následný B3
+reader a DEV web, 120 nových 24h syntetických Shoutů, fixture přečtení 70/20,
+kompatibilita, návrat a úklid. Nové Auth účty, Rules, indexová konfigurace,
+Scheduler, produkce a main jsou mimo rozsah. Znovu se na stejný pilot neptat.
+Na feature/feed-b3-dev je připravená kompatibilní fáze (compatibleGenerations
+true, unreadFirst a webové serverUnreadFeed zatím false) a pilotní helper
+functions/feed_b3_pilot.js / tools/feed_b3_pilot.mjs. Helper má přesné CI,
+digest, místní obnovitelný stav a odmítá opětovné vytvoření po úklidu.
+Před vytvořením ověří oba existující profily, právní souhlas, omezení a
+vzájemné blokace. Zachování původních Shoutů kontroluje jen podle ID/updateTime
+bez opakovaného přenosu jejich textů. Testy zahrnují i větvenou cizí read
+historii, idempotentní vytváření, ochranu cizích potomků a oba formáty indexu.
+Interní čtecí ověření není důkaz veřejného callable Auth/App Check; to zůstává
+součástí živého UI průchodu. Úklid kontroluje aktuální metadata v obou indexech;
+neměnné historické kořeny mají nadále běžnou retenci a GC. Samotný helper se
+do Functions balíčků nedostane. Lokálně prošlo 19 širších emulátorových testů,
+po menší úpravě ještě 3 cílené a 11 unit/artifact kontrol; následuje úplné CI.
+živý stav je zatím původní feed-v1, nové řazení vypnuté. Skutečné SHA/CI,
+nasazené revize a výsledky se doplní až po jejich ověření.

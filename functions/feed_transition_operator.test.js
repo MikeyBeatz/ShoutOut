@@ -39,15 +39,15 @@ test('ambiguous actions/targets/approval fail before credentials and network', a
     ['status', '--project', 'shoutout-dev-46c81', '--plan', 'none.json', '--ci-run', '1']]) await assert.rejects(main(argv, options));
   assert.equal(parseTransitionArguments(['plan', '--project', 'shoutout-dev-46c81', '--generation', 'feed-v2']).mutating, false);
 });
-test('shared serving switches remain disabled and stage compatible writers before unread serving', () => {
-  assert.equal(feedRuntimeConfiguration.compatibleGenerations, false); assert.equal(feedRuntimeConfiguration.unreadFirst, false);
-  assert.deepEqual(feedPageHostOptions(), { compatibleGenerations: false, readOrdering: null });
+test('trusted serving profiles stage compatible writers before unread serving', () => {
+  const disabled = { ...feedRuntimeConfiguration, compatibleGenerations: false, unreadFirst: false };
+  assert.deepEqual(feedPageHostOptions(disabled), { compatibleGenerations: false, readOrdering: null });
   assert.deepEqual(feedPageHostOptions({ ...feedRuntimeConfiguration, compatibleGenerations: true }), { compatibleGenerations: true, readOrdering: null });
-  assert.throws(() => feedPageHostOptions({ ...feedRuntimeConfiguration, unreadFirst: true }));
+  assert.throws(() => feedPageHostOptions({ ...disabled, unreadFirst: true }));
   const on = feedPageHostOptions({ ...feedRuntimeConfiguration, compatibleGenerations: true, unreadFirst: true });
   assert.equal(on.readOrdering.cache, feedPrivateReadCache); assert.equal(on.readOrdering.maxBlockReads, 256);
 });
-test('CLI checks a valid plan and full release before opening credentials, and its default cannot mutate', async () => {
+test('CLI checks a valid plan and full release before opening credentials, and a disabled release cannot mutate', async () => {
   const directory = new URL('../build/b3-operator/', import.meta.url); mkdirSync(directory, { recursive: true });
   const file = new URL(`contract-${randomUUID()}.json`, directory);
   const value = { v: 1, kind: 'feed-content-identity-transition', projectId: 'shoutout-dev-46c81', sourceGenerationId: 'feed-v1',
@@ -59,7 +59,8 @@ test('CLI checks a valid plan and full release before opening credentials, and i
   const openDatabase = () => assert.fail('Unexpected credentials');
   try {
     await assert.rejects(main(argv, { openDatabase, inspectRelease: () => ({ ...proof, ci: { ...proof.ci, jobs: [] } }) }), /exact-full-ci/);
-    await assert.rejects(main(argv, { openDatabase, inspectRelease: () => proof }), /compatible-writer/);
+    await assert.rejects(main(argv, { openDatabase, inspectRelease: () => proof,
+      configuration: { ...feedRuntimeConfiguration, compatibleGenerations: false } }), /compatible-writer/);
   } finally { unlinkSync(file); }
 });
 test('measurement refuses a live/default environment before initialization', { skip: !!process.env.FIRESTORE_EMULATOR_HOST }, async () => {

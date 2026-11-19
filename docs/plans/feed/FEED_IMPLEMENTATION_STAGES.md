@@ -50,7 +50,8 @@ obnovitelný backfill, audit, kompatibilita a rollback; zbývá řízený provoz
 vstup, konkrétní živý plán a DEV akceptace. Následně schválená
 [provozní příprava](B3_DEV_ROLLOUT.md#operator-preparation) už obsahuje CLI,
 vypnuté zapojení, měření a konkrétní návrh DEV pilotu; zdroj 16e2ea5 má
-success úplné CI 44607375041. Další je schválení a vymezený živý DEV pilot.
+success úplné CI 44607375041. Vymezený živý DEV pilot je následně schválený;
+na feature/feed-b3-dev se připravuje kompatibilní release a fixture helper.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu
