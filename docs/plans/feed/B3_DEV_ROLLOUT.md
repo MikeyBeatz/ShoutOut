@@ -240,7 +240,17 @@ provozních prostředků či Auth účtů.
 
 Lokálně prošlo 22 emulátorových regresí (18 přechodových + 4 operátorské),
 6 unit regresí CLI/release/hostitele a kontrola obou skutečných artefaktů.
-Společný push a přesné úplné CI se dokončují; živé přepínače jsou vypnuté.
+Přípravný úsek je uzavřený a pushnutý: zdroj
+`16e2ea524f565a43e2bbc43f9e83f8e0b69c4ded` má
+[success úplné CI 44607375041](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44607375041).
+Prošlo 381 Flutter, 17 browserových + 2 transportní, 82 tools, 141 Functions
+unit (486 integračních mimo emulátor přeskočeno), 457 Rules/server, 34 B2 runtime,
+138 purge/runtime a 15 Storage testů, lint, formát, analyzátor i webový build.
+Při následném ověření skutečného CI dokladu odmítl CLI vstup mutaci chybou
+feed-compatible-writer-release-required ještě před otevřením databáze.
+Test databázovou factory zároveň nepodmíněně blokoval; počet jejích volání
+byl 0. Žádná mutace ani nasazení se tím neprováděly. Živé přepínače jsou vypnuté.
+Další je schválení a provedení vymezeného DEV pilotu níže; obecnou přípravu neopakovat.
 
 ### Rozlišené měření studené cesty
 

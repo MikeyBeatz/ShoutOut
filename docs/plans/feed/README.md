@@ -8,7 +8,7 @@ B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2
 Další je B3, následně B4; kapacitu produkce tento pilot neprokazuje.
 Lokální B3 i [kompatibilní přechod](B3_DEV_ROLLOUT.md#local-transition-results)
 mají success úplné CI. Navazující [provozní vstup a měření](B3_DEV_ROLLOUT.md#operator-preparation)
-jsou připravené, dokončuje se jejich CI. [Konkrétní živý DEV plán](B3_DEV_ROLLOUT.md#dev-pilot-proposal)
+jsou uzavřené po úplném CI 44607375041. [Konkrétní živý DEV plán](B3_DEV_ROLLOUT.md#dev-pilot-proposal)
 čeká na schválení; vypnuté B3 flags nejsou dokladem nasazení.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)

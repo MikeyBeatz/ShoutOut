@@ -11,7 +11,15 @@ Na feature/feed-b3-operator je schválená
 řízený CLI s digestem, kontrolou přesného úplného CI a zdrojové inkarnace,
 společné vypnuté hostitelské zapojení a oddělená omezená read cache.
 Prošlo 22 emulátorových a 6 unit regresí; oba Functions artefakty zachovaly
-oddělení migračního nástroje od živého hostitele. Dokončuje se společné CI.
+oddělení migračního nástroje od živého hostitele. Zdroj
+**16e2ea524f565a43e2bbc43f9e83f8e0b69c4ded** má
+[success úplné CI 44607375041](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44607375041):
+381 Flutter, 17 browserových + 2 transportní, 82 tools, 141 Functions unit
+(486 integračních mimo emulátor přeskočeno), 457 Rules/server, 34 B2 runtime,
+138 purge/runtime a 15 Storage testů, lint/formát/analyzátor i webový build.
+Skutečný CI doklad prošel ověřením CLI a vypnutý režim odmítl mutaci před
+otevřením databáze; test navíc databázovou factory nepodmíněně blokoval.
+Přípravný úsek je uzavřený, nevracet se k jeho implementaci.
 [Měření](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation) má 5 scénářů / 35
 výběrů: hustá historie 10 000 značek znamenala 284 SDK dokumentových čtení
 na první stránku/novou obnovu, další stránka 80; vždy včetně 50 těl.

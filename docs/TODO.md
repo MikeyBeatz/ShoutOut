@@ -68,7 +68,7 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    [Provozní příprava](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation) nyní
    obsahuje CLI s digestem/přesným úplným CI, společné vypnuté zapojení,
    22 emulátorových + 6 unit regresí a 35 rozlišených měřených výběrů.
-   Dokončit společné CI, potom předložit
+   Příprava 16e2ea5 má success úplné CI 44607375041. Další je předložit
    [připravený DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
    feed-v1 → feed-v2 s pilotem a návratem ke schválení. Živý index zatím neměnit.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
