@@ -6,6 +6,8 @@ A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální labora
 
 B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
 Další je B3, následně B4; kapacitu produkce tento pilot neprokazuje.
+Lokální B3 má success úplné CI; navazuje
+[konkrétní návrh kompatibilního přechodu a DEV zapojení](B3_DEV_ROLLOUT.md).
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)
@@ -19,5 +21,6 @@ Další je B3, následně B4; kapacitu produkce tento pilot neprokazuje.
 - [Progresivní feed – schválený směr a doložená implementace](FEED_PROGRESSIVE_PLAN.md)
 - [Přečtení, hodnocení a platnost klientské relace](FEED_READING_POLICY.md)
 - [B2 – příprava DEV zapojení, indexů a návratové verze](B2_DEV_ROLLOUT.md)
+- [B3 – návrh přechodu indexu a DEV zapojení](B3_DEV_ROLLOUT.md)
 - [Feed: přečtení, stabilní stránky a ruční obnovení](FEED_READ_REFRESH_PLAN.md)
 - [Zápisové cesty před připojením prostorového indexu](FEED_WRITER_INTEGRATION.md)

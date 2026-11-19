@@ -12,7 +12,8 @@ test('unchanged Rules deny direct runtime control, index and erasure-proof acces
   } });
   const id = randomUUID(), paths = [`feedIndexGenerations/access-${id}`, `feedIndexGenerations/access-${id}/nodes/hash`,
     'feedIndexControl/current', 'feedIndexMaintenance/erasureQueue', `feedIndexMaintenance/erasureQueue/jobs/${id}`,
-    `feedIndexMaintenance/erasureQueue/jobs/${id}/targets/generation`], fixtures = [...paths];
+    `feedIndexMaintenance/erasureQueue/jobs/${id}/targets/generation`,
+    `feedIndexMaintenance/transitions/jobs/${id}`], fixtures = [...paths];
   t.after(async () => {
     await env.withSecurityRulesDisabled(async context => {
       for (const path of fixtures) await deleteDoc(doc(context.firestore(), path));

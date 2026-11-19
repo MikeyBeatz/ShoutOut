@@ -1,5 +1,5 @@
 // Shared runtime. Activation requires the checked installation and live writer cutover.
-import { createBlockIndexStore } from './feed_block_index_store.js';
+import { createBlockIndexStore, blockCache } from './feed_block_index_store.js';
 import { createEarlyErasureQueueStore } from './feed_early_erasure_queue.js';
 import { assertFeedRuntimeTarget, runtimeIndexBinding } from './feed_index_paths.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
@@ -8,6 +8,9 @@ import { indexMaintenance } from './feed_index_maintenance.js';
 export const feedRuntimeConfiguration = Object.freeze({ enabled: true });
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();
+// One existing bounded public-node cache per process. A fresh timer-backed
+// cache on every request would keep abandoned request maps alive for an hour.
+export const feedRuntimeBlockCache = blockCache();
 
 // Every attempted SDK mutation counts, including source/receipt/rate/journal
 // writes after plan.apply(). Exceeding the limit throws BEFORE commit. The
@@ -36,7 +39,7 @@ function budgetDatabase(db) {
 
 export function createFeedGenerationStore(db, generationId, { contentIdentity = false } = {}) {
   const binding = runtimeIndexBinding(db, generationId);
-  const store = createBlockIndexStore(db, { binding, accountRetention: true, contentIdentity });
+  const store = createBlockIndexStore(db, { binding, accountRetention: true, contentIdentity, cache: feedRuntimeBlockCache });
   // No seed, arbitrary source mutation, fake GC time, or fixture hooks. Runtime
   // generation creation/backfill/GC orchestration is a separate migration gate.
   return Object.freeze({ base: store.base, prepare: store.prepare, prepareBatch: store.prepareBatch,
@@ -44,8 +47,10 @@ export function createFeedGenerationStore(db, generationId, { contentIdentity = 
     purgeAccountIndex: store.purgeAccountIndex, prepareAccountIndexFinish: store.prepareAccountIndexFinish });
 }
 
-export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date(), contentIdentity = false } = {}) {
-  if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
+export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date(), contentIdentity = false,
+  compatibleGenerations = false } = {}) {
+  if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean' || typeof compatibleGenerations !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
+  const format = compatibleGenerations ? 'generation' : contentIdentity;
   // Disabled wrappers keep the exact legacy database and do not even inspect
   // control/registry/queue documents or require a new Auth capability.
   if (!enabled) return Object.freeze({ enabled: false, database: db, indexWriter: null, earlyErasureQueue: null, indexErasureCoordinator: null, indexMaintenance: null });
@@ -55,7 +60,7 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   const binding = {
     base: database.doc('feedIndexMaintenance/erasureQueue'),
     indexFor: id => runtimeIndexBinding(database, id).base,
-    createIndex: (measured, id) => createFeedGenerationStore(measured, id, { contentIdentity }),
+    createIndex: (measured, id) => createFeedGenerationStore(measured, id, { contentIdentity: format }),
   };
   const earlyErasureQueue = createEarlyErasureQueueStore(database, auth, { binding, clock });
 
@@ -72,9 +77,10 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
     // Plan all generations before any apply. The same control snapshot fences
     // concurrent activation, pause and generation replacement transactions.
     const plans = [];
+    const generationContext = { transaction: tx, control: state, markers: new Map(), jobs: new Map(), profiles: new Map() };
     for (const id of state.writeGenerationIds) {
-      const store = createFeedGenerationStore(database, id, { contentIdentity });
-      plans.push(await store.prepareBatch(tx, changes, options));
+      const store = createFeedGenerationStore(database, id, { contentIdentity: format });
+      plans.push(await store.prepareBatch(tx, changes, { ...options, generationContext }));
     }
     const sum = key => plans.reduce((count, plan) => count + plan[key], 0);
     const indexWrites = sum('nodeWrites') + sum('directoryWrites') + sum('historyWrites');
@@ -84,7 +90,8 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
       throw new Error('feed-transaction-write-budget-exceeded');
     }
     let applied = false;
-    return { reads: 1 + Number(state.mode === 'off') + sum('reads'), sourceChanges: plans[0]?.sourceChanges ?? 0, sourceChanged: Boolean(plans[0]?.sourceChanged),
+    const changedIds = new Set(plans.flatMap(plan => plan.changedIds));
+    return { reads: 1 + Number(state.mode === 'off') + sum('reads'), sourceChanges: changedIds.size, sourceChanged: changedIds.size > 0,
       nodeWrites: sum('nodeWrites'), directoryWrites: sum('directoryWrites'), historyWrites: sum('historyWrites'),
       totalWrites: indexWrites + changes.length + additional, generations: plans.length,
       apply() {

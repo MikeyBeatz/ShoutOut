@@ -9,6 +9,7 @@ import { feedCursorCodec, InvalidFeedCursor } from './feed_cursor.js';
 import { FeedSessionExpired } from './feed_session_policy.js';
 import { distanceKm } from './feed_spatial.js';
 import { captureFeedReadRevision, feedReadClassifier } from './feed_read_snapshot.js';
+import { generationContentIdentity } from './feed_generation_format.js';
 
 const fail = (code, message, details) => { throw new HttpsError(code, message, details); };
 const plain = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -20,14 +21,16 @@ function rethrowFeedError(error) {
   throw error;
 }
 function filters(input) {
-  if (!plain(input) || Object.keys(input).some(key => !['point', 'radiusKm', 'order', 'category'].includes(key)) ||
+  if (!plain(input) || Object.keys(input).some(key => !['point', 'radiusKm', 'order', 'category', 'readPolicy'].includes(key)) ||
+      !(input.readPolicy === undefined || input.readPolicy === 'confirmed-v1') ||
       !plain(input.point) || Object.keys(input.point).some(key => !['latitude', 'longitude'].includes(key)) ||
       !Number.isFinite(input.point.latitude) || Math.abs(input.point.latitude) > 90 ||
       !Number.isFinite(input.point.longitude) || Math.abs(input.point.longitude) > 180 ||
       ![1, 3, 5, 10, 20, 50].includes(input.radiusKm) ||
       !['nearest', 'popular', 'endingSoon', 'followed'].includes(input.order) ||
       !(input.category === null || categories.has(input.category))) fail('invalid-argument', 'Invalid feed filters.');
-  return { point: { ...input.point }, radiusKm: input.radiusKm, order: input.order, category: input.category };
+  return { point: { ...input.point }, radiusKm: input.radiusKm, order: input.order, category: input.category,
+    ...(input.readPolicy ? { readPolicy: input.readPolicy } : {}) };
 }
 
 export function publicFeedBody(data) {
@@ -48,13 +51,13 @@ export function publicFeedBody(data) {
 // Internal operation: limits/key must be supplied by its trusted host. No
 // environment key/default signing secret, collection creation or writes here.
 export async function getFeedPageOperation(request, db, { key, workNodes = 32, clock = () => new Date(),
-  readOrdering = null, observeMetrics = () => {} } = {}) {
+  readOrdering = null, compatibleGenerations = false, observeMetrics = () => {} } = {}) {
   assertFeedRuntimeTarget(db);
   const identity = requireCallableIdentity(request), input = request?.data;
   if (!plain(input) || Object.keys(input).some(key => !['expectedUserId', 'context', 'cursor'].includes(key)) ||
       input.expectedUserId !== identity.uid || !(input.cursor === undefined || input.cursor === null || typeof input.cursor === 'string') ||
       input.cursor && input.context !== undefined) fail('invalid-argument', 'Invalid feed request.');
-  if (!Number.isInteger(workNodes) || workNodes < 1 || workNodes > 128 || typeof clock !== 'function') throw new Error('invalid-feed-host-options');
+  if (!Number.isInteger(workNodes) || workNodes < 1 || workNodes > 128 || typeof clock !== 'function' || typeof compatibleGenerations !== 'boolean') throw new Error('invalid-feed-host-options');
   if (readOrdering !== null && (!Number.isSafeInteger(readOrdering.maxBlockReads) || readOrdering.maxBlockReads < 1)) {
     throw new Error('invalid-feed-read-options');
   }
@@ -75,11 +78,12 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       if (!state || !['active', 'building'].includes(state.mode) || !state.readGenerationId) fail('unavailable', 'Feed index is not available.');
       const generation = id ?? state.readGenerationId, marker = await tx.get(db.doc(`feedIndexGenerations/${generation}`));
       if (marker.get('schemaVersion') !== 1 || marker.get('v') !== 1 || marker.get('accountRetention') !== true) throw new FeedSessionExpired();
-      if ((marker.get('readIdentity') === 1) !== (readOrdering !== null)) {
+      const contentIdentity = generationContentIdentity(marker.data());
+      if (!compatibleGenerations && contentIdentity !== (readOrdering !== null)) {
         fail('failed-precondition', 'Incompatible feed reading generation.');
       }
       if (expected && JSON.stringify(stamp(marker.createTime)) !== JSON.stringify(expected)) throw new FeedSessionExpired();
-      return { generation, incarnation: stamp(marker.createTime) };
+      return { generation, incarnation: stamp(marker.createTime), ...(compatibleGenerations ? { contentIdentity } : {}) };
     }, { readOnly: true });
   }
   const privateIds = async (readTime = null, includeFollowing = false) => db.runTransaction(async tx => {
@@ -97,11 +101,20 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       ({ snapshot, binding, baseline } = decoded.context);
       if (!plain(snapshot) || !plain(binding) || typeof baseline !== 'string' ||
           !/^[a-z][a-z0-9-]{0,39}$/.test(binding.generation)) throw new InvalidFeedCursor();
-      await generationState(binding.generation, binding.incarnation);
+      const actual = await generationState(binding.generation, binding.incarnation);
+      if (compatibleGenerations) {
+        if (binding.contentIdentity !== undefined && binding.contentIdentity !== actual.contentIdentity) throw new FeedSessionExpired();
+        binding.contentIdentity = actual.contentIdentity;
+      }
     } else {
       binding = await generationState();
-      const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: readOrdering !== null });
-      snapshot = await store.capturePortable({ ...requested, uid: identity.uid, now: now(), unreadFirst: readOrdering !== null && requested.order === 'nearest' });
+      const contentIdentity = compatibleGenerations ? binding.contentIdentity : readOrdering !== null;
+      const grouped = readOrdering !== null && requested.order === 'nearest' &&
+        (!compatibleGenerations || requested.readPolicy === 'confirmed-v1');
+      if (grouped && !contentIdentity) fail('failed-precondition', 'Unread feed is not active yet.');
+      if (compatibleGenerations && requested.readPolicy && !readOrdering) fail('failed-precondition', 'Unread feed is paused.');
+      const store = createFeedGenerationStore(db, binding.generation, { contentIdentity });
+      snapshot = await store.capturePortable({ ...requested, uid: identity.uid, now: now(), unreadFirst: grouped });
       if (snapshot.context.unreadFirst) {
         snapshot.context.readPolicy = 'content-v1';
         snapshot.context.readRevision = await captureFeedReadRevision(db, identity.uid, snapshot.readTime);
@@ -114,7 +127,8 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       decoded = codec.decode(cursor, { uid: identity.uid, project: db.projectId, now: now() });
     }
     const alive = () => { if (now() >= decoded.expiresAt) throw new FeedSessionExpired(); };
-    const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: readOrdering !== null });
+    if (snapshot.context.unreadFirst && !readOrdering) fail('failed-precondition', 'Unread feed is paused.');
+    const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: compatibleGenerations ? binding.contentIdentity : readOrdering !== null });
     const reading = snapshot.context.unreadFirst ? feedReadClassifier(db, identity.uid, snapshot, readOrdering) : null;
     const page = await store.portablePage(snapshot, decoded.position, { uid: identity.uid, assertSessionAlive: alive, nodes: workNodes,
       ...(reading ? { readIds: reading.readIds, classifyRead: reading.classify } : {}) });

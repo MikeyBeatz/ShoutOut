@@ -6,6 +6,24 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+Kontrola po přerušení 19. listopadu potvrdila success zdrojového CI 44419427913
+i dokumentačního CI 44421327266, shodu pushnutých commitů a čistý pracovní strom.
+Předchozí lokální B3 bylo dokončené. Vlastník následně schválil
+[lokální přechod obou formátů](plans/feed/B3_DEV_ROLLOUT.md#local-transition-proposal).
+Na feature/feed-b3-transition je kompatibilní writer, obnovitelné doplnění,
+audit úplných projekcí, přepnutí/návrat a kompatibilita starých kurzorů.
+Prošlo 132 společných purge/runtime regresí a po posledních drobných změnách
+všech 18 cílených přechodových testů; také 35 cílených Flutter testů,
+82 tools, ESLint, formát a analyzátor. Následuje společný push a úplné CI.
+[Podrobné výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results)
+rozlišují lokální důkazy a provozní meze. Nové B3 flags zůstávají vypnuté;
+žádné nasazení ani živá migrace neproběhly.
+
+Další je připravit řízený provozní vstup a konkrétní plán živého DEV přechodu
+s aktuální inventurou, digestem, prostředky, pilotem a návratem. Interní jádro
+není součástí nasazovaných Functions. Tento živý rozsah vyžaduje zvláštní souhlas;
+hotové lokální implementace ani B2 testy neopakovat.
+
 **B2 je uzavřené v DEV; lokální implementace a automatické ověření B3 jsou uzavřené po CI.**
 [Rozsah a upřesnění vlastníka](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
 zmrazené globální pořadí, dvě skupiny podle vzdálenosti a oddělovač Přečtené.
@@ -24,7 +42,7 @@ je opravená oddělením čistého otisku od B2 kodeku; kontrola balíčků zůs
 Pracovní strom je po zdrojových commitech čistý; nejde o nasazení.
 [Lokální výsledky a naměřené náklady](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
 odlišují studenou cestu od opakovaných stránek s cache. Před DEV aktivací
-zbývá posoudit studený náklad a připravit společný přechod generace/writerů.
+zbývá posoudit studený náklad a doložit živý plán společného přechodu.
 
 [Závěrečná akceptace a úklid](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete)
 dokládají přenos/import mezi dvěma klientskými relacemi, zachování fronty při
@@ -45,8 +63,8 @@ success úplné CI 44157663737 a doplňují živý průchod. Ověřený restart 
 nový dokument/Flutter aplikaci přes Ctrl+R, nikoli celý proces Chrome nebo
 odpojení operačního systému. Nevytvářet znovu fixture ani neopakovat hotové B2.
 
-Hotový lokální rozsah B3 ani B2 neopakovat. Další je konkrétní přechod
-generace/writerů, posouzení studené cesty a plán živého ověření. B3/B4 ani
+Hotový lokální rozsah B3 ani B2 neopakovat. Další je provozní příprava
+přechodu generace/writerů, posouzení studené cesty a plán živého ověření. B3/B4 ani
 produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové v DEV nejsou.
 
 Fontová oprava je také uzavřená v DEV: zdroj

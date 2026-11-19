@@ -113,7 +113,14 @@ class FeedPageGateway<T> {
       guard();
       final response = await send({
         'expectedUserId': uid,
-        if (token == null) 'context': context.toPayload() else 'cursor': token,
+        if (token == null)
+          'context': {
+            ...context.toPayload(),
+            if (unreadFirst && context.order == 'nearest')
+              'readPolicy': 'confirmed-v1',
+          }
+        else
+          'cursor': token,
       });
       guard();
       if (response is! Map) throw StateError('Invalid feed response');

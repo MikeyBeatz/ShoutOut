@@ -32,6 +32,30 @@ Map<String, Object?> reply(
 
 void main() {
   test(
+    'only the new nearest client advertises confirmed B3 capability',
+    () async {
+      for (final enabled in [false, true]) {
+        final requests = <Map<String, Object?>>[];
+        final gateway = FeedPageGateway<String>(
+          unreadFirst: enabled,
+          currentUserId: () => 'reader',
+          decodeItem: (r) => r['id'] as String,
+          send: (r) async {
+            requests.add(r);
+            return {...reply([]), if (enabled) 'readOrdering': 'unread-first'};
+          },
+        );
+        await gateway.load(near, null);
+        expect(
+          (requests.single['context'] as Map)['readPolicy'],
+          enabled ? 'confirmed-v1' : isNull,
+        );
+        gateway.dispose();
+      }
+    },
+  );
+
+  test(
     'B3 rejects an unread row after the read group even on a later page',
     () async {
       final gateway = FeedPageGateway<String>(

@@ -13,6 +13,7 @@ import { isPurgedShoutContext } from './shout_context.js';
 import { deletedPublicIdentity } from './account_public_identity.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
+import { buildingGeneration, generationContentIdentity } from './feed_generation_format.js';
 
 const tupleCompare = (a, b) => {
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
@@ -146,8 +147,11 @@ function nodeKey(summary, c) {
 export function createBlockIndexStore(db, { binding, cache = blockCache(), elapsedClock = () => performance.now(),
   accountRetention = false, contentIdentity = false, ...blockOptions }) {
   assertIndexBinding(db, binding);
-  if (typeof accountRetention !== 'boolean' || typeof contentIdentity !== 'boolean') throw new Error('invalid-account-retention-mode');
-  const sourceMetadata = value => metadataOf(value, { contentIdentity });
+  if (typeof accountRetention !== 'boolean' || !(typeof contentIdentity === 'boolean' || contentIdentity === 'generation')) throw new Error('invalid-account-retention-mode');
+  const sourceMetadata = (value, identity = contentIdentity) => {
+    if (typeof identity !== 'boolean') throw new Error('explicit-generation-format-required');
+    return metadataOf(identity ? value : { ...value, contentHash: undefined }, { contentIdentity: identity });
+  };
   const { base, source, namespace } = binding;
   const cells = base.collection('cells'), nodes = base.collection('nodes');
   const reconcile = Symbol('reconcile-current-source');
@@ -156,7 +160,9 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
   let cacheRevision = null;
   const mode = marker => {
     if ((marker.accountRetention === true) !== accountRetention) throw new Error('index-retention-mode-mismatch');
-    if ((marker.readIdentity === 1) !== contentIdentity) throw new Error('index-content-identity-mode-mismatch');
+    const identity = generationContentIdentity(marker);
+    if (contentIdentity !== 'generation' && identity !== contentIdentity) throw new Error('index-content-identity-mode-mismatch');
+    return identity;
   };
   async function retentionFence(tx, marker, roots, expected = null, metrics = null) {
     mode(marker);
@@ -227,33 +233,42 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
   // Reserve receipt/other caller writes with additionalWrites; sourceChanges
   // counts changed index projections, not unrelated full-body updates.
   async function prepareBatch(tx, changes, { operationId = randomUUID(), reconcileExpired = false, additionalWrites = 0,
-    erasure = null } = {}) {
+    erasure = null, reconcileBuilding = false, generationContext = null } = {}) {
     assertId(operationId);
     if (!Array.isArray(changes) || changes.length > 50 || !Number.isSafeInteger(additionalWrites) ||
         additionalWrites < 0 || additionalWrites > 450) throw new Error('invalid-index-batch');
     const ids = new Set();
-    const normalized = changes.map(change => {
+    for (const change of changes) {
       if (!change || typeof change !== 'object') throw new Error('invalid-index-batch');
-      const { id, before, after } = change;
+      const { id } = change;
       assertId(id);
       if (ids.has(id)) throw new Error('duplicate-index-id');
       ids.add(id);
-      const old = before === null ? null : sourceMetadata({ ...before, id });
-      const next = after === null ? null : sourceMetadata({ ...after, id });
-      return { old, next, changed: canonical(old) !== canonical(next) };
-    });
-    let reads = 1;
-    const marker = await tx.get(base);
+    }
+    let reads = 0;
+    if (generationContext && generationContext.transaction !== tx) throw new Error('foreign-generation-transaction');
+    const marker = generationContext?.markers.get(namespace) ?? await (async () => { reads++; return tx.get(base); })();
     if (binding.kind === 'runtime' && (marker.get('schemaVersion') !== 1 || marker.get('v') !== 1 || marker.get('accountRetention') !== true)) {
       throw new Error('feed-index-generation-unavailable');
     }
     if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
-    mode(marker.data());
+    const identity = mode(marker.data());
+    if (generationContext) {
+      if (generationContext.transaction !== tx) throw new Error('foreign-generation-transaction');
+      generationContext.markers.set(namespace, marker);
+    }
+    const building = contentIdentity === 'generation' && await buildingGeneration(tx, db, marker, generationContext, () => reads++);
+    if (reconcileBuilding && !building) throw new Error('building-generation-required');
+    const normalized = changes.map(({ id, before, after }) => {
+      const old = before === null ? null : sourceMetadata({ ...before, id }, identity);
+      const next = after === null ? null : sourceMetadata({ ...after, id }, identity);
+      return { old, next, changed: canonical(old) !== canonical(next), id };
+    });
     const privateErasure = erasure?.capability === erasureCapability;
     if (erasure && !privateErasure) throw new Error('invalid-erasure-capability');
     const cutoff = marker.data().prunedThrough ?? -1;
     const sourceChanges = normalized.filter(change => change.changed).length;
-    const edits = normalized.filter(change => change.changed || reconcileExpired).map(({ old, next }) => ({
+    const edits = normalized.filter(change => change.changed || reconcileExpired || reconcileBuilding).map(({ old, next }) => ({
       oldIndex: old?.status === 'active' ? old : null,
       newIndex: next?.status === 'active' && next.expiresAt > cutoff ? next : null,
     }));
@@ -268,7 +283,12 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       }
       const authors = [...new Set(edits.flatMap(edit => [edit.newIndex?.authorId,
         ...(!privateErasure && edit.oldIndex ? [edit.oldIndex.authorId] : [])]).filter(Boolean))];
-      const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : []; reads += profiles.length;
+      const missingProfiles = authors.filter(uid => !generationContext?.profiles?.has(uid));
+      const fetchedProfiles = missingProfiles.length ? await tx.getAll(...missingProfiles.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
+      reads += fetchedProfiles.length;
+      const profileMap = generationContext?.profiles ?? new Map();
+      fetchedProfiles.forEach(profile => profileMap.set(profile.id, profile));
+      const profiles = authors.map(uid => profileMap.get(uid));
       const deletedAuthors = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
       for (const profile of profiles) if (canonical(profile.data()) === canonical(deletedPublicIdentity)) erasedAuthors.add(profile.id);
       if (edits.some(edit => edit.newIndex && deletedAuthors.has(edit.newIndex.authorId))) throw new Error('index-author-erased');
@@ -290,6 +310,12 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     for (const edit of edits) {
       let { oldIndex } = edit;
       const { newIndex } = edit;
+      if (building && oldIndex) {
+        const root = working.get(oldIndex.geohash.slice(0, 4));
+        const existing = await builder.find(root ? { hash: root.hash } : null, oldIndex, load);
+        if (!existing) oldIndex = null;
+        else if (canonical(existing) !== canonical(oldIndex)) throw new Error('incomplete-index');
+      }
       // R5 may legitimately erase metadata before the retained source changes
       // status. Only an exact server marker permits reconciling an absent row;
       // a present but different row still fails the normal edit validation.
@@ -313,7 +339,8 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const totalWrites = reachable.size + updates.size + historyWrites + sourceChanges + additionalWrites;
     if (totalWrites > 450) throw new Error('lab-mutation-too-large');
     let applied = false;
-    return { reads, sourceChanged: sourceChanges > 0, sourceChanges, nodeWrites: reachable.size,
+    return { reads, sourceChanged: sourceChanges > 0, sourceChanges,
+      changedIds: normalized.filter(change => change.changed).map(change => change.id), nodeWrites: reachable.size,
       directoryWrites: updates.size, historyWrites, totalWrites,
       apply() {
         if (applied) throw new Error('index-plan-already-applied');

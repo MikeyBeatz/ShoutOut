@@ -56,9 +56,16 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    skupinami oddělovač. Top/Končící/Sledované zachovat. Lokální implementace
    i automatické ověření jsou hotové: c2cdb48 má success úplné CI 44419427913.
    [Výsledky a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
-   ukazují úsporu cache i dražší studenou cestu. Další je konkrétní návrh
+   ukazují úsporu cache i dražší studenou cestu. Další je provozní příprava
    přechodu generace/writerů a živého ověření; pouhé zapnutí webového flag
-   nestačí. Tento přechod zatím není povolený lokálním souhlasem.
+   nestačí. Živá migrace zatím není povolená lokálním souhlasem.
+   [Konkrétní navazující lokální návrh](plans/feed/B3_DEV_ROLLOUT.md#local-transition-proposal)
+   je schválený lokálně: dva formáty, bezpečný doplňovací writer,
+   obnovitelný backfill, audit pokrytí a kompatibilní reader/rollback.
+   [Implementace a výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results):
+   132 společných regresí a 18 cílených přechodových testů prošlo; následuje
+   společné CI. Potom připravit řízený provozní vstup a přesný živý plán
+   s digestem, pilotem a návratem. Živý index zatím neměnit.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
    Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy
