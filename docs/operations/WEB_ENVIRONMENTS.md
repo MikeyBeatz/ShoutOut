@@ -1,5 +1,13 @@
 # Vývojový a produkční web
 
+Od 19. listopadu je [B3 reader a web nasazený v DEV](../plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
+ze zdroje 1db4631 po success úplném CI 44620011513, Hosting 62bd3a157ab5342b.
+B2 a serverUnreadFeed jsou true. getFeedPage-00003-tux a kompatibilní šestice
+z 1a4d184 používají feed-v2 / oba writery. UI akceptace a úklid 120 schválených
+fixture jsou otevřené. Návratový v3 web bez B3 z 1a4d184 je ověřený; návrat
+readeru vyžaduje kompatibilní rollback podle B3 plánu, nikoli starý backend.
+Přesné aktuální revize určuje PROJECT_STATUS; následující starší záznamy jsou datované.
+
 [B2 je od 17. listopadu nasazené v DEV](../plans/feed/B2_DEV_ROLLOUT.md#dev-rollout-results)
 původně ze zdroje bc4a6e1. Klient používá IndexedDB v3 a aktivní cloudovou synchronizaci;
 [DEV akceptace a úklid jsou od 18. listopadu uzavřené](../plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).

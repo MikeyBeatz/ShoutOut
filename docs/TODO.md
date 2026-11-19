@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,01 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,05 %** — vážené dokončení podúseků
 
-Hotové úseky: **149/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **150/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,19 %** — vážené dokončení podúseků
 
-Hotové úseky: **180/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **181/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -46,7 +46,7 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-1. **Připravit řízené DEV zapnutí B3 — nepřečtené první pouze v Nejblíž.**
+1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
    [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
@@ -74,7 +74,10 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    [Probíhající rollout](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results):
    kompatibilní 1a4d184 prošel úplným CI 44614605147; všech sedm Functions je
    ACTIVE a migrace včetně návratu/nového auditu skončila na feed-v2 / revision 6.
-   Další je aktivační B3 reader/web s vlastním CI, 120 fixture a živá akceptace.
+   Aktivační 1db4631 má success úplné CI 44620011513; getFeedPage a web
+   62bd3a157ab5342b jsou ověřené v DEV. Vzniklo 120 schválených fixture a
+   přečtení 70/20; interní živé jádro ověřilo oběma účtům stránky 50 → 100 → 120
+   i skupiny. Následuje již vyžádaný UI průchod, klientské interakce a úklid.
    Nežádat znovu o stejný pilot. Produkce/main/Rules/Auth účty zůstávají mimo něj.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.

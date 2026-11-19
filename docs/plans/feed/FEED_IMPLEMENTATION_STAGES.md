@@ -13,6 +13,16 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
+**19. listopadu: B3 je nasazené v DEV; zbývá UI a úklid pilotu.**
+Zdroj 1db4631 má success úplné CI 44620011513, reader i web jsou ověřené.
+Control revision 6 čte feed-v2 a udržuje oba kompatibilní writery; skutečný
+rollback a reaktivace s novým auditem prošly. Na 120 nových schválených fixture
+interní jádro ověřilo oběma účtům 50 → 100 → 120 i globální skupiny 50/70 a
+100/20. Nejde o veřejný Auth/App Check a UI důkaz; ten je vyžádaný a fixture
+zůstávají připravené. [Aktuální důkazy a pokračování](B3_DEV_ROLLOUT.md#dev-rollout-results).
+B4 indikátor novinek/delta obnova je další otevřená etapa. Datované podklady
+předchozích příprav níže nejsou současným stavem nasazení.
+
 A0 (plný detail) je nasazené v DEV; A1 je dokončený lokální prototyp.
 Negativní hodnocení už mimo Top nemění pořadí, ale sbalení. A2/A3 mají
 moduly prostorového indexu, historické relace, kurzoru a koordinátoru.

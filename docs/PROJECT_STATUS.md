@@ -6,21 +6,32 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**DEV pilot B3 je nově výslovně schválený, nečeká na další souhlas.**
-Vlastník povolil celý [vymezený přechod a pilot](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
-včetně helperu/testů, přesných CI aktivačních commitů, sedmi stávajících
-Functions, feed-v1 → feed-v2, B3 readeru a DEV webu, 120 nových 24h fixture
-pod oběma existujícími testovacími účty, fixture přečtení 70/20 a úklidu.
-Kompatibilní zdroj 1a4d184 má success úplné CI 44614605147 a všech sedm
-Functions je nasazených/ACTIVE se schválenými prostředky. Přechod i skutečný
-rollback → resume → nový audit → activate prošly: control revision 6 čte
-feed-v2 a zapisuje do obou generací. Návratový v3 web bez B3 je ověřený.
-Na feature/feed-b3-dev nyní připravujeme aktivační reader/web s vlastním
-úplným CI a transakčně chráněný pilot. Web ještě používá původní pořadí;
-120 nových fixture a UI akceptace dosud neběžely.
-[Živý průběh a revize](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
-rozlišují nasazený kompatibilní backend od připravené aktivace.
-Produkce/main/Rules/Auth účty/Scheduler se nemění.
+**B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
+Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
+[success úplné CI 44620011513](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44620011513).
+getFeedPage je ACTIVE na revizi getfeedpage-00003-tux; DEV Hosting verze
+62bd3a157ab5342b má ověřených pět zásadních souborů na obou originech.
+serverUnreadFeed a B2 jsou zapnuté. Kompatibilních sedm Functions ze zdroje
+1a4d184 / CI 44614605147 a skutečný rollback → resume → nový audit → activate
+jsou ověřené; control revision 6 čte feed-v2 a udržuje oba writery.
+
+V rámci [schváleného pilotu](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
+vzniklo přesně 120 nových 24h syntetických Shoutů a 90 testovacích značek
+přečtení. Živé interní jádro oběma účtům vrátilo 50 → 100 → 120, staré
+negrupované i B3 pořadí: Bright_Otter_182 má 50 nepřečtených, TestBusiness 100.
+Tento důkaz nenahrazuje veřejný Auth/App Check a UI; uživatel dostal konkrétní
+kontrolu Nejblíž / 50 km / oddělovač / další stránky / obnova. Po ní dokončit
+interakce a další potřebné klientské kontroly, následně schválený úklid.
+Původních 38 zdrojů a původní žádost jsou zachované; žádná Auth mutace.
+Browser host byl nedostupný a nativní automatická kontrola zastavila Chrome
+kvůli neověřené URL; ve stejném tahu tuto kontrolu neobcházet jinou cestou.
+
+Čistý izolovaný checkout nasazeného 1db4631 je v ignorovaném
+build/b3-dev/release-1db4631, jeho místní pilot-state má phase verified.
+Pokračovat/uklízet CLI odsud s přesným CI 44620011513 a digestem uloženého
+plánu; průběžně aktualizovat i hlavní build/b3-dev/pilot-state.json.
+Nezakládat nový pilot ani neopakovat migraci. Návratový v3 web bez B3 je
+ověřený. Produkce/main/Rules/indexová konfigurace/Auth účty/Scheduler se nemění.
 
 **Předchozí provozní příprava — uzavřená:**
 
@@ -657,17 +668,17 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `9e3828dd37bd8ce68713f87cedb956db0a135124` / `74d0c3756884ac19`; úplné CI 44178308912 success, fontová oprava, B2 aktivní. JavaScript/index/config na obou doménách shodné s releasem; živá offline/restart B2 akceptace a úklid A/B fixture čekají. |
+| Webový zdroj / Hosting verze | `1db4631e424c3333553c12ebbfbba5e2aa54cca0` / `62bd3a157ab5342b`; úplné CI 44620011513 success. B2/B3 aktivní; index, JavaScript, config, bootstrap a version na obou doménách shodné s releasem. B2 akceptace uzavřená, B3 čeká na UI/úklid. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
-| Příprava mazání | Zdroj `ccc879f`, ACTIVE `prepareaccountdeletion-00002-sar`; společný indexový writer |
+| Příprava mazání | Zdroj `1a4d184`, ACTIVE `prepareaccountdeletion-00003-pav`; kompatibilní společný indexový writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
-| Účtové Functions | `bc4a6e1`, obě ACTIVE; request `00012-tiw`, recovery `00012-rud`; readSyncEnabled=true, oba ZIP shodné se 39 soubory balíčku. |
+| Účtové Functions | `1a4d184`, obě ACTIVE; request `00013-caf`, recovery `00013-cal`; read úklid a kompatibilita obou generací zachované, 39 zdrojových modulů ověřeno před uploadem. |
 | B2 čtecí Functions | `bc4a6e1`, ACTIVE `syncreadbatch-00001-fox` / `getreadstatepage-00001-xub`, klíč v1, min0/max1/concurrency1/256 MiB/15 s, oba HTTP 401 bez identity/attestace; ZIP shodné s 10 soubory balíčku. |
-| Čtecí Functions | `ccc879f`: ACTIVE `getfeedpage-00001-cim` (klíč v1) a `getsavedshouts-00001-tav`; `4e7e5bd`: ACTIVE `getownshouts-00001-fik`, 42 modulů shodných, anonymní HTTP 401, max1/min0, concurrency1, 256 MiB/15 s |
-| Obsahové writery | `ccc879f`: ACTIVE `createshout-00004-ves`, `deleteshout-00002-jax`; `14b7885`: ACTIVE `toggleshoutreaction-00008-zek`; společný indexový writer |
+| Čtecí Functions | `1db4631`: ACTIVE `getfeedpage-00003-tux` (stávající klíč v1), B3/kompatibilita, 256 read bloků, oddělená cache 4 MiB / ≤1 h, anonymní HTTP 401. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zůstávají z předchozích zdrojů. |
+| Obsahové writery | `1a4d184`: ACTIVE `createshout-00005-goj`, `deleteshout-00003-vav`, `toggleshoutreaction-00009-tec`; kompatibilní společný indexový writer |
 | Ostatní obsahové Functions | `14b7885`: ACTIVE `togglecommentreaction-00007-rir`, `toggleshoutsave-00006-roq`; všechny tři nové revize mají max1/min0, concurrency1, 256 MiB/15 s a shodu 42 modulů. `deleteComment` a `createContentReport` zůstávají ze zdroje f81eaf4 |
 | Firestore Rules | `d5193d0b-e957-4c76-ab46-54b0f9a8beac`, zdroj 14b7885; navíc zámek interakcí dle activeShout, čtení a vlastní mazání zachované |
-| Prostorový index | `feed-v1` active, klíč v1; dalších 5 složených indexů READY a 5 výjimek ověřeno, bez změny TTL |
+| Prostorový index | Control revision 6 / active, čte `feed-v2`, zapisuje `[feed-v1, feed-v2]`; migrace, rollback, nový audit i reaktivace ověřené. Klíč v1 a indexová konfigurace zůstaly zachované, bez změny TTL. |
 | Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
@@ -699,7 +710,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a pokračující DEV cleanup každou minutu, max. 500 dokumentů / 10 s na fázi, po dokončení 24h klid. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
-| Feed | DEV prostorové API, writer/index/feed-v1, klient, vlastní stránky a plovoucí tlačítka; B1 uzavřené a B2 synchronizace/úklid nasazené. | Živá klientská akceptace a úklid B2, unread-first B3 a novinky B4. Regrese Uložených uzavřená v DEV. |
+| Feed | DEV prostorové API a kompatibilní writery, feed-v2, vlastní stránky a plovoucí tlačítka; B1/B2 akceptace uzavřené. B3 nasazené, interní živý pilot 50 → 100 → 120 prošel. | UI akceptace a úklid B3, novinky B4 a závěrečná společná brána. Regrese Uložených uzavřená v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 Aktuální stupnice jsou generované v [TODO](TODO.md#postup) z

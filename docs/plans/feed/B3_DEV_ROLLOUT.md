@@ -437,3 +437,44 @@ testovací fixture dědící nově aktivní B3 při záměrném vypnutí prostor
 nebo B2. Fixture nyní přepínače oddělují; test chybějícího B3 klíče dál ověřuje
 výchozí false a produkční guard zůstává. Po opravě lokálně prošlo všech 381
 Flutter testů a 82 tools testů; čeká se na nové přesné úplné CI.
+
+### Aktivace a serverový pilot — 19. listopadu, UI dosud neuzavřené
+
+Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
+[success úplné CI 44620011513](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44620011513).
+Čistý HEAD i všechny požadované úplné kroky ověřil stejný release guard jako
+migrační CLI. Lokální release má 68 souborů; nasazené getFeedPage bylo připravené
+ze shodných modulů. Ostatní šestice kompatibilních Functions se znovu nenasazovala.
+
+- **Reader:** ACTIVE getfeedpage-00003-tux, hash 4b1dd75308f58da5dcccb459714adefb66085561,
+  původní prostředky min0/max1/concurrency1/256 MiB/15 s, stávající podpisový klíč.
+  Anonymní callable vrací HTTP 401; to nedokládá úspěšnou klientskou attestaci.
+- **Hosting:** site shoutout-dev-46c81, verze 62bd3a157ab5342b, release
+  1795124919775000 z 2026-11-19T21:48:39.775Z. Na web.app i firebaseapp.com
+  odpovídá SHA-256 index.html, main.dart.js, app-config.json, flutter_bootstrap.js
+  a version.json release manifestu (10 kontrol). B2 i serverUnreadFeed true.
+- **Pilot:** přesně 120 nových 24h zdrojů v předem určeném bodě, 60 na každý
+  existující účet; run mvp-b3-mwo2nutj-4a8c6eeeb464, digest plánu
+  2099624a2567909fe1baea29c6a64dee9069c98259c9d66a72630e88c408b93a.
+  Vzniklo pouze 90 schválených testovacích read značek: 70 Bright / 20 Business.
+  Zdrojová místní identifikace je v build/b3-dev/pilot-state.json, phase verified.
+- **Živé interní jádro:** čtyři průchody (oba účty × původní negrupované/B3
+  pořadí), vždy stránky 50 → 100 → 120, přesná ID a žádné duplicity.
+  B3 vrací 50 nepřečtených / 70 přečtených Brightovi a 100 / 20 Business.
+  Původních 38 zdrojů má stejné updateTime; původní žádost se nemění.
+  Žádná Auth mutace, nové Rules/indexy/Scheduler ani produkční změna.
+
+Veřejný Auth/App Check s obsahem, skutečný oddělovač, scroll/obnova a klientské
+interakce ještě čekají na UI. Byl vyžádaný konkrétní průchod Bright_Otter_182
+v Nejblíž s dosahem 50 km. Browser host není dostupný; nativní kontrola Chrome
+odmítla pokračování kvůli nezjištěné URL. Ve stejném tahu automatizaci neobcházet.
+Živá akceptace proto zůstává otevřená a fixture se zatím neuklízejí.
+
+Pro pokračování bez opakování úplného CI pouze kvůli záznamu výsledků vznikl
+čistý izolovaný checkout build/b3-dev/release-1db4631 na nasazeném commitu.
+Obsahuje kopii přesně téhož pilot-state a odkazy na již instalované závislosti,
+žádné nové přihlašovací údaje. CLI akce v něm dál vyžadují CI 44620011513,
+projekt i digest; cleanup navíc skutečně dokončené klientské kontroly.
+Při pokračování vždy nejprve status, po úklidu přenést stav a důkaz zpět do
+hlavního build/b3-dev, potvrdit zachování baseline/žádosti a uzavřít dokumentaci.
+Nový pilot ani migraci nezakládat. Nezměněná historie indexu má původní GC.
