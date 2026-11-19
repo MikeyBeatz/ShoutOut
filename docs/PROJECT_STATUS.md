@@ -11,11 +11,16 @@ Vlastník povolil celý [vymezený přechod a pilot](plans/feed/B3_DEV_ROLLOUT.m
 včetně helperu/testů, přesných CI aktivačních commitů, sedmi stávajících
 Functions, feed-v1 → feed-v2, B3 readeru a DEV webu, 120 nových 24h fixture
 pod oběma existujícími testovacími účty, fixture přečtení 70/20 a úklidu.
-Na feature/feed-b3-dev připravit nejprve kompatibilní release s B3 čtením
-false a jeho návratový web. Až po jeho úplném CI a nasazení všech writerů
-provést schválený digest; potom aktivační reader/web s vlastním úplným CI.
-[Živý průběh](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results) je zatím bez
-nasazení a mutací. Produkce/main/Rules/Auth účty/Scheduler se nemění.
+Kompatibilní zdroj 1a4d184 má success úplné CI 44614605147 a všech sedm
+Functions je nasazených/ACTIVE se schválenými prostředky. Přechod i skutečný
+rollback → resume → nový audit → activate prošly: control revision 6 čte
+feed-v2 a zapisuje do obou generací. Návratový v3 web bez B3 je ověřený.
+Na feature/feed-b3-dev nyní připravujeme aktivační reader/web s vlastním
+úplným CI a transakčně chráněný pilot. Web ještě používá původní pořadí;
+120 nových fixture a UI akceptace dosud neběžely.
+[Živý průběh a revize](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
+rozlišují nasazený kompatibilní backend od připravené aktivace.
+Produkce/main/Rules/Auth účty/Scheduler se nemění.
 
 **Předchozí provozní příprava — uzavřená:**
 

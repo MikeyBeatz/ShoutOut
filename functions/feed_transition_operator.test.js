@@ -42,7 +42,7 @@ test('ambiguous actions/targets/approval fail before credentials and network', a
 test('trusted serving profiles stage compatible writers before unread serving', () => {
   const disabled = { ...feedRuntimeConfiguration, compatibleGenerations: false, unreadFirst: false };
   assert.deepEqual(feedPageHostOptions(disabled), { compatibleGenerations: false, readOrdering: null });
-  assert.deepEqual(feedPageHostOptions({ ...feedRuntimeConfiguration, compatibleGenerations: true }), { compatibleGenerations: true, readOrdering: null });
+  assert.deepEqual(feedPageHostOptions({ ...disabled, compatibleGenerations: true }), { compatibleGenerations: true, readOrdering: null });
   assert.throws(() => feedPageHostOptions({ ...disabled, unreadFirst: true }));
   const on = feedPageHostOptions({ ...feedRuntimeConfiguration, compatibleGenerations: true, unreadFirst: true });
   assert.equal(on.readOrdering.cache, feedPrivateReadCache); assert.equal(on.readOrdering.maxBlockReads, 256);

@@ -362,7 +362,7 @@ produkční nasazení, nemění main a nezavírá B4 ani kapacitní bránu.
 
 <a id="dev-rollout-results"></a>
 
-## DEV rollout — zahájená příprava, zatím bez nasazení
+## DEV rollout — kompatibilní Functions a přechod nasazené
 
 Vlastník odpověděl „Schvaluji DEV přechod a uvedený pilot“ pro celý rozsah
 výše: helper/testy, přesné úplné CI aktivačních commitů, sedm stávajících
@@ -383,5 +383,51 @@ součástí živého UI průchodu. Úklid kontroluje aktuální metadata v obou 
 neměnné historické kořeny mají nadále běžnou retenci a GC. Samotný helper se
 do Functions balíčků nedostane. Lokálně prošlo 19 širších emulátorových testů,
 po menší úpravě ještě 3 cílené a 11 unit/artifact kontrol; následuje úplné CI.
-živý stav je zatím původní feed-v1, nové řazení vypnuté. Skutečné SHA/CI,
-nasazené revize a výsledky se doplní až po jejich ověření.
+Předchozí odstavec dokládá první přípravu; následný skutečný stav je níže.
+
+### Kompatibilní nasazení a migrace 19. listopadu
+
+Zdroj **1a4d1845ac3f734780f64e9c8f671dd7e99c35bb** má
+[úspěšné úplné CI 44614605147](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44614605147).
+Oba balíčky byly ověřené proti zdrojům (51/39 modulů, bez pilotního helperu).
+Návratový release web bez B3 zachovává B2 a IndexedDB v3; všech 68 souborů
+kopie build/b3-dev/rollback-1a4d1845 je ověřených proti manifestu.
+
+| Function | Ověřená ACTIVE revize |
+|---|---|
+| createShout | createshout-00005-goj |
+| toggleShoutReaction | toggleshoutreaction-00009-tec |
+| deleteShout | deleteshout-00003-vav |
+| prepareAccountDeletion | prepareaccountdeletion-00003-pav |
+| getFeedPage | getfeedpage-00002-zic |
+| accountDeletionRequestCreatedDev | accountdeletionrequestcreateddev-00013-caf |
+| resumeAccountDeletionJobsDev | resumeaccountdeletionjobsdev-00013-cal |
+
+Všech sedm má europe-west3, Node.js 22, min 0 / max 1, concurrency 1,
+256 MiB a timeout 15 s / 60 s podle schváleného plánu. Metadata API ověřila
+nové revize; po posledním update uplynulo alespoň 60 s před migrací.
+Původní inventura byla zopakovaná: 38 zdrojů, 0 active a jedna původní žádost.
+Lokální neveřejný kontrolní otisk uchovává jen jejich ID/updateTime.
+
+Schválený digest 6db86498…b329347c prošel start → backfill → audit → activate.
+Obecný doplňovací průchod nenašel žádný aktivní zdroj, oba auditní akumulátory
+mají count 0 a shodné otisky. Potom byl skutečně proveden rollback na feed-v1,
+resume, nový audit a druhá aktivace. Konečný control má **revision 6, active,
+readGenerationId feed-v2, writeGenerationIds [feed-v1, feed-v2]**; soukromý
+job phase active / version 11. Generace ani job nebyly fyzicky odstraněné.
+Dosavadní web stále používá původní pořadí; samotná migrace není B3 akceptace.
+
+### Navazující aktivační zdroj
+
+Připravený aktivační commit zapíná unreadFirst a pouze DEV serverUnreadFeed.
+Před vytvořením pilotních dat byly doplněné transakční kontroly eligibility
+a vzájemné blokace v každé dávce; úklid nově kontroluje updateTime rodiče
+i aktuální členství záložek, reakcí a potvrzení uvnitř transakce. Nová regrese
+ověřuje žádost o smazání mezi preflightem a zápisem i souběžnou změnu rodiče
+nebo cizího potomka. Nejde o změnu Rules či oprávnění.
+Prošlo 8 cílených emulátorových testů (4 pilotní / 4 operátorské), 11 unit/artifact
+kontrol a celá Functions unit sada: 143 pass, 490 integrací mimo emulátor
+přeskočeno; také cílený ESLint a kontrola odkazů/metrik. Původních 38 zdrojů
+i jedna žádost mají po migraci stejné updateTime. Následuje úplné CI, potom
+pouze getFeedPage a DEV web.
+120 fixture, veřejný Auth/App Check průchod, UI akceptace a úklid dosud neběžely.

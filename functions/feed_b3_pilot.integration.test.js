@@ -89,3 +89,27 @@ test('pilot cleanup preserves an unexpected foreign child and stops before remov
   await assert.rejects(cleanupB3Pilot(db, f.plan), /foreign-pilot-descendant/);
   assert.equal((await child.get()).exists, true); assert.equal((await db.doc(`shouts/${row.id}`).get()).exists, true);
 });
+
+function beforeFirstTransaction(operation) {
+  let pending = true;
+  return new Proxy(db, { get(target, key) {
+    if (key === 'runTransaction') return async (...args) => {
+      if (pending) { pending = false; await operation(); }
+      return target.runTransaction(...args);
+    };
+    return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
+  } });
+}
+
+test('pilot fences concurrent deletion eligibility, parent changes and new descendants', { skip: !enabled }, async t => {
+  const f = await fixture(t), pending = db.doc(`accountDeletionRequests/${f.actors[0].uid}`); f.roots.push(pending);
+  await assert.rejects(seedB3Pilot(beforeFirstTransaction(() => pending.create({ status: 'pending' })), f.plan), /deletion is pending/);
+  assert((await db.getAll(...f.plan.rows.map(row => db.doc(`shouts/${row.id}`)))).every(doc => !doc.exists));
+  await pending.delete(); await seedB3Pilot(db, f.plan);
+  const ref = db.doc(`shouts/${f.plan.rows[0].id}`);
+  await assert.rejects(cleanupB3Pilot(beforeFirstTransaction(() => ref.update({ likesCount: 1 })), f.plan), /pilot-cleanup-race/);
+  assert.equal((await ref.get()).exists, true);
+  const child = ref.collection('saves').doc('concurrent-foreign-user');
+  await assert.rejects(cleanupB3Pilot(beforeFirstTransaction(() => child.create({ userId: child.id })), f.plan), /pilot-cleanup-race/);
+  assert.equal((await child.get()).exists, true); assert.equal((await ref.get()).exists, true);
+});

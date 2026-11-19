@@ -68,7 +68,7 @@ export async function planB3Pilot(db, actors, { runId, createdAt = Date.now(), b
   const blocked = await db.getAll(...actors.map((actor, i) => db.doc(`users/${actor.uid}/blocked/${actors[1 - i].uid}`)));
   assert(blocked.every(doc => !doc.exists), 'pilot-actors-blocked');
   for (const actor of actors) {
-    assert(uid(actor.uid)); const identity = await requireEligibleActor({ request: request(actor.uid), db });
+    assert(uid(actor.uid)); const identity = await requireEligibleActor({ request: request(actor.uid), db, requireContentPermission: true });
     assert.equal(identity.profile.nickname, actor.nickname);
     const publicProfile = await db.doc(`publicProfiles/${actor.uid}`).get(); assert.notEqual(publicProfile.get('accountStatus'), 'deleted');
     const avatar = Object.fromEntries(['avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd', 'avatarGradientDirection']
@@ -99,10 +99,16 @@ export async function assertB3PilotBaseline(db, plan) {
 export async function seedB3Pilot(db, plan) {
   check(plan, db); await assertB3PilotBaseline(db, plan); await control(db, db, plan.incarnations);
   assert(Date.now() < plan.expiresAt, 'pilot-expired');
-  for (const actor of plan.actors) await requireEligibleActor({ request: request(actor.uid), db });
   const runtime = createFeedRuntime(db, noAuth, { compatibleGenerations: true }); let created = 0;
   for (let offset = 0; offset < 120; offset += 50) created += await runtime.database.runTransaction(async tx => {
     await control(tx, db, plan.incarnations);
+    // Fence eligibility and mutual blocks with each batch, including retries.
+    for (const actor of plan.actors) {
+      const identity = await requireEligibleActor({ request: request(actor.uid), db, reader: tx, requireContentPermission: true });
+      assert.equal(identity.profile.nickname, actor.nickname, 'pilot-actor-changed');
+    }
+    const blocked = await tx.getAll(...plan.actors.map((actor, i) => db.doc(`users/${actor.uid}/blocked/${plan.actors[1 - i].uid}`)));
+    assert(blocked.every(doc => !doc.exists), 'pilot-actors-blocked');
     const chunk = plan.rows.slice(offset, offset + 50), docs = await tx.getAll(...chunk.map(row => db.doc(`shouts/${row.id}`)));
     const changes = chunk.flatMap((row, i) => { owned(docs[i], row); return docs[i].exists ? [] : [{ id: row.id, before: null, after: body(row) }]; });
     if (!changes.length) return 0;
@@ -176,6 +182,20 @@ export async function cleanupB3Pilot(db, plan) {
       await control(tx, db, plan.incarnations);
       const docs = await tx.getAll(ref, ...children.map(doc => doc.ref), ...receipts.docs.map(doc => doc.ref), ...notificationRefs);
       owned(docs[0], row);
+      assert.equal(docs[0].exists, source.exists, 'pilot-cleanup-race');
+      if (source.exists) assert(docs[0].updateTime.isEqual(source.updateTime), 'pilot-cleanup-race');
+      // Parent counters alone do not fence a newly introduced child/receipt.
+      // Query membership in the transaction before preparing any index writes.
+      const currentChildren = [];
+      for (const collection of ['saves', 'reactions']) {
+        const current = await tx.get(ref.collection(collection).limit(3));
+        assert(current.size <= 2, 'pilot-cleanup-race'); currentChildren.push(...current.docs);
+      }
+      const currentReceipts = await tx.get(db.collection('serverOperations').where('shoutId', '==', row.id).limit(41));
+      const membership = snapshots => snapshots.map(doc => doc.ref.path).sort();
+      assert.deepEqual(membership(currentChildren), membership(children), 'pilot-cleanup-race');
+      assert.deepEqual(membership(currentReceipts.docs), membership(receipts.docs), 'pilot-cleanup-race');
+      for (const collection of ['comments', 'privateReplies']) assert((await tx.get(ref.collection(collection).limit(1))).empty, 'unexpected-pilot-descendants');
       const known = [...children, ...receipts.docs]; known.forEach((before, i) => assert(docs[i + 1].updateTime?.isEqual(before.updateTime), 'pilot-cleanup-race'));
       const extras = docs.slice(1).filter(doc => doc.exists);
       const index = await runtime.indexWriter.prepareBatch(tx, docs[0].exists ? [{ id: row.id, before: docs[0].data(), after: null }] : [], { additionalWrites: extras.length });

@@ -72,8 +72,9 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    [připravený DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
    feed-v1 → feed-v2 s pilotem a návratem vlastník již schválil.
    [Probíhající rollout](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results):
-   připravený helper a kompatibilní fáze čekají na přesné úplné CI; potom
-   sedm schválených Functions, přechod/audit a následný B3 reader/web s vlastním CI.
+   kompatibilní 1a4d184 prošel úplným CI 44614605147; všech sedm Functions je
+   ACTIVE a migrace včetně návratu/nového auditu skončila na feed-v2 / revision 6.
+   Další je aktivační B3 reader/web s vlastním CI, 120 fixture a živá akceptace.
    Nežádat znovu o stejný pilot. Produkce/main/Rules/Auth účty zůstávají mimo něj.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
