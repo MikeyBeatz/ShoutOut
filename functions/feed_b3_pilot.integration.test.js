@@ -105,7 +105,11 @@ test('pilot fences concurrent deletion eligibility, parent changes and new desce
   const f = await fixture(t), pending = db.doc(`accountDeletionRequests/${f.actors[0].uid}`); f.roots.push(pending);
   await assert.rejects(seedB3Pilot(beforeFirstTransaction(() => pending.create({ status: 'pending' })), f.plan), /deletion is pending/);
   assert((await db.getAll(...f.plan.rows.map(row => db.doc(`shouts/${row.id}`)))).every(doc => !doc.exists));
-  await pending.delete(); await seedB3Pilot(db, f.plan);
+  await pending.delete();
+  const block = db.doc(`users/${f.actors[0].uid}/blocked/${f.actors[1].uid}`);
+  await assert.rejects(seedB3Pilot(beforeFirstTransaction(() => block.create({})), f.plan), /pilot-actors-blocked/);
+  assert((await db.getAll(...f.plan.rows.map(row => db.doc(`shouts/${row.id}`)))).every(doc => !doc.exists));
+  await block.delete(); await seedB3Pilot(db, f.plan);
   const ref = db.doc(`shouts/${f.plan.rows[0].id}`);
   await assert.rejects(cleanupB3Pilot(beforeFirstTransaction(() => ref.update({ likesCount: 1 })), f.plan), /pilot-cleanup-race/);
   assert.equal((await ref.get()).exists, true);
