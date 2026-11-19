@@ -21,6 +21,8 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('read_sync_runtime.js'));
     assert(actual.includes('feed_generation_format.js'));
     assert(!actual.includes('feed_generation_transition.js'));
+    assert(!actual.includes('feed_transition_operator.js'));
+    assert.equal(actual.includes('feed_serving_options.js'), entry === 'content.js');
     assert.deepEqual(actual, artifact.files);
     const manifest = JSON.parse(readFileSync(resolve(artifact.target, 'package.json')));
     assert.equal(manifest.main, entry); assert.equal(manifest.scripts, undefined);

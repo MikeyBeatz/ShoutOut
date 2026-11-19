@@ -6,6 +6,28 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+Na feature/feed-b3-operator je schválená
+[provozní příprava B3](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation):
+řízený CLI s digestem, kontrolou přesného úplného CI a zdrojové inkarnace,
+společné vypnuté hostitelské zapojení a oddělená omezená read cache.
+Prošlo 22 emulátorových a 6 unit regresí; oba Functions artefakty zachovaly
+oddělení migračního nástroje od živého hostitele. Dokončuje se společné CI.
+[Měření](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation) má 5 scénářů / 35
+výběrů: hustá historie 10 000 značek znamenala 284 SDK dokumentových čtení
+na první stránku/novou obnovu, další stránka 80; vždy včetně 50 těl.
+Nejde o cenu ani potvrzení kapacity 5 000 aktivních uživatelů.
+
+Read-only DEV inventura: Standard/europe-west3, control active/revision 1,
+jediná generace feed-v1, 38 Shoutů / 0 active. Všech sedm dotčených Functions
+je ACTIVE; žádné cloudové zápisy. Je připravený
+[konkrétní živý DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
+feed-v1 → feed-v2 s digestem 6db86498…b329347c, sedmi kompatibilními Functions,
+návratem a pilotem na 120 nových 24h syntetických Shoutech. Živý rozsah
+ještě vyžaduje souhlas. Nové B3 přepínače zůstávají false; main/produkce/Rules,
+Auth účty a Scheduler se nemění. Dnešní lokální příprava nic nenasazuje.
+
+**Předchozí přechodové jádro — uzavřené po CI:**
+
 Kontrola po přerušení 19. listopadu potvrdila success zdrojového CI 44419427913
 i dokumentačního CI 44421327266, shodu pushnutých commitů a čistý pracovní strom.
 Předchozí lokální B3 bylo dokončené. Vlastník následně schválil
@@ -22,9 +44,8 @@ také formát, analyzátor, lint a webový build.
 rozlišují lokální důkazy a provozní meze. Nové B3 flags zůstávají vypnuté;
 žádné nasazení ani živá migrace neproběhly.
 
-Další je připravit řízený provozní vstup a konkrétní plán živého DEV přechodu
-s aktuální inventurou, digestem, prostředky, pilotem a návratem. Interní jádro
-není součástí nasazovaných Functions. Tento živý rozsah vyžaduje zvláštní souhlas;
+Řízený provozní vstup a návrh živého DEV přechodu jsou připravené výše.
+Interní jádro není součástí nasazovaných Functions. Živý rozsah vyžaduje zvláštní souhlas;
 hotové lokální implementace ani B2 testy neopakovat.
 
 **Předchozí základ B3 — lokální implementace a automatické ověření uzavřené po CI.**
@@ -66,8 +87,8 @@ success úplné CI 44157663737 a doplňují živý průchod. Ověřený restart 
 nový dokument/Flutter aplikaci přes Ctrl+R, nikoli celý proces Chrome nebo
 odpojení operačního systému. Nevytvářet znovu fixture ani neopakovat hotové B2.
 
-Hotový lokální rozsah B3 ani B2 neopakovat. Další je provozní příprava
-přechodu generace/writerů, posouzení studené cesty a plán živého ověření. B3/B4 ani
+Hotový lokální rozsah B3 ani B2 neopakovat. Další je po CI a schválení provést
+připravený řízený DEV přechod a živé ověření. B3/B4 ani
 produkční kapacita 100 000 účtů / 5 000 aktivních relací hotové v DEV nejsou.
 
 Fontová oprava je také uzavřená v DEV: zdroj

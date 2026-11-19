@@ -47,7 +47,9 @@ akceptace zůstávají samostatné kroky; živé konfigurace se nezměnily.
 Navazující [lokální přechod obou formátů](B3_DEV_ROLLOUT.md#local-transition-results)
 je také uzavřený: 7191502 má success úplné CI 44565313452. Připravený je
 obnovitelný backfill, audit, kompatibilita a rollback; zbývá řízený provozní
-vstup, konkrétní živý plán a DEV akceptace.
+vstup, konkrétní živý plán a DEV akceptace. Následně schválená
+[provozní příprava](B3_DEV_ROLLOUT.md#operator-preparation) už obsahuje CLI,
+vypnuté zapojení, měření a konkrétní návrh DEV pilotu; dokončuje se společné CI.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu

@@ -64,8 +64,13 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    obnovitelný backfill, audit pokrytí a kompatibilní reader/rollback.
    [Implementace a výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results):
    přechod 7191502 má success úplné CI 44565313452, včetně 134 purge/runtime
-   regresí se všemi 18 přechodovými testy. Připravit řízený provozní vstup a přesný živý plán
-   s digestem, pilotem a návratem. Živý index zatím neměnit.
+   regresí se všemi 18 přechodovými testy.
+   [Provozní příprava](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation) nyní
+   obsahuje CLI s digestem/přesným úplným CI, společné vypnuté zapojení,
+   22 emulátorových + 6 unit regresí a 35 rozlišených měřených výběrů.
+   Dokončit společné CI, potom předložit
+   [připravený DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
+   feed-v1 → feed-v2 s pilotem a návratem ke schválení. Živý index zatím neměnit.
    [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
    [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
    Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy

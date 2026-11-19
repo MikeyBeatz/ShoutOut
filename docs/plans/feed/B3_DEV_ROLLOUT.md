@@ -1,6 +1,9 @@
 # B3 — návrh přechodu indexu a DEV zapojení
 
 19. listopadu 2026. **Vlastník schválil lokální přechod a testy; nejde o živé nasazení.**
+Následně schválil celý [přípravný provozní úsek](#operator-preparation).
+[Konkrétní návrh živého DEV přechodu](#dev-pilot-proposal) je oddělený;
+jeho provedení dosud schválené není.
 [Lokální jádro a měření](FEED_DELTA_REFRESH_PLAN.md#b3-local-results) jsou uzavřené.
 Zdroj c2cdb48aedcd0584eeb675935b4694af8b46701e má
 [success úplné CI 44419427913](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44419427913),
@@ -194,3 +197,155 @@ nová migrace a nová živá data potřebují samostatné schválení.
 Metriky zůstávají **60,01 % MVP / 70,19 % backlog**. Důkazy lokálního B3 jsou
 doplněné, jejich již započtené váhy se nemění. Tento přechod nezavírá
 nasazení ani živou akceptaci B3.
+
+<a id="operator-preparation"></a>
+
+## Provozní příprava po schválení vlastníkem
+
+Vlastník 19. listopadu odpověděl „Schvaluji celý přípravný úsek“. Rozsah:
+řízený nástroj, vypnuté společné zapojení, rozlišené měření, návrh pilotu,
+testy, dokumentace, commit/push a CI. Bez živé migrace, nasazení, změn Rules,
+provozních prostředků či Auth účtů.
+
+- `tools/feed_generation_transition.mjs` poskytuje `plan`, `status`, `start`,
+  `backfill`, `begin-audit`, `audit`, `activate`, `rollback`, `resume`, `abort`.
+  Každé mutační spuštění provede jeden obnovitelný krok dosavadního jádra;
+  nezavádí Scheduler ani neomezenou smyčku. Dávka zůstává 50 / 450 zápisů,
+  audit nejvýše 32 uzlů za krok. Po ztrátě odpovědi nejprve načíst status:
+  uvnitř fáze lze pokračovat stejnou akcí, po jejím dokončení zvolit další.
+  Opakování backfill po přechodu do auditu se bezpečně odmítne bez zápisu.
+- Plán zahrnuje projekt, generace, původní kontrolní revizi, inkarnaci zdroje
+  a dávku 50; všechny položky kryje SHA-256. Změna obsahu vyžaduje jiný digest.
+  Nástroj odmítá cizí job či znovu vytvořený zdroj. Plán ani stav nedávají
+  oprávnění k mutaci a jejich čtení nemění cloudová data.
+- Mutace vyžaduje `--project`, shodné `--confirm-project`, `--plan`,
+  `--approved-digest`, `--ci-run`, čistý Git včetně nesledovaných souborů
+  a přesné úspěšné **úplné** CI. Ověřují se i úspěšné jednotlivé aplikační,
+  serverové, browserové, dokumentační kroky a build; lehké CI neprojde.
+  Produkce navíc vyžaduje main a odpovídající tag. Schválení produkce a
+  startovní brána zůstávají samostatné podmínky, které CLI samo nedokazuje.
+- `feedRuntimeConfiguration.compatibleGenerations` a `unreadFirst` zůstávají
+  false. Všechny factory writerů/účtového úklidu sdílejí první volbu;
+  `getFeedPage` přebírá výhradně důvěryhodné hostitelské nastavení. Druhá volba
+  vyžaduje první. Mutátor CLI při vypnuté kompatibilitě odmítne běh ještě
+  před otevřením databáze. Provozní nasazení všech writerů se ověřuje zvlášť;
+  čistý lokální kód není důkazem cloudových revizí.
+- Budoucí B3 hostitel má samostatnou omezenou cache soukromých read bloků,
+  oddělenou od veřejného indexu. Klíč stále zahrnuje projekt, UID a readTime.
+  Profil je dosavadních 4 MiB / 1 024 položek / hodina; budget 256 read bloků
+  je nadále kandidát pro DEV pilot, nikoli určená produkční kapacita.
+  IndexedDB, přenos B2, retence a oprávnění se tím nemění.
+- Migrační jádro i operátor zůstávají mimo oba nasazované Functions balíčky.
+  Testy jsou ve Functions sadě až po instalaci jejích SDK závislostí.
+
+Lokálně prošlo 22 emulátorových regresí (18 přechodových + 4 operátorské),
+6 unit regresí CLI/release/hostitele a kontrola obou skutečných artefaktů.
+Společný push a přesné úplné CI se dokončují; živé přepínače jsou vypnuté.
+
+### Rozlišené měření studené cesty
+
+[Reprodukovatelný nástroj](../../../tools/measure_feed_b3.mjs) vytvořil
+[úplný report](../../benchmarks/FEED_B3_2026-11-19.json): pět scénářů, každý
+120 syntetických Shoutů, dva databázové testovací profily bez Auth a sedm
+měřených stránek/obnov. Všechny běžely pouze v `shoutout-rules-test` na
+127.0.0.1:8080. Report obsahuje otisky použitých souborů a omezení měření.
+
+| Další historie účtu | První stránka: celkem / read bloky | Další stránka | Nová obnova | Další stránka po vyhození cache |
+|---|---:|---:|---:|---:|
+| 0 | 87 / 1 | 80 / 0 | 87 / 1 | 81 / 1 |
+| 100, stejný den expirace | 89 / 3 | 80 / 0 | 89 / 3 | 83 / 3 |
+| 1 000, stejný den | 109 / 23 | 80 / 0 | 109 / 23 | 103 / 23 |
+| 10 000, stejný den | 284 / 198 | 80 / 0 | 284 / 198 | 278 / 198 |
+| 10 000, jiný den | 87 / 1 | 80 / 0 | 87 / 1 | 81 / 1 |
+
+Každá stránka zahrnuje **50 čtených těl**, ostatní SDK dokumentová čtení
+včetně prázdných dotazů a eligibility/control/retention práce. Nejde o celý
+účet: účtované index entries, HTTP callable, Auth/App Check, transaction
+begin/commit RPC a síť nejsou měřené. SDK read calls nejsou úplný počet RPC.
+Založení fixture, B2 přenos a úklid jsou mimo tato čísla. Ve všech 35 výběrech
+byly ověřené výsledky, beze změn zdrojů nebo read stavu během samotného čtení.
+
+Druhý účet nevyužil cizí osobní cache; v hustém scénáři opět 198 read bloků.
+Nové readTime znovu platí studený osobní výběr. Veřejné adaptéry stále
+ověřují retenční fence a nové adaptéry cache invalidují; cache tedy není
+hotovým B4 porovnáním verzí. Opakování starého kurzoru zůstalo shodné i po
+vyhození cache. „Studený proces“ v reportu je vyprázdnění obou cache, nikoli
+měření skutečného cloudového cold startu. Emulátor neprokazuje cenu, latenci
+ani propustnost 5 000 aktivních uživatelů. Hustou studenou cestu zohlednit
+v B4 a kapacitní bráně; nezvyšovat potichu budget při jeho vyčerpání.
+
+Reprodukce po instalaci tools/functions závislostí: ve Firestore emulátoru
+projektu `shoutout-rules-test` spustit `node tools/measure_feed_b3.mjs`.
+Bez přesného lokálního hostu nástroj skončí před inicializací. Dočasné
+výsledky tohoto úseku jsou společně v build/b3-operator.
+
+<a id="dev-pilot-proposal"></a>
+
+## Konkrétní návrh následného DEV přechodu — čeká na schválení
+
+Read-only inventura 19. listopadu: Standard Firestore v europe-west3,
+`feed-v1`, control active / revision 1 / writers `[feed-v1]`, 38 zdrojových
+Shoutů, 0 se statusem active. Všech sedm níže uvedených Functions je ACTIVE,
+Node.js 22, europe-west3. Inventura není souhlas se zápisem ani trvalá záruka
+počtů; před skutečným provedením ji obnovit. Použít stejný obecný doplňovací
+postup i při nulovém počtu zdrojů, nikoli znovu prázdný bootstrap.
+
+Read-only připravený plán je v ignorovaném
+`docs/local/migrations/feed-b3-transition-2026-11-19.json`. Sdílené parametry:
+
+| Parametr | Hodnota |
+|---|---|
+| Projekt | shoutout-dev-46c81 |
+| Zdroj → cíl | feed-v1 → feed-v2 |
+| Původní control revision | 1 |
+| Inkarnace zdroje (seconds, nanoseconds) | [1794043015, 319104000] |
+| Dávka | 50 |
+| Digest | 6db86498320baf666e263c48e4359f3dafd837b3e94232dd3448ef22b329347c |
+
+1. **Kompatibilní release.** Zapnout jen compatibleGenerations, B3 čtení i
+   webový serverUnreadFeed ponechat false. Přesné úplné CI aktivačního commitu,
+   čistý artefakt a předem uložený kompatibilní v3 návratový web. Aktualizovat
+   pouze createShout, toggleShoutReaction, deleteShout, prepareAccountDeletion,
+   getFeedPage a dva stávající účtové workery accountDeletionRequestCreatedDev,
+   resumeAccountDeletionJobsDev. Callables zachovají min 0 / max 1, concurrency 1,
+   256 MiB / 15 s; účtové Functions stejný profil s 60 s. Žádná nová Function,
+   klíč, Rules, indexová konfigurace ani Scheduler. Ověřit skutečné cloudové
+   revize všech writerů/workerů a doběhnutí předchozích požadavků před migrací.
+2. **Obecný přechod indexu.** Se schváleným digestem a přesným úplným CI
+   provést start, obnovitelné backfill kroky, begin-audit a audit do ready.
+   Starý reader běží dál. Změna inkarnace/revize či chybný audit přechod
+   zastaví. Prázdný zdroj projde stejně přes audit; nově publikované zdroje
+   se souběžně udržují v obou generacích. Až potom activate přepne reader.
+3. **B3 reader a web.** V navazujícím otestovaném commitu zapnout unreadFirst
+   a DEV serverUnreadFeed, zachovat compatibleGenerations. Pro pilot navrhnout
+   dosavadních 256 read bloků / požadavek s explicitní chybou při překročení;
+   žádné zvýšení instancí ani produkční kapacity. Po přesném úplném CI nasadit
+   getFeedPage a DEV Hosting site shoutout-dev-46c81, ověřit app-config i artefakt.
+4. **Vymezený pilot.** Připravit testovací helper a jeho testy před cloudovým
+   během. Navrhnout 120 nových syntetických Shoutů s platností 24 h (60 pod
+   Bright_Otter_182, 60 TestBusiness), v syntetickém okolí Litoměřic
+   [50.533, 14.13]. Ověřit 50 → 100 → 120, globální skupiny napříč stránkami,
+   oddělovač, stabilní scroll a nové pořadí po obnově; Top/Končící/Sledované
+   zachovat. Pro průkaz globálního pořadí navrhnout testovací značky přečtení
+   prvních 70 příspěvků pro Bright_Otter_182 a prvních 20 pro TestBusiness.
+   Jde pouze o nové fixture ID, skutečné značky účtů se nezmění; toto přímé
+   seedingové ověření musí být výslovně zahrnuté v živém souhlasu. Skutečný
+   B2 přenos a UI čtení dalších fixture ověřit samostatně.
+   Kontrolovat starý web/kurzor, reakci, záložku, mazání a změnu přihlášeného
+   účtu bez zakládání či mazání Auth účtů. UI akceptaci netvrdit, pokud
+   tester nemá testovací oblast v dosahu. Úklid přes společný writer v obou
+   generacích; odstranit pouze fixture obsah, související vlastní potvrzení,
+   záložky a testovací read klíče se zachováním cizích dat. Původní pending
+   žádost a 38 původních zdrojů zachovat, ověřit před/po.
+5. **Návrat a zastavení.** Před aktivací lze abort vrátit samotný starý writer;
+   registry cíle se nemažou kvůli R5. Po aktivaci vrátit kompatibilní web bez
+   B3 a rollback přepne čtení na feed-v1, oba writery/úklid zůstanou aktivní.
+   Nevracet starý backend s compatibleGenerations=false nad dvě generace.
+   Znovuzapnutí vyžaduje resume a nový audit. Staré generace ani soukromý job
+   nyní fyzicky nevyřazovat; hodinové kurzory a R5 mají dál původní ochrany.
+
+Všechny mutace CLI požadují navíc potvrzení projektu a digestu a shodné CI
+pro aktuální čistý commit. Operátorské názvy akcí nejsou automatický souhlas
+uživatele. Aktivační SHA/run ID se doplní až po konkrétních commitech; dnešní
+vypnutý zdroj se za kompatibilní živý release nevydává. Tento návrh neprovádí
+produkční nasazení, nemění main a nezavírá B4 ani kapacitní bránu.

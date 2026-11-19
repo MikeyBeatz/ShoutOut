@@ -5,7 +5,8 @@ import { assertFeedRuntimeTarget, runtimeIndexBinding } from './feed_index_paths
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { indexMaintenance } from './feed_index_maintenance.js';
 
-export const feedRuntimeConfiguration = Object.freeze({ enabled: true });
+export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: false,
+  unreadFirst: false, maxReadBlockReads: 256 }); // Prepared laboratory/DEV candidate, not production capacity.
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();
 // One existing bounded public-node cache per process. A fresh timer-backed
@@ -48,7 +49,7 @@ export function createFeedGenerationStore(db, generationId, { contentIdentity = 
 }
 
 export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date(), contentIdentity = false,
-  compatibleGenerations = false } = {}) {
+  compatibleGenerations = feedRuntimeConfiguration.compatibleGenerations } = {}) {
   if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean' || typeof compatibleGenerations !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
   const format = compatibleGenerations ? 'generation' : contentIdentity;
   // Disabled wrappers keep the exact legacy database and do not even inspect

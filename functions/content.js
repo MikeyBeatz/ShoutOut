@@ -3,6 +3,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { createFeedRuntime } from './feed_runtime.js';
 import { feedRuntimeConfiguration } from './feed_runtime.js';
 import { getFeedPageOperation } from './get_feed_page.js';
+import { feedPageHostOptions } from './feed_serving_options.js';
 import { getSavedShoutsOperation } from './get_saved_shouts.js';
 import { getOwnShoutsOperation } from './get_own_shouts.js';
 import { defineSecret } from 'firebase-functions/params';
@@ -59,7 +60,7 @@ export const getFeedPage = onCall({
   if (!feedRuntimeConfiguration.enabled) throw new HttpsError('failed-precondition', 'Spatial feed is not enabled.');
   const encoded = feedCursorKey.value(), key = Buffer.from(encoded, 'base64');
   if (key.length !== 32 || key.toString('base64') !== encoded) throw new Error('invalid-feed-cursor-key');
-  return getFeedPageOperation(request, getFirestore(), { key });
+  return getFeedPageOperation(request, getFirestore(), { key, ...feedPageHostOptions() });
 });
 
 // Local preparation only: the client switch remains disabled.
