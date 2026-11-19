@@ -31,6 +31,7 @@ void main() {
       final web = WebEnvironment.fromJson({
         ...config('dev'),
         'serverSpatialFeed': false,
+        'serverUnreadFeed': false,
         'serverAccountDeletionPreparation': enabled,
         'serverAccountDeletionFinalization': enabled,
         'serverShoutDeletion': enabled,

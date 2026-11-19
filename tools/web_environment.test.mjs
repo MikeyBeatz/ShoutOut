@@ -10,10 +10,12 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 const actualDev = loadConfig('dev');
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverSpatialFeed: false, serverReadSynchronization: false };
+const dev = { ...actualDev, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
 
-test('B3 remains off and requires the DEV spatial/read pair', () => {
-  assert.notEqual(actualDev.serverUnreadFeed, true);
+test('B3 is enabled in DEV and requires the DEV spatial/read pair', () => {
+  assert.equal(actualDev.serverUnreadFeed, true);
+  const without = { ...actualDev }; delete without.serverUnreadFeed;
+  assert.doesNotThrow(() => validateConfig(without, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...actualDev, serverUnreadFeed: true }, 'dev'));
   for (const options of [{ serverUnreadFeed: 'true' }, { serverUnreadFeed: true, serverReadSynchronization: false },
     { serverUnreadFeed: true, serverSpatialFeed: false }]) {

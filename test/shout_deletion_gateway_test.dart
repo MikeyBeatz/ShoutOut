@@ -128,7 +128,8 @@ void main() {
           jsonDecode(File('config/dev.json').readAsStringSync())
                 as Map<String, dynamic>
             ..remove('serverShoutDeletion')
-            ..['serverSpatialFeed'] = false;
+            ..['serverSpatialFeed'] = false
+            ..['serverUnreadFeed'] = false;
       expect(WebEnvironment.fromJson(config).serverShoutDeletion, isFalse);
       expect(
         WebEnvironment.fromJson({

@@ -431,3 +431,9 @@ přeskočeno; také cílený ESLint a kontrola odkazů/metrik. Původních 38 zd
 i jedna žádost mají po migraci stejné updateTime. Následuje úplné CI, potom
 pouze getFeedPage a DEV web.
 120 fixture, veřejný Auth/App Check průchod, UI akceptace a úklid dosud neběžely.
+
+První aktivační CI zastavila zastaralá generovaná evidence, následné CI odhalilo
+testovací fixture dědící nově aktivní B3 při záměrném vypnutí prostorového feedu
+nebo B2. Fixture nyní přepínače oddělují; test chybějícího B3 klíče dál ověřuje
+výchozí false a produkční guard zůstává. Po opravě lokálně prošlo všech 381
+Flutter testů a 82 tools testů; čeká se na nové přesné úplné CI.
