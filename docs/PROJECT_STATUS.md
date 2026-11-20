@@ -6,32 +6,31 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválená oprava okamžité odezvy — lokálně hotová, čeká na přesné CI a DEV web.**
-Původní závěrečné akce pilotu funkčně prošly: 070 je deleted, počty 0/0/0,
-receipt dokládají palce/záložku i jejich odebrání a Business má 24/120 přečtení
-včetně 119. Vlastník ale nahlásil odezvu 10–15 s a zástupné místo po smazání.
-Logy potvrzují studený start 2,2–3,3 s, první POST 0,7–1,3 s, teplý palec
-0,34–0,43 s; zbytek klientské prodlevy zatím změřený není.
-[Diagnóza](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
-řeší oddělený okamžitý náhled/pending stav, bezpečné opakování, průběh mazání
-a odebrání potvrzeně vlastního smazaného Shoutu bez skoku scrollu. Vlastník
-rozsah schválil; v Network má No throttling a nahlásil QUIC/400 chyby Listen
-kanálu. Jejich souvislost s prodlevou není prokázaná ani jejich oprava tvrzená.
-Na fix/interaction-feedback je oddělený náhled, bezpečné opakování, sdílená
-lokální SDK bariéra a výjimečné dvoudokumentové serverové ověření po chybějící
-živé aktualizaci. Vlastní potvrzené smazání odstraní ID i z připravených stránek,
-scroll má widgetovou regresi. Prošlo 69 cílených a všech 408 Flutter testů,
-lib/test analyzátor je čistý. Emulátor navíc potvrdil čtecí transakci pod
-uzavřenými zápisovými Rules, vlastní/cizí položky a blokaci po žádosti o mazání.
-[Rozsah, výsledky a meze](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
-Konečná lokální kontrola doplnila přechod do expirace během odesílání:
-uzavřená karta ukazuje potvrzené počty místo předběžného náhledu. Běh
-44787074643 pro meziverzi fa72df5 byl zrušen jako překonaný, nikoli kvůli
-selhání testu; následuje úplné CI finálního zdroje před nasazením.
-Zatím je živý web ab27253; nové Functions/Rules/retence/prostředky se nemění.
-Pilot ponechat, žádný nový seed a nepoužívat smazané 070 pro další reakce.
+**Nyní: potvrdit odezvu nasazené opravy a potom uklidit původní B3 pilot.**
+Zdroj **fc795adba3aa9092a8afe3d7c82272da07a2b5ab** z fix/interaction-feedback má
+[success úplné CI 44788753267](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44788753267).
+DEV Hosting projekt/site shoutout-dev-46c81 je ve verzi **5b4d711b715a85e3**,
+release 20. listopadu **19:17:37 UTC**. Všech 68 souborů buildu je ověřených,
+pět kritických souborů na obou originech odpovídá SHA-256 manifestu.
+[Implementace a meze](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation),
+[důkaz nasazení a další průchod](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-dev).
+Palec/záložka mají oddělený okamžitý náhled, bezpečný retry a indikátor;
+potvrzené vlastní mazání odebere kartu i z připravených stránek se stabilním
+scrollem. Expirace vrátí zobrazení k potvrzeným počtům. Prošlo 69 cílených /
+408 celkových Flutter testů, analýza/formát i emulátorová regrese čtení pod
+uzavřenými Rules. Functions, Rules, prostředky, retence, main a produkce se neměnily.
 
-**Oprava měření a barevného stavu je potvrzená v UI i na serveru.**
+Vlastník dostal krátký průchod TestBusiness / „MVP B3 119“ na ?mvp=fc795ad:
+okamžitý palec/záložka, jejich návrat a vlastní smazání s průběhem bez
+zástupného místa. Browser host je nedostupný. **Odpověď a úklid zatím chybí**;
+celou B3 akceptaci neuzavírat. Pilot ponechat, žádný nový seed a nepoužívat
+deleted 070. Původní expirace je 21:38:25 UTC (22:38 českého času).
+Původní zápisy/mazání 070 a Business čtení 119 už prošly funkčně; neprovádět
+znovu migraci, seed ani akceptované měření přečtení. [Diagnóza prodlevy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
+rozlišuje studený start a nezměřený zbytek. Vlastník má No throttling a hlásil
+QUIC/400 Listen chyby; jejich oprava ani příčinná souvislost nejsou potvrzené.
+
+**Předchozí oprava měření a barevného stavu — potvrzená v UI i na serveru.**
 Vlastník potvrdil stránky i oddělovač, ale nahlásil nepřečtené „MVP B3 070“.
 Na fix/b3-read-feedback jsou reprodukované a opravené dva klientské
 nedostatky: překreslení statického plovoucího ovládání restartovalo měření

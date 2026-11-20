@@ -703,3 +703,48 @@ Browser host znovu vrací unavailable. Zbytek původního pilotu se ponechává
 pro jeden krátký průchod po nasazení, bez opakování úspěšného čtení a bez
 použití deleted 070. Původní expirace je 20. listopadu 21:38:25 UTC; termín
 se bez souhlasu neprodlužuje. Poté schválený úklid a úplná B3 akceptace.
+
+<a id="interaction-feedback-dev"></a>
+
+### Oprava odezvy — nasazený DEV web, živá akceptace čeká
+
+Finální zdroj **fc795adba3aa9092a8afe3d7c82272da07a2b5ab** má
+[success úplné CI 44788753267](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44788753267).
+Před nasazením byl znovu ověřený úplný SHA, čistý strom včetně nesledovaných
+souborů, shodný upstream, všech 68 souborů release buildu a skutečný dosavadní
+Hosting 1f3dc2f8355c02ce. Kontrola CI vyžadovala success všech podstatných
+plných kroků včetně Flutter/browser/server/Rules/B2/purge/Storage a buildu.
+Pomocné sledování gh run watch jednou skončilo chybou připojení k GitHub API;
+následný přímý dotaz potvrdil completed/success a úspěšné kroky stejného SHA.
+Chyba sledovacího klienta nebyla výsledkem CI.
+
+Nasazení **pouze Hosting** do projektu/site **shoutout-dev-46c81**:
+
+- verze **5b4d711b715a85e3**, release **1795202257059000**,
+  **2026-11-20T19:17:37.059Z**;
+- index.html, main.dart.js, app-config.json, flutter_bootstrap.js a version.json
+  mají na web.app i firebaseapp.com HTTP 200 a shodné SHA-256 s release manifestem
+  (10/10 ověření, kontrola 19:18 UTC); všech 68 souborů ověřeno také místně;
+- návratový 68souborový v3/B3 web ab27253 je uložený a ověřený v
+  build/b3-dev/rollback-before-interaction, s manifestem vedle adresáře;
+- nezměněné Functions, Rules, indexy, prostředky, Scheduler, Auth účty,
+  retenční lhůty, main a produkce. Žádný nový seed ani prodloužení testů.
+
+Neveřejné stručné důkazy: build/b3-dev/interaction-release-proof.json,
+interaction-hosting-proof.json, interaction-ci-final-state.json a checkpoint.json;
+provozní log je interaction-hosting-deploy.log. Síťové URL se session parametry,
+hesla ani tokeny se do sdíleného záznamu nekopírují.
+
+**Živá akceptace opravy a úklid zůstávají otevřené.** Vlastník dostal dotaz
+na ?mvp=fc795ad pod TestBusiness: v Mé shouty → Aktivní → „MVP B3 119“ ověřit
+okamžitý palec i záložku, po doběhnutí/odstupu je vrátit a smazat pouze svůj
+testovací Shout s viditelným průběhem. Potom zkontrolovat, že otevřený feed
+po vlastním potvrzeném smazání neponechal jeho placeholder. Přečtení ani celý
+feed se neopakuje; browser host znovu vrací unavailable. Případnou další
+prodlevu rozlišit pomocí bezpečných řádků Interaction timing, ne odhadem z HTTP.
+
+Do odpovědi ponechat týž pilot a phase verified, nezakládat nové účty/fixture,
+nepoužívat deleted 070. Po úspěchu ověřit databázový výsledek a spustit už
+schválený úklid z čistého release-1db4631 podle původního digestu; nedoplňovat
+zpětně další read seeding 70/20. Zachovat přesné updateTime původních 38 zdrojů
+a původní pending žádosti. Teprve po úklidu uzavřít feed-b3-accept v metrikách.

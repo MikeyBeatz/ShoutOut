@@ -52,8 +52,11 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    [Měřené časy a nový návrh](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
    mají schválenou navazující [opravu odezvy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
    Lokální klientská implementace, 69 cílených / 408 celkových Flutter testů
-   a cílený emulátorový test čtení jsou hotové; další je
-   úplné CI přesného commitu, DEV web a krátké ověření stávajícím fixture.
+   a cílený emulátorový test čtení jsou hotové. fc795ad má success úplné CI
+   44788753267 a ověřený DEV web **5b4d711b715a85e3** na obou doménách.
+   [Nasazení a čekající průchod](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-dev):
+   vlastník má ověřit okamžitý palec/záložku a smazání svého „MVP B3 119“
+   pod TestBusiness. Odpověď chybí, potom serverová kontrola a úklid.
    Ponechat stávající pilot pro navazující ověření, žádný nový seed; 070 už
    je deleted. Opravu přečtení ani původní závěrečné akce znovu netestovat.
    **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
