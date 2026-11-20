@@ -264,6 +264,12 @@ void main() {
     expect(cache.get(scope, 'a', a.version), isNull);
     cache.put(scope, payload('big', text: 'x' * 1000), 2000);
     expect(cache.bytes, 0);
+    cache.put(scope, a, 140);
+    now = 150;
+    // A fresh inline body after expiration replaces the expired entry rather
+    // than inheriting its old deadline and forcing a needless second fetch.
+    cache.put(scope, a, 2000);
+    expect(cache.get(scope, 'a', a.version), isNotNull);
   });
   test(
     'selection validation rejects changed ordering/deadline and more than fifty cards',

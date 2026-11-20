@@ -20,6 +20,12 @@ hybrid zmenšuje model živého přenosu za cenu dalších zápisů. Aktivní ho
 Home, Rules, živá data a zdroj DEV webu zůstávají beze změny. Další je návrh
 provozní integrace a levnější cold/refill cesty, nikoli nasazení laboratorních bucketů.
 
+Samostatná diagnostika IDE: kořenová lokální Flutter analýza reprodukovala
+6 chyb pouze v tools/node_modules/firebase-tools/templates/init/functions/dart/server.dart.
+Jde o neinstancovanou cizí šablonu, nikoli lib/test aplikace. Vyloučení
+node_modules z analýzy bylo navrženo a vysvětleno, ale ještě není výslovně
+schválené; analysis_options.yaml proto zůstává beze změny.
+
 B3 má **uzavřenou živou DEV akceptaci i úklid**. Vlastník potvrdil okamžitou
 odezvu závěrečného průchodu. Server doložil u 119 palec/záložku 0 → 1 → 0,
 smazání a výsledné 0/0/0. Následný schválený úklid odstranil 120 testovacích

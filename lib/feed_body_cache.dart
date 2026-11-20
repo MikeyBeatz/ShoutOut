@@ -178,7 +178,10 @@ class FeedBodyCache {
     final until = [
       deadline,
       now + maximumAgeMillis,
-      if (old != null && old.payload.version == payload.version) old.until,
+      if (old != null &&
+          old.until > now &&
+          old.payload.version == payload.version)
+        old.until,
     ].reduce((a, b) => a < b ? a : b);
     _entries[payload.id] = _CachedBody(payload, until, size);
     _bytes += size;
