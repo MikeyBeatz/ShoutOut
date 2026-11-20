@@ -34,6 +34,9 @@ váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
+**Drobná oprava IDE dokončená lokálně:** [vyloučení cizích Dart šablon npm](operations/TESTING.md#dart-dependency-templates).
+Celá flutter analyze nyní bez nálezů; žádný nový MVP kredit, build či rollout.
+
 **Odbočka ke konzoli – fontová oprava dokončená v DEV:**
 [Důkazy](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout): 9e3828d má
 success úplné CI 44178308912, verze 74d0c3756884ac19 je nasazená a ověřená

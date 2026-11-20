@@ -193,7 +193,7 @@
     {"id":"legacy-mvp-05","title":"Business registrace, pobočky a důvěryhodná ruční aktivace s auditem.","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt"]},
     {"id":"legacy-mvp-06","title":"Moderátorské rozhraní, role, regionální rozsahy a základní Rules ochrana.","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt"]},
     {"id":"legacy-mvp-07","title":"Web jako funkční vývojový cíl se sedmi jazyky.","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt"]},
-    {"id":"legacy-mvp-08","title":"Automatické Flutter a Firestore Rules testy zapojené do CI.","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt"]},
+    {"id":"legacy-mvp-08","title":"Automatické Flutter a Firestore Rules testy zapojené do CI.","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt","analysis_options.yaml","docs/operations/TESTING.md#dart-dependency-templates"]},
     {"id":"legacy-mvp-09","title":"Připravit `go.shoutout-app.eu` a Hosting pro aplikaci odděleně od","phase":"legacy","complete":true,"evidence":["docs/archive/TODO_2026-11-12.txt"]},
     {"id":"feed-a0-code","title":"Úplný detail Shoutu A0 – implementace","phase":"implementation","complete":true,"evidence":["docs/plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav"]},
     {"id":"feed-a0-check","title":"Úplný detail Shoutu A0 – automatické ověření","phase":"verification","complete":true,"evidence":["docs/plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav"],"requires":["feed-a0-code"]},

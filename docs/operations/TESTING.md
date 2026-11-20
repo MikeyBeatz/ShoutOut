@@ -20,6 +20,48 @@ ověřená v sedmi rendererových scénářích (aktuální kategorie 0 varován
 staré syntetické kontroly stále varují), 26 Shout testech a úplném CI 44178308912
 pro 9e3828d. DEV artefakt je po nasazení bajtově ověřený na obou doménách.
 
+<a id="dart-dependency-templates"></a>
+
+## Dart analýza a šablony npm závislostí
+
+Oprava 20. listopadu 2026: `analysis_options.yaml` vylučuje `build/**`
+a `**/node_modules/**`. Druhá cesta obsahuje cizí neinstancované Dart
+šablony Firebase CLI, nikoli Dart kód ShoutOutu. Flutter lints i kontroly
+lib/test se nemění; nepřidávají se ignore diagnostik ani Dart serverové
+závislosti do klienta. Postup odpovídá [nastavení exclude v Dart](https://dart.dev/tools/analysis#excluding-files).
+
+Původ šesti hlášek byl `tools/node_modules/firebase-tools/templates/init/functions/dart/server.dart`.
+Šablona má vlastní pubspec pro ukázkový server a importuje firebase_functions;
+bez vytvoření a instalace takového projektu není import vyřešený. První
+uri_does_not_exist vyvolá pět dalších hlášek nad runFunctions, HttpsOptions,
+Cors, Instances a Response. Aplikace používá jiný klientský balíček cloud_functions;
+kvůli šabloně se její pubspec ani knihovny nemění.
+
+Doložená historie:
+
+- cfd2524 (25. října) přidal do analýzy jen vyloučení build/; od té doby se
+  soubor do této opravy neměnil.
+- 48247fe (30. října) připnul firebase-tools 15.31.0 v tools/package.json
+  a lockfile. Nejde o závislost nově přidanou B4a.
+- Současná lokální kopie server.dart má filesystem creationTime
+  19. listopadu 2026 20:54:13 UTC (21:54:13 Europe/Prague). To dokládá tuto
+  kopii, nikoli první instalaci nebo první zobrazení chyby v editoru.
+- Kořenová analýza 20. listopadu 20:57 UTC doložila přesně 6 chyb této
+  šablony; samostatná lib/test analýza byla čistá. Po opravě prošel stejný
+  kořenový příkaz flutter analyze bez jediného nálezu (6,3 s).
+
+Přesný první výskyt v IDE není doložený: node_modules je ignorovaný Gitem
+a instalační příkaz této kopie se nepodařilo ověřit z dostupných npm logů.
+CI analyzuje před npm ci v tools, proto jeho čistý checkout tuto místní
+závadu rozsahu nemusel reprodukovat. Nevydávat úspěšné starší CI za důkaz,
+že místní IDE nemohlo mít uvedené hlášky.
+
+Oprava má lokální ověření, bez nového buildu, nasazení či změny Firebase.
+Push/úplné CI lze seskupit s dalším zdrojovým checkpointem; nejde o nový
+MVP milník ani kredit do stupnice. Pokud editor drží staré diagnostiky i po
+změně konfigurace, obnovit Dart Analysis Server; jeho aktuální panel nebyl
+při této opravě ovládán, ověřený je výsledek CLI.
+
 <a id="dva-rezimy-ci"></a>
 
 ## Dva režimy CI
