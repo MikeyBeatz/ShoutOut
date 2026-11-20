@@ -6,24 +6,30 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: dokončit schválenou opravu měření přečtení a barevný stav B3.**
+**Nyní: ověřit v UI nasazenou opravu měření a barevného stavu B3.**
 Vlastník potvrdil stránky i oddělovač, ale nahlásil nepřečtené „MVP B3 070“.
-Na fix/b3-read-feedback jsou reprodukované a lokálně opravené dva klientské
+Na fix/b3-read-feedback jsou reprodukované a opravené dva klientské
 nedostatky: překreslení statického plovoucího ovládání restartovalo měření
 sekundy a ovládání zakrytého feedu mohlo blokovat čtení otevřeného detailu.
 Prošlo 34 cílených a všech 389 Flutter testů; lib/test analýza je čistá.
-Připravené je okamžité jemné barevné rozlišení bez
+Nasazené je okamžité jemné barevné rozlišení bez
 změny pořadí a zpráva při serverem potvrzené prázdné nepřečtené skupině.
 [Souhlas, diagnóza a výsledky](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
-Následují celé místní kontroly, přesné úplné CI a pouze DEV web; server se
-zatím měnit nemusí. Neopakovat migraci ani seed; stávající pilot ponechat.
-Nové zdroje zatím nejsou nasazené; aktuální živý stav je uvedený níže.
+Zdroj **ab27253d1da7a0b1666caee04483ec5c4606a4d9** má
+[success úplné CI 44684384849](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44684384849).
+Je na DEV Hostingu ve verzi **1f3dc2f8355c02ce**, pět souborů na obou
+originech odpovídá release manifestu; všech 68 souborů lokálně ověřeno.
+Functions, Rules, indexy, konfigurační přepínače a produkce se neměnily.
+Uživatel dostal novou konkrétní kontrolu 070: celý detail 2 s → změna odstínu
+bez přesunu → obnova; případně jiný dosud nepřečtený fixture s uvedením názvu.
+Po odpovědi ověřit odpovídající cloudovou značku a další potřebná klientská
+kritéria, teprve pak úklid/akceptaci. Neopakovat migraci ani seed.
 
 **B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
 Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
 [success úplné CI 44620011513](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44620011513).
-getFeedPage je ACTIVE na revizi getfeedpage-00003-tux; DEV Hosting verze
-62bd3a157ab5342b má ověřených pět zásadních souborů na obou originech.
+getFeedPage je ACTIVE na revizi getfeedpage-00003-tux; prvotní DEV Hosting verzi
+62bd3a157ab5342b nahradila výše uvedená oprava ab27253.
 serverUnreadFeed a B2 jsou zapnuté. Kompatibilních sedm Functions ze zdroje
 1a4d184 / CI 44614605147 a skutečný rollback → resume → nový audit → activate
 jsou ověřené; control revision 6 čte feed-v2 a udržuje oba writery.
@@ -681,7 +687,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `1db4631e424c3333553c12ebbfbba5e2aa54cca0` / `62bd3a157ab5342b`; úplné CI 44620011513 success. B2/B3 aktivní; index, JavaScript, config, bootstrap a version na obou doménách shodné s releasem. B2 akceptace uzavřená, B3 čeká na UI/úklid. |
+| Webový zdroj / Hosting verze | `ab27253d1da7a0b1666caee04483ec5c4606a4d9` / `1f3dc2f8355c02ce`; úplné CI 44684384849 success. Oprava měření a barevný read stav; B2/B3 aktivní. Index, JavaScript, config, bootstrap a version na obou doménách shodné s releasem. B3 čeká na nové UI ověření/úklid. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `1a4d184`, ACTIVE `prepareaccountdeletion-00003-pav`; kompatibilní společný indexový writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |

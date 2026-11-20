@@ -49,9 +49,10 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
 1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
    **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
    [opravu měření čtení a barevný stav](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
-   Dva nedostatky klienta jsou reprodukované; lokální oprava + jemné pozadí
-   a zpráva při nulové nepřečtené skupině mají 34 cílených testů.
-   Dokončit celé kontroly/CI, nasadit DEV web a ověřit na stávajícím pilotu.
+   Dva nedostatky klienta jsou reprodukované; oprava + jemné pozadí
+   a zpráva při nulové nepřečtené skupině mají 34 cílených / 389 celkových testů.
+   ab27253 má success úplné CI 44684384849 a ověřený DEV web 1f3dc2f8355c02ce.
+   Nyní dokončit již vyžádané UI ověření 070 a serverové potvrzení na stávajícím pilotu.
    B3 živou akceptaci ani úklid zatím nezaškrtávat; žádný nový seed/migrace.
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.

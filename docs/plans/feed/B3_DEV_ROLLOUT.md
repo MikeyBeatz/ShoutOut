@@ -533,3 +533,26 @@ v tools/node_modules a našlo šest chyb jeho chybějícího balíčku, nikoli z
 aplikace. Výjimky analyzátoru ani závislosti kvůli tomu změněné nebyly.
 Úplné CI stále provede povinný standardní analyzátor v čistém prostředí.
 Před živým nasazením zůstává vyžadovaný jeho přesný úspěšný výsledek.
+
+**Skutečné DEV nasazení opravy 20. listopadu:** zdroj
+**ab27253d1da7a0b1666caee04483ec5c4606a4d9** má
+[success úplné CI 44684384849](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44684384849),
+včetně standardní analýzy v čistém CI, Flutter/browser, Functions, Rules/server,
+B2, purge, Storage a webového buildu. Guard ověřil přesný SHA, úplné kroky,
+čistý strom a shodu konfigurace/68 release souborů; Functions/Rules/indexy/config
+jsou proti 47fc40c beze změny. Předchozí aktivní B3 web z 1db4631 má ověřenou
+kopii všech 68 souborů v build/b3-dev/rollback-before-feedback pro návrat.
+
+Nasazený byl pouze site shoutout-dev-46c81, verze **1f3dc2f8355c02ce**,
+release 1795155133907000 z 2026-11-20T06:12:13.907Z. Na web.app i firebaseapp.com
+odpovídají otisky index.html, main.dart.js, app-config.json, flutter_bootstrap.js
+a version.json manifestu (10 kontrol). Nevznikl nový účet, pilotní obsah,
+Function, Scheduler, klíč, index ani změna retence. Read-only kontrola před
+nasazením měla 070 stále active, bez cloudové read značky, s původní 24h expirací.
+
+Spojení browser hostu je stále nedostupné. Vlastník dostal navazující UI kontrolu
+na ?mvp=ab27253: Bright_Otter_182, plný detail 070 asi 2 s, okamžitá změna
+pozadí bez posunu, pak plovoucí obnova. Je-li 070 již přečtené po startovní
+synchronizaci, použít jiný dosud nepřečtený fixture a uvést jeho název.
+Serverovou značku ověřit po odpovědi; živá akceptace B3 a úklid dál otevřené.
+Samotné nasazení opravy není důkaz úspěšné opravy konkrétní klientské relace.

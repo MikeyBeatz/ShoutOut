@@ -9,8 +9,9 @@ místo Shoutu. Navazuje na [etapy](FEED_IMPLEMENTATION_STAGES.md).
 opakované překreslení plovoucího ovládání a ovládání předchozí routy v detailu.
 Místní kvalifikované přečtení má nově ihned změnit odstín karty, její poloha
 se pořád mění až po skutečné obnově. Podmínka celého obsahu a jedné sekundy,
-fronta, synchronizační hranice i retence zůstávají stejné. Oprava je zatím
-lokální; skutečný zdroj a nasazení určuje PROJECT_STATUS.
+fronta, synchronizační hranice i retence zůstávají stejné. Oprava ab27253 je
+po success úplném CI 44684384849 nasazená pouze na DEV web; živé UI potvrzení
+je otevřené. Přesné aktuální revize určuje PROJECT_STATUS.
 
 <a id="refresh-boundary-policy"></a>
 
