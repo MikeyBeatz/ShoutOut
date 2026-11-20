@@ -361,9 +361,17 @@ nikoli tvrzení, že se už produkční writery změnily. B4b signály/číslovk
 celé B4 DEV/akceptace zůstávají otevřené.
 
 Ověření: 8 serverových kontraktových, 8 Dart testů, 6 emulátorových scénářů,
-Functions lint a cílená lib/test analýza. Úplný lokální Flutter průchod prošel
-414 testy před doplněním posledních dvou cílených testů; konečnou revizi ještě
-musí potvrdit společné úplné CI. Žádné nasazení ani skutečná data nejsou součástí.
+Functions lint a cílená lib/test analýza. Konečný zdroj
+**13bfe74c182e266eb4ed7c86ca7c1f1dfcecfc64** má
+[úspěšné úplné CI 44816457563](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44816457563):
+416 Flutter, 152 Functions unit (495 emulátorových testů v unit fázi záměrně
+skip), 464 transakčních, 34 B2 runtime, 142 purge a 15 Storage testů;
+formát/analýza, browser read-state a webový build prošly také. Výstup měření
+B4a v CI se přesně shoduje s uloženým lokálním reportem. Konečná oprava TTL
+navíc testuje náhradu vypršelého záznamu čerstvě ověřeným tělem, aby nevznikal
+zbytečný druhý fetch. Starší CI a3ebdad bylo po nahrazení zrušené.
+**Lokální B4a je uzavřené; celé B4 ani provozní integrace tím nejsou dokončené.**
+Žádné nasazení ani skutečná data nejsou součástí.
 
 ### Verze a jejich význam
 

@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,11 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,12 %** — vážené dokončení podúseků
 
-Hotové úseky: **152/213**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **153/213**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,21 %** — vážené dokončení podúseků
 
-Hotové úseky: **183/291**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **184/291**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -52,7 +52,9 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Nejbližší konkrétní úsek:** uzavřít společné CI [lokálního B4a základu](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
+   **Poslední dokončený úsek:** [lokální základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results),
+   zdroj 13bfe74 / úspěšné úplné CI 44816457563. **Další:** konkrétní návrh
+   provozní integrace a levnější cold/refill cesty podle výsledků.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený lokální základ B4a je implementovaný; čeká společné úplné CI.**
+**Nyní: schválený lokální základ B4a je dokončený a má úspěšné úplné CI.**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)
 zahrnují celé body oddělené od stavu, omezený výběr/doplnění, RAM cache,
 porovnání blokové/kompaktní živé projekce a všechny zápisové cesty včetně
@@ -14,6 +14,12 @@ geografie/komentářových odpočtů. Průzkum našel také původní plný Home
 vedle prostorového feedu. Bez jeho započítání a živých odběrů by byl odhad
 úspory neúplný. [Výsledky, měření a matice zbývající integrace](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results):
 8 serverových, 8 Dart a 6 emulátorových scénářů; lint a lib/test analýza čisté.
+Zdroj **13bfe74c182e266eb4ed7c86ca7c1f1dfcecfc64** má
+[success úplné CI 44816457563](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44816457563):
+416 Flutter testů, 152 Functions unit testů, 464 transakčních, 34 B2 runtime,
+142 purge a 15 Storage testů i webový build. CI měření B4a se přesně shoduje
+s uloženým lokálním benchmarkem. Předchozí běh a3ebdad byl zrušen po nahrazení
+finální opravou TTL cache; není důkazem dokončení.
 Bloková varianta má 0 zdrojových těl při warm obnově, ale cold/refill režie
 zatím brání tvrdit plošnou úsporu reads. Individual projekce pro výběr je dražší;
 hybrid zmenšuje model živého přenosu za cenu dalších zápisů. Aktivní hostitelé,
