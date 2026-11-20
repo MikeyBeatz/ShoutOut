@@ -377,9 +377,9 @@ zbytečný druhý fetch. Starší CI a3ebdad bylo po nahrazení zrušené.
 
 ### Další ucelený úsek – bezpečné a levnější sestavení stránky
 
-**Stav 20. listopadu: vlastník výslovně schválil lokální úsek a uvedené testy.**
+**Stav 20. listopadu: schválený lokální úsek je dokončený s úplným CI, viz výsledky níže.**
 Navazuje na dokončený B4a základ; nejde o opakování jeho testů ani povolení
-živého zapojení. Implementace pokračuje na feature/feed-b4-consistent-reads.
+živého zapojení. Implementace je na feature/feed-b4-consistent-reads.
 Před začátkem práce se zbývající delta-code/check váha rozděluje napůl mezi
 finální reader a zbývající writery/aktivní integraci: MVP 22 + 22, backlog
 35 + 35. Součet a již dokončené váhy se nemění; žádný nový kredit za plán.
@@ -469,7 +469,7 @@ před DEV aktivací. B4b signály a číslovka tímto úsekem nezačínají.
 
 ### Finální transakční reader – lokální výsledky
 
-Schválený úsek je implementovaný, před společným úplným CI. Aktivní cesta
+Schválený úsek je implementovaný a má úspěšné úplné CI. Aktivní cesta
 getFeedPage/Home ani žádný živý writer se neměnily.
 
 - `feed_body_reader.js` přijímá pouze serverově připravený binding, původní
@@ -536,7 +536,15 @@ Lokálně prošlo 9 emulátorových scénářů (včetně 200 karet po stránká
 emulátorová sada 6 scénářů rovněž prošla po rozšíření laboratorního adaptéru.
 Celá flutter analyze, formát, Functions lint i nástroje výběru CI/metrik jsou
 čisté. Nová sada má samostatný test:body-reader a CI krok, aby neprodlužovala
-již dlouhou pětiminutovou Rules sadu. Úplné CI konečného commitu ještě zbývá.
+již dlouhou pětiminutovou Rules sadu.
+
+Konečný zdroj **0b2d004472873408eae74daf570d8e8abc03e4d2** má
+[úspěšné úplné CI 44825059479](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44825059479):
+418 Flutter, 156 Functions unit (504 emulátorových testů v této fázi skip),
+464 transakčních, 9 nových B4 reader, 34 B2 runtime, 142 purge a 15 Storage
+testů. Browser, lint/analýza/formát i webový build rovněž prošly. JSON
+benchmark z CI se přesně shoduje s uloženým lokálním reportem. Checkpoint
+zahrnuje také předchozí schválenou opravu analýzy node_modules a její dokumentaci.
 
 **Hranice dokončení:** pouze neaktivní čtecí jádro a laboratorní projekce.
 Před živou aktivací stále zbývá provozní layout, atomické zapojení všech

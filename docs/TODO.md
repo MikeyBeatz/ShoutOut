@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,13 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,14 %** — vážené dokončení podúseků
 
-Hotové úseky: **154/215**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **155/215**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,21 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
 
-Hotové úseky: **185/293**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **186/293**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,12 +55,12 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Poslední dokončený úsek:** [lokální základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results),
-   zdroj 13bfe74 / úspěšné úplné CI 44816457563. **Další:** konkrétní návrh
-   [finálního transakčního sestavení stránky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
-   a potřebných metadat. [Lokální reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
-   jsou připravené se skutečnými guardy; čeká společné úplné CI. Potom zbývá
-   provozní layout a zapojení writerů/úklidu. Živý datový přechod je samostatná brána.
+   **Poslední dokončený úsek:** [lokální transakční reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results),
+   zdroj 0b2d004 / úspěšné úplné CI 44825059479. Navazuje na uzavřený
+   [základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
+   **Další:** konkrétní provozní projekční layout, atomické zapojení všech
+   writerů a R5/history/purge; potom náhrada závislých Home/živých odběrů
+   se zachováním promo. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

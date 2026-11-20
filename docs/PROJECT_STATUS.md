@@ -6,7 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: finální transakční reader je lokálně připravený, čeká společné úplné CI.**
+**Nyní: schválený lokální transakční reader je uzavřený včetně úplného CI.**
+Odeslaný zdroj **0b2d004472873408eae74daf570d8e8abc03e4d2**, větev
+feature/feed-b4-consistent-reads, [úplné CI 44825059479 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44825059479).
+Prošlo 418 Flutter, 156 Functions unit, 464 transakčních, 9 nových B4,
+34 B2 runtime, 142 purge a 15 Storage testů; browser, analýza/formát i webový
+build také. CI benchmark přesně odpovídá lokálnímu JSON reportu.
+Neopakovat implementaci ani 50/200 fixture bez nové příčiny. Žádné nové DEV nasazení.
 [Finální transakční sestavení stránky a potřebná metadata](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
 sloučí opakované čtení bloků při zachování skutečných serverových kontrol.
 [Výsledky a úplnější měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results):
@@ -14,10 +20,10 @@ bloková/zdrojová část potvrdila 95 → 65 / 45 → 15 / 76 → 31. Se skute�
 guardy/B3 a prostorovým výběrem je warm 38/41 reads pro fixture 50/200.
 Prošlo 9 emulátorových, 12 metadata/kontraktových a 10 Dart testů, celá
 analýza i lint. Neaktivní reader kontroluje skutečné serverové dokumenty;
-živé writery, formát, Home/odběry, Rules a data se nemění. Další po CI je
+živé writery, formát, Home/odběry, Rules a data se nemění. Další je
 provozní projekční layout a úplné atomické pokrytí writerů/úklidu před DEV.
 
-**Poslední dokončený kód:**
+**Předchozí lokální základ B4a:**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)
 zahrnují celé body oddělené od stavu, omezený výběr/doplnění, RAM cache,
 porovnání blokové/kompaktní živé projekce a všechny zápisové cesty včetně
@@ -42,8 +48,8 @@ analysis_options.yaml vylučuje cizí npm šablony přes `**/node_modules/**`.
 Celá lokální flutter analyze prošla bez nálezů (před opravou 6 chyb šablony).
 [Příčina, doložená historie a meze](operations/TESTING.md#dart-dependency-templates).
 Pravidla lib/test, závislosti a Firebase se nemění; editorový panel nebyl
-ovládán. Oprava je v samostatné větvi fix/dart-analysis-dependencies;
-push/úplné CI se seskupí s dalším zdrojovým checkpointem, nic se nenasazovalo.
+ovládán. Původní fix/dart-analysis-dependencies je zahrnutý v tomto společném
+checkpointu 0b2d004; push i úplné CI jsou úspěšné. Nic se nenasazovalo.
 
 B3 má **uzavřenou živou DEV akceptaci i úklid**. Vlastník potvrdil okamžitou
 odezvu závěrečného průchodu. Server doložil u 119 palec/záložku 0 → 1 → 0,
