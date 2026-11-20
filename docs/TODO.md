@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 19. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 20. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -47,6 +47,12 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
 1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
+   **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
+   [opravu měření čtení a barevný stav](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
+   Dva nedostatky klienta jsou reprodukované; lokální oprava + jemné pozadí
+   a zpráva při nulové nepřečtené skupině mají 34 cílených testů.
+   Dokončit celé kontroly/CI, nasadit DEV web a ověřit na stávajícím pilotu.
+   B3 živou akceptaci ani úklid zatím nezaškrtávat; žádný nový seed/migrace.
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
    [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).

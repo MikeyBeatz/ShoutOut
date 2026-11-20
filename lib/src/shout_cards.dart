@@ -74,13 +74,22 @@ class ShoutCard extends StatelessWidget {
   final VoidCallback? onPrivateReply;
 
   @override
-  Widget build(BuildContext context) => ShoutInteractionGate(
-    expiresAt: shout.expiresAt,
-    enabled: shout.status == ShoutStatus.active,
-    builder: (context, open) => _buildCard(context, open),
+  Widget build(BuildContext context) => ReadStatusBuilder(
+    content: ReadContent(
+      shoutId: shout.id,
+      title: shout.title,
+      text: shout.text,
+      expiresAt: shout.expiresAt,
+    ),
+    confirmedRead: shout.feedRead == true,
+    builder: (context, read) => ShoutInteractionGate(
+      expiresAt: shout.expiresAt,
+      enabled: shout.status == ShoutStatus.active,
+      builder: (context, open) => _buildCard(context, open, read: read),
+    ),
   );
 
-  Widget _buildCard(BuildContext context, bool open) {
+  Widget _buildCard(BuildContext context, bool open, {required bool read}) {
     final theme = Theme.of(context);
     final titleText = Text(
       shout.title,
@@ -111,9 +120,17 @@ class ShoutCard extends StatelessWidget {
     }
 
     final highlighted = shout.businessHighlighted;
+    final baseColor = highlighted
+        ? theme.colorScheme.secondaryContainer.withValues(alpha: .55)
+        : theme.cardTheme.color ?? theme.colorScheme.surfaceContainerLow;
     return Card(
-      color: highlighted
-          ? theme.colorScheme.secondaryContainer.withValues(alpha: .55)
+      color: read
+          ? Color.alphaBlend(
+              theme.colorScheme.onSurface.withValues(alpha: .09),
+              baseColor,
+            )
+          : highlighted
+          ? baseColor
           : null,
       shape: highlighted
           ? RoundedRectangleBorder(

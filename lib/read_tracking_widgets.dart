@@ -96,6 +96,65 @@ class ReadTrackingScope extends InheritedWidget {
       controller != oldWidget.controller;
 }
 
+/// Only rebuild the mounted card whose own reading state changed. No network
+/// work, feed reordering, or per-account cache is introduced by presentation.
+class ReadStatusBuilder extends StatefulWidget {
+  const ReadStatusBuilder({
+    super.key,
+    required this.content,
+    required this.builder,
+    this.confirmedRead = false,
+  });
+  final ReadContent content;
+  final bool confirmedRead;
+  final Widget Function(BuildContext, bool) builder;
+  @override
+  State<ReadStatusBuilder> createState() => _ReadStatusBuilderState();
+}
+
+class _ReadStatusBuilderState extends State<ReadStatusBuilder> {
+  ReadTrackingController? _controller;
+  bool _read = false;
+  bool get _current =>
+      widget.confirmedRead || (_controller?.contains(widget.content) ?? false);
+
+  void _changed() {
+    final value = _current;
+    if (mounted && value != _read) setState(() => _read = value);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = ReadTrackingScope.maybeOf(context);
+    if (_controller != controller) {
+      _controller?.removeListener(_changed);
+      _controller = controller;
+      _controller?.addListener(_changed);
+    }
+    _read = _current;
+    unawaited(_controller?.load(widget.content));
+  }
+
+  @override
+  void didUpdateWidget(ReadStatusBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _read = _current;
+    if (oldWidget.content.key != widget.content.key) {
+      unawaited(_controller?.load(widget.content));
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_changed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _read);
+}
+
 class ReadTrackingRoot extends StatefulWidget {
   const ReadTrackingRoot({
     super.key,
@@ -270,11 +329,39 @@ class ReadOccluder extends StatefulWidget {
 }
 
 class _ReadOccluderState extends State<ReadOccluder> {
+  Rect? _paintedBounds;
+  bool _routeCurrent = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final current = ModalRoute.isCurrentOf(context) ?? true;
+    if (current != _routeCurrent) {
+      _routeCurrent = current;
+      _paintedBounds = null;
+      readVisibility.changed();
+    }
+  }
+
+  void _paint() {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached || !box.hasSize) return;
+    final bounds = MatrixUtils.transformRect(
+      box.getTransformTo(null),
+      Offset.zero & box.size,
+    );
+    // Repainting a stationary floating control does not interrupt a continuous
+    // view of the text. Its actual movement/resize still invalidates exposure.
+    if (bounds == _paintedBounds) return;
+    _paintedBounds = bounds;
+    readVisibility.changed();
+  }
+
   @override
   void initState() {
     super.initState();
     readVisibility.occluders[this] = () =>
-        context.findRenderObject() as RenderBox?;
+        _routeCurrent ? context.findRenderObject() as RenderBox? : null;
   }
 
   @override
@@ -286,7 +373,7 @@ class _ReadOccluderState extends State<ReadOccluder> {
 
   @override
   Widget build(BuildContext context) =>
-      _ReadPaintObserver(onPaint: readVisibility.changed, child: widget.child);
+      _ReadPaintObserver(onPaint: _paint, child: widget.child);
 }
 
 class ReadTrackedContent extends StatefulWidget {

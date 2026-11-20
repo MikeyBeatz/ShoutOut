@@ -478,3 +478,58 @@ projekt i digest; cleanup navíc skutečně dokončené klientské kontroly.
 Při pokračování vždy nejprve status, po úklidu přenést stav a důkaz zpět do
 hlavního build/b3-dev, potvrdit zachování baseline/žádosti a uzavřít dokumentaci.
 Nový pilot ani migraci nezakládat. Nezměněná historie indexu má původní GC.
+
+<a id="read-feedback-fix"></a>
+
+### Oprava měření a vizuální stav — schváleno 20. listopadu
+
+Vlastník potvrdil načítání dalších stránek a následně i oddělovač. Uvedl však,
+že otevřené „MVP B3 070“ zůstalo nepřečtené, a požádal o barevné rozlišení.
+Read-only kontrola tehdy našla u Bright_Otter_182 87/120 značek (původních 70
+a 17 nových), ale nikoli 070; u Business zůstalo původních 20. To dokládá
+částečně funkční živý přenos, nikoli příčinu konkrétního nepřečtení.
+
+Vlastník výslovně schválil společný úsek: reprodukovanou chybu čtení opravit
+bez změny celého zobrazení a jedné sekundy, okamžitý jemný barevný stav při
+pevném pořadí, zprávu „Žádné nepřečtené Shouty“ jen při potvrzené prázdné
+skupině a odpovídající testy/dokumentaci/DEV rollout po přesném úplném CI.
+Použít existující pilot, bez nových Auth účtů, Rules, retencí či produkce;
+serverovou změnu zahrnout jen při prokázané nutnosti v dosavadním kontraktu.
+
+Na fix/b3-read-feedback jsou lokálně reprodukované dva nedostatky:
+
+1. Každé překreslení statického plovoucího ovládání rušilo rozměřenou sekundu,
+   přestože se jeho geometrie nezměnila. Regrese se stálým překreslováním
+   před opravou selhala. Oprava hlásí změnu zakrytí jen při změně skutečných
+   globálních hranic; skutečné posunutí/změna velikosti pořád měření přeruší.
+2. Ovládání předchozí zakryté routy zůstalo v seznamu překážek otevřeného
+   detailu. Regrese s dokončenou animací před opravou selhala a po omezení
+   překážky na aktuální routu prochází. Modalita, životní cyklus a skrytý či
+   oříznutý text mají dál původní ochrany.
+
+Tyto reprodukce prokazují chyby klienta; jejich odstranění v konkrétní živé
+relaci 070 musí teprve potvrdit nové UI ověření. Backend se nemění.
+ReadStatusBuilder sleduje jen změnu bool stavu vlastní karty; cizí značky ji
+nepřestavují. Místní uložení, remote import i obnova mění barvu bez změny
+výšky, scrollu, serverového feedRead nebo pořadí. Uložené/nové barevné stavy
+nevyvolávají síťový přenos; zachovaná synchronizace běží při spuštění/obnově.
+Pozadí zachovává Business zvýraznění, interakce i textový kontrast.
+
+Zpráva bez nepřečtených se zobrazuje nad oddělovačem v Nejblíž pouze pokud
+první vrácená položka má serverový feedRead=true. Globální pořadí tím
+potvrzuje prázdnou nepřečtenou skupinu i přes další stránky. Prázdná nefinální
+stránka, loading, Top a pouhé místní přečtení aktuální dávky zprávu nespustí.
+„Nepřečtené“ se nezaměňuje s nově příchozími Shouty, jejichž indikátor je B4.
+Text má překlady ve všech šesti dalších podporovaných jazycích.
+
+Prošlo 34 cílených Flutter testů včetně detail → mark → refresh sync → nová
+serverová skupina, neprůběžného uploadu, rozhraní obou témat, kontrastu ≥4,5:1,
+živého ovládání karty a změny uživatele. Zatím jde o místní kód a výsledky;
+úplné kontroly, přesné CI, DEV nasazení a ruční akceptace následují.
+
+Celá místní Flutter sada má **389 pass**; analýza lib/test je bez nálezů.
+Obecné místní flutter analyze navíc zahrnulo Dart šablonu vendored Firebase CLI
+v tools/node_modules a našlo šest chyb jeho chybějícího balíčku, nikoli zdrojů
+aplikace. Výjimky analyzátoru ani závislosti kvůli tomu změněné nebyly.
+Úplné CI stále provede povinný standardní analyzátor v čistém prostředí.
+Před živým nasazením zůstává vyžadovaný jeho přesný úspěšný výsledek.

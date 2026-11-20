@@ -1,6 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const vietnameseTranslations = <String, String>{
   'Přečtené': 'Đã đọc',
+  'Žádné nepřečtené Shouty': 'Không có Shout chưa đọc',
   'Obnovit': 'Làm mới',
   'Načíst další': 'Tải thêm',
   'Pro zobrazení okolí povol polohu.':

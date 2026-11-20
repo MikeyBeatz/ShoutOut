@@ -1,10 +1,23 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 19. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 20. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
+
+**Nyní: dokončit schválenou opravu měření přečtení a barevný stav B3.**
+Vlastník potvrdil stránky i oddělovač, ale nahlásil nepřečtené „MVP B3 070“.
+Na fix/b3-read-feedback jsou reprodukované a lokálně opravené dva klientské
+nedostatky: překreslení statického plovoucího ovládání restartovalo měření
+sekundy a ovládání zakrytého feedu mohlo blokovat čtení otevřeného detailu.
+Prošlo 34 cílených a všech 389 Flutter testů; lib/test analýza je čistá.
+Připravené je okamžité jemné barevné rozlišení bez
+změny pořadí a zpráva při serverem potvrzené prázdné nepřečtené skupině.
+[Souhlas, diagnóza a výsledky](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
+Následují celé místní kontroly, přesné úplné CI a pouze DEV web; server se
+zatím měnit nemusí. Neopakovat migraci ani seed; stávající pilot ponechat.
+Nové zdroje zatím nejsou nasazené; aktuální živý stav je uvedený níže.
 
 **B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
 Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
@@ -19,9 +32,9 @@ V rámci [schváleného pilotu](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results
 vzniklo přesně 120 nových 24h syntetických Shoutů a 90 testovacích značek
 přečtení. Živé interní jádro oběma účtům vrátilo 50 → 100 → 120, staré
 negrupované i B3 pořadí: Bright_Otter_182 má 50 nepřečtených, TestBusiness 100.
-Tento důkaz nenahrazuje veřejný Auth/App Check a UI; uživatel dostal konkrétní
-kontrolu Nejblíž / 50 km / oddělovač / další stránky / obnova. Po ní dokončit
-interakce a další potřebné klientské kontroly, následně schválený úklid.
+Tento důkaz nenahrazuje veřejný Auth/App Check a UI. Uživatel potvrdil další
+stránky a oddělovač; zjištěná regrese měření a vizuální doplnění mají rozsah
+výše. Po jejich nasazení dokončit klientské kontroly, potom schválený úklid.
 Původních 38 zdrojů a původní žádost jsou zachované; žádná Auth mutace.
 Browser host byl nedostupný a nativní automatická kontrola zastavila Chrome
 kvůli neověřené URL; ve stejném tahu tuto kontrolu neobcházet jinou cestou.

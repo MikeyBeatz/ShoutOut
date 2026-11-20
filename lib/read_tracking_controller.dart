@@ -37,8 +37,9 @@ class ReadTrackingController extends ChangeNotifier {
       final found = await store
           .contains(content, clock())
           .timeout(const Duration(seconds: 10));
-      if (enabled && found) {
-        _read.putIfAbsent(content.key, () => content);
+      if (enabled && found && !_read.containsKey(content.key)) {
+        _read[content.key] = content;
+        notifyListeners();
       }
     } catch (_) {
       _failure();
@@ -54,6 +55,7 @@ class ReadTrackingController extends ChangeNotifier {
     _read[content.key] = content;
     _pending[content.key] = content;
     _prepareWrite(content.key);
+    notifyListeners();
     unawaited(retry());
   }
 
@@ -136,6 +138,7 @@ class ReadTrackingController extends ChangeNotifier {
         await Future<void>.delayed(Duration.zero);
       }
       if (enabled) {
+        final before = _read.length;
         _read.removeWhere(
           (_, content) => !clock().isBefore(content.retainUntil),
         );
@@ -150,6 +153,7 @@ class ReadTrackingController extends ChangeNotifier {
             persisted.complete(true);
           }
         }
+        if (_read.length != before) notifyListeners();
       }
     } catch (_) {
       _failure();
@@ -165,6 +169,7 @@ class ReadTrackingController extends ChangeNotifier {
     _read.clear();
     _pending.clear();
     _cancelWrites();
+    notifyListeners();
     await store.erase().timeout(const Duration(seconds: 10));
   }
 
@@ -181,11 +186,15 @@ class ReadTrackingController extends ChangeNotifier {
 
   void acceptRemote(List<ReadUpload> rows) {
     if (!enabled) return;
+    var changed = false;
     for (final row in rows) {
-      if (clock().isBefore(row.content.retainUntil)) {
-        _read.putIfAbsent(row.content.key, () => row.content);
+      if (clock().isBefore(row.content.retainUntil) &&
+          !_read.containsKey(row.content.key)) {
+        _read[row.content.key] = row.content;
+        changed = true;
       }
     }
+    if (changed) notifyListeners();
   }
 }
 

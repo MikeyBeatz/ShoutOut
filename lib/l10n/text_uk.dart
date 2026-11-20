@@ -1,6 +1,7 @@
 // Generated draft translations. Review context and wording before release.
 const ukrainianTranslations = <String, String>{
   'Přečtené': 'Прочитані',
+  'Žádné nepřečtené Shouty': 'Немає непрочитаних Shout',
   'Obnovit': 'Оновити',
   'Načíst další': 'Завантажити ще',
   'Pro zobrazení okolí povol polohu.':

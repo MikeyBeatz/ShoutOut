@@ -511,6 +511,21 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                 ),
               ),
+            if (!widget.isLoading &&
+                widget.spatial != null &&
+                widget.filters.order == FeedOrder.nearest &&
+                shouts.isNotEmpty &&
+                shouts.first.feedRead == true)
+              SliverToBoxAdapter(
+                child: Padding(
+                  key: const ValueKey('feed-no-unread'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Text(tr(context, 'Žádné nepřečtené Shouty')),
+                ),
+              ),
             if (widget.isLoading)
               const SliverFillRemaining(
                 hasScrollBody: false,

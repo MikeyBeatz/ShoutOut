@@ -55,6 +55,62 @@ Widget harness(
 );
 
 void main() {
+  testWidgets(
+    'only a confirmed empty unread group shows the no-unread message',
+    (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      Widget view(
+        List<Shout> rows, {
+        FeedOrder order = FeedOrder.nearest,
+        bool loading = false,
+      }) => harness(
+        FeedPage(
+          shouts: rows,
+          isLoading: loading,
+          onSave: (_) {},
+          onReaction: (_, {required bool like}) async {},
+          onNotifications: () {},
+          filters: FeedFilters()..order = order,
+          followedUserIds: {},
+          spatial: SpatialFeedPresentation(
+            scrollController: scroll,
+            refresh: () {},
+            changeFilters: (_) {},
+            prefetch: () {},
+            loadMore: () {},
+            hasMore: true,
+            loadingMore: false,
+            refreshing: false,
+            card: (shout) => SizedBox(height: 40, child: Text(shout.title)),
+          ),
+        ),
+      );
+      final read = decodeSpatialFeedItem({...item(1), 'read': true});
+      await tester.pumpWidget(view([read]));
+      await tester.pump();
+      expect(find.text('Žádné nepřečtené Shouty'), findsOneWidget);
+      expect(find.text('Přečtené'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Žádné nepřečtené Shouty')).dy,
+        lessThan(tester.getTopLeft(find.text('Přečtené')).dy),
+      );
+      for (final other in [
+        view([]),
+        view([read], loading: true),
+        view([read], order: FeedOrder.popular),
+        view([
+          decodeSpatialFeedItem({...item(1), 'read': false}),
+        ]),
+      ]) {
+        await tester.pumpWidget(other);
+        await tester.pump();
+        expect(find.byKey(const ValueKey('feed-no-unread')), findsNothing);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   testWidgets('B3 renders one frozen read separator at a page boundary', (
     tester,
   ) async {

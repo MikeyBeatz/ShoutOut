@@ -4,6 +4,14 @@
 a upřesnil, že negativní hodnocení mimo Top mění sbalení, nikoli časové/prostorové
 místo Shoutu. Navazuje na [etapy](FEED_IMPLEMENTATION_STAGES.md).
 
+**20. listopadu — schválená navazující oprava B3:**
+[Měření zakrytí a barevný stav](B3_DEV_ROLLOUT.md#read-feedback-fix) řeší
+opakované překreslení plovoucího ovládání a ovládání předchozí routy v detailu.
+Místní kvalifikované přečtení má nově ihned změnit odstín karty, její poloha
+se pořád mění až po skutečné obnově. Podmínka celého obsahu a jedné sekundy,
+fronta, synchronizační hranice i retence zůstávají stejné. Oprava je zatím
+lokální; skutečný zdroj a nasazení určuje PROJECT_STATUS.
+
 <a id="refresh-boundary-policy"></a>
 
 ## Aktuální upřesnění obnovy a synchronizace — 12. listopadu 2026

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -99,6 +100,51 @@ void main() {
       expect(store.rows, isEmpty);
     },
   );
+
+  testWidgets(
+    'repainting a stationary floating control does not restart readable exposure',
+    (tester) async {
+      late StateSetter redraw;
+      var alternate = false;
+      await tester.pumpWidget(
+        harness(
+          tester,
+          wrap: (child) => StatefulBuilder(
+            builder: (_, setState) {
+              redraw = setState;
+              return ColoredBox(
+                color: alternate ? Colors.white : Colors.grey,
+                child: SizedBox(
+                  height: 160,
+                  child: Stack(
+                    children: [
+                      Align(alignment: Alignment.topLeft, child: child),
+                      const Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: ReadOccluder(
+                          child: SizedBox(width: 40, height: 40),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+      for (var i = 0; i < 12; i++) {
+        redraw(() => alternate = !alternate);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(controller.contains(content), isTrue);
+      expect(store.rows.length, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(readVisibility.occluders, isEmpty);
+    },
+  );
   testWidgets(
     'long text requires the entire scroll range including its last line',
     (tester) async {
@@ -122,6 +168,112 @@ void main() {
         await tester.pump();
       }
       expect(controller.contains(content), isTrue);
+    },
+  );
+
+  testWidgets(
+    'controls on a covered feed route do not occlude its open detail',
+    (tester) async {
+      final navigator = GlobalKey<NavigatorState>(),
+          observer = ReadNavigationObserver();
+      addTearDown(observer.clear);
+      await tester.pumpWidget(
+        harness(
+          tester,
+          navigator: navigator,
+          observers: [observer],
+          wrap: (child) => Stack(
+            children: [
+              child,
+              const Positioned(
+                top: 0,
+                left: 0,
+                child: ReadOccluder(child: SizedBox(width: 300, height: 60)),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 2));
+      expect(controller.contains(content), isFalse);
+      final epoch = tester.binding.clock.now();
+      unawaited(
+        navigator.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) => Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 220,
+                  child: ListView(
+                    children: [
+                      ReadTrackedContent(
+                        content: content,
+                        title: const Text('Title'),
+                        body: const Text('Body'),
+                        clock: () =>
+                            tester.binding.clock.now().difference(epoch),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1100));
+      await tester.pump();
+      final read = controller.contains(content);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(read, isTrue);
+    },
+  );
+
+  testWidgets(
+    'a floating control moving over text still interrupts its second',
+    (tester) async {
+      late StateSetter move;
+      var covered = false;
+      await tester.pumpWidget(
+        harness(
+          tester,
+          wrap: (child) => StatefulBuilder(
+            builder: (_, setState) {
+              move = setState;
+              return SizedBox(
+                height: 160,
+                child: Stack(
+                  children: [
+                    Align(alignment: Alignment.topLeft, child: child),
+                    Positioned(
+                      top: covered ? 0 : 100,
+                      left: 0,
+                      child: const ReadOccluder(
+                        child: SizedBox(width: 300, height: 60),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      move(() => covered = true);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      expect(controller.contains(content), isFalse);
+      move(() => covered = false);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 999));
+      expect(controller.contains(content), isFalse);
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump();
+      expect(controller.contains(content), isTrue);
+      await tester.pumpWidget(const SizedBox.shrink());
     },
   );
   testWidgets(
