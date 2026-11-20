@@ -52,8 +52,11 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    Dva nedostatky klienta jsou reprodukované; oprava + jemné pozadí
    a zpráva při nulové nepřečtené skupině mají 34 cílených / 389 celkových testů.
    ab27253 má success úplné CI 44684384849 a ověřený DEV web 1f3dc2f8355c02ce.
-   Nyní dokončit již vyžádané UI ověření 070 a serverové potvrzení na stávajícím pilotu.
-   B3 živou akceptaci ani úklid zatím nezaškrtávat; žádný nový seed/migrace.
+   Oprava má potvrzený UI výsledek i skutečný server: Bright 120/120 přečtených,
+   070 potvrzené, platné Auth/App Check a HTTP 200. [Důkaz a zbytek pilotu](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
+   Dokončit již vyžádané interakce/mazání 070 a přepnutí na Business/čtení 119,
+   ověřit server a uklidit pilot. Celou B3 akceptaci zatím nezaškrtávat.
+   Žádný nový seed/migrace ani opakování úspěšného UI testu čtení Brighta.
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
    [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).

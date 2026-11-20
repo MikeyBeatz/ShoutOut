@@ -556,3 +556,32 @@ pozadí bez posunu, pak plovoucí obnova. Je-li 070 již přečtené po startovn
 synchronizaci, použít jiný dosud nepřečtený fixture a uvést jeho název.
 Serverovou značku ověřit po odpovědi; živá akceptace B3 a úklid dál otevřené.
 Samotné nasazení opravy není důkaz úspěšné opravy konkrétní klientské relace.
+
+<a id="read-feedback-acceptance"></a>
+
+### Oprava přečtení — potvrzená v UI i na serveru 20. listopadu
+
+Vlastník na novém webu potvrdil živou změnu pozadí, správné zařazení po obnově
+a všechny příspěvky pod oddělovačem „Přečtené“. Kontrola 2026-11-20T15:48:29Z
+našla u Bright_Otter_182 **120/120** fixture read záznamů; dříve chybějící 070
+má confirmedAt **2026-11-20T15:46:09.289Z**. Před opravou měl tentýž testovací
+ID serverovou značku nepřítomnou. TestBusiness má dál svých samostatných 20/120;
+záznamy běžného účtu se druhému účtu nepřenesly. Kontrola nic nezapisovala.
+Neveřejné stručné důkazy jsou build/b3-dev/feedback-ui-server-proof.json a
+feedback-live-callable-proof.json; neobsahují tokeny ani hesla.
+
+Sedm ověřovacích záznamů skutečných callable getFeedPage/syncReadBatch má
+auth VALID / app VALID a odpovídající úspěšné požadavky HTTP 200. HTTP 204
+v témže výpisu je preflight. Jde o klientský průchod po nasazení, nikoli jen
+interní Admin SDK test. Vlastník už také dříve potvrdil stránkování bez skoku
+a samotný oddělovač. Konkrétní znění hlášky při nule nepřečtených neopisoval;
+zobrazení hlášky a nefinální prázdné stránky mají cílený widgetový test.
+
+Oprava měření a vizuálního stavu je tímto akceptovaná. **Celé B3 zatím
+neuzavírat:** v původně schváleném pilotu zbývají živé interakce/mazání a
+přepnutí na Business po novém zapojení. Po nedostupnosti browser hostu byl
+vyžádaný jeden navazující průchod: Bright na 070 palec a odebrání, záložka
+a odebrání (s odstupem kvůli stávajícím limitům), smazat pouze svůj 070;
+potom TestBusiness přečte svůj 119 v Mé shouty a obnoví feed. Ověřit serverový
+výsledek a schváleně uklidit zbytek týchž 120 ID, read klíče a vlastní
+testovací potvrzení. Žádná nová implementace ani nový seed nejsou vyžádané.

@@ -10,8 +10,11 @@ opakované překreslení plovoucího ovládání a ovládání předchozí routy
 Místní kvalifikované přečtení má nově ihned změnit odstín karty, její poloha
 se pořád mění až po skutečné obnově. Podmínka celého obsahu a jedné sekundy,
 fronta, synchronizační hranice i retence zůstávají stejné. Oprava ab27253 je
-po success úplném CI 44684384849 nasazená pouze na DEV web; živé UI potvrzení
-je otevřené. Přesné aktuální revize určuje PROJECT_STATUS.
+po success úplném CI 44684384849 nasazená pouze na DEV web. Vlastník potvrdil
+živou změnu odstínu i zařazení po obnově; server potvrdil 120/120 testovacích
+přečtení včetně dříve chybějícího 070. [Důkaz](B3_DEV_ROLLOUT.md#read-feedback-acceptance).
+Celý B3 pilot ještě čeká na zbývající interakce/druhý účet a úklid.
+Přesné aktuální revize určuje PROJECT_STATUS.
 
 <a id="refresh-boundary-policy"></a>
 

@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: ověřit v UI nasazenou opravu měření a barevného stavu B3.**
+**Oprava měření a barevného stavu je potvrzená; dokončit zbytek pilotu a úklid B3.**
 Vlastník potvrdil stránky i oddělovač, ale nahlásil nepřečtené „MVP B3 070“.
 Na fix/b3-read-feedback jsou reprodukované a opravené dva klientské
 nedostatky: překreslení statického plovoucího ovládání restartovalo měření
@@ -20,10 +20,15 @@ Zdroj **ab27253d1da7a0b1666caee04483ec5c4606a4d9** má
 Je na DEV Hostingu ve verzi **1f3dc2f8355c02ce**, pět souborů na obou
 originech odpovídá release manifestu; všech 68 souborů lokálně ověřeno.
 Functions, Rules, indexy, konfigurační přepínače a produkce se neměnily.
-Uživatel dostal novou konkrétní kontrolu 070: celý detail 2 s → změna odstínu
-bez přesunu → obnova; případně jiný dosud nepřečtený fixture s uvedením názvu.
-Po odpovědi ověřit odpovídající cloudovou značku a další potřebná klientská
-kritéria, teprve pak úklid/akceptaci. Neopakovat migraci ani seed.
+Uživatel potvrdil živou změnu pozadí a správné řazení po obnově; všechny
+testovací Shouty vidí pod oddělovačem. Server ověřil Bright 120/120, včetně
+070 s confirmedAt 2026-11-20T15:46:09.289Z; Business dál samostatných 20/120.
+Skutečné požadavky getFeedPage/syncReadBatch mají HTTP 200 / Auth VALID /
+App Check VALID. [Akceptace opravy a zbývající test](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
+Je vyžádaný poslední navazující průchod původního pilotu: Bright u 070
+palec/záložka s odebráním a smazání pouze tohoto vlastního fixture; potom
+Business přečte svůj 119 a obnoví feed. Po odpovědi ověřit server, potom
+schválený úklid a B3 akceptaci. Neopakovat migraci, seed ani tuto UI kontrolu.
 
 **B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
 Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
