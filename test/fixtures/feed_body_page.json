@@ -1,0 +1,124 @@
+{
+  "cold": {
+    "schema": 1,
+    "project": "shoutout-rules-test",
+    "uid": "reader",
+    "generation": "local-v3",
+    "incarnation": "first",
+    "context": "nearest",
+    "unreadFirst": true,
+    "rows": [
+      {
+        "id": "wire",
+        "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+        "read": false,
+        "state": {
+          "schema": 1,
+          "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+          "authorId": "writer",
+          "status": "active",
+          "expiresAt": 5000,
+          "likesCount": 0,
+          "dislikesCount": 0,
+          "commentsCount": 1,
+          "savesCount": 0
+        }
+      }
+    ],
+    "bodies": [
+      {
+        "id": "wire",
+        "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+        "body": {
+          "authorId": "writer",
+          "authorNickname": "Synthetic",
+          "title": "Shout český",
+          "text": "Local only",
+          "categories": [
+            "Tip"
+          ],
+          "createdAt": 1,
+          "expiresAt": 5000
+        }
+      }
+    ],
+    "expiresAt": 4000,
+    "token": "eyJjb250ZXh0IjoibmVhcmVzdCIsImV4cGlyZXNBdCI6NDAwMCwiZ2VuZXJhdGlvbiI6ImxvY2FsLXYzIiwiaW5jYXJuYXRpb24iOiJmaXJzdCIsInByb2plY3QiOiJzaG91dG91dC1ydWxlcy10ZXN0Iiwicm93cyI6W3siYm9keVZlcnNpb24iOiI5ZjZlZWI1ZmU0NThjYjdhOTQ4NGI4YTI1N2Y2NGI1Y2Q3NWJhYmZiNjcxZmM3MWIxNTJmMGQ4ZmM0ZGM3ZTRmIiwiaWQiOiJ3aXJlIiwicmVhZCI6ZmFsc2V9XSwic3RhcnRlZEF0IjoxLCJ1aWQiOiJyZWFkZXIiLCJ1bnJlYWRGaXJzdCI6dHJ1ZSwidiI6MX0.7x0k09VfeIsaphLHLefDOvCz208kCITKUlUvmFAx4Jk"
+  },
+  "manifest": {
+    "schema": 1,
+    "project": "shoutout-rules-test",
+    "uid": "reader",
+    "generation": "local-v3",
+    "incarnation": "first",
+    "context": "nearest",
+    "unreadFirst": true,
+    "rows": [
+      {
+        "id": "wire",
+        "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+        "read": false,
+        "state": {
+          "schema": 1,
+          "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+          "authorId": "writer",
+          "status": "active",
+          "expiresAt": 5000,
+          "likesCount": 0,
+          "dislikesCount": 0,
+          "commentsCount": 1,
+          "savesCount": 0
+        }
+      }
+    ],
+    "bodies": [],
+    "expiresAt": 4000,
+    "token": "eyJjb250ZXh0IjoibmVhcmVzdCIsImV4cGlyZXNBdCI6NDAwMCwiZ2VuZXJhdGlvbiI6ImxvY2FsLXYzIiwiaW5jYXJuYXRpb24iOiJmaXJzdCIsInByb2plY3QiOiJzaG91dG91dC1ydWxlcy10ZXN0Iiwicm93cyI6W3siYm9keVZlcnNpb24iOiI5ZjZlZWI1ZmU0NThjYjdhOTQ4NGI4YTI1N2Y2NGI1Y2Q3NWJhYmZiNjcxZmM3MWIxNTJmMGQ4ZmM0ZGM3ZTRmIiwiaWQiOiJ3aXJlIiwicmVhZCI6ZmFsc2V9XSwic3RhcnRlZEF0IjoxLCJ1aWQiOiJyZWFkZXIiLCJ1bnJlYWRGaXJzdCI6dHJ1ZSwidiI6MX0.7x0k09VfeIsaphLHLefDOvCz208kCITKUlUvmFAx4Jk"
+  },
+  "completed": {
+    "schema": 1,
+    "project": "shoutout-rules-test",
+    "uid": "reader",
+    "generation": "local-v3",
+    "incarnation": "first",
+    "context": "nearest",
+    "unreadFirst": true,
+    "rows": [
+      {
+        "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+        "id": "wire",
+        "read": false,
+        "state": {
+          "schema": 1,
+          "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+          "authorId": "writer",
+          "status": "active",
+          "expiresAt": 5000,
+          "likesCount": 0,
+          "dislikesCount": 0,
+          "commentsCount": 1,
+          "savesCount": 0
+        }
+      }
+    ],
+    "bodies": [
+      {
+        "id": "wire",
+        "bodyVersion": "9f6eeb5fe458cb7a9484b8a257f64b5cd75babfb671fc71b152f0d8fc4dc7e4f",
+        "body": {
+          "authorId": "writer",
+          "authorNickname": "Synthetic",
+          "title": "Shout český",
+          "text": "Local only",
+          "categories": [
+            "Tip"
+          ],
+          "createdAt": 1,
+          "expiresAt": 5000
+        }
+      }
+    ],
+    "expiresAt": 4000,
+    "token": "eyJjb250ZXh0IjoibmVhcmVzdCIsImV4cGlyZXNBdCI6NDAwMCwiZ2VuZXJhdGlvbiI6ImxvY2FsLXYzIiwiaW5jYXJuYXRpb24iOiJmaXJzdCIsInByb2plY3QiOiJzaG91dG91dC1ydWxlcy10ZXN0Iiwicm93cyI6W3siYm9keVZlcnNpb24iOiI5ZjZlZWI1ZmU0NThjYjdhOTQ4NGI4YTI1N2Y2NGI1Y2Q3NWJhYmZiNjcxZmM3MWIxNTJmMGQ4ZmM0ZGM3ZTRmIiwiaWQiOiJ3aXJlIiwicmVhZCI6ZmFsc2V9XSwic3RhcnRlZEF0IjoxLCJ1aWQiOiJyZWFkZXIiLCJ1bnJlYWRGaXJzdCI6dHJ1ZSwidiI6MX0.7x0k09VfeIsaphLHLefDOvCz208kCITKUlUvmFAx4Jk"
+  }
+}

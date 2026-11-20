@@ -6,13 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: konkrétní lokální B4a návrh je připravený, čeká na souhlas s implementací.**
+**Nyní: schválený lokální základ B4a je implementovaný; čeká společné úplné CI.**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)
 zahrnují celé body oddělené od stavu, omezený výběr/doplnění, RAM cache,
 porovnání blokové/kompaktní živé projekce a všechny zápisové cesty včetně
 geografie/komentářových odpočtů. Průzkum našel také původní plný Home dotaz
 vedle prostorového feedu. Bez jeho započítání a živých odběrů by byl odhad
-úspory neúplný. Zatím jen dokumentace; runtime, Rules a živá data beze změny.
+úspory neúplný. [Výsledky, měření a matice zbývající integrace](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results):
+8 serverových, 8 Dart a 6 emulátorových scénářů; lint a lib/test analýza čisté.
+Bloková varianta má 0 zdrojových těl při warm obnově, ale cold/refill režie
+zatím brání tvrdit plošnou úsporu reads. Individual projekce pro výběr je dražší;
+hybrid zmenšuje model živého přenosu za cenu dalších zápisů. Aktivní hostitelé,
+Home, Rules, živá data a zdroj DEV webu zůstávají beze změny. Další je návrh
+provozní integrace a levnější cold/refill cesty, nikoli nasazení laboratorních bucketů.
 
 B3 má **uzavřenou živou DEV akceptaci i úklid**. Vlastník potvrdil okamžitou
 odezvu závěrečného průchodu. Server doložil u 119 palec/záložku 0 → 1 → 0,
@@ -28,7 +34,7 @@ klientská IndexedDB a skutečná historie přečtení se plošně nečistily.
 Další B4 určuje [schválený směr a otevřené technické volby](plans/feed/FEED_DELTA_REFRESH_PLAN.md):
 nejprve verze obsahu, manifest/porovnání a bezpečné opakované využití cache,
 potom úsporné signály a přesný počet nových relevantních Shoutů do 99+.
-Před zdrojovými změnami předložit konkrétní schéma, ověření a nákladové meze;
+Před navazující provozní integrací předložit konkrétní schéma, ověření a nákladové meze;
 B3 je neurčuje. B4, společná finální regrese a kapacitní brána nejsou hotové.
 
 **Poslední ověřený DEV web se nemění:**

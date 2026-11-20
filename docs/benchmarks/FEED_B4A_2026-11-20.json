@@ -1,0 +1,493 @@
+{
+  "units": "SDK fetch counts / attempted transaction reads; committed writes; JSON representation bytes, not wire/billing bytes",
+  "excludes": [
+    "spatial selection",
+    "Auth/App Check/actor/block/R5 guard costs",
+    "existing own reaction/save reads",
+    "index entry billing",
+    "network framing/compression"
+  ],
+  "subscriptionModel": "one assumed establishment of 50 Home + 50 parent card deliveries, NOT per-refresh billing; retained subscriptions may deliver no new documents",
+  "cases": [
+    {
+      "count": 50,
+      "mode": "packed",
+      "creationWrites": 65,
+      "creationReadMetrics": {
+        "reads": 65,
+        "sourceReads": 50,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedWrites": 2,
+      "counterWrites": 2,
+      "cold": {
+        "label": "cold",
+        "reads": 95,
+        "sourceReads": 50,
+        "jsonBytes": 142105,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 34365,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 76,
+        "sourceReads": 1,
+        "jsonBytes": 57841,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 34365,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 195,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 145,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 201680,
+      "simultaneous5000WarmCoreFetches": 225000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    },
+    {
+      "count": 50,
+      "mode": "individual",
+      "creationWrites": 100,
+      "creationReadMetrics": {
+        "reads": 100,
+        "sourceReads": 50,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedWrites": 2,
+      "counterWrites": 2,
+      "cold": {
+        "label": "cold",
+        "reads": 200,
+        "sourceReads": 50,
+        "jsonBytes": 142210,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 150,
+        "sourceReads": 0,
+        "jsonBytes": 34470,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 251,
+        "sourceReads": 1,
+        "jsonBytes": 58016,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 150,
+        "sourceReads": 0,
+        "jsonBytes": 34470,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 300,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 250,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 201680,
+      "simultaneous5000WarmCoreFetches": 750000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    },
+    {
+      "count": 50,
+      "mode": "hybrid",
+      "creationWrites": 115,
+      "creationReadMetrics": {
+        "reads": 115,
+        "sourceReads": 50,
+        "jsonBytes": 0,
+        "requests": 3,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 3,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 3,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 3,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 3,
+        "queries": 0
+      },
+      "changedWrites": 3,
+      "counterWrites": 3,
+      "cold": {
+        "label": "cold",
+        "reads": 95,
+        "sourceReads": 50,
+        "jsonBytes": 142105,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 34365,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 76,
+        "sourceReads": 1,
+        "jsonBytes": 57841,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 34365,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 195,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 145,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 111790,
+      "simultaneous5000WarmCoreFetches": 225000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    },
+    {
+      "count": 200,
+      "mode": "packed",
+      "creationWrites": 261,
+      "creationReadMetrics": {
+        "reads": 261,
+        "sourceReads": 200,
+        "jsonBytes": 0,
+        "requests": 8,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedWrites": 2,
+      "counterWrites": 2,
+      "cold": {
+        "label": "cold",
+        "reads": 95,
+        "sourceReads": 50,
+        "jsonBytes": 237877,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 130137,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 76,
+        "sourceReads": 1,
+        "jsonBytes": 217461,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 130137,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 195,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 145,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 201680,
+      "simultaneous5000WarmCoreFetches": 225000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    },
+    {
+      "count": 200,
+      "mode": "individual",
+      "creationWrites": 400,
+      "creationReadMetrics": {
+        "reads": 400,
+        "sourceReads": 200,
+        "jsonBytes": 0,
+        "requests": 8,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 2,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 2,
+        "queries": 0
+      },
+      "changedWrites": 2,
+      "counterWrites": 2,
+      "cold": {
+        "label": "cold",
+        "reads": 200,
+        "sourceReads": 50,
+        "jsonBytes": 142210,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 150,
+        "sourceReads": 0,
+        "jsonBytes": 34470,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 251,
+        "sourceReads": 1,
+        "jsonBytes": 58016,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 150,
+        "sourceReads": 0,
+        "jsonBytes": 34470,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 300,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 250,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 201680,
+      "simultaneous5000WarmCoreFetches": 750000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    },
+    {
+      "count": 200,
+      "mode": "hybrid",
+      "creationWrites": 461,
+      "creationReadMetrics": {
+        "reads": 461,
+        "sourceReads": 200,
+        "jsonBytes": 0,
+        "requests": 12,
+        "queries": 0
+      },
+      "changedReadMetrics": {
+        "reads": 3,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 3,
+        "queries": 0
+      },
+      "counterReadMetrics": {
+        "reads": 3,
+        "sourceReads": 1,
+        "jsonBytes": 0,
+        "requests": 3,
+        "queries": 0
+      },
+      "changedWrites": 3,
+      "counterWrites": 3,
+      "cold": {
+        "label": "cold",
+        "reads": 95,
+        "sourceReads": 50,
+        "jsonBytes": 237877,
+        "requests": 4,
+        "queries": 0,
+        "responseJsonBytes": 121959,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "label": "warm",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 130137,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "label": "one-body-changed",
+        "reads": 76,
+        "sourceReads": 1,
+        "jsonBytes": 217461,
+        "requests": 6,
+        "queries": 0,
+        "responseJsonBytes": 25035,
+        "callableRoundTrips": 2
+      },
+      "counterRefresh": {
+        "label": "counter-only",
+        "reads": 45,
+        "sourceReads": 0,
+        "jsonBytes": 130137,
+        "requests": 3,
+        "queries": 0,
+        "responseJsonBytes": 24680,
+        "callableRoundTrips": 1
+      },
+      "unchangedLegacyInitialDocuments": {
+        "home": 50,
+        "parentCards": 50,
+        "ownPrivate": "unchanged"
+      },
+      "baselineWithAssumedSubscriptionEstablishment": 150,
+      "proposedColdWithAssumedSubscriptionEstablishment": 195,
+      "proposedWarmWithAssumedSubscriptionEstablishment": 145,
+      "currentHomeAndParentPublicRepresentationBytes": 201680,
+      "candidateHomeAndParentPublicRepresentationBytes": 111790,
+      "simultaneous5000WarmCoreFetches": 225000,
+      "simultaneous5000AssumedSubscriptionEstablishment": 500000
+    }
+  ]
+}

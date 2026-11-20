@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,09 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,11 %** — vážené dokončení podúseků
 
-Hotové úseky: **151/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **152/213**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,20 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,21 %** — vážené dokončení podúseků
 
-Hotové úseky: **182/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **183/291**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -52,10 +52,11 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Nejbližší konkrétní úsek:** [B4a – návrh ke schválení](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal).
+   **Nejbližší konkrétní úsek:** uzavřít společné CI [lokálního B4a základu](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
-   stavové projekce se započtením existujících živých/Home odběrů. Implementace
-   zatím neschválená; žádný nový rollout nebo živé kolekce.
+   stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
+   připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;
+   individual varianta pro výběr se nedoporučuje. Žádný nový rollout nebo živé kolekce.
    Celé B4 zahrnuje verze/metadatové porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.

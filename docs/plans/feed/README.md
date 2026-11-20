@@ -6,7 +6,7 @@ A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální labora
 
 B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
 B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
-Další je [B4a – konkrétní lokální návrh ke schválení](FEED_DELTA_REFRESH_PLAN.md#b4a-proposal),
+Probíhá [schválený lokální základ B4a](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results),
 potom B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
 neopakovat je jako otevřenou práci.

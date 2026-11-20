@@ -1,0 +1,30 @@
+[
+  {
+    "body": {
+      "title": "Český Shout 🚀",
+      "text": "Line\nnext",
+      "createdAt": 1795202257059.123,
+      "expiresAt": 1795288657059,
+      "categories": [
+        "Tip",
+        "Help"
+      ],
+      "color": 4294967295,
+      "small": 1e-7
+    },
+    "version": "7967afd11f528581efcbde788a51457e755c3ec29de93068f456bc1f11d4f824"
+  },
+  {
+    "body": {
+      "title": "Empty",
+      "text": "",
+      "businessPromotion": "spotlight",
+      "businessHighlighted": true,
+      "avatarId": null,
+      "geography": {
+        "localityName": "Town"
+      }
+    },
+    "version": "43a3c91c546bec24188c206a65e12929c777eaf00be9a7a7afb30a69aaea3841"
+  }
+]

@@ -255,6 +255,116 @@ Názvy/cesty nových provozních dat, výsledný migrační formát a provozní 
 se po měření předloží konkrétně. Čerstvost/slučování signálů, případné znovu
 zpřístupněné novinky a číslovka patří do navazujícího B4b, ne do tohoto úseku.
 
+<a id="b4a-local-results"></a>
+
+### B4a – lokální základ a výsledky
+
+Vlastník 20. listopadu výslovně schválil celý výše uvedený lokální rozsah.
+Evidence stupnic rozlišuje již předem plánovanou hranici B4a základ / budoucí
+provozní integrace: každá dostává polovinu dosud nedokončené váhy delta-code
+a delta-check (MVP 44 + 44, backlog 70 + 70). Původní součty ani hotové váhy
+se nemění; za B4a se nezapočítává integrace, DEV nasazení ani živá akceptace.
+Implementace je oddělená od aktivních hostitelů a generací:
+
+- `functions/feed_body_contract.js`: veřejné tělo podle dnešní whitelist
+  serializace, samostatný SHA-256 bodyVersion, oddělený stav a omezený protokol
+  výběr/doplnění. Kategorie zachovají pořadí. Typované kanonické tokeny čísel
+  používají IEEE-754, aby se JavaScript/Dart shodly i na zlomkových časech.
+  B3 hash nadpisu/textu se nemění. Podpis váže UID/projekt, generaci i její
+  inkarnaci, kontext, pořadí/verze/read skupiny a původní deadline. Čítače se
+  nepodepisují podruhé; aktuální stav se ověří nezávisle. Cold cesta vrací těla
+  rovnou, warm cesta žádná, doplnění jen chybějící ID z podepsaného výběru.
+- `lib/feed_body_cache.dart`: RAM cache oddělená projektem/UID, omezení
+  4 MiB/hodina, LRU a ochrana proti posunu hodin. Již zobrazené karty evikce
+  nemění. Assembler potvrzuje stránku celou, ověřuje hash a ohradí změnu účtu,
+  smazání cache, zánik i opožděnou odpověď. Sdílený JSON wire fixture ověřuje
+  skutečný serverový formát na Dart straně, nejen dva nezávislé mocky.
+- `functions/feed_body_lab.js`: pouze shoutout-rules-test/127.0.0.1:8080,
+  tři varianty packed / individual / hybrid. Hybrid drží blokový výběr a malý
+  živý stav bez textu. Zdroj, projekce a plány obou generací se uloží atomicky;
+  rozpočet 450 hlídá plán i skutečné SDK mutace včetně pokusu spolknout chybu.
+  Stejné hodnoty/replay nepíšou. Komentáře/uložení nemění řadicí strom.
+  Anonymní purged kontext zůstane zachovaný, ale jeho projekce se odstraní.
+
+Guard je povinný injektovaný hostitelský kontrakt, nikoli nová implementace
+Auth/App Check/eligibility/block/R5 kontrol. Lokální testy ověřují odmítnutí
+při revokaci a změně generace/R5 i čekání; skutečné zapojení stávajících
+bezpečnostních kontrol do nového protokolu teprve zbývá. Kód se neimportuje
+z aktivního feed gateway ani Functions hostitele. Žádný feature flag,
+živý index nebo Rules se neměnil.
+
+#### Měření a doporučení
+
+[Reprodukovatelný výstup](../../benchmarks/FEED_B4A_2026-11-20.json) pochází
+z `feed_body_lab.integration.test.js`: 50/200 syntetických zdrojů, stránky 50.
+Počet reads zahrnuje samostatné načtení projekce pro výběr a obě kontroly
+dostupnosti. Nezahrnuje společný prostorový výběr a produkční bezpečnostní
+guardy. Přenos je velikost konkrétní JSON reprezentace, **nikoli naměřené
+Firestore síťové/billing bajty**. Framework, masky listenerů a komprese nejsou
+emulátorovým měřením prokázané. Zápisy níže nezahrnují stávající index;
+jeho atomickou kompatibilitu ověřuje zvláštní dvougenerační test.
+
+| Varianta | Cold reads / těla | Warm reads / těla | Jedno nové tělo, dva obraty | Zápisy při vytvoření 50 / 200 |
+| --- | --- | --- | --- | --- |
+| packed | 95 / 50 | 45 / 0 | 76 / 1 | 65 / 261 |
+| individual | 200 / 50 | 150 / 0 | 251 / 1 | 100 / 400 |
+| hybrid | 95 / 50 | 45 / 0 | 76 / 1 | 115 / 461 |
+
+200 zdrojů se zapisuje ve čtyřech transakcích po 50; údaj 461 není jedna
+transakce přes rozpočet. Cold má jeden callable obrat, doplnění dva; všechny
+varianty přenášejí stejný veřejný formát. Warm nečte zdrojová těla, ale nový
+protokol **zatím nepřináší plošné snížení reads**. Varianta individual je pro
+výběr nevhodná. Hybrid má smysl jen po doložení přínosu živého přenosu proti
+dalším zápisům. Není automaticky doporučený k provozní aktivaci.
+
+Současný Home dotaz a odběry rodičů jsou zvlášť zahrnuté jako model jednoho
+počátečního doručení 50 + 50 dokumentů. Neúčtovat je mechanicky znovu při
+každé obnově: existující SDK odběry mohou zůstat a data sdílet. Soukromé
+reakce/záložky zůstávají samostatné. U fixture je dolní veřejná reprezentace
+Home+rodičů 201 680 B; náhrada jen rodičů kompaktním stavem ji modelově mění
+na 111 790 B, při stejném počtu počátečních dokumentů a s dalšími zápisy.
+Nejde o zachycený provoz listenerů. Home nelze odstranit bez náhrady promo.
+Model 5 000 warm sestavení má 225 000 packed nebo 750 000 individual fetches,
+plus případné odběry a vynechané společné/policy náklady; není to SLA ani cena.
+
+**Doporučené schéma k navazujícímu návrhu:** statický bodyVersion spolu se
+sdílenou neměnnou blokovou projekcí ve verzované generaci, mimo řadicí klíč;
+čítače/dostupnost v oddělené kompaktní blokové stavové vrstvě. Samostatné živé
+stavové dokumenty přidat pouze při nahrazení celých rodičovských odběrů a
+doložené úspoře celého toku. Další integrace musí sloučit duplicitní načítání
+výběru/ověření a vyřešit drahou cold/refill cestu, nikoli nasadit tuto tabulku
+jako finální optimalizaci. Laboratorních 16 hash bucketů je omezený experiment
+(64 řádků/64 KiB na bucket), **nikoli globální produkční index pro 100 000 účtů**.
+Provozní generace musí využít existující dělené bloky a plán kompatibility.
+
+#### Matice zbývajícího zapojení
+
+| Cesta | Dnešní zápis | Co musí navazující integrace pokrýt |
+| --- | --- | --- |
+| create_shout / toggle_shout_reaction / delete_shout | zdroj + index | přidat stejný body/state plán a zachovat receipt |
+| prepare_account_deletion / account_shout_hiding | dávka zdrojů + index | rezervovat všechny projekce v rozpočtu 450, max. 50 |
+| shout_expiration | zdroj + index | stav/dostupnost i bez dalšího načtení těla |
+| account_reaction_removal | rodičovské počty, u Shoutu index | kompaktní stav jen u Shoutu; nepřidat druhý odpočet |
+| create_comment / delete_comment | commentsCount rodiče | stav atomicky, bez řadicího stromu |
+| toggle_shout_save | savesCount rodiče | stav atomicky, osobní záložka dál soukromá |
+| account_content_archive / account_purge_job | odpočty commentsCount | stav atomicky, zachovat cizí obsah |
+| account_purge_job / R5 časná fronta | odstranění metadat a zdroje/kontextu | odstranit nové projekce i historii, fence i pro warm reuse |
+| functions/index.js geografie | přímé geography update po geokódování | odvozená verze ve stejné transakci; žádné nové placené volání |
+| administrativní opravy/backfill | guard index-off | zachovat zákaz obcházení, konkrétní nový migrační plán |
+| Home / spatial karta / detail | plné zdroje/odběry | zachovat promo/sledované/vlastní; nahrazovat až společně s writery |
+
+Pro živé použití zbývá schválit formát nové generace, doplnění a audit pokrytí,
+R5/history/purge včetně nových dat, přesné Rules a kompatibilní návratový web.
+Při návratu musí zdroje a starší writery zůstat konzistentní; nikdy přepnout
+reader na neúplnou generaci. Tato matice je důkaz rozsahu zbývající práce,
+nikoli tvrzení, že se už produkční writery změnily. B4b signály/číslovka a
+celé B4 DEV/akceptace zůstávají otevřené.
+
+Ověření: 8 serverových kontraktových, 8 Dart testů, 6 emulátorových scénářů,
+Functions lint a cílená lib/test analýza. Úplný lokální Flutter průchod prošel
+414 testy před doplněním posledních dvou cílených testů; konečnou revizi ještě
+musí potvrdit společné úplné CI. Žádné nasazení ani skutečná data nejsou součástí.
+
 ### Verze a jejich význam
 
 Oddělit následující významy; jde o koncepty, nikoli již schválené názvy polí:
