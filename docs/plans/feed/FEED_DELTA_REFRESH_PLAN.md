@@ -373,6 +373,95 @@ zbytečný druhý fetch. Starší CI a3ebdad bylo po nahrazení zrušené.
 **Lokální B4a je uzavřené; celé B4 ani provozní integrace tím nejsou dokončené.**
 Žádné nasazení ani skutečná data nejsou součástí.
 
+<a id="b4a-read-integration-proposal"></a>
+
+### Další ucelený úsek – bezpečné a levnější sestavení stránky
+
+**Stav 20. listopadu: návrh ke schválení, bez nových zdrojových úprav.**
+Navazuje na dokončený B4a základ; nejde o opakování jeho testů ani povolení
+živého zapojení. Vlastník nyní povolil připravit konkrétní návrh.
+
+#### Co průzkum ověřil
+
+`feed_body_contract.js` vyžaduje hotové descriptory před select; laboratorní
+měření je získává samostatným čtením projekce. Hydrate pak čte stejné bloky
+před těly a po nich. Pro fixture s 15 dotčenými bloky jde o 45 čtení bloků,
+při dvoufázovém doplnění ještě dalších 30. To je odstranitelná duplicita,
+nikoli důvod vynechat kontrolu oprávnění.
+
+`requireEligibleActor` už přijímá transakční reader. `hydratePortable` dnes
+kontroluje také aktuální přesnou polohu, kategorii, createdAt a Spotlight
+podmínku přes available; B3 navíc porovnává hash aktuálního nadpisu/textu
+s vybraným snapshotem. Základní stav B4a obsahuje pouze autora, dostupnost,
+expiraci, bodyVersion a čítače. Pro náhradu čtení zdroje tyto údaje nestačí.
+
+#### Doporučené konkrétní řešení
+
+1. **Oddělit prostorový výběr od finálního sestavení.** Zachovat existující
+   progresivní výběr nejvýše 50 ID, zmrazené pořadí, read snapshot a podepsaný
+   kurzor. Nepřidávat klientský seznam celé cache ani průchod všemi Shouty.
+2. **Jeden závěrečný konzistentní read-only transakční krok.** Po výběru v něm
+   načíst aktuální stavové bloky jednou, případná chybějící těla a všechny
+   související serverové dokumenty přes tentýž reader. Zachovat vstupní
+   Auth/App Check/eligibility kontrolu před drahou prací i opětovné ověření
+   účtu, blokací, generace/inkarnace, R5 fence a smazaných autorů při finálním
+   sestavení. Kontroly neukládat do sdílené cache. Po návratu ověřit časové
+   hranice bez dalšího čekání. Konzistence znamená serverový snapshot této
+   transakce; neslibuje zabránění změně po dokončení čtení.
+3. **Doplnit potřebná metadata.** Laboratorní projekce bude obsahovat dnešní
+   výběrová pole metadataOf: přesnou polohu/geohash, createdAt/expiresAt,
+   kategorie, autora, status a Business dostupnost; také současný B3 hash
+   nadpisu/textu. bodyVersion a veřejné čítače zůstanou oddělené. Podpis
+   doplnění naváže i neměnnou identitu výběrových polí. Jejich změna nebo
+   nesoulad textového hashe vyžádá obnovu celé stránky; změna samotného počtu
+   palců/komentářů/záložek zachová pořadí a převezme aktuální počty.
+4. **Cold/teplá/doplňovací cesta.** Cold vrátí potřebná těla přímo v prvním
+   obratu. Teplý výběr vrátí finálně ověřené descriptory a klient použije
+   shodnou RAM cache. Při chybějících tělech druhý požadavek znovu ověří
+   podepsaný výběr a provede jeden finální transakční krok, nikoli dvě další
+   čtení stejných bloků. Změna během čekání nikdy nepotvrdí neúplnou stránku.
+5. **Jedno trvalé čtecí jádro mimo aktivní cestu.** Doplnit konkrétní
+   transakční adaptér a jeho zapojení do klientského assembleru, s testem
+   serverového wire formátu. Aktivní getFeedPage, Home/živé odběry, writery
+   a generace zůstanou zatím stejné; nový čtecí adaptér se nesmí pustit na
+   živé cesty bez kompletního zápisového pokrytí a R5/purge přechodu.
+
+#### Cíl měření, nikoli slíbený účet
+
+Pro stejných N dotčených stavových bloků a M chybějících těl je návrhový cíl:
+
+| Cesta | Hotový B4a prototyp | Cíl nového sestavení |
+| --- | --- | --- |
+| Cold | 3N + 50 | N + 50 |
+| Teplá, vše v RAM | 3N | N |
+| Výběr + doplnění M těl | 5N + M | 2N + M |
+
+Při N=15/M=1 tedy 95 → 65, 45 → 15 a 76 → 31. Jde o **teoretické cíle
+pro stejné laboratorní rozložení**, ne naměřené výsledky nebo produkční
+limity. Rozšířená metadata mohou změnit počet/velikost bloků; měřit znovu.
+Vykázat i skutečné součty s actor/blocks/author/generation/R5 čteními,
+prostorovým výběrem, transakčními opakováními a stávajícími Home/živými cestami.
+Nesrovnávat nový úplný součet s původním neúplným. Zachovat oddělení SDK
+operací, JSON bajtů a neověřeného síťového/billing přenosu.
+
+#### Rozsah navržený k povolení
+
+Ucelená lokální implementace finálního transakčního readeru, potřebného
+projekčního kontraktu a klientského dekódování. Přidat emulátorovou regresi
+se skutečnými existujícími eligibility helpery a read snapshotem: změna
+polohy/kategorie/promo/textu, blokace, postih, smazání účtu/autorů, R5,
+inkarnace, expirace, výpadek/restart a souběh mezi výběrem a doplněním.
+Ověřit 50/200 zdrojů, cold/warm/jednu změnu, stejné počty i dávku nejvýše 50
+a společný zápisový rozpočet 450. Doplnit měření a dokumentaci, lokální
+commity a jeden společný push/úplné CI včetně již hotové opravy analyzátoru.
+
+**Bez živých kolekcí, nového provozního formátu/generace, migrace, nasazení,
+Rules, Auth účtů, Scheduleru, navýšení prostředků nebo změn retence.**
+Laboratorní nové projekce zůstanou chráněné emulátorem; 16 bucketů se nesmí
+vydávat za globální produkční schéma. Nový runtime datový layout a dokončení
+všech writerů/odběrů včetně promo náhrady budou navazující konkrétní přechod
+před DEV aktivací. B4b signály a číslovka tímto úsekem nezačínají.
+
 ### Verze a jejich význam
 
 Oddělit následující významy; jde o koncepty, nikoli již schválené názvy polí:

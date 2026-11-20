@@ -57,7 +57,9 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 1. **Dokončit úspornou obnovu s novinkami v B4.**
    **Poslední dokončený úsek:** [lokální základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results),
    zdroj 13bfe74 / úspěšné úplné CI 44816457563. **Další:** konkrétní návrh
-   provozní integrace a levnější cold/refill cesty podle výsledků.
+   [finálního transakčního sestavení stránky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
+   a potřebných metadat. Návrh čeká na souhlas; jde nejprve o lokální čtecí
+   zapojení se skutečnými guardy. Živý datový přechod zůstává samostatnou bránou.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

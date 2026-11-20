@@ -6,7 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený lokální základ B4a je dokončený a má úspěšné úplné CI.**
+**Nyní: lokální základ B4a je uzavřený; další konkrétní návrh čeká na souhlas.**
+[Finální transakční sestavení stránky a potřebná metadata](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
+sloučí opakované čtení bloků při zachování skutečných serverových kontrol.
+Teoretické cíle 95 → 65 / 45 → 15 / 76 → 31 ještě nejsou výsledky měření;
+musí zahrnout i změněnou velikost metadat a úplné guard/index/Home náklady.
+Zatím vznikl pouze návrh, žádné nové čtecí ani zápisové jádro.
+
+**Poslední dokončený kód:**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)
 zahrnují celé body oddělené od stavu, omezený výběr/doplnění, RAM cache,
 porovnání blokové/kompaktní živé projekce a všechny zápisové cesty včetně
