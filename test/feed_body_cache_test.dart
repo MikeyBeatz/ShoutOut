@@ -40,6 +40,92 @@ FeedBodyPage page(
 
 void main() {
   test(
+    'consistent transaction wire keeps selection identity across cold, cached and refill pages',
+    () async {
+      final fixture =
+          jsonDecode(
+                File(
+                  'test/fixtures/feed_body_reader_page.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final cold = FeedBodyPage.fromWire(
+        fixture['cold'] as Map<String, dynamic>,
+      );
+      final manifest = FeedBodyPage.fromWire(
+        fixture['manifest'] as Map<String, dynamic>,
+      );
+      final completed = FeedBodyPage.fromWire(
+        fixture['completed'] as Map<String, dynamic>,
+      );
+      final cache = FeedBodyCache(clock: () => cold.deadline - 1000)
+        ..bind(cold.scope);
+      final assembler = FeedBodyPageAssembler(cache);
+      final first = await assembler.assemble(
+        cold,
+        complete: (_, _) async => throw StateError('cold already has bodies'),
+      );
+      expect(first.map((card) => card.descriptor.read), [false, true]);
+      expect(
+        first.every((card) => card.descriptor.selectionVersion != null),
+        isTrue,
+      );
+      await assembler.assemble(
+        manifest,
+        complete: (_, _) async =>
+            throw StateError('warm has no missing bodies'),
+      );
+      cache.clear();
+      final cards = await assembler.assemble(
+        manifest,
+        complete: (_, missing) async {
+          expect(missing.length, 2);
+          return completed;
+        },
+      );
+      expect(cards.last.descriptor.stateData['commentsCount'], 3);
+      expect(
+        cards.every(
+          (card) => !card.descriptor.stateData.containsKey('eligibility'),
+        ),
+        isTrue,
+      );
+    },
+  );
+  test(
+    'refill cannot swap selection metadata while retaining the same body and token',
+    () async {
+      final fixture =
+          jsonDecode(
+                File(
+                  'test/fixtures/feed_body_reader_page.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final manifest = FeedBodyPage.fromWire(
+        fixture['manifest'] as Map<String, dynamic>,
+      );
+      final altered = fixture['completed'] as Map<String, dynamic>;
+      ((altered['rows'] as List).first
+              as Map<String, dynamic>)['selectionVersion'] =
+          'f' * 64;
+      final reply = FeedBodyPage.fromWire(altered);
+      final cache = FeedBodyCache(clock: () => manifest.deadline - 1000)
+        ..bind(manifest.scope);
+      await expectLater(
+        FeedBodyPageAssembler(
+          cache,
+        ).assemble(manifest, complete: (_, _) async => reply),
+        throwsFormatException,
+      );
+      expect(cache.bytes, 0);
+      ((altered['rows'] as List).first
+              as Map<String, dynamic>)['selectionVersion'] =
+          42;
+      expect(() => FeedBodyPage.fromWire(altered), throwsFormatException);
+    },
+  );
+  test(
     'actual server wire fixture decodes and assembles cold, warm and missing-body paths',
     () async {
       final fixture =

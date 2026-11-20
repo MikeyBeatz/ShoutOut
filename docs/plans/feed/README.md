@@ -7,7 +7,7 @@ A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální labora
 B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
 B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
-Další [návrh lokálního čtecího adaptéru](FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal) čeká na souhlas.
+Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je připravený před společným CI.
 Má zlevnit cold/refill při zachování aktuální dostupnosti a B3 textové identity.
 Poté následuje provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;

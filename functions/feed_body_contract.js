@@ -57,6 +57,9 @@ export function validateDescriptors(rows, { stateRequired = true, unreadFirst = 
     if (!idValid(row.id) || !/^[a-f0-9]{64}$/.test(row.bodyVersion) || typeof row.read !== 'boolean' ||
         (stateRequired && !row.state) || (row.state && (!validState(row.state) || row.bodyVersion !== row.state.bodyVersion)) ||
         (row.distanceKm !== undefined && (!Number.isFinite(row.distanceKm) || row.distanceKm < 0))) throw new Error('invalid-body-descriptor');
+    for (const key of ['selectionVersion', 'frozenContentHash']) {
+      if (row[key] !== undefined && !/^[a-f0-9]{64}$/.test(row[key])) throw new Error('invalid-body-descriptor');
+    }
     if (unreadFirst && read && !row.read) throw new Error('invalid-body-read-order');
     read ||= row.read;
     canonicalBody(row);
@@ -85,8 +88,10 @@ export function bodySelectionCodec(key) {
       const { project, uid, generation, incarnation, context, startedAt, expiresAt } = selection;
       const value = { project, uid, generation, incarnation, context, startedAt, expiresAt,
         unreadFirst: selection.unreadFirst ?? false,
-        rows: selection.rows.map(({ id, bodyVersion, read, distanceKm }) => ({ id, bodyVersion, read,
-          ...(distanceKm === undefined ? {} : { distanceKm }) })), v: 1 }; validate(value);
+        rows: selection.rows.map(({ id, bodyVersion, read, distanceKm, selectionVersion, frozenContentHash }) => ({ id, bodyVersion, read,
+          ...(distanceKm === undefined ? {} : { distanceKm }),
+          ...(selectionVersion === undefined ? {} : { selectionVersion }),
+          ...(frozenContentHash === undefined ? {} : { frozenContentHash }) })), v: 1 }; validate(value);
       const payload = Buffer.from(canonicalBody(value)).toString('base64url');
       if (payload.length > 131072) throw new Error('body-proof-too-large');
       return `${payload}.${mac(payload).toString('base64url')}`;

@@ -1,0 +1,176 @@
+{
+  "units": "SDK read units and JSON representation bytes, not billing or network bytes",
+  "scope": "prepared signed snapshot; admission + real progressive selection/B3 classification + final policy/blocks/bodies",
+  "excludes": [
+    "initial snapshot creation",
+    "Auth/App Check platform verification",
+    "existing Home/live/private subscriptions",
+    "network overhead and Firestore index-entry billing"
+  ],
+  "cases": [
+    {
+      "count": 50,
+      "cold": {
+        "kind": "cold",
+        "documentReads": 82,
+        "blockReads": 15,
+        "sourceReads": 50,
+        "policyReads": 16,
+        "readStateReads": 1,
+        "sdkRequests": 9,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 150236,
+        "projectionJsonBytes": 37286,
+        "transactions": 2,
+        "transactionAttempts": 2,
+        "classificationTransactions": 1,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 89,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 15
+        },
+        "responseJsonBytes": 163721,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "kind": "warm",
+        "documentReads": 32,
+        "blockReads": 15,
+        "sourceReads": 0,
+        "policyReads": 16,
+        "readStateReads": 1,
+        "sdkRequests": 8,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 0,
+        "projectionJsonBytes": 37286,
+        "transactions": 2,
+        "transactionAttempts": 2,
+        "classificationTransactions": 1,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 38,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 13
+        },
+        "responseJsonBytes": 49642,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "documentReads": 32,
+        "blockReads": 15,
+        "sourceReads": 1,
+        "policyReads": 16,
+        "readStateReads": 0,
+        "sdkRequests": 8,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 2999,
+        "projectionJsonBytes": 37286,
+        "transactions": 1,
+        "transactionAttempts": 1,
+        "classificationTransactions": 0,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 32,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 8
+        },
+        "responseJsonBytes": 51921,
+        "combinedBlockAndSourceReads": 31,
+        "combinedWholeReads": 70,
+        "callableRoundTrips": 2
+      },
+      "unchangedHomeAndParentEstablishmentModel": 100,
+      "ownPrivateSubscriptions": "unchanged; measured separately before activation",
+      "model5000WarmAssemblies": 190000
+    },
+    {
+      "count": 200,
+      "cold": {
+        "kind": "cold",
+        "documentReads": 83,
+        "blockReads": 15,
+        "sourceReads": 50,
+        "policyReads": 17,
+        "readStateReads": 1,
+        "sdkRequests": 9,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 150236,
+        "projectionJsonBytes": 140801,
+        "transactions": 2,
+        "transactionAttempts": 2,
+        "classificationTransactions": 1,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 96,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 19
+        },
+        "responseJsonBytes": 163723,
+        "callableRoundTrips": 1
+      },
+      "warm": {
+        "kind": "warm",
+        "documentReads": 33,
+        "blockReads": 15,
+        "sourceReads": 0,
+        "policyReads": 17,
+        "readStateReads": 1,
+        "sdkRequests": 8,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 0,
+        "projectionJsonBytes": 140801,
+        "transactions": 2,
+        "transactionAttempts": 2,
+        "classificationTransactions": 1,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 41,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 13
+        },
+        "responseJsonBytes": 49644,
+        "callableRoundTrips": 1
+      },
+      "refill": {
+        "documentReads": 33,
+        "blockReads": 15,
+        "sourceReads": 1,
+        "policyReads": 17,
+        "readStateReads": 0,
+        "sdkRequests": 8,
+        "queries": 1,
+        "emptyQueries": 1,
+        "sourceJsonBytes": 2999,
+        "projectionJsonBytes": 140801,
+        "transactions": 1,
+        "transactionAttempts": 1,
+        "classificationTransactions": 0,
+        "finalTransactions": 1,
+        "wholeSdk": {
+          "reads": 33,
+          "queries": 1,
+          "emptyQueries": 1,
+          "requests": 8
+        },
+        "responseJsonBytes": 51923,
+        "combinedBlockAndSourceReads": 31,
+        "combinedWholeReads": 74,
+        "callableRoundTrips": 2
+      },
+      "unchangedHomeAndParentEstablishmentModel": 100,
+      "ownPrivateSubscriptions": "unchanged; measured separately before activation",
+      "model5000WarmAssemblies": 205000
+    }
+  ]
+}

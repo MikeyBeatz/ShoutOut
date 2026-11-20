@@ -377,9 +377,12 @@ zbytečný druhý fetch. Starší CI a3ebdad bylo po nahrazení zrušené.
 
 ### Další ucelený úsek – bezpečné a levnější sestavení stránky
 
-**Stav 20. listopadu: návrh ke schválení, bez nových zdrojových úprav.**
+**Stav 20. listopadu: vlastník výslovně schválil lokální úsek a uvedené testy.**
 Navazuje na dokončený B4a základ; nejde o opakování jeho testů ani povolení
-živého zapojení. Vlastník nyní povolil připravit konkrétní návrh.
+živého zapojení. Implementace pokračuje na feature/feed-b4-consistent-reads.
+Před začátkem práce se zbývající delta-code/check váha rozděluje napůl mezi
+finální reader a zbývající writery/aktivní integraci: MVP 22 + 22, backlog
+35 + 35. Součet a již dokončené váhy se nemění; žádný nový kredit za plán.
 
 #### Co průzkum ověřil
 
@@ -461,6 +464,86 @@ Laboratorní nové projekce zůstanou chráněné emulátorem; 16 bucketů se ne
 vydávat za globální produkční schéma. Nový runtime datový layout a dokončení
 všech writerů/odběrů včetně promo náhrady budou navazující konkrétní přechod
 před DEV aktivací. B4b signály a číslovka tímto úsekem nezačínají.
+
+<a id="b4-read-local-results"></a>
+
+### Finální transakční reader – lokální výsledky
+
+Schválený úsek je implementovaný, před společným úplným CI. Aktivní cesta
+getFeedPage/Home ani žádný živý writer se neměnily.
+
+- `feed_body_reader.js` přijímá pouze serverově připravený binding, původní
+  snapshot/session a callback stávajícího progresivního výběru. Admission
+  proběhne před callbackem. B3 klasifikace používá skutečný feedReadClassifier
+  nad zmrazenými B2 bloky. Pak jedna read-only transakce načte stavové bloky,
+  requireEligibleActor přes reader, control/generaci/inkarnaci, R5 buňky,
+  blokace a veřejné markery autorů; zdrojová těla jen pro chybějící ID.
+  Čas relace a expirace se kontrolují i po návratu transakce.
+- `feed_body_state.js` přidává pouze do laboratorní projekce metadataOf,
+  textovou identitu B3 a selectionVersion. Změna přesné polohy uvnitř téhož
+  geohashe tak nezneužije shodný bodyVersion; počty mohou dál aktualizovat
+  zobrazení bez přesunu karty. Přesná poloha a interní eligibility se do
+  klientského wire stavu neposílají. Laboratorní writer je udržuje atomicky
+  a zachovává limit 50/450 i úplný rollback.
+- Podpis váže selectionVersion a frozenContentHash spolu s dosavadním
+  účtem/generací/kontextem/deadline. Doplnění znovu ověří dostupnost v jedné
+  transakci; nevytváří serverovou per-user relaci. Dart decoder/assembler
+  tyto identity kontroluje a odmítne jejich záměnu před potvrzením stránky.
+
+Read-only snapshot je konkrétní bod oprávnění/dostupnosti. Test se souběžným
+zápisem po prvním čtení ověřuje starou projekci se starým tělem, nikdy starý
+hash s novým textem. Změna provedená až po tomto bodě nemůže být tímto čtením
+garantovaně zachycená. Admission/final-policy test naopak prokazuje odmítnutí
+postihu vloženého před začátkem závěrečné transakce. Auth/App Check testy zde
+ověřují existující helpery a request kontrakt; nenahrazují živé ověření tokenů
+platformou ani neaktivují veřejný callable.
+
+#### Naměřené operace
+
+[Výstup 50/200](../../benchmarks/FEED_B4_READ_2026-11-20.json) má dvě nezávislá
+počítadla: čtecí adaptér a pozorovatel SDK zahrnující také skutečný prostorový
+výběr. V obou fixture je jeden potvrzený B2 marker. Nezahrnuje vytvoření
+počátečního snapshotu, platformní Auth/App Check, Home/živé odběry a síťové
+rámcování. SDK request znamená čtecí volání, nikoli všechny gRPC zprávy.
+
+| Případ | Bloky + zdroje | Se skutečnými guardy/B3 | Navíc i prostorový výběr |
+| --- | --- | --- | --- |
+| 50 zdrojů, cold | 65 | 82 | 89 |
+| 50 zdrojů, warm | 15 | 32 | 38 |
+| 50 zdrojů, výběr + doplnění jednoho těla | 31 | 64 | 70 |
+| 200 zdrojů, cold | 65 | 83 | 96 |
+| 200 zdrojů, warm | 15 | 33 | 41 |
+| 200 zdrojů, výběr + doplnění jednoho těla | 31 | 66 | 74 |
+
+Srovnání 95 → 65, 45 → 15 a 76 → 31 platí pouze pro **stejně vymezené
+blokové/zdrojové čtení**, ne pro kompletní součty různých benchmarků.
+Cold čte 50 těl a má jeden obrat; warm nečte žádné. Doplnění používá druhý
+obrat a jedno tělo. Každý obrat má právě jednu závěrečnou read-only transakci;
+B3 bloky mohou vyvolat vlastní historickou transakci, kterou report počítá.
+
+Veřejná odpověď má v této fixture asi 164 kB cold / 50 kB warm. Nesrovnávat
+přímo s bajty staršího B4a, které používalo jiný text a menší podpisový
+kontrakt. Interní JSON projekce roste na asi 37/141 kB pro 50/200 zdrojů:
+laboratorních 16 bucketů načítá i nevybraná metadata. Odstranili jsme
+duplicitní čtení, **neprokázali optimální provozní layout ani síťový přenos**.
+Home+parent odběry zůstávají jako samostatný model 100 počátečních doručení,
+nikoli automatická položka při každém refreshi. Model 5 000 warm sestavení
+samotné měřené cesty je 190 000/205 000 reads; nejde o návštěvnost, SLA,
+účet nebo zátěžový test.
+
+Lokálně prošlo 9 emulátorových scénářů (včetně 200 karet po stránkách),
+12 kontraktových/metadata testů a 10 Dart cache/wire testů. Původní B4a
+emulátorová sada 6 scénářů rovněž prošla po rozšíření laboratorního adaptéru.
+Celá flutter analyze, formát, Functions lint i nástroje výběru CI/metrik jsou
+čisté. Nová sada má samostatný test:body-reader a CI krok, aby neprodlužovala
+již dlouhou pětiminutovou Rules sadu. Úplné CI konečného commitu ještě zbývá.
+
+**Hranice dokončení:** pouze neaktivní čtecí jádro a laboratorní projekce.
+Před živou aktivací stále zbývá provozní layout, atomické zapojení všech
+writerů z matice výše, R5/history/purge nové vrstvy, náhrada závislých
+Home/živých odběrů se zachováním promo, migrační audit a kompatibilní rollback.
+Nový reader spoléhá na úplné zápisové pokrytí; sám jej nenahrazuje. Nové živé
+cesty/generace, Rules, data, Auth, Scheduler a prostředky se neměnily.
 
 ### Verze a jejich význam
 

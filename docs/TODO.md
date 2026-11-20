@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,12 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,13 %** — vážené dokončení podúseků
 
-Hotové úseky: **153/213**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **154/215**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,21 %** — vážené dokončení podúseků
 
-Hotové úseky: **184/291**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **185/293**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -58,8 +58,9 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    **Poslední dokončený úsek:** [lokální základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results),
    zdroj 13bfe74 / úspěšné úplné CI 44816457563. **Další:** konkrétní návrh
    [finálního transakčního sestavení stránky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
-   a potřebných metadat. Návrh čeká na souhlas; jde nejprve o lokální čtecí
-   zapojení se skutečnými guardy. Živý datový přechod zůstává samostatnou bránou.
+   a potřebných metadat. [Lokální reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
+   jsou připravené se skutečnými guardy; čeká společné úplné CI. Potom zbývá
+   provozní layout a zapojení writerů/úklidu. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

@@ -68,12 +68,16 @@ class FeedBodyDescriptor {
     required this.version,
     required this.read,
     this.distanceKm,
+    this.selectionVersion,
+    this.frozenContentHash,
     required Map<String, dynamic> state,
   }) : state = jsonEncode(state);
   final String id;
   final String version;
   final bool read;
   final double? distanceKm;
+  final String? selectionVersion;
+  final String? frozenContentHash;
   // Serialized copies prevent caller mutation of validated state.
   final String state;
   Map<String, dynamic> get stateData =>
@@ -253,11 +257,21 @@ class FeedBodyPage {
                 (distance is! num || !distance.isFinite || distance < 0)) {
               throw const FormatException('Invalid body page distance');
             }
+            for (final key in ['selectionVersion', 'frozenContentHash']) {
+              final identity = value[key];
+              if (identity != null &&
+                  (identity is! String ||
+                      !RegExp(r'^[a-f0-9]{64}$').hasMatch(identity))) {
+                throw const FormatException('Invalid body selection identity');
+              }
+            }
             return FeedBodyDescriptor(
               id: value['id'] as String,
               version: value['bodyVersion'] as String,
               read: value['read'] as bool,
               distanceKm: (distance as num?)?.toDouble(),
+              selectionVersion: value['selectionVersion'] as String?,
+              frozenContentHash: value['frozenContentHash'] as String?,
               state: value['state'] as Map<String, dynamic>,
             );
           })
@@ -387,7 +401,9 @@ class FeedBodyPageAssembler {
         if (a.id != b.id ||
             a.version != b.version ||
             a.read != b.read ||
-            a.distanceKm != b.distanceKm) {
+            a.distanceKm != b.distanceKm ||
+            a.selectionVersion != b.selectionVersion ||
+            a.frozenContentHash != b.frozenContentHash) {
           throw const FormatException('Changed body order');
         }
       }

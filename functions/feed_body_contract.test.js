@@ -52,6 +52,17 @@ test('shared server wire fixture keeps the exact signed selection across cold/ma
   assert.deepEqual(cold, completed); assert.deepEqual(manifest.bodies, []);
   for (const payload of cold.bodies) assert.equal(bodyDigest({ schema: 1, body: payload.body }), payload.bodyVersion);
 });
+test('consistent reader wire proof includes exact selection and frozen text identity, without internal metadata', () => {
+  const { cold, manifest, completed } = JSON.parse(readFileSync(new URL('../test/fixtures/feed_body_reader_page.json', import.meta.url)));
+  const decoded = bodySelectionCodec(Buffer.alloc(32, 21)).decode(manifest.token, manifest, manifest.expiresAt - 1);
+  assert.equal(decoded.rows.length, cold.rows.length);
+  assert.equal(completed.token, manifest.token);
+  for (let i = 0; i < decoded.rows.length; i++) {
+    assert.equal(decoded.rows[i].selectionVersion, manifest.rows[i].selectionVersion);
+    assert.equal(decoded.rows[i].frozenContentHash, manifest.rows[i].frozenContentHash);
+    assert.equal(Object.hasOwn(completed.rows[i].state, 'eligibility'), false);
+  }
+});
 test('bounded signed proof binds every scope field, content, order and original deadline', () => {
   const f = fixture(), token = codec.encode(f.selection);
   assert.deepEqual(codec.decode(token, scope, 100).rows, f.selection.rows.map(({ id, bodyVersion, read }) => ({ id, bodyVersion, read })));

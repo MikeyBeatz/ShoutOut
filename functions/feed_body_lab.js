@@ -4,8 +4,9 @@ import { Buffer } from 'node:buffer';
 import { labIndexBinding } from './feed_index_paths.js';
 import { bodyProjection, bodyDigest, canonicalBody } from './feed_body_contract.js';
 import { isPurgedShoutContext } from './shout_context.js';
+import { feedBodyState } from './feed_body_state.js';
 
-export function bodyProjectionLab(db, { namespace, mode = 'packed', indexes = [] }) {
+export function bodyProjectionLab(db, { namespace, mode = 'packed', indexes = [], extendedState = false }) {
   const binding = labIndexBinding(db, namespace);
   if (!['packed', 'individual', 'hybrid'].includes(mode)) throw new Error('invalid-body-lab-mode');
   const { base, source } = binding;
@@ -14,31 +15,32 @@ export function bodyProjectionLab(db, { namespace, mode = 'packed', indexes = []
   const metrics = { reads: 0, sourceReads: 0, jsonBytes: 0, requests: 0, queries: 0 };
   const shard = id => mode === 'individual' ? id : bodyDigest(id).slice(0, 1);
   const bytes = value => Buffer.byteLength(canonicalBody(value));
-  const projection = value => value && !isPurgedShoutContext(value) ? bodyProjection(value).state : null;
+  const project = (id, value) => extendedState ? feedBodyState(id, value) : bodyProjection(value);
+  const projection = (id, value) => value && !isPurgedShoutContext(value) ? project(id, value).state : null;
   const idsValid = ids => {
     if (!Array.isArray(ids) || ids.length > 50 || new Set(ids).size !== ids.length ||
         ids.some(id => typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(id))) throw new Error('invalid-body-lab-ids');
   };
-  async function states(ids) {
+  async function readStates(reader, ids) {
     idsValid(ids); if (!ids.length) return new Map();
     const keys = [...new Set(ids.map(shard))];
-    const docs = await db.getAll(...keys.map(key => projections.doc(key)));
+    const docs = await reader.getAll(...keys.map(key => projections.doc(key)));
     metrics.reads += docs.length; metrics.requests++;
     const byShard = new Map(docs.map(doc => {
       const rows = doc.data()?.rows ?? {}; metrics.jsonBytes += bytes(rows); return [doc.id, rows];
     }));
     return new Map(ids.filter(id => Object.hasOwn(byShard.get(shard(id)), id)).map(id => [id, byShard.get(shard(id))[id]]));
   }
-  return { base, source, liveState, metrics, states,
+  async function readBodies(reader, ids) {
+    idsValid(ids); if (!ids.length) return new Map();
+    const docs = await reader.getAll(...ids.map(id => source.doc(id)));
+    metrics.sourceReads += docs.length; metrics.reads += docs.length; metrics.requests++;
+    for (const doc of docs) if (doc.exists && !isPurgedShoutContext(doc.data())) metrics.jsonBytes += bytes(project(doc.id, doc.data()));
+    return new Map(docs.filter(doc => doc.exists).map(doc => [doc.id, doc.data()]));
+  }
+  return { base, source, liveState, binding, metrics, states: ids => readStates(db, ids), readStates, readBodies,
     resetMetrics() { for (const key of Object.keys(metrics)) metrics[key] = 0; },
-    async bodies(ids) {
-      idsValid(ids); if (!ids.length) return new Map();
-      const docs = await db.getAll(...ids.map(id => source.doc(id)));
-      metrics.sourceReads += docs.length; metrics.reads += docs.length; metrics.requests++;
-      // JSON representation sizes, NOT Firestore wire/billing bytes.
-      for (const doc of docs) if (doc.exists) metrics.jsonBytes += bytes(bodyProjection(doc.data()));
-      return new Map(docs.filter(doc => doc.exists).map(doc => [doc.id, doc.data()]));
-    },
+    bodies: ids => readBodies(db, ids),
     async mutate(changes, { additionalWrites = 0, beforeApply = () => {}, guard = async () => {} } = {}) {
       idsValid(changes.map(change => change.id));
       if (!Number.isSafeInteger(additionalWrites) || additionalWrites < 0) throw new Error('invalid-body-write-reservation');
@@ -72,9 +74,9 @@ export function bodyProjectionLab(db, { namespace, mode = 'packed', indexes = []
         const dirty = new Set();
         const liveChanges = [];
         for (const [i, edit] of edits.entries()) {
-          const key = shard(edit.id), rows = next.get(key), old = projection(edit.before);
+          const key = shard(edit.id), rows = next.get(key), old = projection(edit.id, edit.before);
           if (!isDeepStrictEqual(Object.hasOwn(rows, edit.id) ? rows[edit.id] : null, old)) throw new Error('body-projection-inconsistent');
-          const state = projection(edit.after);
+          const state = projection(edit.id, edit.after);
           if (mode === 'hybrid') {
             if (!isDeepStrictEqual(live[i].exists ? live[i].data() : null, old)) throw new Error('body-live-projection-inconsistent');
             if (!isDeepStrictEqual(old, state)) liveChanges.push({ id: edit.id, state });

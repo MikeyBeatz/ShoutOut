@@ -66,6 +66,11 @@ při této opravě ovládán, ověřený je výsledek CLI.
 
 ## Dva režimy CI
 
+Neaktivní finální B4 reader má samostatnou emulátorovou sadu
+`npm --prefix tools run test:body-reader` (CI 3 min), mimo pětiminutové
+test:rules. Ověřuje skutečné policy/B3/R5 čtení a počty operací; neaktivuje
+žádný host ani nový provozní formát. [Výsledky](../plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results).
+
 Dokumentace a místní počítadlo spouštějí jen Node, testy výběru/výpočtu a kontrolu
 dokumentace. Zachovává se workflow Flutter checks a job `verify`; Flutter,
 Java, npm závislosti, emulátory a build se v lehkém režimu vůbec nespouštějí.
