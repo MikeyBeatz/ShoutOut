@@ -537,11 +537,15 @@ class ReactionButton extends StatelessWidget {
     required this.value,
     required this.onPressed,
     this.selected = false,
+    this.pending = false,
+    this.uncertain = false,
   });
   final IconData icon;
   final int value;
   final VoidCallback? onPressed;
   final bool selected;
+  final bool pending;
+  final bool uncertain;
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onPressed,
@@ -550,14 +554,18 @@ class ReactionButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 19,
-            color: onPressed == null
-                ? Theme.of(context).disabledColor
-                : selected
-                ? Theme.of(context).colorScheme.primary
-                : null,
+          PendingActionIcon(
+            pending: pending,
+            uncertain: uncertain,
+            child: Icon(
+              icon,
+              size: 19,
+              color: onPressed == null && !pending
+                  ? Theme.of(context).disabledColor
+                  : selected
+                  ? Theme.of(context).colorScheme.primary
+                  : null,
+            ),
           ),
           const SizedBox(width: 5),
           Text('$value'),
@@ -565,6 +573,99 @@ class ReactionButton extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Fixed-size overlay: feedback must not move text or disturb read exposure.
+class PendingActionIcon extends StatelessWidget {
+  const PendingActionIcon({
+    super.key,
+    required this.child,
+    this.pending = false,
+    this.uncertain = false,
+  });
+  final Widget child;
+  final bool pending, uncertain;
+  @override
+  Widget build(BuildContext context) => Stack(
+    clipBehavior: Clip.none,
+    children: [
+      child,
+      if (pending)
+        Positioned(
+          right: -4,
+          bottom: -4,
+          child: SizedBox(
+            width: 10,
+            height: 10,
+            child: uncertain
+                ? Icon(
+                    Icons.refresh,
+                    size: 10,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : const CircularProgressIndicator(strokeWidth: 1.5),
+          ),
+        ),
+    ],
+  );
+}
+
+class AsyncActionIconButton extends StatefulWidget {
+  const AsyncActionIconButton({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    this.tooltip,
+    this.feedbackEnabled,
+  });
+  final Future<void> Function()? onPressed;
+  final Widget icon;
+  final String? tooltip;
+  final bool? feedbackEnabled;
+  @override
+  State<AsyncActionIconButton> createState() => _AsyncActionIconButtonState();
+}
+
+class _AsyncActionIconButtonState extends State<AsyncActionIconButton> {
+  bool _running = false;
+  @override
+  Widget build(BuildContext context) {
+    if (!(widget.feedbackEnabled ?? _useInteractionFeedback)) {
+      return IconButton(
+        tooltip: widget.tooltip,
+        icon: widget.icon,
+        onPressed: widget.onPressed,
+      );
+    }
+    return IconButton(
+      tooltip: widget.tooltip,
+      icon: _running
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : widget.icon,
+      onPressed: _running || widget.onPressed == null
+          ? null
+          : () async {
+              setState(() => _running = true);
+              try {
+                await widget.onPressed!();
+              } catch (error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(_serverWriteFailureText(context, error)),
+                    ),
+                  );
+                }
+              } finally {
+                if (mounted) setState(() => _running = false);
+              }
+            },
+    );
+  }
 }
 
 class EmptyState extends StatelessWidget {

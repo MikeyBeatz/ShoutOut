@@ -10,6 +10,38 @@ FeedBatch<String> batch(
 
 void main() {
   test(
+    'confirmed own removal fences late refresh and prepared pages without resetting context or cursor',
+    () async {
+      final next = Completer<FeedBatch<String>>();
+      var first = true;
+      final controller = FeedSessionController<String, String>(
+        idOf: (id) => id,
+        load: (_, cursor) async {
+          if (cursor != null) return next.future;
+          if (first) {
+            first = false;
+            return batch(['a', 'b'], 'next');
+          }
+          return batch(['b', 'c', 'd'], null);
+        },
+      );
+      addTearDown(controller.dispose);
+      await controller.refresh('near');
+      final prefetch = controller.prefetch();
+      controller.removeConfirmed('b');
+      controller.removeConfirmed('c');
+      expect(controller.items, ['a']);
+      expect(controller.context, 'near');
+      expect(controller.hasMore, true);
+      next.complete(batch(['b', 'c', 'd'], null));
+      await prefetch;
+      await controller.loadMore();
+      expect(controller.items, ['a', 'd']);
+      await controller.refresh('near');
+      expect(controller.items, ['d']);
+    },
+  );
+  test(
     'cached next page expires at fixed hour; cards survive and only successful refresh resets expiry',
     () async {
       var elapsed = Duration.zero;

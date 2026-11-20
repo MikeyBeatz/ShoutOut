@@ -61,6 +61,7 @@ class ShoutCard extends StatelessWidget {
     this.openOnTap = true,
     this.showFullContent = false,
     this.onPrivateReply,
+    this.feedback,
   });
 
   final Shout shout;
@@ -72,6 +73,7 @@ class ShoutCard extends StatelessWidget {
   final bool openOnTap;
   final bool showFullContent;
   final VoidCallback? onPrivateReply;
+  final InteractionFeedback? feedback;
 
   @override
   Widget build(BuildContext context) => ReadStatusBuilder(
@@ -85,12 +87,48 @@ class ShoutCard extends StatelessWidget {
     builder: (context, read) => ShoutInteractionGate(
       expiresAt: shout.expiresAt,
       enabled: shout.status == ShoutStatus.active,
-      builder: (context, open) => _buildCard(context, open, read: read),
+      builder: (context, open) => InteractionFeedbackBuilder(
+        id: shout.id,
+        feedback:
+            feedback ?? (_useInteractionFeedback ? interactionFeedback : null),
+        builder: (context, feedback) =>
+            _buildCard(context, open, read: read, feedback: feedback),
+      ),
     ),
   );
 
-  Widget _buildCard(BuildContext context, bool open, {required bool read}) {
+  Widget _buildCard(
+    BuildContext context,
+    bool open, {
+    required bool read,
+    InteractionFeedback? feedback,
+  }) {
     final theme = Theme.of(context);
+    final reaction = feedback?.preview(shout.id, InteractionKind.reaction);
+    final save = feedback?.preview(shout.id, InteractionKind.save);
+    final liveReaction = feedback?.confirmed(
+      shout.id,
+      InteractionKind.reaction,
+    );
+    final liveSave = feedback?.confirmed(shout.id, InteractionKind.save);
+    final reactionPending =
+        feedback?.pending(shout.id, InteractionKind.reaction) ?? false;
+    final savePending =
+        feedback?.pending(shout.id, InteractionKind.save) ?? false;
+    final reactionBusy =
+        feedback?.busy(shout.id, InteractionKind.reaction) ?? false;
+    final saveBusy = feedback?.busy(shout.id, InteractionKind.save) ?? false;
+    final isLiked = reaction != null
+        ? reaction.targetReaction == 'like'
+        : liveReaction != null
+        ? liveReaction.reaction == 'like'
+        : shout.isLiked;
+    final isDisliked = reaction != null
+        ? reaction.targetReaction == 'dislike'
+        : liveReaction != null
+        ? liveReaction.reaction == 'dislike'
+        : shout.isDisliked;
+    final isSaved = save?.targetSaved ?? liveSave?.saved ?? shout.isSaved;
     final titleText = Text(
       shout.title,
       maxLines: showFullContent ? null : 2,
@@ -238,16 +276,25 @@ class ShoutCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: open ? onSave : null,
-                    tooltip: shout.isSaved
+                    onPressed: open && !saveBusy ? onSave : null,
+                    tooltip: isSaved
                         ? tr(context, 'Odebrat z uložených')
                         : tr(context, 'Uložit shout'),
-                    icon: Icon(
-                      shout.isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                    icon: PendingActionIcon(
+                      pending: savePending,
+                      uncertain:
+                          feedback?.uncertain(shout.id, InteractionKind.save) ??
+                          false,
+                      child: Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                        color: isSaved && open
+                            ? theme.colorScheme.primary
+                            : null,
+                      ),
                     ),
                   ),
                   if (showDeleteButton)
-                    IconButton(
+                    AsyncActionIconButton(
                       onPressed: () async {
                         final confirmed = await showDialog<bool>(
                           context: context,
@@ -325,18 +372,38 @@ class ShoutCard extends StatelessWidget {
                           children: [
                             ReactionButton(
                               icon: Icons.thumb_up_outlined,
-                              value: shout.likes,
-                              selected: shout.isLiked,
-                              onPressed: open
+                              value:
+                                  reaction?.likes ??
+                                  liveReaction?.likes ??
+                                  shout.likes,
+                              selected: isLiked,
+                              pending: reactionPending,
+                              uncertain:
+                                  feedback?.uncertain(
+                                    shout.id,
+                                    InteractionKind.reaction,
+                                  ) ??
+                                  false,
+                              onPressed: open && !reactionBusy
                                   ? () => unawaited(onReaction(true))
                                   : null,
                             ),
                             const SizedBox(width: 4),
                             ReactionButton(
                               icon: Icons.thumb_down_outlined,
-                              value: shout.dislikes,
-                              selected: shout.isDisliked,
-                              onPressed: open
+                              value:
+                                  reaction?.dislikes ??
+                                  liveReaction?.dislikes ??
+                                  shout.dislikes,
+                              selected: isDisliked,
+                              pending: reactionPending,
+                              uncertain:
+                                  feedback?.uncertain(
+                                    shout.id,
+                                    InteractionKind.reaction,
+                                  ) ??
+                                  false,
+                              onPressed: open && !reactionBusy
                                   ? () => unawaited(onReaction(false))
                                   : null,
                             ),
@@ -363,7 +430,7 @@ class ShoutCard extends StatelessWidget {
                     ),
                   if (showSaveCount)
                     Text(
-                      '${shout.saves} ${tr(context, 'Uložené')}',
+                      '${save?.saves ?? liveSave?.saves ?? shout.saves} ${tr(context, 'Uložené')}',
                       style: theme.textTheme.bodySmall,
                     ),
                 ],

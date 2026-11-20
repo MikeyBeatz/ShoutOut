@@ -102,6 +102,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         if (mounted) setState(() {});
       },
     );
+    if (_useInteractionFeedback) {
+      interactionFeedback.addListener(_confirmedDeletions);
+    }
     WidgetsBinding.instance.addObserver(this);
     RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
@@ -222,6 +225,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   @override
   void dispose() {
+    interactionFeedback.removeListener(_confirmedDeletions);
     WidgetsBinding.instance.removeObserver(this);
     _spatialGateway.dispose();
     _spatialSession.dispose();
@@ -608,7 +612,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   Future<void> _deleteShout(Shout shout) async {
     try {
-      await _deleteShoutContent(shout.id);
+      await _deleteShoutContent(shout.id, ownAuthor: shout.authorId);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -616,7 +620,16 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         );
       }
     }
-    // The active feed listener removes this document without another query.
+  }
+
+  void _confirmedDeletions() {
+    if (!mounted ||
+        interactionFeedback.viewer != FirebaseAuth.instance.currentUser?.uid) {
+      return;
+    }
+    for (final id in interactionFeedback.deleted) {
+      _spatialSession.removeConfirmed(id);
+    }
   }
 
   Future<void> _publishServerShout(Map<String, dynamic> payload) async {
@@ -649,11 +662,26 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     final uid = FirebaseAuth.instance.currentUser!.uid;
     if (kIsWeb && WebEnvironment.current.serverShoutSaves) {
       try {
-        await _saveGateway.toggle(userId: uid, shoutId: shout.id);
+        if (_useInteractionFeedback) {
+          await interactionFeedback.run(
+            viewer: uid,
+            id: shout.id,
+            kind: InteractionKind.save,
+            base: _interactionState(shout),
+            send: () => _saveGateway.toggle(userId: uid, shoutId: shout.id),
+            definitive: isDefinitiveReactionFailure,
+            reconcile: () =>
+                _reconcileInteraction(uid, shout.id, InteractionKind.save),
+          );
+        } else {
+          await _saveGateway.toggle(userId: uid, shoutId: shout.id);
+        }
       } on SaveAccountChanged {
         return;
       } on FirebaseException catch (error) {
-        if (mounted) _showWriteFailure(error);
+        if (mounted && FirebaseAuth.instance.currentUser?.uid == uid) {
+          _showWriteFailure(error);
+        }
       }
       return;
     }
@@ -719,15 +747,29 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     final uid = FirebaseAuth.instance.currentUser!.uid;
     if (kIsWeb && WebEnvironment.current.serverShoutReactions) {
       try {
-        await _reactionGateway.toggle(
-          userId: uid,
-          shoutId: shout.id,
-          like: like,
-        );
+        Future<void> send() =>
+            _reactionGateway.toggle(userId: uid, shoutId: shout.id, like: like);
+        if (_useInteractionFeedback) {
+          await interactionFeedback.run(
+            viewer: uid,
+            id: shout.id,
+            kind: InteractionKind.reaction,
+            like: like,
+            base: _interactionState(shout),
+            send: send,
+            definitive: isDefinitiveReactionFailure,
+            reconcile: () =>
+                _reconcileInteraction(uid, shout.id, InteractionKind.reaction),
+          );
+        } else {
+          await send();
+        }
       } on ReactionAccountChanged {
         return;
       } on FirebaseException catch (error) {
-        if (mounted) _showWriteFailure(error);
+        if (mounted && FirebaseAuth.instance.currentUser?.uid == uid) {
+          _showWriteFailure(error);
+        }
       }
       return;
     }
@@ -910,7 +952,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
             onSave: _toggleSaved,
             onReaction: _toggleReaction,
             onDelete: _useSpatialFeed
-                ? (shout) => _deleteShoutContent(shout.id)
+                ? (shout) =>
+                      _deleteShoutContent(shout.id, ownAuthor: shout.authorId)
                 : _deleteShout,
           ),
           _ => const ProfilePage(),

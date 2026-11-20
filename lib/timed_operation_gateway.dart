@@ -23,6 +23,7 @@ class TimedOperationGateway {
     required this.currentUserId,
     required this.issuedAt,
     required this.send,
+    this.onTiming,
     String Function()? newNonce,
   }) : newNonce = newNonce ?? _randomNonce;
 
@@ -31,6 +32,8 @@ class TimedOperationGateway {
   final Future<void> Function(String operation, Map<String, dynamic> payload)
   send;
   final String Function() newNonce;
+  final void Function(String operation, String stage, Duration elapsed)?
+  onTiming;
 
   static String _randomNonce() {
     final random = Random.secure();
@@ -99,8 +102,14 @@ class TimedOperationGateway {
     TimedOperationAttempt attempt,
     String frozenPayload,
   ) async {
+    final clock = Stopwatch()..start();
     if (attempt._timedKey == null) {
-      final serverTime = await issuedAt(userId);
+      late final DateTime serverTime;
+      try {
+        serverTime = await issuedAt(userId);
+      } finally {
+        onTiming?.call(operation, 'auth-metadata', clock.elapsed);
+      }
       if (currentUserId() != userId) throw _accountChanged();
       final seconds = serverTime.toUtc().millisecondsSinceEpoch ~/ 1000;
       final nonce = newNonce();
@@ -116,7 +125,12 @@ class TimedOperationGateway {
     final request = jsonDecode(frozenPayload) as Map<String, dynamic>;
     request['idempotencyKey'] = attempt._timedKey;
     request['expectedUserId'] = userId;
-    await send(operation, request);
+    final callableClock = Stopwatch()..start();
+    try {
+      await send(operation, request);
+    } finally {
+      onTiming?.call(operation, 'callable', callableClock.elapsed);
+    }
     // The caller retains only the fingerprint/key binding, including after an
     // acknowledgement. A caller retry after a later UI failure must still be
     // the original request. Expiry never silently mints a replacement key.

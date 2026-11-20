@@ -54,6 +54,8 @@ import 'shout_deletion_gateway.dart';
 import 'timed_operation_gateway.dart';
 import 'archived_comment_target.dart';
 import 'live_shout_state.dart';
+import 'interaction_feedback.dart';
+import 'interaction_feedback_widgets.dart';
 import 'feed_session.dart';
 import 'feed_page_gateway.dart';
 import 'own_shouts_gateway.dart';

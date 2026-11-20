@@ -223,6 +223,9 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                         !doc.metadata.hasPendingWrites),
               )
               .map((doc) => doc.exists),
+          synchronized: _useInteractionFeedback
+              ? _interactionSnapshotBarrier
+              : null,
         ).listen(
           (value) {
             if (!mounted) return;
@@ -238,6 +241,9 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                 ..isDisliked = value.reaction == 'dislike'
                 ..isSaved = value.saved;
             });
+            if (_useInteractionFeedback) {
+              interactionFeedback.observe(uid, widget.shout.id, value);
+            }
             if (_unavailable) _notifyUnavailable();
           },
           onError: (Object error, StackTrace stack) {

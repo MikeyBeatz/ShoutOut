@@ -585,3 +585,116 @@ a odebrání (s odstupem kvůli stávajícím limitům), smazat pouze svůj 070;
 potom TestBusiness přečte svůj 119 v Mé shouty a obnoví feed. Ověřit serverový
 výsledek a schváleně uklidit zbytek týchž 120 ID, read klíče a vlastní
 testovací potvrzení. Žádná nová implementace ani nový seed nejsou vyžádané.
+
+<a id="interaction-feedback-diagnosis"></a>
+
+### Závěrečné interakce prošly funkčně; diagnóza odezvy
+
+Vlastník nahlásil první zobrazení palce asi po 15 s, rychlejší odebrání a další
+reakce; vlastní mazání asi 10 s a následný zástupný blok ve feedu. Potvrdil
+také živý odstín v Mé shouty. Zatím se kvůli tomu neuklízí původní pilot.
+
+Read-only serverová kontrola 2026-11-20T17:18:17Z potvrdila u **070 status
+deleted**, likes/dislikes/saves 0/0/0. Jedenáct původních receipt dokládá
+úspěšné přidání/odebrání palce, uložení/odebrání a deleteShout=true. TestBusiness
+má **24/120** přečtení, včetně **119**, odděleně od Brightova úplného přečtení.
+Přepnutí účtu, Business čtení a funkční zápisy jsou tedy doložené. Neopakuje
+se úspěšný test čtení a nepokoušet se znovu používat smazané 070 k reakcím.
+
+Logy stejného období mají platný Auth/App Check a následující měřené časy:
+
+| Operace | První OPTIONS se startem instance | První POST | Další úspěšné POST |
+|---|---:|---:|---:|
+| Palec 15:52 UTC | 2,349 s | 1,254 s | 0,433 s |
+| Palec 17:07 UTC | 2,247 s | 0,967 s | 0,337–0,433 s |
+| Záložka | 3,280 s | 0,742 s | 0,138 s |
+| Smazání | 2,232 s | 1,048 s | — |
+
+Startup záznamy uvádějí AUTOSCALING při chybějící dostupné instanci. Jeden
+pozdější palec skončil HTTP 429 za 0,056 s; stávající limity se neměnily.
+Časy HTTP nejsou celý čas kliknutí → vykreslení. Studený start je potvrzenou
+částí prodlevy, **celých hlášených 10–15 s zatím není rozložených** mezi SDK,
+tokeny/přenos a dodání živého stavu. Neoznačovat zbývající čas bez měření za
+chybu App Check či Firestore. Krátké lokální důkazy jsou
+build/b3-dev/interaction-latency-diagnosis.json a final-pilot-interactions-proof.json.
+První pokus o čtení logů vrátil dočasné API 429; pozdější dotaz prošel,
+žádná kvóta nebyla změněná.
+
+Současný ReactionGateway záměrně nepromítá historické počty z receipt do UI;
+karta čeká na potvrzená Firestore data a nemá okamžitý náhled/stav odesílání.
+_SpatialShoutCard záměrně zachovává výšku nedostupné karty pro stabilní scroll,
+takže smazání z Mé shouty neodstraní objekt ze starého otevřeného feed snapshotu.
+Po nové obnově server deleted zdroj vynechá; zástupné místo není důkazem
+neúspěšného smazání. Při této diagnóze ještě nebyla změna pravidla schválená.
+
+**Následně schválený návrh:** okamžitý oddělený náhled
+palce/záložky/počtu a pending stav, bez dvojího započítání živých změn;
+jednoznačné odmítnutí vrátí náhled, nejasný výsledek zachová původní pokus.
+Mazání ihned zobrazí průběh; až potvrzené vlastní smazání odstraní kartu i
+z otevřeného feedu s ukotvením scrollu, cizí znepřístupnění ponechá placeholder.
+Zahrnout klientské měření časů bez tokenů/textů, cílené regrese a přesné CI/DEV
+web. Beze změny serverových prostředků/Rules/retence/produkce a bez nového seedu.
+Vlastník potvrdil No throttling; poslal ERR_QUIC_PROTOCOL_ERROR, HTTP 400
+a transport errored u Firestore Listen v 17:13 UTC. Stav dřívějšího request
+blocking nepotvrdil výslovně. Tyto chyby mohou souviset s dodáním živých dat,
+ale samy příčinu 15 s ani trvalý výpadek neprokazují. Parametry síťových URL
+se do sdílené dokumentace nekopírují. Zdrojový kód ani živé nastavení se
+v samotném diagnostickém úseku neměnily.
+
+<a id="interaction-feedback-implementation"></a>
+
+### Okamžitá odezva interakcí — schválená lokální implementace 20. listopadu
+
+Vlastník výslovně schválil navazující opravu a ověření pouze v DEV webu,
+bez nového seedu. Větev fix/interaction-feedback navazuje na ověřený ab27253
+a dokumentační checkpoint 1c67754. Runtime změny mají explicitní DEV webovou
+podmínku; nevzniká nová Function, kolekce, oprávnění, retence ani změna prostředků.
+
+- Palec/záložka a předběžný počet se mění v prvním vykreslení, s pevným
+  indikátorem odesílání. Náhled nemutuje zdrojový Shout ani serverové řazení.
+  Během letu se druhý požadavek sloučí. Nejasná odpověď zachová původní pokus
+  i tlačítko; potvrzená akce se při opakování už znovu nepřepíná.
+- Počty z historických receipt se dál nezobrazují jako současné. Existující
+  živé odběry rodiče/reakce/záložky se publikují po lokální SDK snapshotsInSync
+  bariéře, sdílené mezi kartami; nejde o další síťové dotazy. Náhled se nahradí
+  potvrzeným celým stavem bez přičtení vlastní změny podruhé. Jednoznačné
+  odmítnutí vrátí náhled k nejnovějším živým datům, včetně cizích mezitímních změn.
+- Pokud po potvrzení callable chybí živé převzetí ještě 2 s, proběhne jediné
+  atomické serverové přečtení rodiče a příslušné vlastní položky — **2 dodatečná
+  přímá SDK dokumentová čtení**, žádný obsahový zápis. Existující Rules se dál
+  uplatní; nejde o výpočet všech účtovaných interních operací. Běžná živá cesta
+  ověření ruší a nic navíc nečte. Ověřovací odpověď nepřepíše novější živý
+  event doručený během tohoto čtení.
+  Neúspěšné ověření zůstane viditelně čekající s možností ručního opakování
+  čtení; nevzniká polling ani nový toggle. Mimo obrazovky s úplným živým odběrem
+  může být toto ověření potřeba i při úspěšném zápisu. Neměnit kvůli tomu
+  serverový interaction cooldown; dříve pozorované HTTP 429 tím není odstraněné.
+- Mazání ihned ukáže průběh a blokuje dvojklik. Teprve úspěch manuálního
+  smazání vlastního obsahu odstraní ID z otevřené feed relace. Opožděná/právě
+  připravená stránka je nemůže vrátit. Widget zachová pozici zbývající viditelné
+  karty v mezích scrollu. Cizí znepřístupnění/moderace zachovává placeholder.
+- Měření `Interaction timing:` vypisuje pouze druh operace, fázi a milisekundy:
+  Auth metadata, callable, živé převzetí a případné ověřovací čtení. Bez UID,
+  textu, tokenů, adres či nové serverové telemetrie. QUIC/400 hlášky se tím
+  nepotlačují ani neoznačují za opravené.
+
+Lokální ověření: **68 cílených testů** pokrývá pořadí ack/live v obou směrech,
+ztracenou odpověď a neměnný retry, cizí změnu počtu, odmítnutí/expiraci,
+opožděné serverové ověření po změně účtu, zánik widgetu, chybu mazání bez
+Uncaught Error, světlý/tmavý vzhled, zachování přečteného odstínu a geometrie,
+kotvu scrollu a opožděné stránky. Prošla i celá sada **407 Flutter testů**;
+lib/test analýza a formát jsou čisté. Cílená emulátorová regrese v
+tools/rules/feed_runtime_access.integration.test.mjs potvrdila, že čtecí
+transakce funguje i při zakázaných zápisech: běžný i Business účet,
+existující/neexistující vlastní položka, odmítnutí cizího/odhlášeného čtení
+a zablokování po žádosti o mazání. Bez změny Rules a živých dat. Důkazy místně
+build/b3-dev/interaction-targeted-tests.log a interaction-flutter-tests.log.
+Emulátorové logy interaction-rules-test.log / interaction-rules-role-test.log
+obsahují i očekávaná odmítnutí nepovolených testovacích akcí.
+Přesné úplné CI, release build, Hosting a živá akceptace tohoto úseku ještě
+nejsou potvrzené. Dosud živá verze je ab27253 / 1f3dc2f8355c02ce.
+
+Browser host znovu vrací unavailable. Zbytek původního pilotu se ponechává
+pro jeden krátký průchod po nasazení, bez opakování úspěšného čtení a bez
+použití deleted 070. Původní expirace je 20. listopadu 21:38:25 UTC; termín
+se bez souhlasu neprodlužuje. Poté schválený úklid a úplná B3 akceptace.

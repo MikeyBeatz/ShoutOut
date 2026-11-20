@@ -5,6 +5,60 @@ import 'package:shoutout/live_shout_state.dart';
 
 void main() {
   test(
+    'listener barrier publishes counts and own state together, forwards errors and cancels',
+    () async {
+      final documents = StreamController<Map<String, dynamic>?>();
+      final reactions = StreamController<Map<String, dynamic>?>();
+      final saves = StreamController<bool>();
+      final sync = StreamController<void>();
+      final values = <LiveShoutState>[], errors = <Object>[];
+      final sub = watchLiveShoutState(
+        documents.stream,
+        reactions.stream,
+        ownSave: saves.stream,
+        synchronized: sync.stream,
+      ).listen(values.add, onError: errors.add);
+      documents.add({'likesCount': 0, 'savesCount': 0});
+      reactions.add(null);
+      saves.add(false);
+      sync.add(null);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(values.length, 1);
+      documents.add({'likesCount': 13, 'savesCount': 7});
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        values.length,
+        1,
+        reason: 'No half-updated aggregate before SDK barrier',
+      );
+      reactions.add({'type': 'like'});
+      saves.add(true);
+      sync.add(null);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(values.length, 2);
+      expect(values.last.likes, 13);
+      expect(values.last.saves, 7);
+      expect(values.last.reaction, 'like');
+      expect(values.last.saved, true);
+      reactions.addError(StateError('revoked'));
+      await Future<void>.delayed(Duration.zero);
+      expect(errors.single, isA<StateError>());
+      await sub.cancel();
+      expect([
+        documents.hasListener,
+        reactions.hasListener,
+        saves.hasListener,
+        sync.hasListener,
+      ], everyElement(false));
+      await Future.wait([
+        documents.close(),
+        reactions.close(),
+        saves.close(),
+        sync.close(),
+      ]);
+    },
+  );
+  test(
     'initial bookmark state waits for confirmation before publishing availability',
     () async {
       final documents = StreamController<Map<String, dynamic>?>();

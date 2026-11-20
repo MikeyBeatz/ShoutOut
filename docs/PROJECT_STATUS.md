@@ -6,7 +6,28 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Oprava měření a barevného stavu je potvrzená; dokončit zbytek pilotu a úklid B3.**
+**Nyní: schválená oprava okamžité odezvy — lokálně hotová, čeká na přesné CI a DEV web.**
+Původní závěrečné akce pilotu funkčně prošly: 070 je deleted, počty 0/0/0,
+receipt dokládají palce/záložku i jejich odebrání a Business má 24/120 přečtení
+včetně 119. Vlastník ale nahlásil odezvu 10–15 s a zástupné místo po smazání.
+Logy potvrzují studený start 2,2–3,3 s, první POST 0,7–1,3 s, teplý palec
+0,34–0,43 s; zbytek klientské prodlevy zatím změřený není.
+[Diagnóza](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
+řeší oddělený okamžitý náhled/pending stav, bezpečné opakování, průběh mazání
+a odebrání potvrzeně vlastního smazaného Shoutu bez skoku scrollu. Vlastník
+rozsah schválil; v Network má No throttling a nahlásil QUIC/400 chyby Listen
+kanálu. Jejich souvislost s prodlevou není prokázaná ani jejich oprava tvrzená.
+Na fix/interaction-feedback je oddělený náhled, bezpečné opakování, sdílená
+lokální SDK bariéra a výjimečné dvoudokumentové serverové ověření po chybějící
+živé aktualizaci. Vlastní potvrzené smazání odstraní ID i z připravených stránek,
+scroll má widgetovou regresi. Prošlo 68 cílených a všech 407 Flutter testů,
+lib/test analyzátor je čistý. Emulátor navíc potvrdil čtecí transakci pod
+uzavřenými zápisovými Rules, vlastní/cizí položky a blokaci po žádosti o mazání.
+[Rozsah, výsledky a meze](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
+Zatím je živý web ab27253; nové Functions/Rules/retence/prostředky se nemění.
+Pilot ponechat, žádný nový seed a nepoužívat smazané 070 pro další reakce.
+
+**Oprava měření a barevného stavu je potvrzená v UI i na serveru.**
 Vlastník potvrdil stránky i oddělovač, ale nahlásil nepřečtené „MVP B3 070“.
 Na fix/b3-read-feedback jsou reprodukované a opravené dva klientské
 nedostatky: překreslení statického plovoucího ovládání restartovalo měření
@@ -22,13 +43,13 @@ originech odpovídá release manifestu; všech 68 souborů lokálně ověřeno.
 Functions, Rules, indexy, konfigurační přepínače a produkce se neměnily.
 Uživatel potvrdil živou změnu pozadí a správné řazení po obnově; všechny
 testovací Shouty vidí pod oddělovačem. Server ověřil Bright 120/120, včetně
-070 s confirmedAt 2026-11-20T15:46:09.289Z; Business dál samostatných 20/120.
+070 s confirmedAt 2026-11-20T15:46:09.289Z; při této kontrole měl Business 20/120,
+při novější závěrečné kontrole výše 24/120 včetně 119.
 Skutečné požadavky getFeedPage/syncReadBatch mají HTTP 200 / Auth VALID /
 App Check VALID. [Akceptace opravy a zbývající test](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
-Je vyžádaný poslední navazující průchod původního pilotu: Bright u 070
-palec/záložka s odebráním a smazání pouze tohoto vlastního fixture; potom
-Business přečte svůj 119 a obnoví feed. Po odpovědi ověřit server, potom
-schválený úklid a B3 akceptaci. Neopakovat migraci, seed ani tuto UI kontrolu.
+Navazující průchod původního pilotu je funkčně ověřený; nové výhrady k odezvě
+a vlastnímu smazání jsou popsané výše. Neopakovat migraci, seed ani úspěšné
+UI čtení; úklid a celou B3 akceptaci uzavřít po vyřešení tohoto checkpointu.
 
 **B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
 Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má

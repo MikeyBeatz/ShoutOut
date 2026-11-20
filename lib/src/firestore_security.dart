@@ -116,7 +116,89 @@ String _serverWriteFailureText(
     expiredOperationText(error, Localizations.localeOf(context).languageCode) ??
     tr(context, fallback);
 
+bool get _useInteractionFeedback =>
+    kIsWeb && WebEnvironment.current.name == 'dev';
+
+Stream<void> get _interactionSnapshotBarrier {
+  final key = liveDataKey('shout-interaction-barrier');
+  return liveStreams.watch(
+    key,
+    FirebaseFirestore.instance.snapshotsInSync,
+    isCurrent: () => FirebaseAuth.instance.currentUser?.uid == key.$1,
+  );
+}
+
+LiveShoutState _interactionState(Shout shout) => LiveShoutState(
+  likes: shout.likes,
+  dislikes: shout.dislikes,
+  comments: shout.comments,
+  reaction: shout.isLiked
+      ? 'like'
+      : shout.isDisliked
+      ? 'dislike'
+      : null,
+  saves: shout.saves,
+  saved: shout.isSaved,
+);
+
+/// Only used if acknowledged writes outpace the live channel. Atomic, read-only,
+/// two documents; no new endpoint, listener, polling or receipt counters.
+Future<LiveShoutState> _reconcileInteraction(
+  String uid,
+  String id,
+  InteractionKind kind,
+) async {
+  if (FirebaseAuth.instance.currentUser?.uid != uid) {
+    throw FirebaseFunctionsException(
+      code: 'unauthenticated',
+      message: 'The signed-in account changed.',
+    );
+  }
+  final ref = FirebaseFirestore.instance.collection('shouts').doc(id);
+  final result = await FirebaseFirestore.instance.runTransaction(
+    (tx) async {
+      final parent = await tx.get(ref);
+      final own = await tx.get(
+        ref
+            .collection(kind == InteractionKind.save ? 'saves' : 'reactions')
+            .doc(uid),
+      );
+      final data = parent.data();
+      return LiveShoutState(
+        likes: (data?['likesCount'] as num?)?.toInt() ?? 0,
+        dislikes: (data?['dislikesCount'] as num?)?.toInt() ?? 0,
+        comments: (data?['commentsCount'] as num?)?.toInt() ?? 0,
+        reaction: kind == InteractionKind.reaction
+            ? (own.data()?['type'] as String?)
+            : null,
+        saves: (data?['savesCount'] as num?)?.toInt() ?? 0,
+        saved: kind == InteractionKind.save && own.exists,
+        contentPurged:
+            data == null ||
+            data['status'] == 'deleted' ||
+            data['contentPurged'] == true,
+      );
+    },
+    maxAttempts: 1,
+    timeout: const Duration(seconds: 15),
+  );
+  if (FirebaseAuth.instance.currentUser?.uid != uid) {
+    throw FirebaseFunctionsException(
+      code: 'unauthenticated',
+      message: 'The signed-in account changed.',
+    );
+  }
+  return result;
+}
+
 final _serverContentOperations = TimedOperationGateway(
+  onTiming: (operation, stage, elapsed) {
+    if (_useInteractionFeedback) {
+      debugPrint(
+        'Interaction timing: operation=$operation stage=$stage elapsedMs=${elapsed.inMilliseconds}',
+      );
+    }
+  },
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   issuedAt: (userId) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -173,12 +255,16 @@ final _shoutDeletionGateway = ShoutDeletionGateway(
   },
 );
 
-Future<void> _deleteShoutContent(String shoutId) async {
+Future<void> _deleteShoutContent(String shoutId, {String? ownAuthor}) async {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
   if (DeletionWritePolicy.current.shoutDeletion) {
     await _shoutDeletionGateway.delete(
       userId: FirebaseAuth.instance.currentUser?.uid ?? '',
       shoutId: shoutId,
     );
+    if (_useInteractionFeedback && uid != null && ownAuthor == uid) {
+      interactionFeedback.confirmOwnDeletion(uid, shoutId);
+    }
     return;
   }
   await FirebaseFirestore.instance.collection('shouts').doc(shoutId).update({

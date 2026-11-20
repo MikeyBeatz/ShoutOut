@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'live_data.dart';
 
 /// Public counters come from the parent document, including comments outside
@@ -27,20 +29,51 @@ Stream<LiveShoutState> watchLiveShoutState(
   Stream<Map<String, dynamic>?> shout,
   Stream<Map<String, dynamic>?> ownReaction, {
   Stream<bool>? ownSave,
-}) => combineLatestValues(
-  combineLatestValues(
-    shout,
-    ownReaction,
-    (document, reaction) => (document, reaction),
-  ),
-  ownSave ?? Stream.value(false),
-  (state, saved) => LiveShoutState(
-    likes: (state.$1?['likesCount'] as num?)?.toInt() ?? 0,
-    dislikes: (state.$1?['dislikesCount'] as num?)?.toInt() ?? 0,
-    comments: (state.$1?['commentsCount'] as num?)?.toInt() ?? 0,
-    reaction: state.$2?['type'] as String?,
-    saves: (state.$1?['savesCount'] as num?)?.toInt() ?? 0,
-    saved: saved,
-    contentPurged: state.$1 == null || state.$1?['contentPurged'] == true,
-  ),
-);
+  Stream<void>? synchronized,
+}) {
+  final values = combineLatestValues(
+    combineLatestValues(
+      shout,
+      ownReaction,
+      (document, reaction) => (document, reaction),
+    ),
+    ownSave ?? Stream.value(false),
+    (state, saved) => LiveShoutState(
+      likes: (state.$1?['likesCount'] as num?)?.toInt() ?? 0,
+      dislikes: (state.$1?['dislikesCount'] as num?)?.toInt() ?? 0,
+      comments: (state.$1?['commentsCount'] as num?)?.toInt() ?? 0,
+      reaction: state.$2?['type'] as String?,
+      saves: (state.$1?['savesCount'] as num?)?.toInt() ?? 0,
+      saved: saved,
+      contentPurged: state.$1 == null || state.$1?['contentPurged'] == true,
+    ),
+  );
+  return synchronized == null ? values : _atSync(values, synchronized);
+}
+
+/// Deliver a coherent group after the SDK's listener barrier. A zero-delay
+/// event lets the shared streams' queued microtasks finish; no network polling.
+Stream<T> _atSync<T>(Stream<T> values, Stream<void> synchronized) =>
+    Stream<T>.multi((output) {
+      T? latest;
+      bool dirty = false, cancelled = false;
+      Timer? flush;
+      final data = values.listen((value) {
+        latest = value;
+        dirty = true;
+      }, onError: output.addError);
+      final barrier = synchronized.listen((_) {
+        flush ??= Timer(Duration.zero, () {
+          flush = null;
+          if (!cancelled && dirty) {
+            dirty = false;
+            output.add(latest as T);
+          }
+        });
+      }, onError: output.addError);
+      output.onCancel = () async {
+        cancelled = true;
+        flush?.cancel();
+        await Future.wait([data.cancel(), barrier.cancel()]);
+      };
+    });

@@ -137,6 +137,61 @@ class _CompactFilterDropdown<T> extends StatelessWidget {
 }
 
 class _FeedPageState extends State<FeedPage> {
+  final _cardAnchors = <String, GlobalKey>{};
+  int _anchorRevision = 0;
+
+  @override
+  void didUpdateWidget(covariant FeedPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final spatial = widget.spatial;
+    if (spatial == null || spatial.refreshing) return;
+    final remaining = widget.shouts.map((shout) => shout.id).toSet();
+    if (!oldWidget.shouts.any((shout) => !remaining.contains(shout.id))) return;
+    final scroll = spatial.scrollController;
+    if (!scroll.hasClients) return;
+    final viewport = context.findRenderObject();
+    final top = viewport is RenderBox
+        ? viewport.localToGlobal(Offset.zero).dy
+        : 0.0;
+    GlobalKey? anchor;
+    double? before;
+    for (final shout in oldWidget.shouts) {
+      if (!remaining.contains(shout.id)) continue;
+      final key = _cardAnchors[shout.id];
+      final box = key?.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      final y = box.localToGlobal(Offset.zero).dy;
+      if (y + box.size.height > top) {
+        anchor = key;
+        before = y;
+        break;
+      }
+    }
+    final revision = ++_anchorRevision;
+    final oldOffset = scroll.offset;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          revision != _anchorRevision ||
+          !scroll.hasClients ||
+          spatial.refreshing) {
+        return;
+      }
+      final box = anchor?.currentContext?.findRenderObject();
+      if (before != null && box is RenderBox && box.attached) {
+        // Respect a user's concurrent scroll instead of dragging it back.
+        if ((scroll.offset - oldOffset).abs() < 1) {
+          final delta = box.localToGlobal(Offset.zero).dy - before;
+          final target = (scroll.offset + delta).clamp(
+            scroll.position.minScrollExtent,
+            scroll.position.maxScrollExtent,
+          );
+          if ((target - scroll.offset).abs() > .5) scroll.jumpTo(target);
+        }
+      }
+      _cardAnchors.removeWhere((id, _) => !remaining.contains(id));
+    });
+  }
+
   void _changeFilters(void Function(FeedFilters) change) {
     final spatial = widget.spatial;
     if (spatial == null) {
@@ -201,6 +256,10 @@ class _FeedPageState extends State<FeedPage> {
         .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
         .toList();
     final shouts = visibleFeedShouts;
+    final childIndices = {
+      for (var i = 0; i < shouts.length; i++) shouts[i].id: i * 2,
+    };
+    _cardAnchors.removeWhere((id, _) => !childIndices.containsKey(id));
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value:
@@ -555,49 +614,60 @@ class _FeedPageState extends State<FeedPage> {
                   widget.spatial == null ? 180 : 12,
                 ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    if (index.isOdd) return const SizedBox(height: 12);
-                    final shout = shouts[index ~/ 2];
-                    if (widget.spatial case final spatial?) {
-                      return KeyedSubtree(
-                        key: ValueKey(shout.id),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (shout.feedRead == true &&
-                                (index == 0 ||
-                                    shouts[index ~/ 2 - 1].feedRead != true))
-                              Padding(
-                                key: const ValueKey('feed-read-separator'),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Expanded(child: Divider()),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index.isOdd) return const SizedBox(height: 12);
+                      final shout = shouts[index ~/ 2];
+                      if (widget.spatial case final spatial?) {
+                        return KeyedSubtree(
+                          key: ValueKey(shout.id),
+                          child: Column(
+                            key: _cardAnchors.putIfAbsent(
+                              shout.id,
+                              GlobalKey.new,
+                            ),
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (shout.feedRead == true &&
+                                  (index == 0 ||
+                                      shouts[index ~/ 2 - 1].feedRead != true))
+                                Padding(
+                                  key: const ValueKey('feed-read-separator'),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Expanded(child: Divider()),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        child: Text(tr(context, 'Přečtené')),
                                       ),
-                                      child: Text(tr(context, 'Přečtené')),
-                                    ),
-                                    const Expanded(child: Divider()),
-                                  ],
+                                      const Expanded(child: Divider()),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            spatial.card(shout),
-                          ],
-                        ),
+                              spatial.card(shout),
+                            ],
+                          ),
+                        );
+                      }
+                      return RatedShoutCard(
+                        key: ValueKey(shout.id),
+                        shout: shout,
+                        onSave: () => widget.onSave(shout),
+                        onReaction: (like) =>
+                            widget.onReaction(shout, like: like),
                       );
-                    }
-                    return RatedShoutCard(
-                      key: ValueKey(shout.id),
-                      shout: shout,
-                      onSave: () => widget.onSave(shout),
-                      onReaction: (like) =>
-                          widget.onReaction(shout, like: like),
-                    );
-                  }, childCount: shouts.length * 2 - 1),
+                    },
+                    childCount: shouts.length * 2 - 1,
+                    findChildIndexCallback: (key) {
+                      if (key is! ValueKey<String>) return null;
+                      return childIndices[key.value];
+                    },
+                  ),
                 ),
               ),
             if (widget.spatial case final spatial?)

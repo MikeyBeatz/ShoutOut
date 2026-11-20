@@ -63,24 +63,33 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         final ref = FirebaseFirestore.instance
             .collection('shouts')
             .doc(widget.shout.id);
-        _liveShout = watchLiveShoutState(
-          ref
-              .liveSnapshots(includeMetadataChanges: true)
-              .where((shout) => shout.exists || !shout.metadata.isFromCache)
-              .map((shout) => shout.data()),
-          ref
-              .collection('reactions')
-              .doc(uid)
-              .liveSnapshots()
-              .map((reaction) => reaction.data()),
-          ownSave: WebEnvironment.current.serverShoutSaves
-              ? ref
-                    .collection('saves')
-                    .doc(uid)
-                    .liveSnapshots()
-                    .map((save) => save.exists)
-              : null,
-        );
+        _liveShout =
+            watchLiveShoutState(
+              ref
+                  .liveSnapshots(includeMetadataChanges: true)
+                  .where((shout) => shout.exists || !shout.metadata.isFromCache)
+                  .map((shout) => shout.data()),
+              ref
+                  .collection('reactions')
+                  .doc(uid)
+                  .liveSnapshots()
+                  .map((reaction) => reaction.data()),
+              ownSave: WebEnvironment.current.serverShoutSaves
+                  ? ref
+                        .collection('saves')
+                        .doc(uid)
+                        .liveSnapshots()
+                        .map((save) => save.exists)
+                  : null,
+              synchronized: _useInteractionFeedback
+                  ? _interactionSnapshotBarrier
+                  : null,
+            ).map((value) {
+              if (_useInteractionFeedback) {
+                interactionFeedback.observe(uid, widget.shout.id, value);
+              }
+              return value;
+            });
       }
     }
   }
@@ -215,7 +224,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
           ),
         if (!_contentPurged &&
             widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid)
-          IconButton(
+          AsyncActionIconButton(
             onPressed: _deleteShout,
             tooltip: tr(context, 'Smazat shout'),
             icon: const Icon(Icons.delete_outline),
@@ -740,16 +749,21 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   Future<void> _deleteShout() async {
+    final viewer = FirebaseAuth.instance.currentUser?.uid;
     try {
-      await _deleteShoutContent(widget.shout.id);
+      await _deleteShoutContent(
+        widget.shout.id,
+        ownAuthor: widget.shout.authorId,
+      );
     } catch (error) {
-      if (mounted) {
+      if (mounted && FirebaseAuth.instance.currentUser?.uid == viewer) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_serverWriteFailureText(context, error))),
         );
       }
       return;
     }
+    if (FirebaseAuth.instance.currentUser?.uid != viewer) return;
     widget.shout.status = ShoutStatus.deleted;
     if (mounted) Navigator.pop(context, true);
   }

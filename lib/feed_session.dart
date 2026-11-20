@@ -63,6 +63,8 @@ class FeedSessionController<T, C extends Object> {
   String? _baseline;
   FeedBatch<T>? _prepared;
   final Set<String> _news = {};
+  // A successful explicit deletion cannot reappear from a frozen/prefetched page.
+  final Set<String> _removed = {};
   Future<void>? _refreshFlight;
   Future<void>? _prefetchFlight;
   Future<void>? _appendFlight;
@@ -99,7 +101,18 @@ class FeedSessionController<T, C extends Object> {
 
   List<T> _unique(Iterable<T> values) {
     final ids = <String>{};
-    return values.where((value) => ids.add(idOf(value))).toList();
+    return values
+        .where(
+          (value) => !_removed.contains(idOf(value)) && ids.add(idOf(value)),
+        )
+        .toList();
+  }
+
+  void removeConfirmed(String id) {
+    if (_disposed || !_removed.add(id)) return;
+    _items = _items.where((item) => idOf(item) != id).toList();
+    _news.remove(id);
+    onChanged?.call();
   }
 
   Future<void> refresh(C requested) {
@@ -262,5 +275,6 @@ class FeedSessionController<T, C extends Object> {
     _deadline = null;
     _expired = false;
     _news.clear();
+    _removed.clear();
   }
 }

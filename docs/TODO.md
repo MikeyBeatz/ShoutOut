@@ -47,6 +47,15 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
 1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
+   **Nejnovější checkpoint:** palce/záložka/mazání i Business čtení jsou
+   serverově ověřené, ale vlastník hlásí pomalou první odezvu a zástupnou kartu.
+   [Měřené časy a nový návrh](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
+   mají schválenou navazující [opravu odezvy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
+   Lokální klientská implementace, 68 cílených / 407 celkových Flutter testů
+   a cílený emulátorový test čtení jsou hotové; další je
+   úplné CI přesného commitu, DEV web a krátké ověření stávajícím fixture.
+   Ponechat stávající pilot pro navazující ověření, žádný nový seed; 070 už
+   je deleted. Opravu přečtení ani původní závěrečné akce znovu netestovat.
    **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
    [opravu měření čtení a barevný stav](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
    Dva nedostatky klienta jsou reprodukované; oprava + jemné pozadí
@@ -54,8 +63,8 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    ab27253 má success úplné CI 44684384849 a ověřený DEV web 1f3dc2f8355c02ce.
    Oprava má potvrzený UI výsledek i skutečný server: Bright 120/120 přečtených,
    070 potvrzené, platné Auth/App Check a HTTP 200. [Důkaz a zbytek pilotu](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
-   Dokončit již vyžádané interakce/mazání 070 a přepnutí na Business/čtení 119,
-   ověřit server a uklidit pilot. Celou B3 akceptaci zatím nezaškrtávat.
+   Interakce/mazání 070 a Business/čtení 119 jsou funkčně ověřené; navazující
+   odezva má schválenou opravu výše. Potom úklid a konečná B3 akceptace.
    Žádný nový seed/migrace ani opakování úspěšného UI testu čtení Brighta.
    B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
    výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.

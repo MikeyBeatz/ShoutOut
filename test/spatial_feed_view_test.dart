@@ -56,6 +56,63 @@ Widget harness(
 
 void main() {
   testWidgets(
+    'confirmed removal above the viewport preserves the next visible card anchor',
+    (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      final rows = List.generate(
+        25,
+        (index) => decodeSpatialFeedItem(item(index)),
+      );
+      Widget view(List<Shout> values) => harness(
+        FeedPage(
+          shouts: values,
+          isLoading: false,
+          onSave: (_) {},
+          onReaction: (_, {required bool like}) async {},
+          onNotifications: () {},
+          filters: FeedFilters(),
+          followedUserIds: {},
+          spatial: SpatialFeedPresentation(
+            scrollController: scroll,
+            refresh: () {},
+            changeFilters: (_) {},
+            prefetch: () {},
+            loadMore: () {},
+            hasMore: false,
+            loadingMore: false,
+            refreshing: false,
+            card: (shout) => SizedBox(
+              height: 100 + int.parse(shout.id.split('-').last) % 3 * 20.0,
+              child: Text(shout.title),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(view(rows));
+      await tester.pumpAndSettle();
+      scroll.jumpTo(1000);
+      await tester.pumpAndSettle();
+      final visible = rows.where((row) {
+        final found = find.text(row.title);
+        if (found.evaluate().isEmpty) return false;
+        final y = tester.getTopLeft(found).dy;
+        return y >= 0 && y < 400;
+      }).first;
+      final before = tester.getTopLeft(find.text(visible.title)).dy;
+      await tester.pumpWidget(
+        view(rows.where((row) => row.id != 'shout-2').toList()),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text(visible.title)).dy,
+        closeTo(before, .5),
+      );
+      expect(find.text('Card 2'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+  testWidgets(
     'only a confirmed empty unread group shows the no-unread message',
     (tester) async {
       final scroll = ScrollController();

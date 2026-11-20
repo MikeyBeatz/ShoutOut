@@ -1,4 +1,5 @@
 import 'live_data.dart';
+import 'interaction_feedback.dart';
 import 'account_deletion.dart';
 import 'account_deletion_attempt.dart';
 import 'read_tracking_controller.dart';
@@ -33,6 +34,7 @@ class AuthGate extends StatelessWidget {
       ('auth', FirebaseAuth.instance),
       () => FirebaseAuth.instance.userChanges().map((user) {
         liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
+        interactionFeedback.retainViewer(user?.uid);
         readSessions.retainViewer(user?.uid);
         return user;
       }),
