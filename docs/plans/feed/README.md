@@ -5,12 +5,11 @@
 A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální laboratorní parametry nejsou provozní limity. Aktuální pořadí určuje implementační plán.
 
 B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
-Další je B3, následně B4; kapacitu produkce tento pilot neprokazuje.
-Lokální B3 i [kompatibilní přechod](B3_DEV_ROLLOUT.md#local-transition-results)
-mají success úplné CI. Navazující [provozní vstup a měření](B3_DEV_ROLLOUT.md#operator-preparation)
-jsou uzavřené po úplném CI 44607375041. [Konkrétní živý DEV plán](B3_DEV_ROLLOUT.md#dev-pilot-proposal)
-je schválený a [připravuje se kompatibilní rollout](B3_DEV_ROLLOUT.md#dev-rollout-results);
-vypnuté B3 řazení není dokladem jeho nasazení.
+B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
+Další je [B4a – konkrétní lokální návrh ke schválení](FEED_DELTA_REFRESH_PLAN.md#b4a-proposal),
+potom B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
+Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
+neopakovat je jako otevřenou práci.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)

@@ -51,8 +51,12 @@ Původní podrobný [checkpoint je zachovaný](plans/feed/B3_DEV_ROLLOUT.md#todo
 v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudových
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
-1. **Dokončit úspornou obnovu s novinkami v B4.** Verze/metadatové
-   porovnání, přenos rozdílů a cache,
+1. **Dokončit úspornou obnovu s novinkami v B4.**
+   **Nejbližší konkrétní úsek:** [B4a – návrh ke schválení](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal).
+   Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
+   stavové projekce se započtením existujících živých/Home odběrů. Implementace
+   zatím neschválená; žádný nový rollout nebo živé kolekce.
+   Celé B4 zahrnuje verze/metadatové porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).

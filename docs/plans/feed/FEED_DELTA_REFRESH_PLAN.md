@@ -143,6 +143,118 @@ Ověřené v kódu při přípravě tohoto plánu:
 
 ## Společný kontrakt před další implementací
 
+<a id="b4a-proposal"></a>
+
+### B4a — konkrétní návrh prvního lokálního úseku, 20. listopadu
+
+**Stav: připravený návrh ke schválení, žádná B4 implementace ani aktivace.**
+Navazuje na uzavřenou B3 akceptaci a zdrojový checkpoint 2878782. Vlastník
+schválil pokračovat přípravou B4; níže vymezená změna serverového/klientského
+kontraktu a laboratorní projekce ještě nemá konkrétní implementační souhlas.
+
+#### Co ověřil průzkum současného kódu
+
+- `functions/get_feed_page.js` po výběru stránky volá `hydratePortable`.
+  `functions/feed_block_index_store.js` v tomto kroku čte každý vybraný zdroj
+  pomocí getAll. Opakovaná plná stránka tedy znovu znamená až 50 zdrojových
+  SDK čtení, i když klient už všechna těla má; vedle toho běží ostatní kontroly.
+- `metadataOf` v `functions/feed_block_index.js` obsahuje geometrii, status,
+  řadicí údaje a B3 `contentHash` nad title/text. Neobsahuje verzi celé přenášené
+  karty ani commentsCount/savesCount. Existující hash proto nelze vydávat za
+  úplnou validaci cache veřejného těla karty.
+- `lib/src/spatial_feed.dart` a detail mají dokumentový živý odběr `shouts/id`;
+  `_startFeedListeners` v Home spouští i při prostorovém feedu původní globální
+  dotaz na 50 aktivních dokumentů, mimo jiné jako zdroj promo karet.
+  Pouhé zkrácení callable odpovědi tyto cesty neodstraní. Rozpočet a měření
+  musí zahrnout i je; před náhradou zachovat promo, vlastní a sledované sekce.
+- Komentáře a záložky dnes mění čítače rodiče bez řadicího index writeru.
+  Totéž musí nová stavová projekce pokrýt u archivace/purge komentáře.
+  Geografické obohacení ve zdrojovém `functions/index.js` zapisuje geography
+  přímo. Nová verze celého těla musí zachytit i tuto cestu; sama B3 ji nepotřebovala.
+- Engine už má porovnání neměnných kořenů `indexChanges`, ale jde o interní
+  rozdíl indexových metadat mezi kompatibilními views. Není to nasazený
+  přenositelný delta protokol, aktuální kontrola dostupnosti ani osobní počet novinek.
+
+Firestore dokumentuje počáteční snapshot a další události při změně dokumentu;
+RPC protokol navíc rozlišuje úplný stav a případné maskované změny. Proto
+neodvozovat skutečné síťové bajty jen z velikosti callback objektu, ani bez
+měření slibovat, že každá událost přenáší všechny bajty těla. Současný kód
+nicméně nemá vlastní oddělený kompaktní stavový odběr ani body reuse kontrakt.
+Primární reference: [listeners](https://firebase.google.com/docs/firestore/query-data/listen),
+[DocumentChange/DocumentMask](https://docs.cloud.google.com/firestore/docs/reference/rpc/google.firestore.v1#documentchange).
+
+#### Doporučený výsledný kontrakt k lokálnímu ověření
+
+1. **Tělo a stav oddělit.** Navržená `bodyVersion` je serverově odvozený SHA-256
+   kanonické, verzované serializace všech statických veřejných polí dnešní
+   `publicFeedBody`: text/nadpis, kategorie v renderovaném pořadí, autorův
+   snapshot/avatar, geografická a Business prezentace, časy. Čítače, aktuální
+   dostupnost a osobní reakce/záložka patří do stavové části. Existující B3
+   contentHash/read markery se nemění při pouhé změně prezentace nebo čítačů.
+2. **Nejdřív vybrat, potom doplnit chybějící těla.** Server určí stejné pořadí
+   a nejvýše dnešních 50 descriptorů ID + bodyVersion + drobný stav + read skupina.
+   Klient je porovná se svou RAM cache; zdrojová těla se načtou jen pro chybějící
+   či odlišné verze. Složená stránka se potvrdí atomicky, nikoli po kusech.
+   Při prázdné cache porovnat přímou studenou cestu s dvoufázovou; nevnucovat
+   druhý síťový obrat každému prvnímu otevření. Do požadavků neposílat neomezený
+   seznam všech dříve viděných ID. Podpis výběru musí vázat projekt, UID, generaci,
+   kontext, pořadí, verze a původní deadline; není náhradou nového ověření přístupu.
+3. **Dostupnost ověřit před reuse i po síťových čekáních.** Zachovat Auth/App Check,
+   blokace, aktuální status/expiraci, B3 read snapshot a R5/60denní fence. Shodný
+   hash neopravňuje zobrazit nově zakázaný obsah. Změna mezi výběrem a doplněním
+   vrátí bezpečně chybějící/změněnou položku nebo vyžádá novou obnovu; nesmí
+   označit jiné tělo starou verzí ani vyrobit neúplnou hotovou stránku.
+4. **Aktuální metadata musí stačit bez čtení všech těl.** Laboratorně porovnat
+   rozšířenou blokovou projekci celého těla s variantou doplněnou o malý
+   serverový stavový dokument bez textu u každého Shoutu. Kandidát stavového
+   dokumentu obsahuje verze, authorId, status/expiry a veřejné počty; osobní
+   reakce/záložky zůstanou soukromé v dosavadních cestách. Jedna další položka
+   na Shout může šetřit přenos živých dat, sama nesnižuje počet dokumentových reads.
+   Výstup musí doložit součet čtení, zápisů i přenosů a potřebné změny Rules,
+   ne automaticky doporučit další dokument jen kvůli jeho menší velikosti.
+5. **Jedna atomická zápisová cesta.** Prototyp plánu musí zachovat zdroj, obsahové
+   verze, stav a případný index ve stejné transakci, včetně mazání, expirace,
+   účtových odpočtů/archivu/purge a geografie. Replay ani zápis shodných hodnot
+   nesmí vytvářet další verze/zápisy. Nepropisovat každé zvýšení comments/saves
+   do drahé řadicí stromové struktury, pokud výběr neovlivňuje.
+6. **RAM cache a bezpečné doplnění.** Oddělit projekt/UID, žádné nové trvalé
+   ukládání textů do IndexedDB. Laboratorní kandidát je 4 MiB na body cache,
+   položka nejvýše po dobu existující hodinové hranice; nejde o limit celé
+   paměti aplikace ani schválený produkční parametr. Evikce pouze vyvolá
+   doplnění těla, nesmí odstranit načtené karty nebo měnit pořadí. Změna účtu
+   či potvrzená žádost o smazání vyprázdní cache a ohradí opožděné odpovědi.
+
+#### Konkrétní první implementační rozsah ke schválení
+
+Ucelený **lokální B4a základ**: čisté serializační/verzovací helpery a kontrakt
+výběr/doplnění, Dart RAM cache a skládání stránky, vypnutý laboratorní adaptér
+blokové/stavové projekce a emulátorové ověření atomických zápisových plánů.
+Aktuální callable hostitelé, aktivní generace, skutečné Home odběry a Rules
+zůstanou v této části zapojené dosavadním způsobem. Laboratorní kód smí pracovat
+jen s pamětí nebo striktně ověřeným emulátorem shoutout-rules-test/127.0.0.1:8080;
+žádné skutečné Auth účty a žádné volání placeného geokódování.
+
+Ověřit 50/200 karet a matici beze změn / nové tělo / změna jen čítačů / pouze
+geografie / smazání / expirace / blokace / jiný účet / ztráta odpovědi / poškozená
+či evikovaná cache. Přidat dávku až 50 zdrojových změn a zachovat společný
+rozpočet 450 zápisů, kompatibilní generace, rollback celé transakce a R5.
+Studené a teplé průchody měřit zvlášť: SDK reads/writes/queries, nové zdrojové
+body, velikosti reprezentací/přenosů, počet obratů a náklad živých odběrů včetně
+původního Home dotazu. Model 5 000 relací pouze propočítat z těchto operací;
+neoznačovat to za zátěžový test ani garanci cloudové ceny/latence.
+
+**Výstup:** ověřený protokol a klientské jádro za vypnutou cestou, srovnání
+variant a jedno doporučené schéma, úplná matice writerů i zbývajících zásahů,
+podklady pro kompatibilní přechod/retenci/rollback, dokumentace, metriky,
+seskupený commit/push a úplné CI. Před živou aktivací musí být prokazatelně
+nahrazené všechny závislé zápisové/živé cesty; laboratorní cache není hotové B4.
+
+**Hranice:** bez živých dat/kolekcí, backfillu, změn Rules, nasazení, Auth účtů,
+nového Scheduleru, podpisového klíče, navýšení prostředků nebo aktivace B4.
+Názvy/cesty nových provozních dat, výsledný migrační formát a provozní limity
+se po měření předloží konkrétně. Čerstvost/slučování signálů, případné znovu
+zpřístupněné novinky a číslovka patří do navazujícího B4b, ne do tohoto úseku.
+
 ### Verze a jejich význam
 
 Oddělit následující významy; jde o koncepty, nikoli již schválené názvy polí:

@@ -6,7 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: připravit konkrétní návrh B4 — úsporná delta/cache a indikátor novinek.**
+**Nyní: konkrétní lokální B4a návrh je připravený, čeká na souhlas s implementací.**
+[Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)
+zahrnují celé body oddělené od stavu, omezený výběr/doplnění, RAM cache,
+porovnání blokové/kompaktní živé projekce a všechny zápisové cesty včetně
+geografie/komentářových odpočtů. Průzkum našel také původní plný Home dotaz
+vedle prostorového feedu. Bez jeho započítání a živých odběrů by byl odhad
+úspory neúplný. Zatím jen dokumentace; runtime, Rules a živá data beze změny.
+
 B3 má **uzavřenou živou DEV akceptaci i úklid**. Vlastník potvrdil okamžitou
 odezvu závěrečného průchodu. Server doložil u 119 palec/záložku 0 → 1 → 0,
 smazání a výsledné 0/0/0. Následný schválený úklid odstranil 120 testovacích
