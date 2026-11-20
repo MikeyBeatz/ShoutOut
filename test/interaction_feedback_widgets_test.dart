@@ -23,6 +23,77 @@ LiveShoutState live({
 
 void main() {
   testWidgets(
+    'expiration during an outstanding action hides tentative counts and leaves all interactions disabled',
+    (tester) async {
+      final f = InteractionFeedback()..retainViewer('alice');
+      addTearDown(f.dispose);
+      final ack = Completer<void>();
+      final shout = Shout(
+        id: 'a',
+        author: 'Fixture',
+        title: 'Expiring',
+        text: 'Body',
+        categories: [],
+        distanceKm: 1,
+        createdAt: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(hours: 1)),
+        likes: 3,
+        saves: 2,
+      );
+      final task = f.run(
+        viewer: 'alice',
+        id: 'a',
+        kind: InteractionKind.reaction,
+        base: live(),
+        send: () => ack.future,
+        definitive: (_) => true,
+        reconcile: () async => live(),
+      );
+      Widget view() => MaterialApp(
+        home: Scaffold(
+          body: ShoutCard(
+            shout: shout,
+            feedback: f,
+            onSave: () {},
+            onReaction: (_) async {},
+          ),
+        ),
+      );
+      await tester.pumpWidget(view());
+      expect(
+        tester
+            .widgetList<ReactionButton>(find.byType(ReactionButton))
+            .first
+            .value,
+        4,
+      );
+      shout.status = ShoutStatus.expired;
+      await tester.pumpWidget(view());
+      final like = tester
+          .widgetList<ReactionButton>(find.byType(ReactionButton))
+          .first;
+      expect(
+        like.value,
+        3,
+        reason:
+            'Expired cards show confirmed state even while an old action remains unresolved',
+      );
+      expect(like.onPressed, null);
+      expect(
+        tester
+            .widget<IconButton>(
+              find.widgetWithIcon(IconButton, Icons.bookmark_outline),
+            )
+            .onPressed,
+        null,
+      );
+      f.retainViewer(null);
+      ack.complete();
+      await task;
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+  testWidgets(
     'failed delete restores its control and shows an error without an unhandled future',
     (tester) async {
       await tester.pumpWidget(

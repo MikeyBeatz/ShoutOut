@@ -104,8 +104,12 @@ class ShoutCard extends StatelessWidget {
     InteractionFeedback? feedback,
   }) {
     final theme = Theme.of(context);
-    final reaction = feedback?.preview(shout.id, InteractionKind.reaction);
-    final save = feedback?.preview(shout.id, InteractionKind.save);
+    final reaction = open
+        ? feedback?.preview(shout.id, InteractionKind.reaction)
+        : null;
+    final save = open
+        ? feedback?.preview(shout.id, InteractionKind.save)
+        : null;
     final liveReaction = feedback?.confirmed(
       shout.id,
       InteractionKind.reaction,

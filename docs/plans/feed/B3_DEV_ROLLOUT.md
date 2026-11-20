@@ -669,6 +669,8 @@ podmínku; nevzniká nová Function, kolekce, oprávnění, retence ani změna p
   čtení; nevzniká polling ani nový toggle. Mimo obrazovky s úplným živým odběrem
   může být toto ověření potřeba i při úspěšném zápisu. Neměnit kvůli tomu
   serverový interaction cooldown; dříve pozorované HTTP 429 tím není odstraněné.
+  Při expiraci během odesílání zůstane karta neaktivní a přepne z předběžných
+  počtů na potvrzená data; nevyřešený technický pokus nemění pravidlo expirace.
 - Mazání ihned ukáže průběh a blokuje dvojklik. Teprve úspěch manuálního
   smazání vlastního obsahu odstraní ID z otevřené feed relace. Opožděná/právě
   připravená stránka je nemůže vrátit. Widget zachová pozici zbývající viditelné
@@ -678,11 +680,11 @@ podmínku; nevzniká nová Function, kolekce, oprávnění, retence ani změna p
   textu, tokenů, adres či nové serverové telemetrie. QUIC/400 hlášky se tím
   nepotlačují ani neoznačují za opravené.
 
-Lokální ověření: **68 cílených testů** pokrývá pořadí ack/live v obou směrech,
+Lokální ověření: **69 cílených testů** pokrývá pořadí ack/live v obou směrech,
 ztracenou odpověď a neměnný retry, cizí změnu počtu, odmítnutí/expiraci,
 opožděné serverové ověření po změně účtu, zánik widgetu, chybu mazání bez
 Uncaught Error, světlý/tmavý vzhled, zachování přečteného odstínu a geometrie,
-kotvu scrollu a opožděné stránky. Prošla i celá sada **407 Flutter testů**;
+kotvu scrollu, expiraci během odesílání a opožděné stránky. Prošla i celá sada **408 Flutter testů**;
 lib/test analýza a formát jsou čisté. Cílená emulátorová regrese v
 tools/rules/feed_runtime_access.integration.test.mjs potvrdila, že čtecí
 transakce funguje i při zakázaných zápisech: běžný i Business účet,
@@ -693,6 +695,9 @@ Emulátorové logy interaction-rules-test.log / interaction-rules-role-test.log
 obsahují i očekávaná odmítnutí nepovolených testovacích akcí.
 Přesné úplné CI, release build, Hosting a živá akceptace tohoto úseku ještě
 nejsou potvrzené. Dosud živá verze je ab27253 / 1f3dc2f8355c02ce.
+Meziverze fa72df5 měla připravený 68souborový release, ale nebyla nasazená;
+její běh 44787074643 byl zrušen po doplnění posledního hraničního testu
+expirace a odpovídající ochrany. Finální zdroj musí projít vlastním úplným CI.
 
 Browser host znovu vrací unavailable. Zbytek původního pilotu se ponechává
 pro jeden krátký průchod po nasazení, bez opakování úspěšného čtení a bez

@@ -51,7 +51,7 @@ je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zat�
    serverově ověřené, ale vlastník hlásí pomalou první odezvu a zástupnou kartu.
    [Měřené časy a nový návrh](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
    mají schválenou navazující [opravu odezvy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
-   Lokální klientská implementace, 68 cílených / 407 celkových Flutter testů
+   Lokální klientská implementace, 69 cílených / 408 celkových Flutter testů
    a cílený emulátorový test čtení jsou hotové; další je
    úplné CI přesného commitu, DEV web a krátké ověření stávajícím fixture.
    Ponechat stávající pilot pro navazující ověření, žádný nový seed; 070 už

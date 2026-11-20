@@ -20,10 +20,14 @@ kanálu. Jejich souvislost s prodlevou není prokázaná ani jejich oprava tvrze
 Na fix/interaction-feedback je oddělený náhled, bezpečné opakování, sdílená
 lokální SDK bariéra a výjimečné dvoudokumentové serverové ověření po chybějící
 živé aktualizaci. Vlastní potvrzené smazání odstraní ID i z připravených stránek,
-scroll má widgetovou regresi. Prošlo 68 cílených a všech 407 Flutter testů,
+scroll má widgetovou regresi. Prošlo 69 cílených a všech 408 Flutter testů,
 lib/test analyzátor je čistý. Emulátor navíc potvrdil čtecí transakci pod
 uzavřenými zápisovými Rules, vlastní/cizí položky a blokaci po žádosti o mazání.
 [Rozsah, výsledky a meze](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
+Konečná lokální kontrola doplnila přechod do expirace během odesílání:
+uzavřená karta ukazuje potvrzené počty místo předběžného náhledu. Běh
+44787074643 pro meziverzi fa72df5 byl zrušen jako překonaný, nikoli kvůli
+selhání testu; následuje úplné CI finálního zdroje před nasazením.
 Zatím je živý web ab27253; nové Functions/Rules/retence/prostředky se nemění.
 Pilot ponechat, žádný nový seed a nepoužívat smazané 070 pro další reakce.
 
