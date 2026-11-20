@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,05 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,09 %** — vážené dokončení podúseků
 
-Hotové úseky: **150/211**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **151/211**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,19 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,20 %** — vážené dokončení podúseků
 
-Hotové úseky: **181/289**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **182/289**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -46,77 +46,20 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
-   **Nejnovější checkpoint:** palce/záložka/mazání i Business čtení jsou
-   serverově ověřené, ale vlastník hlásí pomalou první odezvu a zástupnou kartu.
-   [Měřené časy a nový návrh](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
-   mají schválenou navazující [opravu odezvy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
-   Lokální klientská implementace, 69 cílených / 408 celkových Flutter testů
-   a cílený emulátorový test čtení jsou hotové. fc795ad má success úplné CI
-   44788753267 a ověřený DEV web **5b4d711b715a85e3** na obou doménách.
-   [Nasazení a čekající průchod](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-dev):
-   vlastník má ověřit okamžitý palec/záložku a smazání svého „MVP B3 119“
-   pod TestBusiness. Odpověď chybí, potom serverová kontrola a úklid.
-   Ponechat stávající pilot pro navazující ověření, žádný nový seed; 070 už
-   je deleted. Opravu přečtení ani původní závěrečné akce znovu netestovat.
-   **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
-   [opravu měření čtení a barevný stav](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
-   Dva nedostatky klienta jsou reprodukované; oprava + jemné pozadí
-   a zpráva při nulové nepřečtené skupině mají 34 cílených / 389 celkových testů.
-   ab27253 má success úplné CI 44684384849 a ověřený DEV web 1f3dc2f8355c02ce.
-   Oprava má potvrzený UI výsledek i skutečný server: Bright 120/120 přečtených,
-   070 potvrzené, platné Auth/App Check a HTTP 200. [Důkaz a zbytek pilotu](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
-   Interakce/mazání 070 a Business/čtení 119 jsou funkčně ověřené; navazující
-   odezva má schválenou opravu výše. Potom úklid a konečná B3 akceptace.
-   Žádný nový seed/migrace ani opakování úspěšného UI testu čtení Brighta.
-   B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
-   výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
-   [Závěrečný checkpoint a meze důkazu](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete).
-   [Konkrétní rozsah je schválený](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local):
-   úplná synchronizační bariéra, globální řazení napříč stránkami a stabilita
-   otevřeného seznamu. Nepřečtené i přečtené řadit podle vzdálenosti, mezi
-   skupinami oddělovač. Top/Končící/Sledované zachovat. Lokální implementace
-   i automatické ověření jsou hotové: c2cdb48 má success úplné CI 44419427913.
-   [Výsledky a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
-   ukazují úsporu cache i dražší studenou cestu. Další je provozní příprava
-   přechodu generace/writerů a živého ověření; pouhé zapnutí webového flag
-   nestačí. Živá migrace zatím není povolená lokálním souhlasem.
-   [Konkrétní navazující lokální návrh](plans/feed/B3_DEV_ROLLOUT.md#local-transition-proposal)
-   je schválený lokálně: dva formáty, bezpečný doplňovací writer,
-   obnovitelný backfill, audit pokrytí a kompatibilní reader/rollback.
-   [Implementace a výsledky](plans/feed/B3_DEV_ROLLOUT.md#local-transition-results):
-   přechod 7191502 má success úplné CI 44565313452, včetně 134 purge/runtime
-   regresí se všemi 18 přechodovými testy.
-   [Provozní příprava](plans/feed/B3_DEV_ROLLOUT.md#operator-preparation) nyní
-   obsahuje CLI s digestem/přesným úplným CI, společné vypnuté zapojení,
-   22 emulátorových + 6 unit regresí a 35 rozlišených měřených výběrů.
-   Příprava 16e2ea5 má success úplné CI 44607375041. Další je předložit
-   [připravený DEV návrh](plans/feed/B3_DEV_ROLLOUT.md#dev-pilot-proposal)
-   feed-v1 → feed-v2 s pilotem a návratem vlastník již schválil.
-   [Probíhající rollout](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results):
-   kompatibilní 1a4d184 prošel úplným CI 44614605147; všech sedm Functions je
-   ACTIVE a migrace včetně návratu/nového auditu skončila na feed-v2 / revision 6.
-   Aktivační 1db4631 má success úplné CI 44620011513; getFeedPage a web
-   62bd3a157ab5342b jsou ověřené v DEV. Vzniklo 120 schválených fixture a
-   přečtení 70/20; interní živé jádro ověřilo oběma účtům stránky 50 → 100 → 120
-   i skupiny. Následuje již vyžádaný UI průchod, klientské interakce a úklid.
-   Nežádat znovu o stejný pilot. Produkce/main/Rules/Auth účty zůstávají mimo něj.
-   [Společný návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md) a
-   [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
-   Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy
-   jsou zachované v [historii etap](plans/feed/B2_DEV_ROLLOUT.md#todo-pre-acceptance-history).
-   Produkční kapacita 100 000 účtů / 5 000 současně aktivních relací zůstává
-   samostatnou otevřenou branou; DEV profil ji neprokazuje.
+**Poslední uzavřený úsek:** [B3 – živá DEV akceptace a úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
+Původní podrobný [checkpoint je zachovaný](plans/feed/B3_DEV_ROLLOUT.md#todo-b3-preacceptance-history)
+v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudových
+značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
-2. **Po B3 dokončit úspornou obnovu s novinkami v B4.** Verze/metadatové
+1. **Dokončit úspornou obnovu s novinkami v B4.** Verze/metadatové
    porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
    [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
-   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3, B1 a B2 v DEV nemění
+   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1–B3 v DEV nemění
    automaticky celý serverový milník. Doložené podúseky posouvají váženou stupnici
    podle [nové metodiky](PROGRESS.md).
-3. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
+2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
 

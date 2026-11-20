@@ -2,7 +2,8 @@
 
 ## Aktuální stav a použití plánu
 
-Souhrn k 11. listopadu 2026. Níže jsou kritéria dokončení, nikoli seznam
+Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 20. listopadu.
+Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
 Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
 
@@ -10,7 +11,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. | B2–B4 a ostatní níže uvedená kritéria; A2/A3, regrese Uložených a B1 jsou uzavřené v DEV. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A2/A3, Uložené a B1–B3 mají uzavřenou DEV akceptaci. | B4 (delta/cache a indikátor novinek), společná finální regrese feedu a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
@@ -166,9 +167,11 @@ potvrdil zmizení odebrané karty i nepřítomnost po restartu. Přečtení obou
 testovacích Shoutů má stejné lokální časy před/po znovuotevření pod Bright_Otter_182.
 B1 uzavřené; nová dvojice je uklizená přes writer (2 zdroje, 3 záložky,
 9 receipt), 37 původních zdrojů beze změny. Functions/Rules beze změny.
-B2–B4 i ostatní požadavky serverové brány zůstávají otevřené. B2 má schválený
-první lokální úsek, retenci a načasování; připravené bloky/IndexedDB/fronta
-nejsou živá aktivace. [Checkpoint](plans/feed/FEED_READING_POLICY.md#b2-local-results).
+B2 má od 18. listopadu [uzavřenou DEV akceptaci](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete),
+B3 od 20. listopadu [uzavřenou akceptaci i úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
+Původní lokální [checkpoint B2](plans/feed/FEED_READING_POLICY.md#b2-local-results)
+je historie, nikoli další neprovedený rollout. B4 a ostatní požadavky celé
+serverové brány zůstávají otevřené.
 Vlastník 12. listopadu začlenil [úspornou obnovu, verze, cache a přenos rozdílů](plans/feed/FEED_DELTA_REFRESH_PLAN.md)
 do navazujících B2–B4 před MVP. Nejprve společný kontrakt, potom B2, B3 a B4;
 samotné zapsání plánu nedokládá dostupnou deltu, číslovku ani cloudovou kapacitu.

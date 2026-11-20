@@ -13,13 +13,16 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
-**19. listopadu: B3 je nasazené v DEV; zbývá UI a úklid pilotu.**
-Zdroj 1db4631 má success úplné CI 44620011513, reader i web jsou ověřené.
+**20. listopadu: B3 má uzavřenou živou DEV akceptaci i úklid pilotu.**
+Reader z 1db4631 má success úplné CI 44620011513; aktuální web fc795ad má
+success úplné CI 44788753267 a ověřený Hosting 5b4d711b715a85e3.
 Control revision 6 čte feed-v2 a udržuje oba kompatibilní writery; skutečný
 rollback a reaktivace s novým auditem prošly. Na 120 nových schválených fixture
 interní jádro ověřilo oběma účtům 50 → 100 → 120 i globální skupiny 50/70 a
-100/20. Nejde o veřejný Auth/App Check a UI důkaz; ten je vyžádaný a fixture
-zůstávají připravené. [Aktuální důkazy a pokračování](B3_DEV_ROLLOUT.md#dev-rollout-results).
+100/20. Následný skutečný klientský/UI průchod potvrdil přečtení, stránkování,
+oddělovač, obnovu, palce/záložky i vlastní mazání. Opravené měření a okamžitá
+odezva jsou akceptované. Uklizeno 120 fixture a 144 cloudových read klíčů,
+původních 38 zdrojů a pending žádost beze změny. [Konečné důkazy](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 B4 indikátor novinek/delta obnova je další otevřená etapa. Datované podklady
 předchozích příprav níže nejsou současným stavem nasazení.
 
@@ -50,7 +53,9 @@ a jsou 11. listopadu uklizené včetně záložek/receipt i aktuálního indexu.
 [Aktuální checkpoint](FEED_INSTALLATION_AND_ROLLOUT.md#saved-client-regression).
 Webové B1 má skutečnou expozici i místní trvalé označování a je uzavřené
 v DEV. Synchronizace B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete);
-navazující B3–B4 nejsou hotové v DEV. Od 19. listopadu je schválené a lokálně
+Navazující B3 je po 20. listopadu uzavřené výše; B4 zůstává otevřené.
+Následující doklady zachovávají historické přípravy, neopakovat je jako novou práci.
+Od 19. listopadu bylo schválené a lokálně
 ověřené [jádro B3 s oddělovačem a potvrzeným read snapshotem](FEED_DELTA_REFRESH_PLAN.md#b3-local-results);
 zdroj c2cdb48 má success úplné CI 44419427913. Řízený živý přechod a DEV
 akceptace zůstávají samostatné kroky; živé konfigurace se nezměnily.
@@ -61,7 +66,8 @@ vstup, konkrétní živý plán a DEV akceptace. Následně schválená
 [provozní příprava](B3_DEV_ROLLOUT.md#operator-preparation) už obsahuje CLI,
 vypnuté zapojení, měření a konkrétní návrh DEV pilotu; zdroj 16e2ea5 má
 success úplné CI 44607375041. Vymezený živý DEV pilot je následně schválený;
-na feature/feed-b3-dev se připravuje kompatibilní release a fixture helper.
+na feature/feed-b3-dev se připravoval kompatibilní release a fixture helper;
+jejich živý výsledek a úklid jsou nyní uzavřené výše.
 11. listopadu vlastník schválil [konkrétní webové B1](FEED_READING_POLICY.md#b1-proposal)
 i retenci expiresAt + 7 dní. Zdroj 503eea6 prošel CI 43056516730
 (350 Flutter / 8 skutečných Chrome/IndexedDB) a je na DEV webu
@@ -80,7 +86,7 @@ lokální protokol s 61/61 cílenými testy a success CI 42076107087. Navazujíc
 moderační regrese a opravy jsou lokálně uzavřené: 35/35 cílených testů a success CI 42107616925.
 Navazující R6a–R6e, provozní měření, instalace a query API jsou doložené
 v přechodovém plánu; jejich živý DEV výsledek je uveden výše. Po uzavřeném
-A2/A3, B1 a B2 následuje osobní pořadí B3 a indikátor B4
+A2/A3, B1, B2 a B3 následuje indikátor/delta obnova B4
 se společnou regresí. Původní úplná
 příprava okolí před první stránkou není zvolená.
 [Progresivní směr](FEED_PROGRESSIVE_PLAN.md), [writeři](FEED_WRITER_INTEGRATION.md),

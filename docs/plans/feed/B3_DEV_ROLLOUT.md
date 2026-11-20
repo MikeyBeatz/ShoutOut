@@ -748,3 +748,122 @@ nepoužívat deleted 070. Po úspěchu ověřit databázový výsledek a spustit
 schválený úklid z čistého release-1db4631 podle původního digestu; nedoplňovat
 zpětně další read seeding 70/20. Zachovat přesné updateTime původních 38 zdrojů
 a původní pending žádosti. Teprve po úklidu uzavřít feed-b3-accept v metrikách.
+
+<a id="b3-acceptance-complete"></a>
+
+### B3 — živá DEV akceptace a úklid uzavřené 20. listopadu
+
+Vlastník na závěrečný tříbodový průchod verze fc795ad odpověděl „vše reaguje
+okamžitě“. Tím potvrdil odezvu palce/záložky, jejich vrácení, průběh vlastního
+smazání a odstranění karty. Předchozí UI akceptace už ověřila stránkování,
+oddělovač, skutečné přečtení/detail a správné zařazení po obnově. Tyto testy
+se znovu neopakovaly. Čtení Brighta 120/120 a Businessu 24/120 včetně 119
+bylo doložené na serveru; účty mají oddělené značky.
+
+Read-only kontrola 19:33 UTC našla u **MVP B3 119 status deleted** a počty
+0/0/0. Pět serverových receipt dokládá like 0 → 1 → 0, save 0 → 1 → 0
+a deleteShout=true, mezi 19:31:15 a 19:31:51 UTC. Jde o skutečný klientský
+průchod nového webu, ne pouze interní Admin SDK operaci. Zlepšení odezvy
+potvrzuje vlastník; univerzální cloudové SLA tím netvrdíme. QUIC/400 Listen
+chyby z dřívější relace se neoznačují za vyřešené.
+
+Následoval původně schválený úklid pouze v **shoutout-dev-46c81** z čistého
+checkoutu **1db4631e424c3333553c12ebbfbba5e2aa54cca0**, ověřené úplné CI
+**44620011513**, digest pilotu
+**2099624a2567909fe1baea29c6a64dee9069c98259c9d66a72630e88c408b93a**.
+CLI použilo explicitní dokončení klientských testů a společný indexový writer:
+
+- fyzicky odstraněno **120** přesně vymezených testovacích zdrojů, jejich
+  dovolené reakce/záložky, receipt a testovací reaction oznámení;
+- odstraněno **144** cloudových read klíčů týchž fixture (120 Bright / 24 Business);
+  prázdné read listy/routing zachované pro standardní retenční úklid;
+- v aktuální projekci feed-v1 i feed-v2 nezůstala žádná metadata těchto ID;
+  historické kořeny/relace podléhají běžné retenci, nebyly plošně smazané;
+- původních **38 Shoutů a 1 pending žádost** mají shodné přesné updateTime
+  před i po úklidu; související nefixture read položky v dotčeném dni se nezměnily;
+- žádný nový seed, prodloužení expirace, Auth mutace, zásah do produkce či main.
+
+Nezávislé ověření **2026-11-20T19:38:27.239Z** potvrdilo **0/120 zdrojů,
+0 testovacích receipt a 0 testovacích cloudových read klíčů**. Místní stav
+v hlavním i izolovaném checkoutu má phase cleaned. Důkazy jsou
+build/b3-dev/interaction-acceptance-precleanup.json, cleanup-result.log,
+acceptance-cleanup-proof.json a pilot-state.json. Ověření samo nic nezapisovalo.
+Místní klientské značky mohou zůstat do své už schválené expirace + 7 dní;
+nesmazala se uživatelova IndexedDB ani skutečná historie přečtení.
+
+**feed-b3-accept je uzavřené v DEV.** Živý web zůstává fc795ad / Hosting
+5b4d711b715a85e3 se success úplným CI 44788753267. Není potřeba znovu
+seedovat pilot, migrovat generace ani opakovat jeho akceptaci. B4 (verze,
+delta/cache a počet nových Shoutů) a společná finální regrese celého feedu
+zůstávají otevřené; tato akceptace neuzavírá celý serverový milník ani
+kapacitní cíl 100 000 účtů / 5 000 současně aktivních relací.
+
+<a id="todo-b3-preacceptance-history"></a>
+
+### TODO checkpoint před uzavřením B3 — historický záznam
+
+Následující původní přehled je zachovaný beze ztráty informací; relativní odkazy
+jsou přepojené na toto umístění. Jeho čekající stavy jsou historické; platný
+výsledek určuje [konečná akceptace](#b3-acceptance-complete) výše.
+
+1. **Dokončit UI akceptaci a úklid nasazeného B3 — nepřečtené první pouze v Nejblíž.**
+   **Nejnovější checkpoint:** palce/záložka/mazání i Business čtení jsou
+   serverově ověřené, ale vlastník hlásí pomalou první odezvu a zástupnou kartu.
+   [Měřené časy a nový návrh](B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
+   mají schválenou navazující [opravu odezvy](B3_DEV_ROLLOUT.md#interaction-feedback-implementation).
+   Lokální klientská implementace, 69 cílených / 408 celkových Flutter testů
+   a cílený emulátorový test čtení jsou hotové. fc795ad má success úplné CI
+   44788753267 a ověřený DEV web **5b4d711b715a85e3** na obou doménách.
+   [Nasazení a čekající průchod](B3_DEV_ROLLOUT.md#interaction-feedback-dev):
+   vlastník má ověřit okamžitý palec/záložku a smazání svého „MVP B3 119“
+   pod TestBusiness. Odpověď chybí, potom serverová kontrola a úklid.
+   Ponechat stávající pilot pro navazující ověření, žádný nový seed; 070 už
+   je deleted. Opravu přečtení ani původní závěrečné akce znovu netestovat.
+   **Aktuální úsek:** vlastník potvrdil scroll/oddělovač a schválil
+   [opravu měření čtení a barevný stav](B3_DEV_ROLLOUT.md#read-feedback-fix).
+   Dva nedostatky klienta jsou reprodukované; oprava + jemné pozadí
+   a zpráva při nulové nepřečtené skupině mají 34 cílených / 389 celkových testů.
+   ab27253 má success úplné CI 44684384849 a ověřený DEV web 1f3dc2f8355c02ce.
+   Oprava má potvrzený UI výsledek i skutečný server: Bright 120/120 přečtených,
+   070 potvrzené, platné Auth/App Check a HTTP 200. [Důkaz a zbytek pilotu](B3_DEV_ROLLOUT.md#read-feedback-acceptance).
+   Interakce/mazání 070 a Business/čtení 119 jsou funkčně ověřené; navazující
+   odezva má schválenou opravu výše. Potom úklid a konečná B3 akceptace.
+   Žádný nový seed/migrace ani opakování úspěšného UI testu čtení Brighta.
+   B2 je uzavřené v DEV včetně přenosu mezi klientskými relacemi, řízeného
+   výpadku, restartu aplikace, online potvrzení a úklidu dvou testovacích Shoutů.
+   [Závěrečný checkpoint a meze důkazu](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
+   [Konkrétní rozsah je schválený](FEED_DELTA_REFRESH_PLAN.md#b3-local):
+   úplná synchronizační bariéra, globální řazení napříč stránkami a stabilita
+   otevřeného seznamu. Nepřečtené i přečtené řadit podle vzdálenosti, mezi
+   skupinami oddělovač. Top/Končící/Sledované zachovat. Lokální implementace
+   i automatické ověření jsou hotové: c2cdb48 má success úplné CI 44419427913.
+   [Výsledky a měření](FEED_DELTA_REFRESH_PLAN.md#b3-local-results)
+   ukazují úsporu cache i dražší studenou cestu. Další je provozní příprava
+   přechodu generace/writerů a živého ověření; pouhé zapnutí webového flag
+   nestačí. Živá migrace zatím není povolená lokálním souhlasem.
+   [Konkrétní navazující lokální návrh](B3_DEV_ROLLOUT.md#local-transition-proposal)
+   je schválený lokálně: dva formáty, bezpečný doplňovací writer,
+   obnovitelný backfill, audit pokrytí a kompatibilní reader/rollback.
+   [Implementace a výsledky](B3_DEV_ROLLOUT.md#local-transition-results):
+   přechod 7191502 má success úplné CI 44565313452, včetně 134 purge/runtime
+   regresí se všemi 18 přechodovými testy.
+   [Provozní příprava](B3_DEV_ROLLOUT.md#operator-preparation) nyní
+   obsahuje CLI s digestem/přesným úplným CI, společné vypnuté zapojení,
+   22 emulátorových + 6 unit regresí a 35 rozlišených měřených výběrů.
+   Příprava 16e2ea5 má success úplné CI 44607375041. Další je předložit
+   [připravený DEV návrh](B3_DEV_ROLLOUT.md#dev-pilot-proposal)
+   feed-v1 → feed-v2 s pilotem a návratem vlastník již schválil.
+   [Probíhající rollout](B3_DEV_ROLLOUT.md#dev-rollout-results):
+   kompatibilní 1a4d184 prošel úplným CI 44614605147; všech sedm Functions je
+   ACTIVE a migrace včetně návratu/nového auditu skončila na feed-v2 / revision 6.
+   Aktivační 1db4631 má success úplné CI 44620011513; getFeedPage a web
+   62bd3a157ab5342b jsou ověřené v DEV. Vzniklo 120 schválených fixture a
+   přečtení 70/20; interní živé jádro ověřilo oběma účtům stránky 50 → 100 → 120
+   i skupiny. Následuje již vyžádaný UI průchod, klientské interakce a úklid.
+   Nežádat znovu o stejný pilot. Produkce/main/Rules/Auth účty zůstávají mimo něj.
+   [Společný návrh](FEED_DELTA_REFRESH_PLAN.md) a
+   [etapy](FEED_IMPLEMENTATION_STAGES.md#aktualni-stav) určují návaznosti.
+   Hotové B2 přípravy, rollout a fixture neopakovat; původní podrobné checkpointy
+   jsou zachované v [historii etap](B2_DEV_ROLLOUT.md#todo-pre-acceptance-history).
+   Produkční kapacita 100 000 účtů / 5 000 současně aktivních relací zůstává
+   samostatnou otevřenou branou; DEV profil ji neprokazuje.

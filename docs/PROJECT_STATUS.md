@@ -6,7 +6,25 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: potvrdit odezvu nasazené opravy a potom uklidit původní B3 pilot.**
+**Nyní: připravit konkrétní návrh B4 — úsporná delta/cache a indikátor novinek.**
+B3 má **uzavřenou živou DEV akceptaci i úklid**. Vlastník potvrdil okamžitou
+odezvu závěrečného průchodu. Server doložil u 119 palec/záložku 0 → 1 → 0,
+smazání a výsledné 0/0/0. Následný schválený úklid odstranil 120 testovacích
+zdrojů a 144 cloudových read klíčů, včetně příslušných potomků/receipt/oznámení.
+Nezávislá kontrola 19:38 UTC našla 0 zdrojů/receipt/read klíčů pilotu;
+původních 38 zdrojů a 1 pending žádost mají nezměněné updateTime.
+[Konečná akceptace a důkazy](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
+Oba pilot-state mají phase cleaned. **Neopakovat seed, migraci, akceptaci
+čtení ani úklid téhož pilotu.** Historické kořeny mají standardní retenci;
+klientská IndexedDB a skutečná historie přečtení se plošně nečistily.
+
+Další B4 určuje [schválený směr a otevřené technické volby](plans/feed/FEED_DELTA_REFRESH_PLAN.md):
+nejprve verze obsahu, manifest/porovnání a bezpečné opakované využití cache,
+potom úsporné signály a přesný počet nových relevantních Shoutů do 99+.
+Před zdrojovými změnami předložit konkrétní schéma, ověření a nákladové meze;
+B3 je neurčuje. B4, společná finální regrese a kapacitní brána nejsou hotové.
+
+**Poslední ověřený DEV web se nemění:**
 Zdroj **fc795adba3aa9092a8afe3d7c82272da07a2b5ab** z fix/interaction-feedback má
 [success úplné CI 44788753267](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44788753267).
 DEV Hosting projekt/site shoutout-dev-46c81 je ve verzi **5b4d711b715a85e3**,
@@ -20,13 +38,7 @@ scrollem. Expirace vrátí zobrazení k potvrzeným počtům. Prošlo 69 cílen�
 408 celkových Flutter testů, analýza/formát i emulátorová regrese čtení pod
 uzavřenými Rules. Functions, Rules, prostředky, retence, main a produkce se neměnily.
 
-Vlastník dostal krátký průchod TestBusiness / „MVP B3 119“ na ?mvp=fc795ad:
-okamžitý palec/záložka, jejich návrat a vlastní smazání s průběhem bez
-zástupného místa. Browser host je nedostupný. **Odpověď a úklid zatím chybí**;
-celou B3 akceptaci neuzavírat. Pilot ponechat, žádný nový seed a nepoužívat
-deleted 070. Původní expirace je 21:38:25 UTC (22:38 českého času).
-Původní zápisy/mazání 070 a Business čtení 119 už prošly funkčně; neprovádět
-znovu migraci, seed ani akceptované měření přečtení. [Diagnóza prodlevy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
+[Diagnóza prodlevy](plans/feed/B3_DEV_ROLLOUT.md#interaction-feedback-diagnosis)
 rozlišuje studený start a nezměřený zbytek. Vlastník má No throttling a hlásil
 QUIC/400 Listen chyby; jejich oprava ani příčinná souvislost nejsou potvrzené.
 
@@ -41,7 +53,8 @@ změny pořadí a zpráva při serverem potvrzené prázdné nepřečtené skupi
 [Souhlas, diagnóza a výsledky](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-fix).
 Zdroj **ab27253d1da7a0b1666caee04483ec5c4606a4d9** má
 [success úplné CI 44684384849](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44684384849).
-Je na DEV Hostingu ve verzi **1f3dc2f8355c02ce**, pět souborů na obou
+Byl původně na DEV Hostingu ve verzi **1f3dc2f8355c02ce**, dnes nahrazené fc795ad.
+Pět souborů na obou
 originech odpovídá release manifestu; všech 68 souborů lokálně ověřeno.
 Functions, Rules, indexy, konfigurační přepínače a produkce se neměnily.
 Uživatel potvrdil živou změnu pozadí a správné řazení po obnově; všechny
@@ -52,9 +65,9 @@ Skutečné požadavky getFeedPage/syncReadBatch mají HTTP 200 / Auth VALID /
 App Check VALID. [Akceptace opravy a zbývající test](plans/feed/B3_DEV_ROLLOUT.md#read-feedback-acceptance).
 Navazující průchod původního pilotu je funkčně ověřený; nové výhrady k odezvě
 a vlastnímu smazání jsou popsané výše. Neopakovat migraci, seed ani úspěšné
-UI čtení; úklid a celou B3 akceptaci uzavřít po vyřešení tohoto checkpointu.
+UI čtení; navazující odezva i celá B3 akceptace jsou nyní uzavřené výše.
 
-**B3 je nasazené v DEV, serverový pilot prošel; zbývá UI akceptace a úklid.**
+**Původní B3 rollout — navazující UI akceptace a úklid nyní uzavřené:**
 Aktivační zdroj **1db4631e424c3333553c12ebbfbba5e2aa54cca0** má
 [success úplné CI 44620011513](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44620011513).
 getFeedPage je ACTIVE na revizi getfeedpage-00003-tux; prvotní DEV Hosting verzi
@@ -66,18 +79,18 @@ jsou ověřené; control revision 6 čte feed-v2 a udržuje oba writery.
 V rámci [schváleného pilotu](plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
 vzniklo přesně 120 nových 24h syntetických Shoutů a 90 testovacích značek
 přečtení. Živé interní jádro oběma účtům vrátilo 50 → 100 → 120, staré
-negrupované i B3 pořadí: Bright_Otter_182 má 50 nepřečtených, TestBusiness 100.
-Tento důkaz nenahrazuje veřejný Auth/App Check a UI. Uživatel potvrdil další
+negrupované i B3 pořadí: na začátku měl Bright_Otter_182 50 nepřečtených, TestBusiness 100.
+Tento původní důkaz sám nenahrazoval veřejný Auth/App Check a UI. Uživatel potvrdil další
 stránky a oddělovač; zjištěná regrese měření a vizuální doplnění mají rozsah
-výše. Po jejich nasazení dokončit klientské kontroly, potom schválený úklid.
+výše. Po jejich nasazení proběhly klientské kontroly i schválený úklid.
 Původních 38 zdrojů a původní žádost jsou zachované; žádná Auth mutace.
 Browser host byl nedostupný a nativní automatická kontrola zastavila Chrome
 kvůli neověřené URL; ve stejném tahu tuto kontrolu neobcházet jinou cestou.
 
 Čistý izolovaný checkout nasazeného 1db4631 je v ignorovaném
-build/b3-dev/release-1db4631, jeho místní pilot-state má phase verified.
-Pokračovat/uklízet CLI odsud s přesným CI 44620011513 a digestem uloženého
-plánu; průběžně aktualizovat i hlavní build/b3-dev/pilot-state.json.
+build/b3-dev/release-1db4631, jeho místní i hlavní pilot-state mají phase cleaned.
+Úklid odsud proběhl s přesným CI 44620011513 a digestem uloženého plánu;
+další práce tímto CLI není potřeba. Stav je synchronizovaný v obou checkout.
 Nezakládat nový pilot ani neopakovat migraci. Návratový v3 web bez B3 je
 ověřený. Produkce/main/Rules/indexová konfigurace/Auth účty/Scheduler se nemění.
 

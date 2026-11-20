@@ -11,6 +11,14 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 ## Cíl a ověřený výchozí stav
 
+**Aktualizace 20. listopadu:** B2 i B3 mají uzavřenou DEV akceptaci včetně
+úklidu testovacích dat. [B3 – konečné důkazy](B3_DEV_ROLLOUT.md#b3-acceptance-complete)
+zahrnují skutečné přečtení a řazení, obě identity, interakce i mazání.
+Další je konkrétní návrh B4: verze/metadatové porovnání a delta/cache,
+potom úsporné signály a číslo nově příchozích Shoutů. Technické schéma,
+čerstvost/slučování a provozní náklady před implementací konkretizovat;
+samotné uzavření B3 je neurčuje. Datované přípravné checkpointy níže jsou historie.
+
 <a id="b3-local"></a>
 
 ### B3 — schválený lokální úsek, 19. listopadu 2026

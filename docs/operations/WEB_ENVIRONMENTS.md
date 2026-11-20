@@ -3,8 +3,12 @@
 Od 19. listopadu je [B3 reader a web nasazený v DEV](../plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)
 ze zdroje 1db4631 po success úplném CI 44620011513, Hosting 62bd3a157ab5342b.
 B2 a serverUnreadFeed jsou true. getFeedPage-00003-tux a kompatibilní šestice
-z 1a4d184 používají feed-v2 / oba writery. UI akceptace a úklid 120 schválených
-fixture jsou otevřené. Návratový v3 web bez B3 z 1a4d184 je ověřený; návrat
+z 1a4d184 používají feed-v2 / oba writery. Po navazujících klientských opravách
+je aktuální DEV web **fc795ad**, success úplné CI **44788753267**, Hosting
+**5b4d711b715a85e3**. [Živá B3 akceptace a úklid](../plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete)
+jsou od 20. listopadu uzavřené: 120 fixture / 144 read klíčů uklizeno,
+původních 38 zdrojů a pending žádost zachované. Nezakládat znovu tentýž pilot.
+Návratový v3 web bez B3 z 1a4d184 je ověřený; návrat
 readeru vyžaduje kompatibilní rollback podle B3 plánu, nikoli starý backend.
 Přesné aktuální revize určuje PROJECT_STATUS; následující starší záznamy jsou datované.
 
