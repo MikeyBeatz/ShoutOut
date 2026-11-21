@@ -16,8 +16,16 @@ lokální Rules a návrh indexů. Prošlo 429 Flutter, 159 Functions unit,
 142 purge a 15 Storage testů, nástroje, browser, analýza/lint/formát i build.
 Nové testy zahrnují Chrome proti emulátoru a vlastní bariéru po změně účtu.
 [Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
-Nové přepínače jsou vypnuté, nic se nenasazovalo. Další je připravit konkrétní DEV
-přechod s auditem, kompatibilitou a rollbackem; živá migrace vyžaduje vlastní souhlas.
+Nové přepínače jsou vypnuté, nic se nenasazovalo.
+[Konkrétní návrh dalšího lokálního přechodového úseku](plans/feed/B4_DEV_ROLLOUT.md#local-transition-proposal)
+je připravený ve feature/feed-b4-transition: operátor, zpevnění auditu,
+kompatibilita a rollback, indexový plán a emulátorové ověření. Zdrojové
+úpravy tohoto rozšíření čekají na schválení; živá migrace má vlastní bránu.
+Čtecí DEV inventura 21. listopadu 15:25 UTC potvrdila STANDARD/europe-west3,
+control revision 6 / reader feed-v2 / writery feed-v1+feed-v2 a původních
+38 zdrojů (0 active), 1 žádost. [Podklady a chybějící nástroje](plans/feed/B4_DEV_ROLLOUT.md#read-only-inventory).
+Žádné zápisy do Firebase. enrichShoutGeography není v seznamu nasazených
+Functions; případný B4 rollout ji nesmí mimoděk založit přes index.js.
 
 **Předchozí lokální P1 B4 je uzavřený včetně úplného CI.**
 Zdroj **d2cac88313c914f4d4fbf0780f0b0862d77da04e**, větev

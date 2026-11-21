@@ -474,7 +474,8 @@ reads; Rules závislá čtení, reconnect, síťové rámce, App Check a cloudov
 Cache rozpočet počítá kódované payload bajty, ne úplnou haldu procesu
 včetně kontejnerů, widgetů, SDK a vykreslených karet.
 
-**Další brána:** připravit společný živý DEV přechod P1 + klient/Rules,
+**Další brána:** [konkrétní plán operátoru a DEV přechodu](B4_DEV_ROLLOUT.md)
+je připravený k novému lokálnímu schválení. Zahrne společný přechod P1 + klient/Rules,
 audit všech zdrojů včetně expirovaných knihovních položek, přesné aktivace,
 indexy, odvodnění starých serverových writerů a rollback s udržovanou v1
 generací. Současný souhlas živou migraci nepokrývá. Signály a číslovka

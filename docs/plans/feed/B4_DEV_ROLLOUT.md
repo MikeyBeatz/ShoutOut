@@ -1,0 +1,159 @@
+# B4 – řízený přechod na metadata, cache a živý stav
+
+[Rozcestník](README.md) · [Hotový klient a důkazy](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
+· [Pravidla vydání](../../operations/RELEASING.md)
+
+## Stav a rozsah
+
+21. listopadu 2026: **připravený návrh dalšího lokálního úseku, nikoli
+schválení nové implementace nebo živé migrace**. Vlastník povolil pokračovat
+přípravou přechodu. Zdroj klienta 62fc8fe má success úplné CI 44917393562;
+uzavírací dokumentace 6c2c7f3 má success lehké CI 44918771643.
+
+Tato příprava provedla pouze čtení DEV a kontrolu kódu. Žádné nasazení,
+změna obsahu, řídicího dokumentu, generací, indexů, Rules ani Auth účtů.
+Nezapočítává se jako nasazení nebo živá akceptace v metrikách.
+
+<a id="read-only-inventory"></a>
+
+## Ověřený výchozí stav
+
+Čtecí inventura 21. listopadu, 15:25 UTC, projekt `shoutout-dev-46c81`,
+databáze `(default)`, **STANDARD**, region europe-west3:
+
+| Oblast | Potvrzený stav |
+| --- | --- |
+| Control | schemaVersion 1, revision 6, active; reader feed-v2 |
+| Udržované generace | feed-v1 a feed-v2, obě formát v1 / accountRetention true; feed-v2 má readIdentity 1 |
+| Původní Shouty | 38: 27 expired, 11 deleted, 0 active a 0 nyní viditelných; žádný purged kontext |
+| Geografie | všech 38 má platný geohash a souřadnice; cardRevision zatím nemají |
+| Účty | 14 autorů těchto zdrojů, žádný jejich veřejný deleted marker; 1 čekající žádost |
+| Indexy | 12 složených indexů / 21 výjimek; žádný publicStates index ani některá z 13 navržených výjimek |
+| Functions | 20 existujících v2 Functions, europe-west3, max. 1 instance / concurrency 1 / 256 MiB |
+
+Otisk ID/updateTime nepurged zdrojů z této inventury:
+`938a7accefb3ab802896cf63a185df2e7213efd00e591f5dc89348bb4c25717d`.
+Jde o podklad kontroly, **ne schválený digest mutačního plánu**. Před živým
+provedením se stav znovu načte; souběžné změny se nesmějí přepsat.
+
+Zvolený kandidát nové generace je `feed-v3`; v inventuře neexistuje.
+Její skutečné založení zatím není povolené. Přechod musí fungovat také
+s aktivním obsahem a souběžnými uživateli; prázdný feed není podmínkou.
+
+## Co už existuje a co chybí
+
+- `createCardBackfill` má begin/step/beginAudit/auditStep: dávky nejvýše 50,
+  dělení příliš velké dávky a společný rozpočet 450 zápisů. Doplňuje malé
+  stavy i pro expirované a smazané zdroje; aktivní obsah patří do prostorového
+  stromu. Účtové deleted markery a purged kontexty zůstávají chráněné.
+- Jádro zatím končí v ready. Nemá hotovou řízenou aktivaci, rollback,
+  resume/abort ani veřejný operátorský vstup pro tento formát.
+- Dosavadní `feed_generation_transition.mjs` obsluhuje přechod B3 bez
+  content identity na v1 s content identity. Jeho planner očekává jediný
+  původní writer; dnešní DEV má dva. Nelze jej použít k B4 ani kvůli němu
+  odstranit feed-v1 z writerů.
+- Statická kontrola `getCompatibleFeedPageOperation` zjistila, že při
+  zapnutém přepínači posílá nové starší požadavky přímo do V2, i když
+  card reader ještě není aktivní. Před doplněním nebo po rollbacku by tak
+  počáteční načtení skončilo odmítnutím. Není to chyba nasazeného DEV:
+  nový přepínač je vypnutý. Přechod musí tuto mezistavovou kompatibilitu
+  vyřešit a otestovat před nasazením.
+- Zvlášť musí projít již otevřený nový klient po návratu na starý reader,
+  včetně jeho živého stavu a Home promo odběru. Samotná výměna webu nezmění
+  kód již otevřené karty. Fallback se smí spustit jen na explicitní serverové
+  capability; běžná chyba oprávnění nebo sítě nesmí otevřít jinou čtecí cestu.
+- Audit potřebuje pevně vynucenou platnost původního snapshotu, úplné
+  ověření journalu a retenčních pojistek, bezpečné pokračování a ochranu
+  opakovaného startu po ztracené odpovědi. Využít vzory B3; neurčovat nové
+  produktové lhůty ani neomezeně zvětšovat pracovní dokument.
+
+<a id="local-transition-proposal"></a>
+
+## Navržený další lokální úsek ke schválení
+
+Jeden ucelený úsek **operátor + kompatibilní přechod/rollback + emulátorový
+pilot**, bez aktivace v cloudu:
+
+1. Doplnit řízené plánování a status, obnovitelné doplnění, audit, aktivaci,
+   rollback, resume a abort pro card generaci. Každá mutace provede omezený
+   krok; ověřuje přesný projekt, digest, původní control revizi, inkarnace
+   a vlastnictví jobu, čistý commit a úspěšné úplné CI. Povinné kontroly
+   zahrnou i tři nové B4 sady. Zachovat všechny dosud udržované generace.
+2. Zpevnit audit a bezpečné opakování existujícího jádra. Ready nestačí
+   samo o sobě k přepnutí: aktivace ověří platnost auditu, aktuální control,
+   původní inkarnace a R5. Po rollbacku vyžaduje resume nový audit. Abort
+   nezlikviduje registrované generace ani jejich retenční podklady.
+3. Doplnit serverové rozhodování podle skutečně aktivní capability a
+   klientské zpracování potvrzeného návratu. Starý klient/kurzor funguje
+   během doplňování i po aktivaci; již otevřený nový klient musí po rollbacku
+   bezpečně přejít na kompatibilní čtení, živé počty a promo. Zachovat
+   Auth/App Check, B2/B3, stabilní pořadí a okamžitý náhled interakcí.
+4. Připravit přesný selektivní indexový plán podle
+   [návrhu](B4_CLIENT_INDEX_PLAN.json): jeden složený index a 13 výjimek.
+   Inventura, digest a kontrola driftu ochrání nesouvisející indexy i TTL.
+   Indexové API není jedna atomická transakce; případné částečné provedení
+   musí být rozpoznatelné a obnovitelné, ne vydávané za úplný úspěch.
+5. Ověřit v emulátoru dva původní writery + nový card writer, prázdné
+   i neprázdné zdroje, aktivní/expired/deleted/purged obsah, souběh publikace,
+   reakcí, komentářů, záložek, mazání účtu, expirace a R5. Zahrnout restart,
+   ztracenou odpověď, stale plán/inkarnaci, chybné pokrytí, propadlý audit,
+   překročení rozpočtu, staré/nové kurzory a rollback již otevřeného klienta.
+   Změřit skutečnou práci tří generací. Nevydávat to za cloudový load test.
+6. Doložit přesné budoucí pořadí nasazení a odvodnění starých writerů,
+   návratový web/reader a rozsah živého pilotu. Společný commit/push a úplné
+   CI; aktualizovat stav a důkazy bez nového kreditu za již uzavřený klient.
+
+Přepínače zůstanou vypnuté. Rozsah zahrnuje potřebné lokální zdrojové změny
+operátoru, jádra přechodu, kompatibility serveru/klienta a jejich testů;
+**nezahrnuje nasazení, živé kolekce nebo migraci, indexové/Rules zápisy,
+nové či mazané Auth účty, nové služby/klíče, Scheduler, změnu prostředků,
+oprávnění, retence, produkce nebo main**. Číslovka novinek se tím nezavádí.
+
+<a id="future-dev-order"></a>
+
+## Budoucí živý DEV postup – zatím nepovolený
+
+1. Čerstvá inventura a konkrétní schválený plán/digest; přesná CI a čisté
+   artefakty. Bez převzetí starého inventurního otisku jako povolení mutace.
+2. Selektivní příprava indexů; ověřit READY a zachování ostatních indexů/TTL.
+3. Nasadit kompatibilní serverové writery, reader a lokálně ověřené Rules
+   v pořadí doloženém testem mezistavů. Ověřit skutečné revize a doběhnutí
+   starých volání **před založením udržované card generace**. Nový guard
+   zpětně neochrání starý Admin zápis bez této kontroly. Samotné vyčkání
+   nakonfigurovaného timeoutu se nebude vydávat za důkaz odvodnění.
+4. Založit cílovou generaci, po dávkách doplnit všechny způsobilé stavy
+   a aktivní prostorová metadata, provést audit. Původní zdroje a jejich
+   updateTime mají zůstat beze změny samotným backfillem. Čekající žádost
+   se nepoužije jako fixture ani se nebude ručně zpracovávat.
+5. Atomicky přepnout reader a card reader při zachování původních writerů,
+   ověřit staré i nové čtení. Potom zapnout schválený DEV web, ověřit
+   metadata/cache, živé stavy, oba typy účtů, promo a návrat.
+6. Živý pilot a jeho úklid povolit zvlášť podle připravených fixture ID,
+   počtu, TTL, účtů a writeru. Dřívější uklizené B3 fixture neopakovat.
+   Odstranění starých generací a vypnutí kompatibilních publisherů nejsou
+   součástí rollbacku; vyžadují vlastní retenčně bezpečný plán.
+
+Z čtecí inventury a konfigurace vychází tento seznam **10 existujících**
+Functions, jejichž společný writer/reader se bude týkat připraveného přechodu:
+
+- content: createShout, deleteShout, toggleShoutReaction,
+  prepareAccountDeletion, createComment, deleteComment, toggleShoutSave,
+  getFeedPage;
+- account-deletion: accountDeletionRequestCreatedDev,
+  resumeAccountDeletionJobsDev.
+
+Callables zůstávají na 15 s, dva workery na 60 s; max. 1 instance,
+concurrency 1, 256 MiB, stávající evropský region. Toto je seznam kandidátů
+budoucího rolloutu, ne příkaz k nasazení. **enrichShoutGeography v inventuře
+nasazených Functions není**; B4 ji nesmí mimoděk založit nasazením celého
+index.js. Příprava jejího publisheru zůstává v kódu pro samostatně schválené
+zapojení. Ostatní codebase a jejich Scheduler se tím nemění.
+
+## Podmínka uzavření a další práce
+
+Lokální úsek bude hotový až po úspěšném úplném CI, prokázaném přechodu
+i návratu, nákladovém reportu a konkrétním návrhu živého pilotu. Implementace,
+nasazení a živá akceptace se evidují zvlášť; samotný plán nezvyšuje stupnice.
+Po živém ověření metadat/cache následují signály a číslovka novinek, potom
+společná B4 akceptace. Cíl 100 000 účtů / 5 000 aktivních relací dál vyžaduje
+samostatnou kapacitní bránu.

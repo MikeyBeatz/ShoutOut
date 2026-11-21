@@ -55,19 +55,23 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Poslední dokončený úsek:** [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results),
-   zdroj d2cac88 / úspěšné úplné CI 44908128699. Navazuje na uzavřený
+   **Poslední dokončený úsek:** [klientské metadata/cache a sdílený stav](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
+   zdroj 62fc8fe / úspěšné úplné CI 44917393562. Předchozí
+   [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
+   má zdroj d2cac88 / úplné CI 44908128699. Navazují na uzavřený
    [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results).
    Atomické zápisy, R5/history/purge, backfill a audit jsou místně ověřené;
    nová vrstva zůstává vypnutá. **Nově uzavřené:** klientský kontrakt, sdílený stav,
    Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
    [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
    [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** připravit
-   řízený DEV přechod s auditem/rollbackem. Živý datový přechod je samostatná brána.
+   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** schválit
+   [připravený lokální úsek operátoru, kompatibility a návratu](plans/feed/B4_DEV_ROLLOUT.md#local-transition-proposal).
+   Podklad obsahuje čerstvou čtecí DEV inventuru; implementace ani živý
+   přechod nezačaly. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
-   připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;
+   připravené. Cold/warm a doplňovací náklady jsou samostatně doložené;
    individual varianta pro výběr se nedoporučuje. Žádný nový rollout nebo živé kolekce.
    Celé B4 zahrnuje verze/metadatové porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
