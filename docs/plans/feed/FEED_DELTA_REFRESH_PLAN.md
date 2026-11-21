@@ -27,6 +27,8 @@ další je řízený DEV přechod, potom signály a číslovka. Celé B4 není u
 **Pozdější stav 21. listopadu:** [metadata/cache B4 mají uzavřenou DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#delta-acceptance-complete).
 Navazující [lokální B4b](#b4b-local-proposal) je schválený a jeho
 [výsledky a návrh četnosti](#b4b-local-results) jsou níže; živé signály ještě neběží.
+Navazuje [konkrétní provozní návrh ke schválení](#b4b-runtime-proposal);
+jeho příprava je povolená, implementace a živý pilot zatím nikoli.
 
 <a id="b3-local"></a>
 
@@ -775,6 +777,183 @@ nálezu v klientském označení čerstvosti: neúspěšná obnova musí ponecha
 předchozí počet a checkpoint, ale číslo zobrazit jako neověřené. Oprava má
 cílenou regresi. Tento zrušený běh nenahrazuje úplné CI konečného zdroje;
 žádný rollout se neprováděl.
+
+<a id="b4b-runtime-proposal"></a>
+
+## B4b – provozní návrh ke schválení, 21. listopadu 2026
+
+**Stav: návrh, nikoli implementace nebo souhlas s novými oprávněními.**
+Vlastník povolil připravit konkrétní další postup. Níže se rozšiřuje hotový
+lokální základ; ten ani metadata/cache pilot se neopakují. Doporučený další
+úsek je jedna ucelená lokální implementace s testy a úplným CI. Živý DEV
+přechod dostane až potom konkrétní aktivaci, inventuru a vymezené fixture.
+
+### Doporučený kontrakt signálu
+
+- Ve stávajícím STANDARD Firestore navrhuji malý dokument
+  `feedIndexGenerations/{generation}/publicationHeads/{cell}`. `cell` je
+  stejný čtyřznakový geohash jako současný adresář indexu. Obsah pouze
+  `{v: 1, token: <náhodná revize>}`; žádné ID/UID, text, souřadnice, přesný
+  čas publikace ani počet příspěvků. Revize není rostoucí čítač.
+- `createShout` při skutečné nové publikaci atomicky zapíše zdroj, index,
+  technické potvrzení a jednu novou revizi příslušné oblasti aktivní news
+  generace. Opakování potvrzené operace, backfill, návrat moderovaného obsahu,
+  palce, záložky a komentáře ji nemění. Samotné `before == null` proto
+  nestačí: backfill také vytváří projekci, ale není novou publikací.
+- Jeden malý soukromý `feedNewsControl/current` má verzovaný režim
+  off/active/paused a vazbu na ID i inkarnaci card generace. Musí se shodovat
+  s autoritativním feedIndexControl; není náhradou jeho kontroly. Pause
+  zastaví detekční čtení, ale zachová již aktivovanou údržbu hlaviček.
+  Nová inkarnace, změna readeru nebo R5 vyžaduje novou relaci; neplatný či
+  chybějící control neaktivuje nic automaticky. Výchozí volby zůstanou off.
+- Hlavička je pomocný signál, nikoli důkaz dostupnosti nebo osobní počet.
+  Přesný count zůstává stávající podepsaný `mode: news` se všemi filtry,
+  kontrolami účtu a R5. Těla se při detekci nestahují. B2 se synchronizuje
+  při spuštění/skutečné obnově, nikoli při každém signálu.
+- Žádné události ani historie hlaviček se nearchivují; zůstane jen poslední
+  anonymní revize oblasti. Nepřidává se TTL nebo nová retenční lhůta obsahu.
+  Návrh indexů: výjimka indexace polí hlavičky, žádný nový složený index,
+  protože se čte podle ID. Přesný indexový diff ověřit při implementaci.
+
+### Čtení, pokrytí a soukromí
+
+Server z podepsaného kontextu spočítá úplné pokrytí kruhu, včetně dosud
+prázdných buněk. Odběr pouze dnešních existujících kořenů by minul první
+publikaci v sousední prázdné buňce. Výchozí revize hlaviček musí odpovídat
+readTime úspěšné obnovy; připojení odběrů potom porovná i jejich první
+serverový stav. Událost během obnovy/připojování nesmí přepadnout do mezery.
+Lokální cache události sama nepotvrzuje aktuální serverový stav.
+
+Navrhuji nejvýše **64 jednotlivých oblastních odběrů na otevřený feed**.
+Je to nová technická mez ke schválení, ne již platný limit. U velkého pokrytí
+(zejména u pólů) se oblast nesmí oříznout: použije se úplný omezený serverový
+count v dávkovém režimu bez přímých odběrů. Dosavadní radiusy 1/3/5/10/20/50 km
+se nemění. Test musí doložit úplnost na hranicích buněk, kolem datové čáry
+i pólů; dražší fallback se musí ukázat v měření, nikoli skrýt v průměru.
+
+Rules návrh dovolí pouze jednotlivé `get` oprávněnému ověřenému účtu podle
+dnešního eligibleUser a platné news/card generace; `list` i všechny klientské
+zápisy zůstanou zakázané. To je **nové čtecí oprávnění k hrubému anonymnímu
+signálu aktivity oblasti**. Neuděluje přístup k soukromému indexu nebo obsahu.
+Serverem dodaný seznam řídí klientské pokrytí, ale samotná Rules neumí
+ověřit HMAC kurzor nebo skutečnou fyzickou polohu uživatele. Oprávněný klient
+může zkusit jednotlivě číst i jinou buňku; nepředstírat geografické omezení
+nebo účetní kvótu, které nejsou vynucené. Při nepřijetí tohoto rozsahu
+viditelnosti zvolit serverovou cestu, ne přidávat skryté osobní granty.
+
+### Navržený adaptivní profil
+
+| Situace | Akce |
+|---|---|
+| Aktivní feed, klidná oblast, počet 0 | Odběr hlaviček; po připojení žádný pravidelný count jen kvůli běhu času. |
+| Změna revize | Označit počet jako neověřený, sloučit pulsy v pevném okně 2 s a spustit jeden count. Pulsy během požadavku zachovat. |
+| Čekající novinky | Opakovat count nejpozději 15 s od začátku předchozí kontroly, při známé expiraci dříve. Tím odečíst i smazané novinky, které publication-only hlavička nehlásí. |
+| Rušná oblast | Odpojit hlučné odběry; každých 5 s dávkově načíst jen revize pokrytých hlaviček. Count pouze při změně, čekajících novinkách nebo zneplatnění. |
+| Pokrytí nad 64 buněk | Bez oříznutí používat stávající úplný count v 5s dávkovém režimu; všechny jeho pokračovací meze platí dál. |
+| Pozadí, jiná sekce, odhlášení | Zastavit odběry i časovače; ohradit pozdní odpovědi projektem/UID/relací. |
+| Návrat do feedu/popředí, reconnect | Bez čekání na další periodu ověřit stav; znovu nepovažovat staré číslo za potvrzené. |
+| Úspěšná obnova | Nová baseline, správný počet vůči ní, návrat nahoru; při chybě zachovat staré karty/baseline a neověřený stav. |
+
+Při čekání se uplatní jediný společný plánovač; 2s slučování nesmí přidat
+další 2 s za již splatnou 15s kontrolu. Nejvýše jeden běžící count na relaci,
+časované kontroly rozptýlit uvnitř posledních 10 % intervalu proti souběžnému
+probuzení klientů. Uváděné časy jsou cíle zahájení online kontroly, ne SLA
+doručení výsledku při výpadku, kvótě nebo pomalém požadavku.
+
+Přepnutí porovná počet doručených hlaviček, závislá Rules čtení, opakovaná
+připojení a skutečnou práci countu proti dávkové cestě se stejným pokrytím.
+Návrh hysteréze: při nákladu odběru nad 125 % dávkové cesty ve dvou 60s
+oknech přejít do dávky; při 32 signálových změnách během 5 s odpojit hned.
+V dávce zůstat alespoň 60 s. Návrat zkusit nejvýše jednou za 60 s krátkým
+5s odběrem; po 32 změnách pokus ukončit. Dva pokusy pod 75 % odhadované
+dávkové ceny dovolí návrat. Do srovnání patří i čtení při těchto pokusech;
+při chybějících měřeních zachovat konzervativní dávkovou cestu.
+Jde o výchozí algoritmus k emulátorovému ověření, ne změřenou cloudovou cenu.
+
+### Ochrany a nákladové meze
+
+- Auth/App Check pro callable a dnešní autorizaci zachovat. Před živým
+  pilotem zvlášť doložit aktuální Firestore App Check enforcement; lokální
+  test Rules nebo callable není důkaz jeho zapnutí. Nic automaticky nevypínat.
+- Samostatný news token bucket podle UID sdílený mezi zařízeními: návrh
+  kapacita 40, doplnění 1 kredit/s, vzor již existujícího B2 bucketu.
+  Každý přijatý HTTP krok včetně pokračování spotřebuje kredit; odmítnutí
+  bucket nepřepisuje. Nejde o převzetí nebo změnu B2 kvóty.
+  Zachovat nejvýše 32 klientských pokračování a současný pracovní rozpočet.
+  Test musí ověřit, zda se nejhorší pokračovací cesta do profilu vejde;
+  kvóta nikdy nesmí vytvořit částečný údaj nebo nekonečné automatické retry.
+- Nejvýše jedna probíhající operace, respektování retryAfter a při síťové
+  chybě návrh backoff 5/10/20/40/60 s s rozptylem. Reconnect může naplánovat
+  kontrolu, ale nesmí obejít serverem určené retryAfter. Změna účtu/mazání
+  zruší staré čekání. Nedokončený stav se ukáže jako neověřený, nikoli 0.
+- Nový bucket přidá na přijatý krok databázové čtení a zápis. Přímé SDK
+  odběry tento bucket neomezí; jejich počet 64 je klientská ochrana, nikoli
+  neobejitelná finanční pojistka. App Check ani maxInstances nejsou pevný
+  měsíční strop účtu. Tuto hranici musí měření výslovně uvádět.
+- Jeden head write přibude na skutečnou novou publikaci v jedné aktivní
+  news generaci, v rámci společného rozpočtu 450 zápisů. Žádný globální
+  dokument se nepřepisuje při každé publikaci. Hotspot v jediné buňce musí
+  ověřit kapacitní test; lokální úspěch není důkaz škálování na 5 000 relací.
+
+Modelové zatížení, **nikoli cenová nabídka**: 5 000 současných feedů,
+všechny s čekajícím počtem a periodou 15 s, představuje 20 000 logických
+kontrol/min. Dosavadních 19–36 SDK reads na jednoduchou kontrolu by znamenalo
+380–720 tisíc reads/min před novým bucketem, Rules a opakováním; pokračování
+náklady dále zvýší. Proto při nule v klidu není zvolen pravidelný count.
+Ani 5s dávka nesmí znamenat automatický celý count, pokud stačí porovnání
+hlaviček. Model zahrne zvlášť počet buněk, délku relací, podíl čekajících
+novinek, fanout a pomocné zápisy. Z celkových registrovaných účtů nelze
+odvodit měsíční částku ani dodržení rozpočtu 5 000 Kč.
+
+### Jeden další lokální úsek a podmínky dokončení
+
+Po schválení připravit společně serverový writer/control a rate guard,
+Rules pro minimální hlavičky, serverové úplné pokrytí, klientský adaptér
+s profilem výše, měření a neaktivní návratovou verzi. Bez nové Function,
+služby, klíče či Scheduleru; stávající getFeedPage a prostředky se nyní
+nepřenastavují. Výjimky indexace pouze připravit. Všechny přepínače off.
+
+Ověření musí zahrnout:
+
+1. Atomický souběh publikací, ztracenou odpověď a opakování; rollback celé
+   transakce včetně signálu při překročení 450 zápisů. Backfill/obnova obsahu
+   a ostatní akce nezvyšují novinky ani nepřepisují head.
+2. Novou prázdnou oblast, hraniční geohash, celou současnou sadu radiusů,
+   póly/datovou čáru a publikaci mezi snapshotem obnovy a připojením odběru.
+3. Krok 0 → 1 → 0, 99+, smazání/expiraci, blokace, R5, změnu generace,
+   pauzu, odvolání oprávnění, druhý účet, zánik obrazovky, offline/reconnect.
+4. Tiché/hlučné oblasti, hysterézi, náklady návratových pokusů, více zařízení,
+   kvótu během pokračování a zachování stabilních karet/scrollu/read sync.
+5. Úplné počty SDK reads/writes, Rules závislostí, přenesených JSON bajtů,
+   count pokračování i volání Functions; 50/200/2 000 zdrojů a model 5 000
+   relací se scénáři řídkého/hustého pokrytí. Reálnou cloudovou latenci,
+   fanout, contention a měsíční cenu ponechat samostatné kapacitní bráně.
+
+Výstup: implementace za off, testy, měření, aktualizovaná dokumentace,
+metriky bez změny rodičovských vah, společný commit/push a úplné CI.
+**Tento návrh nepovoluje živé kolekce/control, migraci, nasazení, Auth účty,
+změnu produkce, Scheduleru, prostředků nebo dosavadních retencí.** Po úspěchu
+naváže konkrétní DEV aktivace a pilot; potom společná akceptace B4 včetně
+interaktivního návratu již otevřeného klienta. Nevzniká další MVP milník.
+
+### Podklady návrhu
+
+Kód: [driver](../../../lib/feed_news_driver.dart),
+[count](../../../functions/feed_news.js),
+[existující adresář a directoryWindows](../../../functions/feed_block_index_store.js),
+[současná validace radiusu](../../../functions/get_feed_page.js),
+[Rules](../../../firestore.rules),
+[B2 bucket jako vzor](../../../functions/read_sync_runtime.js).
+Naměřený základ: [SDK operace a model detektoru](../../benchmarks/FEED_NEWS_2026-11-21.json).
+
+Oficiální dokumentace ověřená při přípravě návrhu:
+[účtování odběrů, opětovných připojení a Rules závislostí](https://firebase.google.com/docs/firestore/pricing),
+[contention jednotlivého dokumentu a indexový fanout](https://firebase.google.com/docs/firestore/best-practices),
+[real-time dotazy a škálování](https://firebase.google.com/docs/firestore/real-time_queries_at_scale).
+Odvozením pro ShoutOut je nutnost započítat každý doručený head a návratový
+odběr; 2s klientské sloučení samo o sobě tyto účtované události neodstraňuje.
+Nové intervaly, prahy a datový kontrakt jsou návrh autora, nikoli doporučené
+číselné limity Firebase nebo již schválený provozní profil.
 
 ## B4: číslovka bez přenačítání feedu
 

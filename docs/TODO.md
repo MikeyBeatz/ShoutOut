@@ -63,9 +63,11 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Nyní:** [schválený lokální B4b](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-proposal)
    pro úsporné signály/číslovku novinek, klienta a měření; pouze nové publikace.
    [Lokální výsledek a návrh četnosti](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
-   je uzavřený: e8c0c9c / úplné CI 44944929884 success. Následuje konkrétní
-   návrh provozního napojení včetně oprávněných oblastních signálů,
-   řízení četnosti a přepínání detekce podle zátěže; nový rozsah předem schválit.
+   je uzavřený: e8c0c9c / úplné CI 44944929884 success.
+   [Konkrétní provozní návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
+   je připravený: minimální oblastní signály, úplné pokrytí, čtecí Rules,
+   četnost/adaptace a news kvóta. Nyní schválit jeden společný lokální
+   implementační/testovací úsek; implementace ani živá aktivace nezačaly.
    Přepínače vypnuté, bez živých změn. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

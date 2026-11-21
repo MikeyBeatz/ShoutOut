@@ -6,6 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Provozní návrh B4b je připravený ke schválení; implementace nezačala.**
+Vlastník povolil přípravu návrhu. [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
+určuje minimální oblastní hlavičky, nové jednotlivé Rules čtení hrubého
+anonymního signálu, úplné pokrytí včetně prázdných buněk, 2/15/5s profil,
+hysterézi a samostatný news bucket. Uvádí také cenu přímých odběrů, fallbacku
+a limit ochrany proti jejich zneužití. Další je souhlas s jedním lokálním
+implementačním/testovacím úsekem; živá aktivace bude následovat až s důkazy.
+Nyní změněna jen dokumentace, žádný aplikační kód, Rules nebo Firebase.
+Přepínače off a níže doložený DEV zůstávají zachované. Metriky nezvýšené.
+
 **Lokální B4b je uzavřené včetně úplného CI ve feature/feed-b4-news-local.**
 Zdroj **e8c0c9c722049d989021ff5cc0339c3260b43a14** má
 [úspěšné úplné CI 44944929884](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44944929884).
@@ -16,8 +26,8 @@ způsobů detekce a zvolil jen nově publikované příspěvky. [Rozsah a kontra
 včetně Chromu. Count dotaz nečte těla a nic nezapisuje; 19–23 reads v klidu,
 30–36 při teplé kontrole jedné novinky v měřeném rozsahu 50/200/2 000 zdrojů.
 Konečné CI potvrdilo i celé dosavadní serverové/Rules/B2/purge/Storage sady
-a webový build. Další je konkrétní návrh bezpečného provozního adaptéru podle
-měření, před úpravami schválit hlavičky/odběry, četnost a adaptivní profil.
+a webový build. Navazující návrh bezpečného provozního adaptéru je výše;
+před implementací schválit hlavičky/odběry, četnost a adaptivní profil.
 Konkrétní četnost/odběry nejsou aktivované. Serverový i klientský
 přepínač zůstává false. Bez nasazení, živých dat, Rules, nových služeb/Auth či změny retence.
 Níže uvedený dokončený B4 metadata/cache rollout je stále skutečný DEV stav.
@@ -39,8 +49,8 @@ oběma účtům správně vrací 0 karet. Původní data znovu ověřená beze z
 Computer Use bylo zastavené kontrolou URL; UI doložil vlastník, Auth/App Check
 VALID i HTTP 200 pro feed a reakce serverové logy. Interaktivní UI rollback
 zbývá ve společné finální regresi B4; technický rollback i klientská regrese prošly.
-**Další:** dokončit schválený lokální B4b výše a doložit měření/úplné CI;
-provozní zapojení bude následovat podle výsledků. Celé B4 ani celý milník nejsou uzavřené.
+**Další:** schválit připravený provozní návrh B4b výše; lokální count/měření
+i jejich úplné CI už jsou hotové. Celé B4 ani celý milník nejsou uzavřené.
 Produkce/main nezměněné; tentýž pilot znovu nezakládat.
 
 **Předchozí lokální přechod B4 je uzavřený včetně úplného CI.**
