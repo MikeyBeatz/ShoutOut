@@ -4,17 +4,17 @@
   "samples": [
     {
       "sources": 50,
-      "cells": 30,
+      "cells": 31,
       "publicationIndexPlan": {
         "totalWrites": 6,
         "signalWrites": 1
       },
       "metadataRefresh": {
-        "reads": 75,
+        "reads": 76,
         "queries": 4,
         "writes": 0,
         "sourceReads": 0,
-        "bytes": 33699,
+        "bytes": 33753,
         "attempts": 8,
         "signalWrites": 0
       },
@@ -37,28 +37,28 @@
         "signalWrites": 0
       },
       "signalBatch": {
-        "reads": 56,
+        "reads": 57,
         "queries": 0,
         "writes": 1,
         "sourceReads": 0,
-        "bytes": 1844,
+        "bytes": 1898,
         "attempts": 3,
         "signalWrites": 0
       }
     },
     {
       "sources": 200,
-      "cells": 30,
+      "cells": 31,
       "publicationIndexPlan": {
         "totalWrites": 8,
         "signalWrites": 1
       },
       "metadataRefresh": {
-        "reads": 78,
+        "reads": 79,
         "queries": 4,
         "writes": 0,
         "sourceReads": 0,
-        "bytes": 77380,
+        "bytes": 77434,
         "attempts": 8,
         "signalWrites": 0
       },
@@ -76,33 +76,33 @@
         "queries": 3,
         "writes": 1,
         "sourceReads": 0,
-        "bytes": 57630,
+        "bytes": 60120,
         "attempts": 5,
         "signalWrites": 0
       },
       "signalBatch": {
-        "reads": 56,
+        "reads": 57,
         "queries": 0,
         "writes": 1,
         "sourceReads": 0,
-        "bytes": 1844,
+        "bytes": 1898,
         "attempts": 3,
         "signalWrites": 0
       }
     },
     {
       "sources": 2000,
-      "cells": 30,
+      "cells": 31,
       "publicationIndexPlan": {
         "totalWrites": 8,
         "signalWrites": 1
       },
       "metadataRefresh": {
-        "reads": 85,
+        "reads": 88,
         "queries": 4,
         "writes": 0,
         "sourceReads": 0,
-        "bytes": 79383,
+        "bytes": 80625,
         "attempts": 8,
         "signalWrites": 0
       },
@@ -120,16 +120,16 @@
         "queries": 3,
         "writes": 1,
         "sourceReads": 0,
-        "bytes": 70144,
+        "bytes": 63998,
         "attempts": 5,
         "signalWrites": 0
       },
       "signalBatch": {
-        "reads": 57,
+        "reads": 58,
         "queries": 0,
         "writes": 1,
         "sourceReads": 0,
-        "bytes": 1848,
+        "bytes": 1902,
         "attempts": 3,
         "signalWrites": 0
       }
@@ -138,12 +138,12 @@
   "model": [
     {
       "users": 5000,
-      "cells": 30,
+      "cells": 31,
       "publicationsPerMinute": 0,
-      "listenerHeadReads": 150000,
-      "rulesDependentReadUpperModel": 1050000,
+      "listenerHeadReads": 155000,
+      "rulesDependentReadUpperModel": 1085000,
       "batchRequestsPerMinute": 60000,
-      "batchSdkReadsPerMinute": 3360000,
+      "batchSdkReadsPerMinute": 3420000,
       "batchQuotaWritesPerMinute": 60000,
       "headPublicationWritesPerMinute": 0,
       "pendingCountRequestsPerMinuteIfAllPending": 20000,
@@ -151,12 +151,12 @@
     },
     {
       "users": 5000,
-      "cells": 30,
+      "cells": 31,
       "publicationsPerMinute": 1,
-      "listenerHeadReads": 155000,
-      "rulesDependentReadUpperModel": 1085000,
+      "listenerHeadReads": 160000,
+      "rulesDependentReadUpperModel": 1120000,
       "batchRequestsPerMinute": 60000,
-      "batchSdkReadsPerMinute": 3360000,
+      "batchSdkReadsPerMinute": 3420000,
       "batchQuotaWritesPerMinute": 60000,
       "headPublicationWritesPerMinute": 1,
       "pendingCountRequestsPerMinuteIfAllPending": 20000,
@@ -164,12 +164,12 @@
     },
     {
       "users": 5000,
-      "cells": 30,
+      "cells": 31,
       "publicationsPerMinute": 100,
-      "listenerHeadReads": 650000,
-      "rulesDependentReadUpperModel": 4550000,
+      "listenerHeadReads": 655000,
+      "rulesDependentReadUpperModel": 4585000,
       "batchRequestsPerMinute": 60000,
-      "batchSdkReadsPerMinute": 3360000,
+      "batchSdkReadsPerMinute": 3420000,
       "batchQuotaWritesPerMinute": 60000,
       "headPublicationWritesPerMinute": 100,
       "pendingCountRequestsPerMinuteIfAllPending": 20000,

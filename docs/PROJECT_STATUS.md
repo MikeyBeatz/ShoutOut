@@ -15,6 +15,9 @@ pozastavení detekce neblokuje načítání feedu. Nové lokální regrese zahrn
 rollback 450 zápisů, opakování createShout, více zařízení, R5 a odvolání
 oprávnění otevřeného odběru. Naměřený report výslovně odděluje model fanoutu
 od cloudového účtu/kapacity. Tři indexové výjimky bez TTL jsou jen připravené.
+Lokální doplňkový test vyžádal technický `_control` head pro okamžité probuzení
+při pauze/návratu; stále nejvýše 64 odběrů celkem. První CI 44952312294 je
+zrušené kvůli této opravě, neoznačovat je jako hotové úplné ověření.
 Další je společný push a úspěšné úplné CI přesného zdroje, potom konkrétní
 DEV aktivace/pilot včetně inventury App Check a bezpečného založení controlu.
 Žádné nasazení nebo živé zápisy; všechny news přepínače zůstávají off.

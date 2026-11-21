@@ -8,6 +8,7 @@ rules_version = '2';
 // feedIndexControl/current: private server-owned index control. Its presence
 // closes direct client creation/reaction writes; Admin callables own projection.
 // publicationHeads/{cell}: {v:1,token:UUID}; no identity/content/time/count.
+// Reserved _control is changed atomically with private control, not by posts.
 // feedNewsControl/current: private {v,revision,mode,generation,incarnation}.
 
 service cloud.firestore {
@@ -67,7 +68,7 @@ service cloud.firestore {
     }
 
     match /feedIndexGenerations/{generation}/publicationHeads/{cell} {
-      allow get: if eligibleUser() && cell.matches('^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$') &&
+      allow get: if eligibleUser() && (cell == '_control' || cell.matches('^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$')) &&
         readableNewsGeneration(generation) && validNewsHead();
       allow list, create, update, delete: if false;
     }

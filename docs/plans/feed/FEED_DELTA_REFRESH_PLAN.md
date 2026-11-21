@@ -826,7 +826,9 @@ readTime úspěšné obnovy; připojení odběrů potom porovná i jejich první
 serverový stav. Událost během obnovy/připojování nesmí přepadnout do mezery.
 Lokální cache události sama nepotvrzuje aktuální serverový stav.
 
-Navrhuji nejvýše **64 jednotlivých oblastních odběrů na otevřený feed**.
+Navrhuji nejvýše **64 přímých odběrů na otevřený feed**. Při lokálním
+ověření je jeden slot rezervovaný pro technický signál `_control` ve stejné
+projekci; zbývá nejvýše 63 geografických buněk. Celková mez 64 se nezvyšuje.
 Je to nová technická mez ke schválení, ne již platný limit. U velkého pokrytí
 (zejména u pólů) se oblast nesmí oříznout: použije se úplný omezený serverový
 count v dávkovém režimu bez přímých odběrů. Dosavadní radiusy 1/3/5/10/20/50 km
@@ -851,7 +853,7 @@ viditelnosti zvolit serverovou cestu, ne přidávat skryté osobní granty.
 | Změna revize | Označit počet jako neověřený, sloučit pulsy v pevném okně 2 s a spustit jeden count. Pulsy během požadavku zachovat. |
 | Čekající novinky | Opakovat count nejpozději 15 s od začátku předchozí kontroly, při známé expiraci dříve. Tím odečíst i smazané novinky, které publication-only hlavička nehlásí. |
 | Rušná oblast | Odpojit hlučné odběry; každých 5 s dávkově načíst jen revize pokrytých hlaviček. Count pouze při změně, čekajících novinkách nebo zneplatnění. |
-| Pokrytí nad 64 buněk | Bez oříznutí používat stávající úplný count v 5s dávkovém režimu; všechny jeho pokračovací meze platí dál. |
+| Pokrytí přes kapacitu 63 geografických buněk + 1 technického odběru | Bez oříznutí používat stávající úplný count v 5s dávkovém režimu; všechny jeho pokračovací meze platí dál. |
 | Pozadí, jiná sekce, odhlášení | Zastavit odběry i časovače; ohradit pozdní odpovědi projektem/UID/relací. |
 | Návrat do feedu/popředí, reconnect | Bez čekání na další periodu ověřit stav; znovu nepovažovat staré číslo za potvrzené. |
 | Úspěšná obnova | Nová baseline, správný počet vůči ní, návrat nahoru; při chybě zachovat staré karty/baseline a neověřený stav. |
@@ -964,9 +966,11 @@ Nové intervaly, prahy a datový kontrakt jsou návrh autora, nikoli doporučen�
 Větev **feature/feed-b4-news-runtime**, navazuje na schválený návrh výše.
 Implementace a lokální kontroly jsou připravené ke společnému úplnému CI;
 úspěch tohoto CI se před jeho dokončením netvrdí. Žádný živý zápis či nasazení.
+První zdroj 73526a0 / CI 44952312294 byl zrušen po lokálním nálezu chybějícího
+probuzení odběrů při změně controlu; zrušený běh není důkaz úplného ověření.
 
 - [Serverový adaptér](../../../functions/feed_news_signals.js) má úplné
-  pokrytí čtyřznakovými buňkami, včetně prázdných. Nad 64 buňkami vrátí
+  pokrytí čtyřznakovými buňkami, včetně prázdných. Nad 63 geografickými buňkami vrátí
   úplný serverový fallback, nikdy oříznutý seznam. Ověřené jsou všechny
   dnešní radiusy, kruhové hranice, datová čára a póly.
 - `createShout` předává explicitní důvod publikace společnému writeru.
@@ -979,6 +983,17 @@ Implementace a lokální kontroly jsou připravené ke společnému úplnému CI
   doložit proti createTime, ne jen opsat libovolnou dvojici z controlu.
   Pauza/off zastaví čtení detektoru; již zavedený writer udržuje hlavičky
   i tehdy, aby nevznikla mezera. Pozastavená číslovka neblokuje načtení feedu.
+- Dodatečné lokální ověření ukázalo, že změna samotného privátního controlu
+  nevzbudila do 5 s již otevřený Firestore odběr. Proto je v téže hlavičkové
+  projekci jeden `_control` s totožným minimálním schématem v/token. Nový
+  neveřejný orchestrace helper mění private control a tuto revizi atomicky;
+  při změně generace také probudí původní kontext, ale neobnoví již odstraněnou
+  generaci. Rules potom odmítnou otevřený odběr a klient přejde do neověřeného
+  stavu. Limit zůstává 64 celkem (63 geografických + 1 technický odběr).
+  Běžná publikace technický head nepřepisuje a soukromý control není čitelný.
+  Aktivace, pauza a rollback musí použít tento helper, nikoli samostatný
+  ruční zápis controlu. Regrese prokazuje probuzení bez změny geografického
+  headu i bez jakékoli publikace. Stejnou pauzu vyžadovat před návratem backendu.
 - Výchozí revize hlaviček se přečtou v readTime původního feed snapshotu;
   aktuální účet/control se ověří znovu před odpovědí. První serverové
   události po připojení se porovnají s těmito revizemi. Nová publikace
@@ -1012,13 +1027,14 @@ Implementace a lokální kontroly jsou připravené ke společnému úplnému CI
 ### Naměřené meze a další brána
 
 [Reprodukovatelný lokální report](../../benchmarks/FEED_NEWS_RUNTIME_2026-11-21.json)
-odděluje SDK operace od modelu 5 000 relací. Měřená oblast má 30 buněk.
+odděluje SDK operace od modelu 5 000 relací. Měřená oblast má 30 geografických
+buněk a jeden technický head, dohromady 31 odběrů.
 
 | Zdroje | Metadata/hlavičky při obnově | Samostatná klidová kontrola | Jedna novinka | Dávka hlaviček | Indexový publikační plán / z toho head |
 |---|---:|---:|---:|---:|---:|
-| 50 | 75 reads | 30 reads | 43 reads | 56 reads | 6 / 1 writes |
-| 200 | 78 reads | 30 reads | 47 reads | 56 reads | 8 / 1 writes |
-| 2 000 | 85 reads | 34 reads | 53 reads | 57 reads | 8 / 1 writes |
+| 50 | 76 reads | 30 reads | 43 reads | 57 reads | 6 / 1 writes |
+| 200 | 79 reads | 30 reads | 47 reads | 57 reads | 8 / 1 writes |
+| 2 000 | 88 reads | 34 reads | 53 reads | 58 reads | 8 / 1 writes |
 
 Detekční dotazy mají 0 source/body reads a po jednom quota write na přijatý
 HTTP krok. Obnova v tabulce je metadata-only, nikoli studené naplnění těl;

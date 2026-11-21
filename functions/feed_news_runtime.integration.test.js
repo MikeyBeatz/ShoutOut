@@ -6,7 +6,7 @@ import { newsFixture, meterNewsDatabase } from './feed_news_lab.js';
 import { createFeedRuntime } from './feed_runtime.js';
 import { createShoutOperation } from './create_shout.js';
 import { operationTestKey } from './test_helpers.js';
-import { newsCoverage, admitNewsRead, validateNewsControl, consumeNewsCredit } from './feed_news_signals.js';
+import { newsCoverage, admitNewsRead, validateNewsControl, consumeNewsCredit, prepareNewsControlChange } from './feed_news_signals.js';
 import { encodeGeohash } from './geohash.js';
 import { writeFileSync } from 'node:fs';
 
@@ -17,9 +17,10 @@ after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 async function fixture(t, size = 50) {
   const f = await newsFixture(db, t, size), marker = await f.base.get();
   f.binding = { generation: f.generation, incarnation: [marker.createTime.seconds, marker.createTime.nanoseconds] };
-  await f.base.update({ newsIncarnation: f.binding.incarnation });
   f.newsControl = db.doc('feedNewsControl/current');
-  await f.newsControl.set({ v: 1, revision: 1, mode: 'active', ...f.binding });
+  await db.runTransaction(async tx => {
+    const plan = await prepareNewsControlChange(tx, db, { v: 1, revision: 1, mode: 'active', ...f.binding }); plan.apply();
+  });
   const rate = db.doc(`rateLimits/${f.uid}`);
   t.after(async () => { await f.newsControl.delete(); await db.recursiveDelete(rate); });
   f.runtime = createFeedRuntime(db, { getUser() {} }, { newsRuntimeEnabled: true });
@@ -76,6 +77,42 @@ test('news quota fails closed for malformed state and does not refill on backwar
   const empty = { v: 1, creditMillis: 0, updatedAt: Timestamp.fromMillis(2000) };
   assert.equal(consumeNewsCredit(empty, 1000).retryAfterMs, 2000);
   assert.equal(consumeNewsCredit(empty, 3000).record.creditMillis, 0);
+});
+
+test('control transition atomically signals even an empty region and rejects stale operator revisions', { skip: !enabled }, async t => {
+  const f = await fixture(t, 0), ref = f.base.collection('publicationHeads').doc('_control');
+  const original = await ref.get();
+  await db.runTransaction(async tx => { (await prepareNewsControlChange(tx, db,
+    { v: 1, revision: 2, mode: 'paused', ...f.binding })).apply(); });
+  assert.notEqual((await ref.get()).get('token'), original.get('token'));
+  const paused = await ref.get();
+  await assert.rejects(db.runTransaction(async tx => { (await prepareNewsControlChange(tx, db,
+    { v: 1, revision: 2, mode: 'active', ...f.binding })).apply(); }), /revision-conflict/);
+  assert((await ref.get()).updateTime.isEqual(paused.updateTime));
+  assert.equal((await f.newsControl.get()).get('mode'), 'paused');
+});
+
+test('control generation replacement wakes the old context without recreating retired markers or touching sources', { skip: !enabled }, async t => {
+  const f = await fixture(t), first = f.base.collection('publicationHeads').doc('_control'), before = await first.get();
+  const original = await db.doc(`shouts/${f.rows[0].id}`).get();
+  async function change(id, revision) {
+    const base = db.doc(`feedIndexGenerations/${id}`);
+    const data = (await f.base.get()).data(); delete data.newsIncarnation;
+    await base.set(data); const marker = await base.get();
+    t.after(() => db.recursiveDelete(base));
+    await f.control.update({ readGenerationId: id, writeGenerationIds: [f.generation, id], cardReadGenerationId: id, cardWriteGenerationIds: [f.generation, id] });
+    await db.runTransaction(async tx => { (await prepareNewsControlChange(tx, db, {
+      v: 1, revision, mode: 'active', generation: id, incarnation: [marker.createTime.seconds, marker.createTime.nanoseconds],
+    })).apply(); });
+    return base;
+  }
+  const second = await change(`${f.generation}-b`, 2);
+  assert.notEqual((await first.get()).get('token'), before.get('token'));
+  assert.equal((await second.collection('publicationHeads').doc('_control').get()).exists, true);
+  await db.recursiveDelete(second);
+  await change(`${f.generation}-c`, 3);
+  assert.equal((await second.collection('publicationHeads').doc('_control').get()).exists, false);
+  assert((await db.doc(`shouts/${f.rows[0].id}`).get()).updateTime.isEqual(original.updateTime));
 });
 
 test('publication signal is atomic; failed budget rolls back and ordinary rewrites do not signal', { skip: !enabled }, async t => {

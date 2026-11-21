@@ -6,6 +6,7 @@ import { directoryWindows } from './feed_block_index_store.js';
 import { encodeGeohash } from './geohash.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { requireEligibleActor } from './callable_security.js';
+import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 
 export const newsSignalLimit = 64;
 // Separate policy/record from B2: importing its runtime here would pull private
@@ -31,10 +32,10 @@ export function newsCoverage(point, radiusKm) {
       !Number.isFinite(point.longitude) || Math.abs(point.longitude) > 180 || ![1, 3, 5, 10, 20, 50].includes(radiusKm)) throw new Error('invalid-news-coverage');
   const cells = new Set();
   for (const w of directoryWindows(point, radiusKm)) {
-    if ((w.latEnd - w.latStart + 1) * (w.lonEnd - w.lonStart + 1) > newsSignalLimit) return null;
+    if ((w.latEnd - w.latStart + 1) * (w.lonEnd - w.lonStart + 1) > newsSignalLimit - 1) return null;
     for (let y = w.latStart; y <= w.latEnd; y++) for (let x = w.lonStart; x <= w.lonEnd; x++) {
       cells.add(encodeGeohash((y + .5) / 1024 * 180 - 90, (x + .5) / 1024 * 360 - 180).slice(0, 4));
-      if (cells.size > newsSignalLimit) return null;
+      if (cells.size > newsSignalLimit - 1) return null;
     }
   }
   return [...cells].sort();
@@ -46,6 +47,35 @@ export function validateNewsControl(data) {
       !Array.isArray(data.incarnation) || data.incarnation.length !== 2 ||
       !data.incarnation.every(Number.isSafeInteger) || data.incarnation[0] < 0 || data.incarnation[1] < 0 || data.incarnation[1] >= 1e9) reject('invalid-news-control');
   return data;
+}
+// Admin orchestration primitive only, never a callable. One reserved opaque
+// head wakes existing listeners atomically with control changes, including an
+// otherwise empty region. No global document is written during publication.
+export async function prepareNewsControlChange(tx, db, desired) {
+  assertFeedRuntimeTarget(db); validateNewsControl(desired);
+  desired = Object.freeze({ ...desired, incarnation: Object.freeze([...desired.incarnation]) });
+  const ref = db.doc('feedNewsControl/current'), previous = await tx.get(ref);
+  const before = previous.exists ? validateNewsControl(previous.data()) : null;
+  if (desired.revision !== (before?.revision ?? 0) + 1) throw new Error('news-control-revision-conflict');
+  const markerRef = db.doc(`feedIndexGenerations/${desired.generation}`), marker = await tx.get(markerRef);
+  const state = validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
+  if (!marker.exists || marker.get('cardReady') !== true || marker.get('cardProjection') !== 1 ||
+      !same(stamp(marker.createTime), desired.incarnation) || desired.mode === 'active' &&
+      (!['active', 'building'].includes(state.mode) || state.cardReadGenerationId !== desired.generation ||
+       !state.cardWriteGenerationIds?.includes(desired.generation))) reject('feed-session-expired');
+  const generations = new Set([desired.generation]);
+  if (before && before.generation !== desired.generation) {
+    const old = await tx.get(db.doc(`feedIndexGenerations/${before.generation}`));
+    if (old.exists && same(stamp(old.createTime), before.incarnation)) generations.add(before.generation);
+  }
+  const edits = [...generations].map(id => [db.doc(`feedIndexGenerations/${id}/publicationHeads/_control`), { v: 1, token: randomUUID() }]);
+  const mirrorNeeded = !same(marker.get('newsIncarnation'), desired.incarnation);
+  let applied = false;
+  return { writes: edits.length + 1 + Number(mirrorNeeded), apply() {
+    if (applied) throw new Error('news-control-plan-already-applied'); applied = true;
+    if (mirrorNeeded) tx.update(markerRef, { newsIncarnation: desired.incarnation });
+    tx.set(ref, desired); for (const [head, data] of edits) tx.set(head, data);
+  } };
 }
 export async function newsControl(tx, db, binding, { writer = false, state = null, marker = null } = {}) {
   const control = validateNewsControl((await tx.get(db.doc('feedNewsControl/current'))).data());
@@ -81,6 +111,7 @@ export async function admitNewsRead(request, db, binding, clock) {
 }
 export async function captureNewsSignals(request, db, { binding, snapshot, baseline }, { historical = false, confirm = true, clock = () => new Date() } = {}) {
   const cells = newsCoverage(snapshot.context.point, snapshot.context.radiusKm);
+  if (cells !== null) cells.push('_control');
   const result = await db.runTransaction(async tx => {
     await requireEligibleActor({ request, db, reader: tx, now: clock() });
     await newsControl(tx, db, binding);

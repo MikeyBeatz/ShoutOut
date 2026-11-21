@@ -24,13 +24,14 @@ class FeedNewsSignals {
         incarnation[1] < 0 ||
         incarnation[1] >= 1000000000 ||
         heads != null &&
-            (heads!.isEmpty ||
+            (!heads!.containsKey('_control') ||
                 heads!.length > 64 ||
                 heads!.entries.any(
                   (e) =>
-                      !RegExp(
-                        r'^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$',
-                      ).hasMatch(e.key) ||
+                      e.key != '_control' &&
+                          !RegExp(
+                            r'^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$',
+                          ).hasMatch(e.key) ||
                       e.value != null &&
                           !RegExp(r'^[a-f0-9-]{36}$').hasMatch(e.value!),
                 ))) {

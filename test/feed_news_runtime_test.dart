@@ -6,7 +6,7 @@ import 'package:shoutout/feed_body_cache.dart';
 
 FeedNewsSignals snapshot({
   String baseline = 'base',
-  Map<String, String?>? heads = const {'u2fk': null},
+  Map<String, String?>? heads = const {'_control': null},
   bool fallback = false,
 }) => FeedNewsSignals.fromWire({
   'v': 1,
@@ -27,7 +27,7 @@ class Harness {
       },
       readHeads: () async {
         polls++;
-        return snapshot(heads: {'u2fk': token})..readUnits = 25;
+        return snapshot(heads: {'_control': token})..readUnits = 25;
       },
       watch: (_, _) => changes.stream,
       pendingCount: () => pending,
@@ -155,13 +155,13 @@ void main() {
           'baseline': 'base',
           'generation': 'feed-v3',
           'incarnation': [1, 2],
-          'heads': {'u2fk': null},
+          'heads': {'_control': null},
         },
         'readUnits': 30,
       });
       await expectLater(first, throwsStateError);
       final result = await client.signals('signed');
-      expect(result.heads, {'u2fk': null});
+      expect(result.heads, {'_control': null});
       expect(result.readUnits, 30);
       client.eraseAccount(uid);
       await expectLater(client.signals('signed'), throwsStateError);
@@ -286,6 +286,7 @@ void main() {
     },
   );
   test('signal schema rejects oversized and foreign routes', () {
+    expect(snapshot(heads: {'_control': null, 'u2fk': null}).heads!.length, 2);
     expect(
       () => snapshot(heads: {'arbitrary/path': null}),
       throwsFormatException,
