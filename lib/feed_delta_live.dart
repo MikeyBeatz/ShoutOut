@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'feed_body_cache.dart';
+import 'feed_session.dart';
 
 import 'live_data.dart';
 import 'live_shout_state.dart';
@@ -40,6 +41,8 @@ class FeedDeltaLive {
   final _retired = <String, Future<Map<String, dynamic>>>{};
   String? _viewer;
   int _epoch = 0;
+  int _revision = -1;
+  bool get isLegacy => _context?['mode'] == 'source-v1';
   final _erased = <String>{};
   Stream<void> get changes => _changes.stream;
   String stamp(Map<String, dynamic> value) =>
@@ -47,6 +50,7 @@ class FeedDeltaLive {
   void retainViewer(String? uid) {
     if (_viewer == uid) return;
     _viewer = uid;
+    _revision = -1;
     _epoch++;
     _context = null;
     _flight = null;
@@ -77,7 +81,27 @@ class FeedDeltaLive {
         value['incarnation'] is! String) {
       throw const FormatException('Foreign live context');
     }
-    if (_context != null && stamp(_context!) == stamp(value)) return;
+    final revision = value['revision'] ?? 0;
+    if (revision is! int ||
+        revision < 0 ||
+        !['card-v1', 'source-v1'].contains(value['mode'] ?? 'card-v1')) {
+      throw const FormatException('Invalid live capability');
+    }
+    if (revision < _revision) throw const FeedSessionExpired();
+    if (_context != null && stamp(_context!) == stamp(value)) {
+      if ((_context!['mode'] ?? 'card-v1') != (value['mode'] ?? 'card-v1')) {
+        throw const FormatException('Conflicting live capability');
+      }
+      _revision = revision;
+      _context = Map.unmodifiable(value);
+      return;
+    }
+    if (value.containsKey('revision') &&
+        revision == _revision &&
+        _context != null) {
+      throw const FormatException('Conflicting live revision');
+    }
+    _revision = revision;
     _context = Map.unmodifiable(value);
     _retired.clear();
     _baselines.clear();
@@ -159,6 +183,7 @@ class FeedDeltaLive {
               _latest[id] = (generation, null);
               return true;
             }
+            if (value['mode'] == 'source-v1') return true;
             final revision = state['revision'];
             if (revision is! int || revision < 0) {
               throw const FormatException('Invalid live revision');

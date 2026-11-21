@@ -43,7 +43,24 @@ class FeedDeltaRuntime {
             })
             as Map,
       ),
-      publicState: (context, id) => publicStates.watch(live.stamp(context), id),
+      publicState: (context, id) => context['mode'] == 'source-v1'
+          ? confirmed(db.doc('shouts/$id')).map((snapshot) {
+              final data = snapshot.data();
+              return data == null
+                  ? null
+                  : <String, dynamic>{
+                      for (final key in [
+                        'likesCount',
+                        'dislikesCount',
+                        'commentsCount',
+                        'savesCount',
+                        'status',
+                        'contentPurged',
+                      ])
+                        if (data.containsKey(key)) key: data[key],
+                    };
+            })
+          : publicStates.watch(live.stamp(context), id),
       reaction: (uid, id) => confirmed(
         db.doc('shouts/$id/reactions/$uid'),
       ).map((snapshot) => snapshot.data()),
@@ -88,7 +105,11 @@ class FeedDeltaRuntime {
   DocumentReference<Map<String, dynamic>> stateReference(
     Map<String, dynamic> context,
     String id,
-  ) => db.doc('feedIndexGenerations/${context['generation']}/publicStates/$id');
+  ) => context['mode'] == 'source-v1'
+      ? db.doc('shouts/$id')
+      : db.doc(
+          'feedIndexGenerations/${context['generation']}/publicStates/$id',
+        );
   Stream<DocumentSnapshot<Map<String, dynamic>>> confirmed(
     DocumentReference<Map<String, dynamic>> reference,
   ) => reference

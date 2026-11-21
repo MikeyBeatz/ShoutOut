@@ -6,6 +6,7 @@ import 'package:shoutout/feed_body_cache.dart';
 import 'package:shoutout/feed_delta_client.dart';
 import 'package:shoutout/feed_delta_live.dart';
 import 'package:shoutout/feed_public_state_pool.dart';
+import 'package:shoutout/feed_session.dart';
 
 const deadline = 10000000;
 Map<String, dynamic> state(String version, {int revision = 0, int count = 1}) =>
@@ -28,6 +29,8 @@ Map<String, dynamic> liveContext(String generation) => {
   'uid': 'viewer',
   'generation': generation,
   'incarnation': '[1,0]',
+  'mode': 'card-v1',
+  'revision': generation == 'g' ? 1 : 2,
 };
 Map<String, dynamic> reply({
   bool body = true,
@@ -78,6 +81,130 @@ Map<String, dynamic> reply({
 }
 
 void main() {
+  test(
+    'open delta client adopts explicit rollback, rejects late old replies and refreshes source',
+    () async {
+      final cache = FeedBodyCache(clock: () => 1000);
+      final pending = Completer<Object?>();
+      var calls = 0;
+      final contexts = <String>[];
+      final source = {
+        ...liveContext('old'),
+        'mode': 'source-v1',
+        'revision': 3,
+      };
+      final client = FeedDeltaClient(
+        project: 'project',
+        currentUserId: () => 'viewer',
+        cache: cache,
+        onContext: (value) => contexts.add(value['mode'] as String),
+        send: (_) async {
+          calls++;
+          if (calls == 1) return reply();
+          if (calls == 2) return pending.future;
+          if (calls == 3) {
+            return {'version': 2, 'state': 'reset', 'capability': source};
+          }
+          return {
+            'version': 1,
+            'state': 'ready',
+            'capability': source,
+            'items': [],
+            'next': null,
+          };
+        },
+      );
+      await client.load({});
+      final delayed = client.load({});
+      await expectLater(client.load({}), throwsA(isA<FeedSessionExpired>()));
+      expect(cache.isEmpty, isTrue);
+      pending.complete(reply());
+      await expectLater(delayed, throwsA(isA<FeedSessionExpired>()));
+      expect((await client.load({}))['version'], 1);
+      expect(contexts, ['card-v1', 'source-v1', 'source-v1']);
+    },
+  );
+
+  test(
+    'network failure and untyped V1 never initiate source fallback',
+    () async {
+      var calls = 0, contexts = 0;
+      final client = FeedDeltaClient(
+        project: 'project',
+        currentUserId: () => 'viewer',
+        cache: FeedBodyCache(clock: () => 1000),
+        onContext: (_) => contexts++,
+        send: (_) async {
+          calls++;
+          if (calls == 1) throw StateError('offline');
+          return {'version': 1, 'state': 'ready', 'items': []};
+        },
+      );
+      await expectLater(client.load({}), throwsStateError);
+      await expectLater(client.load({}), throwsFormatException);
+      expect(calls, 2);
+      expect(contexts, 0);
+    },
+  );
+
+  test(
+    'open live card switches to source counters after rollback and rejects retired capability',
+    () async {
+      final sources = <String, StreamController<Map<String, dynamic>?>>{};
+      var cancellations = 0;
+      final registry = FeedDeltaLive(
+        project: 'project',
+        currentUserId: () => 'viewer',
+        resolveContext: () async => liveContext('g'),
+        publicState: (context, _) {
+          final controller = StreamController<Map<String, dynamic>?>(
+            onCancel: () {
+              cancellations++;
+            },
+          );
+          sources[context['mode'] as String] = controller;
+          return controller.stream;
+        },
+        reaction: (_, _) => Stream.value(null),
+        saved: (_, _) => Stream.value(false),
+      );
+      final values = <int>[];
+      final subscription = registry
+          .watch('one')
+          .listen((value) => values.add(value.likes));
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      sources['card-v1']!.add(state('a' * 64, count: 4));
+      await Future<void>.delayed(Duration.zero);
+      registry.adopt({
+        ...liveContext('old'),
+        'mode': 'source-v1',
+        'revision': 3,
+      });
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      sources['source-v1']!.add({
+        'likesCount': 5,
+        'dislikesCount': 0,
+        'commentsCount': 1,
+        'savesCount': 0,
+        'status': 'active',
+      });
+      await Future<void>.delayed(Duration.zero);
+      expect(values, [4, 5]);
+      expect(registry.isLegacy, isTrue);
+      expect(
+        () => registry.adopt(liveContext('g')),
+        throwsA(isA<FeedSessionExpired>()),
+      );
+      await subscription.cancel();
+      expect(cancellations, 2);
+      for (final source in sources.values) {
+        await source.close();
+      }
+    },
+  );
+
   test(
     'viewer replacement obtains its own SDK synchronization barrier',
     () async {

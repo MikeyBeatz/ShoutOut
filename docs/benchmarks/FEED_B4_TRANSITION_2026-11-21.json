@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "scope": "Emulator, 55 sources, two maintained V1 generations plus one card generation. Complete operator backfill calls: Admin SDK document/transaction reads and attempted writes including retries and status guard; excludes fixture setup, start/audit/activation, Auth/AppCheck, Rules billing and cloud latency.",
+  "backfill": {
+    "reads": 155,
+    "writes": 62,
+    "attempts": 4
+  }
+}

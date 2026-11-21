@@ -1,3 +1,4 @@
+import 'feed_session.dart';
 import 'feed_body_cache.dart';
 
 /// Existing gateway adapter: V2 transport is assembled into its V1 page model.
@@ -21,11 +22,17 @@ class FeedDeltaClient {
   final Map<String, dynamic>? Function(String, String)? currentState;
   int _epoch = 0;
   String? _viewer;
+  int _capabilityRevision = -1;
+  String? _capabilityStamp;
+  bool _legacy = false;
   final _erased = <String>{};
 
   void retainViewer(String? uid) {
     if (uid == _viewer) return;
     _viewer = uid;
+    _capabilityRevision = -1;
+    _capabilityStamp = null;
+    _legacy = false;
     _epoch++;
     cache.bind(
       uid == null || _erased.contains(uid) ? null : FeedBodyScope(project, uid),
@@ -38,6 +45,33 @@ class FeedDeltaClient {
       _epoch++;
       cache.bind(null);
     }
+  }
+
+  void _acceptCapability(Map<String, dynamic> capability, FeedBodyScope scope) {
+    final revision = capability['revision'] ?? 0;
+    final mode = capability['mode'] ?? 'card-v1';
+    if (capability['project'] != scope.project ||
+        capability['uid'] != scope.uid ||
+        capability['generation'] is! String ||
+        capability['incarnation'] is! String ||
+        !['card-v1', 'source-v1'].contains(mode) ||
+        revision is! int ||
+        revision < 0) {
+      throw const FormatException('Invalid feed capability');
+    }
+    final stamp =
+        '${capability['generation']}:${capability['incarnation']}:$mode';
+    if (revision < _capabilityRevision ||
+        revision == _capabilityRevision &&
+            _capabilityStamp != null &&
+            stamp != _capabilityStamp) {
+      throw const FeedSessionExpired();
+    }
+    if (_capabilityStamp != stamp) cache.clear();
+    _capabilityRevision = revision;
+    _capabilityStamp = stamp;
+    _legacy = mode == 'source-v1';
+    onContext?.call(capability);
   }
 
   Future<Map<String, dynamic>> load(Map<String, Object?> payload) async {
@@ -65,6 +99,23 @@ class FeedDeltaClient {
     guard();
     if (response is! Map) throw const FormatException('Invalid delta reply');
     final wire = Map<String, dynamic>.from(response);
+    if (wire['state'] == 'reset' && wire['capability'] is Map) {
+      _acceptCapability(
+        Map<String, dynamic>.from(wire['capability'] as Map),
+        scope,
+      );
+      throw const FeedSessionExpired();
+    }
+    if (wire['version'] == 1 &&
+        wire['capability'] is Map &&
+        (wire['capability'] as Map)['mode'] == 'source-v1' &&
+        ['preparing', 'ready'].contains(wire['state'])) {
+      _acceptCapability(
+        Map<String, dynamic>.from(wire['capability'] as Map),
+        scope,
+      );
+      return wire;
+    }
     if (wire['version'] != 2 ||
         !['preparing', 'ready'].contains(wire['state'])) {
       throw const FormatException('Invalid delta protocol');
@@ -114,6 +165,15 @@ class FeedDeltaClient {
       'cold': cache.isEmpty,
     });
     guard();
+    if (response is Map &&
+        response['state'] == 'reset' &&
+        response['capability'] is Map) {
+      _acceptCapability(
+        Map<String, dynamic>.from(response['capability'] as Map),
+        scope,
+      );
+      throw const FeedSessionExpired();
+    }
     if (response is! Map ||
         response['version'] != 2 ||
         response['state'] != 'ready') {
@@ -139,7 +199,8 @@ class FeedDeltaClient {
     if (raw['live'] is! Map) {
       throw const FormatException('Missing live context');
     }
-    onContext?.call(Map<String, dynamic>.from(raw['live'] as Map));
+    _acceptCapability(Map<String, dynamic>.from(raw['live'] as Map), scope);
+    if (_legacy) throw const FeedSessionExpired();
     Map<String, dynamic>? fullState(FeedBodyDescriptor row) {
       final state = row.stateData;
       if (_completeState(state)) return {...state, '_generation': stamp};
@@ -177,6 +238,15 @@ class FeedDeltaClient {
           'missing': missing,
         });
         guard();
+        if (response is Map &&
+            response['state'] == 'reset' &&
+            response['capability'] is Map) {
+          _acceptCapability(
+            Map<String, dynamic>.from(response['capability'] as Map),
+            scope,
+          );
+          throw const FeedSessionExpired();
+        }
         if (response is! Map ||
             response['version'] != 2 ||
             response['bodyPage'] is! Map) {

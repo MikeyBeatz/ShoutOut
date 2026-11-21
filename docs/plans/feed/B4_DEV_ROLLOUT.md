@@ -5,12 +5,13 @@
 
 ## Stav a rozsah
 
-21. listopadu 2026: **připravený návrh dalšího lokálního úseku, nikoli
-schválení nové implementace nebo živé migrace**. Vlastník povolil pokračovat
-přípravou přechodu. Zdroj klienta 62fc8fe má success úplné CI 44917393562;
+21. listopadu 2026: **vlastník schválil celý lokální přechodový úsek**
+v odpovědi na call_a0d99f40f57446909fb11ba932047dcd. Implementace a lokální
+ověření probíhají; úplné CI zatím není doložené. Živá migrace schválená není.
+Zdroj předchozího klienta 62fc8fe má success úplné CI 44917393562;
 uzavírací dokumentace 6c2c7f3 má success lehké CI 44918771643.
 
-Tato příprava provedla pouze čtení DEV a kontrolu kódu. Žádné nasazení,
+Původní inventura provedla pouze čtení DEV a kontrolu kódu. Žádné nasazení,
 změna obsahu, řídicího dokumentu, generací, indexů, Rules ani Auth účtů.
 Nezapočítává se jako nasazení nebo živá akceptace v metrikách.
 
@@ -40,7 +41,7 @@ Zvolený kandidát nové generace je `feed-v3`; v inventuře neexistuje.
 Její skutečné založení zatím není povolené. Přechod musí fungovat také
 s aktivním obsahem a souběžnými uživateli; prázdný feed není podmínkou.
 
-## Co už existuje a co chybí
+## Nálezy před schválenou implementací
 
 - `createCardBackfill` má begin/step/beginAudit/auditStep: dávky nejvýše 50,
   dělení příliš velké dávky a společný rozpočet 450 zápisů. Doplňuje malé
@@ -69,7 +70,7 @@ s aktivním obsahem a souběžnými uživateli; prázdný feed není podmínkou.
 
 <a id="local-transition-proposal"></a>
 
-## Navržený další lokální úsek ke schválení
+## Schválený lokální úsek
 
 Jeden ucelený úsek **operátor + kompatibilní přechod/rollback + emulátorový
 pilot**, bez aktivace v cloudu:
@@ -157,3 +158,100 @@ nasazení a živá akceptace se evidují zvlášť; samotný plán nezvyšuje st
 Po živém ověření metadat/cache následují signály a číslovka novinek, potom
 společná B4 akceptace. Cíl 100 000 účtů / 5 000 aktivních relací dál vyžaduje
 samostatnou kapacitní bránu.
+
+<a id="local-transition-results"></a>
+
+## Implementace lokálního přechodu
+
+Připravené zdroje, zatím před závěrečným CI:
+
+- [Operátor](../../../tools/feed_card_transition.mjs) používá stejné kontroly
+  čistého SHA, úplného CI a produkčního tagu jako B3; navíc vyžaduje všechny
+  čtyři B4 testovací kroky. Aktuální vypnutá konfigurace zablokuje mutaci
+  **před přístupem k přihlašovacím údajům a databázi**. Plan/status jsou čtecí.
+- [Transakční jádro](../../../functions/feed_card_backfill.js) a
+  [validace](../../../functions/feed_card_transition_validation.js) zachovají
+  všechny původní writery a vážou job na digest, control revizi a createTime
+  **každé** původní generace. Opakovaný start/aktivace/rollback/abort nerozmnoží
+  zápisy; opakovaný datový krok pokračuje podle journalu, stav se před ním čte.
+  Neplatná fáze se odmítne. Samotný backfill nemění zdrojová updateTime.
+- Audit porovnává source/public/index pokrytí v jednom připnutém snapshotu,
+  ověřuje stromové souhrny a cesty, ohraničuje journal existujícím rozpočtem
+  64 KiB a platností snapshotu 1 hodina. Aktivace znovu ověří retenci/R5.
+  Resume po rollbacku odstraní předchozí audit a vyžádá nový. Abort ponechá
+  registrovanou generaci a retenční podklady; neprovádí jejich fyzický úklid.
+- Server vybírá formát podle skutečné generace. Staré raw i nové neprůhledné
+  V1 kurzory zůstávají použitelné v udržovaných generacích. Nový klient dostane
+  při změně readeru explicitní `reset` s capability `source-v1` / `card-v1`
+  a control revizí. Ponechá již načtené karty a nabídne obnovu; další obnova
+  načte správnou cestu. Pozdní odpověď se starší revizí nesmí obnovit starou
+  cache ani odběr. Síťová nebo autorizační chyba sama fallback nespouští.
+- Živý stav a Home umějí v potvrzeném source režimu původní zdrojové odběry.
+  Ty jsou přechodovou kompatibilitou, ne metadatovou úsporou. Zachovávají
+  globálních 50 promo kandidátů a následný přesný filtr 20 km. Po rollbacku
+  se card generace stále udržuje, takže otevřené karty mohou zůstat funkční
+  do dalšího zjištění capability; nepřidává se polling ani nucený skok feedu.
+- [Čistý indexový plánovač](../../../tools/feed_card_index_plan.mjs) pracuje
+  s úplnou inventurou a digestem, rozpoznává plánované/pending/READY kroky
+  i částečné provedení. Povolí jen jeden composite a 13 konkrétních výjimek;
+  PATCH maska obsahuje pouze `indexConfig`. Změněné TTL či cizí explicitní
+  override zastaví pokračování. Žádný živý indexový HTTP zápis tento modul
+  neprovádí. Při návratu readeru se indexy ponechávají; jejich odstranění by
+  mělo vlastní plán a nesmí ohrozit dosud otevřené klienty.
+
+Lokální důkazy jsou v [přechodové sadě](../../../functions/feed_card_transition.integration.test.js),
+[klientské regresi](../../../test/feed_delta_client_test.dart) a
+[kontrolách operátoru/indexů](../../../tools/feed_card_transition.test.mjs).
+Zahrnují souběh, idempotenci, 450-write rollback, account preparation/R5,
+prázdný/neprázdný start, expired/deleted/purged/autory s markerem, chybné
+kořeny, propadlý audit a staré/nové kurzory. Nativní distribuce, živý App Check,
+reálná latence/cena a 5 000 relací tím ověřené nejsou.
+
+Lokální kontroly: 432 Flutter, čistá úplná analýza a formát, 87 nástrojových,
+159 Functions unit (emulátorové scénáře se v unit běhu přeskakují), 8 nových
+přechodových, 14 card/backfill, 9 reader a 11 transportních emulátorových
+testů. Samostatný Chrome HTTP transport proti emulátoru prošel včetně
+odpojení/doplnění; regresi přechodu živých odběrů prověřuje Dart sada.
+Lint a dokumentační kontroly také prošly. První lokální pokus o browser
+skončil `spawn dart ENOENT`; po nastavení přesného `DART_BIN` prošel.
+To nebyla chyba aplikace ani úspěšný browser důkaz prvního pokusu.
+
+[Transakční měření přechodu](../../benchmarks/FEED_B4_TRANSITION_2026-11-21.json):
+55 zdrojů / dva původní writery + nový card writer, celé omezené backfill
+volání včetně status guardu: **155 reads / 62 pokusů zápisu / 4 transakční
+pokusy**. Žádný zdrojový zápis, žádné prodlužování retence. Samostatné
+start/audit/aktivace nejsou v tomto čísle; předchozí P1 má vlastní auditní
+měření 50/200/2 000. Jde o operace SDK, ne fakturu nebo produkční load test.
+Úplné CI nového zdroje ještě čeká na společný push.
+
+Evidence v progress.json doplňuje existující lokální code/check podklady;
+jejich váhy a stavy se znovu nezapočítávají. DEV/akceptace i novinky zůstávají
+otevřené, proto tento přechodový checkpoint sám nezvyšuje procenta.
+
+<a id="future-dev-pilot"></a>
+
+## Konkrétní návrh budoucího pilotu – čeká na schválení
+
+Pouze `shoutout-dev-46c81`: kandidát `feed-v3`, nový čtecí plán/digest po
+inventuře, žádná změna Auth účtů. Po úplném CI aktivačních SHA nejprve indexy,
+kompatibilní existující serverové revize a odvodnění starých volání, potom
+start/backfill/audit/activate a DEV web. Rules z předchozí klientské přípravy
+se ověří a nasadí samostatně před zpřístupněním publicStates; nenasazovat
+celý nesouvisející seznam indexů. Aktuální prostředky a Scheduler zůstávají.
+
+Navržená fixture: **120 nových syntetických Shoutů na 24 hodin**, 60 pod
+Bright_Otter_182 a 60 pod TestBusiness, bez změny skutečných značek přečtení.
+Pouze těmto novým ID nastavit 70/20 testovacích přečtení a vybrané promo
+příznaky. Ověřit 50 → 100 → 120, cold/warm/doplnění jednoho těla, B3 skupiny,
+kartu/detail/Mé/Uložené, počty, promo a návrat již otevřeného klienta.
+Rollback ponechá tři writery, vrátí reader na feed-v2 a nabídne obnovu;
+resume vyžádá nový audit. Nakonec přes společný writer uklidit pouze fixture
+a jejich testovací značky. Původních 38 zdrojů a původní pending žádost se
+nepoužijí jako fixture. Pevné ID/digest a rollback artefakt předložit až po
+čerstvé inventuře; dosavadní čtecí otisk nepředstavuje souhlas s migrací.
+
+Odvodnění je zatím **otevřená živá brána**: doložit nové ACTIVE revize všech
+10 uvedených Functions, nulový provoz do starých revizí a dokončení jejich
+rozpracovaných volání/logů. Pokud to dostupná telemetrie nedoloží, přechod
+nezahájit a předložit vymezené servisní okno. Samotné 60sekundové čekání nebo
+zaškrtnutí `compatibleWriters` v interním testu tento důkaz nenahrazuje.

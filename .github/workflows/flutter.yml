@@ -168,6 +168,12 @@ jobs:
           B4_BROWSER: '1'
         run: npm run test:delta-client
 
+      - name: Test B4 controlled transition
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 4
+        working-directory: tools
+        run: npm run test:card-transition
+
       - name: Test prepared B2 runtime
         if: steps.scope.outputs.full != 'false'
         # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.

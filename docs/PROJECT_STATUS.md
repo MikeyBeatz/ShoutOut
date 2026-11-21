@@ -6,7 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: lokální klientské zapojení B4 je uzavřené včetně úplného CI.**
+**Nyní: schválený lokální přechod B4 je implementovaný, probíhá závěrečné ověření.**
+Větev feature/feed-b4-transition má řízený operátor, platnost a integritu
+auditu, ochranu inkarnací všech zachovaných generací a kompatibilitu již
+otevřeného klienta při rollbacku. [Připravené změny a jejich meze](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results).
+Lokálně prošly Flutter testy i analýza a cílené přechodové testy; úplné CI
+nového zdroje zatím není doložené. Přepínače jsou vypnuté, bez živých změn.
+Další je závěrečný společný push/CI, potom samostatně schválený DEV přechod
+podle [konkrétního návrhu pilotu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
+
+**Předchozí lokální klientské zapojení B4 je uzavřené včetně úplného CI.**
 Zdroj **62fc8feb0bbded06c5f116867bbbd61ec0848b5b** má
 [success úplné CI 44917393562](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44917393562).
 Větev feature/feed-b4-client-integration má skutečný delta transport/RAM cache,
@@ -17,10 +26,8 @@ lokální Rules a návrh indexů. Prošlo 429 Flutter, 159 Functions unit,
 Nové testy zahrnují Chrome proti emulátoru a vlastní bariéru po změně účtu.
 [Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
 Nové přepínače jsou vypnuté, nic se nenasazovalo.
-[Konkrétní návrh dalšího lokálního přechodového úseku](plans/feed/B4_DEV_ROLLOUT.md#local-transition-proposal)
-je připravený ve feature/feed-b4-transition: operátor, zpevnění auditu,
-kompatibilita a rollback, indexový plán a emulátorové ověření. Zdrojové
-úpravy tohoto rozšíření čekají na schválení; živá migrace má vlastní bránu.
+[Konkrétní přechodový úsek](plans/feed/B4_DEV_ROLLOUT.md#local-transition-proposal)
+vlastník schválil; jeho aktuální stav je výše. Živá migrace má vlastní bránu.
 Čtecí DEV inventura 21. listopadu 15:25 UTC potvrdila STANDARD/europe-west3,
 control revision 6 / reader feed-v2 / writery feed-v1+feed-v2 a původních
 38 zdrojů (0 active), 1 žádost. [Podklady a chybějící nástroje](plans/feed/B4_DEV_ROLLOUT.md#read-only-inventory).

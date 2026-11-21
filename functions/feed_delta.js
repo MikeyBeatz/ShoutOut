@@ -29,7 +29,8 @@ export async function getCompatibleFeedPageOperation(request, db, options) {
   if (options.enabled && input && (!input.cursor || typeof input.cursor === 'string' && input.cursor.startsWith('d1:'))) {
     const data = { ...input, format: 'delta-v1', cold: true };
     if (input.cursor) data.cursor = input.cursor.slice(3);
-    const result = await getFeedDeltaOperation({ ...request, data }, db, options);
+    const result = await getFeedDeltaOperation({ ...request, data }, db, { ...options, preserveRetiredCursor: true });
+    if (result.version === 1) return { ...result, next: result.next ? `d1:${result.next}` : null };
     return { version: 1, state: result.state, baseline: result.baseline, expiresAt: result.expiresAt,
       ...(result.readOrdering ? { readOrdering: result.readOrdering } : {}),
       next: result.next ? `d1:${result.next}` : null,
@@ -40,16 +41,28 @@ export async function getCompatibleFeedPageOperation(request, db, options) {
 }
 
 export async function getFeedDeltaOperation(request, db, { key, enabled = false, clock = () => new Date(),
-  workNodes = 32, readOrdering = null, observeMetrics = () => {} } = {}) {
+  workNodes = 32, readOrdering = null, observeMetrics = () => {}, preserveRetiredCursor = false } = {}) {
   const { uid } = requireCallableIdentity(request), input = request.data;
   if (!enabled) fail('failed-precondition', 'Delta feed is not enabled.');
   assertFeedRuntimeTarget(db);
   if (!input || input.format !== 'delta-v1' || input.expectedUserId !== uid) fail('invalid-argument', 'Invalid delta request.');
   const now = () => clock().getTime();
   const cursorKey = scopedKey(key, 'cursor'), bodyCodec = feedCursorCodec({ key: scopedKey(key, 'body') });
-  const liveContext = (generation, incarnation) => ({ project: db.projectId, uid, generation, incarnation: JSON.stringify(incarnation) });
-  async function generation(tx, binding = null) {
-    const controlDoc = await tx.get(db.doc('feedIndexControl/current')), control = validateFeedIndexControl(controlDoc.data());
+  const liveContext = (generation, incarnation, revision) => ({ project: db.projectId, uid, generation, incarnation: JSON.stringify(incarnation), mode: 'card-v1', revision });
+  async function capability(tx, state = null) {
+    state ??= validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
+    if (!['active', 'building'].includes(state.mode) || !state.readGenerationId) throw new FeedSessionExpired();
+    const marker = await tx.get(db.doc(`feedIndexGenerations/${state.readGenerationId}`));
+    if (marker.get('schemaVersion') !== 1 || marker.get('accountRetention') !== true) throw new FeedSessionExpired();
+    const card = marker.get('v') === 2;
+    if (card && (state.cardReadGenerationId !== marker.id || marker.get('cardReady') !== true || marker.get('cardProjection') !== 1 ||
+        marker.get('readIdentity') !== 1 || !state.cardWriteGenerationIds?.includes(marker.id)) || !card && marker.get('v') !== 1) throw new FeedSessionExpired();
+    return { ...liveContext(marker.id, stamp(marker.createTime), state.revision), mode: card ? 'card-v1' : 'source-v1' };
+  }
+  const reset = value => ({ version: 2, state: 'reset', capability: value });
+  const currentCapability = () => db.runTransaction(async tx => { await actor(tx); return capability(tx); }, { readOnly: true });
+  async function generation(tx, binding = null, control = null) {
+    control ??= validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
     const id = binding?.generation ?? control.cardReadGenerationId;
     if (control.schemaVersion !== 2 || !['active', 'building'].includes(control.mode) ||
         !id || !control.cardWriteGenerationIds.includes(id)) throw new FeedSessionExpired();
@@ -57,7 +70,7 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
     if (!marker.exists || marker.get('v') !== 2 || marker.get('schemaVersion') !== 1 || marker.get('cardProjection') !== 1 ||
         marker.get('accountRetention') !== true || marker.get('readIdentity') !== 1 || marker.get('cardReady') !== true ||
         binding && JSON.stringify(stamp(marker.createTime)) !== JSON.stringify(binding.incarnation)) throw new FeedSessionExpired();
-    return { marker, binding: { generation: id, incarnation: stamp(marker.createTime), contentIdentity: true } };
+    return { marker, control, binding: { generation: id, incarnation: stamp(marker.createTime), contentIdentity: true } };
   }
   async function actor(tx) { await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); }
   async function policy(tx, rows) {
@@ -77,6 +90,7 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
     alive();
     const result = await db.runTransaction(async tx => {
       await actor(tx); const current = await generation(tx, binding);
+      if (!preserveRetiredCursor && current.control.cardReadGenerationId !== binding.generation) return { redirect: await capability(tx, current.control) };
       const store = createFeedGenerationStore(db, binding.generation, { cardProjection: true, contentIdentity: true });
       const headers = await store.readHeaderRows(tx, rows, { marker: current.marker, fenceSnapshot: snapshot });
       const allowed = await policy(tx, [...headers.values()]);
@@ -103,9 +117,10 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
         descriptor.state = publicCardState(doc.id, doc.data());
         return { id: doc.id, bodyVersion: descriptor.bodyVersion, body: bodyProjection(doc.data()).body };
       });
-      return { rows: descriptors, bodies, live: liveContext(binding.generation, binding.incarnation) };
+      return { rows: descriptors, bodies, live: liveContext(binding.generation, binding.incarnation, current.control.revision) };
     }, { readOnly: true });
     alive();
+    if (result.redirect) return result;
     if (result.rows.some(row => row.state.expiresAt <= now())) throw new FeedSessionExpired();
     const proof = token ?? bodyCodec.start({ uid, project: db.projectId, readTime: snapshot.readTime,
       context: { ...context, kind: 'complete' }, now: context.startedAt });
@@ -116,14 +131,15 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
   try {
     if (input.mode === 'liveContext') {
       if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode'].includes(k))) fail('invalid-argument', 'Invalid live context.');
-      return await db.runTransaction(async tx => { await actor(tx); const current = await generation(tx); return liveContext(current.binding.generation, current.binding.incarnation); }, { readOnly: true });
+      return await currentCapability();
     }
     if (input.mode === 'complete') {
       if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'token', 'missing'].includes(k))) fail('invalid-argument', 'Invalid completion.');
       const decoded = bodyCodec.decode(input.token, { uid, project: db.projectId, now: now() });
       if (decoded.context.kind !== 'complete') fail('invalid-argument', 'Invalid proof.');
       await requireEligibleActor({ request, db, now: new Date(now()) });
-      return { version: 2, bodyPage: await finish(decoded.context, input.missing, input.token) };
+      const bodyPage = await finish(decoded.context, input.missing, input.token);
+      return bodyPage.redirect ? reset(bodyPage.redirect) : { version: 2, bodyPage };
     }
     if (input.mode === 'presentation') {
       if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'routes', 'point', 'cold'].includes(k)) ||
@@ -135,7 +151,10 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
           !Number.isFinite(input.point.latitude) || Math.abs(input.point.latitude) > 90 ||
           !Number.isFinite(input.point.longitude) || Math.abs(input.point.longitude) > 180) fail('invalid-argument', 'Invalid presentation request.');
       const context = await db.runTransaction(async tx => {
-        await actor(tx); const current = await generation(tx), capture = {};
+        await actor(tx);
+        const control = validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
+        if (!control.cardReadGenerationId) return { redirect: await capability(tx, control) };
+        const current = await generation(tx, null, control), capture = {};
         const store = createFeedGenerationStore(db, current.binding.generation, { cardProjection: true, contentIdentity: true });
         const headers = await store.readHeaderRows(tx, input.routes, { marker: current.marker, capture });
         const allowed = await policy(tx, [...headers.values()]), time = now();
@@ -148,21 +167,28 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
         return { snapshot, binding: current.binding, rows: selected.map(routeOf), reading: false, presentation: true,
           startedAt, expiresAt: startedAt + feedSessionLifetimeMillis, baseline: bodyDigest([current.binding, input.routes, input.point, time]) };
       }, { readOnly: true });
-      return { version: 2, state: 'ready', baseline: context.baseline, expiresAt: context.expiresAt, next: null,
-        bodyPage: await finish(context, input.cold ? context.rows.map(row => row.id) : []) };
+      if (context.redirect) return reset(context.redirect);
+      const bodyPage = await finish(context, input.cold ? context.rows.map(row => row.id) : []);
+      return bodyPage.redirect ? reset(bodyPage.redirect) : { version: 2, state: 'ready', baseline: context.baseline, expiresAt: context.expiresAt, next: null, bodyPage };
     }
     if (input.mode !== undefined || Object.keys(input).some(k => !['format', 'expectedUserId', 'context', 'cursor', 'cold'].includes(k)) ||
         typeof input.cold !== 'boolean') fail('invalid-argument', 'Invalid delta request.');
     const data = { expectedUserId: uid, ...(input.cursor ? { cursor: input.cursor } : { context: input.context }) };
     return await getFeedPageOperation({ ...request, data }, db, { key: cursorKey, clock, workNodes, readOrdering,
-      compatibleGenerations: true, cardProjection: true, observeMetrics,
+      compatibleGenerations: true, cardProjection: 'generation', observeMetrics,
+      onLegacy: async (reply, binding) => {
+        if (!preserveRetiredCursor && binding.currentReader !== binding.generation) return reset(await currentCapability());
+        return { ...reply, capability: { ...liveContext(binding.generation, binding.incarnation, binding.controlRevision), mode: 'source-v1' } };
+      },
       onSelected: async ({ snapshot, binding, decoded, rows, baseline, reading, readIds, next }) => {
         const selected = rows.map(row => routeOf({ ...row, read: reading && readIds.has(row.id) }));
         const context = { snapshot, binding, rows: selected, baseline, reading,
           startedAt: decoded.startedAt, expiresAt: decoded.expiresAt };
+        const bodyPage = await finish(context, input.cold ? selected.map(row => row.id) : []);
+        if (bodyPage.redirect) return reset(bodyPage.redirect);
         return { version: 2, state: 'ready', baseline, expiresAt: decoded.expiresAt, next,
           ...(reading ? { readOrdering: 'unread-first' } : {}),
-          bodyPage: await finish(context, input.cold ? selected.map(row => row.id) : []) };
+          bodyPage };
       } });
   } catch (error) {
     if (error instanceof FeedSessionExpired) throw new HttpsError('failed-precondition', 'Refresh the feed.', { reason: 'feed-session-expired' });

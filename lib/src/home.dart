@@ -221,10 +221,14 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       _promoRequest++;
       await _shoutSubscription?.cancel();
       if (!mounted || _promoGeneration != stamp) return;
-      _shoutSubscription = FirebaseFirestore.instance
-          .collection('feedIndexGenerations')
-          .doc(context['generation'] as String)
-          .collection('publicStates')
+      final legacy = context['mode'] == 'source-v1';
+      final candidates = legacy
+          ? FirebaseFirestore.instance.collection('shouts')
+          : FirebaseFirestore.instance
+                .collection('feedIndexGenerations')
+                .doc(context['generation'] as String)
+                .collection('publicStates');
+      _shoutSubscription = candidates
           .where('status', isEqualTo: 'active')
           .orderBy('createdAt', descending: true)
           .limit(_feedPageSize)
@@ -237,6 +241,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
           .listen(
             (snapshot) {
               if (!mounted || _promoGeneration != stamp) return;
+              if (legacy) {
+                runtime.publicStates.publish(null, {});
+                _promoDocuments = [];
+                _applyShoutDocuments(snapshot.docs);
+                return;
+              }
+              _feedDocuments = null;
               _promoDocuments = snapshot.docs;
               runtime.publicStates.publish(stamp, {
                 for (final doc in snapshot.docs) doc.id: doc.data(),
@@ -267,6 +278,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   Future<void> _updateDeltaPromotions() async {
     final position = _currentPosition;
+    if (feedDeltaRuntime?.live.isLegacy == true) return;
     if (!mounted || position == null || feedDeltaRuntime == null) return;
     final candidates = _promoDocuments
         .where(

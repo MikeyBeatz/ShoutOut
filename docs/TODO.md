@@ -65,10 +65,10 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
    [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
    [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** schválit
-   [připravený lokální úsek operátoru, kompatibility a návratu](plans/feed/B4_DEV_ROLLOUT.md#local-transition-proposal).
-   Podklad obsahuje čerstvou čtecí DEV inventuru; implementace ani živý
-   přechod nezačaly. Živý datový přechod je samostatná brána.
+   zahrnují i Chrome proti emulátoru a nákladové měření. **Nyní:** dokončit
+   společné ověření/CI [schváleného lokálního operátoru, kompatibility a návratu](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results).
+   Implementace je připravená, přepínače vypnuté; živý datový přechod má
+   [samostatný návrh a bránu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Cold/warm a doplňovací náklady jsou samostatně doložené;
