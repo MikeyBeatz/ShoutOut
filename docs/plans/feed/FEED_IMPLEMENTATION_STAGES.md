@@ -13,6 +13,10 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
+**Navazující lokální B4b:** [výpočet číslovky, klient a srovnání detekce](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
+jsou připravené pro úplné CI. Počítají jen nové publikace, zůstávají vypnuté;
+provozní signalizace/četnost a následný DEV rollout ještě zbývají.
+
 **21. listopadu – aktuálně:** [B4 metadata/cache jsou v DEV](B4_DEV_ROLLOUT.md#dev-rollout-results),
 zdroj 8b1de68 / úplné CI 44935555088 success, Hosting fa20f566fc0ab82b.
 Reader feed-v3, control revision 11, tři writery; živý interní pilot,

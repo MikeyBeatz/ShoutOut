@@ -206,6 +206,8 @@ test('full API measurements with fresh per-request stores at 50/200/2000 sources
 
 test('Chrome delta transport against real Firestore emulator, disconnect and refill retry', { skip: !enabled || process.env.B4_BROWSER !== '1', timeout: 180000 }, async t => {
   const f = await fixture(t, 120); let failNext = false;
+  const step=f.step;f.step=(data,options={})=>step(data,{newsEnabled:true,...options});
+  const newsRef=db.doc(`shouts/${f.uid}-news`);f.roots.push(newsRef);
   const server = createServer(async (request, response) => {
     response.setHeader('Access-Control-Allow-Origin', '*'); response.setHeader('Access-Control-Allow-Headers', 'content-type');
     response.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -214,11 +216,19 @@ test('Chrome delta transport against real Firestore emulator, disconnect and ref
       if (request.url === '/info') { response.end(JSON.stringify({ uid: f.uid, project: db.projectId, context: filters })); return; }
       if (request.url === '/fail') { failNext = true; response.end('{}'); return; }
       if (request.url === '/unblock') { failNext = false; response.end('{}'); return; }
+      if (['/publish-news','/remove-news'].includes(request.url)) {
+        const runtime=createFeedRuntime(db,{getUser(){throw new Error('fixture-auth-forbidden');}},{cardStateEnabled:true});
+        await runtime.database.runTransaction(async tx=>{
+          const source=await tx.get(newsRef),before=source.data()??null;
+          const after=request.url==='/publish-news'?{...f.rows[0],id:newsRef.id,title:'Browser news'}:null;
+          const plan=await runtime.indexWriter.prepare(tx,newsRef.id,before,after);plan.apply();if(after)tx.set(newsRef,after);else tx.delete(newsRef);
+        });response.end('{}');return;
+      }
       if (request.url !== '/call') { response.writeHead(404); response.end(); return; }
       const chunks = []; for await (const chunk of request) chunks.push(chunk);
       const data = JSON.parse(Buffer.concat(chunks).toString());
       const result = await f.step(data);
-      if (failNext && data.mode === 'complete') { response.destroy(); return; }
+      if (failNext && ['complete','news'].includes(data.mode)) { response.destroy(); return; }
       response.end(JSON.stringify(result));
     } catch { response.writeHead(409); response.end('{}'); }
   });

@@ -14,6 +14,8 @@ export function assertDevelopmentProject(project) {
 
 export function validateConfig(config, environment) {
   if (config.serverDeltaFeed !== undefined && typeof config.serverDeltaFeed !== 'boolean') throw new Error('serverDeltaFeed must be a boolean.');
+  if (config.serverFeedNews !== undefined && typeof config.serverFeedNews !== 'boolean') throw new Error('serverFeedNews must be a boolean.');
+  if (config.serverFeedNews === true && (environment !== 'dev' || config.serverDeltaFeed !== true)) throw new Error('Feed news requires DEV delta feed.');
   if (config.serverDeltaFeed === true && (environment !== 'dev' || config.serverSpatialFeed !== true || config.serverUnreadFeed !== true || config.serverCommentCreation !== true || config.serverCommentDeletion !== true || config.serverShoutSaves !== true)) throw new Error('Delta feed requires DEV spatial/unread feed and server count writers.');
   if (config.serverUnreadFeed !== undefined && typeof config.serverUnreadFeed !== 'boolean') {
     throw new Error('serverUnreadFeed must be a boolean.');

@@ -137,6 +137,67 @@ class FeedDeltaClient {
     };
   }
 
+  Future<FeedNewsDelta> news(String checkpoint) async {
+    final uid = currentUserId();
+    retainViewer(uid);
+    if (uid == null || _erased.contains(uid)) {
+      throw StateError('No news viewer');
+    }
+    final epoch = _epoch;
+    var cursor = checkpoint;
+    for (var work = 0; work < 32; work++) {
+      final response = await send({
+        'format': 'delta-v1',
+        'expectedUserId': uid,
+        'mode': 'news',
+        'checkpoint': cursor,
+      });
+      if (_epoch != epoch ||
+          _viewer != uid ||
+          currentUserId() != uid ||
+          _erased.contains(uid)) {
+        throw StateError('Stale news viewer');
+      }
+      if (response is! Map ||
+          response['version'] != 1 ||
+          response['checkpoint'] is! String ||
+          (response['checkpoint'] as String).isEmpty ||
+          (response['checkpoint'] as String).length > 262144) {
+        throw const FormatException('Invalid news response');
+      }
+      final next = response['checkpoint'] as String;
+      if (response['state'] == 'preparing') {
+        if (next == cursor || response.containsKey('count')) {
+          throw const FormatException('Invalid partial news response');
+        }
+        cursor = next;
+        continue;
+      }
+      final count = response['count'], validFor = response['validForMillis'];
+      if (response['state'] != 'ready' ||
+          count is! int ||
+          count < 0 ||
+          count > 100 ||
+          response['capped'] != (count == 100) ||
+          response['baseline'] is! String ||
+          (response['baseline'] as String).isEmpty ||
+          validFor is! int ||
+          validFor < 0 ||
+          count > 0 && validFor == 0 ||
+          validFor > const Duration(hours: 1).inMilliseconds ||
+          response['checkedAt'] is! int) {
+        throw const FormatException('Invalid confirmed news count');
+      }
+      return FeedNewsDelta.confirmed(
+        checkpoint: next,
+        baseline: response['baseline'] as String,
+        count: count,
+        validFor: Duration(milliseconds: validFor),
+      );
+    }
+    throw StateError('News preparation work budget exhausted');
+  }
+
   Future<List<FeedBodyCard>> presentation(
     List<Map<String, String>> routes,
     Map<String, double> point,

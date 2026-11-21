@@ -103,6 +103,22 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     );
     _spatialSession = FeedSessionController(
       load: _spatialGateway.load,
+      onNewsExpired: () => unawaited(_checkSpatialNews()),
+      loadNews: _useSpatialFeed && WebEnvironment.current.serverFeedNews
+          ? (_, checkpoint) async {
+              try {
+                return await feedDeltaRuntime!.client.news(checkpoint);
+              } on FirebaseFunctionsException catch (error) {
+                final details = error.details;
+                if (error.code == 'failed-precondition' &&
+                    details is Map &&
+                    details['reason'] == 'feed-session-expired') {
+                  throw const FeedSessionExpired();
+                }
+                rethrow;
+              }
+            }
+          : null,
       idOf: (shout) => shout.id,
       onChanged: () {
         if (mounted) setState(() {});
@@ -492,8 +508,27 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     } finally {
       if (mounted && attempt == _spatialRequest) {
         setState(() => _spatialLoading = false);
+        if (!_spatialFailed) unawaited(_checkSpatialNews());
       }
     }
+  }
+
+  Future<void> _checkSpatialNews() async {
+    if (!_useSpatialFeed ||
+        !WebEnvironment.current.serverFeedNews ||
+        _tab != 0 ||
+        _spatialLoading ||
+        !mounted) {
+      return;
+    }
+    try {
+      await _spatialSession.checkNews();
+    } catch (error) {
+      // Preserve feed/order and the last confirmed number. Unverified counts
+      // have a separate visual state; no body refresh or B2 sync is triggered.
+      debugPrint('Feed news failed: code=${liveDataFailureCode(error)}');
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _spatialMore({bool prefetchOnly = false}) async {
@@ -541,6 +576,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     setState(() => _tab = index);
     if (_useSpatialFeed && index == 0 && _spatialSession.context == null) {
       unawaited(_refreshSpatialFeed());
+    } else if (_useSpatialFeed && index == 0) {
+      unawaited(_checkSpatialNews());
     }
   }
 
@@ -559,6 +596,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       unawaited(_refreshSpatialFeed());
     } else {
       unawaited(_noticeSpatialMovement());
+      unawaited(_checkSpatialNews());
     }
   }
 
@@ -1066,6 +1104,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       body: _BrandedTabBackground(
         child: switch (_tab) {
           0 => FeedRefreshOverlay(
+            newsCount: _spatialSession.newsCount,
+            newsCurrent: _spatialSession.newsIsCurrent,
             onRefresh: _useSpatialFeed
                 ? () => unawaited(_refreshSpatialFeed())
                 : null,

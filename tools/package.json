@@ -6,6 +6,7 @@
     "node": "22.x"
   },
   "scripts": {
+    "test:feed-news": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_news.integration.test.js\"",
     "test:read-runtime": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/read_sync_runtime.integration.test.js ../functions/retention_cleanup.integration.test.js ../functions/retention_runtime.integration.test.js\"",
     "check:docs": "node check_docs.mjs",
     "progress:update": "node project_progress.mjs --write",

@@ -14,6 +14,32 @@ Map<String, dynamic> gatewayFixture() => {
 };
 
 void main() {
+  test('B4b news is disabled and requires DEV delta feed', () {
+    final config =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(config).serverFeedNews, isFalse);
+    expect(
+      WebEnvironment.fromJson({
+        ...config,
+        'serverFeedNews': true,
+      }).serverFeedNews,
+      isTrue,
+    );
+    for (final patch in [
+      {'serverFeedNews': 'true'},
+      {'serverFeedNews': true, 'serverDeltaFeed': false},
+    ]) {
+      expect(
+        () => WebEnvironment.fromJson({...config, ...patch}),
+        throwsStateError,
+      );
+    }
+    final prod =
+        jsonDecode(File('config/prod.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(prod).serverFeedNews, isFalse);
+  });
   test('B4 client is active in DEV and requires all count writers', () {
     final dev =
         jsonDecode(File('config/dev.json').readAsStringSync())

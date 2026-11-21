@@ -12,6 +12,7 @@ import { publicCardState } from './feed_card_state.js';
 import { distanceKm } from './feed_spatial.js';
 import { readContentHash } from './read_content_identity.js';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
+import { feedNewsBaseline, getFeedNewsOperation } from './feed_news.js';
 
 const fail = (code, message) => { throw new HttpsError(code, message); };
 const stamp = time => [time.seconds, time.nanoseconds];
@@ -41,7 +42,7 @@ export async function getCompatibleFeedPageOperation(request, db, options) {
 }
 
 export async function getFeedDeltaOperation(request, db, { key, enabled = false, clock = () => new Date(),
-  workNodes = 32, readOrdering = null, observeMetrics = () => {}, preserveRetiredCursor = false } = {}) {
+  workNodes = 32, readOrdering = null, observeMetrics = () => {}, preserveRetiredCursor = false, newsEnabled = false } = {}) {
   const { uid } = requireCallableIdentity(request), input = request.data;
   if (!enabled) fail('failed-precondition', 'Delta feed is not enabled.');
   assertFeedRuntimeTarget(db);
@@ -126,9 +127,12 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
       context: { ...context, kind: 'complete' }, now: context.startedAt });
     return { schema: 1, project: db.projectId, uid, generation: binding.generation,
       incarnation: JSON.stringify(binding.incarnation), context: bodyDigest([baseline, snapshot]), expiresAt: deadline,
-      token: proof, unreadFirst: context.reading === true, ...result };
+      token: proof, unreadFirst: context.reading === true, ...result,
+      ...(newsEnabled && !context.presentation ? { newsCheckpoint: feedNewsBaseline({ key, uid, project: db.projectId,
+        snapshot, binding, baseline, startedAt: context.startedAt }) } : {}) };
   }
   try {
+    if (input.mode === 'news') return await getFeedNewsOperation(request, db, { key, enabled: newsEnabled, clock, workNodes, observeMetrics });
     if (input.mode === 'liveContext') {
       if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode'].includes(k))) fail('invalid-argument', 'Invalid live context.');
       return await currentCapability();
@@ -188,6 +192,7 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
         if (bodyPage.redirect) return reset(bodyPage.redirect);
         return { version: 2, state: 'ready', baseline, expiresAt: decoded.expiresAt, next,
           ...(reading ? { readOrdering: 'unread-first' } : {}),
+          ...(bodyPage.newsCheckpoint ? { newsCheckpoint: bodyPage.newsCheckpoint } : {}),
           bodyPage };
       } });
   } catch (error) {

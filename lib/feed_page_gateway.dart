@@ -137,6 +137,13 @@ class FeedPageGateway<T> {
       final items = value['items'],
           next = value['next'],
           state = value['state'];
+      final newsCheckpoint = value['newsCheckpoint'];
+      if (newsCheckpoint != null &&
+          (newsCheckpoint is! String ||
+              newsCheckpoint.isEmpty ||
+              newsCheckpoint.length > 262144)) {
+        throw StateError('Invalid feed news checkpoint');
+      }
       if (value['version'] != 1 ||
           !['preparing', 'ready'].contains(state) ||
           value['baseline'] is! String ||
@@ -171,6 +178,9 @@ class FeedPageGateway<T> {
       return FeedBatch(
         items: decoded,
         baseline: baseline,
+        newsCheckpoint: value['newsCheckpoint'] is String
+            ? value['newsCheckpoint'] as String
+            : null,
         next: next == null
             ? null
             : FeedPageCursor._(next as String, uid, context, readGroupStarted),

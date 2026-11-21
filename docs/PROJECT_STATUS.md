@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Lokální B4b je připravené ve feature/feed-b4-news-local; čeká konečné úplné CI.**
+Vlastník schválil ucelený výpočet číslovky/klientský badge a měření dvou
+způsobů detekce a zvolil jen nově publikované příspěvky. [Rozsah a kontrakt](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-proposal).
+[Výsledky a naměřené meze](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results):
+445 Flutter, 89 tools, 165 unit, 9 nových emulátorových a 11 transportních
+včetně Chromu. Count dotaz nečte těla a nic nezapisuje; 19–23 reads v klidu,
+30–36 při teplé kontrole jedné novinky v měřeném rozsahu 50/200/2 000 zdrojů.
+Další je společný push/úplné CI a příprava bezpečného provozního adaptéru
+podle měření; konkrétní četnost/odběry nejsou aktivované. Serverový i klientský
+přepínač zůstává false. Bez nasazení, živých dat, Rules, nových služeb/Auth či změny retence.
+Níže uvedený dokončený B4 metadata/cache rollout je stále skutečný DEV stav.
+
 **Nyní: metadata/cache B4 mají uzavřenou DEV akceptaci i úklid.**
 Zdroj **8b1de6824e116358c4d364785e4b94f57f52fc9d**, [úplné CI 44935555088 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44935555088),
 Hosting **fa20f566fc0ab82b**, pouze shoutout-dev-46c81. Dokončeno 14 indexových
@@ -23,9 +35,8 @@ oběma účtům správně vrací 0 karet. Původní data znovu ověřená beze z
 Computer Use bylo zastavené kontrolou URL; UI doložil vlastník, Auth/App Check
 VALID i HTTP 200 pro feed a reakce serverové logy. Interaktivní UI rollback
 zbývá ve společné finální regresi B4; technický rollback i klientská regrese prošly.
-**Další:** připravit konkrétní úsek B4b – úsporné signály a číslovku novinek
-na plovoucí obnově podle existujícího plánu, před zdrojovými změnami schválit
-nový kontrakt a měřicí rozsah. Celé B4 ani celý milník nejsou uzavřené.
+**Další:** dokončit schválený lokální B4b výše a doložit měření/úplné CI;
+provozní zapojení bude následovat podle výsledků. Celé B4 ani celý milník nejsou uzavřené.
 Produkce/main nezměněné; tentýž pilot znovu nezakládat.
 
 **Předchozí lokální přechod B4 je uzavřený včetně úplného CI.**

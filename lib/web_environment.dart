@@ -156,6 +156,13 @@ class WebEnvironment {
       throw StateError('serverDeltaFeed must be a boolean.');
     }
     serverDeltaFeed = json['serverDeltaFeed'] == true;
+    if (json.containsKey('serverFeedNews') && json['serverFeedNews'] is! bool) {
+      throw StateError('serverFeedNews must be a boolean.');
+    }
+    serverFeedNews = json['serverFeedNews'] == true;
+    if (serverFeedNews && (name != 'dev' || !serverDeltaFeed)) {
+      throw StateError('Feed news requires DEV delta feed.');
+    }
     if (serverDeltaFeed &&
         (name != 'dev' ||
             !serverSpatialFeed ||
@@ -266,6 +273,7 @@ class WebEnvironment {
   late final bool serverReadSynchronization;
   late final bool serverSpatialFeed;
   late final bool serverDeltaFeed;
+  late final bool serverFeedNews;
   late final bool serverUnreadFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;

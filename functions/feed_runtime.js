@@ -8,7 +8,7 @@ import { bindCardPublisher, prepareCardStates, registerCardSourcePlan, cardSourc
 import { indexMaintenance } from './feed_index_maintenance.js';
 
 export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: true,
-  cardStateEnabled: true, deltaResponsesEnabled: true, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
+  cardStateEnabled: true, deltaResponsesEnabled: true, newsEnabled: false, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();
 // One existing bounded public-node cache per process. A fresh timer-backed

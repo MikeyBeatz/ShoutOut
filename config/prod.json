@@ -1,5 +1,6 @@
 {
   "environment": "prod",
+  "serverFeedNews": false,
   "serverReadSynchronization": false,
   "serverSpatialFeed": false,
   "appUrl": "https://go.shoutout-app.eu",

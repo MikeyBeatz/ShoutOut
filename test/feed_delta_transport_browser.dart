@@ -70,6 +70,18 @@ void main() {
       final third = await client.load({'cursor': second['next']});
       expect((third['items'] as List).length, 20);
       expect(third['next'], isNull);
+      final beforeNewsBodies = returnedBodies;
+      final baseline = first['newsCheckpoint'] as String;
+      expect((await client.news(baseline)).count, 0);
+      await http.post(Uri.parse('$origin/publish-news'));
+      await http.post(Uri.parse('$origin/fail'));
+      await expectLater(client.news(baseline), throwsA(anything));
+      await http.post(Uri.parse('$origin/unblock'));
+      expect((await client.news(baseline)).count, 1);
+      expect(returnedBodies, beforeNewsBodies);
+      await http.post(Uri.parse('$origin/remove-news'));
+      expect((await client.news(baseline)).count, 0);
+      expect(returnedBodies, beforeNewsBodies);
     },
   );
 }

@@ -174,6 +174,12 @@ jobs:
         working-directory: tools
         run: npm run test:card-transition
 
+      - name: Test B4 news count and refresh fence
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 5
+        working-directory: tools
+        run: npm run test:feed-news
+
       - name: Test prepared B2 runtime
         if: steps.scope.outputs.full != 'false'
         # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.

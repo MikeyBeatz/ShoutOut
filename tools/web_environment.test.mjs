@@ -8,6 +8,13 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
+test('B4b news is disabled in both environments and requires DEV delta when enabled', () => {
+  assert.equal(actualDev.serverFeedNews,false);assert.equal(loadConfig('prod').serverFeedNews,false);
+  assert.doesNotThrow(()=>validateConfig({...actualDev,serverFeedNews:true},'dev'));
+  assert.throws(()=>validateConfig({...actualDev,serverFeedNews:'true'},'dev'));
+  assert.throws(()=>validateConfig({...actualDev,serverFeedNews:true,serverDeltaFeed:false},'dev'));
+  assert.throws(()=>validateConfig({...actualDev,serverFeedNews:true},'prod'));
+});
 test('B4 delta client is enabled only in DEV and requires all parent-counter gateways', () => {
   assert.equal(actualDev.serverDeltaFeed, true);
   assert.notEqual(loadConfig('prod').serverDeltaFeed, true);

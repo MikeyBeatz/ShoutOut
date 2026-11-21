@@ -1,0 +1,439 @@
+{
+  "schema": 1,
+  "scope": "Firestore emulator SDK operations plus explicit detector/fanout model; not cloud billing/load test",
+  "samples": [
+    {
+      "sources": 50,
+      "quiet": {
+        "label": "quiet-cold",
+        "reads": 19,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1069,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 154
+      },
+      "quietWarm": {
+        "label": "quiet-warm",
+        "reads": 19,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1069,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 158
+      },
+      "counters": {
+        "label": "counter-only",
+        "reads": 24,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 63036,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 247
+      },
+      "one": {
+        "label": "one-new-cold",
+        "reads": 32,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 64757,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 314
+      },
+      "oneWarm": {
+        "label": "one-new-warm",
+        "reads": 30,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 2532,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 351
+      },
+      "publication": {
+        "reads": 8,
+        "queries": 0,
+        "writes": 5,
+        "sourceReads": 1,
+        "bytes": 31318,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "publicationSignal": {
+        "reads": 9,
+        "queries": 0,
+        "writes": 6,
+        "sourceReads": 1,
+        "bytes": 31929,
+        "attempts": 1,
+        "signalWrites": 1
+      }
+    },
+    {
+      "sources": 200,
+      "quiet": {
+        "label": "quiet-cold",
+        "reads": 19,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1069,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 174
+      },
+      "quietWarm": {
+        "label": "quiet-warm",
+        "reads": 19,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1069,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 160
+      },
+      "counters": {
+        "label": "counter-only",
+        "reads": 28,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 76496,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 301
+      },
+      "one": {
+        "label": "one-new-cold",
+        "reads": 40,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 129539,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 443
+      },
+      "oneWarm": {
+        "label": "one-new-warm",
+        "reads": 30,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 2532,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1557,
+        "responseBytes": 1651,
+        "maxCheckpointBytes": 1441,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 320
+      },
+      "publication": {
+        "reads": 10,
+        "queries": 0,
+        "writes": 7,
+        "sourceReads": 1,
+        "bytes": 27086,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "publicationSignal": {
+        "reads": 11,
+        "queries": 0,
+        "writes": 8,
+        "sourceReads": 1,
+        "bytes": 27687,
+        "attempts": 1,
+        "signalWrites": 1
+      }
+    },
+    {
+      "sources": 2000,
+      "quiet": {
+        "label": "quiet-cold",
+        "reads": 23,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1229,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1709,
+        "responseBytes": 1803,
+        "maxCheckpointBytes": 1593,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 174
+      },
+      "quietWarm": {
+        "label": "quiet-warm",
+        "reads": 23,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1229,
+        "attempts": 3,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1709,
+        "responseBytes": 1803,
+        "maxCheckpointBytes": 1593,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 160
+      },
+      "counters": {
+        "label": "counter-only",
+        "reads": 35,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 82186,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 0,
+        "requests": 1,
+        "requestBytes": 1709,
+        "responseBytes": 1803,
+        "maxCheckpointBytes": 1593,
+        "maxRetainedCandidates": 0,
+        "elapsedMillis": 357
+      },
+      "one": {
+        "label": "one-new-cold",
+        "reads": 50,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 152999,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1709,
+        "responseBytes": 1803,
+        "maxCheckpointBytes": 1593,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 550
+      },
+      "oneWarm": {
+        "label": "one-new-warm",
+        "reads": 36,
+        "queries": 3,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 2700,
+        "attempts": 4,
+        "signalWrites": 0,
+        "count": 1,
+        "requests": 1,
+        "requestBytes": 1709,
+        "responseBytes": 1803,
+        "maxCheckpointBytes": 1593,
+        "maxRetainedCandidates": 1,
+        "elapsedMillis": 329
+      },
+      "publication": {
+        "reads": 10,
+        "queries": 0,
+        "writes": 7,
+        "sourceReads": 1,
+        "bytes": 35074,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "publicationSignal": {
+        "reads": 11,
+        "queries": 0,
+        "writes": 8,
+        "sourceReads": 1,
+        "bytes": 35643,
+        "attempts": 1,
+        "signalWrites": 1
+      }
+    }
+  ],
+  "detection": {
+    "quiet": {
+      "signal2s": {
+        "windowMillis": 60000,
+        "publications": 0,
+        "probeRequests": 0,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 1,
+        "maximumModeledDelayMillis": 0
+      },
+      "batch5s": {
+        "windowMillis": 60000,
+        "publications": 0,
+        "probeRequests": 12,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 0
+      },
+      "batch15s": {
+        "windowMillis": 60000,
+        "publications": 0,
+        "probeRequests": 4,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 0
+      }
+    },
+    "one": {
+      "signal2s": {
+        "windowMillis": 60000,
+        "publications": 1,
+        "probeRequests": 1,
+        "signalDocumentWrites": 1,
+        "signalListenerReadModel": 2,
+        "maximumModeledDelayMillis": 2000
+      },
+      "batch5s": {
+        "windowMillis": 60000,
+        "publications": 1,
+        "probeRequests": 12,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 5000
+      },
+      "batch15s": {
+        "windowMillis": 60000,
+        "publications": 1,
+        "probeRequests": 4,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 5000
+      }
+    },
+    "burst": {
+      "signal2s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 1,
+        "signalDocumentWrites": 100,
+        "signalListenerReadModel": 101,
+        "maximumModeledDelayMillis": 2000
+      },
+      "batch5s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 12,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 5000
+      },
+      "batch15s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 4,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 5000
+      }
+    },
+    "steady": {
+      "signal2s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 25,
+        "signalDocumentWrites": 100,
+        "signalListenerReadModel": 101,
+        "maximumModeledDelayMillis": 2000
+      },
+      "batch5s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 12,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 5000
+      },
+      "batch15s": {
+        "windowMillis": 60000,
+        "publications": 100,
+        "probeRequests": 4,
+        "signalDocumentWrites": 0,
+        "signalListenerReadModel": 0,
+        "maximumModeledDelayMillis": 15000
+      }
+    }
+  },
+  "limits": [
+    "Baseline feed load and fixture setup excluded",
+    "bytes measures serialized SDK document JSON, not gRPC transfer",
+    "requestBytes/responseBytes measure callable-envelope JSON; HTTP headers/compression excluded",
+    "Listener reads are a document-change model, not measured billed reads",
+    "Client coalescing does not coalesce server signal writes or billed listener changes",
+    "Publication-only signal needs bounded fallback for removal/expiration/reconnect",
+    "No timing or infrastructure activated"
+  ]
+}

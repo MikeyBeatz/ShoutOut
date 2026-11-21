@@ -24,6 +24,10 @@ samotné uzavření B3 je neurčuje. Datované přípravné checkpointy níže j
 mají uzavřenou lokální implementaci a úplné CI. Nová vrstva zůstává vypnutá;
 další je řízený DEV přechod, potom signály a číslovka. Celé B4 není uzavřené.
 
+**Pozdější stav 21. listopadu:** [metadata/cache B4 mají uzavřenou DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#delta-acceptance-complete).
+Navazující [lokální B4b](#b4b-local-proposal) je schválený a jeho
+[výsledky a návrh četnosti](#b4b-local-results) jsou níže; živé signály ještě neběží.
+
 <a id="b3-local"></a>
 
 ### B3 — schválený lokální úsek, 19. listopadu 2026
@@ -630,6 +634,136 @@ včetně odstranění. Její uložení/retence zatím nejsou zvolené. Při př�
 či neplatném bodu bezpečně znovu porovnat aktuální metadata po dávkách;
 nepředstírat úplnou deltu a nestahovat automaticky všechna těla. Žádný nový
 journal nesmí obejít pevné retenční lhůty nebo obnovit R5 vyčištěná metadata.
+
+<a id="b4b-local-proposal"></a>
+
+## Schválený lokální B4b – 21. listopadu 2026
+
+Vlastník zvolil **jen nově publikované Shouty od úspěšné obnovy**. Starší
+znovu zpřístupněný obsah se objeví při obnově, ale nezvyšuje číslovku.
+Schválil ucelený lokální výpočet nad indexovými metadaty bez celých textů,
+bezpečnou baseline, 1–99/99+, odečtení nedostupných novinek a klientský badge
+za vypnutou volbou. Součástí jsou regrese souběhu/filtrů/výpadků/účtů,
+porovnání malého publication-only signálu s omezenou dávkovou kontrolou,
+naměřené operace/přenosy a návrh provozní četnosti, commit/push a úplné CI.
+Pouze paměť/emulátor: bez nasazení, živých dat, nových služeb, Rules, Auth
+účtů či změn retence. Provozní mechanismus a četnost zatím zvolené nejsou.
+
+Implementace se připravuje ve feature/feed-b4-news-local. Výchozí DEV a
+produkční klientský přepínač serverFeedNews i serverový newsEnabled jsou
+false. Samotné createdAt není spolehlivá hranice: transakce může začít před
+obnovou a publikaci potvrdit později. Prototyp proto váže podepsanou baseline
+na původní indexový snapshot/readTime a první vytvoření publicStates ve
+stejné transakci jako zdroj; hashový rozdíl přeskočí nezměněné podstromy.
+Hranice platí uvnitř téže inkarnace auditované card generace; R5 a přepnutí
+readeru vyžadují obnovu. Nemění se formát ani zápisy živých zdrojů/indexu.
+Za připravený či provozně ověřený výsledek to lze označit až po testech a CI.
+
+<a id="b4b-local-results"></a>
+
+## Lokální B4b – implementace, měření a další provozní brána
+
+Ve feature/feed-b4-news-local je připravený lokální základ; úplné CI
+konečného zdroje je další kontrolní bod. Žádné nové nasazení ani živé zápisy.
+
+- [Serverový kontrakt](../../../functions/feed_news.js) používá podepsaný
+  checkpoint oddělený od čtecích/body kurzorů, svázaný s projektem/UID,
+  filtry, readTime, inkarnací generace a původní hodinovou lhůtou.
+  Není založený na samotném createdAt. První createTime publicStates dokládá
+  atomický vznik nového zdroje, takže opožděný commit nepřepadne mezi obnovu
+  a číslovku a starší obnovený obsah se nepočítá. Platí uvnitř auditované
+  card generace; změna readeru nebo R5 vyžaduje obnovu.
+- [Porovnání stromů](../../../functions/feed_news_scan.js) přeskočí shodné
+  hashe a původní ID ve stejném listu. Počítá dostupné metadata, nikoli celé
+  texty; nejvýše 100 kandidátů dokládá 99+. Pracovní krok používá 32 načtení
+  uzlů, mez odpovídá stávajícímu readeru; potřebuje-li pokračování, nevrací
+  částečný počet. Klient má nejvýše 32 pokračování a starý checkpoint při chybě
+  zachová. Původní 262 144B mez podepsaného kurzoru se nezvětšovala.
+- Před každou odpovědí včetně pokračování se znovu ověří účet a R5.
+  Konečný výsledek kontroluje aktuální hlavičky, blokace, autory, dostupnost,
+  kategorii/promo/radius a expiraci. Změna během přípravy způsobí bezpečné
+  odmítnutí/opakování stejné hranice, nikoli smyšlený počet. B3 read markery
+  se při pouhé detekci nesynchronizují a počet není počet všech nepřečtených.
+- [Klient](../../../lib/feed_delta_client.dart) a
+  [relace](../../../lib/feed_session.dart) přebírají potvrzený počet bez změny
+  karet, pořadí nebo scrollu. Pouze úspěšná obnova převezme novou hranici.
+  Pozdní odpověď, jiný účet/baseline a vadná odpověď se odmítnou. Při známé
+  expiraci se číslo včas označí jako neověřené a aktivní host znovu ověří
+  jen novinky. Tento časovač není odhad stáří ani pravidelné načítání feedu.
+- Plovoucí tlačítko má 1–99/99+ a samostatný neověřený stav; světlý/tmavý
+  vzhled i zachování umístění jsou testované. [Detekční driver](../../../lib/feed_news_driver.dart)
+  má výslovně dodané časování, slučuje pulsy bez hladovění, zachová signál
+  přijatý během požadavku a pracuje jen v aktivním zobrazení. Žádný výchozí
+  provozní polling ani nový odběr se neinstaluje. Home má za vypnutou volbou
+  klientský transport a kontrolu po úspěšné obnově/návratu do feedu/popředí;
+  skutečný publikovací odběr a adaptivní provozní profil zatím napojené nejsou.
+- Výchozí serverový newsEnabled a klientský serverFeedNews jsou false v DEV
+  i produkčním buildu. Změna Rules, datového formátu, retence nebo IndexedDB
+  nebyla potřebná. Publication-only hlavička existuje pouze v
+  [emulátorovém prototypu](../../../functions/feed_news_lab.js); do balíčků
+  Functions se laboratorní modul ani detekční model nepřibalují.
+
+Lokální kontroly: 445 Flutter, 89 nástrojových, 165 Functions unit
+(540 emulátorových scénářů v unit běhu přeskočených), 9 nových databázových
+scénářů a 11 transportních včetně Chromu. Lint, úplná analýza a formát jsou
+kontrolované samostatně; konečný úspěšný úplný CI se doplní po jeho doběhu.
+[Nové regrese](../../../functions/feed_news.integration.test.js) zahrnují
+hranici 99+, mazání/expiraci, starý obnovený obsah, zpožděný commit, publikaci
+během obnovy, změnu účtu, R5, rollback a smazání účtu během přípravy.
+Skutečný headless Chrome prošel serverovým HTTP transportem proti emulátoru:
+0 → 1 → 0, výpadek/opakování, bez přenosu dalších těl. Identitu dodává fixture,
+takže tento test neověřuje živý platformní Auth/App Check.
+
+### Naměřené náklady
+
+[Reprodukovatelný lokální výstup](../../benchmarks/FEED_NEWS_2026-11-21.json)
+odděluje SDK operace od modelu detektoru. Účet/kontrolní dokumenty a
+retenci zahrnuje; založení fixture a prvotní plný feed nezahrnuje.
+
+| Syntetické zdroje | Nezměněné okolí: reads | Jen palec: reads | 1 novinka cold / warm: reads | Celá těla | JSON požadavek / odpověď |
+|---|---:|---:|---:|---:|---:|
+| 50 | 19 | 24 | 32 / 30 | 0 | 1 557 / 1 651 B |
+| 200 | 19 | 28 | 40 / 30 | 0 | 1 557 / 1 651 B |
+| 2 000 | 23 | 35 | 50 / 36 | 0 | 1 709 / 1 803 B |
+
+Všechny samotné count dotazy mají 0 zápisů. Prototyp signálu přidal jeden
+malý zápis při publikaci; změna palce ho nepřidala. Kompletní publikační
+transakce stály podle tvaru stromu 5/7/7 zápisů a se signálem 6/8/8;
+nejde o příslib stejného počtu pro všechny polohy či všechny udržované generace.
+SDK reads nejsou přesně fakturované index-entry reads. Bajty jsou JSON
+serializace se základní callable obálkou, bez HTTP hlaviček/komprese/gRPC.
+Časy emulátoru, stromové hashe a bajty závislé na serverovém čase nejsou
+cloudovou latencí, cenou ani přesně reprodukovatelným číselným SLA.
+
+Detektorový model za 60 sekund: v klidu publication-only signál nevyvolá
+další probe; pevné dávky 5/15 s znamenají 12/4 probe za minutu. Sto publikací
+v jedné dávce se na klientu sloučí na jeden probe, ale stále způsobí 100
+signálových zápisů a modelových 101 listener reads na odběratele. Sto
+rovnoměrných publikací dává 25 probe při 2s slučování proti 12 při 5s dávce.
+Pouhé slučování překreslení/požadavků nešetří doručené změny dokumentu.
+
+### Návrh četnosti pro další schválení
+
+Doporučený směr: **publication-only signál v klidu, 2s slučování**; při
+čekajících novinkách **nejvýše 15 s mezi kontrolami dostupnosti**, známá
+expirace dříve. Po návratu/popředí/reconnectu okamžitá kontrola. Pro hustou
+oblast navrhnout **5s dávku se zastavením hlučného odběru**, když součet
+skutečných signal reads a probe práce vyjde dráž; návrat s hysterézí.
+Jde o návrh, ne zapnuté časování ani garantovanou čerstvost.
+
+Před provozním adaptérem konkretizovat bezpečný kontrakt hlavičky,
+ověřované oblastní odběry, limity/četnost a hysterézi, způsob odečtu
+smazaných novinek a reconnectu, celkové náklady včetně fanoutu i ochranu
+účtu/API proti zahlcení. U publication-only signálu je omezená kontrola
+nutná: sám nesignalizuje mazání/expiraci. V tomto úseku nevznikla služba,
+Scheduler, Cloud Task ani aktivní globální timer. Cíl 5 000 relací má stále
+vlastní kapacitní bránu. Provozní adapter, DEV rollout a společná B4 akceptace
+jsou další otevřené kroky, nejsou součástí zde hotového lokálního základu.
+
+Evidence rozlišuje lokální základ od dosud nezačatého provozního napojení:
+z nedokončené code/check váhy je oddělená lokální a provozní polovina,
+při zachování celkové váhy rodiče a všech dosud hotových částí. Lokální
+verification se uzavře až úspěšným úplným CI konečného zdroje.
 
 ## B4: číslovka bez přenačítání feedu
 
