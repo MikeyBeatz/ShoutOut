@@ -230,6 +230,11 @@ náklad dočasně udržované kompatibility, ne příslib nulové režie.
 Úplné CI finálního zdroje ještě čeká na společný push. Předchozí běh
 44928446576 pro 6d41273 byl zrušen po doplnění tohoto úplnějšího měření;
 není dokladem dokončení ani neúspěšného cloudového nasazení.
+CI 44928809756 pro 2cb7ea2 selhalo v `Test development tools`, protože nový
+operátor importuje serverové moduly a instalace Functions následovala až
+po tomto kroku (`geofire-common` nenalezeno). Pořadí je opravené: instalace
+Functions je před nástrojovými testy; žádná nová závislost ani změna služby.
+Tento neúspěšný běh nenahrazuje potřebné úplné CI finálního commitu.
 
 Evidence v progress.json doplňuje existující lokální code/check podklady;
 jejich váhy a stavy se znovu nezapočítávají. DEV/akceptace i novinky zůstávají

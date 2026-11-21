@@ -106,6 +106,12 @@ jobs:
         working-directory: tools
         run: npm ci
 
+      - name: Install Cloud Functions dependencies
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 4
+        working-directory: functions
+        run: npm ci
+
       - name: Test development tools
         if: steps.scope.outputs.full != 'false'
         timeout-minutes: 2
@@ -119,12 +125,6 @@ jobs:
           node --version
           npm --version
           npm --prefix tools run firebase -- --version
-
-      - name: Install Cloud Functions dependencies
-        if: steps.scope.outputs.full != 'false'
-        timeout-minutes: 4
-        working-directory: functions
-        run: npm ci
 
       - name: Lint Cloud Functions
         if: steps.scope.outputs.full != 'false'
