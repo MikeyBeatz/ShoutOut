@@ -83,6 +83,21 @@
     }
   ],
   "fieldOverrides": [
+    {
+      "collectionGroup": "publicationHeads",
+      "fieldPath": "*",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "feedNewsControl",
+      "fieldPath": "*",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "feedIndexGenerations",
+      "fieldPath": "newsIncarnation",
+      "indexes": []
+    },
     { "collectionGroup": "readBuckets", "fieldPath": "*", "indexes": [] },
     { "collectionGroup": "readBuckets", "fieldPath": "revision", "indexes": [{ "order": "ASCENDING", "queryScope": "COLLECTION" }] },
     { "collectionGroup": "readBuckets", "fieldPath": "day", "indexes": [{ "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }] },

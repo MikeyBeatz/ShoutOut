@@ -1,5 +1,6 @@
 import 'feed_session.dart';
 import 'feed_body_cache.dart';
+import 'feed_news_runtime.dart';
 
 /// Existing gateway adapter: V2 transport is assembled into its V1 page model.
 /// Cache and state belong to one project/viewer; no persistent body storage.
@@ -26,10 +27,14 @@ class FeedDeltaClient {
   String? _capabilityStamp;
   bool _legacy = false;
   final _erased = <String>{};
+  final _newsBaselines = <String, FeedNewsSignals>{};
+  int lastNewsReadUnits = 0;
+  FeedNewsSignals? newsSignalsFor(String? baseline) => _newsBaselines[baseline];
 
   void retainViewer(String? uid) {
     if (uid == _viewer) return;
     _viewer = uid;
+    _newsBaselines.clear();
     _capabilityRevision = -1;
     _capabilityStamp = null;
     _legacy = false;
@@ -41,6 +46,7 @@ class FeedDeltaClient {
 
   void eraseAccount(String uid) {
     _erased.add(uid);
+    _newsBaselines.clear();
     if (_viewer == uid) {
       _epoch++;
       cache.bind(null);
@@ -122,6 +128,17 @@ class FeedDeltaClient {
     }
     if (wire['state'] == 'preparing') return {...wire, 'version': 1};
     final page = await _assemble(wire, scope, guard);
+    final body = wire['bodyPage'];
+    if (body is Map && body['newsSignals'] is Map) {
+      final signals = FeedNewsSignals.fromWire(body['newsSignals'] as Map);
+      if (signals.baseline != wire['baseline']) {
+        throw const FormatException('Foreign news baseline');
+      }
+      _newsBaselines[signals.baseline] = signals;
+      while (_newsBaselines.length > 2) {
+        _newsBaselines.remove(_newsBaselines.keys.first);
+      }
+    }
     return {
       ...wire,
       'version': 1,
@@ -138,6 +155,7 @@ class FeedDeltaClient {
   }
 
   Future<FeedNewsDelta> news(String checkpoint) async {
+    lastNewsReadUnits = 0;
     final uid = currentUserId();
     retainViewer(uid);
     if (uid == null || _erased.contains(uid)) {
@@ -166,6 +184,13 @@ class FeedDeltaClient {
         throw const FormatException('Invalid news response');
       }
       final next = response['checkpoint'] as String;
+      final units = response['readUnits'];
+      if (units != null) {
+        if (units is! int || units < 0) {
+          throw const FormatException('Invalid news work');
+        }
+        lastNewsReadUnits += units;
+      }
       if (response['state'] == 'preparing') {
         if (next == cursor || response.containsKey('count')) {
           throw const FormatException('Invalid partial news response');
@@ -196,6 +221,37 @@ class FeedDeltaClient {
       );
     }
     throw StateError('News preparation work budget exhausted');
+  }
+
+  Future<FeedNewsSignals> signals(String checkpoint) async {
+    final uid = currentUserId();
+    retainViewer(uid);
+    if (uid == null || _erased.contains(uid)) {
+      throw StateError('No news viewer');
+    }
+    final epoch = _epoch;
+    final value = await send({
+      'format': 'delta-v1',
+      'mode': 'news-signals',
+      'expectedUserId': uid,
+      'checkpoint': checkpoint,
+    });
+    if (_epoch != epoch || currentUserId() != uid || _erased.contains(uid)) {
+      throw StateError('Stale news viewer');
+    }
+    if (value is! Map ||
+        value['version'] != 1 ||
+        value['state'] != 'signals' ||
+        value['signals'] is! Map) {
+      throw const FormatException('Invalid signal response');
+    }
+    final result = FeedNewsSignals.fromWire(value['signals'] as Map);
+    final reads = value['readUnits'];
+    if (reads is! int || reads < 0) {
+      throw const FormatException('Invalid signal work');
+    }
+    result.readUnits = reads;
+    return result;
   }
 
   Future<List<FeedBodyCard>> presentation(

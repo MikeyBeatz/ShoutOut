@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "scope": "Local emulator SDK operations and explicit 5000-session model; no cloud capacity or billing proof",
+  "samples": [
+    {
+      "sources": 50,
+      "cells": 30,
+      "publicationIndexPlan": {
+        "totalWrites": 6,
+        "signalWrites": 1
+      },
+      "metadataRefresh": {
+        "reads": 75,
+        "queries": 4,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 33699,
+        "attempts": 8,
+        "signalWrites": 0
+      },
+      "quietCount": {
+        "reads": 30,
+        "queries": 1,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 1927,
+        "attempts": 4,
+        "signalWrites": 0
+      },
+      "oneCount": {
+        "reads": 43,
+        "queries": 3,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 35036,
+        "attempts": 5,
+        "signalWrites": 0
+      },
+      "signalBatch": {
+        "reads": 56,
+        "queries": 0,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 1844,
+        "attempts": 3,
+        "signalWrites": 0
+      }
+    },
+    {
+      "sources": 200,
+      "cells": 30,
+      "publicationIndexPlan": {
+        "totalWrites": 8,
+        "signalWrites": 1
+      },
+      "metadataRefresh": {
+        "reads": 78,
+        "queries": 4,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 77380,
+        "attempts": 8,
+        "signalWrites": 0
+      },
+      "quietCount": {
+        "reads": 30,
+        "queries": 1,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 1927,
+        "attempts": 4,
+        "signalWrites": 0
+      },
+      "oneCount": {
+        "reads": 47,
+        "queries": 3,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 57630,
+        "attempts": 5,
+        "signalWrites": 0
+      },
+      "signalBatch": {
+        "reads": 56,
+        "queries": 0,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 1844,
+        "attempts": 3,
+        "signalWrites": 0
+      }
+    },
+    {
+      "sources": 2000,
+      "cells": 30,
+      "publicationIndexPlan": {
+        "totalWrites": 8,
+        "signalWrites": 1
+      },
+      "metadataRefresh": {
+        "reads": 85,
+        "queries": 4,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 79383,
+        "attempts": 8,
+        "signalWrites": 0
+      },
+      "quietCount": {
+        "reads": 34,
+        "queries": 1,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 2087,
+        "attempts": 4,
+        "signalWrites": 0
+      },
+      "oneCount": {
+        "reads": 53,
+        "queries": 3,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 70144,
+        "attempts": 5,
+        "signalWrites": 0
+      },
+      "signalBatch": {
+        "reads": 57,
+        "queries": 0,
+        "writes": 1,
+        "sourceReads": 0,
+        "bytes": 1848,
+        "attempts": 3,
+        "signalWrites": 0
+      }
+    }
+  ],
+  "model": [
+    {
+      "users": 5000,
+      "cells": 30,
+      "publicationsPerMinute": 0,
+      "listenerHeadReads": 150000,
+      "rulesDependentReadUpperModel": 1050000,
+      "batchRequestsPerMinute": 60000,
+      "batchSdkReadsPerMinute": 3360000,
+      "batchQuotaWritesPerMinute": 60000,
+      "headPublicationWritesPerMinute": 0,
+      "pendingCountRequestsPerMinuteIfAllPending": 20000,
+      "pendingCountSdkReadsPerMinuteIfAllPending": 860000
+    },
+    {
+      "users": 5000,
+      "cells": 30,
+      "publicationsPerMinute": 1,
+      "listenerHeadReads": 155000,
+      "rulesDependentReadUpperModel": 1085000,
+      "batchRequestsPerMinute": 60000,
+      "batchSdkReadsPerMinute": 3360000,
+      "batchQuotaWritesPerMinute": 60000,
+      "headPublicationWritesPerMinute": 1,
+      "pendingCountRequestsPerMinuteIfAllPending": 20000,
+      "pendingCountSdkReadsPerMinuteIfAllPending": 860000
+    },
+    {
+      "users": 5000,
+      "cells": 30,
+      "publicationsPerMinute": 100,
+      "listenerHeadReads": 650000,
+      "rulesDependentReadUpperModel": 4550000,
+      "batchRequestsPerMinute": 60000,
+      "batchSdkReadsPerMinute": 3360000,
+      "batchQuotaWritesPerMinute": 60000,
+      "headPublicationWritesPerMinute": 100,
+      "pendingCountRequestsPerMinuteIfAllPending": 20000,
+      "pendingCountSdkReadsPerMinuteIfAllPending": 860000
+    }
+  ],
+  "exclusions": [
+    "metadataRefresh does not hydrate cold body cache; see accepted B4 delta measurements",
+    "Rules seven dependent documents is a conservative path model, not observed billed reads",
+    "listener startup is included in listenerHeadReads; reconnection frequency needs explicit addition",
+    "network JSON bytes exclude headers, compression and billed egress",
+    "model costs exclude personalized count continuations and transaction retry distribution",
+    "no live infrastructure, fixtures or switches changed"
+  ]
+}

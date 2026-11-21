@@ -170,7 +170,7 @@ export async function createShoutOperation(request, db, clock = () => new Date()
       createdAt: now, expiresAt: Timestamp.fromMillis(now.toMillis() + input.durationMinutes * 60000),
       status: 'active', likesCount: 0, dislikesCount: 0, commentsCount: 0, savesCount: 0,
     };
-    const indexPlan = await indexWriter?.prepare(transaction, key, null, shoutData, { operationId: receiptRef.id });
+    const indexPlan = await indexWriter?.prepare(transaction, key, null, shoutData, { operationId: receiptRef.id, publication: true });
     transaction.create(shoutRef, shoutData);
     indexPlan?.apply();
     transaction.set(rateRef, rateData);

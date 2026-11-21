@@ -6,9 +6,10 @@ import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { bindCardPublisher, prepareCardStates, registerCardSourcePlan, cardSourceMutation, assertCardTransaction, observeCardSources } from './feed_card_state.js';
 import { indexMaintenance } from './feed_index_maintenance.js';
+import { preparePublicationSignal } from './feed_news_signals.js';
 
 export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: true,
-  cardStateEnabled: true, deltaResponsesEnabled: true, newsEnabled: false, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
+  cardStateEnabled: true, deltaResponsesEnabled: true, newsEnabled: false, newsRuntimeEnabled: false, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();
 // One existing bounded public-node cache per process. A fresh timer-backed
@@ -57,8 +58,10 @@ export function createFeedGenerationStore(db, generationId, { contentIdentity = 
 }
 
 export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration.enabled, clock = () => new Date(), contentIdentity = false,
-  compatibleGenerations = feedRuntimeConfiguration.compatibleGenerations, cardStateEnabled = feedRuntimeConfiguration.cardStateEnabled } = {}) {
+  compatibleGenerations = feedRuntimeConfiguration.compatibleGenerations, cardStateEnabled = feedRuntimeConfiguration.cardStateEnabled,
+  newsRuntimeEnabled = feedRuntimeConfiguration.newsRuntimeEnabled } = {}) {
   if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean' || typeof compatibleGenerations !== 'boolean' || typeof cardStateEnabled !== 'boolean') throw new Error('invalid-feed-runtime-enabled');
+  if (typeof newsRuntimeEnabled !== 'boolean' || newsRuntimeEnabled && !cardStateEnabled) throw new Error('invalid-news-runtime-enabled');
   const format = compatibleGenerations ? 'generation' : contentIdentity;
   // Disabled wrappers keep the exact legacy database and do not even inspect
   // control/registry/queue documents or require a new Auth capability.
@@ -94,9 +97,11 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
       plans.push(await store.prepareBatch(tx, changes.map(change => ({ ...change, before: isPurgedShoutContext(change.before) ? null : change.before, after: isPurgedShoutContext(change.after) ? null : change.after })), { ...options, reconcileBuilding: options.cardBackfill ? options.cardBackfill === id : options.reconcileBuilding, generationContext }));
     }
     const cards = cardStateEnabled ? await prepareCardStates(tx, database, changes, state, generationContext, options) : null;
+    if (options.publication !== undefined && options.publication !== true) throw new Error('invalid-publication-option');
+    const publication = newsRuntimeEnabled && options.publication ? await preparePublicationSignal(tx, database, changes, state, generationContext) : null;
     const appliedCards = cards ? registerCardSourcePlan(tx, cards.edits) : null;
     const sum = key => plans.reduce((count, plan) => count + plan[key], 0);
-    const indexWrites = sum('nodeWrites') + sum('directoryWrites') + sum('historyWrites') + (cards?.writes ?? 0);
+    const indexWrites = sum('nodeWrites') + sum('directoryWrites') + sum('historyWrites') + (cards?.writes ?? 0) + (publication?.writes ?? 0);
     const additional = options.additionalWrites ?? 0;
     if (!Number.isSafeInteger(additional) || additional < 0 || indexWrites + changes.length + additional > feedTransactionWriteBudget) {
       budget.exceeded = true;
@@ -106,10 +111,10 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
     const changedIds = new Set(plans.flatMap(plan => plan.changedIds));
     return { reads: 1 + Number(state.mode === 'off') + sum('reads'), sourceChanges: changedIds.size, sourceChanged: changedIds.size > 0,
       nodeWrites: sum('nodeWrites'), directoryWrites: sum('directoryWrites'), historyWrites: sum('historyWrites'),
-      cardWrites: cards?.writes ?? 0, totalWrites: indexWrites + changes.length + additional, generations: plans.length,
+      cardWrites: cards?.writes ?? 0, signalWrites: publication?.writes ?? 0, totalWrites: indexWrites + changes.length + additional, generations: plans.length,
       apply() {
         if (applied) throw new Error('index-plan-already-applied'); applied = true;
-        plans.forEach(plan => plan.apply()); cards?.apply(); appliedCards?.();
+        plans.forEach(plan => plan.apply()); cards?.apply(); publication?.apply(); appliedCards?.();
       } };
   }
   const indexWriter = Object.freeze({ prepareBatch,

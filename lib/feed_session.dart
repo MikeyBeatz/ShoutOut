@@ -111,6 +111,7 @@ class FeedSessionController<T, C extends Object> {
   bool get newsIsCurrent =>
       _newsCurrent && (_newsDeadline == null || _elapsed() < _newsDeadline!);
   String? get checkpoint => _checkpoint;
+  String? get baseline => _baseline;
 
   void setActive(bool active) => _active = active;
 

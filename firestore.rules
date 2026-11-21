@@ -7,6 +7,8 @@ rules_version = '2';
 // while no managed index control exists.
 // feedIndexControl/current: private server-owned index control. Its presence
 // closes direct client creation/reaction writes; Admin callables own projection.
+// publicationHeads/{cell}: {v:1,token:UUID}; no identity/content/time/count.
+// feedNewsControl/current: private {v,revision,mode,generation,incarnation}.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -43,6 +45,33 @@ service cloud.firestore {
     }
 
     // Whitelisted server projection only. Private nodes/control stay denied.
+    function readableNewsGeneration(generation) {
+      let path = /databases/$(database)/documents/feedNewsControl/current;
+      let marker = /databases/$(database)/documents/feedIndexGenerations/$(generation);
+      return exists(path) && get(path).data.keys().hasOnly(['v', 'revision', 'mode', 'generation', 'incarnation']) &&
+        get(path).data.v == 1 && get(path).data.revision is int && get(path).data.revision > 0 &&
+        get(path).data.mode == 'active' && get(path).data.generation == generation &&
+        get(path).data.incarnation is list && get(path).data.incarnation.size() == 2 &&
+        get(path).data.incarnation[0] is int && get(path).data.incarnation[0] >= 0 &&
+        get(path).data.incarnation[1] is int && get(path).data.incarnation[1] >= 0 && get(path).data.incarnation[1] < 1000000000 &&
+        get(marker).data.get('newsIncarnation', []) == get(path).data.incarnation &&
+        get(/databases/$(database)/documents/feedIndexControl/current).data.cardReadGenerationId == generation &&
+        get(/databases/$(database)/documents/feedIndexControl/current).data.mode in ['active', 'building'] &&
+        readableCardGeneration(generation);
+    }
+
+    function validNewsHead() {
+      return resource == null || resource.data.keys().hasOnly(['v', 'token']) &&
+        resource.data.v == 1 && resource.data.token is string &&
+        resource.data.token.matches('^[a-f0-9-]{36}$');
+    }
+
+    match /feedIndexGenerations/{generation}/publicationHeads/{cell} {
+      allow get: if eligibleUser() && cell.matches('^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$') &&
+        readableNewsGeneration(generation) && validNewsHead();
+      allow list, create, update, delete: if false;
+    }
+
     match /feedIndexGenerations/{generation}/publicStates/{shoutId} {
       allow get: if eligibleUser() && readableCardGeneration(generation);
       allow list: if eligibleUser() && limited(50) && readableCardGeneration(generation);

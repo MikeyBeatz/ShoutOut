@@ -11,6 +11,8 @@ import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { distanceKm } from './feed_spatial.js';
 import { scanFeedNews } from './feed_news_scan.js';
 import { verifyNode } from './feed_block_index.js';
+import { admitNewsRead, captureNewsSignals, newsControl } from './feed_news_signals.js';
+import { measureNewsReads } from './feed_news_meter.js';
 
 const codecFor = key => feedCursorCodec({ key: createHmac('sha256', key).update('shoutout-b4-news-v1').digest() });
 const stamp = value => [value.seconds, value.nanoseconds];
@@ -20,19 +22,24 @@ export function feedNewsBaseline({ key, uid, project, snapshot, binding, baselin
   return codecFor(key).start({ uid, project, readTime: snapshot.readTime, now: startedAt,
     context: { kind: 'feed-news-v1', snapshot, binding, baseline } });
 }
-export async function getFeedNewsOperation(request, db, { key, enabled = false, clock = () => new Date(), workNodes = 32, observeMetrics = () => {} } = {}) {
+export async function getFeedNewsOperation(request, db, { key, enabled = false, runtime = false, clock = () => new Date(), workNodes = 32, observeMetrics = () => {} } = {}) {
   const { uid } = requireCallableIdentity(request), input = request.data;
   if (!enabled) throw new HttpsError('failed-precondition', 'Feed news is not enabled.');
   assertFeedRuntimeTarget(db);
   if (!input || Object.keys(input).some(k => !['format', 'mode', 'expectedUserId', 'checkpoint'].includes(k)) ||
-      input.format !== 'delta-v1' || input.mode !== 'news' || input.expectedUserId !== uid) throw new HttpsError('invalid-argument', 'Invalid news request.');
+      input.format !== 'delta-v1' || !['news', 'news-signals'].includes(input.mode) || input.expectedUserId !== uid) throw new HttpsError('invalid-argument', 'Invalid news request.');
   const now = () => clock().getTime(), codec = codecFor(key), scope = () => ({ uid, project: db.projectId, now: now() });
   const decoded = codec.decode(input.checkpoint, scope()), base = decoded.context;
+  const meter = runtime ? measureNewsReads(db) : null;
+  if (meter) db = meter.db;
   if (base.kind !== 'feed-news-v1' || !base.snapshot || !base.binding || typeof base.baseline !== 'string') throw new HttpsError('invalid-argument', 'Invalid news checkpoint.');
+  if (input.mode === 'news-signals' && !runtime) throw new HttpsError('failed-precondition', 'News signals are not enabled.');
+  if (runtime) await admitNewsRead(request, db, base.binding, clock);
   const store = createFeedGenerationStore(db, base.binding.generation, { cardProjection: true, contentIdentity: true });
   async function guard(tx, current = null) {
     const control = validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
     const marker = await tx.get(store.base);
+    if (runtime) await newsControl(tx, db, base.binding, { state: control, marker });
     if (!['active', 'building'].includes(control.mode) || control.cardReadGenerationId !== base.binding.generation ||
         !control.cardWriteGenerationIds?.includes(base.binding.generation) || marker.get('cardReady') !== true ||
         JSON.stringify(stamp(marker.createTime)) !== JSON.stringify(base.binding.incarnation)) throw new FeedSessionExpired();
@@ -45,6 +52,12 @@ export async function getFeedNewsOperation(request, db, { key, enabled = false, 
     await store.readHeaderRows(tx, [], { marker, snapshot: { ...base.snapshot, roots: [...roots.values()], retention } });
     return marker;
   }
+  if (input.mode === 'news-signals') {
+    const signals = await captureNewsSignals(request, db, base, { clock, confirm: false });
+    await db.runTransaction(async tx => { await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); await guard(tx); }, { readOnly: true });
+    codec.decode(input.checkpoint, scope());
+    return { version: 1, state: 'signals', signals, readUnits: meter.reads };
+  }
   await db.runTransaction(async tx => { await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); await guard(tx); }, { readOnly: true });
   let current = decoded.position.current;
   if (!current) current = await store.capturePortable({ ...base.snapshot.context, uid, now: now(), unreadFirst: false });
@@ -54,7 +67,7 @@ export async function getFeedNewsOperation(request, db, { key, enabled = false, 
     (!row.businessSpotlight || row.businessHighlighted) && distanceKm(current.context.point, row.location) <= current.context.radiusKm;
   const ready = (count, validUntil, capped) => ({ version: 1, state: 'ready', baseline: base.baseline,
     checkpoint: codec.advance(input.checkpoint, {}, scope()), count, capped, checkedAt: Math.floor(captureTime.toMillis()),
-    validForMillis: Math.max(0, Math.floor(validUntil - now())) });
+    validForMillis: Math.max(0, Math.floor(validUntil - now())), ...(meter ? { readUnits: meter.reads } : {}) });
   const beforeHashes = new Map(base.snapshot.roots.map(root => [root.path, root.hash]));
   if (current.roots.length === beforeHashes.size && current.roots.every(root => beforeHashes.get(root.path) === root.hash)) {
     await db.runTransaction(async tx => { await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); await guard(tx, current); }, { readOnly: true });
@@ -86,7 +99,7 @@ export async function getFeedNewsOperation(request, db, { key, enabled = false, 
   codec.decode(input.checkpoint, scope());
   if (result.state === 'preparing') {
     await db.runTransaction(async tx => { await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); await guard(tx, current); }, { readOnly: true });
-    return { version: 1, state: 'preparing', checkpoint: codec.advance(input.checkpoint, { current, scan: result.position }, scope()) };
+    return { version: 1, state: 'preparing', checkpoint: codec.advance(input.checkpoint, { current, scan: result.position }, scope()), ...(meter ? { readUnits: meter.reads } : {}) };
   }
   const verified = await db.runTransaction(async tx => {
     await requireEligibleActor({ request, db, reader: tx, now: new Date(now()) }); const marker = await guard(tx, current);

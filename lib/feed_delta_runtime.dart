@@ -7,6 +7,7 @@ import 'feed_body_cache.dart';
 import 'feed_delta_client.dart';
 import 'feed_delta_live.dart';
 import 'feed_public_state_pool.dart';
+import 'feed_news_runtime.dart';
 import 'live_data.dart';
 import 'live_shout_state.dart';
 import 'web_environment.dart';
@@ -94,6 +95,24 @@ class FeedDeltaRuntime {
   final FirebaseFirestore db;
   final FirebaseAuth auth;
   final FirebaseFunctions functions;
+  Stream<FeedNewsSignal> newsSignal(String generation, String cell) => db
+      .doc('feedIndexGenerations/$generation/publicationHeads/$cell')
+      .liveSnapshots(includeMetadataChanges: true)
+      .map((snapshot) {
+        if (snapshot.metadata.isFromCache ||
+            snapshot.metadata.hasPendingWrites) {
+          return const FeedNewsSignal(null, confirmed: false);
+        }
+        final data = snapshot.data();
+        if (data == null) return const FeedNewsSignal(null);
+        if (data.length != 2 ||
+            data['v'] != 1 ||
+            data['token'] is! String ||
+            !RegExp(r'^[a-f0-9-]{36}$').hasMatch(data['token'] as String)) {
+          throw const FormatException('Invalid news signal');
+        }
+        return FeedNewsSignal(data['token'] as String);
+      });
   late final FeedBodyCache cache;
   late final FeedDeltaClient client;
   late final FeedDeltaLive live;

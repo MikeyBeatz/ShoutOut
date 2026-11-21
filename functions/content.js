@@ -64,7 +64,7 @@ export const getFeedPage = onCall({
   if (!feedRuntimeConfiguration.enabled) throw new HttpsError('failed-precondition', 'Spatial feed is not enabled.');
   const encoded = feedCursorKey.value(), key = Buffer.from(encoded, 'base64');
   if (key.length !== 32 || key.toString('base64') !== encoded) throw new Error('invalid-feed-cursor-key');
-  if (request.data?.format === 'delta-v1') return getFeedDeltaOperation(request, getFirestore(), { key, ...feedPageHostOptions(), enabled: feedRuntimeConfiguration.cardStateEnabled && feedRuntimeConfiguration.deltaResponsesEnabled, newsEnabled: feedRuntimeConfiguration.newsEnabled });
+  if (request.data?.format === 'delta-v1') return getFeedDeltaOperation(request, getFirestore(), { key, ...feedPageHostOptions(), enabled: feedRuntimeConfiguration.cardStateEnabled && feedRuntimeConfiguration.deltaResponsesEnabled, newsEnabled: feedRuntimeConfiguration.newsEnabled, newsRuntimeEnabled: feedRuntimeConfiguration.newsRuntimeEnabled });
   return getCompatibleFeedPageOperation(request, getFirestore(), { key, ...feedPageHostOptions(), enabled: feedRuntimeConfiguration.cardStateEnabled && feedRuntimeConfiguration.deltaResponsesEnabled });
 });
 

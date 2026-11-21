@@ -6,15 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Provozní návrh B4b je připravený ke schválení; implementace nezačala.**
-Vlastník povolil přípravu návrhu. [Konkrétní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
-určuje minimální oblastní hlavičky, nové jednotlivé Rules čtení hrubého
-anonymního signálu, úplné pokrytí včetně prázdných buněk, 2/15/5s profil,
-hysterézi a samostatný news bucket. Uvádí také cenu přímých odběrů, fallbacku
-a limit ochrany proti jejich zneužití. Další je souhlas s jedním lokálním
-implementačním/testovacím úsekem; živá aktivace bude následovat až s důkazy.
-Nyní změněna jen dokumentace, žádný aplikační kód, Rules nebo Firebase.
-Přepínače off a níže doložený DEV zůstávají zachované. Metriky nezvýšené.
+**Schválený lokální provozní úsek B4b je implementovaný; úplné CI ještě čeká.**
+Větev feature/feed-b4-news-runtime má [výsledek a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results):
+atomický publication head, samostatnou UID kvótu 40/1s, úplné pokrytí,
+historickou baseline hlaviček, připravené get-only Rules a aktivním feedem
+řízený 2/15/5s adaptér s hysterézí. V klidu při nule neběží periodický count;
+pozastavení detekce neblokuje načítání feedu. Nové lokální regrese zahrnují
+rollback 450 zápisů, opakování createShout, více zařízení, R5 a odvolání
+oprávnění otevřeného odběru. Naměřený report výslovně odděluje model fanoutu
+od cloudového účtu/kapacity. Tři indexové výjimky bez TTL jsou jen připravené.
+Další je společný push a úspěšné úplné CI přesného zdroje, potom konkrétní
+DEV aktivace/pilot včetně inventury App Check a bezpečného založení controlu.
+Žádné nasazení nebo živé zápisy; všechny news přepínače zůstávají off.
+Níže doložený DEV metadata/cache a produkce/main jsou nezměněné.
 
 **Lokální B4b je uzavřené včetně úplného CI ve feature/feed-b4-news-local.**
 Zdroj **e8c0c9c722049d989021ff5cc0339c3260b43a14** má
@@ -26,8 +30,8 @@ způsobů detekce a zvolil jen nově publikované příspěvky. [Rozsah a kontra
 včetně Chromu. Count dotaz nečte těla a nic nezapisuje; 19–23 reads v klidu,
 30–36 při teplé kontrole jedné novinky v měřeném rozsahu 50/200/2 000 zdrojů.
 Konečné CI potvrdilo i celé dosavadní serverové/Rules/B2/purge/Storage sady
-a webový build. Navazující návrh bezpečného provozního adaptéru je výše;
-před implementací schválit hlavičky/odběry, četnost a adaptivní profil.
+a webový build. Navazující provozní rozsah už vlastník schválil;
+jeho aktuální implementace a čekající kontrolní bod jsou výše.
 Konkrétní četnost/odběry nejsou aktivované. Serverový i klientský
 přepínač zůstává false. Bez nasazení, živých dat, Rules, nových služeb/Auth či změny retence.
 Níže uvedený dokončený B4 metadata/cache rollout je stále skutečný DEV stav.
@@ -49,7 +53,7 @@ oběma účtům správně vrací 0 karet. Původní data znovu ověřená beze z
 Computer Use bylo zastavené kontrolou URL; UI doložil vlastník, Auth/App Check
 VALID i HTTP 200 pro feed a reakce serverové logy. Interaktivní UI rollback
 zbývá ve společné finální regresi B4; technický rollback i klientská regrese prošly.
-**Další:** schválit připravený provozní návrh B4b výše; lokální count/měření
+**Další:** dokončit úplné CI provozního B4b výše; lokální původní count/měření
 i jejich úplné CI už jsou hotové. Celé B4 ani celý milník nejsou uzavřené.
 Produkce/main nezměněné; tentýž pilot znovu nezakládat.
 

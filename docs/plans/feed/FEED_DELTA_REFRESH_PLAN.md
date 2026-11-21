@@ -28,7 +28,8 @@ další je řízený DEV přechod, potom signály a číslovka. Celé B4 není u
 Navazující [lokální B4b](#b4b-local-proposal) je schválený a jeho
 [výsledky a návrh četnosti](#b4b-local-results) jsou níže; živé signály ještě neběží.
 Navazuje [konkrétní provozní návrh ke schválení](#b4b-runtime-proposal);
-jeho příprava je povolená, implementace a živý pilot zatím nikoli.
+vlastník následně schválil celý lokální implementační úsek. Jeho
+[aktuální výsledek](#b4b-runtime-results) stále neznamená živou aktivaci.
 
 <a id="b3-local"></a>
 
@@ -780,10 +781,11 @@ cílenou regresi. Tento zrušený běh nenahrazuje úplné CI konečného zdroje
 
 <a id="b4b-runtime-proposal"></a>
 
-## B4b – provozní návrh ke schválení, 21. listopadu 2026
+## B4b – schválený lokální provozní návrh, 21. listopadu 2026
 
-**Stav: návrh, nikoli implementace nebo souhlas s novými oprávněními.**
-Vlastník povolil připravit konkrétní další postup. Níže se rozšiřuje hotový
+**Vlastník následně schválil celý tento lokální úsek včetně Rules a měření.**
+Souhlas neobsahuje živou aktivaci; níže je zachován schválený rozsah.
+Původně vlastník povolil připravit konkrétní další postup. Níže se rozšiřuje hotový
 lokální základ; ten ani metadata/cache pilot se neopakují. Doporučený další
 úsek je jedna ucelená lokální implementace s testy a úplným CI. Živý DEV
 přechod dostane až potom konkrétní aktivaci, inventuru a vymezené fixture.
@@ -954,6 +956,98 @@ Odvozením pro ShoutOut je nutnost započítat každý doručený head a návrat
 odběr; 2s klientské sloučení samo o sobě tyto účtované události neodstraňuje.
 Nové intervaly, prahy a datový kontrakt jsou návrh autora, nikoli doporučené
 číselné limity Firebase nebo již schválený provozní profil.
+
+<a id="b4b-runtime-results"></a>
+
+## B4b – lokální provozní implementace a výsledky
+
+Větev **feature/feed-b4-news-runtime**, navazuje na schválený návrh výše.
+Implementace a lokální kontroly jsou připravené ke společnému úplnému CI;
+úspěch tohoto CI se před jeho dokončením netvrdí. Žádný živý zápis či nasazení.
+
+- [Serverový adaptér](../../../functions/feed_news_signals.js) má úplné
+  pokrytí čtyřznakovými buňkami, včetně prázdných. Nad 64 buňkami vrátí
+  úplný serverový fallback, nikdy oříznutý seznam. Ověřené jsou všechny
+  dnešní radiusy, kruhové hranice, datová čára a póly.
+- `createShout` předává explicitní důvod publikace společnému writeru.
+  Head se uloží ve stejné transakci jako zdroj/index/receipt; běžné změny,
+  backfill, smazání a opakování potvrzené operace ho nepřepisují. Společná
+  pojistka 450 zápisů zahrnuje signál i dodatečné zápisy volajícího.
+- Soukromý news control váže aktivní generaci na její skutečný createTime.
+  Marker má navíc serverové zrcadlo `newsIncarnation` pro Rules, protože
+  Rules nemají SDK vlastnost createTime. Budoucí aktivace musí toto pole
+  doložit proti createTime, ne jen opsat libovolnou dvojici z controlu.
+  Pauza/off zastaví čtení detektoru; již zavedený writer udržuje hlavičky
+  i tehdy, aby nevznikla mezera. Pozastavená číslovka neblokuje načtení feedu.
+- Výchozí revize hlaviček se přečtou v readTime původního feed snapshotu;
+  aktuální účet/control se ověří znovu před odpovědí. První serverové
+  události po připojení se porovnají s těmito revizemi. Nová publikace
+  mezi obnovou a připojením se tedy neztratí. R5 se ověřuje i u samotného
+  `news-signals` transportu; smazání účtu po přečtení hlaviček zabrání odpovědi.
+- [Připravené Rules](../../../firestore.rules) dovolují jen jednotlivé get
+  těchto malých hlaviček současné news/card generace oprávněným účtům.
+  List, klientské zápisy, privátní control a uzly zůstávají zakázané.
+  Regrese zahrnuje chybné schéma, chybějící buňku, role, zákaz, pauzu,
+  inkarnaci a permission-denied na již otevřeném odběru po zrušení přístupu.
+  Jde o lokální prototyp ověřený emulátorem; žádná živá Rules se neměnila.
+- Samostatná UID kvóta má 40 kreditů a doplnění 1/s. Počítá každý HTTP
+  krok, ne jen logický count; odmítnutí nepřepisuje záznam. Poškozený stav
+  ani zpětné hodiny nevytvoří nové kredity. B2 implementace/kvóta se nemění.
+  Záznam je pod dnešním rateLimits stromem zahrnutým ve stávajícím purge.
+- [Klientský runtime](../../../lib/feed_news_runtime.dart) a Home dodržují
+  schválený profil 2/15/5 s, hysterézi, zastavení mimo feed/popředí a
+  serverové retryAfter. Nejvýše jeden count běží současně; signál přijatý
+  během něj přežije. Čerstvá úspěšná baseline s hlavičkami ušetří okamžitý
+  redundantní count; opožděná publikace ho spustí prvním změněným headem.
+  Návrat/reconnect naproti tomu ověření vyžaduje. Expirovaná relace ukončí
+  detektor a ponechá karty s nabídkou obnovy. Nová baseline/account/clear
+  ohradí staré odpovědi. Přečtení, pořadí, scroll a cache těl se tím nemění.
+- Adaptace používá pozorované SDK read jednotky countu a dávky; pro přímé
+  odběry konzervativní model head + nejvýše sedm závislých Rules dokumentů.
+  Počáteční odběry a návratové pokusy se započítávají. To není přesně
+  fakturované měření: SDK/Rules cache a cloudové index-entry reads se liší.
+  Samotné 2s slučování nemění účtování doručených headů. Po chybě čeká
+  backoff 5/10/20/40/60 s s rozptylem, nejméně serverové retryAfter.
+
+### Naměřené meze a další brána
+
+[Reprodukovatelný lokální report](../../benchmarks/FEED_NEWS_RUNTIME_2026-11-21.json)
+odděluje SDK operace od modelu 5 000 relací. Měřená oblast má 30 buněk.
+
+| Zdroje | Metadata/hlavičky při obnově | Samostatná klidová kontrola | Jedna novinka | Dávka hlaviček | Indexový publikační plán / z toho head |
+|---|---:|---:|---:|---:|---:|
+| 50 | 75 reads | 30 reads | 43 reads | 56 reads | 6 / 1 writes |
+| 200 | 78 reads | 30 reads | 47 reads | 56 reads | 8 / 1 writes |
+| 2 000 | 85 reads | 34 reads | 53 reads | 57 reads | 8 / 1 writes |
+
+Detekční dotazy mají 0 source/body reads a po jednom quota write na přijatý
+HTTP krok. Obnova v tabulce je metadata-only, nikoli studené naplnění těl;
+to má samostatné přijaté B4 delta důkazy. Publikační plán zahrnuje zdroj,
+index a head, nikoli dodatečnou kvótu/receipt skutečného createShout.
+Jde o konkrétní uložený běh; tvar stromu a počet reads mohou s jinými ID
+a transakčními opakováními kolísat. Nejde o přesné cenové nebo výkonové SLA.
+V klidu při nule automatická periodická kontrola vůbec neběží. Dávkový
+režim načítá hlavičky a celý count opakuje až při změně nebo potřebném
+ověření čekajících novinek. Zrušena jsou duplicitní kontrolní SDK čtení.
+
+Připraveny jsou tři indexové výjimky v [konfiguraci](../../../firestore.indexes.json):
+publicationHeads.*, feedNewsControl.* a feedIndexGenerations.newsIncarnation;
+bez složeného indexu nebo TTL. Žádná se neaplikovala. Artifact kontrola
+potvrzuje, že laboratorní moduly ani B2 callable runtime nejsou zavlečené
+do nesouvisejících Functions. [Nové serverové regrese](../../../functions/feed_news_runtime.integration.test.js),
+[Rules/odběr](../../../tools/rules/feed_news_access.integration.test.mjs) a
+[klientské regrese](../../../test/feed_news_runtime_test.dart) jsou v úplném CI;
+nové databázové testy patří do stávajícího kroku test:feed-news.
+
+**Zbývá:** přesné úplné CI, potom konkrétní DEV aktivační/pilotní plán,
+ověření App Check enforcement, vazby marker/control, zapnutí writeru před
+readerem a kontrolovaný návrat. Rutinní rollout nevyžaduje opakovaný souhlas,
+ale nové živé kolekce/control, marker a testovací data mají vlastní bránu.
+Společná akceptace B4 stále zahrnuje interaktivní rollback otevřeného klienta.
+Kapacita 100 000 účtů / 5 000 relací a měsíční účet nejsou emulátorem ani
+modelem prokázané; patří do stávající startovní brány, nikoli do nové fáze P.
+V DEV/prod je serverFeedNews false, serverové newsEnabled/newsRuntimeEnabled
+jsou false. Produkce, main, Functions prostředky, Scheduler a retence nezměněné.
 
 ## B4: číslovka bez přenačítání feedu
 

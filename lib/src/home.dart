@@ -47,6 +47,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   late final FeedPageGateway<Shout> _spatialGateway;
   late final FeedSessionController<Shout, SpatialFeedContext> _spatialSession;
   final _spatialScroll = ScrollController();
+  FeedNewsRuntime? _newsRuntime;
+  bool _newsForeground = true;
   final Map<String, double> _spatialHeights = {};
   StreamSubscription<void>? _deltaContexts;
   String? _promoGeneration, _promoSignature;
@@ -77,6 +79,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   @override
   void initState() {
     super.initState();
+    _newsForeground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _useSpatialFeed = kIsWeb && WebEnvironment.current.serverSpatialFeed;
     _spatialGateway = FeedPageGateway(
       unreadFirst: kIsWeb && WebEnvironment.current.serverUnreadFeed,
@@ -103,7 +108,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     );
     _spatialSession = FeedSessionController(
       load: _spatialGateway.load,
-      onNewsExpired: () => unawaited(_checkSpatialNews()),
+      onNewsExpired: () => _newsRuntime?.pulse(immediate: true),
       loadNews: _useSpatialFeed && WebEnvironment.current.serverFeedNews
           ? (_, checkpoint) async {
               try {
@@ -128,6 +133,29 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       interactionFeedback.addListener(_confirmedDeletions);
     }
     WidgetsBinding.instance.addObserver(this);
+    if (_useSpatialFeed && WebEnvironment.current.serverFeedNews) {
+      _newsRuntime = FeedNewsRuntime(
+        check: () => _checkSpatialNews(propagate: true),
+        readHeads: () =>
+            feedDeltaRuntime!.client.signals(_spatialSession.checkpoint!),
+        watch: (generation, cell) =>
+            feedDeltaRuntime!.newsSignal(generation, cell),
+        pendingCount: () => _spatialSession.newsCount,
+        invalidate: _spatialSession.invalidateNews,
+        retryAfter: (error) {
+          if (error is FirebaseFunctionsException && error.details is Map) {
+            final delay = (error.details as Map)['retryAfterMs'];
+            if (delay is num && delay.isFinite && delay >= 0) {
+              return Duration(milliseconds: delay.ceil());
+            }
+          }
+          return null;
+        },
+        onError: (error) => debugPrint(
+          'Feed news detection failed: code=${liveDataFailureCode(error)}',
+        ),
+      );
+    }
     RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
       if (feedDeltaRuntime == null) {
@@ -392,6 +420,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   @override
   void dispose() {
+    _newsRuntime?.dispose();
     interactionFeedback.removeListener(_confirmedDeletions);
     WidgetsBinding.instance.removeObserver(this);
     _spatialGateway.dispose();
@@ -439,6 +468,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   Future<void> _refreshSpatialFeed([FeedFilters? requested]) async {
+    _newsRuntime?.setActive(false);
     final unreadFirst =
         WebEnvironment.current.serverUnreadFeed &&
         (requested ?? _feedFilters).order == FeedOrder.nearest;
@@ -508,12 +538,25 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     } finally {
       if (mounted && attempt == _spatialRequest) {
         setState(() => _spatialLoading = false);
-        if (!_spatialFailed) unawaited(_checkSpatialNews());
+        if (!_spatialFailed) {
+          final signals = feedDeltaRuntime?.client.newsSignalsFor(
+            _spatialSession.baseline,
+          );
+          if (signals != null) {
+            _newsRuntime?.configure(signals);
+          } else {
+            _newsRuntime?.clear();
+          }
+        }
+        _newsRuntime?.setActive(
+          _tab == 0 && _newsForeground,
+          freshBaseline: !_spatialFailed,
+        );
       }
     }
   }
 
-  Future<void> _checkSpatialNews() async {
+  Future<void> _checkSpatialNews({bool propagate = false}) async {
     if (!_useSpatialFeed ||
         !WebEnvironment.current.serverFeedNews ||
         _tab != 0 ||
@@ -523,10 +566,15 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     }
     try {
       await _spatialSession.checkNews();
+      _newsRuntime?.observedCountReads(
+        feedDeltaRuntime?.client.lastNewsReadUnits ?? 0,
+      );
     } catch (error) {
       // Preserve feed/order and the last confirmed number. Unverified counts
       // have a separate visual state; no body refresh or B2 sync is triggered.
       debugPrint('Feed news failed: code=${liveDataFailureCode(error)}');
+      if (error is FeedSessionExpired) _newsRuntime?.clear();
+      if (propagate) rethrow;
     }
     if (mounted) setState(() {});
   }
@@ -574,10 +622,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       }
     }
     setState(() => _tab = index);
+    _newsRuntime?.setActive(index == 0 && _newsForeground && !_spatialLoading);
     if (_useSpatialFeed && index == 0 && _spatialSession.context == null) {
       unawaited(_refreshSpatialFeed());
     } else if (_useSpatialFeed && index == 0) {
-      unawaited(_checkSpatialNews());
+      _newsRuntime?.pulse(immediate: true);
     }
   }
 
@@ -585,6 +634,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!_useSpatialFeed) return;
     final active = state == AppLifecycleState.resumed && _tab == 0;
+    _newsForeground = state == AppLifecycleState.resumed;
+    _newsRuntime?.setActive(active && !_spatialLoading);
     _spatialSession.setActive(active);
     if (!active) {
       _spatialGateway.cancelPending();
@@ -596,7 +647,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       unawaited(_refreshSpatialFeed());
     } else {
       unawaited(_noticeSpatialMovement());
-      unawaited(_checkSpatialNews());
+      _newsRuntime?.pulse(immediate: true);
     }
   }
 

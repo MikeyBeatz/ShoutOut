@@ -15,7 +15,7 @@ export function meterNewsDatabase(raw){
  const db=new Proxy(raw,{get(target,key){
   if(key==='runTransaction')return (run,...options)=>target.runTransaction(async real=>{metric.attempts++;
    const tx=new Proxy(real,{get(value,method){if(['get','getAll'].includes(method))return async(...args)=>{if(method==='get'&&!args[0]?.path)metric.queries++;const result=await value[method](...args);note(result);return result;};
-    if(['set','update','create','delete'].includes(method))return(...args)=>{metric.writes++;if(args[0]?.path.includes('/publicationSignalLab/'))metric.signalWrites++;value[method](...args);return tx;};return typeof value[method]==='function'?value[method].bind(value):value[method];}});
+    if(['set','update','create','delete'].includes(method))return(...args)=>{metric.writes++;if(args[0]?.path.includes('/publicationSignalLab/')||args[0]?.path.includes('/publicationHeads/'))metric.signalWrites++;value[method](...args);return tx;};return typeof value[method]==='function'?value[method].bind(value):value[method];}});
    return run(tx);
   },...options);
   if(key==='getAll')return async(...args)=>{const result=await target.getAll(...args);note(result);return result;};
