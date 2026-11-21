@@ -13,7 +13,8 @@ Další [konkrétní návrh provozní vrstvy a všech writerů](FEED_STATE_STORA
 má [uzavřenou lokální implementaci a úplné CI](FEED_STATE_STORAGE_PROPOSAL.md#p1-results). Poté následuje klient/Rules,
 provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 [Klientské zapojení a Rules – konkrétní navazující návrh](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal)
-čeká na schválení; nepřidává další očíslované P úseky.
+je schválený a má [lokální implementaci a výsledky](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results);
+čeká závěrečné úplné CI, nikoli nový souhlas s touž implementací. Nepřidává další očíslované P úseky.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
 neopakovat je jako otevřenou práci.
 

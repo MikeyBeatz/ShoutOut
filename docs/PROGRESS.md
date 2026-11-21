@@ -93,7 +93,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
-| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 93,62 % | 112/121 |
+| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 93,73 % | 113/121 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
@@ -107,7 +107,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 
 | Položka | Dokončení | Úseky |
 |---|---:|---:|
-| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 92,66 % | 72/79 |
+| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 92,83 % | 73/79 |
 | [bl-019: Přepracovat onboarding na interaktivní tutorial. Po MVP *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*](BACKLOG.md#bl-019) | 25,00 % | 1/4 |
 | [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
 | [bl-048: MVP — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby jsou starší záznamy bezpečně nečitelné.](BACKLOG.md#bl-048) | 33,34 % | 1/3 |
@@ -262,7 +262,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | feed-b4-read-code: B4 – finální čtecí transakce a metadata dostupnosti | implementation | ✅ | [1](../functions/feed_body_reader.js), [2](../functions/feed_body_state.js), [3](../lib/feed_body_cache.dart), [4](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) |
 | feed-b4-read-check: B4 – regrese finálního readeru a úplné počty operací | verification | ✅ | [1](../functions/feed_body_reader.integration.test.js), [2](../functions/feed_body_state.test.js), [3](../functions/feed_body_contract.test.js), [4](../test/feed_body_cache_test.dart), [5](../docs/benchmarks/FEED_B4_READ_2026-11-20.json), [6](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44825059479) |
 | feed-b4-state-code: Serverová vrstva B4 – atomická integrace všech writerů | implementation | ✅ | [1](../docs/plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results), [2](../functions/feed_card_state.js), [3](../functions/feed_card_backfill.js), [4](../functions/feed_runtime.js) |
-| feed-b4-delta-code: Metadata/verze a cache – klientské zapojení a sdílené odběry | implementation | ⬜ | [1](../docs/plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal) |
+| feed-b4-delta-code: Metadata/verze a cache – klientské zapojení a sdílené odběry | implementation | ✅ | [1](../lib/feed_delta_client.dart), [2](../lib/feed_delta_live.dart), [3](../functions/feed_delta.js), [4](../docs/plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results) |
 | feed-b4-state-check: Serverová vrstva B4 – automatické ověření writerů a doplnění | verification | ✅ | [1](../functions/feed_card_state.integration.test.js), [2](../docs/benchmarks/FEED_B4_STATE_2026-11-21.json), [3](../docs/plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44908128699) |
 | feed-b4-delta-check: Metadata/verze a cache – automatické ověření celé integrace | verification | ⬜ | — |
 | feed-b4-badge-code: Úsporné signály a číslovka novinek – implementace | implementation | ⬜ | — |

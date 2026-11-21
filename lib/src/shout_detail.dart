@@ -48,6 +48,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   PublicationAttempt _commentAttempt = PublicationAttempt();
   Stream<LiveShoutState>? _liveShout;
   bool _contentPurged = false;
+  bool _interactionReady = feedDeltaRuntime == null;
 
   @override
   void initState() {
@@ -64,32 +65,37 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             .collection('shouts')
             .doc(widget.shout.id);
         _liveShout =
-            watchLiveShoutState(
-              ref
-                  .liveSnapshots(includeMetadataChanges: true)
-                  .where((shout) => shout.exists || !shout.metadata.isFromCache)
-                  .map((shout) => shout.data()),
-              ref
-                  .collection('reactions')
-                  .doc(uid)
-                  .liveSnapshots()
-                  .map((reaction) => reaction.data()),
-              ownSave: WebEnvironment.current.serverShoutSaves
-                  ? ref
-                        .collection('saves')
-                        .doc(uid)
-                        .liveSnapshots()
-                        .map((save) => save.exists)
-                  : null,
-              synchronized: _useInteractionFeedback
-                  ? _interactionSnapshotBarrier
-                  : null,
-            ).map((value) {
-              if (_useInteractionFeedback) {
-                interactionFeedback.observe(uid, widget.shout.id, value);
-              }
-              return value;
-            });
+            (feedDeltaRuntime?.live.watch(widget.shout.id) ??
+                    watchLiveShoutState(
+                      ref
+                          .liveSnapshots(includeMetadataChanges: true)
+                          .where(
+                            (shout) =>
+                                shout.exists || !shout.metadata.isFromCache,
+                          )
+                          .map((shout) => shout.data()),
+                      ref
+                          .collection('reactions')
+                          .doc(uid)
+                          .liveSnapshots()
+                          .map((reaction) => reaction.data()),
+                      ownSave: WebEnvironment.current.serverShoutSaves
+                          ? ref
+                                .collection('saves')
+                                .doc(uid)
+                                .liveSnapshots()
+                                .map((save) => save.exists)
+                          : null,
+                      synchronized: _useInteractionFeedback
+                          ? _interactionSnapshotBarrier
+                          : null,
+                    ))
+                .map((value) {
+                  if (_useInteractionFeedback) {
+                    interactionFeedback.observe(uid, widget.shout.id, value);
+                  }
+                  return value;
+                });
       }
     }
   }
@@ -122,6 +128,14 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
       builder: (context, snapshot) {
         final value = snapshot.data;
         if (value != null) {
+          _interactionReady = true;
+          if (value.status != null) {
+            widget.shout.status = switch (value.status) {
+              'deleted' => ShoutStatus.deleted,
+              'expired' => ShoutStatus.expired,
+              _ => ShoutStatus.active,
+            };
+          }
           if (value.contentPurged && !_contentPurged) {
             _contentPurged = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -147,6 +161,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
 
   Widget _shoutCard() => ShoutCard(
     shout: widget.shout,
+    interactionReady: _interactionReady,
     onSave: () {
       widget.onSave();
       setState(() {});

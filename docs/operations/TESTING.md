@@ -8,6 +8,16 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
+CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný
+Chrome transport proti Firestore emulátoru. Windows lze předat absolutní
+`DART_BIN`. [Výsledky a hranice](../plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
+Další pokus `flutter test --platform chrome test/feed_delta_client_test.dart`
+se lokálně zastavil při načítání/kompilaci a byl ukončen; není důkazem
+úspěchu ani náhradou dokončeného Dart/Chrome HTTP testu. Stejná čistá
+klientská logika prochází nativní Flutter testovací sadou. Živý UI průchod
+se zapnutým přepínačem patří až do samostatného DEV přechodu.
+
 Velikost implementačního úseku určuje [schválený postup kontrolních bodů](RELEASING.md#development-checkpoints):
 průběžné cílené lokální kontroly, seskupený push/úplné CI pro hotový funkční
 úsek a živé ověření po DEV nasazení. Rizikové přechody mají potřebné vlastní brány.

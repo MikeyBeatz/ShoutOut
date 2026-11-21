@@ -46,7 +46,8 @@ export function metadataOf(source, { contentIdentity = false, cardProjection = f
     location: { latitude: source.location.latitude, longitude: source.location.longitude },
     createdAt, expiresAt, likesCount, dislikesCount, status: source.status,
     categories: [...new Set(source.categories)].sort(),
-    businessHighlighted: source.businessHighlighted === true, businessSpotlight: source.businessSpotlight === true,
+    businessHighlighted: source.businessHighlighted === true || cardProjection && source.businessPromotion === 'highlighted',
+    businessSpotlight: source.businessSpotlight === true || cardProjection && source.businessPromotion === 'spotlight',
     ...(contentHash === undefined ? {} : { contentHash }) };
   if (cardProjection) {
     const bodyVersion = typeof source.title === 'string' ? bodyProjection(source).version : source.bodyVersion;

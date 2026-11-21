@@ -27,7 +27,8 @@
     "test:purge": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/account_purge.integration.test.js ../functions/feed_maintenance.integration.test.js ../functions/feed_account_retention.integration.test.js ../functions/feed_moderation_index.integration.test.js ../functions/feed_account_retention_runner.integration.test.js ../functions/feed_early_erasure_queue.integration.test.js ../functions/feed_purge_coordinator.integration.test.js ../functions/feed_runtime.integration.test.js ../functions/feed_generation_transition.integration.test.js ../functions/feed_transition_operator.integration.test.js ../functions/feed_b3_pilot.integration.test.js ../functions/feed_gc_checkpoint.integration.test.js ../functions/feed_normal_gc.integration.test.js\"",
     "model:capacity": "node capacity_model.mjs --json",
     "test:body-reader": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_body_reader.integration.test.js\"",
-    "test:card-state": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_card_state.integration.test.js\""
+    "test:card-state": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_card_state.integration.test.js\"",
+    "test:delta-client": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 rules/feed_delta_access.integration.test.mjs ../functions/feed_delta.integration.test.js\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",

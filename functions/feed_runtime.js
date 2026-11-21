@@ -8,7 +8,7 @@ import { bindCardPublisher, prepareCardStates, registerCardSourcePlan, cardSourc
 import { indexMaintenance } from './feed_index_maintenance.js';
 
 export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: true,
-  cardStateEnabled: false, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
+  cardStateEnabled: false, deltaResponsesEnabled: false, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
 export const feedTransactionWriteBudget = 450; // Existing conservative planner limit, now shared across generations/caller writes.
 const transactionBudgets = new WeakMap();
 // One existing bounded public-node cache per process. A fresh timer-backed
@@ -52,6 +52,7 @@ export function createFeedGenerationStore(db, generationId, { contentIdentity = 
   // generation creation/backfill/GC orchestration is a separate migration gate.
   return Object.freeze({ base: store.base, prepare: store.prepare, prepareBatch: store.prepareBatch,
     open: store.open, hydrate: store.hydrate, capturePortable: store.capturePortable, portablePage: store.portablePage, hydratePortable: store.hydratePortable,
+    readHeaderRows: store.readHeaderRows, restorePosition: store.restorePosition,
     purgeAccountIndex: store.purgeAccountIndex, prepareAccountIndexFinish: store.prepareAccountIndexFinish });
 }
 

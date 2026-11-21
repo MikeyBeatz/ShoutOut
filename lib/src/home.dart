@@ -48,6 +48,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   late final FeedSessionController<Shout, SpatialFeedContext> _spatialSession;
   final _spatialScroll = ScrollController();
   final Map<String, double> _spatialHeights = {};
+  StreamSubscription<void>? _deltaContexts;
+  String? _promoGeneration, _promoSignature;
+  int _promoRequest = 0;
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _promoDocuments = [];
   bool _spatialLoading = false;
   bool _spatialLoadingMore = false;
   bool _spatialFailed = false;
@@ -80,6 +84,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       decodeItem: decodeSpatialFeedItem,
       send: (payload) async {
         try {
+          final delta = feedDeltaRuntime;
+          if (delta != null) return await delta.client.load(payload);
           final reply = await FirebaseFunctions.instanceFor(
             region: 'europe-west3',
           ).httpsCallable('getFeedPage').call<Map<String, dynamic>>(payload);
@@ -108,15 +114,17 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     WidgetsBinding.instance.addObserver(this);
     RegistrationTiming.finish('first-app-screen');
     if (Firebase.apps.isNotEmpty) {
-      _interactions = _shoutInteractions(
-        onChanged: () {
-          if (mounted) setState(() {});
-        },
-        onError: (error, stack) {
-          // Transient disconnects are retried by the Firestore SDK.
-          debugPrint('Feed interaction subscription failed: $error');
-        },
-      );
+      if (feedDeltaRuntime == null) {
+        _interactions = _shoutInteractions(
+          onChanged: () {
+            if (mounted) setState(() {});
+          },
+          onError: (error, stack) {
+            // Transient disconnects are retried by the Firestore SDK.
+            debugPrint('Feed interaction subscription failed: $error');
+          },
+        );
+      }
       _initializeFeed();
     }
     _expiryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -143,18 +151,25 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   void _startFeedListeners() {
     final firestore = FirebaseFirestore.instance;
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    _shoutSubscription = firestore
-        .collection('shouts')
-        .where('status', isEqualTo: 'active')
-        .orderBy('createdAt', descending: true)
-        .limit(_feedPageSize)
-        .liveSnapshots()
-        .listen(
-          (snapshot) => _applyShoutDocuments(snapshot.docs),
-          onError: (_) {
-            if (mounted) setState(() => _isLoadingShouts = false);
-          },
-        );
+    if (feedDeltaRuntime != null) {
+      _deltaContexts = feedDeltaRuntime!.live.changes.listen(
+        (_) => unawaited(_startDeltaPromotions()),
+      );
+      unawaited(_startDeltaPromotions());
+    } else {
+      _shoutSubscription = firestore
+          .collection('shouts')
+          .where('status', isEqualTo: 'active')
+          .orderBy('createdAt', descending: true)
+          .limit(_feedPageSize)
+          .liveSnapshots()
+          .listen(
+            (snapshot) => _applyShoutDocuments(snapshot.docs),
+            onError: (_) {
+              if (mounted) setState(() => _isLoadingShouts = false);
+            },
+          );
+    }
     _blockedSubscription = firestore
         .collection('users')
         .doc(uid)
@@ -167,6 +182,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
               setState(() {
                 _blockedUserIds = snapshot.docs.map((doc) => doc.id).toSet();
               });
+              if (feedDeltaRuntime != null) unawaited(_updateDeltaPromotions());
             }
           },
           onError: (Object error, StackTrace stack) => debugPrint(
@@ -191,6 +207,129 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
             'Feed following subscription failed: code=${liveDataFailureCode(error)}',
           ),
         );
+  }
+
+  Future<void> _startDeltaPromotions() async {
+    try {
+      final runtime = feedDeltaRuntime!;
+      final context = await runtime.live.context();
+      if (!mounted) return;
+      final stamp = runtime.live.stamp(context);
+      if (_promoGeneration == stamp) return;
+      _promoGeneration = stamp;
+      _promoSignature = null;
+      _promoRequest++;
+      await _shoutSubscription?.cancel();
+      if (!mounted || _promoGeneration != stamp) return;
+      _shoutSubscription = FirebaseFirestore.instance
+          .collection('feedIndexGenerations')
+          .doc(context['generation'] as String)
+          .collection('publicStates')
+          .where('status', isEqualTo: 'active')
+          .orderBy('createdAt', descending: true)
+          .limit(_feedPageSize)
+          .liveSnapshots(includeMetadataChanges: true)
+          .where(
+            (snapshot) =>
+                !snapshot.metadata.isFromCache &&
+                !snapshot.metadata.hasPendingWrites,
+          )
+          .listen(
+            (snapshot) {
+              if (!mounted || _promoGeneration != stamp) return;
+              _promoDocuments = snapshot.docs;
+              runtime.publicStates.publish(stamp, {
+                for (final doc in snapshot.docs) doc.id: doc.data(),
+              });
+              unawaited(_updateDeltaPromotions());
+            },
+            onError: (Object error, StackTrace stack) {
+              if (mounted) setState(() => _isLoadingShouts = false);
+              debugPrint(
+                'Promo subscription failed: code=${liveDataFailureCode(error)}',
+              );
+              if (error is FirebaseException &&
+                  error.code == 'permission-denied') {
+                unawaited(
+                  runtime.live
+                      .context(retired: stamp)
+                      .then((_) {})
+                      .catchError((Object error) {}),
+                );
+              }
+            },
+          );
+    } catch (error) {
+      if (mounted) setState(() => _isLoadingShouts = false);
+      debugPrint('Promo context failed: code=${liveDataFailureCode(error)}');
+    }
+  }
+
+  Future<void> _updateDeltaPromotions() async {
+    final position = _currentPosition;
+    if (!mounted || position == null || feedDeltaRuntime == null) return;
+    final candidates = _promoDocuments
+        .where(
+          (doc) =>
+              doc.data()['businessSpotlight'] == true &&
+              !_blockedUserIds.contains(doc.data()['authorId']),
+        )
+        .toList();
+    final signature =
+        '${position.latitude}:${position.longitude}:$_promoGeneration:${candidates.map((doc) => '${doc.id}:${doc.data()['bodyVersion']}:${doc.data()['selectionVersion']}').join(',')}';
+    void counts() {
+      final byId = {for (final doc in candidates) doc.id: doc.data()};
+      _shouts.removeWhere((shout) => !byId.containsKey(shout.id));
+      for (final shout in _shouts) {
+        final data = byId[shout.id]!;
+        shout
+          ..likes = data['likesCount'] as int
+          ..dislikes = data['dislikesCount'] as int
+          ..comments = data['commentsCount'] as int
+          ..saves = data['savesCount'] as int;
+      }
+    }
+
+    counts();
+    if (signature == _promoSignature) {
+      setState(() {});
+      return;
+    }
+    final attempt = ++_promoRequest;
+    try {
+      final cards = await feedDeltaRuntime!.client.presentation(
+        [
+          for (final doc in candidates)
+            {'id': doc.id, 'geohash': doc.data()['geohash'] as String},
+        ],
+        {'latitude': position.latitude, 'longitude': position.longitude},
+      );
+      if (!mounted || attempt != _promoRequest) return;
+      setState(() {
+        _promoSignature = signature;
+        _shouts
+          ..clear()
+          ..addAll(
+            cards.map(
+              (card) => decodeSpatialFeedItem({
+                'id': card.descriptor.id,
+                'distanceKm': card.descriptor.distanceKm,
+                'read': card.descriptor.read,
+                'data': {...card.payload.body, ...card.descriptor.stateData},
+              }),
+            ),
+          );
+        counts();
+        _isLoadingShouts = false;
+      });
+    } catch (error) {
+      if (mounted && attempt == _promoRequest) {
+        setState(() => _isLoadingShouts = false);
+      }
+      debugPrint(
+        'Promo presentation failed: code=${liveDataFailureCode(error)}',
+      );
+    }
   }
 
   Future<_LocationRefreshResult> _refreshLocation({
@@ -231,6 +370,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     _spatialSession.dispose();
     _spatialScroll.dispose();
     _expiryTimer.cancel();
+    _promoRequest++;
+    feedDeltaRuntime?.publicStates.publish(null, {});
+    _deltaContexts?.cancel();
     _shoutSubscription?.cancel();
     _blockedSubscription?.cancel();
     _followingSubscription?.cancel();
@@ -298,6 +440,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         return;
       }
       if (_feedDocuments != null) _applyShoutDocuments(_feedDocuments!);
+      if (feedDeltaRuntime != null) unawaited(_updateDeltaPromotions());
       final context = SpatialFeedContext(
         latitude: position.latitude,
         longitude: position.longitude,

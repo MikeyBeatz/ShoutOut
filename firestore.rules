@@ -24,6 +24,31 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/feedIndexControl/current);
     }
 
+    function managedCardProjection() {
+      let control = /databases/$(database)/documents/feedIndexControl/current;
+      return exists(control) && get(control).data.get('schemaVersion', 1) == 2 &&
+        get(control).data.get('cardWriteGenerationIds', []).size() > 0;
+    }
+
+    function readableCardGeneration(generation) {
+      let control = /databases/$(database)/documents/feedIndexControl/current;
+      let marker = /databases/$(database)/documents/feedIndexGenerations/$(generation);
+      return exists(control) && get(control).data.schemaVersion == 2 &&
+        get(control).data.mode in ['active', 'building', 'paused'] &&
+        generation in get(control).data.cardWriteGenerationIds &&
+        exists(marker) && get(marker).data.schemaVersion == 1 &&
+        get(marker).data.v == 2 && get(marker).data.cardProjection == 1 &&
+        get(marker).data.readIdentity == 1 && get(marker).data.accountRetention == true &&
+        get(marker).data.cardReady == true;
+    }
+
+    // Whitelisted server projection only. Private nodes/control stay denied.
+    match /feedIndexGenerations/{generation}/publicStates/{shoutId} {
+      allow get: if eligibleUser() && readableCardGeneration(generation);
+      allow list: if eligibleUser() && limited(50) && readableCardGeneration(generation);
+      allow create, update, delete: if false;
+    }
+
     function hasRoleLevel(minimumLevel) {
       let rolePath =
         /databases/$(database)/documents/accountRoles/$(request.auth.uid);
@@ -2046,6 +2071,7 @@ service cloud.firestore {
         validShoutCreate();
       allow update: if eligibleUser() &&
         resource.data.get('contentPurged', false) != true &&
+        !managedCardProjection() &&
         (
           !managedFeedProjection() ||
           !request.resource.data.diff(resource.data).affectedKeys()
@@ -2079,6 +2105,7 @@ service cloud.firestore {
         allow get: if eligibleUser();
         allow list: if eligibleUser() && limited(50);
         allow create: if canCreateContent() &&
+          !managedCardProjection() &&
           activeShout(shoutId) &&
           consumedRate('comment', commentId) &&
           request.resource.data.keys().hasOnly([
@@ -2131,6 +2158,7 @@ service cloud.firestore {
           request.resource.data.dislikesCount >= 0 &&
           validCommentReactionCounters();
         allow delete: if eligibleUser() &&
+          !managedCardProjection() &&
           (resource.data.authorId == request.auth.uid || isModerator()) &&
           consumedRate('delete', commentId) &&
           getAfter(
@@ -2271,6 +2299,7 @@ service cloud.firestore {
       match /saves/{userId} {
         allow get: if eligibleUser() && userId == request.auth.uid;
         allow create: if eligibleUser() &&
+          !managedCardProjection() &&
           activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'save_' + shoutId) &&
@@ -2279,6 +2308,7 @@ service cloud.firestore {
           request.resource.data.userId == request.auth.uid &&
           request.resource.data.createdAt == request.time;
         allow delete: if eligibleUser() &&
+          !managedCardProjection() &&
           activeShout(shoutId) &&
           userId == request.auth.uid &&
           consumedRate('interaction', 'save_' + shoutId);

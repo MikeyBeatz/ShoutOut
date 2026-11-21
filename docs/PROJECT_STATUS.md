@@ -6,7 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený lokální P1 B4 je uzavřený včetně úplného CI.**
+**Nyní: klientské zapojení B4 je lokálně připravené; závěrečné úplné CI čeká.**
+Větev feature/feed-b4-client-integration má skutečný delta transport/RAM cache,
+společný malý stav karty/detailu/Mé/Uložených, náhradu Home promo odběru,
+lokální Rules a návrh indexů. Prošlo 13 nových emulátorových scénářů včetně
+Chrome transportu proti emulátoru, 49 cílených serverových regresí a osm
+Dart klientských testů. [Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
+Analýza a lint čisté; úplné CI ještě není doložené. Nové přepínače jsou
+vypnuté, nic se nenasazovalo. Další je uzavřít CI a připravit konkrétní DEV
+přechod s auditem, kompatibilitou a rollbackem; živá migrace vyžaduje vlastní souhlas.
+
+**Předchozí lokální P1 B4 je uzavřený včetně úplného CI.**
 Zdroj **d2cac88313c914f4d4fbf0780f0b0862d77da04e**, větev
 feature/feed-b4-state-storage, [úplné CI 44908128699 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44908128699).
 Prošlo 419 Flutter, 158 Functions unit, 464 Rules/transakčních, 9 B4 reader,
@@ -19,14 +29,9 @@ fixture; JSON bajty závislé na serverových časech nejsou byte-for-byte srovn
 Celkový účet ani kapacita 5 000 relací nejsou tím prokázané.
 Runtime má **cardStateEnabled: false**. Žádné nasazení, živá data, Rules,
 Auth účty, Scheduler ani prostředky se v tomto úseku neměnily.
-**Další:** konkrétní klientský kontrakt metadat/doplnění a sloučení živého
-stavu, náhrada Home/rodičovských odběrů se zachováním promo a uzavření
-přímých čítačových zápisů v Rules. Potom samostatný připravený DEV přechod;
-nový konkrétní rozsah předložit ke schválení. Neopakovat P1 ani jeho fixture.
 [Konkrétní návrh klientského úseku](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal)
-je připravený: skutečný delta gateway, sdílené malé odběry včetně reconcile,
-náhrada Home promo dotazu a lokální Rules. Čeká na schválení implementace;
-v této návazné práci se zatím měnila pouze dokumentace, bez nového kreditu.
+je schválený a jeho implementace je popsaná ve výsledcích výše. Neopakovat
+P1 ani hotové piloty. Signály/číslovka novinek zůstávají navazující blok B4.
 
 Předchozí [transakční reader a jeho úplné výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
 jsou rovněž uzavřené: 0b2d004 / úplné CI 44825059479 success. Jeho silnější

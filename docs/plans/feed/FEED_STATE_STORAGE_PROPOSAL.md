@@ -160,7 +160,7 @@ Návrh nemění pořadí nepřečtené → přečtené, ruční obnovu, sekundov
 
 ## Klientské zapojení B4 – konkrétní rozsah před DEV
 
-Návrh z 21. listopadu, **čeká na schválení implementace**. Je to první ze
+Návrh z 21. listopadu, **vlastník schválil celý lokální rozsah; lokální implementace je připravená, závěrečné CI dosud čeká**. Je to první ze
 tří zbývajících bloků výše, nikoli nová řada P1–Pn. Serverový P1 zůstává
 uzavřený; jeho algoritmy ani celé fixture bez důvodu neopakovat.
 
@@ -355,3 +355,114 @@ zápisu, přesný indexový plán a migrační/rollback postup s odvodněním st
 serverových volání. Pro budoucí indexový plán ponechat authorId pro účtový
 úklid; monotonní cardRevision/revision a hashe nepotřebují vlastní dotazové
 indexy. Zatím se neměnil firestore.indexes.json, TTL ani živé konfigurace.
+
+<a id="client-integration-results"></a>
+
+## Klientské zapojení – implementace a lokální důkazy
+
+Stav 21. listopadu: připravený kód a cílené lokální kontroly, závěrečné úplné
+CI dosud čeká. Nejde o nasazení ani živou akceptaci. `cardStateEnabled` i
+`deltaResponsesEnabled` zůstávají false; `serverDeltaFeed` má výchozí false
+a žádná konfigurace jej nezapíná. Prostředky a retence se nemění.
+
+- Stávající getFeedPage má oddělený formát delta-v1: výběr, doplnění a
+  potvrzený kontext živých odběrů. Nová relace starého klienta dostane
+  kompatibilní stránku v1 s plnými těly; již vydané v1 kurzory dál používají
+  původní reader a udržovanou starou generaci. Aktivace bude vyžadovat
+  zachování obou generací a přesný audit. Nevzniká další Function ani klíč.
+- Konečná čtecí transakce znovu ověřuje účet, blokace, autora, R5, aktuální
+  hlavičky a verze. Zdrojové Shouty čte jen pro chybějící těla. Kurzory
+  nesou odkazy na řádky/uzly, ne souřadnice zdrojů; server si je obnovuje
+  z původních neměnných kořenů. Podpis používá oddělený derivát stávajícího
+  klíče. Čitelný podepsaný kurzor se nepovažuje za šifrování.
+- RAM cache páruje celé tělo a potvrzený stav podle projektu/UID/verze
+  a inkarnace generace. Limit je stále laboratorní 4 MiB / nejvýše hodina;
+  stavové aktualizace neprodlužují původní platnost. Opožděná odpověď
+  nepřepíše novější živou revizi. Změna účtu a potvrzené mazání data odpojí;
+  těla se nezapisují do IndexedDB.
+- Karta, detail, Mé a Uložené sdílejí jednu kombinaci malého veřejného stavu
+  a vlastního palce/záložky. Neznámé vlastní příznaky se nepředstírají jako
+  potvrzené nuly; interakce čekají na serverové snapshoty. Po potvrzené akci
+  zůstává dosavadní optimistický náhled a reconciliace čte malý stav místo
+  celého rodiče. Poslední odběratel vše odpojí; staré události účtu/generace
+  a klesající revize se odmítají. Odpojení generace vyvolá nejvýše jedno
+  dohledání nového kontextu, nikoli opakující se polling.
+- Home v nové větvi odebírá posledních globálních 50 aktivních malých stavů,
+  teprve potom filtruje Spotlight. Přesnou hranici 20 km ověřuje server;
+  geohash není náhradou vzdálenosti. Podporuje i původní businessPromotion.
+  Čítač sám nevyvolá přenos těla. Promo query současně poskytuje stav
+  otevřené kartě/detailu a zabrání duplicitnímu dokumentovému odběru;
+  při opuštění query převezme stav jednotlivý dokument.
+- Nová větev nahrazuje plný Home dotaz a jeho hromadné vlastní interakce;
+  vypnutá větev zůstává původní. Formáty knihovních stránek, pořadí,
+  odscrollování, promo pravidla a B2 spouštění se nemění. Malá projekce
+  přidává veřejný geohash a dva promo příznaky, žádnou přesnou polohu.
+- Lokální Rules dovolují get a list nejvýše 50 stavů pouze oprávněnému
+  uživateli v udržované ready card generaci. Soukromé uzly/control i cizí
+  palce/záložky zůstávají nepřístupné. Ani moderátor/vlastník nemůže stav
+  zapisovat. Při udržované card generaci se uzavřou přímé rodičovské čítače,
+  komentářové create/delete a záložky; bez ní zůstává stará kompatibilita.
+  [Přesný indexový návrh](B4_CLIENT_INDEX_PLAN.json) je pouze návrh: jeden
+  složený index, 13 výjimek, žádné TTL; authorId zůstává pro R5. Živý ani
+  kořenový firestore.indexes.json se tím nemění.
+
+### Ověření
+
+Nová emulátorová sada má 13 úspěšných testů včetně měření 50/200/2 000,
+skutečného Web SDK query/listeneru a Chrome HTTP proti serverové operaci
+s Firestore emulátorem. Ověřuje 50 → 100 → 120, rozpracovaný kurzor,
+ztrátu spojení při doplnění a retry, blokaci/mazání účtu, R5, změnu těla,
+paused stav, starý formát klienta, 20 km a všechny role. Prohlížečový harness
+dodává syntetickou identitu přímo serverové operaci: **neověřuje platformní
+Auth/reCAPTCHA/App Check ani živou aplikaci** a nezakládá Auth účty.
+
+Osm Dart regresí pokrývá cache, chybějící tělo, změnu účtu/generace,
+monotónní živý stav, pozdní odpověď a sdílení 50 karet + 50 detailů.
+S deseti překrývajícími promo řádky vznikne 40 veřejných dokumentových
+odběrů a po 50 vlastních reaction/save odběrech; další detail je nezdvojí.
+Dosavadní testy optimistického potvrzování a scrollu zůstávají součástí
+celé Flutter sady. Závěrečné úplné CI musí ještě potvrdit všechny sady
+včetně ostatních serverových writerů, retence a webového sestavení.
+
+### Měření bez slibu plošné úspory
+
+[Report skutečných SDK čtení a JSON bajtů](../../benchmarks/FEED_B4_CLIENT_2026-11-21.json)
+zahrnuje vstupní kontroly, blokace a B3. Každý požadavek vytváří nový adaptér;
+opravené inkarnací/retencí ohraničené sdílení serverových bloků přežije
+tento restart adaptéru. Studená, opakovaná a doplňovací cesta jsou oddělené:
+
+| Zdrojů | Cold reads / těla | Warm reads / těla | Doplnění jednoho: reads / těla |
+| --- | --- | --- | --- |
+| 50 | 80 / 50 | 29 / 0 | 17 / 1 |
+| 200 | 83 / 50 | 29 / 0 | 17 / 1 |
+| 2 000 | 90 / 50 | 34 / 0 | 18 / 1 |
+
+Stejný Home query má před i po změně 50 dokumentových čtení, ale v této
+fixture přibližně 54 kB proti 24 kB JSON. Malá aktualizace čítače přenáší
+stav, ne text; těla ani manifest se kvůli ní znovu nestahují. Warm API
+odpověď má pořád přibližně 60–62 kB včetně podepsaných kurzorů a metadat;
+cold 112–115 kB. **Nulová warm těla neznamenají nulový přenos ani reads.**
+
+B2 se dál spouští při startu/obnově a má vlastní proměnnou práci podle
+fronty/pokračování, nikoli pevnou konstantu na stránku. Report navíc měří
+skutečné odeslání 50 nových přečtení dvěma uploady (32 + 18), jejich download
+a následující B3 obnovu ve stejné fixture: upload má 84 reads / 6 zápisů,
+download 15 reads / 1 kvótový zápis a přibližně 11 kB JSON. Nové přečtení
+se prokazatelně promítne do pořadí. Pro 200/2 000 zdrojů tím předchozí
+první stránku nahradí 50 dalších nepřečtených těl: metadata sama je
+nestahují, ale klient je následně potřebuje doplnit (66/67 reads včetně
+50 těl). Ani tato práce se nesmí schovat do tvrzení o nulových warm tělech.
+Dřívější unit, browserové a emulátorové B2 sady navíc znovu poběží v CI.
+P1 report dál eviduje cenu publishera: změna čítače ve staré + card generaci
+7 reads / 2 SDK zápisy. Nový report k tomu nepřidává další publisher.
+Počty aktivních logických odběrů jsou klientská regrese, nikoli fakturované
+reads; Rules závislá čtení, reconnect, síťové rámce, App Check a cloudové
+škálování mohou přidat práci. Emulátor neurčuje cenu ani kapacitu 5 000 relací.
+Cache rozpočet počítá kódované payload bajty, ne úplnou haldu procesu
+včetně kontejnerů, widgetů, SDK a vykreslených karet.
+
+**Další brána:** připravit společný živý DEV přechod P1 + klient/Rules,
+audit všech zdrojů včetně expirovaných knihovních položek, přesné aktivace,
+indexy, odvodnění starých serverových writerů a rollback s udržovanou v1
+generací. Současný souhlas živou migraci nepokrývá. Signály a číslovka
+novinek zůstávají další implementační blok; celé B4 zatím není uzavřené.

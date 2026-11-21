@@ -13,8 +13,11 @@ const snapshotValue = value => Array.isArray(value) ? value.map(snapshotValue) :
 export function publicCardState(id, source, revision = source?.cardRevision ?? 0) {
   if (!usable(source)) return null;
   if (!validRevision(revision)) throw new Error('invalid-card-revision');
+  const businessHighlighted = source.businessHighlighted === true || source.businessPromotion === 'highlighted';
+  const businessSpotlight = source.businessSpotlight === true || source.businessPromotion === 'spotlight';
   return { schemaVersion: 1, ...bodyProjection(source).state,
-    createdAt: source.createdAt.toMillis(), selectionVersion: selectionIdentity({ ...source, id }), revision };
+    createdAt: source.createdAt.toMillis(), selectionVersion: selectionIdentity({ ...source, id, businessHighlighted, businessSpotlight }), revision,
+    geohash: source.geohash, businessHighlighted, businessSpotlight };
 }
 export function bindCardPublisher(db, publisher) { publishers.set(db, publisher); }
 export function observeCardSources(tx, result) {

@@ -1,3 +1,4 @@
+import 'feed_delta_runtime.dart';
 import 'live_data.dart';
 import 'interaction_feedback.dart';
 import 'account_deletion.dart';
@@ -36,6 +37,7 @@ class AuthGate extends StatelessWidget {
         liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
         interactionFeedback.retainViewer(user?.uid);
         readSessions.retainViewer(user?.uid);
+        feedDeltaRuntime?.retainViewer(user?.uid);
         return user;
       }),
     ),
@@ -1075,6 +1077,7 @@ class _DeletionRequestGateState extends State<DeletionRequestGate> {
           _pending = document.data;
           if (!document.isFromCache && !document.hasPendingWrites) {
             unawaited(readSessions.eraseAccount(uid));
+            feedDeltaRuntime?.eraseAccount(uid);
           }
         } else if (!document.isFromCache && !document.hasPendingWrites) {
           _pending = null;

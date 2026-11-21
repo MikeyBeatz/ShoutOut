@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "scope": "Actual Admin SDK reads/writes + JSON payloads, emulator. Includes B2 upload/download and ensuing B3 refresh; excludes platform Auth/AppCheck, billed Rules reads, live listener delivery and HTTP framing. Logical listener sharing has a separate Dart regression.",
+  "cases": [
+    {
+      "sources": 50,
+      "cold": {
+        "reads": 80,
+        "queries": 4,
+        "sourceReads": 50,
+        "documentJsonBytes": 86475,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 112460
+      },
+      "warm": {
+        "reads": 29,
+        "queries": 4,
+        "sourceReads": 0,
+        "documentJsonBytes": 1525,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 59671
+      },
+      "refillOne": {
+        "reads": 17,
+        "queries": 1,
+        "sourceReads": 1,
+        "documentJsonBytes": 1664,
+        "attemptedWrites": 0
+      },
+      "home": {
+        "oldReads": 50,
+        "newReads": 50,
+        "oldJsonBytes": 54294,
+        "newJsonBytes": 23901
+      },
+      "readSync50": {
+        "uploadCalls": 2,
+        "upload": {
+          "reads": 84,
+          "queries": 2,
+          "sourceReads": 50,
+          "documentJsonBytes": 63898,
+          "attemptedWrites": 6
+        },
+        "downloadCalls": 1,
+        "download": {
+          "reads": 15,
+          "queries": 1,
+          "sourceReads": 0,
+          "documentJsonBytes": 14546,
+          "attemptedWrites": 1
+        },
+        "responseJsonBytes": 10998,
+        "ensuingB3Refresh": {
+          "reads": 30,
+          "queries": 4,
+          "sourceReads": 0,
+          "documentJsonBytes": 15911,
+          "attemptedWrites": 0
+        },
+        "missingBodiesAfterReorder": 0,
+        "refillAfterReorder": {
+          "reads": 0,
+          "queries": 0,
+          "sourceReads": 0,
+          "documentJsonBytes": 0,
+          "attemptedWrites": 0
+        }
+      }
+    },
+    {
+      "sources": 200,
+      "cold": {
+        "reads": 83,
+        "queries": 4,
+        "sourceReads": 50,
+        "documentJsonBytes": 130006,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 113978
+      },
+      "warm": {
+        "reads": 29,
+        "queries": 4,
+        "sourceReads": 0,
+        "documentJsonBytes": 1525,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 61189
+      },
+      "refillOne": {
+        "reads": 17,
+        "queries": 1,
+        "sourceReads": 1,
+        "documentJsonBytes": 1664,
+        "attemptedWrites": 0
+      },
+      "home": {
+        "oldReads": 50,
+        "newReads": 50,
+        "oldJsonBytes": 54356,
+        "newJsonBytes": 23901
+      },
+      "readSync50": {
+        "uploadCalls": 2,
+        "upload": {
+          "reads": 84,
+          "queries": 2,
+          "sourceReads": 50,
+          "documentJsonBytes": 63898,
+          "attemptedWrites": 6
+        },
+        "downloadCalls": 1,
+        "download": {
+          "reads": 15,
+          "queries": 1,
+          "sourceReads": 0,
+          "documentJsonBytes": 14546,
+          "attemptedWrites": 1
+        },
+        "responseJsonBytes": 10998,
+        "ensuingB3Refresh": {
+          "reads": 30,
+          "queries": 4,
+          "sourceReads": 0,
+          "documentJsonBytes": 15911,
+          "attemptedWrites": 0
+        },
+        "missingBodiesAfterReorder": 50,
+        "refillAfterReorder": {
+          "reads": 66,
+          "queries": 1,
+          "sourceReads": 50,
+          "documentJsonBytes": 54851,
+          "attemptedWrites": 0
+        }
+      }
+    },
+    {
+      "sources": 2000,
+      "cold": {
+        "reads": 90,
+        "queries": 4,
+        "sourceReads": 50,
+        "documentJsonBytes": 131997,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 114287
+      },
+      "warm": {
+        "reads": 34,
+        "queries": 4,
+        "sourceReads": 0,
+        "documentJsonBytes": 1689,
+        "attemptedWrites": 0,
+        "responseJsonBytes": 61498
+      },
+      "refillOne": {
+        "reads": 18,
+        "queries": 1,
+        "sourceReads": 1,
+        "documentJsonBytes": 1668,
+        "attemptedWrites": 0
+      },
+      "home": {
+        "oldReads": 50,
+        "newReads": 50,
+        "oldJsonBytes": 54428,
+        "newJsonBytes": 23901
+      },
+      "readSync50": {
+        "uploadCalls": 2,
+        "upload": {
+          "reads": 84,
+          "queries": 2,
+          "sourceReads": 50,
+          "documentJsonBytes": 63898,
+          "attemptedWrites": 6
+        },
+        "downloadCalls": 1,
+        "download": {
+          "reads": 15,
+          "queries": 1,
+          "sourceReads": 0,
+          "documentJsonBytes": 14546,
+          "attemptedWrites": 1
+        },
+        "responseJsonBytes": 10998,
+        "ensuingB3Refresh": {
+          "reads": 35,
+          "queries": 4,
+          "sourceReads": 0,
+          "documentJsonBytes": 16075,
+          "attemptedWrites": 0
+        },
+        "missingBodiesAfterReorder": 50,
+        "refillAfterReorder": {
+          "reads": 67,
+          "queries": 1,
+          "sourceReads": 50,
+          "documentJsonBytes": 54855,
+          "attemptedWrites": 0
+        }
+      }
+    }
+  ]
+}

@@ -154,6 +154,10 @@ Future<LiveShoutState> _reconcileInteraction(
       message: 'The signed-in account changed.',
     );
   }
+  final delta = feedDeltaRuntime;
+  if (delta != null) {
+    return delta.reconcile(uid, id, save: kind == InteractionKind.save);
+  }
   final ref = FirebaseFirestore.instance.collection('shouts').doc(id);
   final result = await FirebaseFirestore.instance.runTransaction(
     (tx) async {

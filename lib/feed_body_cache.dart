@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-// B4a laboratory core: deliberately not imported by the active feed gateway.
+// B4 cache core. The production adapter remains behind the disabled opt-in.
 String canonicalFeedBody(Object? value) {
   if (value == null || value is String || value is bool || value is int) {
     return jsonEncode(value);
@@ -99,10 +99,11 @@ class FeedBodyPayload {
 }
 
 class _CachedBody {
-  _CachedBody(this.payload, this.until, this.bytes);
+  _CachedBody(this.payload, this.until, this.bytes, this.state);
   final FeedBodyPayload payload;
   final int until;
   final int bytes;
+  final String? state;
 }
 
 /// RAM only. Eviction cannot alter already assembled/frozen cards.
@@ -129,6 +130,7 @@ class FeedBodyCache {
   int get bytes => _bytes;
   int get epoch => _epoch;
   FeedBodyScope? get scope => _scope;
+  bool get isEmpty => _entries.isEmpty;
 
   int _now() {
     final now = clock();
@@ -165,16 +167,52 @@ class FeedBodyCache {
     return entry.payload;
   }
 
-  void put(FeedBodyScope scope, FeedBodyPayload payload, int deadline) {
+  Map<String, dynamic>? state(FeedBodyScope scope, String id, String version) {
+    if (get(scope, id, version) == null) return null;
+    final encoded = _entries[id]?.state;
+    return encoded == null
+        ? null
+        : Map<String, dynamic>.from(jsonDecode(encoded) as Map);
+  }
+
+  void evict(String id) {
+    final old = _entries.remove(id);
+    if (old != null) _bytes -= old.bytes;
+  }
+
+  void updateState(
+    FeedBodyScope scope,
+    String id,
+    String version,
+    Map<String, dynamic> state,
+  ) {
+    if (get(scope, id, version) == null) return;
+    final old = _entries[id]!;
+    put(scope, old.payload, old.until, state: state);
+  }
+
+  void put(
+    FeedBodyScope scope,
+    FeedBodyPayload payload,
+    int deadline, {
+    Map<String, dynamic>? state,
+  }) {
     payload.validate();
     final now = _now();
     if (_scope != scope) throw StateError('Foreign body cache scope');
     final old = _entries.remove(payload.id);
     if (old != null) _bytes -= old.bytes;
+    final encodedState = state == null
+        ? (old?.payload.version == payload.version ? old?.state : null)
+        : canonicalFeedBody(state);
+    if (state != null && state['bodyVersion'] != payload.version) {
+      throw const FormatException('Foreign cached state');
+    }
     final size =
         utf8.encode(payload.encoded).length +
         utf8.encode(payload.id).length +
-        64;
+        64 +
+        (encodedState == null ? 0 : utf8.encode(encodedState).length);
     if (size > maximumBytes || deadline <= now) return;
     while (_bytes + size > maximumBytes && _entries.isNotEmpty) {
       _bytes -= _entries.remove(_entries.keys.first)!.bytes;
@@ -187,7 +225,7 @@ class FeedBodyCache {
           old.payload.version == payload.version)
         old.until,
     ].reduce((a, b) => a < b ? a : b);
-    _entries[payload.id] = _CachedBody(payload, until, size);
+    _entries[payload.id] = _CachedBody(payload, until, size, encodedState);
     _bytes += size;
   }
 }

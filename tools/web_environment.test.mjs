@@ -8,6 +8,14 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
+test('B4 delta client stays off and requires all DEV parent-counter gateways', () => {
+  assert.notEqual(actualDev.serverDeltaFeed, true);
+  assert.doesNotThrow(() => validateConfig({ ...actualDev, serverDeltaFeed: true }, 'dev'));
+  for (const patch of [{ serverDeltaFeed: 'true' }, { serverDeltaFeed: true, serverUnreadFeed: false },
+    { serverDeltaFeed: true, serverCommentCreation: false }, { serverDeltaFeed: true, serverCommentDeletion: false },
+    { serverDeltaFeed: true, serverShoutSaves: false }]) assert.throws(() => validateConfig({ ...actualDev, ...patch }, 'dev'));
+  assert.throws(() => validateConfig({ ...actualDev, serverDeltaFeed: true }, 'prod'));
+});
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
 const dev = { ...actualDev, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };

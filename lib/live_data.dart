@@ -267,11 +267,13 @@ extension LiveDocument on DocumentReference<Map<String, dynamic>> {
 }
 
 extension LiveQuery on Query<Map<String, dynamic>> {
-  Stream<QuerySnapshot<Map<String, dynamic>>> liveSnapshots() {
+  Stream<QuerySnapshot<Map<String, dynamic>>> liveSnapshots({
+    bool includeMetadataChanges = false,
+  }) {
     final key = liveDataKey(this);
     return liveStreams.watch(
-      key,
-      snapshots,
+      includeMetadataChanges ? (key, true) : key,
+      () => snapshots(includeMetadataChanges: includeMetadataChanges),
       isCurrent: () =>
           FirebaseAuth.instanceFor(app: firestore.app).currentUser?.uid ==
           key.$1,

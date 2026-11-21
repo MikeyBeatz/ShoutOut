@@ -160,6 +160,14 @@ jobs:
         working-directory: tools
         run: npm run test:card-state
 
+      - name: Test B4 client transport, state Rules and Chrome against emulator
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 4
+        working-directory: tools
+        env:
+          B4_BROWSER: '1'
+        run: npm run test:delta-client
+
       - name: Test prepared B2 runtime
         if: steps.scope.outputs.full != 'false'
         # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.

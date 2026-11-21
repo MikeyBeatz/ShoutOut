@@ -13,6 +13,9 @@ class LiveShoutState {
     required this.saves,
     required this.saved,
     this.contentPurged = false,
+    this.status,
+    this.revision,
+    this.bodyVersion,
   });
 
   final int likes;
@@ -22,6 +25,9 @@ class LiveShoutState {
   final int saves;
   final bool saved;
   final bool contentPurged;
+  final String? status;
+  final int? revision;
+  final String? bodyVersion;
 }
 
 Stream<LiveShoutState> watchLiveShoutState(
@@ -45,7 +51,13 @@ Stream<LiveShoutState> watchLiveShoutState(
       reaction: state.$2?['type'] as String?,
       saves: (state.$1?['savesCount'] as num?)?.toInt() ?? 0,
       saved: saved,
-      contentPurged: state.$1 == null || state.$1?['contentPurged'] == true,
+      contentPurged:
+          state.$1 == null ||
+          state.$1?['contentPurged'] == true ||
+          state.$1?['status'] == 'deleted',
+      status: state.$1?['status'] as String?,
+      revision: state.$1?['revision'] as int?,
+      bodyVersion: state.$1?['bodyVersion'] as String?,
     ),
   );
   return synchronized == null ? values : _atSync(values, synchronized);

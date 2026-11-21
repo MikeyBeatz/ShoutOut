@@ -25,7 +25,7 @@ export function blockCache({ maxBytes = 4194304, maxEntries = 1024, maxAgeMillis
   clock = () => performance.now() } = {}) {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || !Number.isSafeInteger(maxEntries) || maxEntries < 1 ||
       !Number.isSafeInteger(maxAgeMillis) || maxAgeMillis < 1 || maxAgeMillis > feedSessionLifetimeMillis || typeof clock !== 'function') throw new Error('invalid-cache-config');
-  const entries = new Map(), flights = new Map(), invalidated = new Set();
+  const entries = new Map(), flights = new Map(), invalidated = new Set(), fences = new Map();
   let bytes = 0;
   const remove = key => { const entry = entries.get(key); if (entry) { clearTimeout(entry.timer); bytes -= entry.bytes; entries.delete(key); } };
   const expire = () => { for (const [key, entry] of entries) if (clock() >= entry.expiresAt) remove(key); };
@@ -37,6 +37,19 @@ export function blockCache({ maxBytes = 4194304, maxEntries = 1024, maxAgeMillis
     invalidate(key) {
       remove(key);
       if (flights.has(key)) invalidated.add(flights.get(key));
+    },
+    fence(prefix, version) {
+      if (!fences.has(prefix) && fences.size >= maxEntries) {
+        const oldest = fences.keys().next().value;
+        for (const key of entries.keys()) if (key.startsWith(oldest)) remove(key);
+        for (const [key, flight] of flights) if (key.startsWith(oldest)) invalidated.add(flight);
+        fences.delete(oldest);
+      }
+      if (fences.has(prefix) && fences.get(prefix) !== version) {
+        for (const key of entries.keys()) if (key.startsWith(prefix)) remove(key);
+        for (const [key, flight] of flights) if (key.startsWith(prefix)) invalidated.add(flight);
+      }
+      fences.set(prefix, version);
     },
     async load(key, fetcher) {
       expire();
@@ -169,11 +182,13 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     if (contentIdentity !== 'generation' && identity !== contentIdentity) throw new Error('index-content-identity-mode-mismatch');
     return identity;
   };
-  async function retentionFence(tx, marker, roots, expected = null, metrics = null) {
+  async function retentionFence(tx, markerDoc, roots, expected = null, metrics = null) {
+    const marker = markerDoc.data();
     mode(marker);
     if (!accountRetention) return null;
     const revision = marker.erasureRevision ?? 0;
-    if (cacheRevision !== revision) { cache.clear(); cacheRevision = revision; }
+    if (cache.fence) cache.fence(`${db.projectId}:${base.path}:`, `${markerDoc.createTime.seconds}:${markerDoc.createTime.nanoseconds}:${revision}`);
+    else if (cacheRevision !== revision) { cache.clear(); cacheRevision = revision; }
     const docs = roots.length ? await tx.getAll(...roots.map(root => fences.doc(root.path))) : [];
     if (metrics) metrics.retentionReadUnits = (metrics.retentionReadUnits ?? 0) + docs.length;
     docs.forEach(doc => retentionCell(doc.data()));
@@ -186,7 +201,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     await db.runTransaction(async tx => {
       const marker = await tx.get(base);
       if (metrics) metrics.retentionReadUnits = (metrics.retentionReadUnits ?? 0) + 1;
-      await retentionFence(tx, marker.data(), captured.roots, captured.retention, metrics);
+      await retentionFence(tx, marker, captured.roots, captured.retention, metrics);
       if (!accountRetention) return;
       const authors = [...new Set(rows.map(row => row.authorId))];
       const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
@@ -408,7 +423,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
         }
       }
       const roots = [...result].map(([path, key]) => ({ hash: key, path, summary: null }));
-      retention = await retentionFence(tx, marker.data(), roots, null, metrics);
+      retention = await retentionFence(tx, marker, roots, null, metrics);
       return roots;
     }, { readOnly: true });
     alive();
@@ -553,7 +568,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const root = await db.runTransaction(async tx => {
       const [marker, header] = await tx.getAll(base, cells.doc(cell));
       if (!marker.exists || ![1, 2].includes(marker.data().v)) throw new Error('index-not-seeded');
-      await retentionFence(tx, marker.data(), [{ path: cell }]);
+      await retentionFence(tx, marker, [{ path: cell }]);
       if (now > (marker.data().prunedThrough ?? -1)) tx.update(base, { prunedThrough: now });
       return header.exists ? directoryEntry(cell, header.data()).hash : null;
     });
@@ -649,9 +664,58 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     return { items, metrics: { sourceReads: docs.length, ...metrics } };
   }
 
+  // Shared immutable paths, with current or frozen roots. Routing hints never
+  // authorize content; the caller still validates policy and signed versions.
+  async function readHeaderRows(tx, routes, { marker = null, snapshot = null, fenceSnapshot = snapshot, maxNodes = 256, capture = null, budget = new Set() } = {}) {
+    if (!Array.isArray(routes) || routes.length > 50 || new Set(routes.map(row => row.id)).size !== routes.length ||
+        routes.some(row => !/^[A-Za-z0-9_-]{1,128}$/.test(row.id) || !/^[0123456789bcdefghjkmnpqrstuvwxyz]{7}$/.test(row.geohash)) ||
+        !Number.isSafeInteger(maxNodes) || maxNodes < 1) throw new Error('invalid-header-routes');
+    marker ??= await tx.get(base); mode(marker.data());
+    const regionIds = [...new Set(routes.map(row => row.geohash.slice(0, 4)))];
+    let roots;
+    if (snapshot) roots = new Map(snapshot.roots.map(root => [root.path, root.hash]));
+    else {
+      const docs = regionIds.length ? await tx.getAll(...regionIds.map(cell => cells.doc(cell))) : [];
+      roots = new Map(docs.filter(doc => doc.exists).map(doc => [doc.id, directoryEntry(doc.id, doc.data()).hash]));
+    }
+    const fenceRoots = [...new Set([...regionIds, ...(fenceSnapshot?.roots ?? []).map(root => root.path)])].map(path => ({ path }));
+    const retention = await retentionFence(tx, marker, fenceRoots, fenceSnapshot?.retention ?? null);
+    if (capture) { capture.roots = [...roots].map(([path, hash]) => ({ path, hash, summary: null })); capture.retention = retention; }
+    const loaded = new Map(), builder = treeBuilder({ ...blockOptions, cardProjection: cardFormat });
+    const load = key => {
+      if (!loaded.has(key)) {
+        if (!budget.has(key) && budget.size >= maxNodes) throw new Error('header-read-budget-exceeded');
+        budget.add(key);
+        loaded.set(key, cache.load(cacheKey(key), async () => verify(key, (await tx.get(nodes.doc(key))).data())).then(result => result.node));
+      }
+      return loaded.get(key);
+    };
+    const rows = await Promise.all(routes.map(row => builder.find(roots.has(row.geohash.slice(0, 4)) ? { hash: roots.get(row.geohash.slice(0, 4)) } : null, row, load)));
+    return new Map(rows.filter(Boolean).map(row => [row.id, row]));
+  }
+
+  async function restorePosition(snapshot, position, { maxNodes = 256 } = {}) {
+    if (!position || !(position.pending || position.candidates || position.frontier)) return position;
+    return db.runTransaction(async tx => {
+      const marker = await tx.get(base), routes = [...(position.pending ?? []), ...(position.candidates ?? [])];
+      const budget = new Set(), rows = await readHeaderRows(tx, routes, { marker, snapshot, maxNodes, budget });
+      const restore = values => (values ?? []).map(route => { const row = rows.get(route.id); if (!row) throw new FeedSessionExpired(); return row; });
+      const frontier = position.frontier ?? [];
+      if (frontier.length > maxNodes) throw new Error('header-read-budget-exceeded');
+      const descriptors = await Promise.all(frontier.map(async item => {
+        if (!budget.has(item.hash) && budget.size >= maxNodes) throw new Error('header-read-budget-exceeded');
+        budget.add(item.hash);
+        const node = (await cache.load(cacheKey(item.hash), async () => verify(item.hash, (await tx.get(nodes.doc(item.hash))).data()))).node;
+        if (item.exact ? node.path !== item.path : !node.path.startsWith(item.path)) throw new Error('invalid-delta-frontier');
+        return { ...item, summary: node.summary };
+      }));
+      return { ...position, pending: restore(position.pending), candidates: restore(position.candidates), frontier: descriptors };
+    }, { readOnly: true });
+  }
+
   const erasure = accountRetention ? createAccountRetentionStore(db, binding, (tx, rows, context) => prepareBatch(tx,
     rows.map(row => ({ id: row.id, before: row, after: null })), { erasure: { ...context, capability: erasureCapability } })) : null;
-  return { mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage, hydratePortable,
+  return { mutate, prepare, prepareBatch, open, hydrate, indexChanges, cache, base, beginExpiryPrune, capturePortable, portablePage, hydratePortable, readHeaderRows, restorePosition,
     ...(erasure ? { purgeAccountIndex: erasure.step, prepareAccountIndexFinish: erasure.prepareFinish, erasureJobFor: erasure.jobFor } : {}),
     async expiredCells(now, limit = 32) {
       if (!Number.isSafeInteger(now) || now < 0 || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid-prune-discovery');

@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "state": "proposal-only-no-deploy",
+  "ttlChanges": false,
+  "indexes": [
+    {
+      "collectionGroup": "publicStates",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "schemaVersion",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "schema",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "bodyVersion",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "selectionVersion",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "revision",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "geohash",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "businessHighlighted",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "businessSpotlight",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "likesCount",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "dislikesCount",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "commentsCount",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "publicStates",
+      "fieldPath": "savesCount",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "shouts",
+      "fieldPath": "cardRevision",
+      "indexes": []
+    }
+  ],
+  "preserve": [
+    "publicStates.authorId single-field for R5",
+    "all current unrelated indexes and TTL settings"
+  ]
+}

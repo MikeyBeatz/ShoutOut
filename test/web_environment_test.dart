@@ -13,6 +13,39 @@ Map<String, dynamic> gatewayFixture() => {
 };
 
 void main() {
+  test('B4 client defaults off and requires all DEV count writers', () {
+    final dev =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(dev).serverDeltaFeed, isFalse);
+    expect(
+      WebEnvironment.fromJson({
+        ...dev,
+        'serverDeltaFeed': true,
+      }).serverDeltaFeed,
+      isTrue,
+    );
+    for (final key in [
+      'serverSpatialFeed',
+      'serverUnreadFeed',
+      'serverCommentCreation',
+      'serverCommentDeletion',
+      'serverShoutSaves',
+    ]) {
+      expect(
+        () => WebEnvironment.fromJson({
+          ...dev,
+          'serverDeltaFeed': true,
+          key: false,
+        }),
+        throwsStateError,
+      );
+    }
+    expect(
+      () => WebEnvironment.fromJson({...dev, 'serverDeltaFeed': 'true'}),
+      throwsStateError,
+    );
+  });
   test('B3 flag defaults off and needs DEV feed/read synchronization', () {
     final dev =
         jsonDecode(File('config/dev.json').readAsStringSync())

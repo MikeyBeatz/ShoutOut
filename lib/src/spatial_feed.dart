@@ -153,6 +153,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
   final _measure = GlobalKey();
   StreamSubscription<LiveShoutState>? _subscription;
   bool _unavailable = false;
+  bool _interactionReady = feedDeltaRuntime == null;
 
   bool get _visible => switch (widget.ownSection) {
     OwnShoutsSection.expired => widget.shout.isRetainedExpired,
@@ -190,78 +191,91 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
         .collection('shouts')
         .doc(widget.shout.id);
     _subscription =
-        watchLiveShoutState(
-          ref
-              .liveSnapshots(includeMetadataChanges: true)
-              .where(
-                (doc) =>
-                    (doc.exists || !doc.metadata.isFromCache) &&
-                    (!widget.requireSaved ||
-                        (!doc.metadata.isFromCache &&
-                            !doc.metadata.hasPendingWrites)),
-              )
-              .map((doc) {
-                final data = doc.data();
-                if (data == null || !_accepts(data)) {
-                  return null;
+        (feedDeltaRuntime?.live.watch(widget.shout.id) ??
+                watchLiveShoutState(
+                  ref
+                      .liveSnapshots(includeMetadataChanges: true)
+                      .where(
+                        (doc) =>
+                            (doc.exists || !doc.metadata.isFromCache) &&
+                            (!widget.requireSaved ||
+                                (!doc.metadata.isFromCache &&
+                                    !doc.metadata.hasPendingWrites)),
+                      )
+                      .map((doc) {
+                        final data = doc.data();
+                        if (data == null || !_accepts(data)) {
+                          return null;
+                        }
+                        return data;
+                      }),
+                  ref
+                      .collection('reactions')
+                      .doc(uid)
+                      .liveSnapshots()
+                      .map((doc) => doc.data()),
+                  ownSave: ref
+                      .collection('saves')
+                      .doc(uid)
+                      .liveSnapshots(
+                        includeMetadataChanges: widget.requireSaved,
+                      )
+                      .where(
+                        (doc) =>
+                            !widget.requireSaved ||
+                            (!doc.metadata.isFromCache &&
+                                !doc.metadata.hasPendingWrites),
+                      )
+                      .map((doc) => doc.exists),
+                  synchronized: _useInteractionFeedback
+                      ? _interactionSnapshotBarrier
+                      : null,
+                ))
+            .listen(
+              (value) {
+                if (!mounted) return;
+                setState(() {
+                  _interactionReady = true;
+                  if (value.status != null) {
+                    widget.shout.status = switch (value.status) {
+                      'deleted' => ShoutStatus.deleted,
+                      'expired' => ShoutStatus.expired,
+                      _ => ShoutStatus.active,
+                    };
+                  }
+                  _unavailable =
+                      value.contentPurged ||
+                      (widget.requireSaved && !value.saved);
+                  widget.shout
+                    ..likes = value.likes
+                    ..dislikes = value.dislikes
+                    ..comments = value.comments
+                    ..saves = value.saves
+                    ..isLiked = value.reaction == 'like'
+                    ..isDisliked = value.reaction == 'dislike'
+                    ..isSaved = value.saved;
+                });
+                if (_useInteractionFeedback) {
+                  interactionFeedback.observe(uid, widget.shout.id, value);
                 }
-                return data;
-              }),
-          ref
-              .collection('reactions')
-              .doc(uid)
-              .liveSnapshots()
-              .map((doc) => doc.data()),
-          ownSave: ref
-              .collection('saves')
-              .doc(uid)
-              .liveSnapshots(includeMetadataChanges: widget.requireSaved)
-              .where(
-                (doc) =>
-                    !widget.requireSaved ||
-                    (!doc.metadata.isFromCache &&
-                        !doc.metadata.hasPendingWrites),
-              )
-              .map((doc) => doc.exists),
-          synchronized: _useInteractionFeedback
-              ? _interactionSnapshotBarrier
-              : null,
-        ).listen(
-          (value) {
-            if (!mounted) return;
-            setState(() {
-              _unavailable =
-                  value.contentPurged || (widget.requireSaved && !value.saved);
-              widget.shout
-                ..likes = value.likes
-                ..dislikes = value.dislikes
-                ..comments = value.comments
-                ..saves = value.saves
-                ..isLiked = value.reaction == 'like'
-                ..isDisliked = value.reaction == 'dislike'
-                ..isSaved = value.saved;
-            });
-            if (_useInteractionFeedback) {
-              interactionFeedback.observe(uid, widget.shout.id, value);
-            }
-            if (_unavailable) _notifyUnavailable();
-          },
-          onError: (Object error, StackTrace stack) {
-            if (!mounted) return;
-            if (error is FirebaseException &&
-                [
-                  'permission-denied',
-                  'not-found',
-                  'unauthenticated',
-                ].contains(error.code)) {
-              setState(() => _unavailable = true);
-              _notifyUnavailable();
-            }
-            debugPrint(
-              'Feed card subscription failed: code=${liveDataFailureCode(error)}',
+                if (_unavailable) _notifyUnavailable();
+              },
+              onError: (Object error, StackTrace stack) {
+                if (!mounted) return;
+                if (error is FirebaseException &&
+                    [
+                      'permission-denied',
+                      'not-found',
+                      'unauthenticated',
+                    ].contains(error.code)) {
+                  setState(() => _unavailable = true);
+                  _notifyUnavailable();
+                }
+                debugPrint(
+                  'Feed card subscription failed: code=${liveDataFailureCode(error)}',
+                );
+              },
             );
-          },
-        );
   }
 
   @override
@@ -311,11 +325,13 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
       child: widget.ownSection == null
           ? RatedShoutCard(
               shout: widget.shout,
+              interactionReady: _interactionReady,
               onSave: widget.onSave,
               onReaction: widget.onReaction,
             )
           : ShoutCard(
               shout: widget.shout,
+              interactionReady: _interactionReady,
               onSave: widget.onSave,
               onReaction: widget.onReaction,
               showSaveCount: true,

@@ -1,3 +1,4 @@
+import 'feed_delta_runtime.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -169,7 +170,10 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         auth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
         user: user,
-        onIntentConfirmed: () => readSessions.eraseAccount(user.uid),
+        onIntentConfirmed: () async {
+          feedDeltaRuntime?.eraseAccount(user.uid);
+          await readSessions.eraseAccount(user.uid);
+        },
         finalizeIntent: policy.finalization
             ? () async =>
                   (await FirebaseFunctions.instanceFor(region: 'europe-west3')

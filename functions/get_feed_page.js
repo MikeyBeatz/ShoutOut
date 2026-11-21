@@ -1,3 +1,4 @@
+import { packDeltaPosition } from './feed_delta_position.js';
 import { publicFeedBody } from './feed_public_body.js';
 export { publicFeedBody } from './feed_public_body.js';
 import { createHash } from 'node:crypto';
@@ -38,7 +39,7 @@ function filters(input) {
 // Internal operation: limits/key must be supplied by its trusted host. No
 // environment key/default signing secret, collection creation or writes here.
 export async function getFeedPageOperation(request, db, { key, workNodes = 32, clock = () => new Date(),
-  readOrdering = null, compatibleGenerations = false, observeMetrics = () => {} } = {}) {
+  readOrdering = null, compatibleGenerations = false, observeMetrics = () => {}, cardProjection = false, onSelected = null } = {}) {
   assertFeedRuntimeTarget(db);
   const identity = requireCallableIdentity(request), input = request?.data;
   if (!plain(input) || Object.keys(input).some(key => !['expectedUserId', 'context', 'cursor'].includes(key)) ||
@@ -64,7 +65,8 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
       const state = control.exists ? validateFeedIndexControl(control.data()) : null;
       if (!state || !['active', 'building'].includes(state.mode) || !state.readGenerationId) fail('unavailable', 'Feed index is not available.');
       const generation = id ?? state.readGenerationId, marker = await tx.get(db.doc(`feedIndexGenerations/${generation}`));
-      if (marker.get('schemaVersion') !== 1 || marker.get('v') !== 1 || marker.get('accountRetention') !== true) throw new FeedSessionExpired();
+      if (marker.get('schemaVersion') !== 1 || marker.get('v') !== (cardProjection ? 2 : 1) || marker.get('accountRetention') !== true ||
+          cardProjection && (state.schemaVersion !== 2 || !state.cardWriteGenerationIds.includes(generation) || marker.get('cardProjection') !== 1 || marker.get('cardReady') !== true || !id && state.cardReadGenerationId !== generation)) throw new FeedSessionExpired();
       const contentIdentity = generationContentIdentity(marker.data());
       if (!compatibleGenerations && contentIdentity !== (readOrdering !== null)) {
         fail('failed-precondition', 'Incompatible feed reading generation.');
@@ -100,7 +102,7 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
         (!compatibleGenerations || requested.readPolicy === 'confirmed-v1');
       if (grouped && !contentIdentity) fail('failed-precondition', 'Unread feed is not active yet.');
       if (compatibleGenerations && requested.readPolicy && !readOrdering) fail('failed-precondition', 'Unread feed is paused.');
-      const store = createFeedGenerationStore(db, binding.generation, { contentIdentity });
+      const store = createFeedGenerationStore(db, binding.generation, { contentIdentity, cardProjection });
       snapshot = await store.capturePortable({ ...requested, uid: identity.uid, now: now(), unreadFirst: grouped });
       if (snapshot.context.unreadFirst) {
         snapshot.context.readPolicy = 'content-v1';
@@ -115,14 +117,22 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
     }
     const alive = () => { if (now() >= decoded.expiresAt) throw new FeedSessionExpired(); };
     if (snapshot.context.unreadFirst && !readOrdering) fail('failed-precondition', 'Unread feed is paused.');
-    const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: compatibleGenerations ? binding.contentIdentity : readOrdering !== null });
+    const store = createFeedGenerationStore(db, binding.generation, { contentIdentity: compatibleGenerations ? binding.contentIdentity : readOrdering !== null, cardProjection });
     const reading = snapshot.context.unreadFirst ? feedReadClassifier(db, identity.uid, snapshot, readOrdering) : null;
-    const page = await store.portablePage(snapshot, decoded.position, { uid: identity.uid, assertSessionAlive: alive, nodes: workNodes,
+    const position = cardProjection ? await store.restorePosition(snapshot, decoded.position) : decoded.position;
+    const page = await store.portablePage(snapshot, position, { uid: identity.uid, assertSessionAlive: alive, nodes: workNodes,
       ...(reading ? { readIds: reading.readIds, classifyRead: reading.classify } : {}) });
     let items = [];
-    const current = await privateIds();
+    const current = cardProjection && page.state !== 'preparing' ? null : await privateIds();
     if (page.state === 'preparing' && [...(page.position?.pending ?? []), ...(page.position?.candidates ?? [])]
       .some(row => current.blocked.includes(row.authorId))) throw new FeedSessionExpired();
+    if (cardProjection && page.state !== 'preparing') {
+      if (typeof onSelected !== 'function') throw new Error('delta-page-responder-required');
+      observeMetrics({ ...page.metrics, ...reading?.metrics, phase: 'delta-selection' });
+      return onSelected({ snapshot, binding, decoded, store, baseline, rows: page.rows,
+        readIds: reading?.readIds ?? new Set(), reading: !!reading,
+        next: page.position ? codec.advance(cursor, cardProjection ? packDeltaPosition(page.position) : page.position, { uid: identity.uid, project: db.projectId, now: now() }) : null });
+    }
     if (page.state !== 'preparing') {
       const hydrated = await store.hydratePortable(snapshot, page.rows.map(row => row.id), now(), { blocked: current.blocked });
       const selected = new Map(page.rows.map(row => [row.id, row]));
@@ -137,9 +147,9 @@ export async function getFeedPageOperation(request, db, { key, workNodes = 32, c
     // Recheck caller eligibility after network waits too; account deletion or
     // a ban during page assembly must not return newly selected full bodies.
     await requireEligibleActor({ request, db, now: new Date(now()) }); alive();
-    return { version: 1, state: page.state === 'preparing' ? 'preparing' : 'ready', baseline,
+    return { version: cardProjection ? 2 : 1, state: page.state === 'preparing' ? 'preparing' : 'ready', baseline,
       ...(reading ? { readOrdering: 'unread-first' } : {}),
       expiresAt: decoded.expiresAt, items,
-      next: page.position ? codec.advance(cursor, page.position, { uid: identity.uid, project: db.projectId, now: now() }) : null };
+      next: page.position ? codec.advance(cursor, cardProjection ? packDeltaPosition(page.position) : page.position, { uid: identity.uid, project: db.projectId, now: now() }) : null };
   } catch (error) { rethrowFeedError(error); }
 }

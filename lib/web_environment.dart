@@ -151,6 +151,22 @@ class WebEnvironment {
     }
     serverCommentCreation = commentsGateway == true;
     serverPrivateReplyCreation = privateRepliesGateway == true;
+    if (json.containsKey('serverDeltaFeed') &&
+        json['serverDeltaFeed'] is! bool) {
+      throw StateError('serverDeltaFeed must be a boolean.');
+    }
+    serverDeltaFeed = json['serverDeltaFeed'] == true;
+    if (serverDeltaFeed &&
+        (name != 'dev' ||
+            !serverSpatialFeed ||
+            !serverUnreadFeed ||
+            !serverCommentCreation ||
+            !serverCommentDeletion ||
+            !serverShoutSaves)) {
+      throw StateError(
+        'Delta feed requires DEV spatial/unread feed and server count writers.',
+      );
+    }
     if (serverShoutCreation && appCheckSiteKey == null) {
       throw StateError('Server Shout creation requires web App Check.');
     }
@@ -249,6 +265,7 @@ class WebEnvironment {
   late final bool serverShoutCreation;
   late final bool serverReadSynchronization;
   late final bool serverSpatialFeed;
+  late final bool serverDeltaFeed;
   late final bool serverUnreadFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;

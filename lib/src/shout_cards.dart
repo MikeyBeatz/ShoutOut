@@ -6,8 +6,10 @@ class RatedShoutCard extends StatefulWidget {
     required this.shout,
     required this.onSave,
     required this.onReaction,
+    this.interactionReady = true,
   });
 
+  final bool interactionReady;
   final Shout shout;
   final VoidCallback onSave;
   final Future<void> Function(bool like) onReaction;
@@ -43,6 +45,7 @@ class _RatedShoutCardState extends State<RatedShoutCard> {
     }
     return ShoutCard(
       shout: widget.shout,
+      interactionReady: widget.interactionReady,
       onSave: widget.onSave,
       onReaction: widget.onReaction,
     );
@@ -55,6 +58,7 @@ class ShoutCard extends StatelessWidget {
     required this.shout,
     required this.onSave,
     required this.onReaction,
+    this.interactionReady = true,
     this.showSaveCount = false,
     this.showDeleteButton = false,
     this.onDelete,
@@ -64,6 +68,7 @@ class ShoutCard extends StatelessWidget {
     this.feedback,
   });
 
+  final bool interactionReady;
   final Shout shout;
   final VoidCallback onSave;
   final Future<void> Function(bool like) onReaction;
@@ -91,8 +96,12 @@ class ShoutCard extends StatelessWidget {
         id: shout.id,
         feedback:
             feedback ?? (_useInteractionFeedback ? interactionFeedback : null),
-        builder: (context, feedback) =>
-            _buildCard(context, open, read: read, feedback: feedback),
+        builder: (context, feedback) => _buildCard(
+          context,
+          open && interactionReady,
+          read: read,
+          feedback: feedback,
+        ),
       ),
     ),
   );
