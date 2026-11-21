@@ -5,9 +5,11 @@
 
 ## Stav a rozsah
 
-21. listopadu 2026: **vlastník schválil celý lokální přechodový úsek**
-v odpovědi na call_a0d99f40f57446909fb11ba932047dcd. Implementace a lokální
-ověření probíhají; úplné CI zatím není doložené. Živá migrace schválená není.
+21. listopadu 2026: **schválený lokální přechodový úsek je uzavřený**.
+Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
+[success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
+Vlastník rozsah schválil v odpovědi na call_a0d99f40f57446909fb11ba932047dcd.
+Živá migrace schválená není, přepínače zůstávají vypnuté.
 Zdroj předchozího klienta 62fc8fe má success úplné CI 44917393562;
 uzavírací dokumentace 6c2c7f3 má success lehké CI 44918771643.
 
@@ -163,7 +165,7 @@ samostatnou kapacitní bránu.
 
 ## Implementace lokálního přechodu
 
-Připravené zdroje, zatím před závěrečným CI:
+Dokončené zdroje, ověřené úplným CI uvedeným výše:
 
 - [Operátor](../../../tools/feed_card_transition.mjs) používá stejné kontroly
   čistého SHA, úplného CI a produkčního tagu jako B3; navíc vyžaduje všechny
@@ -227,7 +229,7 @@ změna textu **14 reads / 8 writes**, obě po jednom transakčním pokusu.
 Publisher vyhodnotí všechny generace; nejstarší bez content identity
 nepřepisuje prostorová metadata při samotné změně textu. Tyto zápisy jsou
 náklad dočasně udržované kompatibility, ne příslib nulové režie.
-Úplné CI finálního zdroje ještě čeká na společný push. Předchozí běh
+Předchozí běh
 44928446576 pro 6d41273 byl zrušen po doplnění tohoto úplnějšího měření;
 není dokladem dokončení ani neúspěšného cloudového nasazení.
 CI 44928809756 pro 2cb7ea2 selhalo v `Test development tools`, protože nový
@@ -235,6 +237,16 @@ operátor importuje serverové moduly a instalace Functions následovala až
 po tomto kroku (`geofire-common` nenalezeno). Pořadí je opravené: instalace
 Functions je před nástrojovými testy; žádná nová závislost ani změna služby.
 Tento neúspěšný běh nenahrazuje potřebné úplné CI finálního commitu.
+
+**Konečné CI je úspěšné:** 44929196473 pro přesný zdroj cd21019d846aa018c8d7939ca62c994ba6082520.
+Potvrdilo 432 Flutter, 87 nástrojových, 159 Functions unit (528 emulátorových
+testů v unit běhu správně přeskočeno), 464 Rules/server, 9 reader, 14 card,
+13 transport/Rules/Chrome, 8 přechodových, 34 B2 runtime, 142 purge a 15 Storage
+testů; formát, analýzu/lint, browserové sady a webový build také.
+Operátor proti skutečnému GitHub výsledku ověřil všechny požadované kroky,
+shodu úplného SHA a čistý pracovní strom před uzavírací dokumentací.
+Žádné Firebase nasazení, živé zápisy, Rules/indexy, Auth, Scheduler,
+prostředky, main ani produkce se tímto úsekem nezměnily.
 
 Evidence v progress.json doplňuje existující lokální code/check podklady;
 jejich váhy a stavy se znovu nezapočítávají. DEV/akceptace i novinky zůstávají

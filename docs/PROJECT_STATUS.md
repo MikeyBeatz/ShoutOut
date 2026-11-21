@@ -6,14 +6,20 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený lokální přechod B4 je implementovaný, probíhá závěrečné ověření.**
+**Nyní: schválený lokální přechod B4 je uzavřený včetně úplného CI.**
+Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
+[success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
 Větev feature/feed-b4-transition má řízený operátor, platnost a integritu
 auditu, ochranu inkarnací všech zachovaných generací a kompatibilitu již
 otevřeného klienta při rollbacku. [Připravené změny a jejich meze](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results).
-Lokálně prošly Flutter testy i analýza a cílené přechodové testy; úplné CI
-nového zdroje zatím není doložené. Přepínače jsou vypnuté, bez živých změn.
-Další je závěrečný společný push/CI, potom samostatně schválený DEV přechod
-podle [konkrétního návrhu pilotu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
+Prošlo 432 Flutter, 87 nástrojových, 159 Functions unit, 464 Rules/server,
+9 reader, 14 card, 13 transport/Rules/Chrome, 8 přechodových, 34 B2 runtime,
+142 purge a 15 Storage testů, analýza/lint/formát i webový build.
+Přepínače jsou vypnuté, bez živých změn. Další je schválení konkrétního
+DEV přechodu podle [návrhu pilotu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot),
+včetně čerstvého plánu, indexů a důkazu doběhnutí starých serverových volání.
+Předchozí 44928809756 selhalo na pořadí instalace závislostí; opraveno a
+ověřeno konečným během. 44928446576 bylo zrušeno po doplnění měření.
 
 **Předchozí lokální klientské zapojení B4 je uzavřené včetně úplného CI.**
 Zdroj **62fc8feb0bbded06c5f116867bbbd61ec0848b5b** má

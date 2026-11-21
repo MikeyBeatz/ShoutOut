@@ -55,7 +55,9 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Poslední dokončený úsek:** [klientské metadata/cache a sdílený stav](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
+   **Poslední lokální checkpoint:** [řízený přechod, audit a kompatibilní rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
+   zdroj cd21019 / úspěšné úplné CI 44929196473. Přepínače zůstávají vypnuté.
+   Předchozí [klientská metadata/cache a sdílený stav](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
    zdroj 62fc8fe / úspěšné úplné CI 44917393562. Předchozí
    [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
    má zdroj d2cac88 / úplné CI 44908128699. Navazují na uzavřený
@@ -65,10 +67,10 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
    [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
    [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. **Nyní:** dokončit
-   společné ověření/CI [schváleného lokálního operátoru, kompatibility a návratu](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results).
-   Implementace je připravená, přepínače vypnuté; živý datový přechod má
-   [samostatný návrh a bránu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
+   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** schválit
+   [konkrétní živý DEV přechod a pilot](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
+   Operátor, kompatibilita, indexový plán a přechodové ověření jsou uzavřené;
+   živá migrace/akceptace ani číslovka novinek tím hotové nejsou.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Cold/warm a doplňovací náklady jsou samostatně doložené;
