@@ -316,26 +316,23 @@ void main() {
     },
   );
 
-  test(
-    'late UID response cannot fill the new account cache',
-    () async {
-      String? uid = 'viewer';
-      final flight = Completer<Object?>();
-      final cache = FeedBodyCache(clock: () => 1000);
-      final client = FeedDeltaClient(
-        project: 'project',
-        currentUserId: () => uid,
-        cache: cache,
-        send: (_) => flight.future,
-      );
-      final pending = client.load({});
-      uid = 'different';
-      client.retainViewer(uid);
-      flight.complete(reply());
-      await expectLater(pending, throwsStateError);
-      expect(cache.isEmpty, isTrue);
-    },
-  );
+  test('late UID response cannot fill the new account cache', () async {
+    String? uid = 'viewer';
+    final flight = Completer<Object?>();
+    final cache = FeedBodyCache(clock: () => 1000);
+    final client = FeedDeltaClient(
+      project: 'project',
+      currentUserId: () => uid,
+      cache: cache,
+      send: (_) => flight.future,
+    );
+    final pending = client.load({});
+    uid = 'different';
+    client.retainViewer(uid);
+    flight.complete(reply());
+    await expectLater(pending, throwsStateError);
+    expect(cache.isEmpty, isTrue);
+  });
 
   test(
     'new generation refills body/state pair; counters do not renew body lifetime',
