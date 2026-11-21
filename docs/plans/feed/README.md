@@ -9,7 +9,9 @@ B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.
 Má zlevnit cold/refill při zachování aktuální dostupnosti a B3 textové identity.
-Poté následuje provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
+Další [konkrétní návrh provozní vrstvy a všech writerů](FEED_STATE_STORAGE_PROPOSAL.md)
+čeká na schválení lokální implementace. Poté následuje klient/Rules,
+provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
 neopakovat je jako otevřenou práci.
 
@@ -19,6 +21,7 @@ neopakovat je jako otevřenou práci.
 - [Trvalá instalace indexu a zapojení API/klienta](FEED_INSTALLATION_AND_ROLLOUT.md)
 - [Feed – implementační etapy a návrhy ke schválení](FEED_IMPLEMENTATION_STAGES.md)
 - [Úsporná obnova – verze, přenos rozdílů, cache a novinky v B2–B4](FEED_DELTA_REFRESH_PLAN.md)
+- [B4 – návrh provozní vrstvy obsahu, živého stavu a atomických writerů](FEED_STATE_STORAGE_PROPOSAL.md)
 - [Retence prostorového indexu – lokální ověření R4](FEED_INDEX_RETENTION.md)
 - [Migrační připravenost feedu a zbývající brány](FEED_MIGRATION_READINESS.md)
 - [Přenositelný kurzor a omezený výběr stránky – lokální stav](FEED_PORTABLE_CURSOR.md)

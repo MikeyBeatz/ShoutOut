@@ -469,6 +469,10 @@ před DEV aktivací. B4b signály a číslovka tímto úsekem nezačínají.
 
 ### Finální transakční reader – lokální výsledky
 
+Navazující [konkrétní návrh provozní vrstvy a všech writerů](FEED_STATE_STORAGE_PROPOSAL.md)
+je připravený ke schválení. Nemění dokončení tohoto readeru ani sám
+nepovoluje zdrojové úpravy nebo živý přechod.
+
 Schválený úsek je implementovaný a má úspěšné úplné CI. Aktivní cesta
 getFeedPage/Home ani žádný živý writer se neměnily.
 

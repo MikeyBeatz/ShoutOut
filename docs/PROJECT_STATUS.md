@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 20. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 21. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -22,6 +22,11 @@ Prošlo 9 emulátorových, 12 metadata/kontraktových a 10 Dart testů, celá
 analýza i lint. Neaktivní reader kontroluje skutečné serverové dokumenty;
 živé writery, formát, Home/odběry, Rules a data se nemění. Další je
 provozní projekční layout a úplné atomické pokrytí writerů/úklidu před DEV.
+[Konkrétní návrh P1](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md) odděluje sdílený
+index verzí od malého živého stavu jednoho Shoutu. Předložený lokální rozsah
+pokrývá všechny writery, geografii, R5/purge a obnovitelné doplnění; čeká na
+schválení implementace. Nyní pouze průzkum a dokumentace, žádná změna zdrojů
+aplikace ani nasazení. Návrh nedostává nový kredit ve stupnicích.
 
 **Předchozí lokální základ B4a:**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)

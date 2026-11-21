@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 20. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 21. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -58,7 +58,8 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    **Poslední dokončený úsek:** [lokální transakční reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results),
    zdroj 0b2d004 / úspěšné úplné CI 44825059479. Navazuje na uzavřený
    [základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
-   **Další:** konkrétní provozní projekční layout, atomické zapojení všech
+   **Další:** schválit [konkrétní lokální P1 – provozní vrstvu a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md).
+   Návrh je připravený, implementace nezačala. Zahrnuje atomické zapojení všech
    writerů a R5/history/purge; potom náhrada závislých Home/živých odběrů
    se zachováním promo. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
