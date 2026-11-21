@@ -28,7 +28,7 @@ export function validateNewsPlan(plan, project, approved = plan?.digest) {
   const { digest, ...data } = plan ?? {};
   if (digest !== approved || hash(data) !== digest || plan.v !== 1 || plan.projectId !== project ||
       plan.generation !== 'feed-v3' || !Array.isArray(plan.incarnation) || plan.incarnation.length !== 2 ||
-      !plan.incarnation.every(Number.isSafeInteger) || !Array.isArray(plan.originals) || !Array.isArray(plan.requests) ||
+      !plan.incarnation.every(Number.isSafeInteger) || !Number.isSafeInteger(plan.feedControl?.revision) || plan.feedControl.revision >= Number.MAX_SAFE_INTEGER || !Array.isArray(plan.originals) || !Array.isArray(plan.requests) ||
       !Array.isArray(plan.transitions) || plan.transitions.length !== 5 ||
       !same(plan.transitions, ['paused', 'active', 'paused', 'active', 'paused'])) throw Error('news-activation-approved-plan-required');
 }
@@ -45,7 +45,7 @@ export async function planNewsActivation(db, { expectedSources = 38 } = {}) {
         c.get('mode') !== 'active' || c.get('cardReadGenerationId') !== 'feed-v3' || !c.get('cardWriteGenerationIds')?.includes('feed-v3') ||
         sources.size !== expectedSources || requests.size > 50) throw Error('news-activation-initial-state-conflict');
     return { v: 1, projectId: db.projectId, generation: 'feed-v3', incarnation: stamp(marker.createTime), markerUpdate: stamp(marker.updateTime),
-      feedControlUpdate: stamp(c.updateTime), originals: sources.docs.map(d => ({ id: d.id, update: stamp(d.updateTime) })),
+      feedControlUpdate: stamp(c.updateTime), feedControl: c.data(), originals: sources.docs.map(d => ({ id: d.id, update: stamp(d.updateTime) })),
       requests: requests.docs.map(d => ({ id: d.id, update: stamp(d.updateTime) })), transitions: ['paused', 'active', 'paused', 'active', 'paused'] };
   }, { readOnly: true });
   return { ...plan, digest: hash(plan) };
@@ -65,15 +65,22 @@ export async function applyNewsTransition(db, plan, revision, { approvedDigest =
     await assertNewsOriginals(tx, db, plan);
     const c = await tx.get(db.doc('feedIndexControl/current')), marker = await tx.get(db.doc(`feedIndexGenerations/${plan.generation}`));
     const current = await tx.get(db.doc('feedNewsControl/current'));
-    if (!same(stamp(c.updateTime), plan.feedControlUpdate) || !same(stamp(marker.createTime), plan.incarnation)) throw Error('news-activation-generation-drift');
     const desired = { v: 1, revision, mode: plan.transitions[revision - 1], generation: plan.generation, incarnation: plan.incarnation };
-    if (current.exists && same(current.data(), desired)) return { revision, mode: desired.mode, replay: true, writes: 0 };
+    const replay = current.exists && same(current.data(), desired), activated = revision > 2 || revision === 2 && replay;
+    const expectedControl = activated ? { ...plan.feedControl, revision: plan.feedControl.revision + 1 } : plan.feedControl;
+    if (!same(c.data(), expectedControl) || !activated && !same(stamp(c.updateTime), plan.feedControlUpdate) || !same(stamp(marker.createTime), plan.incarnation)) throw Error('news-activation-generation-drift');
+    if (replay) return { revision, mode: desired.mode, replay: true, writes: 0 };
     if ((current.get('revision') ?? 0) !== revision - 1 || revision > 1 &&
         (!same(current.get('incarnation'), plan.incarnation) || current.get('generation') !== plan.generation || current.get('mode') !== plan.transitions[revision - 2])) throw Error('news-activation-transition-conflict');
     if (revision === 1 && (current.exists || !same(stamp(marker.updateTime), plan.markerUpdate) ||
         !(await tx.get(marker.ref.collection('publicationHeads').limit(1))).empty)) throw Error('news-activation-bootstrap-drift');
     const change = await prepareNewsControlChange(tx, db, desired); change.apply();
-    return { revision, mode: desired.mode, replay: false, writes: change.writes };
+    // The retired publisher may have already sent a Firestore commit RPC.
+    // Fence its shared control read atomically with the first active news
+    // control. Rewriting an identical marker value is a no-op in Firestore;
+    // the actual revision increment fences late commits from every writer.
+    if (revision === 2) tx.update(c.ref, { revision: plan.feedControl.revision + 1 });
+    return { revision, mode: desired.mode, replay: false, writes: change.writes + Number(revision === 2) };
   });
 }
 export function planNewsIndexes(projectId, fields) {

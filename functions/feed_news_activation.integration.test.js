@@ -20,14 +20,19 @@ test('guarded bootstrap, lost response replay, pause/reactivation and final safe
   const f = await fixture(t), ref = db.doc('feedIndexGenerations/feed-v3/publicationHeads/_control');
   assert.equal((await applyNewsTransition(db, f.plan, 1)).writes, 3);
   const head = await ref.get();
+  const beforeActive = await f.marker.get();
   assert.equal((await applyNewsTransition(db, f.plan, 1)).replay, true); assert((await ref.get()).updateTime.isEqual(head.updateTime));
   await assert.rejects(applyNewsTransition(db, f.plan, 2), /drain-required/);
   const both = await Promise.all([applyNewsTransition(db, f.plan, 2, { drain }), applyNewsTransition(db, f.plan, 2, { drain })]);
   assert.equal(both.filter(x => !x.replay).length, 1);
+  const activeMarker = await f.marker.get();
+  assert(activeMarker.updateTime.isEqual(beforeActive.updateTime)); assert.deepEqual(activeMarker.data(), beforeActive.data());
+  assert.equal((await f.control.get()).get('revision'), 12);
   for (const revision of [3, 4, 5]) await applyNewsTransition(db, f.plan, revision);
+  assert((await f.marker.get()).updateTime.isEqual(activeMarker.updateTime), 'ordinary pause/resume must not rewrite marker');
   assert.equal((await db.doc('feedNewsControl/current').get()).get('mode'), 'paused');
   assert.equal(await assertNewsOriginals(db, db, f.plan), 2);
-  await assert.rejects(applyNewsTransition(db, f.plan, 1), /transition-conflict/);
+  await assert.rejects(applyNewsTransition(db, f.plan, 1), /generation-drift|transition-conflict/);
 });
 test('operator rejects source/control drift, plan tampering and marker reincarnation without partial bootstrap', { skip: !enabled }, async t => {
   const f = await fixture(t);

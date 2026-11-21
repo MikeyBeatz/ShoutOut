@@ -53,7 +53,7 @@ async function fixture(t, generations = 2) {
   batch.set(roots[0], { schemaVersion: 2, revision: 1, mode: ids.length > 1 ? 'building' : 'active',
     readGenerationId: ids[0], writeGenerationIds: ids, cardWriteGenerationIds: ids, cardReadGenerationId: ids[0] });
   await batch.commit();
-  const runtime = createFeedRuntime(db, auth, { cardStateEnabled: true, clock });
+  const runtime = createFeedRuntime(db, auth, { cardStateEnabled: true, newsRuntimeEnabled: false, clock });
   const mutate = async (id, update, hook = async () => {}) => runtime.database.runTransaction(async tx => {
     const ref = db.doc(`shouts/${id}`), before = (await tx.get(ref)).data() ?? null;
     const after = typeof update === 'function' ? update(before) : update;
@@ -169,7 +169,7 @@ test('concurrent independent and shared sources, control changes and forgotten a
     const ref = db.doc(`shouts/${a}`), data = (await tx.get(ref)).data();
     const plan = await prepareCardMutation(f.runtime.database, tx, a, data, { ...data, savesCount: 1 }); plan.apply();
   }), /unapplied-card/);
-  const old = createFeedRuntime(db, auth, { cardStateEnabled: false });
+  const old = createFeedRuntime(db, auth, { cardStateEnabled: false, newsRuntimeEnabled: false });
   await assert.rejects(old.database.runTransaction(async tx => {
     const data = (await tx.get(db.doc(`shouts/${a}`))).data();
     await old.indexWriter.prepare(tx, a, data, { ...data, status: 'deleted' });

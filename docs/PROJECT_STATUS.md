@@ -13,6 +13,12 @@ Návrh cílí jen na dvě Functions, tři indexové výjimky, Rules a DEV web,
 se třemi novými fixture a společnou akceptací/návratem. Probíhá lokální příprava
 operátoru, testů a aktivačního zdroje; žádné nasazení ani cloudové zápisy neproběhly.
 Původní metadata/cache pilot zůstává uzavřený, metriky beze změny.
+Aktivační zdroj má news přepínače on, ale nasazený DEV je stále off.
+Cílená regrese operátoru, legacy writerů a přechodů prošla 54 scénáři.
+První aktivace novinek jednou zvýší technickou feed control revision 11 → 12,
+aby ohradila i pozdní databázový commit starého publisheru; generace a retence
+se nemění. Dvě předchozí CI skončila na zděděných závislostech starých fixture;
+jsou opravené, před živým přechodem musí projít nové úplné CI přesného zdroje.
 
 **Schválený lokální provozní úsek B4b je uzavřený včetně úplného CI.**
 Větev feature/feed-b4-news-runtime má [výsledek a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results):

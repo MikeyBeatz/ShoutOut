@@ -58,7 +58,7 @@ async function fixture(t, count = 55) {
     accountRetention: true, erasureRevision: 0, prunedThrough: -1, ...(i ? { readIdentity: 1 } : {}) });
   await control.set({ schemaVersion: 1, revision: 6, mode: 'active', readGenerationId: gens[1], writeGenerationIds: gens.slice(0, 2) });
   const auth = { async getUser() { throw Object.assign(new Error('absent'), { code: 'auth/user-not-found' }); } };
-  const runtime = createFeedRuntime(db, auth, { cardStateEnabled: true });
+  const runtime = createFeedRuntime(db, auth, { cardStateEnabled: true, newsRuntimeEnabled: false });
   const rows = [], now = Date.now();
   const mutate = async (id, change, extra = null) => runtime.database.runTransaction(async tx => {
     const ref = db.doc(`shouts/${id}`), before = (await tx.get(ref)).data() ?? null;

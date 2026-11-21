@@ -36,7 +36,7 @@ async function fixture(t, count = 65, batchSize = 50) {
   });
   let offset = 0;
   const clock = () => new Date(Date.now() + offset), key = randomBytes(32);
-  const old = createFeedRuntime(db, absent), runtime = () => createFeedRuntime(db, absent, { compatibleGenerations: true, clock });
+  const old = createFeedRuntime(db, absent, { newsRuntimeEnabled: false }), runtime = () => createFeedRuntime(db, absent, { compatibleGenerations: true, newsRuntimeEnabled: false, clock });
   await from.create({ schemaVersion: 1, v: 1, accountRetention: true, erasureRevision: 0, prunedThrough: -1 });
   await control.create({ schemaVersion: 1, revision: 0, mode: 'active', readGenerationId: source, writeGenerationIds: [source] });
   await db.doc(`users/${uid}`).set({ nickname: 'Migration fixture', avatarId: 'avatar_01', avatarBackgroundStart: 1,

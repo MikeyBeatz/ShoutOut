@@ -501,7 +501,7 @@ Po úspěšném úplném CI přesného aktivačního commitu provést jen v DEV:
 2. Pomocí `prepareNewsControlChange` atomicky založit news control v režimu
    paused, revision 1, pro přesnou inkarnaci feed-v3; doplnit markerové
    newsIncarnation a technický publicationHeads/_control. Existující
-   feedIndexControl se nemění. Nasadit připravené get-only news Rules.
+   generace ve feedIndexControl se nemění. Nasadit připravené get-only news Rules.
 3. Ze stejného ověřeného zdroje aktualizovat **pouze createShout a getFeedPage**,
    zapnout serverové newsEnabled/newsRuntimeEnabled. Prostředky i stávající
    podpisový klíč zachovat. Ostatních 18 Functions ani plánovače neaktualizovat.
@@ -511,7 +511,12 @@ Po úspěšném úplném CI přesného aktivačního commitu provést jen v DEV:
    rozšířit o přesně vymezenou dvojici; nesnižovat požadovaný důkaz na čekání
    nebo nepřítomnost logů. Bez důkazu neaktivovat číslovku.
 5. Stejným transakčním helperem přepnout control na active, revision 2;
-   technický head se změní ve stejné transakci. Potom nasadit DEV web
+   technický head se změní ve stejné transakci. Při této první aktivaci navíc
+   jednou zvýšit technickou revision feedIndexControl o 1 (11 → 12): ohradí
+   případný již odeslaný databázový commit starého publisheru. Zápis stejné
+   hodnoty markeru je ve Firestore no-op a tento důkaz nezajistí. Generace,
+   writery a retence zůstávají stejné; starý kurzor může požádat o bezpečnou
+   obnovu. Opakování a běžná pauza/návrat revizi znovu nezvyšují. Potom nasadit DEV web
    se serverFeedNews true a ověřit artefakt/config na obou DEV doménách.
 
 Četnost 2/15/5 s, nejvýše 64 odběrů, samostatná news kvóta 40/1 s,
@@ -540,12 +545,23 @@ Lokální příprava doložila 92 tools, 22 konfiguračních Flutter a 24 news
 emulátorových scénářů; po posledním doplnění se opakuje cílená sada operátoru.
 Úplné CI aktivačního zdroje a skutečné nasazení zatím zbývají.
 Čtecí aktivační plán má digest
-`d45707b2023883bd4716792d959f82e409e5b705bdfa73728c5be90f04ccfd2c`
-(docs/local/b4b-activation-plan.json); konečný pilotní manifest
+`ec4debeaee94064798ce97913154f23b95faf28f0061068a201f6eeeabe16b72`
+(docs/local/b4b-activation-plan-v2.json, včetně původního controlu pro jednorázový fence);
+starší aktivační draft bez tohoto údaje se nepoužívá. Konečný pilotní manifest
 `86221a3301eaff9e137bc4a5084c815c25c9057d4c4748478bd02e11244519fe`
 (docs/local/b4b-pilot-state-v2.json). Starší draft bez plannedAt se nepoužívá.
 Vytvoření obou plánů mělo 0 cloudových zápisů. Bezprostředně před mutací
 znovu ověřit jejich preconditions; změněná inventura není povolení k jejímu přepsání.
+
+CI aktivačních zdrojů ebc32f4 / 44958041369 a db13ff7 / 44958266379 skončilo
+neúspěšně: nejprve tři starší klientské konfigurační fixture, potom dvě
+serverové fixture pro předchozí režim. Při simulaci vypnuté delta/card vrstvy
+musí výslovně vypnout i novou news závislost. Validace se neoslabuje;
+aktuální news scénáře dál používají zapnutý runtime. Nasazení ani první živý
+zápis neproběhly. Následuje společné CI opravených fixture a aktivačního fence.
+Cílený následný emulátorový průchod má **54/54 success**:
+operátor, card stav/přechod, generace a runtime včetně dávky 50, souběhu,
+rollbacku a účetního úklidu. Log build/b4b-cutover-regression.log.
 
 - A vytvoří počáteční kontext. Publikace B po úspěšné obnově musí změnit badge
   na 1 bez přeskupení načtených karet; po jeho smazání počet klesne na 0.
