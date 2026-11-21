@@ -416,8 +416,11 @@ paused stav, starý formát klienta, 20 km a všechny role. Prohlížečový har
 dodává syntetickou identitu přímo serverové operaci: **neověřuje platformní
 Auth/reCAPTCHA/App Check ani živou aplikaci** a nezakládá Auth účty.
 
-Osm Dart regresí pokrývá cache, chybějící tělo, změnu účtu/generace,
+Devět Dart regresí pokrývá cache, chybějící tělo, změnu účtu/generace,
 monotónní živý stav, pozdní odpověď a sdílení 50 karet + 50 detailů.
+Zahrnují výměnu synchronizační bariéry po přihlášení jiného účtu; původní
+odběr se nesmí přenést do nové relace. Ochrana platí i pro opožděné události
+při výměně generace a zániku posledního odběratele.
 S deseti překrývajícími promo řádky vznikne 40 veřejných dokumentových
 odběrů a po 50 vlastních reaction/save odběrech; další detail je nezdvojí.
 Dosavadní testy optimistického potvrzování a scrollu zůstávají součástí

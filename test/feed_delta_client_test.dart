@@ -78,6 +78,52 @@ Map<String, dynamic> reply({
 }
 
 void main() {
+  test(
+    'viewer replacement obtains its own SDK synchronization barrier',
+    () async {
+      String? uid = 'viewer';
+      final barriers = {
+        'viewer': StreamController<void>.broadcast(),
+        'other': StreamController<void>.broadcast(),
+      };
+      final bound = <String>[];
+      final registry = FeedDeltaLive(
+        project: 'project',
+        currentUserId: () => uid,
+        resolveContext: () async => {...liveContext('g'), 'uid': uid},
+        publicState: (_, _) => Stream.value(state('a' * 64)),
+        reaction: (_, _) => Stream.value(null),
+        saved: (_, _) => Stream.value(false),
+        synchronized: () {
+          bound.add(uid!);
+          return barriers[uid]!.stream;
+        },
+      );
+      final first = Completer<void>(), second = Completer<void>();
+      final a = registry.watch('one').listen((_) {
+        if (!first.isCompleted) first.complete();
+      });
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      barriers['viewer']!.add(null);
+      await first.future.timeout(const Duration(seconds: 2));
+      uid = 'other';
+      registry.retainViewer(uid);
+      final b = registry.watch('one').listen((_) {
+        if (!second.isCompleted) second.complete();
+      });
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      barriers['other']!.add(null);
+      await second.future.timeout(const Duration(seconds: 2));
+      expect(bound, ['viewer', 'other']);
+      await a.cancel();
+      await b.cancel();
+      for (final barrier in barriers.values) {
+        await barrier.close();
+      }
+    },
+  );
   test('late manifest cannot replace newer live counters', () async {
     final version = feedBodyVersion({'title': 'Title', 'text': 'Body'});
     final client = FeedDeltaClient(
@@ -271,7 +317,7 @@ void main() {
   );
 
   test(
-    'offline completion keeps old page usable; late UID response cannot fill cache',
+    'late UID response cannot fill the new account cache',
     () async {
       String? uid = 'viewer';
       final flight = Completer<Object?>();

@@ -50,10 +50,8 @@ class FeedDeltaRuntime {
       saved: (uid, id) => confirmed(
         db.doc('shouts/$id/saves/$uid'),
       ).map((snapshot) => snapshot.exists),
-      synchronized: liveStreams.watch(
-        liveDataKey('delta-barrier'),
-        db.snapshotsInSync,
-      ),
+      synchronized: () =>
+          liveStreams.watch(liveDataKey('delta-barrier'), db.snapshotsInSync),
       onState: (id, value, stamp) {
         final uid = auth.currentUser?.uid, version = value['bodyVersion'];
         if (uid != null &&

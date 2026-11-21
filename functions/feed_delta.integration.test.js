@@ -258,6 +258,10 @@ test('completion rechecks body version, author deletion, permissions and origina
   const foreign = { ...f.request({ mode: 'complete', token: current.bodyPage.token, missing: [id] }), auth: { uid: 'different', token: { email: 'fixture@example.test', email_verified: true } } };
   foreign.data.expectedUserId = 'different';
   await assert.rejects(getFeedDeltaOperation(foreign, db, { key: f.key, enabled: true }), error => error.code === 'invalid-argument');
+  const erased = db.doc(`publicProfiles/${f.rows[0].authorId}`); f.roots.push(erased);
+  await erased.set({ accountStatus: 'deleted' });
+  await assert.rejects(f.step({ mode: 'complete', token: current.bodyPage.token, missing: [id] }), error => error.code === 'failed-precondition');
+  await erased.delete();
   f.now += 3600001;
   await assert.rejects(f.step({ mode: 'complete', token: current.bodyPage.token, missing: [id] }), error => error.code === 'failed-precondition');
 });

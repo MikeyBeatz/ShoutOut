@@ -10,8 +10,9 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 Větev feature/feed-b4-client-integration má skutečný delta transport/RAM cache,
 společný malý stav karty/detailu/Mé/Uložených, náhradu Home promo odběru,
 lokální Rules a návrh indexů. Prošlo 13 nových emulátorových scénářů včetně
-Chrome transportu proti emulátoru, 49 cílených serverových regresí a osm
-Dart klientských testů. [Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
+Chrome transportu proti emulátoru, 49 cílených serverových regresí a devět
+Dart klientských testů včetně vlastní synchronizační bariéry po změně účtu.
+[Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
 Analýza a lint čisté; úplné CI ještě není doložené. Nové přepínače jsou
 vypnuté, nic se nenasazovalo. Další je uzavřít CI a připravit konkrétní DEV
 přechod s auditem, kompatibilitou a rollbackem; živá migrace vyžaduje vlastní souhlas.

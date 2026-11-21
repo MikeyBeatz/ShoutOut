@@ -24,7 +24,7 @@ class FeedDeltaLive {
   publicState;
   final Stream<Map<String, dynamic>?> Function(String, String) reaction;
   final Stream<bool> Function(String, String) saved;
-  final Stream<void>? synchronized;
+  final Stream<void> Function()? synchronized;
   final void Function(String, Map<String, dynamic>, String)? onState;
   final _shared = SharedLiveStreams();
   final _changes = StreamController<void>.broadcast(sync: true);
@@ -183,7 +183,7 @@ class FeedDeltaLive {
                 states,
                 reaction(uid!, id),
                 ownSave: saved(uid, id),
-                synchronized: synchronized,
+                synchronized: synchronized?.call(),
               ).listen(
                 (value) {
                   if (!cancelled && attempt == binding) output.add(value);
