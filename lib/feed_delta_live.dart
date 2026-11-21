@@ -185,7 +185,9 @@ class FeedDeltaLive {
                 ownSave: saved(uid, id),
                 synchronized: synchronized,
               ).listen(
-                output.add,
+                (value) {
+                  if (!cancelled && attempt == binding) output.add(value);
+                },
                 onError: (Object error, StackTrace stack) async {
                   if (cancelled || attempt != binding) return;
                   if (!recovered &&
@@ -226,13 +228,13 @@ class FeedDeltaLive {
         output.onCancel = () async {
           cancelled = true;
           binding++;
-          await changes.cancel();
-          await source?.cancel();
           if (viewerEpoch == _epoch) {
             _baselines.remove(id);
             _active.remove(id);
             _latest.remove(id);
           }
+          await changes.cancel();
+          await source?.cancel();
         };
       }),
       isCurrent: () =>
