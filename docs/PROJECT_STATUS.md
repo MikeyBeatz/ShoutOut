@@ -11,6 +11,9 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 bez potvrzení Auth. Připravují se aktivační přepínače, oddělený B4 pilot a
 kontrola serverového RETIRED stavu starých revizí. [Přesné plány a aktuální stav](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
 Zatím bez externích změn; další je lokální ověření a úplné CI aktivačního SHA.
+První aktivační f9117a6 / CI 44932675068 nebyl úspěšný: opravené explicitní
+nastavení starého writeru v regresním testu; nasazení zůstává blokované do
+úspěšného konečného CI. [Podrobnost](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
 
 **Nyní: schválený lokální přechod B4 je uzavřený včetně úplného CI.**
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má

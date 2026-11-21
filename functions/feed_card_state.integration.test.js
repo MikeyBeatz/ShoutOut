@@ -169,7 +169,7 @@ test('concurrent independent and shared sources, control changes and forgotten a
     const ref = db.doc(`shouts/${a}`), data = (await tx.get(ref)).data();
     const plan = await prepareCardMutation(f.runtime.database, tx, a, data, { ...data, savesCount: 1 }); plan.apply();
   }), /unapplied-card/);
-  const old = createFeedRuntime(db, auth);
+  const old = createFeedRuntime(db, auth, { cardStateEnabled: false });
   await assert.rejects(old.database.runTransaction(async tx => {
     const data = (await tx.get(db.doc(`shouts/${a}`))).data();
     await old.indexWriter.prepare(tx, a, data, { ...data, status: 'deleted' });

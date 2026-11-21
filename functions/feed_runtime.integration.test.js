@@ -61,7 +61,9 @@ async function fixture(t, { count = 2, generations = 2, separated = false } = {}
     readGenerationId: ids[0], writeGenerationIds: [...ids] });
   if (ids.length) await activate();
   const f = { uid, prefix, rows, roots, ids, control, register, activate, now: Date.now() + 1000 };
-  f.runtime = () => createFeedRuntime(db, absent, { enabled: true, clock: () => new Date(f.now) });
+  // This suite exercises the earlier metadata-only contract, including partial
+  // source fixtures. The complete card publisher has its own strict suite.
+  f.runtime = () => createFeedRuntime(db, absent, { enabled: true, cardStateEnabled: false, clock: () => new Date(f.now) });
   f.snapshot = async () => canonical(await Promise.all(ids.map(async id => {
     const ref = db.doc(`feedIndexGenerations/${id}`), records = {};
     for (const name of ['cells', 'nodes', 'retiredRoots']) records[name] = (await ref.collection(name).get()).docs.map(doc => ({

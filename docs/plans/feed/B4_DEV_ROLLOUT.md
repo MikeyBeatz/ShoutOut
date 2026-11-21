@@ -304,6 +304,18 @@ Aktivační commit zapíná společné serverové přepínače a DEV serverDelta
 Nasazení má pořadí: indexy → 10 existujících Functions → ověřený drain →
 Rules → start/backfill/audit/activate → web → pilot/rollback/resume/úklid.
 Každý skutečně nasazovaný SHA musí nejprve projít úplným CI.
+První aktivační běh 44932675068 pro f9117a6 zastavil card test: simulace
+starého writeru dědila nově zapnutý card přepínač. Správně odmítla zápis,
+ale jako nový writer hlásila `unapplied-card-source-plan`. Simulace nyní
+výslovně používá `cardStateEnabled: false` a dál požaduje odmítnutí starého
+writeru. Bez oslabení runtime ochrany; po opravě se před nasazením znovu
+ověřují související sady a úplné CI. Žádný živý zápis dosud neproběhl.
+Rozšířený místní průchod navíc zachytil starší metadata-only fixture R6,
+která nemá úplné veřejné tělo ani všechny zdrojové snapshoty nové card
+cesty. Tato starší sada nyní výslovně testuje svůj původní režim s card
+publisherem vypnutým; aktivní úplnou cestu dál pokrývají samostatné B4 sady.
+Read-only kontrola všech 38 skutečných DEV zdrojů potvrdila platný nový
+card kontrakt (0 chybných); není potřeba opravovat původní data.
 
 [Kontrola drainu](../../../tools/feed_revision_drain.mjs) vyžaduje 100 %
 provozu na nové připravené revizi a serverový stav Active/RETIRED u všech
