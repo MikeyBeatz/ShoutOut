@@ -14,6 +14,9 @@ Zatím bez externích změn; další je lokální ověření a úplné CI aktiva
 První aktivační f9117a6 / CI 44932675068 nebyl úspěšný: opravené explicitní
 nastavení starého writeru v regresním testu; nasazení zůstává blokované do
 úspěšného konečného CI. [Podrobnost](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
+Navazující a792243 / CI 44934903548 bylo zrušeno kvůli doplnění platného
+těla staré fixture operátoru. Po opravě celá místní regresní sada prošla
+142/142; připravuje se konečný kandidát pro úplné CI, stále bez nasazení.
 
 **Nyní: schválený lokální přechod B4 je uzavřený včetně úplného CI.**
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má

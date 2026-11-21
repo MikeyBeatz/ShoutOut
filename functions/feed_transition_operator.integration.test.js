@@ -22,7 +22,7 @@ async function fixture(t, count = 3) {
   await from.create({ schemaVersion: 1, v: 1, accountRetention: true, erasureRevision: 0, prunedThrough: -1 });
   const runtime = createFeedRuntime(db, { async getUser() { return {}; } });
   const location = { latitude: 50.08, longitude: 14.44 }, time = Date.now();
-  const rows = Array.from({ length: count }, (_, i) => ({ id: `${id}-${i}`, authorId: id, location,
+  const rows = Array.from({ length: count }, (_, i) => ({ id: `${id}-${i}`, authorId: id, authorNickname: 'Fixture', location,
     geohash: encodeGeohash(location.latitude, location.longitude), status: 'active', categories: ['Dotaz'],
     title: `Operator ${i}`, text: 'Synthetic body', createdAt: Timestamp.fromMillis(time - 1000), expiresAt: Timestamp.fromMillis(time + 86400000) }));
   rows.forEach(row => roots.push(db.doc(`shouts/${row.id}`)));

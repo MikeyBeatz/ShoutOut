@@ -317,6 +317,13 @@ publisherem vypnutým; aktivní úplnou cestu dál pokrývají samostatné B4 sa
 Read-only kontrola všech 38 skutečných DEV zdrojů potvrdila platný nový
 card kontrakt (0 chybných); není potřeba opravovat původní data.
 
+Navazující CI 44934903548 pro a792243 bylo zrušeno po nálezu ještě jedné
+staré fixture operátoru bez authorNickname. Fixture nyní obsahuje platné
+veřejné tělo i pro aktivní publisher; produkční validace se nemění.
+Úplná místní sada purge/R5/R6/runtime/operátoru poté prošla: **142/142**
+bez chyb (build/b4-dev-purge-activation.log). Před nasazením následuje
+úplné CI konečného kandidáta; z neúspěšných kandidátů se nic nenasadilo.
+
 [Kontrola drainu](../../../tools/feed_revision_drain.mjs) vyžaduje 100 %
 provozu na nové připravené revizi a serverový stav Active/RETIRED u všech
 historických revizí. Stav RETIRED podle [dokumentace Cloud Run](https://docs.cloud.google.com/run/docs/managing/revisions)
