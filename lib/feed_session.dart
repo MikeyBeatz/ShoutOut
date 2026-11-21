@@ -142,6 +142,12 @@ class FeedSessionController<T, C extends Object> {
     onChanged?.call();
   }
 
+  void invalidateNews() {
+    if (_disposed || !_newsCurrent) return;
+    _newsCurrent = false;
+    onChanged?.call();
+  }
+
   Future<void> refresh(C requested) {
     if (_disposed) return Future.value();
     if (_refreshFlight != null && _refreshContext == requested) {
@@ -181,6 +187,7 @@ class FeedSessionController<T, C extends Object> {
           }
         });
     _refreshFlight = flight;
+    invalidateNews();
     return flight;
   }
 

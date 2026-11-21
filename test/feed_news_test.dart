@@ -118,6 +118,7 @@ void main() {
       await expectLater(c.refresh('other'), throwsStateError);
       expect(c.newsCount, 3);
       expect(c.checkpoint, 'confirmed');
+      expect(c.newsIsCurrent, false);
       pending = Completer();
       final request = c.checkNews();
       fail = false;

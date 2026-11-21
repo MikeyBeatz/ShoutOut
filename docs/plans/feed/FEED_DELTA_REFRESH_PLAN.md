@@ -765,6 +765,12 @@ z nedokončené code/check váhy je oddělená lokální a provozní polovina,
 při zachování celkové váhy rodiče a všech dosud hotových částí. Lokální
 verification se uzavře až úspěšným úplným CI konečného zdroje.
 
+První společný kandidát 6cc2d4a / CI 44944087675 byl zrušen po závěrečném
+nálezu v klientském označení čerstvosti: neúspěšná obnova musí ponechat
+předchozí počet a checkpoint, ale číslo zobrazit jako neověřené. Oprava má
+cílenou regresi. Tento zrušený běh nenahrazuje úplné CI konečného zdroje;
+žádný rollout se neprováděl.
+
 ## B4: číslovka bez přenačítání feedu
 
 Preferovaný směr je odběr malých změnových signálů pro relevantní oblasti,
