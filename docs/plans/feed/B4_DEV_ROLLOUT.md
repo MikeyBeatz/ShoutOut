@@ -222,7 +222,14 @@ volání včetně status guardu: **155 reads / 62 pokusů zápisu / 4 transakčn
 pokusy**. Žádný zdrojový zápis, žádné prodlužování retence. Samostatné
 start/audit/aktivace nejsou v tomto čísle; předchozí P1 má vlastní auditní
 měření 50/200/2 000. Jde o operace SDK, ne fakturu nebo produkční load test.
-Úplné CI nového zdroje ještě čeká na společný push.
+Při stejných třech generacích má změna palce **17 reads / 11 writes**,
+změna textu **14 reads / 8 writes**, obě po jednom transakčním pokusu.
+Publisher vyhodnotí všechny generace; nejstarší bez content identity
+nepřepisuje prostorová metadata při samotné změně textu. Tyto zápisy jsou
+náklad dočasně udržované kompatibility, ne příslib nulové režie.
+Úplné CI finálního zdroje ještě čeká na společný push. Předchozí běh
+44928446576 pro 6d41273 byl zrušen po doplnění tohoto úplnějšího měření;
+není dokladem dokončení ani neúspěšného cloudového nasazení.
 
 Evidence v progress.json doplňuje existující lokální code/check podklady;
 jejich váhy a stavy se znovu nezapočítávají. DEV/akceptace i novinky zůstávají

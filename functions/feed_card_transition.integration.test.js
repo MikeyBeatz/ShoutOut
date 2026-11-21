@@ -118,6 +118,14 @@ test('three-generation transition: old/new cursors, pinned source, rollback and 
   const legacy = await f.page(true); assert.equal(legacy.items.length, 50);
   assert.equal((await f.page(true, { context: undefined, cursor: legacy.next })).items.length, 5);
   assert.equal((await getFeedPageOperation(f.request({ cursor: raw.next }), db, f.options)).items.length, 5);
+  const measuredRuntime = createFeedRuntime(measured.db, { getUser() { throw new Error('not-used'); } }, { cardStateEnabled: true });
+  const changeMeasured = patch => measuredRuntime.database.runTransaction(async tx => {
+    const ref = db.doc(`shouts/${f.rows[0].id}`), before = (await tx.get(ref)).data(), after = { ...before, ...patch };
+    const plan = await measuredRuntime.indexWriter.prepare(tx, ref.id, before, after); plan.apply(); tx.set(ref, after);
+  });
+  measured.reset(); await changeMeasured({ likesCount: 1 }); const counterAcrossThree = { ...measured.counts };
+  measured.reset(); await changeMeasured({ text: 'Versioned replacement body' }); const bodyAcrossThree = { ...measured.counts };
+  assert(counterAcrossThree.writes > 2); assert(bodyAcrossThree.writes > 2);
   const retired = await f.delta({ cursor: before.next }); assert.equal(retired.state, 'reset'); assert.equal(retired.capability.mode, 'card-v1');
   await f.step('rollback'); assert.equal((await f.step('rollback')).changed, false);
   assert.deepEqual((await f.control.get()).get('writeGenerationIds'), f.gens);
@@ -131,7 +139,7 @@ test('three-generation transition: old/new cursors, pinned source, rollback and 
   await f.step('resume'); await assert.rejects(f.step('activate'));
   await f.ready(); await f.step('activate');
   assert.equal((await f.page()).version, 2);
-  const report = { schema: 1, scope: 'Emulator, 55 sources, two maintained V1 generations plus one card generation. Complete operator backfill calls: Admin SDK document/transaction reads and attempted writes including retries and status guard; excludes fixture setup, start/audit/activation, Auth/AppCheck, Rules billing and cloud latency.', backfill };
+  const report = { schema: 1, scope: 'Emulator, 55 sources, two maintained V1 generations plus one card generation. Complete operator backfill calls include status guard; counter/body mutations include source and all three publishers. Admin SDK reads and attempted writes including retries; excludes fixture setup, start/audit/activation, Auth/AppCheck, Rules billing and cloud latency.', backfill, counterAcrossThree, bodyAcrossThree };
   writeFileSync(new URL('../build/b4-transition-measurement.json', import.meta.url), JSON.stringify(report, null, 2) + '\n');
   assert(backfill.writes > 55); assert(backfill.reads > 55);
 });
