@@ -34,6 +34,10 @@ function indexedOperation(operation, request) {
   return operation(request, runtime.database, () => new Date(), { indexWriter: runtime.indexWriter });
 }
 
+function projectedOperation(operation, request) {
+  return feedRuntimeConfiguration.cardStateEnabled ? indexedOperation(operation, request) : operation(request, getFirestore());
+}
+
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
 
 // The declaration does not provision a key. Each project's checked initial
@@ -91,7 +95,7 @@ export const deleteComment = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => deleteCommentOperation(request, getFirestore()));
+}, (request) => projectedOperation(deleteCommentOperation, request));
 
 export const createShout = onCall({
   ...secureCallableOptions,
@@ -109,7 +113,7 @@ export const createComment = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => createCommentOperation(request, getFirestore()));
+}, (request) => projectedOperation(createCommentOperation, request));
 
 export const createPrivateReply = onCall({
   ...secureCallableOptions,
@@ -145,7 +149,7 @@ export const toggleShoutSave = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => toggleShoutSaveOperation(request, getFirestore()));
+}, (request) => projectedOperation(toggleShoutSaveOperation, request));
 
 export const createContentReport = onCall({
   ...secureCallableOptions,

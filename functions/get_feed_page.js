@@ -1,3 +1,5 @@
+import { publicFeedBody } from './feed_public_body.js';
+export { publicFeedBody } from './feed_public_body.js';
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -31,21 +33,6 @@ function filters(input) {
       !(input.category === null || categories.has(input.category))) fail('invalid-argument', 'Invalid feed filters.');
   return { point: { ...input.point }, radiusKm: input.radiusKm, order: input.order, category: input.category,
     ...(input.readPolicy ? { readPolicy: input.readPolicy } : {}) };
-}
-
-export function publicFeedBody(data) {
-  if (typeof data.authorId !== 'string' || typeof data.authorNickname !== 'string' || typeof data.title !== 'string' ||
-      typeof data.text !== 'string' || !(data.createdAt instanceof Timestamp) || !(data.expiresAt instanceof Timestamp)) {
-    fail('data-loss', 'Invalid feed source.');
-  }
-  const result = Object.fromEntries(['authorId', 'authorNickname', 'title', 'text', 'categories', 'geohash', 'status',
-    'likesCount', 'dislikesCount', 'commentsCount', 'savesCount', 'avatarId', 'avatarBackgroundStart', 'avatarBackgroundEnd',
-    'avatarGradientDirection', 'businessLocationId', 'businessAuthorFormat', 'businessHighlighted', 'businessSpotlight',
-    'businessExtendedDuration', 'businessPromotion'].filter(key => Object.hasOwn(data, key)).map(key => [key, data[key]]));
-  result.createdAt = data.createdAt.toMillis(); result.expiresAt = data.expiresAt.toMillis();
-  if (plain(data.geography)) result.geography = Object.fromEntries(['countryCode', 'subdivisionCode', 'localityName', 'providerPlaceId']
-    .filter(key => typeof data.geography[key] === 'string').map(key => [key, data.geography[key]]));
-  return result;
 }
 
 // Internal operation: limits/key must be supplied by its trusted host. No

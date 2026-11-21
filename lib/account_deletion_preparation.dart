@@ -76,7 +76,7 @@ class AccountDeletionPreparationGateway {
           (response['hidden'] as int) < 0 ||
           (response['hidden'] as int) > 50 ||
           response['hasMore'] is! bool ||
-          response['hasMore'] != (response['hidden'] == 50)) {
+          (response['hidden'] == 0 && response['hasMore'] == true)) {
         throw FirebaseFunctionsException(
           code: 'data-loss',
           message: 'Invalid account deletion preparation result.',

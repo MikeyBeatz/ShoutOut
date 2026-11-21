@@ -172,6 +172,21 @@ void main() {
     },
   );
 
+  test('a budget-reduced page continues with a new request key', () async {
+    var keys = 0, sends = 0;
+    final gateway = AccountDeletionPreparationGateway(
+      currentUserId: () => 'owner',
+      newKey: () => 'prefix-${++keys}',
+      send: (request) async {
+        sends++;
+        return {'hidden': sends == 1 ? 25 : 0, 'hasMore': sends == 1};
+      },
+    );
+    await gateway.prepare('owner');
+    expect(sends, 2);
+    expect(keys, 2);
+  });
+
   test(
     'a page retry retains the actual timed key after an uncertain callable response',
     () async {

@@ -1,3 +1,4 @@
+import { generationCardProjection } from './feed_generation_format.js';
 import { assertIndexBinding } from './feed_index_paths.js';
 // Internal generation-bound engine; lab and DEV entry points remain separate.
 import { FieldPath, FieldValue, Timestamp } from 'firebase-admin/firestore';
@@ -62,7 +63,7 @@ export function createAccountRetentionStore(db, binding, removeRows) {
       const job = snapshot.data();
       if (job && (job.v !== 1 || job.userId !== identity.userId || !samePurgeTime(job.requestCreateTime, identity.requestCreateTime) ||
           !samePurgeTime(job.retainUntil, retainUntil) || !Number.isSafeInteger(job.version) || job.version < 0 ||
-          !['inventory', 'cells', 'verify', 'cleanup', 'complete'].includes(job.phase) ||
+          !['inventory', 'cells', 'verify', 'cleanup', 'public-state', 'complete'].includes(job.phase) ||
           !(job.cursor === null || /^[a-f0-9]{64}$/.test(job.cursor)) ||
           !(job.cellCursor === null || /^[0123456789bcdefghjkmnpqrstuvwxyz]{4}$/.test(job.cellCursor)))) throw new Error('invalid-erasure-journal');
       const save = patch => tx.update(ref, { ...patch, version: job.version + 1 });
@@ -76,7 +77,7 @@ export function createAccountRetentionStore(db, binding, removeRows) {
         if (job.cursor) query = query.startAfter(job.cursor);
         const page = await tx.get(query), found = new Set();
         for (const doc of page.docs) {
-          const node = verifyNode(doc.id, doc.data()), cell = node.path.slice(0, 4); checkCell(cell);
+          const node = verifyNode(doc.id, doc.data(), { cardProjection: generationCardProjection(marker.data()) }), cell = node.path.slice(0, 4); checkCell(cell);
           if (node.rows?.some(row => row.authorId === identity.userId)) found.add(cell);
         }
         if (job.phase === 'verify' && found.size) throw new Error('erasure-verification-failed');
@@ -111,7 +112,7 @@ export function createAccountRetentionStore(db, binding, removeRows) {
             const frontier = [...task.frontier], selected = [], marks = []; let processed = 0;
             while (frontier.length && processed < reads && selected.length < 50) {
               const item = frontier.pop(), doc = await tx.get(nodes.doc(item.hash)); processed++;
-              const node = verifyNode(item.hash, doc.data());
+              const node = verifyNode(item.hash, doc.data(), { cardProjection: generationCardProjection(marker.data()) });
               if (!node.path.startsWith(cell)) throw new Error('index-path-mismatch');
               if (task.phase === 'mark') {
                 if (node.rows?.some(row => row.authorId === identity.userId)) throw new Error('erasure-current-root-not-clean');
@@ -169,6 +170,10 @@ export function createAccountRetentionStore(db, binding, removeRows) {
       } else if (job.phase === 'cleanup') {
         const page = await tx.get(ref.collection('cells').limit(Math.min(reads, deletes)));
         page.docs.forEach(doc => { if (doc.get('phase') !== 'done') throw new Error('incomplete-erasure-cell'); tx.delete(doc.ref); });
+        if (page.empty) { state = generationCardProjection(marker.data()) ? 'public-state' : 'complete'; save({ phase: state }); } else save({});
+      } else if (job.phase === 'public-state') {
+        const page = await tx.get(base.collection('publicStates').where('authorId', '==', identity.userId).limit(Math.min(reads, deletes)));
+        page.docs.forEach(doc => tx.delete(doc.ref, { lastUpdateTime: doc.updateTime }));
         if (page.empty) { state = 'complete'; save({ phase: state }); } else save({});
       } else if (job.phase !== 'complete') throw new Error('invalid-erasure-stage');
       if (beforeCommit) await beforeCommit({ phase: state, transaction: tx });

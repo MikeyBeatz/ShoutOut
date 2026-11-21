@@ -1,3 +1,4 @@
+import { prepareCardMutation } from './feed_card_state.js';
 import { receiptRetentionFields } from './operation_retention.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { createHash } from 'node:crypto';
@@ -93,6 +94,8 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
     const result = { deleted: true };
     // Preserve the legacy single-document deletion. Replies, reports and reaction
     // subcollections have a separate lifecycle; no unbounded recursive operation.
+    const cardPlan = !isPurgedShoutContext(data) ? await prepareCardMutation(db, transaction, input.shoutId, data, { ...data, commentsCount: Math.max(0, comments - 1) }) : null;
+    cardPlan?.apply();
     transaction.delete(commentRef);
     if (!isPurgedShoutContext(data)) transaction.update(shoutRef, { commentsCount: Math.max(0, comments - 1) });
     transaction.set(rateRef, rateData);

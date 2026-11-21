@@ -1,7 +1,7 @@
 // Inactive B4a contract. No host registration, live collection or default key.
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { Buffer } from 'node:buffer';
-import { publicFeedBody } from './get_feed_page.js';
+import { publicFeedBody } from './feed_public_body.js';
 
 export const bodySchema = 1;
 export function canonicalBody(value) {

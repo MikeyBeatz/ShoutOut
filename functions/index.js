@@ -1,3 +1,6 @@
+import { finishShoutGeography } from './shout_geography_update.js';
+import { createFeedRuntime, feedRuntimeConfiguration } from './feed_runtime.js';
+import { getAuth } from 'firebase-admin/auth';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { defineSecret } from 'firebase-functions/params';
@@ -105,24 +108,21 @@ export const enrichShoutGeography = onDocumentCreated(
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Geocoding HTTP ${response.status}`);
     const payload = await response.json();
+    const database = feedRuntimeConfiguration.cardStateEnabled ? createFeedRuntime(getFirestore(), getAuth()).database : getFirestore();
     if (payload.status === 'ZERO_RESULTS') {
-      await snapshot.ref.update({
-        geography: {
+      await finishShoutGeography(database, snapshot, {
           schemaVersion: 1,
           geohash,
           provider: 'google',
           resolutionStatus: 'zeroResults',
           resolvedAt: FieldValue.serverTimestamp(),
-        },
       });
       return;
     }
     if (payload.status !== 'OK' || !payload.results?.length) {
       throw new Error(`Geocoding failed: ${payload.status ?? 'unknown'}`);
     }
-    await snapshot.ref.update({
-      geography: normalizedGeography(payload.results[0], geohash),
-    });
+    await finishShoutGeography(database, snapshot, normalizedGeography(payload.results[0], geohash));
   },
 );
 

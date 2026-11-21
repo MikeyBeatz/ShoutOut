@@ -1,3 +1,4 @@
+import { generationCardProjection } from './feed_generation_format.js';
 import { assertIndexBinding } from './feed_index_paths.js';
 // Internal generation-bound engine; lab and DEV entry points remain separate.
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
@@ -29,7 +30,7 @@ export async function beginIndexGc(db, binding, cell, {
     if (retention?.get('owner')) throw new Error('index-cell-retention-busy');
     return [marker, root, retention];
   }, { readOnly: true });
-  if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+  if (!marker.exists || ![1, 2].includes(marker.data().v)) throw new Error('index-not-seeded');
   let saved = null;
   if (checkpoint !== null) {
     const { digest, ...data } = checkpoint;
@@ -132,7 +133,7 @@ export async function beginIndexGc(db, binding, cell, {
           reads -= docs.length; metrics.markReads += docs.length;
           // Finish validation before changing the queue. Missing/corrupt data
           // aborts the step before any sweep can start.
-          const payloads = docs.map((doc, i) => verifyNode(keys[i], doc.data()));
+          const payloads = docs.map((doc, i) => verifyNode(keys[i], doc.data(), { cardProjection: generationCardProjection(marker.data()) }));
           if (payloads.some(node => !node.path.startsWith(cell))) throw new Error('index-path-mismatch');
           queue.splice(0, keys.length);
           for (let i = 0; i < keys.length; i++) { queued.delete(keys[i]); marked.add(keys[i]); }

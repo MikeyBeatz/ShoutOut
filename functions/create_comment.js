@@ -1,3 +1,4 @@
+import { prepareCardMutation } from './feed_card_state.js';
 import { receiptRetentionFields } from './operation_retention.js';
 import { readNotificationRecipients } from './notification_recipient.js';
 import { createHash } from 'node:crypto';
@@ -104,6 +105,8 @@ export async function createCommentOperation(request, db, clock = () => new Date
     }
     const notificationRecipients = await readNotificationRecipients(transaction, db, recipients.map(recipient => recipient.uid));
     const rateData = nextCommentRate(rate.data(), now, key);
+    const cardPlan = await prepareCardMutation(db, transaction, input.shoutId, shout, { ...shout, commentsCount: count + 1 });
+    cardPlan?.apply();
     transaction.create(commentRef, { authorId: uid, authorNickname, text: input.text,
       createdAt: now, likesCount: 0, dislikesCount: 0, ...reply });
     transaction.update(shoutRef, { commentsCount: count + 1 });

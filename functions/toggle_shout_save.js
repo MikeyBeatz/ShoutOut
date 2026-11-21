@@ -1,3 +1,4 @@
+import { prepareCardMutation } from './feed_card_state.js';
 import { receiptRetentionFields } from './operation_retention.js';
 import { isPurgedShoutContext, shoutAcceptsInteractions } from './shout_context.js';
 import { createHash } from 'node:crypto';
@@ -70,6 +71,8 @@ export async function toggleShoutSaveOperation(request, db, clock = () => new Da
     if (!shoutAcceptsInteractions(data, Timestamp.fromDate(clock()))) fail('failed-precondition', 'shout-interactions-closed');
     const result = saveTransition(save.exists, data.savesCount === undefined ? 0 : data.savesCount);
     const rateData = nextInteractionRate(rate.data(), now, `save_${input.shoutId}`);
+    const cardPlan = await prepareCardMutation(db, transaction, input.shoutId, data, { ...data, savesCount: result.count });
+    cardPlan?.apply();
     if (result.saved) transaction.create(saveRef, { createdAt: now, userId: uid });
     else transaction.delete(saveRef);
     transaction.update(shoutRef, { savesCount: result.count });

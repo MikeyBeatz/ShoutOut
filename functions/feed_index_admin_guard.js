@@ -9,9 +9,10 @@ export class FeedIndexAdminWriteBlocked extends Error {
 
 export function validateFeedIndexControl(data) {
   const invalid = () => { throw new Error('invalid-feed-index-control'); };
+  const keys = data?.schemaVersion === 2 ? [...controlKeys, 'cardWriteGenerationIds', 'cardReadGenerationId'] : controlKeys;
   if (!data || typeof data !== 'object' || Array.isArray(data) ||
-      Object.keys(data).length !== controlKeys.length || Object.keys(data).some(key => !controlKeys.includes(key)) ||
-      data.schemaVersion !== 1 || !Number.isSafeInteger(data.revision) || data.revision < 0 ||
+      Object.keys(data).length !== keys.length || Object.keys(data).some(key => !keys.includes(key)) ||
+      ![1, 2].includes(data.schemaVersion) || !Number.isSafeInteger(data.revision) || data.revision < 0 ||
       !['off', 'building', 'active', 'paused'].includes(data.mode) ||
       !(data.readGenerationId === null || generationId(data.readGenerationId)) ||
       !Array.isArray(data.writeGenerationIds) || data.writeGenerationIds.some(id => !generationId(id)) ||
@@ -21,7 +22,11 @@ export function validateFeedIndexControl(data) {
   if (mode === 'off' && (reader !== null || writers.length !== 0) ||
       mode === 'active' && reader === null || mode === 'paused' && (reader !== null || !writers.length) ||
       mode === 'building' && writers.length <= (reader === null ? 0 : 1)) invalid();
-  return { ...data, writeGenerationIds: [...writers] };
+  if (data.schemaVersion === 2 && (!Array.isArray(data.cardWriteGenerationIds) ||
+      new Set(data.cardWriteGenerationIds).size !== data.cardWriteGenerationIds.length ||
+      data.cardWriteGenerationIds.some(id => !writers.includes(id)) ||
+      !(data.cardReadGenerationId === null || data.cardReadGenerationId === reader && data.cardWriteGenerationIds.includes(reader)))) invalid();
+  return { ...data, writeGenerationIds: [...writers], ...(data.schemaVersion === 2 ? { cardWriteGenerationIds: [...data.cardWriteGenerationIds] } : {}) };
 }
 
 export function assertFeedAdminTarget(db) {

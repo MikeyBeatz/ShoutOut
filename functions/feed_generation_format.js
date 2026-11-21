@@ -9,6 +9,12 @@ export function generationContentIdentity(marker) {
   if (!marker || !(marker.readIdentity === undefined || marker.readIdentity === 1)) throw new Error('invalid-index-content-identity-mode');
   return marker.readIdentity === 1;
 }
+export function generationCardProjection(marker) {
+  if (!marker || !(marker.cardProjection === undefined || marker.cardProjection === 1) ||
+      (marker.v !== (marker.cardProjection === 1 ? 2 : 1))) throw new Error('invalid-index-card-format');
+  if (marker.cardProjection === 1 && marker.readIdentity !== 1) throw new Error('invalid-index-card-format');
+  return marker.cardProjection === 1;
+}
 export function transitionRef(db, target) {
   if (!generationId(target)) throw new Error('invalid-transition-generation');
   return db.doc(`feedIndexMaintenance/transitions/jobs/${target}`);
@@ -17,13 +23,14 @@ export function transitionRef(db, target) {
 // The optional context is created inside ONE caller transaction attempt, never
 // cached globally: SDK retries must re-read control and generation documents.
 export async function buildingGeneration(tx, db, marker, context = null, onRead = () => {}) {
-  if (marker.get('transitionId') === undefined) return false;
+  const card = marker.get('cardBackfillId') !== undefined;
+  if (!card && marker.get('transitionId') === undefined) return false;
   const get = ref => { onRead(); return tx.get(ref); };
   const target = marker.id;
-  if (marker.get('transitionId') !== target || !generationId(target)) throw new Error('invalid-building-generation');
+  if (marker.get(card ? 'cardBackfillId' : 'transitionId') !== target || !generationId(target)) throw new Error('invalid-building-generation');
   if (context && context.transaction !== tx) throw new Error('foreign-generation-transaction');
   const control = context?.control ?? validateFeedIndexControl((await get(db.doc('feedIndexControl/current'))).data());
-  const job = context?.jobs?.get(target) ?? await get(transitionRef(db, target));
+  const job = context?.jobs?.get(target) ?? await get(card ? db.doc(`feedIndexMaintenance/cardBackfills/jobs/${target}`) : transitionRef(db, target));
   context?.jobs?.set(target, job);
   if (!job.exists || job.get('v') !== 1 || job.get('target') !== target ||
       !job.createTime.isEqual(marker.createTime) || !generationId(job.get('source'))) throw new Error('invalid-building-generation');

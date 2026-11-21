@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { geohashBounds } from './feed_spatial.js';
 import { readContentHash } from './read_content_identity.js';
+import { bodyProjection, bodyDigest } from './feed_body_contract.js';
 
 export const blockDefaults = Object.freeze({ entries: 64, bytes: 65536 });
 export const clone = value => JSON.parse(JSON.stringify(value));
@@ -20,7 +21,7 @@ export function canonical(value) {
 export const encodedBytes = value => Buffer.byteLength(canonical(value));
 export const nodeHash = node => hash(canonical(node));
 
-export function metadataOf(source, { contentIdentity = false } = {}) {
+export function metadataOf(source, { contentIdentity = false, cardProjection = false } = {}) {
   if (!source || !identifier(source.id) || typeof source.authorId !== 'string' ||
       !source.authorId.length || source.authorId.length > 128 ||
       typeof source.geohash !== 'string' || !/^[0123456789bcdefghjkmnpqrstuvwxyz]{7}$/.test(source.geohash) ||
@@ -41,12 +42,20 @@ export function metadataOf(source, { contentIdentity = false } = {}) {
     ? readContentHash(source.title, source.text) : source.contentHash;
   if (contentHash !== undefined && !/^[a-f0-9]{64}$/.test(contentHash)) throw new Error('invalid-index-content-identity');
   if (contentIdentity && contentHash === undefined) throw new Error('missing-index-content-identity');
-  return { id: source.id, authorId: source.authorId, geohash: source.geohash,
+  const row = { id: source.id, authorId: source.authorId, geohash: source.geohash,
     location: { latitude: source.location.latitude, longitude: source.location.longitude },
     createdAt, expiresAt, likesCount, dislikesCount, status: source.status,
     categories: [...new Set(source.categories)].sort(),
     businessHighlighted: source.businessHighlighted === true, businessSpotlight: source.businessSpotlight === true,
     ...(contentHash === undefined ? {} : { contentHash }) };
+  if (cardProjection) {
+    const bodyVersion = typeof source.title === 'string' ? bodyProjection(source).version : source.bodyVersion;
+    const selection = Object.fromEntries(Object.entries(row).filter(([key]) => !['likesCount', 'dislikesCount', 'contentHash'].includes(key)));
+    const selectionVersion = bodyDigest({ schema: 1, selection });
+    if (!/^[a-f0-9]{64}$/.test(bodyVersion ?? '') || source.selectionVersion !== undefined && source.selectionVersion !== selectionVersion) throw new Error('invalid-index-card-identity');
+    Object.assign(row, { bodyVersion, selectionVersion });
+  }
+  return row;
 }
 
 export function lowRated(row) {
@@ -99,13 +108,13 @@ export function treeBuilder(options = {}) {
   function branch(path, children) {
     if (!Object.keys(children).length) return null;
     if (Object.keys(children).length === 1) return Object.values(children)[0];
-    return store({ v: 1, kind: 'branch', path, summary: combine(children), children });
+    return store({ v: config.cardProjection ? 2 : 1, kind: 'branch', path, summary: combine(children), children });
   }
   function build(input, path) {
     if (!input.length) return null;
     const rows = [...input].sort((a, b) => ordinal(a.id, b.id));
     if (rows.some(row => !route(row).startsWith(path))) throw new Error('index-path-mismatch');
-    const leaf = { v: 1, kind: 'leaf', path, summary: summarize(rows), rows };
+    const leaf = { v: config.cardProjection ? 2 : 1, kind: 'leaf', path, summary: summarize(rows), rows };
     if (rows.length <= config.entries && encodedBytes(leaf) <= config.bytes) return store(leaf);
     if (rows.length === 1) throw new Error('index-entry-too-large');
     const routes = rows.map(route).sort();
@@ -177,8 +186,8 @@ export function treeBuilder(options = {}) {
   return { build, edit, find, reachable, writes, config };
 }
 
-export function verifyNode(key, node) {
-  if (!node || node.v !== 1 || !['leaf', 'branch'].includes(node.kind) || nodeHash(node) !== key ||
+export function verifyNode(key, node, { cardProjection = false } = {}) {
+  if (!node || node.v !== (cardProjection ? 2 : 1) || !['leaf', 'branch'].includes(node.kind) || nodeHash(node) !== key ||
       encodedBytes(node) > blockDefaults.bytes) throw new Error('index-integrity-failed');
   const s = node.summary;
   if (!s || !Number.isSafeInteger(s.count) || s.count < 1 || !Number.isSafeInteger(s.normal) ||
@@ -192,7 +201,7 @@ export function verifyNode(key, node) {
         !/^[a-f0-9]{64}$/.test(child.hash)))) throw new Error('index-integrity-failed');
   if (node.kind === 'leaf' && (!Array.isArray(node.rows) || node.rows.length > blockDefaults.entries ||
       new Set(node.rows.map(row => row.id)).size !== node.rows.length ||
-      node.rows.some(row => row.status !== 'active' || canonical(metadataOf(row)) !== canonical(row) || !route(row).startsWith(node.path)))) throw new Error('index-integrity-failed');
+      node.rows.some(row => row.status !== 'active' || canonical(metadataOf(row, { cardProjection })) !== canonical(row) || !route(row).startsWith(node.path)))) throw new Error('index-integrity-failed');
   const summary = node.kind === 'leaf' ? summarize(node.rows) : combine(node.children);
   if (canonical(summary) !== canonical(node.summary)) throw new Error('index-integrity-failed');
   return node;

@@ -1,0 +1,161 @@
+{
+  "scope": "emulator SDK operations; header selection plus optional source bodies; excludes Auth/AppCheck, Home and live streams",
+  "reports": [
+    {
+      "sources": 50,
+      "backfill": {
+        "reads": 121,
+        "writes": 54,
+        "jsonBytes": 24409,
+        "attempts": 2,
+        "steps": 2
+      },
+      "audit": {
+        "reads": 155,
+        "writes": 7,
+        "jsonBytes": 88993,
+        "attempts": 16
+      },
+      "oldCold": {
+        "reads": 59,
+        "writes": 0,
+        "jsonBytes": 42814,
+        "attempts": 3
+      },
+      "oldWarm": {
+        "reads": 58,
+        "writes": 0,
+        "jsonBytes": 22133,
+        "attempts": 3
+      },
+      "cold": {
+        "reads": 59,
+        "writes": 0,
+        "jsonBytes": 51371,
+        "attempts": 3
+      },
+      "warmHeaders": {
+        "reads": 8,
+        "writes": 0,
+        "jsonBytes": 670,
+        "attempts": 3
+      },
+      "oneMissingBody": {
+        "reads": 1,
+        "writes": 0,
+        "jsonBytes": 445,
+        "attempts": 0
+      },
+      "counter": {
+        "reads": 7,
+        "writes": 2,
+        "jsonBytes": 2408,
+        "attempts": 1
+      }
+    },
+    {
+      "sources": 200,
+      "backfill": {
+        "reads": 463,
+        "writes": 225,
+        "jsonBytes": 201963,
+        "attempts": 5,
+        "steps": 5
+      },
+      "audit": {
+        "reads": 521,
+        "writes": 13,
+        "jsonBytes": 322960,
+        "attempts": 34
+      },
+      "oldCold": {
+        "reads": 63,
+        "writes": 0,
+        "jsonBytes": 73590,
+        "attempts": 3
+      },
+      "oldWarm": {
+        "reads": 58,
+        "writes": 0,
+        "jsonBytes": 22183,
+        "attempts": 3
+      },
+      "cold": {
+        "reads": 63,
+        "writes": 0,
+        "jsonBytes": 93503,
+        "attempts": 3
+      },
+      "warmHeaders": {
+        "reads": 8,
+        "writes": 0,
+        "jsonBytes": 670,
+        "attempts": 3
+      },
+      "oneMissingBody": {
+        "reads": 1,
+        "writes": 0,
+        "jsonBytes": 446,
+        "attempts": 0
+      },
+      "counter": {
+        "reads": 7,
+        "writes": 2,
+        "jsonBytes": 2415,
+        "attempts": 1
+      }
+    },
+    {
+      "sources": 2000,
+      "backfill": {
+        "reads": 4663,
+        "writes": 2385,
+        "jsonBytes": 2624669,
+        "attempts": 41,
+        "steps": 41
+      },
+      "audit": {
+        "reads": 4945,
+        "writes": 87,
+        "jsonBytes": 3169104,
+        "attempts": 256
+      },
+      "oldCold": {
+        "reads": 72,
+        "writes": 0,
+        "jsonBytes": 78164,
+        "attempts": 3
+      },
+      "oldWarm": {
+        "reads": 62,
+        "writes": 0,
+        "jsonBytes": 22381,
+        "attempts": 3
+      },
+      "cold": {
+        "reads": 72,
+        "writes": 0,
+        "jsonBytes": 98078,
+        "attempts": 3
+      },
+      "warmHeaders": {
+        "reads": 12,
+        "writes": 0,
+        "jsonBytes": 819,
+        "attempts": 3
+      },
+      "oneMissingBody": {
+        "reads": 1,
+        "writes": 0,
+        "jsonBytes": 447,
+        "attempts": 0
+      },
+      "counter": {
+        "reads": 7,
+        "writes": 2,
+        "jsonBytes": 2423,
+        "attempts": 1
+      }
+    }
+  ]
+}

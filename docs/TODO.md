@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,14 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,15 %** — vážené dokončení podúseků
 
-Hotové úseky: **155/215**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **156/217**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
 
-Hotové úseky: **186/293**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **187/295**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -58,8 +58,8 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    **Poslední dokončený úsek:** [lokální transakční reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results),
    zdroj 0b2d004 / úspěšné úplné CI 44825059479. Navazuje na uzavřený
    [základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
-   **Další:** schválit [konkrétní lokální P1 – provozní vrstvu a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md).
-   Návrh je připravený, implementace nezačala. Zahrnuje atomické zapojení všech
+   **Nyní:** schválený [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md).
+   Implementace a cílené kontroly jsou hotové; úplné CI ještě není doložené. Zahrnuje atomické zapojení všech
    writerů a R5/history/purge; potom náhrada závislých Home/živých odběrů
    se zachováním promo. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání

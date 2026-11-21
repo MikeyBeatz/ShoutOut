@@ -13,7 +13,7 @@ import { isPurgedShoutContext } from './shout_context.js';
 import { deletedPublicIdentity } from './account_public_identity.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
-import { buildingGeneration, generationContentIdentity } from './feed_generation_format.js';
+import { buildingGeneration, generationContentIdentity, generationCardProjection } from './feed_generation_format.js';
 
 const tupleCompare = (a, b) => {
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
@@ -145,12 +145,15 @@ function nodeKey(summary, c) {
 
 // Internal engine. Public entry points validate and bind fixed storage paths.
 export function createBlockIndexStore(db, { binding, cache = blockCache(), elapsedClock = () => performance.now(),
-  accountRetention = false, contentIdentity = false, ...blockOptions }) {
+  accountRetention = false, contentIdentity = false, cardProjection = false, ...blockOptions }) {
   assertIndexBinding(db, binding);
   if (typeof accountRetention !== 'boolean' || !(typeof contentIdentity === 'boolean' || contentIdentity === 'generation')) throw new Error('invalid-account-retention-mode');
+  if (![false, true, 'generation'].includes(cardProjection)) throw new Error('invalid-card-projection-mode');
+  let cardFormat = cardProjection === true;
+  const verify = (key, node) => verifyNode(key, node, { cardProjection: cardFormat });
   const sourceMetadata = (value, identity = contentIdentity) => {
     if (typeof identity !== 'boolean') throw new Error('explicit-generation-format-required');
-    return metadataOf(identity ? value : { ...value, contentHash: undefined }, { contentIdentity: identity });
+    return metadataOf(identity ? value : { ...value, contentHash: undefined }, { contentIdentity: identity, cardProjection: cardFormat });
   };
   const { base, source, namespace } = binding;
   const cells = base.collection('cells'), nodes = base.collection('nodes');
@@ -160,6 +163,8 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
   let cacheRevision = null;
   const mode = marker => {
     if ((marker.accountRetention === true) !== accountRetention) throw new Error('index-retention-mode-mismatch');
+    cardFormat = generationCardProjection(marker);
+    if (cardProjection !== 'generation' && cardFormat !== cardProjection) throw new Error('index-card-format-mismatch');
     const identity = generationContentIdentity(marker);
     if (contentIdentity !== 'generation' && identity !== contentIdentity) throw new Error('index-content-identity-mode-mismatch');
     return identity;
@@ -205,7 +210,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
           try {
             const docs = await db.getAll(...batch.map(job => nodes.doc(job.key)));
             batch.forEach((job, i) => {
-              try { job.resolve(verifyNode(job.key, docs[i].data())); } catch (error) { job.reject(error); }
+              try { job.resolve(verify(job.key, docs[i].data())); } catch (error) { job.reject(error); }
             });
           } catch (error) { batch.forEach(job => job.reject(error)); }
         }
@@ -248,10 +253,10 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     let reads = 0;
     if (generationContext && generationContext.transaction !== tx) throw new Error('foreign-generation-transaction');
     const marker = generationContext?.markers.get(namespace) ?? await (async () => { reads++; return tx.get(base); })();
-    if (binding.kind === 'runtime' && (marker.get('schemaVersion') !== 1 || marker.get('v') !== 1 || marker.get('accountRetention') !== true)) {
+    if (binding.kind === 'runtime' && (marker.get('schemaVersion') !== 1 || ![1, 2].includes(marker.get('v')) || marker.get('accountRetention') !== true)) {
       throw new Error('feed-index-generation-unavailable');
     }
-    if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+    if (!marker.exists || ![1, 2].includes(marker.data().v)) throw new Error('index-not-seeded');
     const identity = mode(marker.data());
     if (generationContext) {
       if (generationContext.transaction !== tx) throw new Error('foreign-generation-transaction');
@@ -298,11 +303,11 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       const doc = await tx.get(cells.doc(cell)); reads++;
       roots.set(cell, doc.exists ? directoryEntry(cell, doc.data()) : null);
     }
-    const builder = treeBuilder(blockOptions), loaded = new Map();
+    const builder = treeBuilder({ ...blockOptions, cardProjection: cardFormat }), loaded = new Map();
     const load = async key => {
       if (!loaded.has(key)) {
         const doc = await tx.get(nodes.doc(key)); reads++;
-        loaded.set(key, verifyNode(key, doc.data()));
+        loaded.set(key, verify(key, doc.data()));
       }
       return loaded.get(key);
     };
@@ -547,7 +552,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     const alive = sessionDeadline(elapsedClock);
     const root = await db.runTransaction(async tx => {
       const [marker, header] = await tx.getAll(base, cells.doc(cell));
-      if (!marker.exists || marker.data().v !== 1) throw new Error('index-not-seeded');
+      if (!marker.exists || ![1, 2].includes(marker.data().v)) throw new Error('index-not-seeded');
       await retentionFence(tx, marker.data(), [{ path: cell }]);
       if (now > (marker.data().prunedThrough ?? -1)) tx.update(base, { prunedThrough: now });
       return header.exists ? directoryEntry(cell, header.data()).hash : null;
@@ -612,7 +617,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     if (accountRetention && (!snapshot.retention || typeof snapshot.retention !== 'object')) throw new Error('invalid-retention-snapshot');
     const metrics = { nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0 };
     await checkRetention(snapshot, [], metrics);
-    const result = await portableIndexPage({ roots: snapshot.roots, position,
+    const result = await portableIndexPage({ roots: snapshot.roots, position, cardProjection: cardFormat,
       readNode: key => loadBlock(key, metrics), eligible: row => available(row, c),
       mayContainRows: summary => minimumDistance(c.point, summary) <= c.radiusKm,
       rowKey: row => rowKey(row, c), nodeKey: summary => nodeKey(summary, c),
@@ -660,7 +665,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       const blocks = new Map(nodeDocs.docs.map(doc => [doc.id, doc.data()])), current = new Set(), found = [];
       function visit(key, prefix) {
         if (current.has(key)) throw new Error('duplicate-index-node');
-        const node = verifyNode(key, blocks.get(key));
+        const node = verify(key, blocks.get(key));
         if (!node.path.startsWith(prefix)) throw new Error('index-path-mismatch');
         current.add(key);
         if (node.kind === 'leaf') found.push(...node.rows);

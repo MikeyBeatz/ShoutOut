@@ -86,7 +86,7 @@ export function createEarlyErasureQueueStore(db, auth, { binding, clock = () => 
       const expected = validateTarget(target.data());
       if (expected.complete || !registration.exists || !index.exists || registration.get('schemaVersion') !== 1 ||
           !samePurgeTime(registration.createTime, expected.registrationCreateTime) || !samePurgeTime(index.createTime, expected.indexCreateTime) ||
-          index.get('v') !== 1 || index.get('accountRetention') !== true) throw new EarlyErasureNeedsReview('early-erasure-generation-replaced');
+          ![1, 2].includes(index.get('v')) || index.get('accountRetention') !== true) throw new EarlyErasureNeedsReview('early-erasure-generation-replaced');
     }
     return { time, data, ref: doc.ref };
   }
@@ -160,7 +160,7 @@ export function createEarlyErasureQueueStore(db, auth, { binding, clock = () => 
         seenWriters = reset ? 0 : data.seenWriters, digest = reset ? emptyDigest : data.digest;
       const prepared = page.docs.map((doc, i) => {
         const index = indexes[i];
-        if (!index.exists || index.get('v') !== 1 || index.get('accountRetention') !== true) throw new EarlyErasureNeedsReview('index-generation-unavailable');
+        if (!index.exists || ![1, 2].includes(index.get('v')) || index.get('accountRetention') !== true) throw new EarlyErasureNeedsReview('index-generation-unavailable');
         const old = previous[i].exists ? validateTarget(previous[i].data()) : null;
         const complete = Boolean(old?.complete && samePurgeTime(old.registrationCreateTime, doc.createTime) && samePurgeTime(old.indexCreateTime, index.createTime));
         targetCount++; if (complete) doneCount++; if (snapshot.writers.includes(doc.id)) seenWriters++;

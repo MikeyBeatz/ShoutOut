@@ -8,7 +8,7 @@ const compare = (a, b) => {
 };
 
 export async function portableIndexPage({ roots, position = {}, readNode, eligible, rowKey, nodeKey,
-  mayContainRows = () => true, prepareRows = async () => {}, assertSessionAlive }, { nodes = 32 } = {}) {
+  cardProjection = false, mayContainRows = () => true, prepareRows = async () => {}, assertSessionAlive }, { nodes = 32 } = {}) {
   if (!Array.isArray(roots) || typeof assertSessionAlive !== 'function' || typeof readNode !== 'function' ||
       typeof eligible !== 'function' || typeof rowKey !== 'function' || typeof nodeKey !== 'function' ||
       !Number.isInteger(nodes) || nodes < 1 || nodes > 128) throw new Error('invalid-portable-selection');
@@ -22,10 +22,11 @@ export async function portableIndexPage({ roots, position = {}, readNode, eligib
     // Derived optimistic keys may contain Infinity; recompute them, never JSON it.
     frontier.push({ ...item, key: nodeKey(item.summary) });
   }
-  const pending = (state.pending ?? []).map(metadataOf);
-  await prepareRows([...pending, ...(state.candidates ?? []).map(metadataOf)]);
+  const metadata = row => metadataOf(row, { cardProjection });
+  const pending = (state.pending ?? []).map(metadata);
+  await prepareRows([...pending, ...(state.candidates ?? []).map(metadata)]);
   assertSessionAlive();
-  const candidates = (state.candidates ?? []).map(row => ({ row: metadataOf(row), key: rowKey(row) }));
+  const candidates = (state.candidates ?? []).map(row => ({ row: metadata(row), key: rowKey(row) }));
   if (pending.length >= 50 || candidates.length + pending.length > 50) throw new Error('invalid-portable-position');
   candidates.sort((a, b) => compare(a.key, b.key));
   let dropped = state.dropped === true, processed = 0;
@@ -40,7 +41,7 @@ export async function portableIndexPage({ roots, position = {}, readNode, eligib
     if (!frontier.peek()) break;
     if (processed >= nodes) return { state: 'preparing', rows: [], position: clone(checkpoint()), metrics };
     const item = frontier.pop();
-    const node = verifyNode(item.hash, await readNode(item.hash));
+    const node = verifyNode(item.hash, await readNode(item.hash), { cardProjection });
     assertSessionAlive(); processed++; metrics.nodesProcessed++;
     if ((item.exact ? node.path !== item.path : !node.path.startsWith(item.path)) ||
         (item.summary && canonical(node.summary) !== canonical(item.summary))) throw new Error('index-descriptor-mismatch');

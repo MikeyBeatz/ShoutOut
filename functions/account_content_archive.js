@@ -1,3 +1,4 @@
+import { prepareCardMutation } from './feed_card_state.js';
 // Internal archive primitives. Reached only by the gated v3 pipeline; no independent callable export.
 import { createHash } from 'node:crypto';
 import { Timestamp, FieldPath } from 'firebase-admin/firestore';
@@ -105,6 +106,9 @@ export async function archiveAccountContentPage(identity, db, auth, options = {}
       }
       const apply = await c.record(transaction, { kind: 'archive-root', contentKind: kind, archiveId,
         pendingArchiveId: kind === 'comment' ? archiveId : null });
+      const cardPlan = kind === 'comment' && shout.exists && shout.get('contentPurged') !== true
+        ? await prepareCardMutation(db, transaction, shout.id, shout.data(), { ...shout.data(), commentsCount: Math.max(0, count - 1) }) : null;
+      cardPlan?.apply();
       transaction.create(archiveRef, { schemaVersion: 1, kind, sourcePath: source.ref.path,
         subjectUserIds: [...new Set(kind === 'comment' ? [source.data().authorId] : [source.data().authorId, source.data().recipientId])],
         sourceShoutId: source.ref.path.split('/')[1],

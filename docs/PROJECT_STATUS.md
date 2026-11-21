@@ -24,9 +24,12 @@ analýza i lint. Neaktivní reader kontroluje skutečné serverové dokumenty;
 provozní projekční layout a úplné atomické pokrytí writerů/úklidu před DEV.
 [Konkrétní návrh P1](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md) odděluje sdílený
 index verzí od malého živého stavu jednoho Shoutu. Předložený lokální rozsah
-pokrývá všechny writery, geografii, R5/purge a obnovitelné doplnění; čeká na
-schválení implementace. Nyní pouze průzkum a dokumentace, žádná změna zdrojů
-aplikace ani nasazení. Návrh nedostává nový kredit ve stupnicích.
+pokrývá všechny writery, geografii, R5/purge a obnovitelné doplnění; vlastník
+schválil celý lokální P1. [Implementace a místní výsledky](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
+jsou připravené ve feature/feed-b4-state-storage: 14 nových emulátorových
+scénářů, 9 účtových Dart testů, 158 Functions unit, 25 nástrojových testů,
+celá analýza i lint prošly. Závěrečné úplné CI ještě není doložené. Nic se nenasazuje.
+Pevná zbývající váha je rozdělená na serverový/klientský úsek bez nového kreditu.
 
 **Předchozí lokální základ B4a:**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)

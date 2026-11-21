@@ -1,3 +1,4 @@
+import { prepareCardMutation } from './feed_card_state.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { accountPurgeJobRef, validateAccountPurgeJob, readAccountPurgeGuard, samePurgeTime,
@@ -77,7 +78,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
       if (Object.keys(data).some(key => !['schemaVersion', 'status', 'contentPurged', 'authorId'].includes(key))) {
         throw new AccountPurgeNeedsReview('invalid-frozen-shout-context');
       }
-      return null;
+      return prepareCardMutation(db, transaction, snapshot.id, data, null);
     }
     const operationId = createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, version])).digest('hex');
     const plan = await indexWriter.prepare(transaction, snapshot.id, data, null, { operationId });
@@ -213,7 +214,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
             const root = await transaction.get(db.doc(selected.path));
             if (!root.exists || !samePurgeTime(root.createTime, selected.createTime) || !validatePurgeSelection(root, stage, identity.userId)) throw new AccountPurgeNeedsReview('purge-root-replaced');
             if (['save', 'reaction'].includes(stage.action)) await purgeActivity(transaction, root, stage.action, identity.userId,
-              { indexWriter, operationId: createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, job.version])).digest('hex') });
+              { indexWriter, database: db, operationId: createHash('sha256').update(JSON.stringify(['accountPurge', jobRef.id, job.version])).digest('hex') });
             if (stage.action === 'comment') {
               const parent = await transaction.get(root.ref.parent.parent), count = parent.get('commentsCount') ?? 0;
               if (parent.exists && parent.get('contentPurged') !== true) {
@@ -222,6 +223,8 @@ export async function runAccountPurgeJob(identity, db, auth, {
                   if (!before(root.updateTime, parent.createTime)) throw new AccountPurgeNeedsReview('ambiguous-purge-comment-parent');
                 } else {
                   if (!Number.isSafeInteger(count) || count < 1) throw new AccountPurgeNeedsReview('invalid-purge-comment-count');
+                  const cardPlan = await prepareCardMutation(db, transaction, parent.id, parent.data(), { ...parent.data(), commentsCount: count - 1 });
+                  cardPlan?.apply();
                   transaction.update(parent.ref, { commentsCount: count - 1 });
                 }
               }

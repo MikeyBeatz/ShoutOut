@@ -2,7 +2,7 @@
 
 [Rozcestník feedu](README.md) · [Výsledky readeru](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
 
-Návrh k 21. listopadu 2026. **Čeká na schválení implementace.** Nejde o
+Návrh k 21. listopadu 2026. **Vlastník schválil celý lokální P1; probíhá implementace.** Nejde o
 nasazenou vrstvu ani prokázanou kapacitu produkce. Navazuje na uzavřený
 neaktivní reader 0b2d004 a jeho úplné CI 44825059479.
 
@@ -130,6 +130,13 @@ Před implementací rozdělit pouze zbývající váhu delta-code/check na serve
 a klientský úsek, bez nového kreditu za tento návrh. P1 je hotové až s úplným
 pokrytím writerů, regresí a úspěšným přesným CI; samotné schéma nestačí.
 
+Rozpad je založený bez nového kreditu: serverové `feed-b4-state-code/check`
+mají po 11 bodech MVP / 18 bodech backlogu, navazující klientské delta-code/check
+po 11 / 17. Součet původních 22 / 35 zůstává stejný. Pro menší transakční
+prefix je nutné kompatibilní dekódování účtové přípravy: pokračování může
+platit i při méně než 50 skrytých Shoutech. Přibyla pouze tato technická
+kompatibilita, bez změny UI nebo pořadí mazání; dosavadní odpovědi zůstávají platné.
+
 ## Následující brány k nasazení
 
 1. **Klient a oprávnění:** verze odpovědi pro metadata/chybějící těla,
@@ -148,3 +155,88 @@ pokrytím writerů, regresí a úspěšným přesným CI; samotné schéma nesta
 Návrh nemění pořadí nepřečtené → přečtené, ruční obnovu, sekundové měření
 čtení, expiraci ani produktové možnosti. Nové nákladové/provozní volby a
 živý datový přechod se předloží konkrétně před provedením.
+
+<a id="p1-results"></a>
+
+## P1 – implementace a ověření
+
+Stav 21. listopadu: implementace připravená, závěrečné úplné CI ještě čeká.
+Tento odstavec není doklad nasazení. Runtime má `cardStateEnabled: false`;
+reader ani cloudová data na novou vrstvu nepřešly.
+
+- `feed_card_state.js` sestavuje whitelist živého stavu a monotónní revizi.
+  Runtime přebírá skutečné zdrojové snapshoty načtené v téže transakci a
+  odmítá odlišný či dodatečně pozměněný plán. Kontroluje chybějící apply,
+  chybějící zdrojový zápis, opakovanou mutaci a spolknutou chybu zápisu.
+  Revize se připojí k původnímu SDK zápisu zdroje, nikoli dalším zápisem navíc.
+  Ochrana platí pro zápisy přes runtime transakci; není náhradou Rules,
+  přezkoumání dalších serverových cest nebo budoucího migračního auditu.
+- Staré uzly zůstávají v1. Card uzly jsou v2 s bodyVersion/selectionVersion;
+  starý verifier je odmítá. Obě verze sdílejí omezený strom a jeho cache,
+  oddělené cestou generace a obsahem hashe. Příslušný generační marker je
+  v2/readIdentity 1/cardProjection 1; control používá schválené schema 2.
+- Komentáře, jejich mazání, záložky, archivace a purge používají společného
+  publishera. Tvorba, palce, expirace, skrytí a mazání jej dostávají přes
+  stávající indexový runtime. Kompatibilní cesta bez publishera při aktivním
+  card control odmítá čítačovou změnu. Staré dosud nenasazené klienty/serverové
+  revize tím zpětně chránit nelze; jejich přechod zůstává samostatnou bránou.
+- `shout_geography_update.js` dokončí výsledek poskytovatele až po kontrole
+  inkarnace zdroje, autora, polohy, aktivního stavu, expirace a deleted markeru.
+  Nezavádí nové geokódování ani jeho opakování. Veřejný whitelist těla je
+  přesunutý beze změny do feed_public_body, aby planner neměl závislost na hostu readeru.
+- `feed_card_backfill.js` má interní begin/step/beginAudit/auditStep, trvalý
+  kurzor a půlení příliš velké dávky. Každá dávka čte aktuální zdroj ve své
+  transakci; po restartu navazuje na potvrzený kurzor. Nevytváří read aktivaci,
+  CLI nebo automatickou migraci. Audit má pevný readTime, dva nezávislé souhrny
+  pro veřejné stavy a aktivní index, omezené stránky a verzi jobu. Poškozené
+  pokrytí nebo změna retenční revize odmítnou ready. Audit lze explicitně
+  restartovat s novým bodem čtení; neúspěch neotevře reader.
+- R5 odstraňuje i publicStates autora po nejvýše min(reads, deletes), s týmiž
+  Auth-confirmation/inkarnace/lease kontrolami. Kontrola profilu brání jejich
+  návratu při pozdějším odpočtu cizího komentáře. V2 historie a GC používají
+  odpovídající verifier; původní obsahová retence se nemění.
+
+Lokální sada má 14 scénářů včetně vnořených měření 50/200/2 000. Zahrnuje
+skutečné create/comment/delete/save/reaction/expiration operace, archivaci
+komentáře a purge záložky, souběh, starší snapshot, R5 s cold restartem,
+50/450 ve třech generacích, chybný audit a odmítnutí změněného control.
+Samostatný CI krok `test:card-state` má čtyřminutovou pojistku; zátěžový
+cloudový test tím není nahrazený. Pro technickou kompatibilitu menších
+účtových dávek prošlo také 9 Dart testů a celá flutter analyze bez nálezů.
+
+### Hranice měření a zbývající integrace
+
+Report eviduje skutečné SDK reads, pokusy o zápis a JSON bajty přečtených
+dokumentů; nejde o přenosové bajty HTTP odpovědi, cenu nebo SLA. Čistá
+čtecí transakce se počítá do attempts stejně jako zapisující. Backfill a
+audit jsou jednorázová práce; běžná obnova je od nich oddělená.
+
+[Lokální report](../../benchmarks/FEED_B4_STATE_2026-11-21.json), stejných
+50 vybraných karet a shodné vymezení staré/nové čtecí cesty:
+
+| Zdrojů | Původní cold / warm reads | Nové cold / warm header reads | Jedno chybějící tělo navíc |
+| --- | --- | --- | --- |
+| 50 | 59 / 58 | 59 / 8 | 1 |
+| 200 | 63 / 58 | 63 / 8 | 1 |
+| 2 000 | 72 / 62 | 72 / 12 | 1 |
+
+Cold v této fixture počet reads nezlepšuje. Warm rozdíl je přesně 50
+neopakovaných zdrojových čtení, ne odstranění ostatních kontrol. Samostatná
+změna čítače v měřených dvou generacích (stará + card) má 7 reads / 2 SDK
+zápisy: zdroj a jeho card stav, bez zápisu stromu. Ostatní operace s
+receipt/rate/oznámeními mají vlastní práci navíc. Backfill měl 2/5/41 dávek,
+121/463/4 663 reads a 54/225/2 385 SDK zápisů. Report uchovává i samostatný audit.
+
+Připravená čtecí cesta porovnává header v RAM a doplňuje pouze chybějící těla.
+Neobsahuje platformní Auth/App Check, B2/B3 synchronizaci, dosavadní Home ani
+počáteční doručení živých odběrů. Tyto části nemizí a musí se připočíst při
+klientském přechodu. Nová per-Shout vrstva se při obnově nenačítá po 50
+dokumentech jen kvůli čítačům. Přidává vlastní stavový zápis a transakční
+kontroly; náklady nelze hodnotit jen podle nulových warm source reads.
+
+Před DEV dál zbývá klientský kontrakt a sloučení živého stavu, náhrada
+Home/rodičovských odběrů se zachováním promo, Rules proti přímému čítačovému
+zápisu, přesný indexový plán a migrační/rollback postup s odvodněním starých
+serverových volání. Pro budoucí indexový plán ponechat authorId pro účtový
+úklid; monotonní cardRevision/revision a hashe nepotřebují vlastní dotazové
+indexy. Zatím se neměnil firestore.indexes.json, TTL ani živé konfigurace.

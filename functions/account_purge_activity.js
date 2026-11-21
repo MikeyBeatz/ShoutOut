@@ -1,8 +1,9 @@
+import { prepareCardMutation } from './feed_card_state.js';
 import { AccountPurgeNeedsReview } from './account_purge_guard.js';
 
 // No new archive after the deadline. Source deletion and the matching live
 // counter decrement still share the caller's fenced journal transaction.
-export async function purgeActivity(transaction, snapshot, action, uid, { indexWriter = null, operationId } = {}) {
+export async function purgeActivity(transaction, snapshot, action, uid, { indexWriter = null, operationId, database = null } = {}) {
   const parts = snapshot.ref.path.split('/'), parent = await transaction.get(snapshot.ref.parent.parent);
   if (parts.at(-1) !== uid || snapshot.get('userId') !== uid) throw new AccountPurgeNeedsReview('invalid-purge-activity-owner');
   if (!parent.exists || parent.get('contentPurged') === true || parent.get('authorId') === uid) return;
@@ -23,5 +24,8 @@ export async function purgeActivity(transaction, snapshot, action, uid, { indexW
   const indexedReaction = action === 'reaction' && parent.ref.path.split('/').length === 2;
   const plan = indexedReaction ? await indexWriter?.prepare(transaction, parent.id, parent.data(), after, { operationId }) : null;
   if (indexedReaction && indexWriter && typeof plan?.apply !== 'function') throw new Error('invalid-purge-index-plan');
+  const cardPlan = !indexedReaction && parent.ref.path.split('/').length === 2
+    ? await prepareCardMutation(database ?? snapshot.ref.firestore, transaction, parent.id, parent.data(), after, { operationId }) : null;
+  cardPlan?.apply();
   plan?.apply(); transaction.update(parent.ref, { [field]: count - 1 });
 }
