@@ -28,7 +28,7 @@ test('disabled activation and incorrect proof fail before database/auth access',
   const digest = createHash('sha256').update(canonical(data)).digest('hex'); writeFileSync(file, JSON.stringify({ ...data, digest }));
   const args = ['start', '--project', project, '--plan', relative(join(import.meta.dirname, '..'), file), '--approved-digest', digest, '--confirm-project', project, '--ci-run', '123'];
   const openDatabase = () => { assert.fail('database must not open'); };
-  await assert.rejects(main(args, { openDatabase, inspectRelease: proof }), /activation-release-required/);
+  await assert.rejects(main(args, { openDatabase, inspectRelease: proof, configuration: {compatibleGenerations: true, cardStateEnabled: false, deltaResponsesEnabled: false} }), /activation-release-required/);
   await assert.rejects(main(args, { openDatabase, inspectRelease: () => ({ ...proof(), dirty: 'changed' }) }), /clean-exact-full-ci/);
 });
 function inventory() {

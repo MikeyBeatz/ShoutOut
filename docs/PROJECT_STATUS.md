@@ -6,6 +6,12 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Nyní: schválený DEV rollout B4 se připravuje ve feature/feed-b4-dev-rollout.**
+Čerstvá inventura stále potvrdila 38 původních zdrojů / 0 active / 1 žádost
+bez potvrzení Auth. Připravují se aktivační přepínače, oddělený B4 pilot a
+kontrola serverového RETIRED stavu starých revizí. [Přesné plány a aktuální stav](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
+Zatím bez externích změn; další je lokální ověření a úplné CI aktivačního SHA.
+
 **Nyní: schválený lokální přechod B4 je uzavřený včetně úplného CI.**
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
 [success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
@@ -15,9 +21,8 @@ otevřeného klienta při rollbacku. [Připravené změny a jejich meze](plans/f
 Prošlo 432 Flutter, 87 nástrojových, 159 Functions unit, 464 Rules/server,
 9 reader, 14 card, 13 transport/Rules/Chrome, 8 přechodových, 34 B2 runtime,
 142 purge a 15 Storage testů, analýza/lint/formát i webový build.
-Přepínače jsou vypnuté, bez živých změn. Další je schválení konkrétního
-DEV přechodu podle [návrhu pilotu](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot),
-včetně čerstvého plánu, indexů a důkazu doběhnutí starých serverových volání.
+Tento předchozí zdroj má přepínače vypnuté a žádné živé změny.
+Navazující DEV přechod je schválený; aktuální příprava je popsaná výše.
 Předchozí 44928809756 selhalo na pořadí instalace závislostí; opraveno a
 ověřeno konečným během. 44928446576 bylo zrušeno po doplnění měření.
 

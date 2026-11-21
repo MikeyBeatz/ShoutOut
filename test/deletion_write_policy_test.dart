@@ -30,6 +30,7 @@ void main() {
     for (final enabled in [false, true]) {
       final web = WebEnvironment.fromJson({
         ...config('dev'),
+        'serverDeltaFeed': false,
         'serverSpatialFeed': false,
         'serverUnreadFeed': false,
         'serverAccountDeletionPreparation': enabled,

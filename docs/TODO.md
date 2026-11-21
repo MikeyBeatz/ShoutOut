@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,16 %** — vážené dokončení podúseků
 
-Hotové úseky: **159/217**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **159/219**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
 
-Hotové úseky: **190/295**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **190/297**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -67,8 +67,8 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
    [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
    [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** schválit
-   [konkrétní živý DEV přechod a pilot](plans/feed/B4_DEV_ROLLOUT.md#future-dev-pilot).
+   zahrnují i Chrome proti emulátoru a nákladové měření. **Nyní:** připravit
+   a po úplném CI provést [schválený živý DEV přechod a pilot](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
    Operátor, kompatibilita, indexový plán a přechodové ověření jsou uzavřené;
    živá migrace/akceptace ani číslovka novinek tím hotové nejsou.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání

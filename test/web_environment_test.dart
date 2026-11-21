@@ -7,17 +7,18 @@ import 'package:shoutout/web_environment.dart';
 Map<String, dynamic> gatewayFixture() => {
   ...jsonDecode(File('config/dev.json').readAsStringSync())
       as Map<String, dynamic>,
+  'serverDeltaFeed': false,
   'serverSpatialFeed': false,
   'serverReadSynchronization': false,
   'serverUnreadFeed': false,
 };
 
 void main() {
-  test('B4 client defaults off and requires all DEV count writers', () {
+  test('B4 client is active in DEV and requires all count writers', () {
     final dev =
         jsonDecode(File('config/dev.json').readAsStringSync())
             as Map<String, dynamic>;
-    expect(WebEnvironment.fromJson(dev).serverDeltaFeed, isFalse);
+    expect(WebEnvironment.fromJson(dev).serverDeltaFeed, isTrue);
     expect(
       WebEnvironment.fromJson({
         ...dev,
@@ -51,6 +52,7 @@ void main() {
         jsonDecode(File('config/dev.json').readAsStringSync())
             as Map<String, dynamic>;
     expect(WebEnvironment.fromJson(dev).serverUnreadFeed, isTrue);
+    dev['serverDeltaFeed'] = false;
     expect(
       WebEnvironment.fromJson(
         {...dev}..remove('serverUnreadFeed'),
@@ -505,6 +507,7 @@ void main() {
     config['environment'] = 'prod';
     config['serverReadSynchronization'] = false;
     config['serverUnreadFeed'] = false;
+    config['serverDeltaFeed'] = false;
     config['appUrl'] = 'https://go.shoutout-app.eu';
     config['hostingSite'] = 'example-shoutout-live';
     config['firebase']['projectId'] = 'shoutout-production-a1b34';
@@ -552,7 +555,9 @@ void main() {
   });
 
   test('server comments are independent and require App Check', () {
-    final config = development()..remove('serverCommentCreation');
+    final config = development()
+      ..remove('serverCommentCreation')
+      ..['serverDeltaFeed'] = false;
     expect(WebEnvironment.fromJson(config).serverCommentCreation, isFalse);
     expect(
       WebEnvironment.fromJson({

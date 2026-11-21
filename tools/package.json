@@ -15,7 +15,7 @@
     "reconcile:data": "node reconcile_counters.mjs",
     "set:role": "node set_role.mjs",
     "activate:business": "node activate_business_application.mjs",
-    "test:tools": "node --test ci_scope.test.mjs read_sync_index_plan.test.mjs project_progress.test.mjs capacity_model.test.mjs function_artifact.test.mjs feed_empty_bootstrap.test.mjs identity_write_fence.test.mjs legacy_feed_seed.test.mjs archive_index_plan.test.mjs business_activation.test.mjs moderation_seed.test.mjs web_environment.test.mjs feed_prototype.test.mjs feed_card_transition.test.mjs",
+    "test:tools": "node --test ci_scope.test.mjs read_sync_index_plan.test.mjs project_progress.test.mjs capacity_model.test.mjs function_artifact.test.mjs feed_empty_bootstrap.test.mjs identity_write_fence.test.mjs legacy_feed_seed.test.mjs archive_index_plan.test.mjs business_activation.test.mjs moderation_seed.test.mjs web_environment.test.mjs feed_prototype.test.mjs feed_card_transition.test.mjs feed_revision_drain.test.mjs",
     "prototype:feed": "node feed_prototype.mjs",
     "backfill:geography": "node backfill_shout_geography.mjs",
     "backfill:public-profiles": "node backfill_public_profiles.mjs",
@@ -29,7 +29,7 @@
     "test:body-reader": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_body_reader.integration.test.js\"",
     "test:card-state": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_card_state.integration.test.js\"",
     "test:delta-client": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 rules/feed_delta_access.integration.test.mjs ../functions/feed_delta.integration.test.js\"",
-    "test:card-transition": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_card_transition.integration.test.js\""
+    "test:card-transition": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_card_transition.integration.test.js ../functions/feed_b4_pilot.integration.test.js\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",

@@ -9,7 +9,9 @@
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
 [success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
 Vlastník rozsah schválil v odpovědi na call_a0d99f40f57446909fb11ba932047dcd.
-Živá migrace schválená není, přepínače zůstávají vypnuté.
+Navazující živý DEV přechod vlastník schválil po vysvětlení postupu a
+indexových výjimek („dobře souhlasím“). Aktivační verze se nyní připravuje;
+dosavadní živý web/server se tímto zápisem nemění.
 Zdroj předchozího klienta 62fc8fe má success úplné CI 44917393562;
 uzavírací dokumentace 6c2c7f3 má success lehké CI 44918771643.
 
@@ -254,7 +256,7 @@ otevřené, proto tento přechodový checkpoint sám nezvyšuje procenta.
 
 <a id="future-dev-pilot"></a>
 
-## Konkrétní návrh budoucího pilotu – čeká na schválení
+## Schválený DEV pilot – připravovaný rollout
 
 Pouze `shoutout-dev-46c81`: kandidát `feed-v3`, nový čtecí plán/digest po
 inventuře, žádná změna Auth účtů. Po úplném CI aktivačních SHA nejprve indexy,
@@ -279,3 +281,45 @@ Odvodnění je zatím **otevřená živá brána**: doložit nové ACTIVE revize
 rozpracovaných volání/logů. Pokud to dostupná telemetrie nedoloží, přechod
 nezahájit a předložit vymezené servisní okno. Samotné 60sekundové čekání nebo
 zaškrtnutí `compatibleWriters` v interním testu tento důkaz nenahrazuje.
+
+<a id="dev-rollout-progress"></a>
+
+## Aktuální příprava DEV
+
+Čerstvá čtecí inventura 21. listopadu 17:42 UTC potvrdila STANDARD/europe-west3,
+38 původních zdrojů (27 expired / 11 deleted), žádný aktivní, jednu žádost
+bez potvrzení odstranění Auth, stejných 20 Functions a dostupný Monitoring.
+Hosting je stále 5b4d711b715a85e3 ze zdroje fc795ad; jde také o návratovou
+verzi webu. Žádný indexový/datový zápis ještě neproběhl.
+
+Připravené konkrétní plány pouze pro shoutout-dev-46c81:
+
+- přechod feed-v2 → feed-v3, původní control revision 6, všechny původní
+  inkarnace zachované; digest
+  `06232230b447b2a1a57780ed341c8853ed6eea12fd7cbe396111f81e9f2a0e67`;
+- jeden composite + 13 výjimek, bez TTL; digest
+  `2ab00cd9aa473d569f87557bfb9779f62e007d46b11a9ed87767140c7ef97585`.
+
+Aktivační commit zapíná společné serverové přepínače a DEV serverDeltaFeed.
+Nasazení má pořadí: indexy → 10 existujících Functions → ověřený drain →
+Rules → start/backfill/audit/activate → web → pilot/rollback/resume/úklid.
+Každý skutečně nasazovaný SHA musí nejprve projít úplným CI.
+
+[Kontrola drainu](../../../tools/feed_revision_drain.mjs) vyžaduje 100 %
+provozu na nové připravené revizi a serverový stav Active/RETIRED u všech
+historických revizí. Stav RETIRED podle [dokumentace Cloud Run](https://docs.cloud.google.com/run/docs/managing/revisions)
+znamená vyřazenou infrastrukturu této revize. Prázdné metriky ani samotné
+čekání nejsou důkazem. Při chybějícím potvrzení se generace nezaloží.
+
+[Nový pilot](../../../functions/feed_b4_pilot.js) má vlastní guard/digest,
+120 nových ID, oddělené 70/20 přečtení a zachování původních zdrojů.
+[Emulátorová sada](../../../functions/feed_b4_pilot.integration.test.js)
+ověřuje idempotenci, cold/warm/refill, tři generace, ochranu cizích potomků
+a historie při úklidu. Dva Business Shouty dostanou promo až po ověření
+120 běžných karet; po této vymezené změně bude v běžném feedu 118 a v promo
+2. Nejde o ztrátu dat. [CLI](../../../tools/feed_b4_pilot.mjs) vyžaduje přesný
+úspěšný úplný CI a před úklidem potvrzení dokončené klientské akceptace.
+
+Před živou prací je z nedokončené váhy nasazení/akceptace B4 oddělená
+metadata/cache část a zbývající společná část s novinkami, v každé stupnici
+půl na půl. Hotové váhy zůstávají zachované; nové úseky jsou zatím nehotové.
