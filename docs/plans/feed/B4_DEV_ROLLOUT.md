@@ -635,7 +635,7 @@ Pouze shoutout-dev-46c81 dosud proběhlo:
   lokálnímu syrovému SHA-256 (8 HTTP odpovědí). První pomocný checker nesprávně
   srovnával syrový hash s hashem gzip přenosu; po opravě ověření vše souhlasí,
   obsah webu se kvůli tomu neměnil ani znovu nenasazoval.
-- Vytvořený je pouze slot **A** / mvp-b4b-mwqzrojk-e0183ed3-A. Publikace
+- První vytvořený slot byl **A** / mvp-b4b-mwqzrojk-e0183ed3-A. Publikace
   atomicky prošla společným writerem tří generací i regionálním headem.
   Interní jádro vrací oběma účtům 1 kartu, news kontext s 36 heads a count 0;
   count má naměřených 30 SDK reads a 1 news quota zápis na účet. Je to interní
@@ -654,11 +654,39 @@ b4b-bright-baseline.log / b4b-bright-zero.log a b4b-business-baseline.log / b4b-
 build/b4b-dev-release/docs/local/b4b-pilot-state-v2.json; kořenová kopie je
 předstartovní podklad, nepoužívat ji pro další mutace. Operátor i jeho plán
 docs/local/b4b-activation-plan-v2.json spouštět z téže čisté release kopie.
-Podle živých důkazů je dokončené **feed-b4-dev**. Vlastník dostal žádost
-o jedinou skutečnou publikaci **MVP B4b B 183ed3** pod TestBusiness:
-24 h / Dotaz / Ústí / bez promo, text přesně podle manifestu.
-Po ní použít `adopt` a ověřit count proti původní baseline, odebrání/expiraci,
-obnovu a otevřeného klienta při pauze/návratu. **C zatím nevytvářet**;
+Podle živých důkazů je dokončené **feed-b4-dev**. Vlastník vytvořil
+**MVP B4b B 183ed3** pod TestBusiness: source
+84e4c14d44c679357231fb4993bf3b2ac6b381f3f89d16589f2022c4bdb98b20,
+createdAt 2026-11-21T23:35:52.317Z, active, přesně 24 h. Callable createShout
+má Auth/App Check VALID a HTTP 200; `adopt` svázal B s manifestem bez cloudových
+zápisů. Aktuálně 40 zdrojů, C chybí. Interní count běžnému účtu proti původní
+baseline vrací 1 / 48 SDK reads; neprokazuje vykreslení číslovky v UI.
+
+Vlastník při tomto průchodu hlásí chybu načtení feedu a nemožnost změnit 5 km
+na 50 km. Klient ukládá nový filtr až po úspěšném načtení, proto tento projev
+sám nedokazuje druhou chybu ovládání. Pozorovaná volání B2/getFeedPage mají
+platné Auth/App Check a HTTP 200, ale samotný stav HTTP neprokazuje úspěch
+konkrétní hlavní stránky feedu (getFeedPage obsluhuje také jiné režimy).
+
+Čtecí diagnostika: skutečná interní odpověď pro TestBusiness / 5 km prošla
+FeedNewsSignals i FeedDeltaClient parserem v Dart testu. Další izolovaný test
+reprodukuje, že jediná `deferred` B2 značka nedostupného Shoutu ponechá po
+úspěšném downloadu `snapshotComplete=true`, `uploadComplete=false` a zablokuje
+`synchronizeForFeed`. Fronta i přečtení přitom správně zůstanou zachované.
+Cloudové read bloky TestBusiness mají 0 entries a revision 8 beze změny od
+19:12:54.174Z, přestože následná upload volání prošla; to hypotézu podporuje,
+ale bez místní fronty ji nepotvrzuje. Vlastník byl požádán o jediné porovnání
+s čerstvým anonymním oknem. Nemazat IndexedDB/frontu, neopakovat publikaci B
+a neuvolňovat podmínku úplné B2 synchronizace bez samostatně ověřeného řešení.
+Zdrojový kód ani živá konfigurace se při diagnóze neměnily.
+
+Diagnostické podklady: build/b4b-user-failure-inspect.log,
+b4b-user-failure-logs.json, b4b-fixture-b-adopt.log, b4b-bright-new-b.log,
+b4b-wire-diagnosis.log a b4b-deferred-diagnosis.log. Dva místní diagnostické
+testy prošly; nejde o novou úplnou CI ani o potvrzení příčiny v prohlížeči.
+
+Nejprve dokončit diagnózu, poté count/odebrání/expiraci, obnovu a otevřeného
+klienta při pauze/návratu. **C zatím nevytvářet**;
 60sekundové okno zahájit až při připraveném pozorujícím klientu.
 Pro interní kontexty používá build/b4b-core-probe.mjs oddělený soubor každého
 účtu (b4b-core-Bright_Otter_182.json a b4b-core-TestBusiness.json), aby se

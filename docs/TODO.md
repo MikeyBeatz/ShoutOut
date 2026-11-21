@@ -74,8 +74,12 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    CI a živého ověření. Zdroj 20206c4 má success úplné CI 44959541907;
    [DEV nasazení je ověřené](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results):
    indexy dokončené, news active / feed control 12, Rules/dvě Functions/drain ověřené,
-   Hosting ca327f10112ef349 / news on. Pilotní A existuje; B čeká na skutečný
-   klientský průchod vlastníka, C zatím nevytvářet. Nasazení je splněné,
+   Hosting ca327f10112ef349 / news on. Pilotní A i B existují; B vznikl přes klienta
+   TestBusiness s validním Auth/App Check a je adoptovaný. Interní count po B je 1.
+   **Nyní vyšetřit chybu načtení feedu / změny dosahu:** lokálně reprodukovaná
+   blokace B2 při odložené značce starého nedostupného obsahu je hypotéza pro
+   konkrétní prohlížeč; čeká porovnání s anonymním oknem. Místní data nemazat,
+   C zatím nevytvářet. Nasazení je splněné,
    společná akceptace zatím ne. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

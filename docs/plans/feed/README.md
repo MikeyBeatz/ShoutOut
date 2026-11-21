@@ -14,7 +14,10 @@ jsou uzavřené včetně úplného CI 44953434700 success ze zdroje 3d381f8.
 [Konkrétní DEV plán a malý společný pilot](B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
 vlastník schválil celý. [B4b je nasazené a aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results)
 ze zdroje 20206c4 / úplné CI 44959541907 success. Živá akceptace a úklid zbývají;
-existuje pouze pilotní A, B čeká na skutečný klient a C na připravené pozorování.
+existují pilotní A i B, B prošel skutečným klientem s validním Auth/App Check.
+Před dalším pilotem se vyšetřuje vlastníkova chyba načtení feedu / změny dosahu;
+blokace obnovy odloženou B2 značkou je reprodukovaná lokálně, ale u vlastníka
+zatím nepotvrzená. C čeká na připravené pozorování, místní frontu nemazat.
 Následující přípravné etapy jsou datované podklady již nasazené metadata/cache vrstvy.
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.

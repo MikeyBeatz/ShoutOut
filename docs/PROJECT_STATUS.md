@@ -18,11 +18,18 @@ jsou nasazené a zdrojově ověřené. Nové ACTIVE revize jsou createShout
 plánovače jsou porovnané beze změny. Hosting **ca327f10112ef349 / news on**:
 69 vzdálených souborů (67 app + 2 Firebase), gzip hashe i 8 skutečných HTTP
 odpovědí na obou doménách odpovídají artefaktu. Původních 38 Shoutů a jedna žádost
-jsou ověřené beze změny; vytvořen pouze pilotní A. Oběma účtům interní jádro
+jsou ověřené beze změny. Pilotní A vznikl nástrojem, B následně skutečným klientem
+TestBusiness (Auth/App Check VALID, HTTP 200, 24 h); B je adoptovaný do manifestu.
+Před publikací B oběma účtům interní jádro
 vrací 1 kartu, news kontext s 36 heads a count 0 (30 SDK reads / 1 quota zápis).
 Nejde o validní callable/UI důkaz. Auth účty, produkce/main nezměněné.
-Další: vlastník má vyžádané skutečné vytvoření **MVP B4b B 183ed3** pod
-TestBusiness (přesný text v manifestu), 24 h / Dotaz / Ústí / bez promo.
+Po B vrací interní count běžnému účtu 1 (48 SDK reads); nejde o UI důkaz.
+**Akceptaci nyní blokuje chyba feedu:** vlastník hlásí neúspěšné načtení a změnu
+dosahu ponechanou na 5 km. Skutečná odpověď jádra prošla klientským parserem.
+Lokální diagnostický test reprodukuje blokaci obnovy při odložené B2 značce
+nedostupného starého obsahu; příčina v konkrétním prohlížeči zatím není potvrzená.
+Probíhá porovnání s novým anonymním oknem, bez mazání místních dat či změny kódu.
+Podrobné důkazy a další krok jsou v [pilotním výsledku](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results).
 Zatím nevytvářet C: 60s okno začít až při připraveném pozorujícím klientu.
 Následuje ověření číslovky/odečtení/obnovy, otevřeného UI při pauze/návratu
 a úklid těchto tří slotů. B4 ani finální feed akceptaci zatím neuzavírat.
