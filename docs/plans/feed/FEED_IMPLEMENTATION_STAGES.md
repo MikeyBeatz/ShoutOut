@@ -26,6 +26,11 @@ původních 38 zdrojů a pending žádost beze změny. [Konečné důkazy](B3_DE
 B4 indikátor novinek/delta obnova je další otevřená etapa. Datované podklady
 předchozích příprav níže nejsou současným stavem nasazení.
 
+**21. listopadu:** [B4 klientské metadata/cache, sdílený malý stav a lokální Rules](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
+jsou uzavřené ve zdroji 62fc8fe po success úplném CI 44917393562. Žádné
+nasazení ani živý datový přechod; nová vrstva je vypnutá. Zbývá připravit
+řízený DEV přechod a následně signály/číslovku a společnou akceptaci B4.
+
 A0 (plný detail) je nasazené v DEV; A1 je dokončený lokální prototyp.
 Negativní hodnocení už mimo Top nemění pořadí, ale sbalení. A2/A3 mají
 moduly prostorového indexu, historické relace, kurzoru a koordinátoru.

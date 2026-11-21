@@ -14,7 +14,8 @@ má [uzavřenou lokální implementaci a úplné CI](FEED_STATE_STORAGE_PROPOSAL
 provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 [Klientské zapojení a Rules – konkrétní navazující návrh](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal)
 je schválený a má [lokální implementaci a výsledky](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results);
-čeká závěrečné úplné CI, nikoli nový souhlas s touž implementací. Nepřidává další očíslované P úseky.
+úplné CI 44917393562 je úspěšné. Další je řízený DEV přechod, nikoli nový
+souhlas s touž implementací. Nepřidává další očíslované P úseky.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
 neopakovat je jako otevřenou práci.
 

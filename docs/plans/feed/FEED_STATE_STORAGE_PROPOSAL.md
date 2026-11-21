@@ -160,7 +160,7 @@ Návrh nemění pořadí nepřečtené → přečtené, ruční obnovu, sekundov
 
 ## Klientské zapojení B4 – konkrétní rozsah před DEV
 
-Návrh z 21. listopadu, **vlastník schválil celý lokální rozsah; lokální implementace je připravená, závěrečné CI dosud čeká**. Je to první ze
+Návrh z 21. listopadu, **vlastník schválil celý lokální rozsah; implementace i úplné CI jsou uzavřené**. Je to první ze
 tří zbývajících bloků výše, nikoli nová řada P1–Pn. Serverový P1 zůstává
 uzavřený; jeho algoritmy ani celé fixture bez důvodu neopakovat.
 
@@ -360,8 +360,11 @@ indexy. Zatím se neměnil firestore.indexes.json, TTL ani živé konfigurace.
 
 ## Klientské zapojení – implementace a lokální důkazy
 
-Stav 21. listopadu: připravený kód a cílené lokální kontroly, závěrečné úplné
-CI dosud čeká. Nejde o nasazení ani živou akceptaci. `cardStateEnabled` i
+Stav 21. listopadu: implementace, lokální kontroly i úplné CI jsou dokončené.
+Zdroj **62fc8feb0bbded06c5f116867bbbd61ec0848b5b**, větev
+feature/feed-b4-client-integration, má
+[úspěšné úplné CI 44917393562](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44917393562).
+Nejde o nasazení ani živou akceptaci. `cardStateEnabled` i
 `deltaResponsesEnabled` zůstávají false; `serverDeltaFeed` má výchozí false
 a žádná konfigurace jej nezapíná. Prostředky a retence se nemění.
 
@@ -424,8 +427,15 @@ při výměně generace a zániku posledního odběratele.
 S deseti překrývajícími promo řádky vznikne 40 veřejných dokumentových
 odběrů a po 50 vlastních reaction/save odběrech; další detail je nezdvojí.
 Dosavadní testy optimistického potvrzování a scrollu zůstávají součástí
-celé Flutter sady. Závěrečné úplné CI musí ještě potvrdit všechny sady
-včetně ostatních serverových writerů, retence a webového sestavení.
+celé Flutter sady. Finální CI potvrdilo 429 Flutter, 83 nástrojových,
+159 Functions unit (520 emulátorových skip v unit fázi), 464 Rules/server,
+9 reader, 14 card/backfill, 13 nových B4, 34 B2 runtime, 142 purge a 15
+Storage testů; browserové sady, lint, analýzu, formát, dokumentaci i webový build.
+
+Předchozí běhy 44915563143 a 44915680084 byly zrušené po doplnění ochrany
+opožděných událostí a opravy synchronizační bariéry po změně účtu. Běh
+44917243560 selhal pouze na formátu testu; oprava je zahrnutá ve finálním
+zdroji. Tyto tři běhy nejsou důkazem dokončení. Rozhodující je success výše.
 
 ### Měření bez slibu plošné úspory
 

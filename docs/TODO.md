@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,16 %** — vážené dokončení podúseků
 
-Hotové úseky: **158/217**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **159/217**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
 
-Hotové úseky: **189/295**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **190/295**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -59,11 +59,12 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    zdroj d2cac88 / úspěšné úplné CI 44908128699. Navazuje na uzavřený
    [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results).
    Atomické zápisy, R5/history/purge, backfill a audit jsou místně ověřené;
-   nová vrstva zůstává vypnutá. **Nyní:** klientský kontrakt, sdílený stav,
-   Home a lokální Rules jsou připravené; čeká závěrečné úplné CI.
+   nová vrstva zůstává vypnutá. **Nově uzavřené:** klientský kontrakt, sdílený stav,
+   Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
    [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
    [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. Živý datový přechod je samostatná brána.
+   zahrnují i Chrome proti emulátoru a nákladové měření. **Další:** připravit
+   řízený DEV přechod s auditem/rollbackem. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

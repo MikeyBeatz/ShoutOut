@@ -19,6 +19,11 @@ potom úsporné signály a číslo nově příchozích Shoutů. Technické sché
 čerstvost/slučování a provozní náklady před implementací konkretizovat;
 samotné uzavření B3 je neurčuje. Datované přípravné checkpointy níže jsou historie.
 
+**Aktualizace 21. listopadu:** serverová vrstva i
+[klientské zapojení metadat/cache a malého živého stavu](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
+mají uzavřenou lokální implementaci a úplné CI. Nová vrstva zůstává vypnutá;
+další je řízený DEV přechod, potom signály a číslovka. Celé B4 není uzavřené.
+
 <a id="b3-local"></a>
 
 ### B3 — schválený lokální úsek, 19. listopadu 2026

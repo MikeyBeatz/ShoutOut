@@ -6,15 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: klientské zapojení B4 je lokálně připravené; závěrečné úplné CI čeká.**
+**Nyní: lokální klientské zapojení B4 je uzavřené včetně úplného CI.**
+Zdroj **62fc8feb0bbded06c5f116867bbbd61ec0848b5b** má
+[success úplné CI 44917393562](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44917393562).
 Větev feature/feed-b4-client-integration má skutečný delta transport/RAM cache,
 společný malý stav karty/detailu/Mé/Uložených, náhradu Home promo odběru,
-lokální Rules a návrh indexů. Prošlo 13 nových emulátorových scénářů včetně
-Chrome transportu proti emulátoru, 49 cílených serverových regresí a devět
-Dart klientských testů včetně vlastní synchronizační bariéry po změně účtu.
+lokální Rules a návrh indexů. Prošlo 429 Flutter, 159 Functions unit,
+464 Rules/server, 9 reader, 14 card/backfill, 13 nových B4, 34 B2 runtime,
+142 purge a 15 Storage testů, nástroje, browser, analýza/lint/formát i build.
+Nové testy zahrnují Chrome proti emulátoru a vlastní bariéru po změně účtu.
 [Výsledky a přesné meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results).
-Analýza a lint čisté; úplné CI ještě není doložené. Nové přepínače jsou
-vypnuté, nic se nenasazovalo. Další je uzavřít CI a připravit konkrétní DEV
+Nové přepínače jsou vypnuté, nic se nenasazovalo. Další je připravit konkrétní DEV
 přechod s auditem, kompatibilitou a rollbackem; živá migrace vyžaduje vlastní souhlas.
 
 **Předchozí lokální P1 B4 je uzavřený včetně úplného CI.**
