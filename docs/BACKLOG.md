@@ -196,9 +196,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,23 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,24 %** — vážené dokončení podúseků
 
-Hotové úseky: **193/299**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **194/299**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.

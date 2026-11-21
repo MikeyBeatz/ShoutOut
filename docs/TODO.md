@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,22 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,23 %** — vážené dokončení podúseků
 
-Hotové úseky: **162/221**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **163/221**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,23 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,24 %** — vážené dokončení podúseků
 
-Hotové úseky: **193/299**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **194/299**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -63,7 +63,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Nyní:** [schválený lokální B4b](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-proposal)
    pro úsporné signály/číslovku novinek, klienta a měření; pouze nové publikace.
    [Lokální výsledek a návrh četnosti](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
-   je připravený; následuje konečné úplné CI a návrh provozního napojení.
+   je uzavřený: e8c0c9c / úplné CI 44944929884 success. Následuje konkrétní
+   návrh provozního napojení včetně oprávněných oblastních signálů,
+   řízení četnosti a přepínání detekce podle zátěže; nový rozsah předem schválit.
    Přepínače vypnuté, bez živých změn. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

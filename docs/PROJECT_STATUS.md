@@ -6,15 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Lokální B4b je připravené ve feature/feed-b4-news-local; čeká konečné úplné CI.**
+**Lokální B4b je uzavřené včetně úplného CI ve feature/feed-b4-news-local.**
+Zdroj **e8c0c9c722049d989021ff5cc0339c3260b43a14** má
+[úspěšné úplné CI 44944929884](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44944929884).
 Vlastník schválil ucelený výpočet číslovky/klientský badge a měření dvou
 způsobů detekce a zvolil jen nově publikované příspěvky. [Rozsah a kontrakt](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-proposal).
 [Výsledky a naměřené meze](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results):
 445 Flutter, 89 tools, 165 unit, 9 nových emulátorových a 11 transportních
 včetně Chromu. Count dotaz nečte těla a nic nezapisuje; 19–23 reads v klidu,
 30–36 při teplé kontrole jedné novinky v měřeném rozsahu 50/200/2 000 zdrojů.
-Další je společný push/úplné CI a příprava bezpečného provozního adaptéru
-podle měření; konkrétní četnost/odběry nejsou aktivované. Serverový i klientský
+Konečné CI potvrdilo i celé dosavadní serverové/Rules/B2/purge/Storage sady
+a webový build. Další je konkrétní návrh bezpečného provozního adaptéru podle
+měření, před úpravami schválit hlavičky/odběry, četnost a adaptivní profil.
+Konkrétní četnost/odběry nejsou aktivované. Serverový i klientský
 přepínač zůstává false. Bez nasazení, živých dat, Rules, nových služeb/Auth či změny retence.
 Níže uvedený dokončený B4 metadata/cache rollout je stále skutečný DEV stav.
 

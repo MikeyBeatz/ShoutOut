@@ -663,8 +663,10 @@ Za připravený či provozně ověřený výsledek to lze označit až po testec
 
 ## Lokální B4b – implementace, měření a další provozní brána
 
-Ve feature/feed-b4-news-local je připravený lokální základ; úplné CI
-konečného zdroje je další kontrolní bod. Žádné nové nasazení ani živé zápisy.
+Lokální základ je uzavřený ve feature/feed-b4-news-local: zdroj
+**e8c0c9c722049d989021ff5cc0339c3260b43a14** má
+[úspěšné úplné CI 44944929884](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44944929884).
+Žádné nové nasazení ani živé zápisy.
 
 - [Serverový kontrakt](../../../functions/feed_news.js) používá podepsaný
   checkpoint oddělený od čtecích/body kurzorů, svázaný s projektem/UID,
@@ -706,7 +708,10 @@ konečného zdroje je další kontrolní bod. Žádné nové nasazení ani živ�
 Lokální kontroly: 445 Flutter, 89 nástrojových, 165 Functions unit
 (540 emulátorových scénářů v unit běhu přeskočených), 9 nových databázových
 scénářů a 11 transportních včetně Chromu. Lint, úplná analýza a formát jsou
-kontrolované samostatně; konečný úspěšný úplný CI se doplní po jeho doběhu.
+prošly; konečné úplné CI potvrdilo také všechny dosavadní serverové,
+Rules, B2, purge a Storage regrese i webový build. Nový samostatný krok
+`Test B4 news count and refresh fence` je úspěšný, místní souhrn důkazu
+je build/b4-news-ci-proof.json. Ověřen byl přesný SHA a čistý pracovní strom.
 [Nové regrese](../../../functions/feed_news.integration.test.js) zahrnují
 hranici 99+, mazání/expiraci, starý obnovený obsah, zpožděný commit, publikaci
 během obnovy, změnu účtu, R5, rollback a smazání účtu během přípravy.
@@ -763,7 +768,7 @@ jsou další otevřené kroky, nejsou součástí zde hotového lokálního zák
 Evidence rozlišuje lokální základ od dosud nezačatého provozního napojení:
 z nedokončené code/check váhy je oddělená lokální a provozní polovina,
 při zachování celkové váhy rodiče a všech dosud hotových částí. Lokální
-verification se uzavře až úspěšným úplným CI konečného zdroje.
+verification je uzavřená výše uvedeným úspěšným úplným CI konečného zdroje.
 
 První společný kandidát 6cc2d4a / CI 44944087675 byl zrušen po závěrečném
 nálezu v klientském označení čerstvosti: neúspěšná obnova musí ponechat

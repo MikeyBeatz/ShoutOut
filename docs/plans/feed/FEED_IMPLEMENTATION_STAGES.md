@@ -14,7 +14,7 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 ### Aktuální stav a pořadí integrace
 
 **Navazující lokální B4b:** [výpočet číslovky, klient a srovnání detekce](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
-jsou připravené pro úplné CI. Počítají jen nové publikace, zůstávají vypnuté;
+jsou uzavřené v e8c0c9c / úplné CI 44944929884 success. Počítají jen nové publikace, zůstávají vypnuté;
 provozní signalizace/četnost a následný DEV rollout ještě zbývají.
 
 **21. listopadu – aktuálně:** [B4 metadata/cache jsou v DEV](B4_DEV_ROLLOUT.md#dev-rollout-results),
