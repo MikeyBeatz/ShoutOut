@@ -10,7 +10,7 @@ B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.
 Má zlevnit cold/refill při zachování aktuální dostupnosti a B3 textové identity.
 Další [konkrétní návrh provozní vrstvy a všech writerů](FEED_STATE_STORAGE_PROPOSAL.md)
-má schválenou lokální implementaci, která nyní probíhá. Poté následuje klient/Rules,
+má [uzavřenou lokální implementaci a úplné CI](FEED_STATE_STORAGE_PROPOSAL.md#p1-results). Poté následuje klient/Rules,
 provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
 Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
 neopakovat je jako otevřenou práci.

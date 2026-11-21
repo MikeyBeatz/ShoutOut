@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,15 %** — vážené dokončení podúseků
 
-Hotové úseky: **156/217**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **157/217**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
 
-Hotové úseky: **187/295**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **188/295**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -49,19 +49,19 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-**Poslední uzavřený úsek:** [B3 – živá DEV akceptace a úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
+**Poslední uzavřený živý úsek:** [B3 – živá DEV akceptace a úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 Původní podrobný [checkpoint je zachovaný](plans/feed/B3_DEV_ROLLOUT.md#todo-b3-preacceptance-history)
 v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudových
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Poslední dokončený úsek:** [lokální transakční reader a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results),
-   zdroj 0b2d004 / úspěšné úplné CI 44825059479. Navazuje na uzavřený
-   [základ B4a](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
-   **Nyní:** schválený [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md).
-   Implementace a cílené kontroly jsou hotové; úplné CI ještě není doložené. Zahrnuje atomické zapojení všech
-   writerů a R5/history/purge; potom náhrada závislých Home/živých odběrů
-   se zachováním promo. Živý datový přechod je samostatná brána.
+   **Poslední dokončený úsek:** [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results),
+   zdroj d2cac88 / úspěšné úplné CI 44908128699. Navazuje na uzavřený
+   [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results).
+   Atomické zápisy, R5/history/purge, backfill a audit jsou místně ověřené;
+   nová vrstva zůstává vypnutá. **Další:** konkrétní klientský kontrakt a náhrada
+   závislých Home/živých odběrů se zachováním promo, související Rules.
+   Nový rozsah předložit ke schválení. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;

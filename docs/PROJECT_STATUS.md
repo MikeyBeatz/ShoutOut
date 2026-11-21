@@ -6,30 +6,28 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený lokální transakční reader je uzavřený včetně úplného CI.**
-Odeslaný zdroj **0b2d004472873408eae74daf570d8e8abc03e4d2**, větev
-feature/feed-b4-consistent-reads, [úplné CI 44825059479 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44825059479).
-Prošlo 418 Flutter, 156 Functions unit, 464 transakčních, 9 nových B4,
-34 B2 runtime, 142 purge a 15 Storage testů; browser, analýza/formát i webový
-build také. CI benchmark přesně odpovídá lokálnímu JSON reportu.
-Neopakovat implementaci ani 50/200 fixture bez nové příčiny. Žádné nové DEV nasazení.
-[Finální transakční sestavení stránky a potřebná metadata](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-read-integration-proposal)
-sloučí opakované čtení bloků při zachování skutečných serverových kontrol.
-[Výsledky a úplnější měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results):
-bloková/zdrojová část potvrdila 95 → 65 / 45 → 15 / 76 → 31. Se skutečnými
-guardy/B3 a prostorovým výběrem je warm 38/41 reads pro fixture 50/200.
-Prošlo 9 emulátorových, 12 metadata/kontraktových a 10 Dart testů, celá
-analýza i lint. Neaktivní reader kontroluje skutečné serverové dokumenty;
-živé writery, formát, Home/odběry, Rules a data se nemění. Další je
-provozní projekční layout a úplné atomické pokrytí writerů/úklidu před DEV.
-[Konkrétní návrh P1](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md) odděluje sdílený
-index verzí od malého živého stavu jednoho Shoutu. Předložený lokální rozsah
-pokrývá všechny writery, geografii, R5/purge a obnovitelné doplnění; vlastník
-schválil celý lokální P1. [Implementace a místní výsledky](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
-jsou připravené ve feature/feed-b4-state-storage: 14 nových emulátorových
-scénářů, 9 účtových Dart testů, 158 Functions unit, 25 nástrojových testů,
-celá analýza i lint prošly. Závěrečné úplné CI ještě není doložené. Nic se nenasazuje.
-Pevná zbývající váha je rozdělená na serverový/klientský úsek bez nového kreditu.
+**Nyní: schválený lokální P1 B4 je uzavřený včetně úplného CI.**
+Zdroj **d2cac88313c914f4d4fbf0780f0b0862d77da04e**, větev
+feature/feed-b4-state-storage, [úplné CI 44908128699 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44908128699).
+Prošlo 419 Flutter, 158 Functions unit, 464 Rules/transakčních, 9 B4 reader,
+14 nových card/backfill, 34 B2 runtime, 142 purge a 15 Storage testů;
+browser, nástroje, analýza/lint/formát i webový build také.
+[Implementace, měření a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
+pokrývají nový formát, všechny serverové writery, geografii, R5/history/purge,
+obnovitelné doplnění a audit. SDK počty se v CI shodují s lokálními 50/200/2 000
+fixture; JSON bajty závislé na serverových časech nejsou byte-for-byte srovnání.
+Celkový účet ani kapacita 5 000 relací nejsou tím prokázané.
+Runtime má **cardStateEnabled: false**. Žádné nasazení, živá data, Rules,
+Auth účty, Scheduler ani prostředky se v tomto úseku neměnily.
+**Další:** konkrétní klientský kontrakt metadat/doplnění a sloučení živého
+stavu, náhrada Home/rodičovských odběrů se zachováním promo a uzavření
+přímých čítačových zápisů v Rules. Potom samostatný připravený DEV přechod;
+nový konkrétní rozsah předložit ke schválení. Neopakovat P1 ani jeho fixture.
+
+Předchozí [transakční reader a jeho úplné výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
+jsou rovněž uzavřené: 0b2d004 / úplné CI 44825059479 success. Jeho silnější
+kontroly volajícího/B3 nejsou součástí nového užšího header benchmarku;
+čísla různě vymezených měření nesrovnávat přímo.
 
 **Předchozí lokální základ B4a:**
 [Rozsah, nálezy v kódu, laboratorní meze a výstupy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4a-proposal)

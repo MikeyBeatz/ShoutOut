@@ -2,7 +2,7 @@
 
 [Rozcestník feedu](README.md) · [Výsledky readeru](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
 
-Návrh k 21. listopadu 2026. **Vlastník schválil celý lokální P1; probíhá implementace.** Nejde o
+Návrh k 21. listopadu 2026. **Vlastník schválil celý lokální P1; implementace i úplné CI jsou uzavřené.** Nejde o
 nasazenou vrstvu ani prokázanou kapacitu produkce. Navazuje na uzavřený
 neaktivní reader 0b2d004 a jeho úplné CI 44825059479.
 
@@ -160,9 +160,23 @@ Návrh nemění pořadí nepřečtené → přečtené, ruční obnovu, sekundov
 
 ## P1 – implementace a ověření
 
-Stav 21. listopadu: implementace připravená, závěrečné úplné CI ještě čeká.
+Stav 21. listopadu: implementace i závěrečné úplné CI jsou dokončené.
 Tento odstavec není doklad nasazení. Runtime má `cardStateEnabled: false`;
 reader ani cloudová data na novou vrstvu nepřešly.
+
+Zdroj **d2cac88313c914f4d4fbf0780f0b0862d77da04e** má
+[success úplné CI 44908128699](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44908128699).
+Prošlo 419 Flutter, 158 Functions unit (513 emulátorových v unit fázi skip),
+464 Rules/transakčních, 9 B4 reader, 14 card/backfill, 34 B2 runtime,
+142 purge a 15 Storage testů, browser, analýza, lint, formát i webový build.
+SDK reads/writes/attempts/steps se pro všechny tři fixture shodují s lokálním
+reportem; JSON bajty serverových timestampů se mohou lišit.
+
+Předchozí CI 44907163960 bylo zrušené po opravě datumové závislosti testu
+geografie. CI 44907302349 mělo 464/464 úspěšných Rules testů, ale
+pětiminutový limit přerušil vypínání emulátoru, takže zůstalo failure.
+Finální workflow má pro tento krok šest minut včetně ukončení. Prostředky
+aplikace a Firebase se tím neměnily; důkaz úspěchu je až finální běh výše.
 
 - `feed_card_state.js` sestavuje whitelist živého stavu a monotónní revizi.
   Runtime přebírá skutečné zdrojové snapshoty načtené v téže transakci a
@@ -228,7 +242,8 @@ receipt/rate/oznámeními mají vlastní práci navíc. Backfill měl 2/5/41 dá
 121/463/4 663 reads a 54/225/2 385 SDK zápisů. Report uchovává i samostatný audit.
 
 Připravená čtecí cesta porovnává header v RAM a doplňuje pouze chybějící těla.
-Neobsahuje platformní Auth/App Check, B2/B3 synchronizaci, dosavadní Home ani
+Neobsahuje vstupní kontroly volajícího a načtení jeho blokací, platformní
+Auth/App Check, B2/B3 synchronizaci, dosavadní Home ani
 počáteční doručení živých odběrů. Tyto části nemizí a musí se připočíst při
 klientském přechodu. Nová per-Shout vrstva se při obnově nenačítá po 50
 dokumentech jen kvůli čítačům. Přidává vlastní stavový zápis a transakční
