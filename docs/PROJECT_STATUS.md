@@ -6,19 +6,24 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: schválený DEV rollout B4 se připravuje ve feature/feed-b4-dev-rollout.**
-Čerstvá inventura stále potvrdila 38 původních zdrojů / 0 active / 1 žádost
-bez potvrzení Auth. Připravují se aktivační přepínače, oddělený B4 pilot a
-kontrola serverového RETIRED stavu starých revizí. [Přesné plány a aktuální stav](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
-Zatím bez externích změn; další je lokální ověření a úplné CI aktivačního SHA.
-První aktivační f9117a6 / CI 44932675068 nebyl úspěšný: opravené explicitní
-nastavení starého writeru v regresním testu; nasazení zůstává blokované do
-úspěšného konečného CI. [Podrobnost](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
-Navazující a792243 / CI 44934903548 bylo zrušeno kvůli doplnění platného
-těla staré fixture operátoru. Po opravě celá místní regresní sada prošla
-142/142; připravuje se konečný kandidát pro úplné CI, stále bez nasazení.
+**Nyní: metadata/cache B4 jsou nasazené v DEV, probíhá akceptace pilotu.**
+Zdroj **8b1de6824e116358c4d364785e4b94f57f52fc9d**, [úplné CI 44935555088 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44935555088),
+Hosting **fa20f566fc0ab82b**, pouze shoutout-dev-46c81. Dokončeno 14 indexových
+kroků bez TTL, deset Functions, ověřený drain všech starších revizí a Rules.
+Feed-v3 je po živém rollbacku, novém auditu a reaktivaci readerem/card readerem;
+control revision 11, všechny tři generace se udržují. Oba plánovače a prostředky
+nezměněné. [Důkazy a přesné meze](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results).
+Interní živý pilot pro oba účty prošel 50 → 100 → 120, warm 0 těl/refill 1,
+přečtením, promo a serverovým resetem rozpracovaného požadavku při návratu.
+Původních 38 zdrojů i pending žádost mají nezměněné updateTime, bez Auth mutací.
+120 testovacích Shoutů zatím zůstává (118 běžných + 2 promo).
+**Další:** odpověď vlastníka na vyžádaný UI/interakční průchod obou účtů,
+ověření otevřeného klienta podle potřeby, potom úklid fixture přes writer.
+Computer Use zastavila automatická kontrola neověřitelné URL; UI ani callable
+Auth/App Check se za ověřené nevydávají. Signály a číslovka novinek zbývají;
+celé B4 ani celý milník ještě nejsou uzavřené. Produkce/main nezměněné.
 
-**Nyní: schválený lokální přechod B4 je uzavřený včetně úplného CI.**
+**Předchozí lokální přechod B4 je uzavřený včetně úplného CI.**
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
 [success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
 Větev feature/feed-b4-transition má řízený operátor, platnost a integritu
@@ -823,23 +828,25 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `ab27253d1da7a0b1666caee04483ec5c4606a4d9` / `1f3dc2f8355c02ce`; úplné CI 44684384849 success. Oprava měření a barevný read stav; B2/B3 aktivní. Index, JavaScript, config, bootstrap a version na obou doménách shodné s releasem. B3 čeká na nové UI ověření/úklid. |
+| Webový zdroj / Hosting verze | `8b1de6824e116358c4d364785e4b94f57f52fc9d` / `fa20f566fc0ab82b`; úplné CI 44935555088 success. B2/B3 i B4 metadata/cache aktivní; 67 cest + 2 rezervované Firebase cesty, HTML/JS/config na obou doménách shodné s releasem. B4 UI akceptace a úklid čekají. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
-| Příprava mazání | Zdroj `1a4d184`, ACTIVE `prepareaccountdeletion-00003-pav`; kompatibilní společný indexový writer |
+| Příprava mazání | Zdroj `8b1de68`, ACTIVE `prepareaccountdeletion-00004-jeh`; společný B4 writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
-| Účtové Functions | `1a4d184`, obě ACTIVE; request `00013-caf`, recovery `00013-cal`; read úklid a kompatibilita obou generací zachované, 39 zdrojových modulů ověřeno před uploadem. |
+| Účtové Functions | `8b1de68`, obě ACTIVE; request `00014-sux`, recovery `00014-pof`; 43 zdrojových modulů ověřeno, prostředky/read úklid zachované. |
 | B2 čtecí Functions | `bc4a6e1`, ACTIVE `syncreadbatch-00001-fox` / `getreadstatepage-00001-xub`, klíč v1, min0/max1/concurrency1/256 MiB/15 s, oba HTTP 401 bez identity/attestace; ZIP shodné s 10 soubory balíčku. |
-| Čtecí Functions | `1db4631`: ACTIVE `getfeedpage-00003-tux` (stávající klíč v1), B3/kompatibilita, 256 read bloků, oddělená cache 4 MiB / ≤1 h, anonymní HTTP 401. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zůstávají z předchozích zdrojů. |
-| Obsahové writery | `1a4d184`: ACTIVE `createshout-00005-goj`, `deleteshout-00003-vav`, `toggleshoutreaction-00009-tec`; kompatibilní společný indexový writer |
-| Ostatní obsahové Functions | `14b7885`: ACTIVE `togglecommentreaction-00007-rir`, `toggleshoutsave-00006-roq`; všechny tři nové revize mají max1/min0, concurrency1, 256 MiB/15 s a shodu 42 modulů. `deleteComment` a `createContentReport` zůstávají ze zdroje f81eaf4 |
-| Firestore Rules | `d5193d0b-e957-4c76-ab46-54b0f9a8beac`, zdroj 14b7885; navíc zámek interakcí dle activeShout, čtení a vlastní mazání zachované |
-| Prostorový index | Control revision 6 / active, čte `feed-v2`, zapisuje `[feed-v1, feed-v2]`; migrace, rollback, nový audit i reaktivace ověřené. Klíč v1 a indexová konfigurace zůstaly zachované, bez změny TTL. |
+| Čtecí Functions | `8b1de68`: ACTIVE `getfeedpage-00004-vay`, B4 delta a V1 kompatibilita, stávající klíč/limity. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zůstávají z předchozích zdrojů. |
+| Obsahové writery | `8b1de68`: ACTIVE `createshout-00006-xah`, `deleteshout-00004-wos`, `toggleshoutreaction-00010-toz`; společný B4 writer |
+| Další B4 writery | `8b1de68`: ACTIVE `createcomment-00005-ziz`, `deletecomment-00005-xec`, `toggleshoutsave-00007-kiz`; obsahový artefakt má 57 zdrojových modulů. toggleCommentReaction, createContentReport a createPrivateReply se tímto rolloutem neaktualizovaly. |
+| Firestore Rules | `7b0e81f6-d153-4c7e-8763-a75965a1896c`, zdroj 8b1de68; ověřená shoda obsahu, B4 publicStates a ochrana přímých čítačů/ukládání |
+| Prostorový index | Control revision 11 / active, reader/card reader `feed-v3`, writery `[feed-v1, feed-v2, feed-v3]`, card writer feed-v3. Živý rollback/reset a nový audit/reaktivace ověřené interním jádrem. Jeden nový composite + 13 výjimek, původních 12 composites zachovaných, bez TTL. |
 | Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
 | Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
 
-Ostatní Functions tímto B2 rolloutem aktualizované nebyly; neoznačovat je za
-jeden společný nový artefakt. Release ověřuje build/b2-hosting-proof.json,
-zdroje a revize build/b2-deployed-source-proof.json a b2-rollout-live-infra-check.json.
+Aktuální B4 důkazy jsou v [živém protokolu](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results).
+Aktualizováno je právě deset vyjmenovaných Functions; ostatní nespojovat
+do jednoho nového artefaktu. Návrat B4: operátorem reader feed-v2, zachovat
+všechny tři writery, přepnout kompatibilní web jen podle plánu; předchozí
+Hosting je 5b4d711b715a85e3 / fc795ad.
 Návrat B2: pozastavit readSyncControl a použít ověřený neaktivní v3 artefakt
 405be7d podle [plánu](plans/feed/B2_DEV_ROLLOUT.md#neaktivní-web-a-návrat).
 Starší v1/v2 weby, včetně historických ce6b07a/7ab60c8, po upgradu IndexedDB
@@ -848,7 +855,7 @@ writery, generaci a ochranné Rules. Účtové a cleanup Functions mají 60 s,
 obsahové/čtecí callable 15 s; všechny uvedené DEV prostředky jsou min0/max1,
 concurrency1, 256 MiB, Node22, europe-west3. Účtový minutový job je zachovaný;
 původní receipt job nově běží také každou minutu. Další Scheduler job nevznikl.
-Rules a Storage se touto fází neměnily. Podpisový klíč zůstává existující v1.
+Rules změnila uvedená B4 fáze; Storage ne. Podpisový klíč zůstává existující v1.
 
 Produkční aplikace na `go.shoutout-app.eu` dosud nemá první release.
 Projekt `shoutout-production-a1b34` sdílí s prezentací, app site je
@@ -865,7 +872,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a pokračující DEV cleanup každou minutu, max. 500 dokumentů / 10 s na fázi, po dokončení 24h klid. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
-| Feed | DEV prostorové API a kompatibilní writery, feed-v2, vlastní stránky a plovoucí tlačítka; B1/B2 akceptace uzavřené. B3 nasazené, interní živý pilot 50 → 100 → 120 prošel. | UI akceptace a úklid B3, novinky B4 a závěrečná společná brána. Regrese Uložených uzavřená v DEV. |
+| Feed | B1/B2/B3 akceptace uzavřené. B4 metadata/cache a feed-v3 nasazené, interní živý pilot včetně návratu prošel. | UI akceptace a úklid B4 pilotu, signály/číslovka novinek a závěrečná společná brána. Regrese Uložených uzavřená v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 Aktuální stupnice jsou generované v [TODO](TODO.md#postup) z

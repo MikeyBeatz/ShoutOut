@@ -342,3 +342,68 @@ a historie při úklidu. Dva Business Shouty dostanou promo až po ověření
 Před živou prací je z nedokončené váhy nasazení/akceptace B4 oddělená
 metadata/cache část a zbývající společná část s novinkami, v každé stupnici
 půl na půl. Hotové váhy zůstávají zachované; nové úseky jsou zatím nehotové.
+
+<a id="dev-rollout-results"></a>
+
+## Nasazená metadata/cache část B4 – 21. listopadu
+
+Přesný zdroj **8b1de6824e116358c4d364785e4b94f57f52fc9d** má
+[úspěšné úplné CI 44935555088](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44935555088).
+Pouze v **shoutout-dev-46c81** proběhlo:
+
+- Dokončeno všech 14 selektivních indexových kroků. Složený index READY,
+  13 field výjimek, všech 12 původních composites zachovaných; bez změny TTL.
+  První krátké čekání skončilo před dokončením INITIALIZING; další kontroly
+  byly pouze čtecí. Žádný druhý composite se nezakládal.
+- Aktualizováno přesně deset Functions ze schváleného seznamu. Všechny
+  ACTIVE, 100 % provozu na nových revizích, **všech 63 historických revizí
+  RETIRED**. Min0/max1, concurrency1, 256 MiB a timeouty zůstaly stejné.
+  Oba existující plánovače mají shodné provozní parametry jako před změnou.
+  Závěrečná inventura potvrzuje 20 Functions: 10 aktualizovaných, ostatních
+  10 s původními revizemi i prostředky. Anonymní getFeedPage/createShout/
+  prepareAccountDeletion správně vracejí 401 UNAUTHENTICATED.
+- Rules `7b0e81f6-d153-4c7e-8763-a75965a1896c` odpovídají nasazovanému souboru.
+  Předchozí ruleset je uložený v místním důkazu pro návrat.
+- Řízený start, backfill 38 původních zdrojů, audit a aktivace feed-v3;
+  následně skutečný rollback na feed-v2, nový audit a reaktivace feed-v3.
+  Aktuální control **revision 11**, reader/card reader feed-v3,
+  writery feed-v1/feed-v2/feed-v3, card writer feed-v3.
+- Hosting **fa20f566fc0ab82b**, release **2026-11-21T18:52:14.959Z**.
+  Zkontrolováno 67 aplikačních cest + 2 rezervované Firebase soubory;
+  HTML, main.dart.js a app-config.json mají na obou doménách shodné SHA-256
+  s ověřeným release buildem. Skrytý místní .last_build_id se podle Hosting
+  ignore pravidel neposílá. DEV serverDeltaFeed je true; produkce nezměněná.
+
+Pilot má digest
+`e009741c9863bc4644ab8b0777fec3e71f8afa4521c9a4fef973512f023d579a`:
+120 nových 24h Shoutů pod oběma původními testovacími účty a 70/20 značek
+pouze jejich nových ID. Oba účty prošly 50 → 100 → 120 v obou čtecích
+režimech, správnými skupinami a delta cold/warm/refill: první stránka 50,
+warm **0 těl**, doplnění **1 těla**. Dvě Business promo položky poté prošly
+presentation cestou; běžných karet je nyní 118, promo 2.
+Před rollbackem byl zachovaný skutečný podepsaný rozpracovaný požadavek;
+po rollbacku dostal reset/source-v1 a původní cesta vrátila 50 karet.
+Po novém auditu opět card-v1/feed-v3 a 50 karet. Původních 38 zdrojů i
+jedna pending žádost mají stále původní updateTime, žádné Auth mutace.
+
+Tyto živé důkazy používají **interní serverové jádro**; nejsou důkazem
+callable Auth/App Check ani UI akceptace otevřeného uživatelského okna.
+Computer Use zastavila automatická bezpečnostní kontrola kvůli nemožnosti
+spolehlivě ověřit URL na Windows; další UI ovládání se neprovádělo.
+Vlastník dostal konkrétní průchod pro oba účty bez konzolových skriptů.
+**Otevřené:** uživatelská UI/interakční akceptace, případná potřebná živá
+kontrola přechodu otevřeného klienta a následný vymezený úklid fixture.
+Testovací data zatím zůstávají pro tento průchod. Signály/číslovka novinek
+nejsou implementované ani nasazené; celé B4 není uzavřené.
+
+Obnovitelné místní podklady: build/b4-final-release-proof.json,
+build/b4-index-progress.json, build/b4-drain-proof.json,
+build/b4-scheduler-before.json a b4-scheduler-after.json,
+build/b4-rules-before.json a b4-rules-after.json, build/b4-hosting-proof.json,
+build/b4-rollback-hold.json / rolled-back.json / restored.json,
+build/b4-scope-proof.json a build/b4-originals-proof.json.
+Pilotní stav je docs/local/b4-pilot-state.json v čisté pracovní kopii
+build/b4-dev/release-f9117a6 na výše uvedeném SHA; jméno adresáře není SHA.
+Po úklidu uložit závěrečný důkaz a ověřit původní inventuru znovu.
+Návratový web je 5b4d711b715a85e3 / fc795ad; návrat readeru používat pouze
+přes operátor, zachovat všechny tři writery, indexy a retence.

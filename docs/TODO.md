@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,16 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,18 %** — vážené dokončení podúseků
 
-Hotové úseky: **159/219**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **160/219**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,22 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,23 %** — vážené dokončení podúseků
 
-Hotové úseky: **190/297**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **191/297**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,26 +55,18 @@ v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudovýc
 značek přečtení, původních 38 zdrojů a pending žádost beze změny.
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Poslední lokální checkpoint:** [řízený přechod, audit a kompatibilní rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
-   zdroj cd21019 / úspěšné úplné CI 44929196473. Přepínače zůstávají vypnuté.
-   Předchozí [klientská metadata/cache a sdílený stav](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
-   zdroj 62fc8fe / úspěšné úplné CI 44917393562. Předchozí
-   [lokální P1 – provozní vrstva a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results)
-   má zdroj d2cac88 / úplné CI 44908128699. Navazují na uzavřený
-   [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results).
-   Atomické zápisy, R5/history/purge, backfill a audit jsou místně ověřené;
-   nová vrstva zůstává vypnutá. **Nově uzavřené:** klientský kontrakt, sdílený stav,
-   Home a lokální Rules; zdroj 62fc8fe / úspěšné úplné CI 44917393562.
-   [Konkrétní lokální rozsah je schválený](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
-   [Lokální výsledky a hranice](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results)
-   zahrnují i Chrome proti emulátoru a nákladové měření. **Nyní:** připravit
-   a po úplném CI provést [schválený živý DEV přechod a pilot](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-progress).
-   Operátor, kompatibilita, indexový plán a přechodové ověření jsou uzavřené;
-   živá migrace/akceptace ani číslovka novinek tím hotové nejsou.
-   Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
-   stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
-   připravené. Cold/warm a doplňovací náklady jsou samostatně doložené;
-   individual varianta pro výběr se nedoporučuje. Žádný nový rollout nebo živé kolekce.
+   **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
+   8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.
+   [Živé důkazy a otevřený konec pilotu](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results):
+   oba účty prošly 50 → 100 → 120, warm 0/refill 1 tělo, promo a serverový
+   rollback/nový audit. **Další:** vyžádaný ruční UI/interakční průchod a
+   navazující úklid právě těchto 120 fixture; původních 38 zdrojů i pending
+   žádost zachované. Signály/číslovka novinek stále zbývají.
+   Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
+   [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
+   [P1 a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results) i
+   [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
+   jsou uzavřené; jejich datované vypnuté konfigurace nejsou současný DEV stav.
    Celé B4 zahrnuje verze/metadatové porovnání, přenos rozdílů a cache,
    úsporné signály i oddělený počet novinek, který nemění rozpracované
    pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
