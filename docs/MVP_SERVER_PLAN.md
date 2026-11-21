@@ -2,7 +2,7 @@
 
 ## Aktuální stav a použití plánu
 
-Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 20. listopadu.
+Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 22. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
 Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním tohoto textu.
@@ -11,7 +11,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A2/A3, Uložené a B1–B3 mají uzavřenou DEV akceptaci. | B4 (delta/cache a indikátor novinek), společná finální regrese feedu a ostatní níže uvedená kritéria. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A2/A3, Uložené, B1–B3 a metadata/cache B4 mají uzavřenou DEV akceptaci. B4b news je od 22. listopadu aktivní v DEV. | Živá společná akceptace B4b a úklid malého pilotu, finální regrese feedu, audit zbývající autority a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |

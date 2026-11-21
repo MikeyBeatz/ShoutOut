@@ -11,8 +11,10 @@ Lokální B4b count má [úplné CI a měření](FEED_DELTA_REFRESH_PLAN.md#b4b-
 navazující [konkrétní provozní rozsah](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
 vlastník schválil. [Lokální implementace/měření](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
 jsou uzavřené včetně úplného CI 44953434700 success ze zdroje 3d381f8.
-Živá aktivace nezačala; [konkrétní DEV plán a malý společný pilot](B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
-vlastník schválil včetně nástroje, CI a živého ověření. Probíhá příprava aktivačního zdroje.
+[Konkrétní DEV plán a malý společný pilot](B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
+vlastník schválil celý. [B4b je nasazené a aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results)
+ze zdroje 20206c4 / úplné CI 44959541907 success. Živá akceptace a úklid zbývají;
+existuje pouze pilotní A, B čeká na skutečný klient a C na připravené pozorování.
 Následující přípravné etapy jsou datované podklady již nasazené metadata/cache vrstvy.
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.

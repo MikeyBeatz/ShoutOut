@@ -11,6 +11,13 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 ## Cíl a ověřený výchozí stav
 
+**Aktualizace 22. listopadu:** [B4b je nasazené a aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results),
+20206c4 / úplné CI 44959541907 success. Funkce, indexy, Rules a Hosting
+ca327f10112ef349 jsou ověřené; news control 2/active, feed control 12/feed-v3.
+Živý pilot má zatím A, čeká skutečný klientský průchod a společná akceptace
+včetně pauzy/návratu a úklidu. Celé B4 není uzavřené. Datované vypnuté
+konfigurace níže jsou předchozí přípravné checkpointy.
+
 **Aktualizace 20. listopadu:** B2 i B3 mají uzavřenou DEV akceptaci včetně
 úklidu testovacích dat. [B3 – konečné důkazy](B3_DEV_ROLLOUT.md#b3-acceptance-complete)
 zahrnují skutečné přečtení a řazení, obě identity, interakce i mazání.

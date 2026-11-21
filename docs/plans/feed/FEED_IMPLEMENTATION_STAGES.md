@@ -13,12 +13,19 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
-**Navazující lokální B4b:** [výpočet číslovky, klient a srovnání detekce](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
+**22. listopadu – aktuálně:** [B4b je aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results),
+zdroj 20206c4 / úplné CI 44959541907 success, Hosting ca327f10112ef349.
+News control 2/active a feed control 12/feed-v3, indexy/Rules i cílené dvě
+Functions ověřené. Existuje pouze pilotní A; skutečná publikace B, C při
+připraveném klientu, UI pauza/návrat a úklid patří do dosud otevřené akceptace.
+Nasazení je hotové; celé B4 a společná feed regrese zatím nejsou uzavřené.
+
+**Předchozí lokální B4b:** [výpočet číslovky, klient a srovnání detekce](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
 jsou uzavřené v e8c0c9c / úplné CI 44944929884 success. Počítají jen nové publikace, zůstávají vypnuté;
 [Schválené provozní napojení](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
 má uzavřenou lokální implementaci, měření a úplné CI 44953434700 success
-ze zdroje 3d381f8. Všechny news volby
-zůstávají off, živá aktivace a společná B4 akceptace zbývají.
+ze zdroje 3d381f8. V tomto datovaném lokálním checkpointu byly news volby
+off; skutečné novější nasazení je výše.
 
 **21. listopadu – aktuálně:** [B4 metadata/cache jsou v DEV](B4_DEV_ROLLOUT.md#dev-rollout-results),
 zdroj 8b1de68 / úplné CI 44935555088 success, Hosting fa20f566fc0ab82b.

@@ -595,3 +595,74 @@ Teprve skutečné nasazení uzavře feed-b4-dev; živý badge/pauza/návrat/úkl
 feed-b4-accept a společná doložená regrese feed-final-accept. Přípravný plán
 žádnou z těchto položek nezaškrtává. Celý serverový mvp-16 navíc ponechává
 audit zbývající autority a kompletní produkční akceptaci podle serverového plánu.
+
+<a id="news-dev-rollout-results"></a>
+
+## B4b – ověřené DEV nasazení 22. listopadu, otevřená akceptace
+
+Zdroj **20206c4a4d8b186c54947c04212d6a4c6ec5625f** má
+[success úplné CI 44959541907](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44959541907).
+Ověřen přesný SHA, všechny požadované kroky a čistá pracovní kopie
+build/b4b-dev-release; důkaz build/b4b-exact-release-proof.json.
+Web byl sestavený na db13ff7; změny do konečného zdroje jsou pouze operátor,
+testy a dokumentace. Git diff lib/web/assets/config/pubspec/build helperu je
+prázdný a release manifest/config/obsah znovu ověřené. Serverový artefakt je
+znovu připravený z konečného zdroje; obsahuje 61 modulů bez pilotu/laboratoří.
+
+Pouze shoutout-dev-46c81 dosud proběhlo:
+
+- Přesně 3 cílené indexové PATCH s updateMask indexConfig; TTL se nemění.
+  Digest ee712e7e7ea7efee6874f111be6c5fa2f769e35dca4b1363d083ca4da89e935b.
+  Všechny tři serverové operace jsou dokončené; konfigurace je ověřená bez TTL změny.
+- Atomický bootstrap news revision 1 / paused: 3 zápisy, žádné zdrojové
+  Shouty. Marker feed-v3 dostal mirror inkarnace a vznikl _control head.
+  Při transakci ověřeno původních 38 zdrojů a 1 žádost podle updateTime.
+  Po důkazu drainu následovala atomická aktivace news revision 2 / active
+  a jednorázové zvýšení feed control revision 11 → 12. Reader i všechny
+  udržované generace zůstávají stejné. Aktivace měla 3 zápisy.
+- Rules 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2 jsou nasazené; obsah odpovídá
+  přesnému zdroji po normalizaci konců řádků. Předchozí ruleset je zazálohovaný.
+- Cíleně nasazené ACTIVE createShout createshout-00007-viz a getFeedPage
+  getfeedpage-00005-res. Ověřeno min0/max1/concurrency1/256 MiB/15 s, 100 %
+  provozu na nových revizích a všech 10 starších revizí RETIRED. Dalších
+  18 Functions má původní revize/prostředky a oba plánovače původní konfiguraci.
+  Anonymní volání obou callable vracejí 401 UNAUTHENTICATED. Interní běžný feed
+  při paused vrací ready/0 karet bez news; nejde o důkaz validního UI přihlášení.
+- Hosting **ca327f10112ef349 / serverFeedNews true** je nasazený a ověřený.
+  Porovnáno všech 67 aplikačních souborů podle gzip(level9) SHA-256 používaného
+  Firebase CLI; celkových 69 zahrnuje 2 rezervované Firebase soubory.
+  Na obou DEV doménách odpovídá skutečný index/main/bootstrap/app-config
+  lokálnímu syrovému SHA-256 (8 HTTP odpovědí). První pomocný checker nesprávně
+  srovnával syrový hash s hashem gzip přenosu; po opravě ověření vše souhlasí,
+  obsah webu se kvůli tomu neměnil ani znovu nenasazoval.
+- Vytvořený je pouze slot **A** / mvp-b4b-mwqzrojk-e0183ed3-A. Publikace
+  atomicky prošla společným writerem tří generací i regionálním headem.
+  Interní jádro vrací oběma účtům 1 kartu, news kontext s 36 heads a count 0;
+  count má naměřených 30 SDK reads a 1 news quota zápis na účet. Je to interní
+  serverový důkaz, nikoli důkaz validního callable přihlášení/UI či faktury.
+  Původních 38 zdrojů a 1 žádost byly znovu ověřené beze změny.
+  Auth účty, produkce/main a globální App Check se neměnily.
+
+Podklady: build/b4b-cloud-before.json, b4b-rules-backup.json,
+b4b-rules-proof.json, b4b-news-index-plan.json, b4b-news-index-operations.json,
+b4b-control-bootstrap.log, b4b-functions-deploy.log, b4b-news-drain-evidence.json,
+b4b-news-drain-proof.json, b4b-scheduler-proof.json, b4b-anonymous-callable-proof.json
+a b4b-paused-feed-proof.log, b4b-control-active.log, b4b-news-index-status.json,
+b4b-hosting-active.json, b4b-fixture-a.log, b4b-active-state-proof.log,
+b4b-bright-baseline.log / b4b-bright-zero.log a b4b-business-baseline.log / b4b-business-zero.log.
+**Kanonický běhový stav pilotu je v čisté release kopii**
+build/b4b-dev-release/docs/local/b4b-pilot-state-v2.json; kořenová kopie je
+předstartovní podklad, nepoužívat ji pro další mutace. Operátor i jeho plán
+docs/local/b4b-activation-plan-v2.json spouštět z téže čisté release kopie.
+Podle živých důkazů je dokončené **feed-b4-dev**. Vlastník dostal žádost
+o jedinou skutečnou publikaci **MVP B4b B 183ed3** pod TestBusiness:
+24 h / Dotaz / Ústí / bez promo, text přesně podle manifestu.
+Po ní použít `adopt` a ověřit count proti původní baseline, odebrání/expiraci,
+obnovu a otevřeného klienta při pauze/návratu. **C zatím nevytvářet**;
+60sekundové okno zahájit až při připraveném pozorujícím klientu.
+Pro interní kontexty používá build/b4b-core-probe.mjs oddělený soubor každého
+účtu (b4b-core-Bright_Otter_182.json a b4b-core-TestBusiness.json), aby se
+nepřepisovaly souběžné checkpointy. Před refresh/reset testem zachovat původní baseline.
+Automatické ovládání okna ShoutOut zamítla URL bezpečnostní kontrola, proto
+další UI kroky vyžadují ruční pomoc. Feed-b4-accept a feed-final-accept
+zůstávají otevřené. Po jejich důkazech uklidit pouze manifestové sloty.

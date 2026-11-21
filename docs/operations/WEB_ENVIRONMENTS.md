@@ -1,5 +1,12 @@
 # Vývojový a produkční web
 
+**Aktuální DEV k 22. listopadu:** [B4b je aktivní, akceptace pokračuje](../plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results).
+Zdroj 20206c4 / úplné CI 44959541907 success, Hosting ca327f10112ef349 / serverFeedNews true.
+CreateShout revize createshout-00007-viz, getFeedPage getfeedpage-00005-res,
+news control 2/active a feed control 12/feed-v3. Indexy i Rules ověřené,
+prostředky/18 ostatních Functions/plánovače nezměněné. Pilot má zatím pouze A;
+neoznačovat celé B4 za dokončené. Produkce/main nezměněné.
+
 **Aktuální DEV k 21. listopadu:** [B4 metadata/cache jsou nasazené](../plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results)
 ze zdroje 8b1de68 / úplné CI 44935555088 success, Hosting fa20f566fc0ab82b.
 DEV serverDeltaFeed je true, reader feed-v3, control revision 11 a tři writery.

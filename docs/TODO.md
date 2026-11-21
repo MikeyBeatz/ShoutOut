@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 21. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 22. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,27 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,29 %** — vážené dokončení podúseků
 
-Hotové úseky: **165/221**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **166/221**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,25 %** — vážené dokončení podúseků
 
-Hotové úseky: **196/299**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **197/299**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -71,8 +71,12 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    [Konkrétní DEV aktivace a malý společný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
    jsou připravené podle čerstvé čtecí inventury: dvě Functions, tři indexové
    výjimky a tři nové fixture. Vlastník schválil celý úsek včetně nástroje,
-   CI a živého ověření. Probíhá příprava aktivačního zdroje; v DEV jsou
-   news přepínače stále vypnuté, bez živých změn. Společná finální
+   CI a živého ověření. Zdroj 20206c4 má success úplné CI 44959541907;
+   [DEV nasazení je ověřené](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results):
+   indexy dokončené, news active / feed control 12, Rules/dvě Functions/drain ověřené,
+   Hosting ca327f10112ef349 / news on. Pilotní A existuje; B čeká na skutečný
+   klientský průchod vlastníka, C zatím nevytvářet. Nasazení je splněné,
+   společná akceptace zatím ne. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),

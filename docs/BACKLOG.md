@@ -198,7 +198,7 @@ Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,25 %** — vážené dokončení podúseků
 
-Hotové úseky: **196/299**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **197/299**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.

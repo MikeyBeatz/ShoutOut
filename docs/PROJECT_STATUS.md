@@ -1,24 +1,32 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 21. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 22. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**Vlastník schválil [celý společný DEV úsek B4b](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal).**
-Čtecí inventura 21. listopadu 22:20 UTC potvrzuje feed-v3/revision 11,
-38 původních Shoutů, 1 žádost a dosud chybějící news control/heads.
-Návrh cílí jen na dvě Functions, tři indexové výjimky, Rules a DEV web,
-se třemi novými fixture a společnou akceptací/návratem. Probíhá lokální příprava
-operátoru, testů a aktivačního zdroje; žádné nasazení ani cloudové zápisy neproběhly.
-Původní metadata/cache pilot zůstává uzavřený, metriky beze změny.
-Aktivační zdroj má news přepínače on, ale nasazený DEV je stále off.
-Cílená regrese operátoru, legacy writerů a přechodů prošla 54 scénáři.
-První aktivace novinek jednou zvýší technickou feed control revision 11 → 12,
-aby ohradila i pozdní databázový commit starého publisheru; generace a retence
-se nemění. Dvě předchozí CI skončila na zděděných závislostech starých fixture;
-jsou opravené, před živým přechodem musí projít nové úplné CI přesného zdroje.
+**B4b je [nasazené a aktivní v DEV](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results); živá akceptace pokračuje.**
+Zdroj **20206c4a4d8b186c54947c04212d6a4c6ec5625f** má
+[úspěšné úplné CI 44959541907](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44959541907).
+Čistá release kopie je build/b4b-dev-release. Všechny tři indexové operace jsou
+dokončené bez TTL změny. News control **revision 2 / active**, feed control
+**revision 12 / feed-v3**, mirror a technický head jsou ověřené. Rules **5dde23bc-6ede-4c90-a2e4-7e47ff3034d2**
+jsou nasazené a zdrojově ověřené. Nové ACTIVE revize jsou createShout
+**createshout-00007-viz** a getFeedPage **getfeedpage-00005-res**; prostředky stejné,
+100 % traffic a všech 10 starších revizí RETIRED. Ostatních 18 Functions i oba
+plánovače jsou porovnané beze změny. Hosting **ca327f10112ef349 / news on**:
+69 vzdálených souborů (67 app + 2 Firebase), gzip hashe i 8 skutečných HTTP
+odpovědí na obou doménách odpovídají artefaktu. Původních 38 Shoutů a jedna žádost
+jsou ověřené beze změny; vytvořen pouze pilotní A. Oběma účtům interní jádro
+vrací 1 kartu, news kontext s 36 heads a count 0 (30 SDK reads / 1 quota zápis).
+Nejde o validní callable/UI důkaz. Auth účty, produkce/main nezměněné.
+Další: vlastník má vyžádané skutečné vytvoření **MVP B4b B 183ed3** pod
+TestBusiness (přesný text v manifestu), 24 h / Dotaz / Ústí / bez promo.
+Zatím nevytvářet C: 60s okno začít až při připraveném pozorujícím klientu.
+Následuje ověření číslovky/odečtení/obnovy, otevřeného UI při pauze/návratu
+a úklid těchto tří slotů. B4 ani finální feed akceptaci zatím neuzavírat.
+Původní metadata/cache pilot neopakovat.
 
 **Schválený lokální provozní úsek B4b je uzavřený včetně úplného CI.**
 Větev feature/feed-b4-news-runtime má [výsledek a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results):
