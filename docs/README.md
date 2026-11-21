@@ -45,6 +45,7 @@ Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, s
 - [B4 – uzavřená metadata/cache DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete)
 - [B4b – lokální číslovka novinek, měření a otevřené provozní zapojení](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
 - [B4b – schválený provozní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal) a [lokální implementace/měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
+- [B4b – konkrétní DEV aktivace a společný závěrečný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
 - [Sdílený prostorový index – lokální návrh a ověření](plans/feed/FEED_BLOCK_INDEX_PLAN.md)
 - [Provozní návrh indexu – náklady, plánování a migrace](plans/feed/FEED_RUNTIME_PROPOSAL.md)
 - [Trvalá instalace indexu a zapojení API/klienta](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)

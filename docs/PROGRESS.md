@@ -270,7 +270,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | feed-b4-badge-code: Provozní napojení úsporných signálů a číslovky – implementace | implementation | ✅ | [1](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results), [2](../functions/feed_news_signals.js), [3](../functions/feed_news_meter.js), [4](../lib/feed_news_runtime.dart) |
 | feed-b4-badge-check: Provozní napojení signálů a číslovky – automatické ověření | verification | ✅ | [1](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results), [2](../functions/feed_news_runtime.integration.test.js), [3](../tools/rules/feed_news_access.integration.test.mjs), [4](../test/feed_news_runtime_test.dart), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44953434700) |
 | feed-b4-delta-dev: B4 metadata/cache a kompatibilni prechod - nasazeni DEV | deployment | ✅ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results), [2](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
-| feed-b4-dev: Nasazení úsporné obnovy a novinek do DEV | deployment | ⬜ | — |
+| feed-b4-dev: Nasazení úsporné obnovy a novinek do DEV | deployment | ⬜ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal) |
 | feed-b4-delta-accept: B4 metadata/cache a prechod - ziva akceptace DEV | acceptance | ✅ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete) |
 | feed-b4-accept: Živá společná akceptace B4, baseline a novinek | acceptance | ⬜ | — |
 | feed-final-accept: Společná finální regrese celého nového feedu | acceptance | ⬜ | — |

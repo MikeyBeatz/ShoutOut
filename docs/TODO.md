@@ -68,7 +68,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    vlastník schválil celý. [Lokální implementace a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
    jsou uzavřené: oblastní/technický signál, úplné pokrytí, čtecí Rules,
    četnost/adaptace a news kvóta; 3d381f8 / úplné CI 44953434700 success.
-   Nyní připravit konkrétní DEV aktivaci/pilot. Živá aktivace nezačala.
+   [Konkrétní DEV aktivace a malý společný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
+   jsou připravené podle čerstvé čtecí inventury: dvě Functions, tři indexové
+   výjimky a tři nové fixture. Nový živý rozsah čeká na souhlas; aktivace nezačala.
    Přepínače vypnuté, bez živých změn. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

@@ -441,3 +441,121 @@ novinek a společná B4 akceptace. Živý rollback byl doložen podepsaným
 rozpracovaným požadavkem a klientský přechod automatickou regresí;
 interaktivní UI rollback patří do společné finální regrese B4. Kapacita
 5 000 současných relací ani produkční připravenost se tímto pilotem netvrdí.
+
+<a id="news-dev-pilot-proposal"></a>
+
+## B4b – konkrétní DEV aktivace a společné dokončení B4
+
+**Návrh připravený 21. listopadu 2026; živý rozsah zatím neschválený.**
+Navazuje na [uzavřený lokální runtime](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
+ze zdroje 3d381f820b22162cf38eb58b757a80e2c9459b7f / úplné CI
+44953434700 success. Předchozí metadata/cache pilot výše je hotový;
+neopakuje se jeho migrace ani 120 fixture. Toto je zbývající aktivace
+číslovky a společná akceptace, nikoli nový milník či další váha.
+
+### Ověřený výchozí stav a hranice
+
+Čtecí inventura 21. listopadu kolem 22:20 UTC potvrdila pouze projekt
+**shoutout-dev-46c81**, databázi `(default)` STANDARD / europe-west3:
+
+- Hosting fa20f566fc0ab82b, serverDeltaFeed true / serverFeedNews false.
+- Feed control revision 11, card reader feed-v3; zachované writery v1/v2/v3.
+  Feed-v3 createTime je `[1795287050,554987000]`, cardReady true.
+  `newsIncarnation` zatím chybí; `feedNewsControl/current` chybí a publicationHeads
+  je prázdná. Není nutná nová generace, backfill ani přepis původních Shoutů.
+- 38 původních Shoutů / 0 aktivních, 1 původní pending žádost. Jejich ID
+  a updateTime jsou uložené pro kontrolu zachování; oba testovací profily existují.
+- createShout revize createshout-00006-xah a getFeedPage getfeedpage-00004-vay;
+  obě ACTIVE, min0/max1, concurrency1, 256 MiB, 15 s, europe-west3.
+  Stávající podpisový klíč je ENABLED; jeho obsah se při inventuře nečetl.
+- Tři cílová pole zatím dědí indexaci předka, bez evidované TTL konfigurace.
+
+Podklady jsou build/b4-news-dev-inventory.json a b4-news-services-check.json;
+obsahují cloudWrites 0. Před zápisem zopakovat inventuru a zkontrolovat
+přesné preconditions. Odlišný stav nesmí vést k automatickému přepsání.
+
+Inventura App Check vrací u Firestore/Storage HTTP 200, ale bez pole
+enforcementMode; seznam konfigurací je prázdný. Podle
+[oficiálního kontraktu](https://firebase.google.com/docs/reference/appcheck/rest/v1/EnforcementMode)
+má nenastavený režim výchozí OFF. **Globální vynucení tedy není doložené**;
+nezaměňovat je s Auth/App Check kontrolou callable Functions. Tento pilot
+globální nastavení nemění. Rules nadále vynucují ověřený účet a rozsah čtení;
+produkční ochrana a kapacita zůstávají součástí startovní brány.
+
+### Jeden společný schvalovaný rozsah
+
+Připravit řízený aktivační/pilotní nástroj, jeho cílené emulátorové testy
+a přepínače, dokumentaci, lokální commity, společný push a úplné CI.
+Nástroj musí vynucovat přesný DEV projekt, čistý zdroj s úspěšným úplným CI,
+digest konkrétního plánu, inkarnaci generace a očekávané verze dokumentů.
+Opakování pokračuje z potvrzeného stavu; konflikt zastaví bez částečné změny.
+Přesný zápisový plán s ID fixture a digestem vznikne po implementaci nástroje
+před první mutací; nynější inventura není vydávána za hotový operátor.
+
+Po úspěšném úplném CI přesného aktivačního commitu provést jen v DEV:
+
+1. Připravit ověřený návratový web bez news a zálohu aktuálních Rules.
+   Cíleně vypnout indexaci právě tří polí: `publicationHeads.*`,
+   `feedNewsControl.*`, `feedIndexGenerations.newsIncarnation`.
+   Zachovat TTL a ostatní indexy; nepoužít celý starý čtrnáctikrokový plán.
+2. Pomocí `prepareNewsControlChange` atomicky založit news control v režimu
+   paused, revision 1, pro přesnou inkarnaci feed-v3; doplnit markerové
+   newsIncarnation a technický publicationHeads/_control. Existující
+   feedIndexControl se nemění. Nasadit připravené get-only news Rules.
+3. Ze stejného ověřeného zdroje aktualizovat **pouze createShout a getFeedPage**,
+   zapnout serverové newsEnabled/newsRuntimeEnabled. Prostředky i stávající
+   podpisový klíč zachovat. Ostatních 18 Functions ani plánovače neaktualizovat.
+   Při paused dál funguje běžný feed; nový publisher již udržuje oblastní head.
+4. Pro obě cílové Functions doložit 100 % provozu na nové revizi a RETIRED
+   infrastrukturu všech předchozích revizí. Starý desetifunkční drain checker
+   rozšířit o přesně vymezenou dvojici; nesnižovat požadovaný důkaz na čekání
+   nebo nepřítomnost logů. Bez důkazu neaktivovat číslovku.
+5. Stejným transakčním helperem přepnout control na active, revision 2;
+   technický head se změní ve stejné transakci. Potom nasadit DEV web
+   se serverFeedNews true a ověřit artefakt/config na obou DEV doménách.
+
+Četnost 2/15/5 s, nejvýše 64 odběrů, samostatná news kvóta 40/1 s,
+hodinová relace a všechny retence zůstávají podle již schváleného runtime.
+Nevznikají nové Functions, služby, Auth účty, klíče ani Scheduler úlohy.
+Produkce, main, původní obsah a původní žádost se nemění.
+
+### Malý pilot a kritéria dokončení
+
+Nejvýše **3 nové syntetické Shouty** pod existujícími Bright_Otter_182 a
+TestBusiness, s jednoznačným manifestem a obnovitelným stavem. A a B platí
+24 hodin; C má pouze v administrátorské fixture krátkou platnost 60 sekund
+od jejího vytvoření pro ověření expirace. Produktové minimum platnosti se nemění.
+Nevytvářet další fixture při opakování; operace musí být idempotentní.
+
+- A vytvoří počáteční kontext. Publikace B po úspěšné obnově musí změnit badge
+  na 1 bez přeskupení načtených karet; po jeho smazání počet klesne na 0.
+- C ověří novou publikaci a odečtení po expiraci. Ruční obnova v samostatném
+  průchodu resetuje baseline/badge, vrátí scroll nahoru a správně zařadí přečtení.
+- Ověřit oba účty, návrat do popředí, zachování feedu při výpadku a bezpečné
+  pokračování. Klidová nula nemá spouštět opakované plné count dotazy.
+- Nejméně jedna publikace a news čtení musí projít skutečným callable s
+  Auth/App Check; interní jádro samo platformní/UI důkaz nenahrazuje.
+- V otevřeném klientu provést řízenou pauzu a opětovnou aktivaci: technický
+  head musí probudit odběr, číslovka se bezpečně zastaví, běžný feed zůstane
+  použitelný. Ověřit také kompatibilní návratový web a následné obnovení.
+- Společná závěrečná regrese využije tyto stejné fixture: delta/cache,
+  stabilní další stránka podle dosavadních automatických důkazů, B2/B3,
+  okamžitá reakce/záložka, detail/Mé/Uložené a dosavadní promo regrese.
+  Třípoložkový pilot sám nově nedokazuje stránkování nad 50 ani kapacitu 5 000.
+- Po UI akceptaci uklidit pouze manifestové zdroje přes společný indexový
+  writer a pouze jejich testovací interakce/read značky/receipty. Provozní
+  opaque heads, control a news quota záznamy zůstávají pod běžnou politikou;
+  neobnovovat slepě jejich předtestovou hodnotu přes souběžné změny.
+  Znovu prokázat zachování updateTime všech 38 původních zdrojů a pending žádosti.
+
+### Návrat a uzavření
+
+Před návratem backendu nejprve transakčně paused přes helper včetně _control;
+samostatný přepis privátního controlu je zakázaný. Použít kompatibilní web
+bez news s ověřeným CI/artefaktem, zachovat běžné feed writery a jejich data.
+Bezpečnou pauzu lze ponechat při nesplněné akceptaci; nevydávat ji za úspěch.
+
+Teprve skutečné nasazení uzavře feed-b4-dev; živý badge/pauza/návrat/úklid
+feed-b4-accept a společná doložená regrese feed-final-accept. Přípravný plán
+žádnou z těchto položek nezaškrtává. Celý serverový mvp-16 navíc ponechává
+audit zbývající autority a kompletní produkční akceptaci podle serverového plánu.
