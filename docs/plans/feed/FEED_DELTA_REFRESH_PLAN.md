@@ -707,7 +707,7 @@ Lokální základ je uzavřený ve feature/feed-b4-news-local: zdroj
 
 Lokální kontroly: 445 Flutter, 89 nástrojových, 165 Functions unit
 (540 emulátorových scénářů v unit běhu přeskočených), 9 nových databázových
-scénářů a 11 transportních včetně Chromu. Lint, úplná analýza a formát jsou
+scénářů a 11 transportních včetně Chromu. Lint, úplná analýza a formát
 prošly; konečné úplné CI potvrdilo také všechny dosavadní serverové,
 Rules, B2, purge a Storage regrese i webový build. Nový samostatný krok
 `Test B4 news count and refresh fence` je úspěšný, místní souhrn důkazu
