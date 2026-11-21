@@ -137,12 +137,12 @@ test('real comment, delete and save operations keep all projections and receipt 
 
 test('geography is fenced against replacement, moved source and deleted authors', { skip: !enabled }, async t => {
   const f = await fixture(t), id = await f.add(), ref = db.doc(`shouts/${id}`), original = await ref.get();
-  assert.equal(await finishShoutGeography(f.runtime.database, original, { schemaVersion: 1, countryCode: 'CZ' }), true);
+  assert.equal(await finishShoutGeography(f.runtime.database, original, { schemaVersion: 1, countryCode: 'CZ' }, { clock }), true);
   assert.equal((await f.states(id))[0].revision, 2);
-  assert.equal(await finishShoutGeography(f.runtime.database, original, { schemaVersion: 1, countryCode: 'SK' }), false);
+  assert.equal(await finishShoutGeography(f.runtime.database, original, { schemaVersion: 1, countryCode: 'SK' }, { clock }), false);
   const other = await f.add(1), snapshot = await db.doc(`shouts/${other}`).get();
   await db.doc(`publicProfiles/${f.uid}`).set({ schemaVersion: 1, accountStatus: 'deleted' });
-  assert.equal(await finishShoutGeography(f.runtime.database, snapshot, { schemaVersion: 1 }), false);
+  assert.equal(await finishShoutGeography(f.runtime.database, snapshot, { schemaVersion: 1 }, { clock }), false);
   const plan = await f.mutate(other, value => ({ ...value, commentsCount: 1 }));
   assert.equal(plan.nodeWrites, 0); assert.equal((await f.states(other))[0], undefined);
 });
