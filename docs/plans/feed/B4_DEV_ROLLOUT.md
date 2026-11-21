@@ -390,11 +390,9 @@ Tyto živé důkazy používají **interní serverové jádro**; nejsou důkazem
 callable Auth/App Check ani UI akceptace otevřeného uživatelského okna.
 Computer Use zastavila automatická bezpečnostní kontrola kvůli nemožnosti
 spolehlivě ověřit URL na Windows; další UI ovládání se neprovádělo.
-Vlastník dostal konkrétní průchod pro oba účty bez konzolových skriptů.
-**Otevřené:** uživatelská UI/interakční akceptace, případná potřebná živá
-kontrola přechodu otevřeného klienta a následný vymezený úklid fixture.
-Testovací data zatím zůstávají pro tento průchod. Signály/číslovka novinek
-nejsou implementované ani nasazené; celé B4 není uzavřené.
+Vlastník následně potvrdil konkrétní průchod pro oba účty bez konzolových
+skriptů; [akceptace a vymezený úklid jsou uzavřené níže](#delta-acceptance-complete).
+Signály/číslovka novinek nejsou implementované ani nasazené; celé B4 není uzavřené.
 
 Obnovitelné místní podklady: build/b4-final-release-proof.json,
 build/b4-index-progress.json, build/b4-drain-proof.json,
@@ -407,3 +405,39 @@ build/b4-dev/release-f9117a6 na výše uvedeném SHA; jméno adresáře není SH
 Po úklidu uložit závěrečný důkaz a ověřit původní inventuru znovu.
 Návratový web je 5b4d711b715a85e3 / fc795ad; návrat readeru používat pouze
 přes operátor, zachovat všechny tři writery, indexy a retence.
+
+<a id="delta-acceptance-complete"></a>
+
+## Uzavřená DEV akceptace metadata/cache části
+
+**21. listopadu 2026** vlastník odpověděl „vše funguje tak jak má“ na
+vyžádaný průchod nové verze pod Bright_Otter_182 a TestBusiness: stránkování
+bez skoku, obnova feedu, odlišení přečtení, přidání/odebrání palce a záložky
+a detail přes Mé shouty. V samostatném vymezeném logovém okně je doloženo
+15 getFeedPage a 2 toggleShoutReaction s HTTP 200 / Auth VALID / App Check VALID;
+ukládání pokrývá uživatelské UI potvrzení. Podklad build/b4-ui-acceptance.json
+odděluje potvrzení vlastníka od skutečně zachycených serverových událostí.
+
+Po potvrzení proběhl schválený úklid z čistého 8b1de68 / úplné CI 44935555088,
+se stejným digestem pilotu a přepínačem clients-complete:
+
+- odstraněno **120** testovacích zdrojů přes společný writer všech tří generací;
+- odstraněno **138** cloudových read klíčů pouze těchto fixture;
+- ověřena absence všech **120** jejich publicStates a příspěvků v aktuálním
+  indexu; historické kořeny zůstávají pod běžnou retencí;
+- původních **38** zdrojů a **1** pending žádost mají původní updateTime;
+  žádné nové/mazané Auth účty ani změny produkce;
+- čerstvý serverový feed pro oba účty vrací 0 karet / 0 těl, protože původní
+  zdroje jsou expired/deleted; aktuální control zůstává revision 11 / feed-v3;
+- web na obou doménách, Rules a oba plánovače jsou znovu ověřené beze změny.
+
+Doklady: build/b4-cleanup-proof.json, build/b4-originals-proof.json,
+build/b4-ui-acceptance.json, build/b4-hosting-proof.json a pilotní stav ve
+výše uvedené čisté pracovní kopii má phase cleaned. Tento pilot nezakládat
+znovu. Místní klientské značky doběhnou podle své schválené retence.
+
+Uzavírá se **feed-b4-delta-accept**. Otevřené zůstávají signály/číslovka
+novinek a společná B4 akceptace. Živý rollback byl doložen podepsaným
+rozpracovaným požadavkem a klientský přechod automatickou regresí;
+interaktivní UI rollback patří do společné finální regrese B4. Kapacita
+5 000 současných relací ani produkční připravenost se tímto pilotem netvrdí.

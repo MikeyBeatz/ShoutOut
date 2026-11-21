@@ -4,7 +4,7 @@
 ze zdroje 8b1de68 / úplné CI 44935555088 success, Hosting fa20f566fc0ab82b.
 DEV serverDeltaFeed je true, reader feed-v3, control revision 11 a tři writery.
 Deset Functions, připravené Rules a selektivní indexy jsou ověřené; prostředky,
-plánovače a produkce nezměněné. Pilot čeká na UI akceptaci a úklid.
+plánovače a produkce nezměněné. [Metadata/cache UI akceptace i úklid jsou uzavřené](../plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
 Následující starší datované rollouty zůstávají historií.
 
 Od 19. listopadu je [B3 reader a web nasazený v DEV](../plans/feed/B3_DEV_ROLLOUT.md#dev-rollout-results)

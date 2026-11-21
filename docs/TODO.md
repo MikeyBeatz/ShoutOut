@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,18 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,20 %** — vážené dokončení podúseků
 
-Hotové úseky: **160/219**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **161/219**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,23 %** — vážené dokončení podúseků
 
-Hotové úseky: **191/297**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **192/297**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -49,19 +49,20 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-**Poslední uzavřený živý úsek:** [B3 – živá DEV akceptace a úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
-Původní podrobný [checkpoint je zachovaný](plans/feed/B3_DEV_ROLLOUT.md#todo-b3-preacceptance-history)
-v plánu; není další otevřenou prací. Uklizeno 120 fixture a 144 cloudových
-značek přečtení, původních 38 zdrojů a pending žádost beze změny.
+**Poslední uzavřený živý úsek:** [B4 metadata/cache – DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
+Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
+120 nových fixture a 138 jejich cloudových značek; původních 38 zdrojů a
+pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
    **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
    8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.
-   [Živé důkazy a otevřený konec pilotu](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results):
+   [Živé důkazy nasazení](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results):
    oba účty prošly 50 → 100 → 120, warm 0/refill 1 tělo, promo a serverový
-   rollback/nový audit. **Další:** vyžádaný ruční UI/interakční průchod a
-   navazující úklid právě těchto 120 fixture; původních 38 zdrojů i pending
-   žádost zachované. Signály/číslovka novinek stále zbývají.
+   rollback/nový audit. [UI akceptace i úklid jsou uzavřené](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
+   **Další:** konkrétní návrh B4b pro úsporné signály/číslovku novinek,
+   včetně měření a provozních mezí před implementací. Společná finální
+   akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
    [P1 a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results) i

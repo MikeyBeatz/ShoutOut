@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní: metadata/cache B4 jsou nasazené v DEV, probíhá akceptace pilotu.**
+**Nyní: metadata/cache B4 mají uzavřenou DEV akceptaci i úklid.**
 Zdroj **8b1de6824e116358c4d364785e4b94f57f52fc9d**, [úplné CI 44935555088 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44935555088),
 Hosting **fa20f566fc0ab82b**, pouze shoutout-dev-46c81. Dokončeno 14 indexových
 kroků bez TTL, deset Functions, ověřený drain všech starších revizí a Rules.
@@ -16,12 +16,17 @@ nezměněné. [Důkazy a přesné meze](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout
 Interní živý pilot pro oba účty prošel 50 → 100 → 120, warm 0 těl/refill 1,
 přečtením, promo a serverovým resetem rozpracovaného požadavku při návratu.
 Původních 38 zdrojů i pending žádost mají nezměněné updateTime, bez Auth mutací.
-120 testovacích Shoutů zatím zůstává (118 běžných + 2 promo).
-**Další:** odpověď vlastníka na vyžádaný UI/interakční průchod obou účtů,
-ověření otevřeného klienta podle potřeby, potom úklid fixture přes writer.
-Computer Use zastavila automatická kontrola neověřitelné URL; UI ani callable
-Auth/App Check se za ověřené nevydávají. Signály a číslovka novinek zbývají;
-celé B4 ani celý milník ještě nejsou uzavřené. Produkce/main nezměněné.
+Vlastník potvrdil UI průchod obou účtů bez chyby. Následně uklizeno všech
+120 fixture a 138 cloudových read klíčů; 120 publicStates chybí a čerstvý feed
+oběma účtům správně vrací 0 karet. Původní data znovu ověřená beze změny.
+[Akceptace, logy a přesné meze](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
+Computer Use bylo zastavené kontrolou URL; UI doložil vlastník, Auth/App Check
+VALID i HTTP 200 pro feed a reakce serverové logy. Interaktivní UI rollback
+zbývá ve společné finální regresi B4; technický rollback i klientská regrese prošly.
+**Další:** připravit konkrétní úsek B4b – úsporné signály a číslovku novinek
+na plovoucí obnově podle existujícího plánu, před zdrojovými změnami schválit
+nový kontrakt a měřicí rozsah. Celé B4 ani celý milník nejsou uzavřené.
+Produkce/main nezměněné; tentýž pilot znovu nezakládat.
 
 **Předchozí lokální přechod B4 je uzavřený včetně úplného CI.**
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
@@ -828,7 +833,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `8b1de6824e116358c4d364785e4b94f57f52fc9d` / `fa20f566fc0ab82b`; úplné CI 44935555088 success. B2/B3 i B4 metadata/cache aktivní; 67 cest + 2 rezervované Firebase cesty, HTML/JS/config na obou doménách shodné s releasem. B4 UI akceptace a úklid čekají. |
+| Webový zdroj / Hosting verze | `8b1de6824e116358c4d364785e4b94f57f52fc9d` / `fa20f566fc0ab82b`; úplné CI 44935555088 success. B2/B3 i B4 metadata/cache aktivní; 67 cest + 2 rezervované Firebase cesty, HTML/JS/config na obou doménách shodné s releasem. B4 metadata/cache UI akceptace a úklid uzavřené. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `8b1de68`, ACTIVE `prepareaccountdeletion-00004-jeh`; společný B4 writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
@@ -872,7 +877,7 @@ produkce. Podrobnosti prostředí jsou v [WEB_ENVIRONMENTS](operations/WEB_ENVIR
 | Technická potvrzení | Sedmidenní timed klíče, zákaz nových legacy klíčů a pokračující DEV cleanup každou minutu, max. 500 dokumentů / 10 s na fázi, po dokončení 24h klid. | Produkční nastavení a společná vydávací brána. |
 | Mazání účtu | DEV serverové fáze včetně purge, povinné směrování, Rules cutover, závěrečný UI/serverový test a úklid dokončené. | Produkční aktivace pod společnou vydávací bránou; žádný rozpracovaný DEV pilot. |
 | Exspirace Shoutů | Serverová změna statusu se společným indexovým writerem a zámek běžných interakcí po expiresAt v DEV. | Sedmidenní fyzický úklid Shoutů a potomků včetně indexu. |
-| Feed | B1/B2/B3 akceptace uzavřené. B4 metadata/cache a feed-v3 nasazené, interní živý pilot včetně návratu prošel. | UI akceptace a úklid B4 pilotu, signály/číslovka novinek a závěrečná společná brána. Regrese Uložených uzavřená v DEV. |
+| Feed | B1/B2/B3 akceptace uzavřené. B4 metadata/cache a feed-v3 mají uzavřený interní/UI pilot i úklid. | Signály/číslovka novinek a závěrečná společná B4 brána včetně interaktivního UI rollbacku. Regrese Uložených uzavřená v DEV. |
 | Produkce a spuštění | Oddělený app site, SDK konfigurace a dříve ověřené DNS/HTTPS. | Runtime služby a zbývající bezpečnostní, právní, provozní a ruční kontroly. |
 
 Aktuální stupnice jsou generované v [TODO](TODO.md#postup) z

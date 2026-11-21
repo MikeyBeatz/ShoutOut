@@ -16,8 +16,9 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 **21. listopadu – aktuálně:** [B4 metadata/cache jsou v DEV](B4_DEV_ROLLOUT.md#dev-rollout-results),
 zdroj 8b1de68 / úplné CI 44935555088 success, Hosting fa20f566fc0ab82b.
 Reader feed-v3, control revision 11, tři writery; živý interní pilot,
-rollback a nový audit prošly. Čeká UI/interakční akceptace a úklid nových
-fixture. Signály/číslovka novinek zůstávají další částí B4. Následující
+rollback a nový audit prošly. [UI/interakční akceptace a úklid](B4_DEV_ROLLOUT.md#delta-acceptance-complete)
+jsou uzavřené. Signály/číslovka novinek zůstávají další částí B4; interaktivní
+UI rollback se ověří ve společné finální regresi. Následující
 datované místní nebo B3 checkpointy zachovávají historii.
 
 **20. listopadu: B3 má uzavřenou živou DEV akceptaci i úklid pilotu.**

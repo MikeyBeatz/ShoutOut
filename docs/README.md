@@ -42,7 +42,7 @@ Serverové fáze, klientský přechod, Rules cutover i závěrečný účtový t
 Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, stránkované API i Home jsou od 7. listopadu zapojené v DEV; vlastní historie je ověřená. Místní přečtení B1 je od 11. listopadu na DEV webu, má uživatelský důkaz značek/restartu; B1, regrese Uložených a společná DEV akceptace A2/A3 jsou uzavřené včetně úklidu fixture. B2 má od 18. listopadu [uzavřenou DEV synchronizaci, recovery a úklid](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete); B3 od 20. listopadu [uzavřenou živou akceptaci i úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete). Další je B4: delta/cache a indikátor novinek. Přesné revize a kontroly určuje PROJECT_STATUS.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](plans/feed/FEED_A1_RESULTS.md)
-- [B4 – nasazená metadata/cache a otevřená DEV akceptace](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results)
+- [B4 – uzavřená metadata/cache DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete)
 - [Sdílený prostorový index – lokální návrh a ověření](plans/feed/FEED_BLOCK_INDEX_PLAN.md)
 - [Provozní návrh indexu – náklady, plánování a migrace](plans/feed/FEED_RUNTIME_PROPOSAL.md)
 - [Trvalá instalace indexu a zapojení API/klienta](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md)
