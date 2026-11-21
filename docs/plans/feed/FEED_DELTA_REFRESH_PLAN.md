@@ -964,8 +964,9 @@ Nové intervaly, prahy a datový kontrakt jsou návrh autora, nikoli doporučen�
 ## B4b – lokální provozní implementace a výsledky
 
 Větev **feature/feed-b4-news-runtime**, navazuje na schválený návrh výše.
-Implementace a lokální kontroly jsou připravené ke společnému úplnému CI;
-úspěch tohoto CI se před jeho dokončením netvrdí. Žádný živý zápis či nasazení.
+Zdroj **3d381f820b22162cf38eb58b757a80e2c9459b7f** má
+[úspěšné úplné CI 44953434700](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44953434700).
+Lokální úsek je uzavřený. Žádný živý zápis či nasazení.
 První zdroj 73526a0 / CI 44952312294 byl zrušen po lokálním nálezu chybějícího
 probuzení odběrů při změně controlu; zrušený běh není důkaz úplného ověření.
 
@@ -1055,9 +1056,17 @@ do nesouvisejících Functions. [Nové serverové regrese](../../../functions/fe
 [klientské regrese](../../../test/feed_news_runtime_test.dart) jsou v úplném CI;
 nové databázové testy patří do stávajícího kroku test:feed-news.
 
-**Zbývá:** přesné úplné CI, potom konkrétní DEV aktivační/pilotní plán,
+Úplné CI potvrdilo 456 Flutter, 89 nástrojových, 167 Functions unit (548
+integration scénářů přeskočených pouze v unit běhu), 464 Rules/server,
+9 reader, 14 card, 13 transport/Rules/Chrome, 12 přechodových, 20 news,
+34 B2, 142 purge a 15 Storage scénářů. Formát, analýza, lint, browser
+persistence i webový build jsou úspěšné. Kontrola ověřila přesný headSha
+a success; místní strojový souhrn je build/b4-news-runtime-ci-proof.json.
+
+**Zbývá:** konkrétní DEV aktivační/pilotní plán,
 ověření App Check enforcement, vazby marker/control, zapnutí writeru před
-readerem a kontrolovaný návrat. Rutinní rollout nevyžaduje opakovaný souhlas,
+readerem po prokázaném doběhnutí starých publikačních revizí a kontrolovaný
+návrat přes atomickou pauzu. Rutinní rollout nevyžaduje opakovaný souhlas,
 ale nové živé kolekce/control, marker a testovací data mají vlastní bránu.
 Společná akceptace B4 stále zahrnuje interaktivní rollback otevřeného klienta.
 Kapacita 100 000 účtů / 5 000 relací a měsíční účet nejsou emulátorem ani

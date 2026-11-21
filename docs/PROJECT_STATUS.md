@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválený lokální provozní úsek B4b je implementovaný; úplné CI ještě čeká.**
+**Schválený lokální provozní úsek B4b je uzavřený včetně úplného CI.**
 Větev feature/feed-b4-news-runtime má [výsledek a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results):
 atomický publication head, samostatnou UID kvótu 40/1s, úplné pokrytí,
 historickou baseline hlaviček, připravené get-only Rules a aktivním feedem
@@ -18,8 +18,15 @@ od cloudového účtu/kapacity. Tři indexové výjimky bez TTL jsou jen připra
 Lokální doplňkový test vyžádal technický `_control` head pro okamžité probuzení
 při pauze/návratu; stále nejvýše 64 odběrů celkem. První CI 44952312294 je
 zrušené kvůli této opravě, neoznačovat je jako hotové úplné ověření.
-Další je společný push a úspěšné úplné CI přesného zdroje, potom konkrétní
-DEV aktivace/pilot včetně inventury App Check a bezpečného založení controlu.
+Zdroj **3d381f820b22162cf38eb58b757a80e2c9459b7f** je pushnutý a má
+[úspěšné úplné CI 44953434700](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44953434700).
+Prošlo 456 Flutter, 89 tools, 167 Functions unit (548 integration skipped v
+unit běhu), 464 Rules/server, 9 reader, 14 card, 13 transport/Rules/Chrome,
+12 přechodových, 20 news, 34 B2, 142 purge a 15 Storage scénářů; analýza,
+formát, lint, browser persistence i webový build. Ověřen přesný SHA a
+conclusion success; místní výpis je build/b4-news-runtime-ci-proof.json.
+Další je konkrétní DEV aktivační/pilotní plán včetně inventury App Check,
+bezpečného založení controlu a doběhnutí starších publikačních revizí.
 Žádné nasazení nebo živé zápisy; všechny news přepínače zůstávají off.
 Níže doložený DEV metadata/cache a produkce/main jsou nezměněné.
 
@@ -56,8 +63,8 @@ oběma účtům správně vrací 0 karet. Původní data znovu ověřená beze z
 Computer Use bylo zastavené kontrolou URL; UI doložil vlastník, Auth/App Check
 VALID i HTTP 200 pro feed a reakce serverové logy. Interaktivní UI rollback
 zbývá ve společné finální regresi B4; technický rollback i klientská regrese prošly.
-**Další:** dokončit úplné CI provozního B4b výše; lokální původní count/měření
-i jejich úplné CI už jsou hotové. Celé B4 ani celý milník nejsou uzavřené.
+**Další:** připravit konkrétní DEV aktivaci/pilot B4b výše; původní count i
+provozní lokální napojení mají úspěšná úplná CI. Celé B4 ani celý milník nejsou uzavřené.
 Produkce/main nezměněné; tentýž pilot znovu nezakládat.
 
 **Předchozí lokální přechod B4 je uzavřený včetně úplného CI.**

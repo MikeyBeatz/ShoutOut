@@ -10,7 +10,8 @@ B4 metadata/cache mají [uzavřenou DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#de
 Lokální B4b count má [úplné CI a měření](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results);
 navazující [konkrétní provozní rozsah](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
 vlastník schválil. [Lokální implementace/měření](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
-jsou připravené ke společnému úplnému CI. Živá aktivace nezačala.
+jsou uzavřené včetně úplného CI 44953434700 success ze zdroje 3d381f8.
+Živá aktivace nezačala; další je její konkrétní DEV plán a pilot.
 Následující přípravné etapy jsou datované podklady již nasazené metadata/cache vrstvy.
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.
