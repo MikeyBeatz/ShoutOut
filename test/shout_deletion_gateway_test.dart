@@ -128,6 +128,7 @@ void main() {
           jsonDecode(File('config/dev.json').readAsStringSync())
                 as Map<String, dynamic>
             ..remove('serverShoutDeletion')
+            ..['serverFeedNews'] = false
             ..['serverDeltaFeed'] = false
             ..['serverSpatialFeed'] = false
             ..['serverUnreadFeed'] = false;

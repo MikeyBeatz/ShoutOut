@@ -146,6 +146,7 @@ void main() {
           jsonDecode(File('config/dev.json').readAsStringSync())
                 as Map<String, dynamic>
             ..remove('serverCommentDeletion')
+            ..['serverFeedNews'] = false
             ..['serverDeltaFeed'] = false;
       expect(WebEnvironment.fromJson(config).serverCommentDeletion, isFalse);
       expect(
