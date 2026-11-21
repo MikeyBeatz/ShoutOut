@@ -8,17 +8,18 @@ Map<String, dynamic> gatewayFixture() => {
   ...jsonDecode(File('config/dev.json').readAsStringSync())
       as Map<String, dynamic>,
   'serverDeltaFeed': false,
+  'serverFeedNews': false,
   'serverSpatialFeed': false,
   'serverReadSynchronization': false,
   'serverUnreadFeed': false,
 };
 
 void main() {
-  test('B4b news is disabled and requires DEV delta feed', () {
+  test('B4b news is active in DEV and requires delta feed', () {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())
             as Map<String, dynamic>;
-    expect(WebEnvironment.fromJson(config).serverFeedNews, isFalse);
+    expect(WebEnvironment.fromJson(config).serverFeedNews, isTrue);
     expect(
       WebEnvironment.fromJson({
         ...config,
@@ -79,6 +80,7 @@ void main() {
             as Map<String, dynamic>;
     expect(WebEnvironment.fromJson(dev).serverUnreadFeed, isTrue);
     dev['serverDeltaFeed'] = false;
+    dev['serverFeedNews'] = false;
     expect(
       WebEnvironment.fromJson(
         {...dev}..remove('serverUnreadFeed'),
@@ -534,6 +536,7 @@ void main() {
     config['serverReadSynchronization'] = false;
     config['serverUnreadFeed'] = false;
     config['serverDeltaFeed'] = false;
+    config['serverFeedNews'] = false;
     config['appUrl'] = 'https://go.shoutout-app.eu';
     config['hostingSite'] = 'example-shoutout-live';
     config['firebase']['projectId'] = 'shoutout-production-a1b34';
@@ -583,6 +586,7 @@ void main() {
   test('server comments are independent and require App Check', () {
     final config = development()
       ..remove('serverCommentCreation')
+      ..['serverFeedNews'] = false
       ..['serverDeltaFeed'] = false;
     expect(WebEnvironment.fromJson(config).serverCommentCreation, isFalse);
     expect(

@@ -70,8 +70,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    četnost/adaptace a news kvóta; 3d381f8 / úplné CI 44953434700 success.
    [Konkrétní DEV aktivace a malý společný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
    jsou připravené podle čerstvé čtecí inventury: dvě Functions, tři indexové
-   výjimky a tři nové fixture. Nový živý rozsah čeká na souhlas; aktivace nezačala.
-   Přepínače vypnuté, bez živých změn. Společná finální
+   výjimky a tři nové fixture. Vlastník schválil celý úsek včetně nástroje,
+   CI a živého ověření. Probíhá příprava aktivačního zdroje; v DEV jsou
+   news přepínače stále vypnuté, bez živých změn. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),

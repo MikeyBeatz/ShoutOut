@@ -12,7 +12,7 @@ navazující [konkrétní provozní rozsah](FEED_DELTA_REFRESH_PLAN.md#b4b-runti
 vlastník schválil. [Lokální implementace/měření](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
 jsou uzavřené včetně úplného CI 44953434700 success ze zdroje 3d381f8.
 Živá aktivace nezačala; [konkrétní DEV plán a malý společný pilot](B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
-jsou připravené a nový živý rozsah čeká na souhlas.
+vlastník schválil včetně nástroje, CI a živého ověření. Probíhá příprava aktivačního zdroje.
 Následující přípravné etapy jsou datované podklady již nasazené metadata/cache vrstvy.
 B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
 Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.

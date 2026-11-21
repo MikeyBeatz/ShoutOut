@@ -446,7 +446,7 @@ interaktivní UI rollback patří do společné finální regrese B4. Kapacita
 
 ## B4b – konkrétní DEV aktivace a společné dokončení B4
 
-**Návrh připravený 21. listopadu 2026; živý rozsah zatím neschválený.**
+**Návrh připravený 21. listopadu 2026; vlastník následně schválil celý DEV úsek a testy.**
 Navazuje na [uzavřený lokální runtime](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
 ze zdroje 3d381f820b22162cf38eb58b757a80e2c9459b7f / úplné CI
 44953434700 success. Předchozí metadata/cache pilot výše je hotový;
@@ -526,6 +526,26 @@ TestBusiness, s jednoznačným manifestem a obnovitelným stavem. A a B platí
 24 hodin; C má pouze v administrátorské fixture krátkou platnost 60 sekund
 od jejího vytvoření pro ověření expirace. Produktové minimum platnosti se nemění.
 Nevytvářet další fixture při opakování; operace musí být idempotentní.
+
+Příprava používá tools/feed_news_activation.mjs a tools/feed_news_pilot.mjs;
+integrační testy jsou zapojené do existujícího news CI kroku. A/C mají pevná
+manifestová ID a před zápisem uložený čas, aby opakování neprodlužovalo platnost.
+B se vytváří skutečným klientem; jeho vygenerované ID nástroj přijme pouze po
+jednoznačné shodě schváleného autora, názvu, textu, 24h platnosti a oblasti.
+Při duplicitě, zásahu do původního zdroje či cizí konverzaci úklid odmítne.
+Ovládání prohlížeče při přípravě opět zastavila automatická URL kontrola;
+další UI ovládání neprovádět přes tentýž zablokovaný nástroj. Živý průchod
+proto může vyžadovat ruční vytvoření právě B, nikoli dalších fixture.
+Lokální příprava doložila 92 tools, 22 konfiguračních Flutter a 24 news
+emulátorových scénářů; po posledním doplnění se opakuje cílená sada operátoru.
+Úplné CI aktivačního zdroje a skutečné nasazení zatím zbývají.
+Čtecí aktivační plán má digest
+`d45707b2023883bd4716792d959f82e409e5b705bdfa73728c5be90f04ccfd2c`
+(docs/local/b4b-activation-plan.json); konečný pilotní manifest
+`86221a3301eaff9e137bc4a5084c815c25c9057d4c4748478bd02e11244519fe`
+(docs/local/b4b-pilot-state-v2.json). Starší draft bez plannedAt se nepoužívá.
+Vytvoření obou plánů mělo 0 cloudových zápisů. Bezprostředně před mutací
+znovu ověřit jejich preconditions; změněná inventura není povolení k jejímu přepsání.
 
 - A vytvoří počáteční kontext. Publikace B po úspěšné obnově musí změnit badge
   na 1 bez přeskupení načtených karet; po jeho smazání počet klesne na 0.

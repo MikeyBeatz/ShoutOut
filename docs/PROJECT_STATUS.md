@@ -6,12 +6,12 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Je připravený [konkrétní společný DEV plán B4b](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal).**
+**Vlastník schválil [celý společný DEV úsek B4b](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal).**
 Čtecí inventura 21. listopadu 22:20 UTC potvrzuje feed-v3/revision 11,
 38 původních Shoutů, 1 žádost a dosud chybějící news control/heads.
 Návrh cílí jen na dvě Functions, tři indexové výjimky, Rules a DEV web,
-se třemi novými fixture a společnou akceptací/návratem. Nový živý rozsah
-čeká na souhlas; žádné nasazení ani cloudové zápisy neproběhly.
+se třemi novými fixture a společnou akceptací/návratem. Probíhá lokální příprava
+operátoru, testů a aktivačního zdroje; žádné nasazení ani cloudové zápisy neproběhly.
 Původní metadata/cache pilot zůstává uzavřený, metriky beze změny.
 
 **Schválený lokální provozní úsek B4b je uzavřený včetně úplného CI.**

@@ -1,9 +1,15 @@
 // Pure evidence validation. Never changes traffic, revisions or services.
 export const b4WriterFunctions = ['createShout','deleteShout','toggleShoutReaction','prepareAccountDeletion','createComment','deleteComment','toggleShoutSave','getFeedPage','accountDeletionRequestCreatedDev','resumeAccountDeletionJobsDev'];
 export function verifyB4RevisionDrain(projectId, before, after, services, revisions) {
+  return verifyRevisionDrain(projectId, before, after, services, revisions, b4WriterFunctions);
+}
+export function verifyNewsRevisionDrain(projectId, before, after, services, revisions) {
+  return verifyRevisionDrain(projectId, before, after, services, revisions, ['createShout', 'getFeedPage']);
+}
+function verifyRevisionDrain(projectId, before, after, services, revisions, names) {
   if(projectId!=='shoutout-dev-46c81') throw new Error('b4-drain-dev-required');
   const result=[];
-  for(const name of b4WriterFunctions){
+  for(const name of names){
     const old=before.find(f=>f.name===name), current=after.find(f=>f.name===name);
     if(!old||!current||current.state!=='ACTIVE'||old.revision===current.revision||current.memory!==old.memory||current.max!==old.max||current.min!==old.min||current.concurrency!==old.concurrency||current.timeout!==old.timeout)throw new Error('b4-drain-function-mismatch');
     const serviceName=current.service?.split('/').at(-1), service=services.find(s=>s.name?.split('/').at(-1)===serviceName);
