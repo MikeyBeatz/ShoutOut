@@ -23,6 +23,10 @@ Auth účty, Scheduler ani prostředky se v tomto úseku neměnily.
 stavu, náhrada Home/rodičovských odběrů se zachováním promo a uzavření
 přímých čítačových zápisů v Rules. Potom samostatný připravený DEV přechod;
 nový konkrétní rozsah předložit ke schválení. Neopakovat P1 ani jeho fixture.
+[Konkrétní návrh klientského úseku](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal)
+je připravený: skutečný delta gateway, sdílené malé odběry včetně reconcile,
+náhrada Home promo dotazu a lokální Rules. Čeká na schválení implementace;
+v této návazné práci se zatím měnila pouze dokumentace, bez nového kreditu.
 
 Předchozí [transakční reader a jeho úplné výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
 jsou rovněž uzavřené: 0b2d004 / úplné CI 44825059479 success. Jeho silnější

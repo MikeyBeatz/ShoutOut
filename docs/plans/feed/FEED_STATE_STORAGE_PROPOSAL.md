@@ -156,6 +156,106 @@ Návrh nemění pořadí nepřečtené → přečtené, ruční obnovu, sekundov
 čtení, expiraci ani produktové možnosti. Nové nákladové/provozní volby a
 živý datový přechod se předloží konkrétně před provedením.
 
+<a id="client-integration-proposal"></a>
+
+## Klientské zapojení B4 – konkrétní rozsah před DEV
+
+Návrh z 21. listopadu, **čeká na schválení implementace**. Je to první ze
+tří zbývajících bloků výše, nikoli nová řada P1–Pn. Serverový P1 zůstává
+uzavřený; jeho algoritmy ani celé fixture bez důvodu neopakovat.
+
+### Ověřené podklady
+
+`home.dart::_startFeedListeners` stále odebírá 50 celých aktivních Shoutů
+od nejnovějšího; v prostorovém režimu je předává do promotionShouts.
+Home následně vyřadí neaktivní/blokované autory a Feed zobrazí Spotlight
+do 20 km. Filtr Spotlight se aplikuje až po výběru těchto 50 kandidátů.
+Jeho přesunutí před limit nebo použití jen aktuální prostorové stránky
+by změnilo produktové chování, proto se nenavrhuje.
+
+`_SpatialShoutCard` a `ShoutDetailPage` mají vlastní odběr celého rodiče,
+vlastní reakce a záložky. `_reconcileInteraction` při opožděném potvrzení
+také čte celý rodičovský dokument. `FeedPageGateway` přijímá pouze v1 s plnými
+těly; laboratorní FeedBodyCache není napojená. Nový stav P1 zatím neobsahuje
+geohash ani promo příznaky, které potřebuje levná náhrada Home dotazu.
+
+### Navržená implementace jednoho uceleného úseku
+
+1. Připravit vypnutou verzovanou větev stávajícího getFeedPage: serverový
+   výběr metadat, studenou stránku s těly a podepsané doplnění pouze chybějících
+   ID. Zachovat starý v1 kontrakt a kurzory. Použít stávající projektový klíč
+   s odděleným podpisovým účelem; žádná nová Function ani tajemství. Studené
+   načtení prázdné cache má jeden obrat, warm manifest jeden, chybějící těla
+   nejvýše jeden navazující obrat. Zachovat dávku 50, přípravný rozpočet,
+   hodinový deadline, inkarnaci generace, B3 a skutečné kontroly účtu/blokací/R5.
+2. Pro warm validaci použít současné kořeny a potřebné cesty společného
+   soukromého indexu. Nečíst navíc 50 publicStates v každém manifestu jen
+   kvůli čítačům. Doplnění těla znovu ověří dostupnost a bodyVersion;
+   chybějící/změněná metadata se nesmějí vydávat za úplnou platnou stránku.
+3. Napojit sdílenou RAM cache projektu/UID a sestavení stránky do skutečného
+   gateway/session. V rozpočtu 4 MiB / nejvýše hodina počítat také potřebný
+   potvrzený stav; aktualizace čítače neprodlužuje životnost těla. Žádná těla
+   do IndexedDB. Při změně účtu, odhlášení či mazání zrušit rozpracované
+   přenosy a vyčistit odpovídající cache. Nepřidávat automatické refresh timery
+   ani měnit dosavadní synchronizaci přečtení při spuštění/obnově.
+4. Připravit společný registry odběrů podle projektu/UID, generace a ID.
+   Karta, detail, Mé/Uložené a promo sdílejí malý veřejný stav i existující
+   vlastní reakci/záložku. Odebírat pouze používané položky; po uvolnění
+   posledního odběratele ukončit stream, při obnově nezakládat duplicitní
+   odběry stejných ID. Slučovat monotónní revize a SDK potvrzení, zachovat
+   okamžitý optimistický náhled bez dvojího čítače. Neznámý stav není nula.
+   Také read-only reconcile po potvrzené akci použije malý stav a vlastní
+   reakci/záložku, nikoli původní plné tělo.
+5. Jednorázově sdílet zjištění aktuální čitelné card generace, i bez polohy
+   v Mé/Uložených. Při vyřazení staré generace jednou bezpečně přesměrovat
+   odběry přes serverem potvrzený kontext; stará odpověď jiné inkarnace se
+   odmítne. Bez nekonečného retry nebo skrytého návratu k celým rodičům.
+   Načtené karty po hodině zůstanou, jejich pořadí se tím nepřestavuje.
+6. Nahradit globální Home dotaz ekvivalentním omezeným dotazem na malé stavy.
+   Před prvním živým použitím doplnit do dosud vypnuté projekce geohash a
+   příznaky businessHighlighted/businessSpotlight, již veřejné v běžném těle.
+   Přesná poloha zůstane soukromá. Pro vybrané promo kandidáty serverově
+   ověřit aktuální indexová metadata a přesnou vzdálenost; nevycházet z pouhého
+   středu geohashe. Těla přes stejnou cache doplňovat jen pro potřebné karty.
+   Zachovat výběr globálních 50 před promo filtrem, živé změny promo sekce,
+   blokace a hranici 20 km včetně případů na hranici dosahu.
+7. Lokálně připravit Rules pro čtení malé projekce oprávněným účtem, jen pro
+   udržovanou a připravenou card generaci; list nejvýše 50, zápisy server-only.
+   Soukromé uzly/control ani vlastní reakce/záložky jiných účtů neotevírat.
+   Při udržování card generace uzavřít i přímé změny commentsCount/savesCount
+   u zdrojového Shoutu, včetně navázaných klientských create/delete cest.
+   Zachovat současnou kompatibilitu starého control schema 1. Privilegovaná
+   klientská role nesmí projít výjimkou; Admin operace se nemění.
+8. Připravit potřebný indexový návrh bez TTL a ověřit celý ucelený stav:
+   cold/warm/chybějící tělo, nová verze během přenosu, ztracená odpověď,
+   neplatný podpis, změna UID/generace, pauza, odpojení, zánik obrazovky,
+   expirace/moderace/mazání/R5, detail a více kopií stejné karty, promo,
+   potvrzené palce a záložky bez dvojího započtení a bez Uncaught Error.
+   Zahrnout Flutter/browser a emulátorové Rules/API testy, dokumentaci,
+   aktualizaci stávajících delta-code/check a společný commit/push/úplné CI.
+
+Přepínače serveru i klienta zůstanou vypnuté. Neměnit nyní serverové
+stránkování Mé/Uložených; zapojit je do společného živého stavu a zachovat
+jejich dosavadní funkčnost. Tato knihovní stránka tedy může dál při otevření
+číst zdrojová těla a není součástí tvrzení o nulovém warm source čtení feedu.
+
+### Měření a hranice souhlasu
+
+Porovnat stejný uživatelský průchod na 50/200/2 000 syntetických zdrojích:
+manifest a doplnění včetně vstupních kontrol, B2/B3, starý/nový Home a živé
+odběry, počáteční doručení, změny čítačů, znovupřipojení, souběžnou kartu/detail,
+počet aktivních odběrů, JSON/payload bajty a paměť. Ověřit, že čítač sám
+nespouští přenos těla a zachování stejného ID při refresh nezakládá další
+plný odběr. Započíst i zápisy P1, závislé Rules kontroly a retry; emulátorový
+report není skutečná cloudová faktura ani důkaz kapacity 5 000 relací.
+
+**Pouze lokální implementace, prohlížečové testy proti emulátoru a CI.**
+Bez nasazení, živých dat, migrace, nových Auth účtů, nových služeb/klíčů,
+Scheduleru, změny prostředků, retence, produkce nebo main. Číslovka novinek
+zůstává následný blok. Před živým DEV přechodem doložit přesný stav schématu,
+indexů, klientské/Rules kompatibility, migrace a rollbacku; nový datový
+kontrakt a čtecí oprávnění nyní nepokrývá původní souhlas s P1.
+
 <a id="p1-results"></a>
 
 ## P1 – implementace a ověření

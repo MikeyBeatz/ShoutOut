@@ -61,7 +61,8 @@ značek přečtení, původních 38 zdrojů a pending žádost beze změny.
    Atomické zápisy, R5/history/purge, backfill a audit jsou místně ověřené;
    nová vrstva zůstává vypnutá. **Další:** konkrétní klientský kontrakt a náhrada
    závislých Home/živých odběrů se zachováním promo, související Rules.
-   Nový rozsah předložit ke schválení. Živý datový přechod je samostatná brána.
+   [Konkrétní rozsah je připravený ke schválení](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal).
+   Zatím pouze návrh, bez implementace a dalšího kreditu. Živý datový přechod je samostatná brána.
    Protokol výběr/doplnění, verze celého těla, pouze RAM cache a lokální srovnání
    stavové projekce se započtením existujících živých/Home odběrů jsou lokálně
    připravené. Další integrace musí zlevnit cold/refill a pokrýt všechny writery;
