@@ -140,7 +140,8 @@ jobs:
 
       - name: Test Firestore Rules and server transactions
         if: steps.scope.outputs.full != 'false'
-        timeout-minutes: 5
+        # 464 tests passed at 4m59s in run 44907302349; allow emulator shutdown too.
+        timeout-minutes: 6
         working-directory: tools
         # Debug output is kept in firebase-debug.log for failure diagnostics.
         env:
