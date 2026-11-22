@@ -1,0 +1,165 @@
+{
+  "scope": "Local Firestore emulator SDK operations and JSON sizes; not cloud billing, latency or 5000-user capacity. Retained checks measure an independent maximum of 50 signed IDs; actual first-page overlaps are skipped.",
+  "policy": {
+    "minimumIntervalMillis": 30000,
+    "reserveMeters": 250,
+    "maximumFixAgeMillis": 30000,
+    "maximumAccuracyMeters": 100
+  },
+  "model": "Firestore emulator SDK operations/JSON bytes, not production billing or latency",
+  "report": [
+    {
+      "sources": 50,
+      "cold": {
+        "reads": 35,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 32708,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 34,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1899,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "retained": {
+        "reads": 12,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 544,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "retainedTransfer": {
+        "requests": 1,
+        "requestBytes": 28318,
+        "responseBytes": 4431,
+        "maxCheckpointBytes": 0
+      },
+      "pages": 1,
+      "selected": 50,
+      "movementProofBytes": 1581,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1755,
+        "responseBytes": 64752,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 4,
+        "requestBytes": 32060,
+        "responseBytes": 198579,
+        "maxCheckpointBytes": 0
+      }
+    },
+    {
+      "sources": 200,
+      "cold": {
+        "reads": 38,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 54458,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 34,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1899,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "retained": {
+        "reads": 15,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 74123,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "retainedTransfer": {
+        "requests": 1,
+        "requestBytes": 28318,
+        "responseBytes": 4431,
+        "maxCheckpointBytes": 0
+      },
+      "pages": 4,
+      "selected": 200,
+      "movementProofBytes": 1581,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1755,
+        "responseBytes": 66411,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 7,
+        "requestBytes": 37272,
+        "responseBytes": 400980,
+        "maxCheckpointBytes": 0
+      }
+    },
+    {
+      "sources": 2000,
+      "cold": {
+        "reads": 50,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 93797,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 40,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 2067,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "retained": {
+        "reads": 17,
+        "queries": 1,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 74131,
+        "attempts": 1,
+        "signalWrites": 0
+      },
+      "retainedTransfer": {
+        "requests": 1,
+        "requestBytes": 28622,
+        "responseBytes": 4431,
+        "maxCheckpointBytes": 0
+      },
+      "pages": 40,
+      "selected": 2000,
+      "movementProofBytes": 1733,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1907,
+        "responseBytes": 67167,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 86,
+        "requestBytes": 235056,
+        "responseBytes": 2953170,
+        "maxCheckpointBytes": 0
+      }
+    }
+  ]
+}

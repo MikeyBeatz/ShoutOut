@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,34 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,35 %** — vážené dokončení podúseků
 
-Hotové úseky: **176/231**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **178/234**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **204/306**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **206/309**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,6 +55,10 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
+   **Nyní ucelené zapojení pohybu a závěrečný úklid:** [schválené meze a připravený rozsah](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+   Ruční průchod až po úplném CI a DEV nasazení; předem dokončit automatické
+   regrese a dry-run restart úklidu. C2 uklizený, zbývajících 50 restartovacích
+   Shoutů a původní A/B/C zůstávají pro závěr. Nasazený stav zatím b57f6b9 níže.
    **Aktuálně nasazené ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
    b57f6b9 / úplné CI 45071219942 success, DEV Hosting **6762922852bede94**,
    getFeedPage **00006-niz**. Vlastník potvrdil dosahy 1–50 km, výchozí 50, bez

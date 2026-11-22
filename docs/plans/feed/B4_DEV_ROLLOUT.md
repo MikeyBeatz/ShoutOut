@@ -1149,3 +1149,78 @@ dostává 11/18. Zbývající rozlišené podmínky 22/34 se dělí na doložen�
 automatický návrat feed-b4-recovery-accept (11/17) a zbytek společné akceptace
 s původním úklidem (11/17). Součet rodiče ani již dokončené váhy se nemění.
 Celé B4 zůstává otevřené; žádný nový kredit za samotnou opravu dříve dokončeného kódu.
+
+<a id="movement-integration"></a>
+
+### Zapojení pohybu a poslední úklid – schválený úsek 22. listopadu
+
+Vlastník schválil jeden společný úsek: klient/server, simulace a regrese,
+dokumentace/CI a pouze DEV rollout, ruční kontrola až na konci. Bez nových
+Auth účtů, služeb, Rules, prostředků či retenčních změn. Provozní pravidla:
+nejvýše jeden geografický přesun za 30 s, až po vzdálenosti větší než
+250 m + přesnost původního i nového fixu, nový fix nejvýše 30 s starý a
+s přesností do 100 m. To není přesnost skutečné polohy ani slíbená latence.
+Při výpadku/nepřesné poloze zůstane poslední potvrzené okolí. Načtené karty
+udrží čtecí posloupnost v nepřečtené/přečtené skupině; nové karty se doplní,
+neplatné odejdou. Úplné nové pořadí určí ruční obnova.
+
+**Připravená integrace:** samostatný FeedMovementController slučuje GPS události,
+ignoruje šum, staré/neplatné fixy a souběžné požadavky. V pozadí a mimo feed
+se sledování odpojí; při otevřeném detailu se žádný pohybový požadavek neposílá.
+Home používá původní podepsaný rebase, nemění publikační hranici, readRevision
+ani hodinový termín a nespouští B2. Žádost dokončí všechna metadata před
+potvrzením nového okolí; chybná/opožděná odpověď staré karty nepřepíše.
+Původní hlášku „Poloha se změnila…“ aktivovaný klient už nepoužije; při
+nedostupnosti zobrazí jeden stav posledního potvrzeného okolí.
+
+**Přesné ponechání karet:** veřejná těla neobsahují přesné souřadnice. Nový
+režim movement-state proto využívá původní podepsanou completion stránku a
+nový movement token. Nejvýše 50 jejích ID ověří proti aktuálním hlavičkám,
+Auth/App Check, blokacím, smazaným autorům a oběma R5 kontextům. Vracejí se
+jen ID a přesná vzdálenost, bez souřadnic a těl. Jiný účet/filtry/inkarnace,
+nepodepsané ID a expirované potvrzení se odmítnou. Další načtené stránky se
+ověřují odděleně; ID v nové první stránce se znovu nekontrolují. RAM důkazy
+zůstanou dostupné i po opakovaném přesunu a neztratí se při chybné přípravě.
+
+FeedMovementView je zapojený do skutečného FeedPage včetně hlavičky, konce,
+oddělovače a ruční obnovy. Regrese zachytila a opravila layoutový posun při
+změně středu; kotva bere skutečnou viditelnou kartu a respektuje probíhající
+uživatelský scroll. Zachované je také odstranění vlastní karty mimo pohyb.
+
+**Úklid:** krátký náhradní C2 je již uklizený původním operátorem z čistého
+20206c4 / success úplného CI 44959541907: 1 zdroj, 0 read klíčů; 38 původních
+zdrojů a pending žádost zachované, 0 Auth mutací. Manifest
+build/b4b-dev-release/docs/local/b4b-c-repeat-2026-11-22.json má phase cleaned,
+digest 9f91b10b…ea49b; podklad build/b4b-c2-cleanup-final.log.
+50 restartovacích Shoutů se ponechává pro poslední ruční průchod. Nástroj
+tools/feed_restart_cleanup.mjs ověří původní manifest e29b1bf9…ef74, přesná ID,
+obsah, autory, časy/polohy, původních 40 zdrojů, pending žádost a inkarnace.
+Před první mutací projde všech 50; komentář, privátní konverzace nebo cizí
+interakce úklid zastaví. Po skupinách nejvýše 10 použije společný writer se
+stávajícím rozpočtem 450 zápisů, zachová cizí read klíče a umožní replay.
+Živý cleanup potřebuje čistý přesný commit s úplným CI a digest. Po ručním
+průchodu pořadí: restart 50 → původní A/B/C, podle jejich manifestů.
+
+Nové zapojení má vlastní implementační/ověřovací/DEV díly v dosud otevřené
+finální váze feedu: MVP původních 44 = 11/11/11 + 11 závěrečné akceptace;
+backlog původních 70 = 18/18/17 + 17 závěrečné akceptace. Hotové váhy,
+prototypové důkazy i součet rodiče zůstávají zachované. Ruční akceptace a
+zbývající živý úklid se před jejich skutečným provedením neuzavírají.
+
+**Místní výsledky:** 481 Flutter testů, analýza bez nálezů, 103 testů nástrojů,
+9 cílených serverových testů a lint Functions prošly. Regrese zahrnuje skutečný
+FeedPage s velkým vložením i vlastním odebráním nad viewportem, ruční návrat
+k hlavičce, přesnost/stáří GPS, cooldown, souběh, ztracenou odpověď a změnu účtu.
+Emulátor ověřil také odmítnutí cizí konverzace před první mutací, odstranění
+všech 50 přes index, zachování cizího přečtení a opakování úklidu.
+[Měření](../../benchmarks/FEED_MOVEMENT_INTEGRATION_2026-11-22.json): nezávislá
+kontrola 50 ponechávaných ID při 50/200/2 000 zdrojích má 12/15/17 SDK reads,
+1 query, 0 source reads a 0 zápisů. Požadavek s již existujícími podepsanými
+kontexty má 28 318–28 622 B JSON, odpověď 4 431 B. V reálném klientu se tato
+kontrola vynechá pro ID obsažená v nové první stránce. Nejde o cloudový účet,
+měření latence ani důkaz 5 000 současných uživatelů.
+
+Živý pouze čtecí dry-run nástroje úklidu potvrdil 50 kandidátů, 40 chráněných
+zdrojů a jednu žádost; 0 cloudových zápisů. Manifest zůstává seeded a všech
+50 restartovacích Shoutů se ponechává pro závěrečnou ruční kontrolu. Podklad
+build/feed-restart-cleanup-dryrun.log.

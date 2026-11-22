@@ -6,6 +6,15 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Právě schválené a místně připravené:** [živé zapojení pohybu + poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+Meze 30 s / 250 m + nejistota obou fixů, fix do 30 s a přesnost do 100 m;
+poslední potvrzené okolí při výpadku, úplné nové seřazení ruční obnovou.
+Klientské/serverové zapojení a nástroj úklidu restart 50 jsou připravené;
+zpráva níže o vypnutém pohybu platí pro dosud nasazený b57f6b9. Následuje
+společné úplné CI a DEV getFeedPage + web, pak jediný ruční průchod a úklid.
+Krátký náhradní C2 již uklizený: 1 zdroj / 0 read klíčů, původní data zachovaná.
+Zbývajících 50 restartovacích a původní A/B/C zatím ponechat pro závěr.
+
 **Aktuální DEV úsek B4:** [návrat novinek po pauze a ruční dosahy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
 Zdroj **b57f6b9793b70530369384cb07eee7f4e56af9c4** má
 [success úplné CI 45071219942](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45071219942).

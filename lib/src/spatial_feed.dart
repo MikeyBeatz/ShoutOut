@@ -114,6 +114,9 @@ class SpatialFeedPresentation {
     required this.loadingMore,
     required this.refreshing,
     this.message,
+    this.movementEnabled = false,
+    this.movementRevision = 0,
+    this.refreshRevision = 0,
   });
   final ScrollController scrollController;
   final VoidCallback refresh;
@@ -125,6 +128,8 @@ class SpatialFeedPresentation {
   final bool loadingMore;
   final bool refreshing;
   final String? message;
+  final bool movementEnabled;
+  final int movementRevision, refreshRevision;
 }
 
 Shout decodeSpatialFeedItem(Map<String, dynamic> item) {

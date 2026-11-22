@@ -1,4 +1,4 @@
-// Prepared B4 transport on the existing callable; activation remains off.
+// B4 transport on the existing callable; capabilities are enabled by its host.
 import { createHmac } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -148,7 +148,44 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
         snapshot, binding, baseline, startedAt: context.startedAt }) } : {}) };
   }
   try {
-    // Prepared only. No deployed host enables this option. Rebase is a child
+    // Revalidate already loaded cards without exposing exact source locations
+    // or transferring bodies. Both contexts were signed by this server.
+    if (input.mode === 'movement-state') {
+      if (!recenterEnabled) fail('failed-precondition', 'Feed movement is not enabled.');
+      if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'token', 'movementToken', 'ids'].includes(k)) ||
+          !Array.isArray(input.ids) || input.ids.length > 50 || new Set(input.ids).size !== input.ids.length ||
+          input.ids.some(id => typeof id !== 'string')) fail('invalid-argument', 'Invalid retained cards.');
+      const source = bodyCodec.decode(input.token, { uid, project: db.projectId, now: now() }).context;
+      const target = movementCodec.decode(input.movementToken, { uid, project: db.projectId, now: now() }).context;
+      if (source.kind !== 'complete' || source.presentation || target.kind !== 'movement' || !Array.isArray(source.rows) || source.rows.length > 50 ||
+          input.ids.some(id => !source.rows.some(row => row.id === id)) ||
+          bodyDigest(source.binding) !== bodyDigest(target.binding) || source.startedAt !== target.startedAt || source.expiresAt !== target.expiresAt ||
+          bodyDigest(source.snapshot.readTime) !== bodyDigest(target.snapshot.readTime) ||
+          ['radiusKm', 'order', 'category', 'now', 'readPolicy', 'readRevision'].some(k =>
+            bodyDigest(source.snapshot.context[k] ?? null) !== bodyDigest(target.snapshot.context[k] ?? null))) fail('invalid-argument', 'Foreign retained cards.');
+      return await db.runTransaction(async tx => {
+        await actor(tx);
+        const current = await generation(tx, target.binding);
+        if (current.control.cardReadGenerationId !== target.binding.generation) throw new FeedSessionExpired();
+        const store = createFeedGenerationStore(db, target.binding.generation, { cardProjection: true, contentIdentity: true });
+        await store.readHeaderRows(tx, [], { marker: current.marker, fenceSnapshot: source.snapshot });
+        const selected = source.rows.filter(row => input.ids.includes(row.id));
+        const headers = await store.readHeaderRows(tx, selected, { marker: current.marker, fenceSnapshot: target.snapshot });
+        const allowed = await policy(tx, [...headers.values()]), c = target.snapshot.context;
+        const rows = selected.flatMap(frozen => {
+          const row = headers.get(frozen.id);
+          if (!row || !allowed(row) || row.status !== 'active' || row.expiresAt <= now() || row.createdAt > c.now ||
+              row.bodyVersion !== frozen.bodyVersion || row.selectionVersion !== frozen.selectionVersion ||
+              row.contentHash !== frozen.frozenContentHash || c.category !== null && !row.categories.includes(c.category) ||
+              row.businessSpotlight && !row.businessHighlighted) return [];
+          const distance = distanceKm(c.point, row.location);
+          return distance <= c.radiusKm ? [{ id: row.id, distanceKm: distance }] : [];
+        });
+        if (now() >= target.expiresAt) throw new FeedSessionExpired();
+        return { version: 1, state: 'movement-state', baseline: target.baseline, rows };
+      }, { readOnly: true });
+    }
+    // Rebase is a child
     // of the original signed view, not a refresh or a new publication cutoff.
     if (input.mode === 'recenter') {
       if (!recenterEnabled) fail('failed-precondition', 'Feed movement is not enabled.');

@@ -9,12 +9,37 @@ Map<String, dynamic> gatewayFixture() => {
       as Map<String, dynamic>,
   'serverDeltaFeed': false,
   'serverFeedNews': false,
+  'serverFeedMovement': false,
   'serverSpatialFeed': false,
   'serverReadSynchronization': false,
   'serverUnreadFeed': false,
 };
 
 void main() {
+  test('movement is DEV-only and requires news and delta', () {
+    final dev =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(dev).serverFeedMovement, isTrue);
+    for (final patch in [
+      {'serverFeedMovement': 'true'},
+      {'serverFeedNews': false},
+      {'serverDeltaFeed': false},
+      {'environment': 'prod'},
+    ]) {
+      expect(
+        () => WebEnvironment.fromJson({...dev, ...patch}),
+        throwsStateError,
+      );
+    }
+    expect(
+      WebEnvironment.fromJson(
+        jsonDecode(File('config/prod.json').readAsStringSync())
+            as Map<String, dynamic>,
+      ).serverFeedMovement,
+      isFalse,
+    );
+  });
   test('B4b news is active in DEV and requires delta feed', () {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())
@@ -81,6 +106,7 @@ void main() {
     expect(WebEnvironment.fromJson(dev).serverUnreadFeed, isTrue);
     dev['serverDeltaFeed'] = false;
     dev['serverFeedNews'] = false;
+    dev['serverFeedMovement'] = false;
     expect(
       WebEnvironment.fromJson(
         {...dev}..remove('serverUnreadFeed'),
@@ -537,6 +563,7 @@ void main() {
     config['serverUnreadFeed'] = false;
     config['serverDeltaFeed'] = false;
     config['serverFeedNews'] = false;
+    config['serverFeedMovement'] = false;
     config['appUrl'] = 'https://go.shoutout-app.eu';
     config['hostingSite'] = 'example-shoutout-live';
     config['firebase']['projectId'] = 'shoutout-production-a1b34';
@@ -587,6 +614,7 @@ void main() {
     final config = development()
       ..remove('serverCommentCreation')
       ..['serverFeedNews'] = false
+      ..['serverFeedMovement'] = false
       ..['serverDeltaFeed'] = false;
     expect(WebEnvironment.fromJson(config).serverCommentCreation, isFalse);
     expect(

@@ -54,6 +54,24 @@ test('movement is disabled by default; proof, point and account are validated', 
   await assert.rejects(getFeedDeltaOperation(req, db, { ...options, enabled: true, key: f.key, clock: f.clock }), e => e.code === 'invalid-argument');
 });
 
+test('signed retained pages revalidate distance, deletion and account without bodies or writes', { skip: !enabled }, async t => {
+  const f = await newsFixture(db, t, 3), page = await initial(f);
+  const next = await moved(f, page, { latitude: f.point.latitude + .001, longitude: f.point.longitude });
+  const ids = page.bodyPage.rows.map(row => row.id);
+  const input = { mode: 'movement-state', token: page.bodyPage.token, movementToken: next.bodyPage.movementToken, ids };
+  const result = await f.step(input, options);
+  assert.equal(result.state, 'movement-state'); assert.equal(result.baseline, next.baseline);
+  assert.deepEqual(result.rows.map(row => row.id), ids);
+  assert(result.rows.every(row => Object.keys(row).sort().join(',') === 'distanceKm,id' && row.distanceKm >= 0));
+  await assert.rejects(f.step({ ...input, ids: [...ids, 'not-signed'] }, options), e => e.code === 'invalid-argument');
+  await assert.rejects(f.step({ ...input, ids: Array(51).fill(ids[0]) }, options), e => e.code === 'invalid-argument');
+  await assert.rejects(f.step(input), e => e.code === 'failed-precondition');
+  await f.change(1, { status: 'deleted' });
+  assert(!(await f.step(input, options)).rows.some(row => row.id === f.rows[1].id));
+  const foreign = await initial(f, 3);
+  await assert.rejects(f.step({ ...input, movementToken: foreign.bodyPage.movementToken }, options), e => e.code === 'invalid-argument');
+});
+
 test('current expiry and deletion during historical capture cannot leak a stale page', { skip: !enabled }, async t => {
   const f = await newsFixture(db, t, 2), expires = Date.now() + 2000;
   await f.change(1, { expiresAt: Timestamp.fromMillis(expires) });
@@ -154,6 +172,13 @@ test('measured bounded movement 50/200/2000 sources; cold restart preserves full
     const cold = meter.snapshot(); meter.reset();
     const replay = await moved(f, page, point);
     const warm = meter.snapshot();
+    meter.reset();
+    const retainedBefore = { ...f.transfer };
+    const retainedReply = await f.step({ mode: 'movement-state', token: page.bodyPage.token,
+      movementToken: child.bodyPage.movementToken, ids: page.bodyPage.rows.map(row => row.id) }, options);
+    const retained = meter.snapshot();
+    const retainedTransfer = Object.fromEntries(Object.keys(retainedBefore).map(key => [key, f.transfer[key] - retainedBefore[key]]));
+    assert.equal(retainedReply.rows.length, 50); assert.equal(retained.writes, 0); assert.equal(retained.sourceReads, 0);
     assert.deepEqual(child.bodyPage.rows, replay.bodyPage.rows);
     assert.equal(child.bodyPage.rows.length, 50);
     assert.equal(cold.writes, 0); assert.equal(cold.sourceReads, 0);
@@ -167,7 +192,7 @@ test('measured bounded movement 50/200/2000 sources; cold restart preserves full
       for (const row of next.bodyPage.rows) { assert(!ids.has(row.id)); ids.add(row.id); }
     }
     assert.equal(ids.size, size);
-    report.push({ sources: size, cold, warm, pages, selected: ids.size,
+    report.push({ sources: size, cold, warm, retained, retainedTransfer, pages, selected: ids.size,
       movementProofBytes: Buffer.byteLength(page.bodyPage.movementToken), movementTransfer, transfer: f.transfer });
   }
   writeFileSync(new URL('../build/feed-recenter-measurement.json', import.meta.url), JSON.stringify({

@@ -93,7 +93,7 @@ class FeedPageGateway<T> {
   Future<FeedBatch<T>> load(SpatialFeedContext context, Object? cursor) =>
       _load(context, cursor);
 
-  /// Prepared transport, deliberately absent from Home/GPS wiring.
+  /// Movement transport. Home applies the approved GPS/cooldown policy first.
   Future<FeedBatch<T>> recenter(
     SpatialFeedContext context,
     String proof, {

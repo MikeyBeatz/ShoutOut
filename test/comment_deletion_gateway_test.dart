@@ -147,6 +147,7 @@ void main() {
                 as Map<String, dynamic>
             ..remove('serverCommentDeletion')
             ..['serverFeedNews'] = false
+            ..['serverFeedMovement'] = false
             ..['serverDeltaFeed'] = false;
       expect(WebEnvironment.fromJson(config).serverCommentDeletion, isFalse);
       expect(

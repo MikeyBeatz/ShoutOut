@@ -137,7 +137,7 @@ class Shout {
   final String title;
   final String text;
   final List<String> categories;
-  final double distanceKm;
+  double distanceKm;
   final DateTime createdAt;
   final DateTime expiresAt;
   int likes;

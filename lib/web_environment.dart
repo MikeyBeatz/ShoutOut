@@ -160,6 +160,15 @@ class WebEnvironment {
       throw StateError('serverFeedNews must be a boolean.');
     }
     serverFeedNews = json['serverFeedNews'] == true;
+    if (json.containsKey('serverFeedMovement') &&
+        json['serverFeedMovement'] is! bool) {
+      throw StateError('serverFeedMovement must be a boolean.');
+    }
+    serverFeedMovement = json['serverFeedMovement'] == true;
+    if (serverFeedMovement &&
+        (name != 'dev' || !serverDeltaFeed || !serverFeedNews)) {
+      throw StateError('Feed movement requires DEV delta feed and news.');
+    }
     if (serverFeedNews && (name != 'dev' || !serverDeltaFeed)) {
       throw StateError('Feed news requires DEV delta feed.');
     }
@@ -274,6 +283,7 @@ class WebEnvironment {
   late final bool serverSpatialFeed;
   late final bool serverDeltaFeed;
   late final bool serverFeedNews;
+  late final bool serverFeedMovement;
   late final bool serverUnreadFeed;
   late final bool serverCommentCreation;
   late final bool serverPrivateReplyCreation;

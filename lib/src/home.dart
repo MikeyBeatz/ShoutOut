@@ -49,6 +49,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   final _spatialScroll = ScrollController();
   FeedNewsRuntime? _newsRuntime;
   FeedNewsBinding? _newsBinding;
+  late final FeedMovementController _movement;
+  StreamSubscription<Position>? _movementPositions;
+  bool _movementBusy = false;
+  int _movementRevision = 0, _feedRefreshRevision = 0;
+  int _positionEpoch = 0;
+  bool get _useMovement =>
+      _useSpatialFeed && WebEnvironment.current.serverFeedMovement;
   bool _newsForeground = true;
   final Map<String, double> _spatialHeights = {};
   StreamSubscription<void>? _deltaContexts;
@@ -84,6 +91,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         WidgetsBinding.instance.lifecycleState == null ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _useSpatialFeed = kIsWeb && WebEnvironment.current.serverSpatialFeed;
+    _movement = FeedMovementController(
+      clock: () => DateTime.now().millisecondsSinceEpoch,
+      move: _moveSpatialFeed,
+    );
     _spatialGateway = FeedPageGateway(
       unreadFirst: kIsWeb && WebEnvironment.current.serverUnreadFeed,
       currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
@@ -181,7 +192,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       _initializeFeed();
     }
     _expiryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _syncMovement();
+      }
     });
   }
 
@@ -429,6 +443,8 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   @override
   void dispose() {
+    _movement.dispose();
+    unawaited(_movementPositions?.cancel());
     _newsRuntime?.dispose();
     interactionFeedback.removeListener(_confirmedDeletions);
     WidgetsBinding.instance.removeObserver(this);
@@ -477,6 +493,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   Future<void> _refreshSpatialFeed([FeedFilters? requested]) async {
+    _movement.setActive(false);
     _newsRuntime?.setActive(false);
     final unreadFirst =
         WebEnvironment.current.serverUnreadFeed &&
@@ -520,7 +537,14 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       }
       await _spatialSession.refresh(context);
       if (!mounted || attempt != _spatialRequest) return;
+      if (_useMovement) {
+        _movement.seed(_movementFix(position));
+        feedDeltaRuntime?.client.adoptMovementBaseline(
+          _spatialSession.baseline!,
+        );
+      }
       setState(() {
+        _feedRefreshRevision++;
         _feedFilters = nextFilters;
         _spatialHeights.clear();
         _spatialMessage =
@@ -548,6 +572,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       if (mounted && attempt == _spatialRequest) {
         setState(() => _spatialLoading = false);
         _syncSpatialNews(freshBaseline: !_spatialFailed);
+        _syncMovement();
       }
     }
   }
@@ -580,7 +605,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     _newsBinding?.update(
       baseline: _spatialSession.baseline,
       active: _tab == 0 && _newsForeground,
-      loading: _spatialLoading || _spatialSession.isRefreshing,
+      loading: _spatialLoading || _movementBusy || _spatialSession.isRefreshing,
       expired: _spatialSession.needsRefresh,
       freshBaseline: freshBaseline,
     );
@@ -588,6 +613,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
 
   Future<void> _spatialMore({bool prefetchOnly = false}) async {
     if (!_useSpatialFeed ||
+        _movementBusy ||
         _tab != 0 ||
         _spatialFailed ||
         _spatialLoading ||
@@ -630,6 +656,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     }
     setState(() => _tab = index);
     _syncSpatialNews();
+    _syncMovement();
     if (_useSpatialFeed && index == 0 && _spatialSession.context == null) {
       unawaited(_refreshSpatialFeed());
     } else if (_useSpatialFeed && index == 0) {
@@ -642,6 +669,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     if (!_useSpatialFeed) return;
     final active = state == AppLifecycleState.resumed && _tab == 0;
     _newsForeground = state == AppLifecycleState.resumed;
+    _syncMovement();
     _spatialSession.setActive(active);
     if (!active) {
       _spatialGateway.cancelPending();
@@ -659,6 +687,152 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     }
   }
 
+  FeedLocationFix _movementFix(Position position) => FeedLocationFix(
+    position.latitude,
+    position.longitude,
+    position.accuracy,
+    position.timestamp.millisecondsSinceEpoch,
+  );
+
+  void _syncMovement() {
+    final active =
+        _useMovement &&
+        mounted &&
+        _tab == 0 &&
+        _newsForeground &&
+        !_spatialLoading &&
+        _spatialSession.context != null &&
+        !_spatialSession.needsRefresh;
+    _movement.setActive(active);
+    if (!active) {
+      ++_positionEpoch;
+      final old = _movementPositions;
+      _movementPositions = null;
+      unawaited(old?.cancel());
+      return;
+    }
+    if (_movementPositions != null) return;
+    final epoch = ++_positionEpoch;
+    _movementPositions =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+          ),
+        ).listen(
+          (position) {
+            if (!mounted ||
+                epoch != _positionEpoch ||
+                _tab != 0 ||
+                !_newsForeground ||
+                ModalRoute.of(context)?.isCurrent != true) {
+              return;
+            }
+            _currentPosition = position;
+            _movement.accept(_movementFix(position));
+          },
+          onError: (Object error) {
+            if (!mounted || epoch != _positionEpoch) return;
+            const message =
+                'Poloha není dostupná. Používáme poslední potvrzené okolí.';
+            if (_spatialMessage != message) {
+              setState(() => _spatialMessage = message);
+            }
+          },
+        );
+  }
+
+  Future<bool> _moveSpatialFeed(FeedLocationFix fix) async {
+    final previous = _spatialSession.context,
+        baseline = _spatialSession.baseline;
+    final client = feedDeltaRuntime?.client;
+    if (!_useMovement ||
+        !mounted ||
+        !_newsForeground ||
+        _tab != 0 ||
+        _spatialLoading ||
+        _spatialLoadingMore ||
+        ModalRoute.of(context)?.isCurrent != true ||
+        _spatialSession.isRefreshing ||
+        _spatialSession.needsRefresh ||
+        previous == null ||
+        baseline == null ||
+        client == null) {
+      return false;
+    }
+    final proof = client.movementProofFor(baseline);
+    if (proof == null) return false; // Compatible older server; keep its cards.
+    final viewer = FirebaseAuth.instance.currentUser?.uid,
+        attempt = ++_spatialRequest;
+    final next = SpatialFeedContext(
+      latitude: fix.latitude,
+      longitude: fix.longitude,
+      radiusKm: previous.radiusKm,
+      order: previous.order,
+      category: previous.category,
+    );
+    final oldIds = _spatialSession.items.map((item) => item.id).toSet();
+    final distances = <String, double>{};
+    final selected = <String>{};
+    bool current() =>
+        mounted &&
+        attempt == _spatialRequest &&
+        FirebaseAuth.instance.currentUser?.uid == viewer &&
+        _newsForeground &&
+        _tab == 0;
+    _movementBusy = true;
+    _syncSpatialNews();
+    try {
+      await _spatialSession.recenter(
+        next,
+        loadMoved: (context) async {
+          final batch = await _spatialGateway.recenter(
+            context,
+            proof,
+            previous: previous,
+          );
+          if (!current()) throw StateError('Stale movement');
+          final fresh = batch.items.map((item) => item.id).toSet();
+          selected.addAll(fresh);
+          distances.addAll(
+            await client.relocateLoaded(
+              previousBaseline: baseline,
+              baseline: batch.baseline,
+              ids: oldIds.difference(fresh),
+            ),
+          );
+          if (!current()) throw StateError('Stale movement');
+          return batch;
+        },
+        retain: (item, _) =>
+            item.isActive &&
+            (distances.containsKey(item.id) || selected.contains(item.id)),
+        isRead: (item) => item.feedRead == true,
+        relocate: (item, _) => item..distanceKm = distances[item.id]!,
+      );
+      if (!current() || _spatialSession.context != next) return false;
+      client.adoptMovementBaseline(_spatialSession.baseline!);
+      setState(() {
+        _movementRevision++;
+        _spatialMessage = null;
+      });
+      unawaited(_updateDeltaPromotions());
+      return true;
+    } catch (error) {
+      if (current()) {
+        const message =
+            'Okolí se nepodařilo aktualizovat. Používáme poslední potvrzené okolí.';
+        if (_spatialMessage != message) {
+          setState(() => _spatialMessage = message);
+        }
+        debugPrint('Feed movement failed: code=${liveDataFailureCode(error)}');
+      }
+      return false;
+    } finally {
+      _movementBusy = false;
+      if (mounted) _syncSpatialNews();
+    }
+  }
+
   Future<void> _noticeSpatialMovement() async {
     final attempt = _spatialRequest;
     final result = await _refreshLocation();
@@ -668,6 +842,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       return;
     }
     final previous = _spatialSession.context, position = _currentPosition;
+    if (_useMovement) {
+      if (position != null) _movement.accept(_movementFix(position));
+      return;
+    }
     if (previous != null &&
         position != null &&
         (previous.latitude != position.latitude ||
@@ -679,6 +857,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   SpatialFeedPresentation _spatialPresentation() => SpatialFeedPresentation(
+    movementEnabled: _useMovement,
+    movementRevision: _movementRevision,
+    refreshRevision: _feedRefreshRevision,
     scrollController: _spatialScroll,
     refresh: () => unawaited(_refreshSpatialFeed()),
     changeFilters: (filters) => unawaited(_refreshSpatialFeed(filters)),

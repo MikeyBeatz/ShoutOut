@@ -129,6 +129,7 @@ void main() {
                 as Map<String, dynamic>
             ..remove('serverShoutDeletion')
             ..['serverFeedNews'] = false
+            ..['serverFeedMovement'] = false
             ..['serverDeltaFeed'] = false
             ..['serverSpatialFeed'] = false
             ..['serverUnreadFeed'] = false;

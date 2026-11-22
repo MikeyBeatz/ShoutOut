@@ -31,7 +31,15 @@ class FeedDeltaClient {
   final _erased = <String>{};
   final _newsBaselines = <String, FeedNewsSignals>{};
   final _movementProofs = <String, String>{};
-  // RAM only, scoped like body cache. No Home/GPS caller enables movement yet.
+  final _movementPages = <String, Map<String, Set<String>>>{};
+  String? _committedMovementBaseline;
+  void adoptMovementBaseline(String baseline) {
+    _committedMovementBaseline = baseline;
+    _movementProofs.removeWhere((key, _) => key != baseline);
+    _movementPages.removeWhere((key, _) => key != baseline);
+  }
+
+  // RAM only, scoped to the viewer. Home uses these only under its DEV flag.
   String? movementProofFor(String? baseline) {
     final uid = currentUserId();
     if (uid == null || uid != _viewer || _erased.contains(uid)) return null;
@@ -50,6 +58,8 @@ class FeedDeltaClient {
     _viewer = uid;
     _newsBaselines.clear();
     _movementProofs.clear();
+    _movementPages.clear();
+    _committedMovementBaseline = null;
     _capabilityRevision = -1;
     _capabilityStamp = null;
     _legacy = false;
@@ -63,6 +73,8 @@ class FeedDeltaClient {
     _erased.add(uid);
     _newsBaselines.clear();
     _movementProofs.clear();
+    _movementPages.clear();
+    _committedMovementBaseline = null;
     if (_viewer == uid) {
       _epoch++;
       cache.bind(null);
@@ -157,8 +169,19 @@ class FeedDeltaClient {
         throw const FormatException('Invalid feed movement proof');
       }
       _movementProofs[wire['baseline'] as String] = proof;
+      final baseline = wire['baseline'] as String;
+      final token = body['token'];
+      if (token is! String || token.isEmpty) {
+        throw const FormatException('Missing retained page proof');
+      }
+      final pages = _movementPages.putIfAbsent(baseline, () => {});
+      pages[token] = page.map((card) => card.descriptor.id).toSet();
       while (_movementProofs.length > 2) {
-        _movementProofs.remove(_movementProofs.keys.first);
+        final oldest = _movementProofs.keys.firstWhere(
+          (key) => key != _committedMovementBaseline,
+        );
+        _movementProofs.remove(oldest);
+        _movementPages.remove(oldest);
       }
     }
     if (body is Map && body['newsSignals'] is Map) {
@@ -289,6 +312,68 @@ class FeedDeltaClient {
         throw const FormatException('Foreign recovered news context');
       }
       _newsBaselines[result.baseline] = result;
+    }
+    return result;
+  }
+
+  /// A signed page proves membership; the server returns only current distances.
+  Future<Map<String, double>> relocateLoaded({
+    required String previousBaseline,
+    required String baseline,
+    required Set<String> ids,
+  }) async {
+    final uid = currentUserId(), epoch = _epoch;
+    final proof = movementProofFor(baseline);
+    if (uid == null || proof == null) {
+      throw StateError('Missing movement context');
+    }
+    final remaining = {...ids}, result = <String, double>{};
+    final pages = Map<String, Set<String>>.from(
+      _movementPages[previousBaseline] ?? {},
+    );
+    for (final entry in pages.entries) {
+      final selected = entry.value.intersection(remaining);
+      if (selected.isEmpty) continue;
+      final reply = await send({
+        'format': 'delta-v1',
+        'mode': 'movement-state',
+        'expectedUserId': uid,
+        'token': entry.key,
+        'movementToken': proof,
+        'ids': selected.toList(),
+      });
+      if (_epoch != epoch || currentUserId() != uid || _erased.contains(uid)) {
+        throw StateError('Stale retained card reply');
+      }
+      if (reply is! Map ||
+          reply['version'] != 1 ||
+          reply['state'] != 'movement-state' ||
+          reply['baseline'] != baseline ||
+          reply['rows'] is! List) {
+        throw const FormatException('Invalid retained card reply');
+      }
+      final seen = <String>{};
+      for (final row in reply['rows'] as List) {
+        if (row is! Map ||
+            row['id'] is! String ||
+            !selected.contains(row['id']) ||
+            !seen.add(row['id'] as String) ||
+            row['distanceKm'] is! num ||
+            !(row['distanceKm'] as num).isFinite ||
+            (row['distanceKm'] as num) < 0) {
+          throw const FormatException('Invalid retained card');
+        }
+        result[row['id'] as String] = (row['distanceKm'] as num).toDouble();
+      }
+      remaining.removeAll(selected);
+    }
+    if (remaining.isNotEmpty) throw StateError('Missing retained page proof');
+    // Keep proofs for retained cards after a second movement, including pages
+    // outside the first 50 returned by the new canonical cursor.
+    final target = _movementPages.putIfAbsent(baseline, () => {});
+    for (final entry in pages.entries) {
+      final kept = entry.value.intersection(result.keys.toSet());
+      if (kept.isNotEmpty) target[entry.key] = kept;
     }
     return result;
   }

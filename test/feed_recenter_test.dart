@@ -19,6 +19,69 @@ bool read(String id) => id.startsWith('r');
 
 void main() {
   test(
+    'retained pages use bounded signed metadata and preserve proofs across movements',
+    () async {
+      var uid = 'viewer', page = 0;
+      final requests = <Map<String, Object?>>[];
+      final client = FeedDeltaClient(
+        project: 'project',
+        currentUserId: () => uid,
+        cache: FeedBodyCache(clock: () => 1000),
+        send: (input) async {
+          requests.add(input);
+          if (input['mode'] == 'movement-state') {
+            return {
+              'version': 1,
+              'state': 'movement-state',
+              'baseline': 'b',
+              'rows': [
+                for (final id in input['ids'] as List)
+                  if (id != 'second') {'id': id, 'distanceKm': .4},
+              ],
+            };
+          }
+          final id = ['first', 'second', 'target'][page++];
+          final result = fixtures.reply(id: id);
+          result['baseline'] = id == 'target' ? 'b' : 'a';
+          final body = result['bodyPage'] as Map;
+          body['token'] = 'proof-$id';
+          body['movementToken'] = 'move-$id';
+          return result;
+        },
+      );
+      await client.load({});
+      client.adoptMovementBaseline('a');
+      await client.load({});
+      await client.load({});
+      final retained = await client.relocateLoaded(
+        previousBaseline: 'a',
+        baseline: 'b',
+        ids: {'first', 'second'},
+      );
+      expect(retained, {'first': .4});
+      expect(requests.where((r) => r['mode'] == 'movement-state').length, 2);
+      client.adoptMovementBaseline('b');
+      expect(
+        await client.relocateLoaded(
+          previousBaseline: 'b',
+          baseline: 'b',
+          ids: {'first'},
+        ),
+        {'first': .4},
+      );
+      uid = 'other';
+      client.retainViewer(uid);
+      await expectLater(
+        client.relocateLoaded(
+          previousBaseline: 'b',
+          baseline: 'b',
+          ids: {'first'},
+        ),
+        throwsStateError,
+      );
+    },
+  );
+  test(
     'movement commits a complete page, retains groups, news and fixed expiry',
     () async {
       var elapsed = Duration.zero;

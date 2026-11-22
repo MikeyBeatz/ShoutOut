@@ -56,6 +56,80 @@ Widget harness(
 
 void main() {
   testWidgets(
+    'integrated movement preserves visible card through large insertion and refresh restores header',
+    (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      var revision = 0, refresh = 0;
+      final rows = List.generate(90, (i) => decodeSpatialFeedItem(item(i)));
+      Widget view(List<Shout> values) => harness(
+        FeedPage(
+          shouts: values,
+          isLoading: false,
+          onSave: (_) {},
+          onReaction: (_, {required bool like}) async {},
+          onNotifications: () {},
+          filters: FeedFilters(),
+          followedUserIds: {},
+          spatial: SpatialFeedPresentation(
+            scrollController: scroll,
+            refresh: () {},
+            changeFilters: (_) {},
+            prefetch: () {},
+            loadMore: () {},
+            hasMore: false,
+            loadingMore: false,
+            refreshing: false,
+            movementEnabled: true,
+            movementRevision: revision,
+            refreshRevision: refresh,
+            card: (shout) => SizedBox(
+              height: 100 + shout.id.hashCode % 3 * 20.0,
+              child: Text(shout.title),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(view(rows));
+      await tester.pumpAndSettle();
+      scroll.jumpTo(2000);
+      await tester.pumpAndSettle();
+      final visible = rows.firstWhere((row) {
+        final f = find.text(row.title);
+        return f.evaluate().isNotEmpty &&
+            tester.getTopLeft(f).dy >= 0 &&
+            tester.getTopLeft(f).dy < 400;
+      });
+      final y = tester.getTopLeft(find.text(visible.title)).dy;
+      final inserted = List.generate(
+        70,
+        (i) => decodeSpatialFeedItem(item(-i - 1, distance: .1)),
+      );
+      revision++;
+      await tester.pumpWidget(
+        view([...inserted, ...rows.where((row) => row.id != 'shout-2')]),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.text(visible.title)).dy, closeTo(y, .5));
+      // Own deletion changes membership without a geographic revision.
+      await tester.pumpWidget(
+        view([
+          ...inserted,
+          ...rows.where((row) => row.id != 'shout-2' && row.id != 'shout-3'),
+        ]),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.text(visible.title)).dy, closeTo(y, .5));
+      refresh++;
+      await tester.pumpWidget(view(rows));
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('50 km'), findsWidgets);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+  testWidgets(
     'confirmed removal above the viewport preserves the next visible card anchor',
     (tester) async {
       final scroll = ScrollController();

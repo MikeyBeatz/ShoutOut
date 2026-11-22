@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Prepared movement viewport. Not used by Home until movement activation.
+/// Movement viewport used by the enabled spatial feed.
 /// A center sliver keeps a surviving visible card available for measurement,
 /// even when a large number of variable-height cards enter above the viewport.
 class FeedMovementView<T> extends StatefulWidget {
@@ -11,12 +11,19 @@ class FeedMovementView<T> extends StatefulWidget {
     required this.card,
     required this.revision,
     required this.controller,
+    this.leadingSlivers = const [],
+    this.trailingSlivers = const [],
+    this.refreshRevision = 0,
+    this.clipBehavior = Clip.hardEdge,
   });
   final List<T> items;
   final String Function(T) idOf;
   final Widget Function(T) card;
   final int revision;
   final ScrollController controller;
+  final List<Widget> leadingSlivers, trailingSlivers;
+  final int refreshRevision;
+  final Clip clipBehavior;
 
   @override
   State<FeedMovementView<T>> createState() => _FeedMovementViewState<T>();
@@ -31,11 +38,17 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
   @override
   void didUpdateWidget(covariant FeedMovementView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.revision == widget.revision ||
-        !widget.controller.hasClients) {
+    if (oldWidget.refreshRevision != widget.refreshRevision) {
+      _anchor = null;
+      ++_layout;
       return;
     }
     final ids = widget.items.map(widget.idOf).toSet();
+    if (!widget.controller.hasClients ||
+        oldWidget.revision == widget.revision &&
+            !oldWidget.items.any((item) => !ids.contains(widget.idOf(item)))) {
+      return;
+    }
     final viewport = context.findRenderObject();
     if (viewport is! RenderBox || !viewport.hasSize) return;
     final top = viewport.localToGlobal(Offset.zero).dy;
@@ -56,6 +69,11 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
     _anchor =
         candidate ??
         (widget.items.isEmpty ? null : widget.idOf(widget.items.first));
+    // Normalize the new center before layout. Keeping the old positive offset
+    // here can make lazy slivers oscillate while estimating their new extent.
+    // The measured card position, including concurrent later scrolling, is
+    // restored in the same frame below.
+    widget.controller.position.correctPixels(0);
     final offset = widget.controller.offset, revision = ++_layout;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || revision != _layout || !widget.controller.hasClients) {
@@ -64,7 +82,11 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       final box = _cards[candidate]?.currentContext?.findRenderObject();
       if (before != null && box is RenderBox && box.attached) {
         final scroll = widget.controller;
-        final expectedY = before - (scroll.offset - offset);
+        final expectedY =
+            before -
+            (scroll.position.isScrollingNotifier.value
+                ? scroll.offset - offset
+                : 0);
         final target =
             scroll.offset + box.localToGlobal(Offset.zero).dy - expectedY;
         scroll.jumpTo(
@@ -80,7 +102,13 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items.isEmpty) return const SizedBox.shrink();
+    if (widget.items.isEmpty) {
+      return CustomScrollView(
+        controller: widget.controller,
+        clipBehavior: widget.clipBehavior,
+        slivers: [...widget.leadingSlivers, ...widget.trailingSlivers],
+      );
+    }
     var centerIndex = widget.items.indexWhere(
       (item) => widget.idOf(item) == _anchor,
     );
@@ -93,10 +121,28 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       );
     }
 
+    if (_anchor == null) {
+      return CustomScrollView(
+        controller: widget.controller,
+        clipBehavior: widget.clipBehavior,
+        center: _center,
+        slivers: [
+          SliverToBoxAdapter(key: _center, child: const SizedBox.shrink()),
+          ...widget.leadingSlivers,
+          SliverList.builder(
+            itemCount: widget.items.length,
+            itemBuilder: (_, index) => row(index),
+          ),
+          ...widget.trailingSlivers,
+        ],
+      );
+    }
     return CustomScrollView(
       controller: widget.controller,
+      clipBehavior: widget.clipBehavior,
       center: _center,
       slivers: [
+        ...widget.leadingSlivers,
         SliverList.builder(
           itemCount: centerIndex,
           itemBuilder: (_, index) => row(centerIndex - 1 - index),
@@ -106,6 +152,7 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
           itemCount: widget.items.length - centerIndex - 1,
           itemBuilder: (_, index) => row(centerIndex + 1 + index),
         ),
+        ...widget.trailingSlivers,
       ],
     );
   }

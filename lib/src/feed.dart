@@ -149,11 +149,66 @@ class _FeedPageState extends State<FeedPage> {
   final _cardAnchors = <String, GlobalKey>{};
   int _anchorRevision = 0;
 
+  Widget _feedScroll(List<Widget> slivers, List<Shout> shouts) {
+    final spatial = widget.spatial;
+    if (spatial == null || !spatial.movementEnabled) {
+      return CustomScrollView(
+        controller: spatial?.scrollController,
+        clipBehavior: Clip.none,
+        slivers: slivers,
+      );
+    }
+    final index = slivers.indexWhere(
+      (sliver) => sliver.key == const ValueKey('feed-main-cards'),
+    );
+    final positions = {for (var i = 0; i < shouts.length; i++) shouts[i].id: i};
+    return FeedMovementView<Shout>(
+      items: shouts,
+      idOf: (shout) => shout.id,
+      revision: spatial.movementRevision,
+      refreshRevision: spatial.refreshRevision,
+      controller: spatial.scrollController,
+      clipBehavior: Clip.none,
+      leadingSlivers: index < 0 ? slivers : slivers.take(index).toList(),
+      trailingSlivers: index < 0 ? const [] : slivers.skip(index + 1).toList(),
+      card: (shout) {
+        final i = positions[shout.id]!;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (shout.feedRead == true &&
+                  (i == 0 || shouts[i - 1].feedRead != true))
+                Padding(
+                  key: const ValueKey('feed-read-separator'),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(tr(context, 'Přečtené')),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                ),
+              spatial.card(shout),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void didUpdateWidget(covariant FeedPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     final spatial = widget.spatial;
-    if (spatial == null || spatial.refreshing) return;
+    if (spatial == null || spatial.refreshing || spatial.movementEnabled) {
+      return;
+    }
     final remaining = widget.shouts.map((shout) => shout.id).toSet();
     if (!oldWidget.shouts.any((shout) => !remaining.contains(shout.id))) return;
     final scroll = spatial.scrollController;
@@ -295,435 +350,427 @@ class _FeedPageState extends State<FeedPage> {
           }
           return false;
         },
-        child: CustomScrollView(
-          controller: widget.spatial?.scrollController,
-          clipBehavior: Clip.none,
-          slivers: [
-            SliverToBoxAdapter(
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 18),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFF1496A8),
-                            _shoutPrimary,
-                            _shoutPrimaryDark,
-                          ],
-                          stops: [0, .4, 1],
-                        ),
+        child: _feedScroll([
+          SliverToBoxAdapter(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFF1496A8),
+                          _shoutPrimary,
+                          _shoutPrimaryDark,
+                        ],
+                        stops: [0, .4, 1],
                       ),
-                      child: SafeArea(
-                        bottom: false,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
-                          child: Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
+                        child: Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Image.asset(
+                                        'assets/branding/feed_mark.png',
+                                        width: 44,
+                                        height: 44,
+                                        fit: BoxFit.contain,
+                                        cacheWidth: 160,
+                                        filterQuality: FilterQuality.high,
+                                        semanticLabel: 'ShoutOut',
+                                      ),
+                                      SizedBox(width: 7),
+                                      Text(
+                                        'ShoutOut',
+                                        style: TextStyle(
+                                          fontFamily: 'Urbanist',
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 28,
+                                          letterSpacing: -.8,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (widget.showNotifications)
                                   Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/branding/feed_mark.png',
-                                          width: 44,
-                                          height: 44,
-                                          fit: BoxFit.contain,
-                                          cacheWidth: 160,
-                                          filterQuality: FilterQuality.high,
-                                          semanticLabel: 'ShoutOut',
-                                        ),
-                                        SizedBox(width: 7),
-                                        Text(
-                                          'ShoutOut',
-                                          style: TextStyle(
-                                            fontFamily: 'Urbanist',
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 28,
-                                            letterSpacing: -.8,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
+                                    alignment: Alignment.centerRight,
+                                    child: NotificationBellButton(
+                                      onPressed: widget.onNotifications,
                                     ),
                                   ),
-                                  if (widget.showNotifications)
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: NotificationBellButton(
-                                        onPressed: widget.onNotifications,
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Divider(
+                              height: 1,
+                              color: Colors.white.withValues(alpha: .2),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 4,
+                                  child: _CompactFilterDropdown<double>(
+                                    value: widget.filters.radius,
+                                    menuWidth: 200,
+                                    hint: tr(context, 'Vzdálenost'),
+                                    prefixIcon: Icons.location_on_outlined,
+                                    style: filterValueStyle,
+                                    hintStyle: filterLabelStyle,
+                                    items: [
+                                      ...feedRadiusOptions.map(
+                                        (value) => DropdownMenuItem(
+                                          value: value.toDouble(),
+                                          child: Center(
+                                            child: Text(
+                                              '$value km',
+                                              style: filterValueStyle,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Divider(
-                                height: 1,
-                                color: Colors.white.withValues(alpha: .2),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: _CompactFilterDropdown<double>(
-                                      value: widget.filters.radius,
-                                      menuWidth: 200,
-                                      hint: tr(context, 'Vzdálenost'),
-                                      prefixIcon: Icons.location_on_outlined,
-                                      style: filterValueStyle,
-                                      hintStyle: filterLabelStyle,
-                                      items: [
-                                        ...feedRadiusOptions.map(
+                                    ],
+                                    selectedItemBuilder: (context) => [
+                                      for (final radius in feedRadiusOptions)
+                                        Center(
+                                          child: Text(
+                                            '$radius km',
+                                            style: filterValueStyle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                    ],
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        _changeFilters((filters) {
+                                          filters.radius = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  flex: 4,
+                                  child: _CompactFilterDropdown<FeedOrder>(
+                                    value: widget.filters.order,
+                                    menuWidth: 112,
+                                    hint: tr(context, 'Řazení'),
+                                    prefixIcon: Icons.schedule_outlined,
+                                    style: filterValueStyle,
+                                    hintStyle: filterLabelStyle,
+                                    selectedItemBuilder: (context) => FeedOrder
+                                        .values
+                                        .map(
+                                          (value) => Center(
+                                            child: Text(
+                                              tr(context, value.label),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: filterValueStyle,
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    items: FeedOrder.values
+                                        .map(
                                           (value) => DropdownMenuItem(
-                                            value: value.toDouble(),
+                                            value: value,
                                             child: Center(
                                               child: Text(
-                                                '$value km',
+                                                tr(context, value.label),
                                                 style: filterValueStyle,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                      selectedItemBuilder: (context) => [
-                                        for (final radius in feedRadiusOptions)
-                                          Center(
-                                            child: Text(
-                                              '$radius km',
-                                              style: filterValueStyle,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        _changeFilters(
+                                          (filters) => filters.order = value,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  flex: 5,
+                                  child: _CompactFilterDropdown<String?>(
+                                    value: widget.filters.selectedCategory,
+                                    menuWidth: _categoryMenuWidth(
+                                      context,
+                                      filterValueStyle,
+                                    ),
+                                    hint: tr(context, 'Kategorie'),
+                                    prefixIcon: Icons.grid_view_rounded,
+                                    style: filterValueStyle,
+                                    hintStyle: filterLabelStyle,
+                                    items: [
+                                      DropdownMenuItem<String?>(
+                                        value: null,
+                                        child: Center(
+                                          child: Text(
+                                            tr(context, 'Vše'),
+                                            style: filterValueStyle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                      ],
-                                      onChanged: (value) {
-                                        if (value != null) {
-                                          _changeFilters((filters) {
-                                            filters.radius = value;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    flex: 4,
-                                    child: _CompactFilterDropdown<FeedOrder>(
-                                      value: widget.filters.order,
-                                      menuWidth: 112,
-                                      hint: tr(context, 'Řazení'),
-                                      prefixIcon: Icons.schedule_outlined,
-                                      style: filterValueStyle,
-                                      hintStyle: filterLabelStyle,
-                                      selectedItemBuilder: (context) =>
-                                          FeedOrder.values
-                                              .map(
-                                                (value) => Center(
-                                                  child: Text(
-                                                    tr(context, value.label),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: filterValueStyle,
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                      items: FeedOrder.values
-                                          .map(
-                                            (value) => DropdownMenuItem(
-                                              value: value,
-                                              child: Center(
-                                                child: Text(
-                                                  tr(context, value.label),
-                                                  style: filterValueStyle,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                      onChanged: (value) {
-                                        if (value != null) {
-                                          _changeFilters(
-                                            (filters) => filters.order = value,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _CompactFilterDropdown<String?>(
-                                      value: widget.filters.selectedCategory,
-                                      menuWidth: _categoryMenuWidth(
-                                        context,
-                                        filterValueStyle,
+                                        ),
                                       ),
-                                      hint: tr(context, 'Kategorie'),
-                                      prefixIcon: Icons.grid_view_rounded,
-                                      style: filterValueStyle,
-                                      hintStyle: filterLabelStyle,
-                                      items: [
-                                        DropdownMenuItem<String?>(
-                                          value: null,
+                                      ...shoutCategories.map(
+                                        (category) => DropdownMenuItem<String?>(
+                                          value: category,
                                           child: Center(
                                             child: Text(
-                                              tr(context, 'Vše'),
+                                              shoutCategoryLabel(
+                                                context,
+                                                category,
+                                              ),
                                               style: filterValueStyle,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ),
-                                        ...shoutCategories.map(
-                                          (category) =>
-                                              DropdownMenuItem<String?>(
-                                                value: category,
-                                                child: Center(
-                                                  child: Text(
-                                                    shoutCategoryLabel(
-                                                      context,
-                                                      category,
-                                                    ),
-                                                    style: filterValueStyle,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ),
-                                        ),
-                                      ],
-                                      onChanged: (value) {
-                                        _changeFilters(
-                                          (filters) =>
-                                              filters.selectedCategory = value,
-                                        );
-                                        if (value != null) {
-                                          completeInteractiveTutorialAction(0);
-                                        }
-                                      },
-                                    ),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      _changeFilters(
+                                        (filters) =>
+                                            filters.selectedCategory = value,
+                                      );
+                                      if (value != null) {
+                                        completeInteractiveTutorialAction(0);
+                                      }
+                                    },
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: SizedBox(
-                      height: 36,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    height: 36,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(28),
                         ),
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 24,
-                    child: IgnorePointer(
-                      child: Container(
-                        height: 12,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0x40074B57), Colors.transparent],
-                          ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 24,
+                  child: IgnorePointer(
+                    child: Container(
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x40074B57), Colors.transparent],
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+
+          if (spotlightShouts.isNotEmpty)
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: SpotlightHeaderDelegate(
+                child: BusinessSpotlightCarousel(
+                  shouts: spotlightShouts,
+                  onSave: widget.onSave,
+                  onReaction: widget.onReaction,
+                ),
               ),
             ),
 
-            if (spotlightShouts.isNotEmpty)
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: SpotlightHeaderDelegate(
-                  child: BusinessSpotlightCarousel(
-                    shouts: spotlightShouts,
-                    onSave: widget.onSave,
-                    onReaction: widget.onReaction,
-                  ),
+          if (widget.spatial?.message case final message?)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  tr(context, message),
+                  key: const ValueKey('spatial-feed-message'),
                 ),
               ),
-
-            if (widget.spatial?.message case final message?)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Text(
-                    tr(context, message),
-                    key: const ValueKey('spatial-feed-message'),
-                  ),
+            ),
+          if (!widget.isLoading &&
+              widget.spatial != null &&
+              widget.filters.order == FeedOrder.nearest &&
+              shouts.isNotEmpty &&
+              shouts.first.feedRead == true)
+            SliverToBoxAdapter(
+              child: Padding(
+                key: const ValueKey('feed-no-unread'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
+                child: Text(tr(context, 'Žádné nepřečtené Shouty')),
               ),
-            if (!widget.isLoading &&
-                widget.spatial != null &&
-                widget.filters.order == FeedOrder.nearest &&
-                shouts.isNotEmpty &&
-                shouts.first.feedRead == true)
-              SliverToBoxAdapter(
-                child: Padding(
-                  key: const ValueKey('feed-no-unread'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Text(tr(context, 'Žádné nepřečtené Shouty')),
-                ),
-              ),
-            if (widget.isLoading)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (shouts.isEmpty && widget.spatial?.hasMore == true)
-              const SliverToBoxAdapter(child: SizedBox(height: 24))
-            else if (shouts.isEmpty && widget.spatial?.message != null)
-              const SliverToBoxAdapter(child: SizedBox(height: 24))
-            else if (shouts.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    EmptyState(
-                      icon: Icons.location_off_outlined,
-                      title: tr(
-                        context,
-                        'V tomto okolí zatím nejsou žádné shouty.',
-                      ),
+            ),
+          if (widget.isLoading)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (shouts.isEmpty && widget.spatial?.hasMore == true)
+            const SliverToBoxAdapter(child: SizedBox(height: 24))
+          else if (shouts.isEmpty && widget.spatial?.message != null)
+            const SliverToBoxAdapter(child: SizedBox(height: 24))
+          else if (shouts.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  EmptyState(
+                    icon: Icons.location_off_outlined,
+                    title: tr(
+                      context,
+                      'V tomto okolí zatím nejsou žádné shouty.',
                     ),
-                    if (widget.spatial != null &&
-                        widget.filters.radius < 50) ...[
-                      Text(tr(context, 'Hledat ve větším okolí?')),
-                      const SizedBox(height: 12),
-                      FilledButton.tonal(
-                        key: const ValueKey('feed-expand-radius'),
-                        onPressed: widget.spatial!.refreshing
-                            ? null
-                            : () => _changeFilters((filters) {
-                                filters.radius = 50;
-                              }),
-                        child: Text(tr(context, 'Hledat až do 50 km')),
-                      ),
-                    ],
+                  ),
+                  if (widget.spatial != null && widget.filters.radius < 50) ...[
+                    Text(tr(context, 'Hledat ve větším okolí?')),
+                    const SizedBox(height: 12),
+                    FilledButton.tonal(
+                      key: const ValueKey('feed-expand-radius'),
+                      onPressed: widget.spatial!.refreshing
+                          ? null
+                          : () => _changeFilters((filters) {
+                              filters.radius = 50;
+                            }),
+                      child: Text(tr(context, 'Hledat až do 50 km')),
+                    ),
                   ],
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  0,
-                  16,
-                  widget.spatial == null ? 180 : 12,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index.isOdd) return const SizedBox(height: 12);
-                      final shout = shouts[index ~/ 2];
-                      if (widget.spatial case final spatial?) {
-                        return KeyedSubtree(
-                          key: ValueKey(shout.id),
-                          child: Column(
-                            key: _cardAnchors.putIfAbsent(
-                              shout.id,
-                              GlobalKey.new,
-                            ),
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (shout.feedRead == true &&
-                                  (index == 0 ||
-                                      shouts[index ~/ 2 - 1].feedRead != true))
-                                Padding(
-                                  key: const ValueKey('feed-read-separator'),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Expanded(child: Divider()),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        child: Text(tr(context, 'Přečtené')),
-                                      ),
-                                      const Expanded(child: Divider()),
-                                    ],
-                                  ),
-                                ),
-                              spatial.card(shout),
-                            ],
-                          ),
-                        );
-                      }
-                      return RatedShoutCard(
+                ],
+              ),
+            )
+          else
+            SliverPadding(
+              key: const ValueKey('feed-main-cards'),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                0,
+                16,
+                widget.spatial == null ? 180 : 12,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index.isOdd) return const SizedBox(height: 12);
+                    final shout = shouts[index ~/ 2];
+                    if (widget.spatial case final spatial?) {
+                      return KeyedSubtree(
                         key: ValueKey(shout.id),
-                        shout: shout,
-                        onSave: () => widget.onSave(shout),
-                        onReaction: (like) =>
-                            widget.onReaction(shout, like: like),
+                        child: Column(
+                          key: _cardAnchors.putIfAbsent(
+                            shout.id,
+                            GlobalKey.new,
+                          ),
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (shout.feedRead == true &&
+                                (index == 0 ||
+                                    shouts[index ~/ 2 - 1].feedRead != true))
+                              Padding(
+                                key: const ValueKey('feed-read-separator'),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Expanded(child: Divider()),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Text(tr(context, 'Přečtené')),
+                                    ),
+                                    const Expanded(child: Divider()),
+                                  ],
+                                ),
+                              ),
+                            spatial.card(shout),
+                          ],
+                        ),
                       );
-                    },
-                    childCount: shouts.length * 2 - 1,
-                    findChildIndexCallback: (key) {
-                      if (key is! ValueKey<String>) return null;
-                      return childIndices[key.value];
-                    },
-                  ),
+                    }
+                    return RatedShoutCard(
+                      key: ValueKey(shout.id),
+                      shout: shout,
+                      onSave: () => widget.onSave(shout),
+                      onReaction: (like) =>
+                          widget.onReaction(shout, like: like),
+                    );
+                  },
+                  childCount: shouts.length * 2 - 1,
+                  findChildIndexCallback: (key) {
+                    if (key is! ValueKey<String>) return null;
+                    return childIndices[key.value];
+                  },
                 ),
               ),
-            if (widget.spatial case final spatial?)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 180),
-                  child: Center(
-                    child: spatial.loadingMore
-                        ? const CircularProgressIndicator()
-                        : spatial.hasMore
-                        ? TextButton(
-                            key: const ValueKey('spatial-feed-more'),
-                            onPressed: spatial.loadMore,
-                            child: Text(tr(context, 'Načíst další')),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+            ),
+          if (widget.spatial case final spatial?)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 180),
+                child: Center(
+                  child: spatial.loadingMore
+                      ? const CircularProgressIndicator()
+                      : spatial.hasMore
+                      ? TextButton(
+                          key: const ValueKey('spatial-feed-more'),
+                          onPressed: spatial.loadMore,
+                          child: Text(tr(context, 'Načíst další')),
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ),
-          ],
-        ),
+            ),
+        ], shouts),
       ),
     );
   }

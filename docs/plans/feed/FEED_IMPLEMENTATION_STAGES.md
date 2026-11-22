@@ -13,7 +13,13 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
-**22. listopadu – aktuálně:** [B4b je aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results),
+**22. listopadu – aktuální návaznost:** [návrat po pauze a ruční dosahy](B4_DEV_ROLLOUT.md#news-pause-recovery-results)
+jsou ověřené v DEV (b57f6b9, news 6/active, feed 12). [Schválené zapojení pohybu](B4_DEV_ROLLOUT.md#movement-integration)
+se dokončuje jako jeden úsek; ruční kontrola na konci a potom úklid zbývajících
+manifestů. Níže uvedené počáteční stavy pilotů jsou historie, nikoli současná
+inventura ani pokyn znovu publikovat testy.
+
+**22. listopadu – počáteční B4b rollout:** [B4b je aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results),
 zdroj 20206c4 / úplné CI 44959541907 success, Hosting ca327f10112ef349.
 News control 2/active a feed control 12/feed-v3, indexy/Rules i cílené dvě
 Functions ověřené. Existuje pouze pilotní A; skutečná publikace B, C při

@@ -32,6 +32,7 @@ void main() {
         ...config('dev'),
         'serverDeltaFeed': false,
         'serverFeedNews': false,
+        'serverFeedMovement': false,
         'serverSpatialFeed': false,
         'serverUnreadFeed': false,
         'serverAccountDeletionPreparation': enabled,

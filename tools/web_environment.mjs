@@ -13,6 +13,8 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  if (config.serverFeedMovement !== undefined && typeof config.serverFeedMovement !== 'boolean') throw new Error('serverFeedMovement must be a boolean.');
+  if (config.serverFeedMovement === true && (environment !== 'dev' || config.serverDeltaFeed !== true || config.serverFeedNews !== true)) throw new Error('Feed movement requires DEV delta feed and news.');
   if (config.serverDeltaFeed !== undefined && typeof config.serverDeltaFeed !== 'boolean') throw new Error('serverDeltaFeed must be a boolean.');
   if (config.serverFeedNews !== undefined && typeof config.serverFeedNews !== 'boolean') throw new Error('serverFeedNews must be a boolean.');
   if (config.serverFeedNews === true && (environment !== 'dev' || config.serverDeltaFeed !== true)) throw new Error('Feed news requires DEV delta feed.');

@@ -8,6 +8,7 @@ import { createFeedRuntime } from './feed_runtime.js';
 import { encodeGeohash } from './geohash.js';
 import { syncReadBatchOperation } from './read_sync.js';
 import { readContentHash } from './read_sync_blocks.js';
+import { cleanupRestart, restartDigest } from '../tools/feed_restart_cleanup.mjs';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'news-pilot') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
@@ -66,4 +67,40 @@ test('fixture rejects changed originals, duplicate client adoption and foreign d
   await assert.rejects(cleanupNewsPilot(db, f.plan, bindings), /unexpected-conversation/); assert((await child.parent.parent.get()).exists);
   await f.pending.update({ untouched: false }); await assert.rejects(publishNewsFixture(db, f.plan, 'C', createdAt), /original-drift/);
   assert.equal((await db.doc(`shouts/${f.plan.slots[2].id}`).get()).exists, false);
+});
+
+test('restart cleanup guards all fifty fixtures before writing, preserves unrelated read keys and is replayable', { skip: !enabled }, async t => {
+  const f = await fixture(t), createdAt = Date.now(), runId = `mvp-restart-${randomUUID().replaceAll('-', '').slice(0, 12)}`;
+  const rows = Array.from({ length: 50 }, (_, i) => ({ id: `${runId}-${String(i + 1).padStart(3, '0')}`,
+    authorId: f.actors[i % 2].uid, authorNickname: f.actors[i % 2].nickname, title: `MVP restart 22.11. ${String(i + 1).padStart(3, '0')}`,
+    text: 'Synthetic DEV restart check. Remove after verification.', location: { latitude: 50.53 + i * .00002, longitude: 14.13 } }));
+  const marker = await db.doc('feedIndexGenerations/feed-v3').get();
+  const p = { v: 1, project: db.projectId, runId, createdAt, expiresAt: createdAt + 86400000, rows, actors: f.actors,
+    originals: f.plan.originals, requests: f.plan.requests, control: (await db.doc('feedIndexControl/current').get()).data(),
+    incarnations: [{ id: 'feed-v3', stamp: [marker.createTime.seconds, marker.createTime.nanoseconds] }] };
+  const state = { phase: 'seeded', plan: p, digest: restartDigest(p) };
+  f.roots.push(...rows.map(row => db.doc(`shouts/${row.id}`)));
+  const runtime = createFeedRuntime(db, { getUser() {} }, { newsRuntimeEnabled: true });
+  await runtime.database.runTransaction(async tx => {
+    const changes = rows.map(row => ({ id: row.id, before: null, after: { ...row, status: 'active', categories: ['Dotaz'],
+      location: new GeoPoint(row.location.latitude, row.location.longitude), geohash: encodeGeohash(row.location.latitude, row.location.longitude),
+      createdAt: Timestamp.fromMillis(createdAt), expiresAt: Timestamp.fromMillis(p.expiresAt) } }));
+    const index = await runtime.indexWriter.prepareBatch(tx, changes, { publication: true });
+    index.apply(); for (const change of changes) tx.create(db.doc(`shouts/${change.id}`), change.after);
+  });
+  assert.equal((await cleanupRestart(db, state, { dryRun: true })).candidates, 50);
+  const child = db.doc(`shouts/${rows[49].id}/comments/foreign`); await child.create({ authorId: 'someone-else' });
+  await assert.rejects(cleanupRestart(db, state), /conversation-present/);
+  assert((await db.doc(`shouts/${rows[0].id}`).get()).exists); await child.delete();
+  const uid = f.actors[0].uid, original = await f.original.get();
+  const accepted = await syncReadBatchOperation({ auth: { uid, token: { email: 'test@example.test', email_verified: true } }, app: { appId: 'test' }, data: { expectedUserId: uid, items: [
+    { shoutId: rows[0].id, contentHash: readContentHash(rows[0].title, rows[0].text), expiresAt: p.expiresAt },
+    { shoutId: original.id, contentHash: readContentHash('Other', 'History'), expiresAt: original.get('expiresAt').toMillis() },
+  ] } }, db);
+  assert(accepted.items.every(item => item.status === 'accepted'));
+  const result = await cleanupRestart(db, state); assert.equal(result.removed, 50); assert.equal(result.readKeys, 1);
+  assert.equal((await cleanupRestart(db, state)).removed, 0);
+  const remaining = (await db.collection(`users/${uid}/readBuckets`).get()).docs.flatMap(doc => Object.values(doc.get('entries') ?? {}));
+  assert.deepEqual(remaining.map(row => row.shoutId), [original.id]);
+  assert.equal((await f.original.get()).updateTime.toMillis(), original.updateTime.toMillis());
 });
