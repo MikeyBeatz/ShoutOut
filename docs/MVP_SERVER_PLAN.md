@@ -146,19 +146,19 @@ limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
 <a id="authority-audit"></a>
 
-### Zbývající přímé zápisy – čtecí audit 22. listopadu
+### Zbývající přímé zápisy – audit a DEV cutover 22. listopadu
 
-Nejde o dokončenou implementaci content-remaining-authority ani celkový audit
-bezpečnosti. Nasazený DEV ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2 má
+Zbývající content-remaining-authority ani celkový audit bezpečnosti nejsou
+uzavřené. Před přechodem měl DEV ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2
 shodu se zdrojem po normalizaci konců řádků. Pět izolovaných testů v emulátoru
 shoutout-rules-test prošlo s aktivní schemaVersion 2 / managed card projekcí:
 
 | Cesta | Ověřený výsledek | Další krok |
 |---|---|---|
 | Přímý čítač Shoutu / vytvoření komentáře | Zamítnuto | Zachovat uzavřenou projekci. |
-| privateReplies create | Povoleno i při blokaci odesílatele příjemcem a targetType privateReply bez rodičovské zprávy. | Uzavřít přímý create, zachovat createPrivateReply; podléhá schválení. |
-| Komentářové reactions | Samostatný like dokument je povolený, likesCount zůstane 0. | Uzavřít přímé reakce i čítače, zachovat toggleCommentReaction; podléhá schválení. |
-| reports create | Přímá tvorba Shout hlášení je povolená vedle serverové cesty. Základní validace existuje. | Do cutoveru zahrnout i commentReports/privateReplyReports; předem je konkrétně otestovat. |
+| privateReplies create | Povoleno i při blokaci odesílatele příjemcem a targetType privateReply bez rodičovské zprávy. | Uzavřít přímý create, zachovat createPrivateReply; cutover níže dokončený. |
+| Komentářové reactions | Samostatný like dokument je povolený, likesCount zůstane 0. | Uzavřít přímé reakce i čítače, zachovat toggleCommentReaction; cutover níže dokončený. |
+| reports create | Přímá tvorba Shout hlášení je povolená vedle serverové cesty. Základní validace existuje. | Do cutoveru zahrnout i commentReports/privateReplyReports; všechny tři jsou otestované v cutoveru níže. |
 | privateReplies delete | Vlastní přímé smazání je povolené bez rate/receipt. | Samostatně navrhnout serverové mazání a zachování moderačního/archivního chování. |
 
 Vlastník první navazující úsek schválil: v managed režimu
@@ -185,7 +185,20 @@ serverová idempotence všech tří operací a přesné počty. Ověřuje také
 účastnické čtení a omezený dotaz soukromé konverzace, odmítnutí cizího čtení,
 zachované vlastní mazání a moderační čtení/rozhodnutí. Nepřítomný App Check
 server odmítá. Nejde o úplný audit všech Rules ani produkční kapacitní test.
-Širší regrese a přesné úplné CI před DEV nasazením ještě čekají.
+**Dokončeno v DEV:** místní širší sada 475/475, 0 selhání; zdroj
+17317e9aede8f6aa286c12365ac335d597a6867f má [úspěšné úplné CI 45056112263](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45056112263).
+Nasazeny výhradně Firestore Rules do shoutout-dev-46c81, ruleset
+476d216c-9208-4e5c-9143-f583cb82a3e9. Čtecí REST kontrola ověřila shodu vydaného
+souboru se zdrojem a nezměněný Hosting 06df6da99db68e74 i všech 20 Functions.
+Aktuální webový app-config má všechny tři serverové cesty zapnuté a odpovídající
+Functions jsou ACTIVE. Staré/nativní přímé cesty jsou v managed režimu blokované;
+mobilní distribuce nebyla součástí této akceptace. Bez nových Auth účtů a
+živých testovacích datových zápisů. Návratový ruleset je
+5dde23bc-6ede-4c90-a2e4-7e47ff3034d2; jeho použití by znovu otevřelo původní
+přímé cesty, proto jen jako odůvodněný návrat. Podklady:
+build/managed-content-cutover-regression.log,
+build/managed-content-cutover-ci-proof.json a build/managed-content-rules-after.json.
+Soukromé mazání a důvěryhodná moderace zůstávají další samostatné úseky.
 
 V metrice se dosud otevřených 88 jednotek content-remaining-authority dělí
 na tento cutover (implementace 15, ověření 15, DEV nasazení 14) a zbývající

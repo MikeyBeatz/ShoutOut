@@ -6,15 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nejbližší proveditelný kódový úsek je uzavření zbývajících přímých obsahových zápisů.**
-[Omezený audit a konkrétní návrh](MVP_SERVER_PLAN.md#authority-audit): 5/5
-emulátorových scénářů potvrdilo přímou soukromou tvorbu přes blokaci, samostatné
-komentářové palce bez čítače, přímé hlášení a vlastní soukromé mazání. Shout
-čítače / comment create jsou naopak správně uzavřené. DEV Rules mají shodu
-se zdrojem. Vlastník schválil první cutover tří existujících serverových cest;
-implementace ve fix/managed-content-write-cutover má 11/11 cílených testů.
-Širší regrese/úplné CI čekají; poté pouze DEV Rules v shoutout-dev-46c81.
-Živá data se nemění. Soukromé mazání/moderace jsou samostatný další úsek.
+**Poslední uzavřený obsahový úsek: přímé zápisy v managed feedu.**
+[Důkazy a hranice](MVP_SERVER_PLAN.md#authority-audit): soukromé odpovědi,
+komentářové palce/čítače a tvorba tří typů hlášení nyní vyžadují serverovou cestu.
+Zdroj **17317e9aede8f6aa286c12365ac335d597a6867f** má
+[success úplné CI 45056112263](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45056112263); místně 11/11 cílených
+a 475/475 širších testů. Pouze DEV Rules shoutout-dev-46c81 jsou nasazené,
+ruleset **476d216c-9208-4e5c-9143-f583cb82a3e9**, shoda zdroje ověřená přes API.
+Hosting 06df6da99db68e74 a všech 20 Functions zůstaly beze změny; bez nových
+Auth účtů a živých testovacích zápisů. Čtení, role, retence, moderace a vlastní
+soukromé mazání zůstávají zachované. Návratový ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2.
+
+**Další krok:** dokončit pozorovanou B4b číslovku/expiraci/pauzu/návrat a úklid
+schváleného pilotu s připraveným klientem. Samostatný další kódový návrh je
+serverové soukromé mazání a moderace; nový rozsah předem předložit vlastníkovi.
+Běžné okno feedu je na jeho žádost odložené, bez smazání místní fronty.
 
 **Samostatná serverová kontrola závěrečného feedu prošla:** oba účty 50 + 2,
 52 jedinečných karet, jedna baseline přes stránky, potvrzené unread-first

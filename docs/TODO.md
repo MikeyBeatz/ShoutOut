@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,31 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,33 %** — vážené dokončení podúseků
 
-Hotové úseky: **171/228**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **173/228**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -108,11 +108,11 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
 2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Připravený další úsek:** [audit zbývající obsahové autority](MVP_SERVER_PLAN.md#authority-audit)
-   má pět emulátorových důkazů a shodu nasazených DEV Rules. První cutover
+   **Poslední uzavřený úsek:** [audit a část zbývající obsahové autority](MVP_SERVER_PLAN.md#authority-audit).
+   První cutover
    přímých private create / comment reaction / content report create je
-   schválený a implementovaný, 11/11 cílených testů prošlo. Širší regrese
-   a úplné CI čekají; pak pouze DEV Rules v shoutout-dev-46c81, bez živých
+   dokončený v DEV: 11/11 cílených, 475/475 širších testů, úplné CI 45056112263
+   success a vydané Rules se shodou zdroje. Web/Functions beze změny, bez živých
    testovacích zápisů. Soukromé mazání a moderace zůstávají dalším úsekem.
 
 ## Hranice MVP

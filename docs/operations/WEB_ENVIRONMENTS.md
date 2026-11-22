@@ -1,10 +1,17 @@
 # Vývojový a produkční web
 
+**Aktuální DEV Rules k 22. listopadu:** [uzavření přímých obsahových zápisů](../MVP_SERVER_PLAN.md#authority-audit)
+ze zdroje 17317e9aede8f6aa286c12365ac335d597a6867f, úplné CI 45056112263 success,
+ruleset 476d216c-9208-4e5c-9143-f583cb82a3e9. Shoda zdroje ověřená; Hosting a všech
+20 Functions beze změny. Žádné nové Auth účty ani živé testovací datové zápisy.
+Soukromé mazání a moderace zůstávají samostatně otevřené.
+
 **Aktuální DEV web k 22. listopadu:** [Auto dosah/max. 50 km](../plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius)
 ze zdroje **6bef37c5af4410a3b87da9946005c70a71bbc1b6**, success úplné
 CI 45020677812, Hosting **06df6da99db68e74**. Všech 67 aplikačních souborů
 i osm HTTP kontrol na obou doménách odpovídá release artefaktu. Živý UI
-průchod čeká; backend/Rules/indexy/plánovače níže se neměnily. Návratový
+průchod v anonymním okně je potvrzený; problém běžného okna je odložený.
+Backend/indexy/plánovače se neměnily, novější Rules cutover je uvedený výše. Návratový
 web ca327f10112ef349 zůstává evidovaný. Při B4b rollback pilotu následně
 obnovit nový Auto artefakt, nikoli starý web v b4b-dev-release.
 

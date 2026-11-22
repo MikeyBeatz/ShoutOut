@@ -93,7 +93,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
-| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 97,51 % | 126/132 |
+| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 97,80 % | 128/132 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
@@ -366,8 +366,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | shout-rules-cutover-dev: Uzavření přímé tvorby a palců Shoutu – nasazení DEV | deployment | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni), [2](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
 | shout-rules-cutover-accept: Uzavření přímé tvorby a palců Shoutu – živá akceptace DEV | acceptance | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
 | content-managed-cutover-code: Spravovaný feed – uzavření přímých odpovědí, reakcí a hlášení | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
-| content-managed-cutover-check: Uzavření přímých obsahových zápisů – regrese | verification | ⬜ | — |
-| content-managed-cutover-dev: Uzavření přímých obsahových zápisů – ověřené DEV Rules | deployment | ⬜ | — |
+| content-managed-cutover-check: Uzavření přímých obsahových zápisů – regrese | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
+| content-managed-cutover-dev: Uzavření přímých obsahových zápisů – ověřené DEV Rules | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
 | content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | — |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
