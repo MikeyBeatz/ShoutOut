@@ -76,6 +76,25 @@ build/feed-automatic-radius-hosting-proof.json a build/feed-automatic-radius-ser
 Zbývá živé ověření na existujícím A/B pilotu. Browser Use hlásí nedostupného
 browser hosta; vlastník byl požádán o Auto → ručních 5 km → nabídku rozšíření.
 Živou akceptaci nezavírat před odpovědí. Návratový Hosting je ca327f10112ef349.
+**Odpověď vlastníka:** „Feed se nepodařilo načíst“. Čtecí logová kontrola
+22. listopadu zachycuje poslední pokusy v 17:14 UTC: syncReadBatch,
+getReadStatePage a getFeedPage mají platné Auth/App Check a HTTP 200, žádná
+serverová ERROR ani HTTP >=400. Samotné getFeedPage může obsluhovat i promo
+či liveContext, není důkazem dokončené hlavní stránky. TestBusiness cloud read
+meta zůstává revision 8 od 21. listopadu 19:12:54.174Z, 3 bloky / 0 entries.
+Živých zdrojů je stále 40 (38 původních + A/B), žádný nový seed ani mutace.
+
+Rozšířený místní diagnostický test skutečného ReadSessions.synchronizeForFeed
+prošel spolu s dosavadními boundary testy: prázdná fronta projde; jediná
+serverem odložená značka zablokuje bariéru i po úspěšném downloadu bez
+lastError; po přijetí téže značky bariéra opět projde. To prokazuje existenci
+této větve, nikoli stav konkrétního IndexedDB vlastníka. Vlastník byl požádán
+o jediné nové anonymní okno s TestBusiness, bez změny dosahu a bez mazání dat.
+Do výsledku nepřisuzovat incident Auto filtru, síti ani B2 s jistotou a
+neuvolňovat podmínku potvrzeného pořadí bez konkrétního ověřeného řešení.
+Aktuální diagnostické podklady: build/feed-automatic-radius-failure-inspect.log,
+build/feed-automatic-radius-failure-logs.json a build/feed-automatic-radius-barrier-diagnosis.log.
+Zdroj aplikace i živé prostředí se během této diagnózy neměnily.
 Při následném B4b rollback pilotu znovu vydat nový ověřený Auto web; starý
 web v čisté b4b-dev-release je historický artefakt.
 Nový seed ani Auth účty nejsou potřeba. Přesný cíl je projekt/site

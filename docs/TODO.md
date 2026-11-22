@@ -58,7 +58,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Právě schválené Auto hledání:** [konkrétní chování a lokální výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
    Klientská příprava a 38 různých cílených regresí jsou hotové; zdroj 6bef37c
    má success úplné CI 45020677812. DEV Hosting 06df6da99db68e74 je ověřený
-   na obou doménách; čeká jediný UI průchod stávajícím A/B pilotem.
+   na obou doménách. Vlastník nyní hlásí chybu načtení feedu; před akceptací
+   ověřit rozdíl čistého anonymního a původního okna, neupravovat naslepo B2
+   ani nemazat místní frontu. Poslední serverová volání jsou úspěšná.
    B4b akceptaci tím nezavírat; po jeho rollbacku obnovit nový Auto web.
    **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
    8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.

@@ -18,7 +18,14 @@ nálezů. Zdroj **6bef37c5af4410a3b87da9946005c70a71bbc1b6** má
 Hosting **06df6da99db68e74** je ověřený: 69 souborů (67 app + 2 Firebase),
 shoda gzip/raw hashů a 8 HTTP kontrol na obou DEV doménách. Backend zůstává
 níže uvedené B4b 20206c4. Vlastník dostal jediný UI průchod Auto → ručních
-5 km → nabídka rozšíření, bez nového seedu či mazání. Spojení pro Browser Use
+5 km → nabídka rozšíření, bez nového seedu či mazání. **Průchod nyní hlásí
+„Feed se nepodařilo načíst“; akceptace je otevřená.** Poslední serverová
+volání v 17:14 UTC mají HTTP 200 a Auth/App Check VALID. TestBusiness read
+meta zůstává revision 8 / 0 entries; lokálně je reprodukovaná blokace skutečné
+feed bariéry odloženou starou značkou, ale příčina v jeho prohlížeči není
+potvrzená. Vlastník dostal jednu kontrolu nového anonymního okna; zatím bez
+mazání IndexedDB/fronty nebo změn zdrojů. [Důkazy incidentu](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+Spojení pro Browser Use
 je nedostupné; tuto akceptaci nenahrazovat HTTP ověřením. Návratový web je
 ca327f10112ef349; po budoucím B4b rollback pilotu obnovit nynější Auto artefakt,
 nikoli historický web uložený v build/b4b-dev-release. Produkce/main nezměněné.
