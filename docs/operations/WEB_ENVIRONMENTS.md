@@ -1,6 +1,15 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – sjednocení číslovek 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
+**Aktuální DEV web a reader – obnova po pauze 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+Zdroj b57f6b9793b70530369384cb07eee7f4e56af9c4, success úplné CI 45071219942,
+Hosting **6762922852bede94**, getFeedPage **getfeedpage-00006-niz**.
+Shodných 67 app souborů a 8 HTTP kontrol; ostatních 19 Functions, Rules
+476d216c-9208-4e5c-9143-f583cb82a3e9 a prostředky zachované. Feed control 12,
+news **6/active**. Ruční dosahy 1/3/5/10/20/50 km, výchozí 50; Auto a údaj
+o načteném dosahu odstraněné. Automatický geografický přesun zůstává vypnutý.
+Návratový kompatibilní web **3881ef4d17f67aa8**; starší záznamy níže jsou historie.
+
+**Předchozí DEV web – sjednocení číslovek 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
 Zdroj 211471bbdb9df36fde9b233adb4149f2e45adfc8, success úplné CI 45066405533, Hosting **3881ef4d17f67aa8**.
 Ověřeno 67 app souborů / 8 HTTP odpovědí. Rules a všech 20 Functions beze změny;
 návrat **346ea6fb1866da8e**. Automatický geografický přesun je pouze místní,

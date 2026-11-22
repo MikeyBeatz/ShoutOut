@@ -1078,7 +1078,7 @@ výchozí 50 km, bez duplicitního Auto.
 
 <a id="news-pause-recovery-results"></a>
 
-### Připravená oprava a dosahy – 22. listopadu
+### Oprava návratu po pauze a ruční dosahy – 22. listopadu
 
 Nový klient výslovně vyjedná newsRecovery=true. Jen taková stránka může během
 paused získat podepsaný checkpoint a kontext recovering bez regionálních
@@ -1094,20 +1094,58 @@ Nový tools/feed_news_recovery.mjs má zvláštní neměnný digestovaný plán,
 přesný DEV cíl, vazbu na původní manifest/inkarnaci a přechody 4 → 5 → 6.
 Odmítá drift původních dat, controlu, jinou revizi a změněný digest; souběžné
 opakování je no-op. Historický aktivační plán se neupravuje. Živý plán se
-připraví z čerstvého stavu; zatím žádná další kontrolní mutace neproběhla.
+připravil z čerstvého stavu, viz následující živý protokol.
 
 UI má jeden ruční seznam 1/3/5/10/20/50 km, výchozí 50. Zmizely Auto i text
 „Načtené Shouty do…“. Rozšíření prázdného menšího okruhu nastaví explicitních
 50 km po kliknutí; dávky 50, cache, řazení a geografický serverový rozsah se
-nemění. Starší Auto důkazy zůstávají historií, nový výsledek je zatím místní.
+nemění. Starší Auto důkazy zůstávají historií; nové UI je nasazené a vlastník je potvrdil.
 
 Místně prošlo 474 Flutter testů, analýza bez nálezů, 100 nástrojových testů
 a lint Functions. Společná news regrese 32/32 a poslední cílená recovery sada
 4/4 zahrnují souběh pauzy s historickým čtením, legacy/off, nulové pauzové
 kvótové zápisy, publikaci během pauzy, replay a souběh operátorů. Dokončení
-automatického návratu i jeho živá akceptace zatím čekají na rollout.
+automatického návratu ověřuje následující živý průchod.
+
+**Nasazení pouze DEV shoutout-dev-46c81:** čistý zdroj
+**b57f6b9793b70530369384cb07eee7f4e56af9c4**, [success úplné CI 45071219942](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45071219942).
+Nejprve getFeedPage **getfeedpage-00006-niz**, 100 % provozu a všechny staré
+revize retired; min0/max1, concurrency1, 256 MiB/15 s beze změny. Potom
+Hosting **6762922852bede94**: 67 app souborů shodných s artefaktem, 8 HTTP
+odpovědí na obou DEV doménách. Ostatních 19 Functions i Rules 476d216c…a3e9
+beze změny. Návratový web 3881ef4d17f67aa8. První CLI pokus ukončil místní
+10s limit discovery před aktualizací; kontrola potvrdila nezměněné prostředí.
+Opakování s FUNCTIONS_DISCOVERY_TIMEOUT=30 uspělo; běhový timeout zůstal 15 s.
+Podklady build/b4b-recovery-release-ci.json, -functions.json a -hosting.json.
+
+**Řízený průchod:** neměnný místní plán docs/local/b4b-news-recovery-2026-11-22.json,
+digest bdd1f66f811ae3b9f5fffdad0387b69f6e88945b58cb0ccfb93c6454a42f727c,
+vázaný na původní plán ec4debea…16b72 a stejnou inkarnaci feed-v3.
+Operátor provedl 22. listopadu 21:39:35 UTC **5/paused**, 2 atomické zápisy.
+Vlastník pod TestBusiness potvrdil novou plovoucí obnovu a detail bez chyby,
+potom návrat do feedu. Operátor v 21:41:08 UTC provedl **6/active**, opět
+2 atomické zápisy. Bez dalšího obnovení stránky doloženy HTTP 200 v 21:43:01
+a 21:43:26 UTC; poslední požadavek 0,380 s obsahuje změnu news kvóty účtu
+it_business a ve stejném trace Auth/App Check VALID. Vlastník potvrdil
+zachovaný seznam. Čekání ve skryté kartě se nepovažuje za latenci aktivní
+detekce; dobu návratu v popředí nelze z této ruční relace přesně změřit.
+Podklady build/b4b-recovery-observe-ready/-paused/-active.json a
+build/b4b-recovery-callable-proof.json. Následující kontrola v 21:46:12 UTC
+potvrdila dalších 101 s bez změny news kvóty či počtu zdrojů, tedy bez dalších
+úspěšných count požadavků v tomto úseku; podklad build/b4b-recovery-observe-quiet.json.
+Samotná absence kvótových zápisů není důkazem nulového Firestore provozu.
+Ve spojení s regresí runtime a ověřeným návratem jde o uzavřenou akceptaci
+této konkrétní obnovy, nikoli o zátěžový test nebo novou pozitivní publikaci.
+
+Inventury potvrzují feed control 12, všech 92 zdrojů, původních 38 Shoutů a
+pending žádost s původními verzemi. Žádné nové fixture/Auth, změny Rules,
+plánovačů, retence, prostředků či produkce. Původní A/B/C/restart úklid dosud
+neproběhl. Vlastník znovu zaznamenal hlášku „Poloha se změnila…“; automatický
+pohyb není součástí tohoto nasazení a zůstává otevřený před živým zapojením.
 
 Samostatně uzavřený kompatibilní web + návrat UI se eviduje v obou stupnicích
 jako feed-b4-compatible-web-accept: z dosud otevřené společné váhy 33/52
-dostává 11/18, zbývá 22/34 pro automatický návrat a zbytek společné akceptace
-s úklidem. Součet rodiče ani již dokončené váhy se nemění. Celé B4 zůstává otevřené.
+dostává 11/18. Zbývající rozlišené podmínky 22/34 se dělí na doložený
+automatický návrat feed-b4-recovery-accept (11/17) a zbytek společné akceptace
+s původním úklidem (11/17). Součet rodiče ani již dokončené váhy se nemění.
+Celé B4 zůstává otevřené; žádný nový kredit za samotnou opravu dříve dokončeného kódu.

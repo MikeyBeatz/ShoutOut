@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,33 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,34 %** — vážené dokončení podúseků
 
-Hotové úseky: **175/230**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **176/231**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **203/305**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **204/306**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,7 +55,16 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Právě schválené Auto hledání:** [konkrétní chování a lokální výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+   **Aktuálně nasazené ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+   b57f6b9 / úplné CI 45071219942 success, DEV Hosting **6762922852bede94**,
+   getFeedPage **00006-niz**. Vlastník potvrdil dosahy 1–50 km, výchozí 50, bez
+   Auto/údaje o načteném dosahu a funkční obnovu/detail během 5/paused. Po
+   6/active doložené úspěšné klientské volání s Auth/App Check VALID a dalších
+   101 s bez změny news kvóty. Návrat novinek uzavřený; zbývá původní úklid.
+   Ostatních 19 Functions a Rules zachované.
+   Hláška o změně polohy stále existuje; automatický pohyb je dosud vypnutý
+   a vyžaduje dokončení mezí/živého zapojení. Nezaměňovat s hotovým lokálním prototypem.
+   **Historické Auto hledání, nyní nahrazené ručním 50 km:** [původní chování a výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
    Klientská příprava a 38 různých cílených regresí jsou hotové; zdroj 6bef37c
    má success úplné CI 45020677812. DEV Hosting 06df6da99db68e74 je ověřený
    na obou doménách. Vlastník potvrdil fungující Auto v novém anonymním okně;
@@ -105,10 +114,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    fixture nevytvářet naslepo. [Pauza a starší kompatibilní web prošly ruční kontrolou](plans/feed/B4_DEV_ROLLOUT.md#news-pause-acceptance);
    současný web je vrácený, news **4/active**, bez změn zdrojů/Rules/Functions.
    Vlastník potvrdil návrat UI pod TestBusiness a schválil [opravu návratu po načtení během pauzy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal).
-   [Místní příprava je ověřená](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results); čeká přesné úplné CI a DEV
-   getFeedPage + web. Schválené UI odstraní Auto i údaj o načteném dosahu;
-   ruční rozsahy 1–50 km budou začínat na 50 km.
-   Automatický návrat novinek ani původní úklid nejsou hotové. Společná finální
+   [Oprava je nyní nasazená](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results),
+   současný stav je výše. Původní úklid není hotový. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
