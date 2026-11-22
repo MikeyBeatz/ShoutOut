@@ -121,6 +121,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     );
     _spatialSession = FeedSessionController(
       load: _spatialGateway.load,
+      compareFor: (context) =>
+          _useMovement && context.order == FeedOrder.nearest.name
+          ? compareNearestSpatialShouts
+          : null,
       onNewsExpired: () => _newsRuntime?.pulse(immediate: true),
       loadNews: _useSpatialFeed && WebEnvironment.current.serverFeedNews
           ? (_, checkpoint) async {
@@ -875,6 +879,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   SpatialFeedPresentation _spatialPresentation() => SpatialFeedPresentation(
+    ensureCoverage: (id) {
+      if (id != null &&
+          !_movementBusy &&
+          _spatialSession.needsCoverageFor(id)) {
+        unawaited(_spatialMore());
+      }
+    },
     movementEnabled: _useMovement,
     movementRevision: _movementRevision,
     refreshRevision: _feedRefreshRevision,

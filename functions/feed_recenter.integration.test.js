@@ -11,6 +11,7 @@ import { readContentHash } from './read_content_identity.js';
 import { encodeGeohash } from './geohash.js';
 import { feedRuntimeBlockCache } from './feed_runtime.js';
 import { writeFileSync } from 'node:fs';
+import { distanceKm } from './feed_spatial.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'feed-recenter') : null;
@@ -198,4 +199,40 @@ test('measured bounded movement 50/200/2000 sources; cold restart preserves full
   writeFileSync(new URL('../build/feed-recenter-measurement.json', import.meta.url), JSON.stringify({
     model: 'Firestore emulator SDK operations/JSON bytes, not production billing or latency', report,
   }, null, 2) + '\n');
+});
+
+test('opposite-side movement streams all 200 rows in canonical read/distance order across page boundaries', { skip: !enabled }, async t => {
+  const f = await newsFixture(db, t, 200);
+  const readIds = new Set(f.rows.filter((_, i) => i % 3 === 0).map(row => row.id));
+  const marked = f.rows.filter(row => readIds.has(row.id));
+  for (let i = 0; i < marked.length; i += 32) {
+    await syncReadBatchOperation({ ...f.request({}), data: { expectedUserId: f.uid,
+      items: marked.slice(i, i + 32).map(row => ({ shoutId: row.id, contentHash: readContentHash(row.title, row.text),
+        expiresAt: row.expiresAt.toMillis() })) } }, db);
+  }
+  f.now = Date.now() + 10;
+  const parent = await initial(f, 50);
+  const point = { latitude: f.point.latitude + .003, longitude: f.point.longitude };
+  const page = await moved(f, parent, point), rows = [...page.bodyPage.rows];
+  const parentProof = decode(f, parent.bodyPage.movementToken), childProof = decode(f, page.bodyPage.movementToken);
+  assert.equal(childProof.expiresAt, parentProof.expiresAt);
+  assert.deepEqual(childProof.readTime, parentProof.readTime);
+  assert.equal(childProof.context.snapshot.context.readRevision, parentProof.context.snapshot.context.readRevision);
+  assert.notEqual(page.bodyPage.rows[0].id, parent.bodyPage.rows[0].id);
+  let cursor = page.next, pages = 1;
+  while (cursor) {
+    const next = await f.step({ cursor, cold: false }, options);
+    cursor = next.next;
+    if (next.state === 'preparing') continue;
+    assert.equal(next.baseline, page.baseline);
+    pages++; rows.push(...next.bodyPage.rows);
+  }
+  const expected = [...f.rows].sort((a, b) => Number(readIds.has(a.id)) - Number(readIds.has(b.id)) ||
+    distanceKm(point, a.location) - distanceKm(point, b.location) || b.createdAt.toMillis() - a.createdAt.toMillis() ||
+    (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  assert.equal(pages, 4);
+  assert.equal(new Set(rows.map(row => row.id)).size, 200);
+  assert.deepEqual(rows.map(row => row.id), expected.map(row => row.id));
+  assert(rows.every(row => row.read === readIds.has(row.id)));
+  assert(rows.every(row => Math.abs(row.distanceKm - distanceKm(point, f.rows.find(source => source.id === row.id).location)) < 1e-12));
 });

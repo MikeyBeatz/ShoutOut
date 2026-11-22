@@ -100,8 +100,8 @@ class FeedRefreshOverlay extends StatelessWidget {
         );
 }
 
-/// One feed view over the shared page/session controller. It does not re-sort
-/// server pages when counters, private interactions or location change.
+/// One view over the shared managed session. Counters/private interactions do
+/// not change selection order; confirmed movement can merge a new ordered page.
 class SpatialFeedPresentation {
   const SpatialFeedPresentation({
     required this.scrollController,
@@ -117,6 +117,7 @@ class SpatialFeedPresentation {
     this.movementEnabled = false,
     this.movementRevision = 0,
     this.refreshRevision = 0,
+    this.ensureCoverage,
   });
   final ScrollController scrollController;
   final VoidCallback refresh;
@@ -130,6 +131,20 @@ class SpatialFeedPresentation {
   final String? message;
   final bool movementEnabled;
   final int movementRevision, refreshRevision;
+  final ValueChanged<String?>? ensureCoverage;
+}
+
+/// The managed server nearest key is unread/read, distance, -createdAt, ID.
+/// IDs use the same binary comparison as the server tuple, not locale sorting.
+int compareNearestSpatialShouts(Shout a, Shout b) {
+  final read = (a.feedRead == true ? 1 : 0).compareTo(
+    b.feedRead == true ? 1 : 0,
+  );
+  if (read != 0) return read;
+  final distance = a.distanceKm.compareTo(b.distanceKm);
+  if (distance != 0) return distance;
+  final time = b.feedCreatedAtMillis.compareTo(a.feedCreatedAtMillis);
+  return time != 0 ? time : a.id.compareTo(b.id);
 }
 
 Shout decodeSpatialFeedItem(Map<String, dynamic> item) {
@@ -143,6 +158,7 @@ Shout decodeSpatialFeedItem(Map<String, dynamic> item) {
     throw StateError('Invalid spatial feed item');
   }
   final data = Map<String, dynamic>.from(body);
+  final createdAtMillis = data['createdAt'];
   for (final field in ['createdAt', 'expiresAt']) {
     final millis = data[field];
     if (millis is! num || !millis.isFinite || millis < 0) {
@@ -158,6 +174,7 @@ Shout decodeSpatialFeedItem(Map<String, dynamic> item) {
     data,
     distanceKm: distance.toDouble(),
     feedRead: item['read'] as bool?,
+    feedCreatedAtMillis: createdAtMillis as num,
   );
 }
 

@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 22. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 23. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -55,11 +55,16 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
+   **Právě dokončená místní oprava:** [živé pořadí v Nejblíž](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+   Vlastník potvrdil aktualizaci vzdáleností, nově schválil i přeskládání karet
+   při potvrzeném pohybu. 486 Flutter testů a 7 serverových regresí prošly;
+   čeká úplné CI, DEV web a krátká kontrola řazení/kotvy. Bez nového MVP kreditu
+   za opravu; společnou akceptaci uzavřít až po skutečném úklidu.
    **Pohyb je nasazený v DEV, čeká už jen závěr:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
    78d6a3f / úplné CI 45077814590 success, Hosting **2d6ae9af70840b03**,
    getFeedPage **00007-moc**. Automatické kontroly, simulace i živý dry-run
-   úklidu jsou hotové. [Jediný ruční průchod](plans/feed/B4_DEV_ROLLOUT.md#movement-manual-acceptance)
-   a potom restart 50 → původní A/B/C podle manifestů. C2 je již uklizený.
+   úklidu jsou hotové. Původní ruční průchod vedl k uvedené změně řazení;
+   po její závěrečné kontrole restart 50 → původní A/B/C podle manifestů. C2 je již uklizený.
    Ostatní Functions, Rules, prostředky a produkce zachované; neuzavírat
    finální akceptaci před odpovědí a skutečným úklidem.
    **Předchozí ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).

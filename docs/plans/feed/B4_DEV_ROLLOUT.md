@@ -1161,8 +1161,9 @@ nejvýše jeden geografický přesun za 30 s, až po vzdálenosti větší než
 250 m + přesnost původního i nového fixu, nový fix nejvýše 30 s starý a
 s přesností do 100 m. To není přesnost skutečné polohy ani slíbená latence.
 Při výpadku/nepřesné poloze zůstane poslední potvrzené okolí. Načtené karty
-udrží čtecí posloupnost v nepřečtené/přečtené skupině; nové karty se doplní,
-neplatné odejdou. Úplné nové pořadí určí ruční obnova.
+v původní verzi udržely čtecí posloupnost v nepřečtené/přečtené skupině;
+nové se doplnily a neplatné odešly. Toto pravidlo pořadí vlastník po ručním
+průchodu změnil 23. listopadu – platí [navazující řazení při pohybu](#movement-order).
 
 **Připravená integrace:** samostatný FeedMovementController slučuje GPS události,
 ignoruje šum, staré/neplatné fixy a souběžné požadavky. V pozadí a mimo feed
@@ -1272,7 +1273,12 @@ ani pravidla vydání se neměnila; dokumentační zdroj se nepoužívá pro rol
 
 <a id="movement-manual-acceptance"></a>
 
-### Jediný čekající ruční průchod a následný úklid
+### Původní ruční průchod a následný úklid
+
+Vlastník jej 23. listopadu vyzkoušel, potvrdil správné změny vzdáleností a
+uvedl, že ostatní průběh přibližně odpovídal zadání. Zároveň požádal o živé
+řazení v Nejblíž. Následující scénář dokumentuje původní kontrolu; celý jej
+neopakovat. Čeká jen [navazující řazení/kotva](#movement-order) a úklid.
 
 Prohlížečový host je stále nedostupný, potvrzeno novou inventurou. Nelze tím
 nahrazovat ruční UI důkaz. Vlastník požádal nechat ruční průchod až na konec;
@@ -1307,3 +1313,57 @@ publicStates, absenci testovacích cloudových read klíčů a neporušené osta
 read položky. Teprve poté dokončit společné akceptační díly; dosavadní kladnou
 číslovku, expiraci a kompatibilní rollback neopakovat. Délka nynějšího feedu
 po hodině vyžaduje obnovu nezávisle na pohybu a netvoří nový problém.
+
+<a id="movement-order"></a>
+
+### Řazení při potvrzeném pohybu – schváleno 23. listopadu
+
+Po ručním průchodu vlastník potvrdil změnu vzdáleností a schválil návrh:
+v Nejblíž přeskupit karty při již schváleném potvrzeném přesunu, zachovat
+právě čtenou kartu na obrazovce a nepřečtené/přečtené oddělení. Nové publikace
+nad původní hranicí dál čekají pod číslovkou obnovy. Meze GPS, 30s cooldown,
+readRevision, hodinový termín, ostatní režimy, oprávnění a retence se nemění.
+
+**Místní implementace a ověření dokončené:** sdílený komparátor kopíruje klíč
+serveru: zmrazená skupina → přesná vzdálenost → createdAt sestupně → binární
+ID vzestupně. Dekódování zachová i zlomky milisekundy pro shodnou vzdálenost.
+Po přesunu se řadí sjednocení nové stránky a serverem znovu ověřených starších
+karet; další stránky nahrazují duplicity a vkládají chybějící karty na správné
+místo. Lokální přečtení, palce a živé čítače samy pořadí nemění.
+
+Ponechaná karta může ležet za dosud potvrzenou částí nového kurzoru. Klient
+proto sleduje poslední viditelnou kartu a pokračuje po původních 50 položkách,
+dokud ji kurzor nepokryje; postupuje i přes stránku tvořenou jen duplicitami.
+Nejde o předběžné načtení celého okolí. Během dohánění nelze tvrdit, že počet
+již ponechaných karet je souvislý globální prefix – stav načítání zůstává
+viditelný a další stránka doplní mezery. Viditelná kotva se zachová i při
+vložení před ní bez nové GPS revize. Kontrola viewportu prochází pouze právě
+vytvořené lazy děti; ne celý historický seznam při každém scroll snímku.
+
+Výsledky: **486 Flutter testů**, analýza bez nálezů, **7 serverových regresí**
+a lint změněného serverového testu. Nová widgetová regrese přesune kotvu z
+původních 100 karet do opačně řazených 200, ověří první snímek i doplnění tří
+stránek včetně zcela duplicitní. Serverový test ověří všechny čtyři stránky
+pro 200 zdrojů s promíchaným přečtením, bez duplicit/mezer a se stejnou původní
+hranicí a termínem. Testy výpadku, neplatného pořadí a staré odpovědi zachovají
+poslední potvrzený seznam. Zdrojové důkazy:
+[klientská regrese](../../../test/feed_movement_order_test.dart),
+[viewport](../../../test/feed_movement_view_test.dart),
+[server](../../../functions/feed_recenter.integration.test.js).
+Místní výpisy build/feed-movement-order-{flutter,analyze2,server}.log.
+
+Serverové jádro již vrací správný proud od nového bodu; mění se pouze klient
+a serverový test. Po úspěšném přesném úplném CI nasadit **jen DEV Hosting
+shoutout-dev-46c81**. Zachovat všech 20 Functions, Rules, control 12/news
+6/active, prostředky i testovací data. Návratový web je 2d6ae9af70840b03.
+Metriky se za opravu znovu nenavyšují; zbývající akceptace zůstává otevřená.
+
+**Poslední ruční kontrola až po nasazení:** stejné existující restartovací
+karty pod TestBusiness, Sensors 50.5300/14.1300/25 m, dosah 1 km a jedna obnova.
+Po posunutí o několik karet změnit po alespoň 30 s Latitude na 50.5340.
+Po potvrzeném přesunu mají být karty uvnitř každé skupiny znovu podle nové
+vzdálenosti, přitom právě viditelná karta zůstane na místě. Pro kontrolu vršku
+scrollovat ručně nahoru; nemačkat obnovu, která by sama vytvořila nové pořadí.
+Potom No override / 50 km / jedna obnova. Nepožadovat opakování již ověřené
+číslovky, expirace, pauzy ani celého původního pohybového průchodu. Při úspěchu
+restart 50 → původní A/B/C podle stávajících manifestů; bez nových fixture/Auth.

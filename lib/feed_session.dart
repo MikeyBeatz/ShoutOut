@@ -49,8 +49,8 @@ class FeedNewsDelta {
   final Duration? validFor;
 }
 
-/// Transport-independent coordination; not yet wired to the legacy Home feed.
-/// Keeps one prefetched page, freezes order and commits refresh atomically.
+/// Coordinates the managed feed and one prefetched page. Refresh commits
+/// atomically; an optional canonical comparator also orders movement merges.
 class FeedSessionController<T, C extends Object> {
   FeedSessionController({
     required this.load,
@@ -58,6 +58,7 @@ class FeedSessionController<T, C extends Object> {
     this.loadNews,
     this.onNewsExpired,
     this.onChanged,
+    this.compareFor,
     Duration Function()? elapsedClock,
   }) : _elapsed = elapsedClock ?? _monotonicClock();
 
@@ -74,13 +75,17 @@ class FeedSessionController<T, C extends Object> {
   final Future<FeedNewsDelta> Function(C context, String checkpoint)? loadNews;
   final void Function()? onNewsExpired;
   final void Function()? onChanged;
+  // Selection keys must remain frozen between confirmed geographical changes.
+  final Comparator<T>? Function(C context)? compareFor;
 
   C? _context;
   C? _refreshContext;
   List<T> _items = const [];
+  final Map<String, T> _itemsById = {};
   Object? _next;
   String? _checkpoint;
   String? _baseline;
+  T? _frontier;
   FeedBatch<T>? _prepared;
   final Set<String> _news = {};
   int? _confirmedNewsCount;
@@ -113,6 +118,49 @@ class FeedSessionController<T, C extends Object> {
   String? get checkpoint => _checkpoint;
   String? get baseline => _baseline;
 
+  /// Retained cards may lie beyond the new cursor's confirmed prefix. Catch
+  /// that cursor up to the viewport rather than waiting for the old list end.
+  bool needsCoverageFor(String id) {
+    if (_disposed || !_active || isRefreshing || !hasMore || _context == null) {
+      return false;
+    }
+    final compare = compareFor?.call(_context!);
+    if (compare == null) return false;
+    final item = _itemsById[id];
+    if (item == null) return false;
+    return _frontier == null || compare(item, _frontier as T) > 0;
+  }
+
+  void _commitItems(List<T> items) {
+    _items = items;
+    _itemsById
+      ..clear()
+      ..addEntries(items.map((item) => MapEntry(idOf(item), item)));
+  }
+
+  List<T> _mergeItems(Iterable<T> values, C context) {
+    final compare = compareFor?.call(context);
+    if (compare == null) return _unique(values);
+    final latest = <String, T>{};
+    for (final item in values) {
+      final id = idOf(item);
+      if (!_removed.contains(id)) latest[id] = item;
+    }
+    return latest.values.toList()..sort(compare);
+  }
+
+  void _checkOrder(FeedBatch<T> batch, C context, {T? previous}) {
+    final compare = compareFor?.call(context);
+    if (compare == null) return;
+    var last = previous;
+    for (final item in batch.items) {
+      if (last != null && compare(last, item) > 0) {
+        throw StateError('Unordered server feed page');
+      }
+      last = item;
+    }
+  }
+
   void setActive(bool active) => _active = active;
 
   /// Cancel in-flight work when leaving the feed, preserving committed cards,
@@ -138,6 +186,7 @@ class FeedSessionController<T, C extends Object> {
   void removeConfirmed(String id) {
     if (_disposed || !_removed.add(id)) return;
     _items = _items.where((item) => idOf(item) != id).toList();
+    _itemsById.remove(id);
     _news.remove(id);
     if (_confirmedNewsCount != null) _newsCurrent = false;
     onChanged?.call();
@@ -166,8 +215,10 @@ class FeedSessionController<T, C extends Object> {
           if (_disposed || generation != _generation) return;
           if (_elapsed() >= deadline) throw const FeedSessionExpired();
           if (batch.baseline.isEmpty) throw StateError('Missing feed baseline');
+          _checkOrder(batch, requested);
           _context = requested;
-          _items = _unique(batch.items);
+          _commitItems(_mergeItems(batch.items, requested));
+          _frontier = batch.items.isEmpty ? null : batch.items.last;
           _next = batch.next;
           _checkpoint = batch.newsCheckpoint ?? batch.baseline;
           _baseline = batch.baseline;
@@ -193,9 +244,8 @@ class FeedSessionController<T, C extends Object> {
   }
 
   /// Local movement path; the host must authorize/pace location changes.
-  /// Preserve the reading sequence of retained cards. Newly eligible cards
-  /// follow it, then the canonical target cursor supplies further pages.
-  /// A manual refresh is still the operation that establishes a new full order.
+  /// Re-rank the retained/current union when a comparator is configured. Its
+  /// next cursor still belongs to the canonical server stream at the new point.
   Future<void> recenter(
     C requested, {
     required Future<FeedBatch<T>> Function(C context) loadMoved,
@@ -220,17 +270,21 @@ class FeedSessionController<T, C extends Object> {
           if (batch.baseline.isEmpty || batch.newsCheckpoint == null) {
             throw StateError('Unconfirmed feed movement');
           }
+          _checkOrder(batch, requested);
           final fresh = {for (final item in batch.items) idOf(item): item};
           final remaining = _items
               .where((item) => retain(item, requested))
               .map((item) => fresh[idOf(item)] ?? relocate(item, requested));
           final combined = _unique([...remaining, ...batch.items]);
-          final committed = [
-            ...combined.where((item) => !isRead(item)),
-            ...combined.where(isRead),
-          ];
+          final committed = compareFor?.call(requested) != null
+              ? _mergeItems(combined, requested)
+              : [
+                  ...combined.where((item) => !isRead(item)),
+                  ...combined.where(isRead),
+                ];
           _context = requested;
-          _items = committed;
+          _commitItems(committed);
+          _frontier = batch.items.isEmpty ? null : batch.items.last;
           _next = batch.next;
           _baseline = batch.baseline;
           _checkpoint = batch.newsCheckpoint;
@@ -278,6 +332,7 @@ class FeedSessionController<T, C extends Object> {
           if (batch.next != null && batch.next == cursor) {
             throw StateError('Feed cursor did not advance');
           }
+          _checkOrder(batch, _context!, previous: _frontier);
           _prepared = batch;
         })
         .catchError((Object error) {
@@ -309,7 +364,8 @@ class FeedSessionController<T, C extends Object> {
           }
           if (needsRefresh) throw const FeedSessionExpired();
           final batch = _prepared!;
-          _items = _unique([..._items, ...batch.items]);
+          _commitItems(_mergeItems([..._items, ...batch.items], _context!));
+          if (batch.items.isNotEmpty) _frontier = batch.items.last;
           _next = batch.next;
           _prepared = null;
           onChanged?.call();
@@ -405,10 +461,12 @@ class FeedSessionController<T, C extends Object> {
     _newsExpiryTimer?.cancel();
     ++_generation;
     _items = const [];
+    _itemsById.clear();
     _context = null;
     _next = null;
     _prepared = null;
     _checkpoint = null;
+    _frontier = null;
     _baseline = null;
     _deadline = null;
     _expired = false;

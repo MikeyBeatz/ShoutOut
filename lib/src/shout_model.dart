@@ -45,6 +45,7 @@ class Shout {
     required this.categories,
     required this.distanceKm,
     required this.createdAt,
+    num? feedCreatedAtMillis,
     required this.expiresAt,
     this.likes = 0,
     this.dislikes = 0,
@@ -58,7 +59,8 @@ class Shout {
     this.businessHighlighted = false,
     this.businessSpotlight = false,
     this.businessExtendedDuration = false,
-  });
+  }) : feedCreatedAtMillis =
+           feedCreatedAtMillis ?? createdAt.microsecondsSinceEpoch / 1000;
 
   factory Shout.fromDocument(
     DocumentSnapshot<Map<String, dynamic>> document, {
@@ -76,6 +78,7 @@ class Shout {
     Map<String, dynamic> data, {
     double distanceKm = 0,
     bool? feedRead,
+    num? feedCreatedAtMillis,
   }) {
     if (data['schemaVersion'] == 1 &&
         data['contentPurged'] == true &&
@@ -96,6 +99,7 @@ class Shout {
     return Shout(
       id: id,
       feedRead: feedRead,
+      feedCreatedAtMillis: feedCreatedAtMillis,
       authorId: data['authorId'] as String,
       author: data['authorNickname'] as String,
       title: data['title'] as String,
@@ -139,6 +143,8 @@ class Shout {
   final List<String> categories;
   double distanceKm;
   final DateTime createdAt;
+  // Preserve the server's sub-millisecond tie-break key through display decode.
+  final num feedCreatedAtMillis;
   final DateTime expiresAt;
   int likes;
   int dislikes;

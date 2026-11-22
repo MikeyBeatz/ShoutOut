@@ -163,6 +163,7 @@ class _FeedPageState extends State<FeedPage> {
     );
     final positions = {for (var i = 0; i < shouts.length; i++) shouts[i].id: i};
     return FeedMovementView<Shout>(
+      onVisibleItem: spatial.ensureCoverage,
       items: shouts,
       idOf: (shout) => shout.id,
       revision: spatial.movementRevision,

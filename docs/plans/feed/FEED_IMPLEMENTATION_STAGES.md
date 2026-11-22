@@ -13,6 +13,12 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
+**23. listopadu – pořadí při pohybu:** vlastník po kontrole vzdáleností schválil
+[nové řazení v Nejblíž se stabilní viditelnou kartou](B4_DEV_ROLLOUT.md#movement-order).
+Místní implementace i automatické ověření hotové; následuje úplné CI a DEV web.
+Dosavadní server již vytváří správné globální stránky; jeho změna není potřebná.
+Nové publikace dál čekají na obnovu, hodinová hranice/read snapshot se nemění.
+
 **22. listopadu – aktuální návaznost:** [návrat po pauze a ruční dosahy](B4_DEV_ROLLOUT.md#news-pause-recovery-results)
 jsou ověřené v DEV (b57f6b9, news 6/active, feed 12). [Schválené zapojení pohybu](B4_DEV_ROLLOUT.md#movement-integration)
 je nasazené pouze v DEV z 78d6a3f / úplného CI 45077814590 success;

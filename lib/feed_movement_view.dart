@@ -15,6 +15,7 @@ class FeedMovementView<T> extends StatefulWidget {
     this.trailingSlivers = const [],
     this.refreshRevision = 0,
     this.clipBehavior = Clip.hardEdge,
+    this.onVisibleItem,
   });
   final List<T> items;
   final String Function(T) idOf;
@@ -24,6 +25,7 @@ class FeedMovementView<T> extends StatefulWidget {
   final List<Widget> leadingSlivers, trailingSlivers;
   final int refreshRevision;
   final Clip clipBehavior;
+  final ValueChanged<String?>? onVisibleItem;
 
   @override
   State<FeedMovementView<T>> createState() => _FeedMovementViewState<T>();
@@ -34,19 +36,71 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
   final _cards = <String, GlobalKey>{};
   String? _anchor;
   int _layout = 0;
+  bool _visibilityScheduled = false;
+  final _mountedCards = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_scheduleVisibility);
+  }
+
+  void _scheduleVisibility() {
+    if (!mounted || _visibilityScheduled || widget.onVisibleItem == null) {
+      return;
+    }
+    _visibilityScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityScheduled = false;
+      if (!mounted) return;
+      final viewport = context.findRenderObject();
+      if (viewport is! RenderBox || !viewport.hasSize) return;
+      final top = viewport.localToGlobal(Offset.zero).dy,
+          bottom = viewport.localToGlobal(Offset(0, viewport.size.height)).dy;
+      String? visible;
+      double? best;
+      // Only mounted lazy children, not the full historical list on every frame.
+      for (final id in _mountedCards) {
+        final box = _cards[id]?.currentContext?.findRenderObject();
+        if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+        final y = box.localToGlobal(Offset.zero).dy;
+        if (y + box.size.height > top &&
+            y < bottom &&
+            (best == null || y > best)) {
+          visible = id;
+          best = y;
+        }
+      }
+      widget.onVisibleItem?.call(visible);
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_scheduleVisibility);
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(covariant FeedMovementView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_scheduleVisibility);
+      widget.controller.addListener(_scheduleVisibility);
+    }
     if (oldWidget.refreshRevision != widget.refreshRevision) {
       _anchor = null;
       ++_layout;
       return;
     }
     final ids = widget.items.map(widget.idOf).toSet();
+    var appendedOnly = oldWidget.items.length <= widget.items.length;
+    for (var i = 0; appendedOnly && i < oldWidget.items.length; i++) {
+      appendedOnly =
+          widget.idOf(oldWidget.items[i]) == widget.idOf(widget.items[i]);
+    }
     if (!widget.controller.hasClients ||
-        oldWidget.revision == widget.revision &&
-            !oldWidget.items.any((item) => !ids.contains(widget.idOf(item)))) {
+        oldWidget.revision == widget.revision && appendedOnly) {
       return;
     }
     final viewport = context.findRenderObject();
@@ -102,6 +156,7 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
 
   @override
   Widget build(BuildContext context) {
+    _scheduleVisibility();
     if (widget.items.isEmpty) {
       return CustomScrollView(
         controller: widget.controller,
@@ -117,7 +172,11 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       final item = widget.items[index], id = widget.idOf(item);
       return KeyedSubtree(
         key: _cards.putIfAbsent(id, GlobalKey.new),
-        child: widget.card(item),
+        child: _MountedMovementCard(
+          id: id,
+          registry: _mountedCards,
+          child: widget.card(item),
+        ),
       );
     }
 
@@ -178,4 +237,34 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       ],
     );
   }
+}
+
+class _MountedMovementCard extends StatefulWidget {
+  const _MountedMovementCard({
+    required this.id,
+    required this.registry,
+    required this.child,
+  });
+  final String id;
+  final Set<String> registry;
+  final Widget child;
+  @override
+  State<_MountedMovementCard> createState() => _MountedMovementCardState();
+}
+
+class _MountedMovementCardState extends State<_MountedMovementCard> {
+  @override
+  void initState() {
+    super.initState();
+    widget.registry.add(widget.id);
+  }
+
+  @override
+  void dispose() {
+    widget.registry.remove(widget.id);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

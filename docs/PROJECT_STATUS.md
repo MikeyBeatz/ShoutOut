@@ -1,10 +1,20 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 22. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 23. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
+
+**Aktuální schválená oprava – místně hotová, zatím nenasazená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
+Klient při potvrzeném přesunu řadí nepřečtené/přečtené podle nové vzdálenosti,
+zachová viditelnou kotvu a vloží další serverové stránky na správná místa.
+Kurzor se průběžně dorovnává k viditelné části i přes stránky obsahující pouze
+již ponechané karty. 486 Flutter testů, analýza bez nálezů, 7 serverových
+regresí a cílený lint prošly. Serverové jádro/Rules/prostředky se nemění;
+následuje seskupený push/úplné CI a pouze DEV web, pak poslední ruční kontrola.
+Živá verze níže má dosavadní stabilní pořadí. Finální akceptace/úklid čekají.
 
 **Nyní nasazené a automaticky ověřené:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
 Zdroj **78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88**, [success úplné CI 45077814590](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45077814590).
@@ -13,8 +23,9 @@ staré revize retired, ostatních 19 Functions/Rules/prostředky zachované.
 Shodných 67 app souborů a 8 HTTP kontrol, serverFeedMovement true pouze DEV.
 Meze 30 s / 250 m + nejistota obou fixů, fix do 30 s a přesnost do 100 m.
 Automaticky ověřený je i první snímek, velké vložení/odebrání a návrat z pozadí;
-ruční UI/pohybová akceptace zatím neproběhla. [Jediný zbývající ruční průchod](plans/feed/B4_DEV_ROLLOUT.md#movement-manual-acceptance)
-je až na konci; po něm restart úklid 50 → původní A/B/C podle manifestů.
+vlastník následně potvrdil změnu vzdáleností a přibližný průběh pohybu, ale
+požádal o změnu pořadí (viz aktuální oprava výše). [Závěrečná ruční kontrola](plans/feed/B4_DEV_ROLLOUT.md#movement-order)
+je až na konci; po ní restart úklid 50 → původní A/B/C podle manifestů.
 Nástroj úklidu má místní/emulátorové testy a živý dry-run 50 kandidátů / 0 zápisů.
 C2 již uklizený: 1 zdroj / 0 read klíčů. Čerstvá inventura 91 zdrojů,
 38 původních a pending žádost zachované; feed control 12, news 6/active.
