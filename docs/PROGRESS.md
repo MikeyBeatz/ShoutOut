@@ -272,7 +272,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | feed-b4-delta-dev: B4 metadata/cache a kompatibilni prechod - nasazeni DEV | deployment | ✅ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results), [2](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
 | feed-b4-dev: Nasazení úsporné obnovy a novinek do DEV | deployment | ✅ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44959541907) |
 | feed-b4-delta-accept: B4 metadata/cache a prechod - ziva akceptace DEV | acceptance | ✅ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete) |
-| feed-b4-accept: Živá společná akceptace B4, baseline a novinek | acceptance | ⬜ | — |
+| feed-b4-accept: Živá společná akceptace B4, baseline a novinek | acceptance | ⬜ | [1](../docs/plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis) |
 | feed-auto-radius-code: Automatický dosah a nabídka rozšíření – klientská implementace | implementation | ✅ | [1](../lib/src/feed.dart), [2](../lib/src/home.dart), [3](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius) |
 | feed-auto-radius-check: Automatický dosah – automatické regrese | verification | ✅ | [1](../test/feed_automatic_radius_test.dart), [2](../test/spatial_feed_view_test.dart), [3](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812) |
 | feed-auto-radius-dev: Automatický dosah – DEV Hosting | deployment | ✅ | [1](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius), [2](../docs/operations/WEB_ENVIRONMENTS.md), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812) |
