@@ -659,6 +659,12 @@ je nyní nasazený ze 6bef37c / success úplné CI 45020677812, Hosting
 06df6da99db68e74. Backend i pilotní manifest zůstávají stejné. Při tomto
 B4b návratovém testu po obnově vydat nový Auto artefakt, nikoli znovu starý
 web 20206c4 uložený v b4b-dev-release; ten je pouze historický podklad.
+**Další fixture na žádost vlastníka:** 22. listopadu přibylo 50 samostatných
+„MVP restart 22.11.“ Shoutů; manifest docs/local/feed-restart-2026-11-22.json
+a [důkazy](FEED_DELTA_REFRESH_PLAN.md#automatic-radius). Nejsou součástí A/B/C
+slotů tohoto pilotu. Původních 38 zdrojů i A/B zůstaly beze změny; nový
+celkový počet zdrojů je 90. Neopakovat adopci B s původním limitem počtu
+zdrojů ani hromadný úklid podle prefixu; každý pilot má vlastní manifest.
 Podle živých důkazů je dokončené **feed-b4-dev**. Vlastník vytvořil
 **MVP B4b B 183ed3** pod TestBusiness: source
 84e4c14d44c679357231fb4993bf3b2ac6b381f3f89d16589f2022c4bdb98b20,

@@ -18,13 +18,22 @@ nálezů. Zdroj **6bef37c5af4410a3b87da9946005c70a71bbc1b6** má
 Hosting **06df6da99db68e74** je ověřený: 69 souborů (67 app + 2 Firebase),
 shoda gzip/raw hashů a 8 HTTP kontrol na obou DEV doménách. Backend zůstává
 níže uvedené B4b 20206c4. Vlastník dostal jediný UI průchod Auto → ručních
-5 km → nabídka rozšíření, bez nového seedu či mazání. **Průchod nyní hlásí
-„Feed se nepodařilo načíst“; akceptace je otevřená.** Poslední serverová
+5 km → nabídka rozšíření. **V novém anonymním okně vlastník potvrdil, že Auto
+feed funguje dobře.** Původní okno hlásilo chybu; jeho místní stav a přesná
+příčina zůstávají otevřené. Poslední serverová
 volání v 17:14 UTC mají HTTP 200 a Auth/App Check VALID. TestBusiness read
 meta zůstává revision 8 / 0 entries; lokálně je reprodukovaná blokace skutečné
 feed bariéry odloženou starou značkou, ale příčina v jeho prohlížeči není
-potvrzená. Vlastník dostal jednu kontrolu nového anonymního okna; zatím bez
-mazání IndexedDB/fronty nebo změn zdrojů. [Důkazy incidentu](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+potvrzená. Místní IndexedDB/fronty se nemazaly, zdroje aplikace se neměnily.
+**Na výslovnou žádost vznikla nová restartovací dávka:** 50 Shoutů
+„MVP restart 22.11. 001–050“ na 24 hodin, zvláštní manifest
+docs/local/feed-restart-2026-11-22.json. Všech 50 zdrojů a publicStates je
+ověřených; původních 40 zdrojů (včetně A/B) a 1 žádost mají původní updateTime.
+Čtecí příprava i následná atomická publikace přes společný writer tří generací
+plánovaly/provedly 110 zápisů včetně jednoho publication headu. Interní reader
+vrací 50 karet a další kurzor. Karty expirují 23. listopadu 18:23:34 CET.
+Zbývá vlastníkův restart test a ruční prázdný okruh/rozšíření; plnou Auto ani
+B4b akceptaci zatím nezavírat. [Důkazy a hranice](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
 Spojení pro Browser Use
 je nedostupné; tuto akceptaci nenahrazovat HTTP ověřením. Návratový web je
 ca327f10112ef349; po budoucím B4b rollback pilotu obnovit nynější Auto artefakt,

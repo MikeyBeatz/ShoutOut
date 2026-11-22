@@ -95,6 +95,43 @@ neuvolňovat podmínku potvrzeného pořadí bez konkrétního ověřeného ře�
 Aktuální diagnostické podklady: build/feed-automatic-radius-failure-inspect.log,
 build/feed-automatic-radius-failure-logs.json a build/feed-automatic-radius-barrier-diagnosis.log.
 Zdroj aplikace i živé prostředí se během této diagnózy neměnily.
+
+**Následná odpověď vlastníka:** v anonymním režimu vše funguje dobře;
+výslovně požádal o novou dávku Shoutů pro zavření/znovuotevření. To potvrzuje
+funkční čisté prostředí, nikoli konkrétní vadnou položku původní fronty.
+Bez smazání místního úložiště, přenastavení B2 nebo změn aplikace vzniklo
+nových **50** syntetických 24h Shoutů pod stávajícími dvěma testovacími účty,
+po 25 na účet, v okolí již používaného bodu Ústí. Nadpisy
+**MVP restart 22.11. 001–050**, kategorie Dotaz, bez promo/komentářů či předem
+vloženého přečtení. Platnost do 2026-11-23T17:23:34.481Z (18:23:34 CET).
+Jde o novou výslovně vyžádanou fixture dávku, nikoli rozšíření původních
+tří slotů ani opakování 120položkového pilotu.
+
+Kanonický manifest: docs/local/feed-restart-2026-11-22.json,
+digest e29b1bf9a97a82e44c467150b797f0df2d6a59900a9e0c45ce94bd054293ef74.
+Jednorázová provozní obálka build/restart-feed-fixtures.mjs používá beze změny
+publisher ze zdroje 20206c4 / úplné CI 44959541907 v čisté release kopii.
+Samotná obálka není vydávaný kód ani nově CI ověřený modul: před mutací
+prošla kontrolou syntaxe a čtecím dry-runem skutečného kompletního plánu;
+transakce dry-runu záměrně skončila před apply, žádné cloudové zápisy.
+Následná jediná atomická transakce vytvořila všech 50 zdrojů, index ve třech
+generacích, 50 publicStates a jeden oblastní head: celkem 110 zápisů / limit
+450. Kontrolovaly se digest, přesný DEV projekt, existující aktéři/blokace,
+inkarnace generací, řídicí stav a updateTime všech 40 existujících zdrojů i
+1 žádosti. Při částečném nebo již odstraněném fixture stavu obálka zakazuje
+obnovu chybějících zdrojů. Žádné Auth mutace, změny retence, Rules, Functions,
+Hostingu nebo produkce. B4b A/B i původní zdroje zůstaly beze změny.
+
+Po zápisu ověřeno 50 zdrojů / 50 publicStates a původní updateTime 40 zdrojů
+i žádosti. Interní reader vrací ready/50 a další kurzor, news kontext aktivní;
+nejde o UI či skutečnou callable akceptaci. Podklady: build/feed-restart-plan.log,
+build/feed-restart-dry-run.log, build/feed-restart-apply.log,
+build/feed-restart-status.log a build/feed-restart-page-check.log.
+Zbývá vlastníkův restart test a ruční rozšíření. Při testu přečtení před
+zavřením všech anonymních oken obnovit feed, aby se místní značky odeslaly;
+anonymní lokální úložiště se zavřením všech těchto oken zaniká. Pozdější úklid
+nové dávky musí použít její vlastní manifest a společný writer; nesmí zasáhnout
+A/B/C, původní obsah ani skutečné značky účtů. Do skončení testu nic neuklízet.
 Při následném B4b rollback pilotu znovu vydat nový ověřený Auto web; starý
 web v čisté b4b-dev-release je historický artefakt.
 Nový seed ani Auth účty nejsou potřeba. Přesný cíl je projekt/site
