@@ -143,8 +143,12 @@ právě 1 tělo a zachoval ID/verze/read skupiny celé stránky. Vše bez cloudo
 zápisů, skutečných uživatelských tokenů či změny jejich read značek. Podklad
 build/feed-final-read-proof.json / .log a provozní helper build/feed-final-read-proof.mjs.
 Nejde o cloudovou kapacitní/latency zkoušku, platný callable/UI průchod ani
-náhradu vlastníkovy akceptace. Restart a ruční rozšíření jsou znovu vyžádané;
-čekají také pozorované badge/pauza/návrat/C expirace a úklid. Kontrolované
+náhradu vlastníkovy akceptace. Vlastník následně na dotaz k restartu a
+ručnímu rozšíření potvrdil: „v anonymním okně to funguje dobře, v normálním
+stále ne“ a výslovně požádal diagnostiku běžného okna odložit. Anonymní
+Auto akceptace je uzavřená; běžné okno není opravené ani není prokázaná jeho
+příčina. IndexedDB/frontu nemažeme a B2 bariéru neuvolňujeme. Čekají
+pozorované badge/pauza/návrat/C expirace a úklid. Kontrolované
 zbývající přechody 3/4 ani 60s C zatím nespotřebovávat bez připraveného UI.
 Při následném B4b rollback pilotu znovu vydat nový ověřený Auto web; starý
 web v čisté b4b-dev-release je historický artefakt.

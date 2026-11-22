@@ -161,12 +161,37 @@ shoutout-rules-test prošlo s aktivní schemaVersion 2 / managed card projekcí:
 | reports create | Přímá tvorba Shout hlášení je povolená vedle serverové cesty. Základní validace existuje. | Do cutoveru zahrnout i commentReports/privateReplyReports; předem je konkrétně otestovat. |
 | privateReplies delete | Vlastní přímé smazání je povolené bez rate/receipt. | Samostatně navrhnout serverové mazání a zachování moderačního/archivního chování. |
 
-Návrh prvního navazujícího úseku byl předložen vlastníkovi: v managed režimu
+Vlastník první navazující úsek schválil: v managed režimu
 uzavřít jen create soukromých odpovědí, komentářové palce a create tří typů
 obsahových hlášení, otestovat existující serverové operace a po přesném CI
 nasadit pouze DEV Rules. Bez nových Auth účtů, živých testovacích zápisů,
 změn čtení, rolí, retence nebo produkce; přímé soukromé mazání a moderace
-zůstávají mimo tento první úsek. Do odpovědi jen průzkum, žádné úpravy Rules.
+zůstávají mimo tento první úsek.
+
+**Implementace cutoveru:** větev fix/managed-content-write-cutover doplňuje
+sedm zákazových podmínek podle přítomnosti feedIndexControl/current, stejně
+jako dosavadní Shout create. Platí také během building/paused a návratu na v1;
+bez řídicího dokumentu zůstává původní validovaný režim. Oproti další kontrole
+card generace tato existující pojistka nepřidává druhé čtení Rules a nepřekročí
+limit přístupů u soukromé tvorby. Čtení, role, moderátorské rozhodnutí a
+soukromé mazání se nemění. Web už používá createPrivateReply,
+toggleCommentReaction a createContentReport; Functions se nenasazují.
+
+Nová trvalá sada tools/rules/managed_content_cutover.integration.test.mjs
+má 11/11 úspěchů: building/active/paused/v1, všechny klientské role,
+anonymní klient, blokace/podvržené vlastnictví/rodič/typy/velikost,
+atomické odmítnutí reakce i samotného čítače bez spotřeby klientského limitu,
+serverová idempotence všech tří operací a přesné počty. Ověřuje také
+účastnické čtení a omezený dotaz soukromé konverzace, odmítnutí cizího čtení,
+zachované vlastní mazání a moderační čtení/rozhodnutí. Nepřítomný App Check
+server odmítá. Nejde o úplný audit všech Rules ani produkční kapacitní test.
+Širší regrese a přesné úplné CI před DEV nasazením ještě čekají.
+
+V metrice se dosud otevřených 88 jednotek content-remaining-authority dělí
+na tento cutover (implementace 15, ověření 15, DEV nasazení 14) a zbývající
+autoritu 44. Již hotové váhy a součet rodiče 10 000 se nemění; celé serverové
+kritérium tím není uzavřené. Živé ověření tohoto úseku je jen čtecí kontrola
+skutečně vydaných Rules, bez nových Auth účtů a testovacích zápisů.
 Podklady: firestore.rules (comments/reactions/privateReplies/reports),
 functions/create_private_reply.js, functions/toggle_comment_reaction.js,
 functions/create_content_report.js a dosavadní tools/rules/firestore.rules.test.mjs.

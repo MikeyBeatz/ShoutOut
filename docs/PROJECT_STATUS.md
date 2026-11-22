@@ -11,20 +11,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 emulátorových scénářů potvrdilo přímou soukromou tvorbu přes blokaci, samostatné
 komentářové palce bez čítače, přímé hlášení a vlastní soukromé mazání. Shout
 čítače / comment create jsou naopak správně uzavřené. DEV Rules mají shodu
-se zdrojem. Ke schválení je nyní předložen první cutover tří existujících
-serverových cest; mazání/moderace mají zůstat samostatným navazujícím úsekem.
-Zdrojové Rules ani živá data se při auditu neměnily; před odpovědí neimplementovat.
+se zdrojem. Vlastník schválil první cutover tří existujících serverových cest;
+implementace ve fix/managed-content-write-cutover má 11/11 cílených testů.
+Širší regrese/úplné CI čekají; poté pouze DEV Rules v shoutout-dev-46c81.
+Živá data se nemění. Soukromé mazání/moderace jsou samostatný další úsek.
 
 **Samostatná serverová kontrola závěrečného feedu prošla:** oba účty 50 + 2,
 52 jedinečných karet, jedna baseline přes stránky, potvrzené unread-first
 a warm 0 / refill 1 tělo. TestBusiness v tomto snapshotu 31 read / 21 unread,
 Bright_Otter 2 read / 50 unread. Čteno interním jádrem nad živým DEV bez
 zápisů; nejde o platformní callable ani UI akceptaci. Podklad
-build/feed-final-read-proof.json. Vlastník má vyžádané výsledky restartu a
-ručního rozšíření; C/pauzu/návrat ani úklid zatím neprovádět bez připraveného
-pozorujícího klienta. B4b/Auto/finální feed akceptace zůstávají otevřené.
+build/feed-final-read-proof.json. Vlastník potvrdil anonymní restart/Auto průchod;
+C/pauzu/návrat ani úklid zatím neprovádět bez připraveného pozorujícího klienta.
+B4b/finální feed akceptace zůstávají otevřené.
 
-**Auto hledání je nasazené v DEV; čeká živá akceptace.**
+**Auto hledání má potvrzený anonymní DEV průchod.**
 [Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius):
 výchozí prostorový dosah Auto/max. 50 km, pokrytí načtených karet a nabídka
 rozšíření prázdného ručního okruhu. Používá stávající serverový index/kurzor,
@@ -50,8 +51,10 @@ ověřených; původních 40 zdrojů (včetně A/B) a 1 žádost mají původní
 Čtecí příprava i následná atomická publikace přes společný writer tří generací
 plánovaly/provedly 110 zápisů včetně jednoho publication headu. Interní reader
 vrací 50 karet a další kurzor. Karty expirují 23. listopadu 18:23:34 CET.
-Zbývá vlastníkův restart test a ruční prázdný okruh/rozšíření; plnou Auto ani
-B4b akceptaci zatím nezavírat. [Důkazy a hranice](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+Vlastník po restartovací dávce znovu potvrdil fungující anonymní průchod.
+Původní běžné okno stále selhává; na jeho žádost je diagnostika odložená.
+Příčina uloženým stavem není prokázaná, IndexedDB/frontu nemažeme a B2
+bariéru neuvolňujeme. B4b akceptace zůstává samostatně otevřená. [Důkazy a hranice](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
 Spojení pro Browser Use
 je nedostupné; tuto akceptaci nenahrazovat HTTP ověřením. Návratový web je
 ca327f10112ef349; po budoucím B4b rollback pilotu obnovit nynější Auto artefakt,

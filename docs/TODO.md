@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,30 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,31 %** — vážené dokončení podúseků
 
-Hotové úseky: **169/225**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **171/228**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **200/303**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **201/303**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -60,9 +60,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    má success úplné CI 45020677812. DEV Hosting 06df6da99db68e74 je ověřený
    na obou doménách. Vlastník potvrdil fungující Auto v novém anonymním okně;
    původní místní problém není tím vyřešený. Na jeho žádost je připravených
-   50 nových 24h restartovacích Shoutů, oddělených od A/B/C pilotu. Čeká
-   restart a ruční prázdný okruh/rozšíření; neupravovat naslepo B2 ani nemazat
-   místní frontu. Po testech uklízet jen příslušný manifest, ne cizí data.
+   50 nových 24h restartovacích Shoutů, oddělených od A/B/C pilotu. Anonymní
+   restart/Auto průchod vlastník potvrdil; běžné okno stále selhává a jeho
+   diagnostiku výslovně odložil. Příčina není potvrzená; neupravovat naslepo
+   B2 ani nemazat místní frontu. Po testech uklízet jen příslušný manifest, ne cizí data.
    B4b akceptaci tím nezavírat; po jeho rollbacku obnovit nový Auto web.
    **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
    8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.
@@ -110,7 +111,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Připravený další úsek:** [audit zbývající obsahové autority](MVP_SERVER_PLAN.md#authority-audit)
    má pět emulátorových důkazů a shodu nasazených DEV Rules. První cutover
    přímých private create / comment reaction / content report create je
-   předložen ke schválení; zatím bez zdrojových úprav či DEV mutací.
+   schválený a implementovaný, 11/11 cílených testů prošlo. Širší regrese
+   a úplné CI čekají; pak pouze DEV Rules v shoutout-dev-46c81, bez živých
+   testovacích zápisů. Soukromé mazání a moderace zůstávají dalším úsekem.
 
 ## Hranice MVP
 

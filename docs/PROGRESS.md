@@ -93,7 +93,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
-| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 97,25 % | 124/129 |
+| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 97,51 % | 126/132 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
@@ -107,7 +107,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 
 | Položka | Dokončení | Úseky |
 |---|---:|---:|
-| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 98,43 % | 84/87 |
+| [bl-005: Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek. MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.](BACKLOG.md#bl-005) | 98,60 % | 85/87 |
 | [bl-019: Přepracovat onboarding na interaktivní tutorial. Po MVP *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*](BACKLOG.md#bl-019) | 25,00 % | 1/4 |
 | [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
 | [bl-048: MVP — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby jsou starší záznamy bezpečně nečitelné.](BACKLOG.md#bl-048) | 33,34 % | 1/3 |
@@ -276,7 +276,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | feed-auto-radius-code: Automatický dosah a nabídka rozšíření – klientská implementace | implementation | ✅ | [1](../lib/src/feed.dart), [2](../lib/src/home.dart), [3](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius) |
 | feed-auto-radius-check: Automatický dosah – automatické regrese | verification | ✅ | [1](../test/feed_automatic_radius_test.dart), [2](../test/spatial_feed_view_test.dart), [3](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812) |
 | feed-auto-radius-dev: Automatický dosah – DEV Hosting | deployment | ✅ | [1](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius), [2](../docs/operations/WEB_ENVIRONMENTS.md), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812) |
-| feed-auto-radius-accept: Automatický dosah – živá akceptace | acceptance | ⬜ | — |
+| feed-auto-radius-accept: Automatický dosah – živá akceptace | acceptance | ✅ | [1](../docs/plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius) |
 | feed-final-accept: Společná finální regrese celého nového feedu | acceptance | ⬜ | — |
 | expired-lock-code: Zámek běžných interakcí po expiraci – implementace | implementation | ✅ | [1](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions) |
 | expired-lock-check: Zámek běžných interakcí po expiraci – automatické ověření | verification | ✅ | [1](../docs/plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions) |
@@ -365,6 +365,9 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | shout-rules-cutover-check: Uzavření přímé tvorby a palců Shoutu – automatické ověření | verification | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
 | shout-rules-cutover-dev: Uzavření přímé tvorby a palců Shoutu – nasazení DEV | deployment | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni), [2](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
 | shout-rules-cutover-accept: Uzavření přímé tvorby a palců Shoutu – živá akceptace DEV | acceptance | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni) |
+| content-managed-cutover-code: Spravovaný feed – uzavření přímých odpovědí, reakcí a hlášení | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
+| content-managed-cutover-check: Uzavření přímých obsahových zápisů – regrese | verification | ⬜ | — |
+| content-managed-cutover-dev: Uzavření přímých obsahových zápisů – ověřené DEV Rules | deployment | ⬜ | — |
 | content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | — |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |

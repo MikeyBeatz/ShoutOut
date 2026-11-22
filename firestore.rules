@@ -10,6 +10,11 @@ rules_version = '2';
 // publicationHeads/{cell}: {v:1,token:UUID}; no identity/content/time/count.
 // Reserved _control is changed atomically with private control, not by posts.
 // feedNewsControl/current: private {v,revision,mode,generation,incarnation}.
+// While managed feed control exists, comment counters/reactions, private reply
+// creation and reports/commentReports/privateReplyReports creation are written
+// only by Admin callables. Their existing schemas/read/moderation rules below
+// remain valid; legacy validated writes apply only outside that managed state.
+// Private reply deletion is intentionally a separate lifecycle cutover.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -1673,6 +1678,7 @@ service cloud.firestore {
 
     match /reports/{reportId} {
       allow create: if eligibleUser() &&
+        !managedFeedProjection() &&
         !exists(
           /databases/$(database)/documents/moderationClearances/$('shout_' + request.resource.data.shoutId)
         ) &&
@@ -1709,6 +1715,7 @@ service cloud.firestore {
 
     match /commentReports/{reportId} {
       allow create: if eligibleUser() &&
+        !managedFeedProjection() &&
         !exists(
           /databases/$(database)/documents/moderationClearances/$('comment_' + request.resource.data.shoutId + '_' + request.resource.data.commentId)
         ) &&
@@ -1748,6 +1755,7 @@ service cloud.firestore {
 
     match /privateReplyReports/{reportId} {
       allow create: if eligibleUser() &&
+        !managedFeedProjection() &&
         !exists(
           /databases/$(database)/documents/moderationClearances/$('privateReply_' + request.resource.data.shoutId + '_' + request.resource.data.privateReplyId)
         ) &&
@@ -2179,6 +2187,7 @@ service cloud.firestore {
               /databases/$(database)/documents/shouts/$(shoutId)
             ).data.get('commentsCount', 0) + 1;
         allow update: if eligibleUser() &&
+          !managedFeedProjection() &&
           activeShout(shoutId) &&
           request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['likesCount', 'dislikesCount']) &&
@@ -2224,6 +2233,7 @@ service cloud.firestore {
 
           allow get: if eligibleUser() && userId == request.auth.uid;
           allow create, update: if eligibleUser() &&
+            !managedFeedProjection() &&
             userId == request.auth.uid &&
             activeShout(shoutId) &&
             commentParentSurvives() &&
@@ -2233,6 +2243,7 @@ service cloud.firestore {
             ) &&
             validCommentReactionData();
           allow delete: if eligibleUser() &&
+            !managedFeedProjection() &&
             userId == request.auth.uid &&
             activeShout(shoutId) &&
             commentParentSurvives() &&
@@ -2257,6 +2268,7 @@ service cloud.firestore {
             resource.data.recipientId == request.auth.uid
           );
         allow create: if canCreateContent() &&
+          !managedFeedProjection() &&
           activeShout(shoutId) &&
           consumedRate('privateReply', replyId) &&
           request.resource.data.keys().hasOnly([
