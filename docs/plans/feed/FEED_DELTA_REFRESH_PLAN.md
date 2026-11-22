@@ -11,10 +11,64 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 ## Cíl a ověřený výchozí stav
 
+<a id="automatic-radius"></a>
+
+### Automatický dosah – schválený úsek 22. listopadu
+
+Vlastník schválil přípravu až 50 vhodných Shoutů, rozšíření podle potřeby
+nejvýše do 50 km a nabídku rozšíření při prázdném ručně zvoleném okruhu.
+Současný serverový index již certifikuje stránku podle pořadí a prostorových
+mezí; není potřeba zavádět nové kolekce, dotazy pro každý mezikruh ani nový
+serverový kontrakt. Nepřečtené zůstávají před přečtenými; ostatní režimy si
+zachovávají vlastní řazení. Příprava správných 50 karet může prověřit více
+než 50 metadat, zvláště při dokazování konce nepřečtené skupiny.
+
+Konkrétní klientské chování:
+
+- Nová prostorová relace Home začíná v režimu **Auto (max. 50 km)**. První
+  stránka používá jediný kontext radiusKm=50 a stávající podepsané stránkování.
+  Existující přípravné pokračování, dávky 50, prefetch jedné stránky,
+  synchronizace B2, cache těl i kontrola dostupnosti zůstávají stejné.
+- Zobrazený údaj „Načtené Shouty do X km · automaticky až 50 km“ odvodí X
+  od nejvzdálenější dosud načtené karty a zaokrouhlí nahoru na stávající
+  nabídku 1/3/5/10/20/50. Jde o pokrytí výsledků, nikoli zúžení podepsaného
+  kontextu: nové publikace/číslovka i další stránky mají stále strop 50 km.
+  Tím změna zobrazeného X nevyvolává nový feed ani nepřehazuje scroll.
+- Ruční volba je pevný filtr. Pouze po úspěšně dokončeném prázdném výsledku
+  pod 50 km nabídnout „Hledat ve větším okolí?“ / „Hledat až do 50 km“.
+  Kliknutí přepne do Auto, zachová kategorii i řazení. Při chybě, čekání na
+  další stránku nebo chybějící poloze prázdné okolí netvrdit.
+- Ruční filtr se nepřepisuje během čekání. Nová relace i volba dosahu se
+  potvrdí společně až po úspěchu; neúspěch zachová dosavadní obsah/filtr.
+  Volba trvá v otevřené relaci Home, stejně jako dosavadní filtry; nová
+  trvalá preference ani ukládání polohy nevzniká.
+- Starší cesta bez serverSpatialFeed zůstává na dosavadním ručním dosahu.
+  Promo si zachovává nezávislou stávající hranici. Žádné Functions, Rules,
+  indexy, infrastruktura, retence nebo prostředky se tím nemění.
+
+Ověření: šest nových policy/gateway/widget scénářů a dosavadní prostorové,
+stránkovací a řadicí regrese – 38 různých testů prošlo. Příklad 25 položek do 20 km
+a dalších 175 do 50 km vrací 25 + 25; další stránka používá pouze kurzor,
+přednačtení nepřipojí karty předčasně. Widget ověřuje souhlas, nezměněné
+filtry, chybu oproti prázdnému okolí a změnu Auto → ruční. Doplněná kontrola
+320px obrazovky pro všechny podporované jazyky ve světlém/tmavém vzhledu
+prošla. Místní úplná sada před touto poslední kontrolou měla 461 úspěšných
+testů; konečná analýza bez nálezů a formát bez změn. Dokončené místní
+ověření není důkaz cloudové latence; delší čekání po Offline zatím změřené není.
+Podklady: test/feed_automatic_radius_test.dart, lib/src/feed.dart,
+lib/src/home.dart a build/feed-automatic-radius-regression.log.
+
+Zbývá přesné úplné CI, DEV Hosting a živé ověření na existujících A/B pilotu.
+Nový seed ani Auth účty nejsou potřeba. Přesný cíl je projekt/site
+shoutout-dev-46c81; produkce/main se nemění. B4b badge/pauza/návrat/úklid
+zůstávají samostatně otevřené. Stávající nedokončená finální feed váha se dělí
+na Auto implementaci/ověření/nasazení/akceptaci a původní závěrečnou regresi;
+žádná hotová váha se nemění a rodiče zůstávají na 10 000.
+
 **Aktualizace 22. listopadu:** [B4b je nasazené a aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results),
 20206c4 / úplné CI 44959541907 success. Funkce, indexy, Rules a Hosting
 ca327f10112ef349 jsou ověřené; news control 2/active, feed control 12/feed-v3.
-Živý pilot má zatím A, čeká skutečný klientský průchod a společná akceptace
+Živý pilot má A i skutečně publikovaný B, čeká společná akceptace
 včetně pauzy/návratu a úklidu. Celé B4 není uzavřené. Datované vypnuté
 konfigurace níže jsou předchozí přípravné checkpointy.
 

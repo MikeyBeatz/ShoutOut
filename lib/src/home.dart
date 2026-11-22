@@ -83,6 +83,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         WidgetsBinding.instance.lifecycleState == null ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _useSpatialFeed = kIsWeb && WebEnvironment.current.serverSpatialFeed;
+    _feedFilters.automaticRadius = _useSpatialFeed;
     _spatialGateway = FeedPageGateway(
       unreadFirst: kIsWeb && WebEnvironment.current.serverUnreadFeed,
       currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
@@ -502,7 +503,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       final context = SpatialFeedContext(
         latitude: position.latitude,
         longitude: position.longitude,
-        radiusKm: nextFilters.radius,
+        radiusKm: nextFilters.searchRadius,
         order: nextFilters.order.name,
         category: nextFilters.selectedCategory,
       );

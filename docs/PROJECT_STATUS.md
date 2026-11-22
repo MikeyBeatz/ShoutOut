@@ -6,6 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválené Auto hledání je připravené lokálně ve feature/feed-automatic-radius.**
+[Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius):
+výchozí prostorový dosah Auto/max. 50 km, pokrytí načtených karet a nabídka
+rozšíření prázdného ručního okruhu. Používá stávající serverový index/kurzor,
+bez nových Functions/Rules/dat. Šest nových testů + dosavadní cílené regrese
+(celkem 38 různých testů) prošlo, včetně úzké obrazovky/překladů.
+Místní celá sada před posledním layout testem měla 461 úspěchů; analýza bez
+nálezů. Čeká úplné CI, DEV web a živý průchod na existujícím A/B.
+Dosud nasazený web i backend jsou nadále níže uvedené B4b 20206c4.
+
 **B4b je [nasazené a aktivní v DEV](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results); živá akceptace pokračuje.**
 Zdroj **20206c4a4d8b186c54947c04212d6a4c6ec5625f** má
 [úspěšné úplné CI 44959541907](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44959541907).

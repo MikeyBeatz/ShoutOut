@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,29 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,30 %** — vážené dokončení podúseků
 
-Hotové úseky: **166/221**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **168/225**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,25 %** — vážené dokončení podúseků
 
-Hotové úseky: **197/299**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **199/303**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,6 +55,9 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
+   **Právě schválené Auto hledání:** [konkrétní chování a lokální výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+   Klientská příprava a 38 různých cílených regresí jsou hotové; následuje úplné CI,
+   pouze DEV Hosting a ověření stávajícím A/B pilotem. B4b akceptaci tím nezavírat.
    **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
    8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.
    [Živé důkazy nasazení](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results):

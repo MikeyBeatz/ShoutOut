@@ -4,6 +4,10 @@
 
 A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální laboratorní parametry nejsou provozní limity. Aktuální pořadí určuje implementační plán.
 
+Vlastník 22. listopadu schválil [Auto dosah/max. 50 km a nabídku rozšíření prázdného ručního okruhu](FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
+Klientské řešení a cílené testy jsou připravené; úplné CI, DEV Hosting a živá
+akceptace následují. Nejde o novou serverovou datovou vrstvu ani uzavření B4b.
+
 B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
 B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 B4 metadata/cache mají [uzavřenou DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#delta-acceptance-complete).

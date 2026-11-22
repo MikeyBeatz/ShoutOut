@@ -4,7 +4,7 @@
 Zdroj 20206c4 / úplné CI 44959541907 success, Hosting ca327f10112ef349 / serverFeedNews true.
 CreateShout revize createshout-00007-viz, getFeedPage getfeedpage-00005-res,
 news control 2/active a feed control 12/feed-v3. Indexy i Rules ověřené,
-prostředky/18 ostatních Functions/plánovače nezměněné. Pilot má zatím pouze A;
+prostředky/18 ostatních Functions/plánovače nezměněné. Pilot má A i skutečně publikovaný B;
 neoznačovat celé B4 za dokončené. Produkce/main nezměněné.
 
 **Aktuální DEV k 21. listopadu:** [B4 metadata/cache jsou nasazené](../plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results)

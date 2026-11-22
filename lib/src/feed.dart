@@ -3,7 +3,32 @@ part of '../main.dart';
 class FeedFilters {
   String? selectedCategory;
   double radius = 5;
+  bool automaticRadius = false;
   FeedOrder order = FeedOrder.nearest;
+
+  double get searchRadius => automaticRadius ? 50 : radius;
+
+  FeedFilters copy() => FeedFilters()
+    ..radius = radius
+    ..automaticRadius = automaticRadius
+    ..order = order
+    ..selectedCategory = selectedCategory;
+}
+
+const feedRadiusOptions = [1, 3, 5, 10, 20, 50];
+
+/// Presentation of the loaded page, never a replacement for its signed scope.
+/// A later page can extend this coverage without restarting the 50 km session.
+int? loadedFeedRadius(Iterable<double> distances) {
+  double? furthest;
+  for (final distance in distances) {
+    if (!distance.isFinite || distance < 0 || distance > 50) {
+      throw ArgumentError.value(distance, 'distance');
+    }
+    if (furthest == null || distance > furthest) furthest = distance;
+  }
+  if (furthest == null) return null;
+  return feedRadiusOptions.firstWhere((radius) => furthest! <= radius);
 }
 
 /// Apply at a new feed snapshot, not when personal read state changes mid-scroll.
@@ -198,10 +223,7 @@ class _FeedPageState extends State<FeedPage> {
       setState(() => change(widget.filters));
       return;
     }
-    final next = FeedFilters()
-      ..radius = widget.filters.radius
-      ..order = widget.filters.order
-      ..selectedCategory = widget.filters.selectedCategory;
+    final next = widget.filters.copy();
     change(next);
     spatial.changeFilters(next);
   }
@@ -256,6 +278,11 @@ class _FeedPageState extends State<FeedPage> {
         .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
         .toList();
     final shouts = visibleFeedShouts;
+    final automaticRadius =
+        widget.spatial != null && widget.filters.automaticRadius;
+    final coverage = automaticRadius
+        ? loadedFeedRadius(shouts.map((shout) => shout.distanceKm))
+        : null;
     final childIndices = {
       for (var i = 0; i < shouts.length; i++) shouts[i].id: i * 2,
     };
@@ -368,33 +395,73 @@ class _FeedPageState extends State<FeedPage> {
                                   Expanded(
                                     flex: 4,
                                     child: _CompactFilterDropdown<double>(
-                                      value: widget.filters.radius,
-                                      menuWidth: 104,
+                                      value: automaticRadius
+                                          ? 0
+                                          : widget.filters.radius,
+                                      menuWidth: 200,
                                       hint: tr(context, 'Vzdálenost'),
                                       prefixIcon: Icons.location_on_outlined,
                                       style: filterValueStyle,
                                       hintStyle: filterLabelStyle,
-                                      items: const [1, 3, 5, 10, 20, 50]
-                                          .map(
-                                            (value) => DropdownMenuItem(
-                                              value: value.toDouble(),
-                                              child: Center(
-                                                child: Text(
-                                                  '$value km',
-                                                  style: filterValueStyle,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                      items: [
+                                        if (widget.spatial != null)
+                                          DropdownMenuItem<double>(
+                                            value: 0,
+                                            child: Center(
+                                              child: Text(
+                                                tr(
+                                                  context,
+                                                  'Auto (max. 50 km)',
                                                 ),
+                                                style: filterValueStyle,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                          )
-                                          .toList(),
+                                          ),
+                                        ...feedRadiusOptions.map(
+                                          (value) => DropdownMenuItem(
+                                            value: value.toDouble(),
+                                            child: Center(
+                                              child: Text(
+                                                '$value km',
+                                                style: filterValueStyle,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      selectedItemBuilder: (context) => [
+                                        if (widget.spatial != null)
+                                          Center(
+                                            child: Text(
+                                              tr(context, 'Auto'),
+                                              style: filterValueStyle,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        for (final radius in feedRadiusOptions)
+                                          Center(
+                                            child: Text(
+                                              '$radius km',
+                                              style: filterValueStyle,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                      ],
                                       onChanged: (value) {
                                         if (value != null) {
-                                          _changeFilters(
-                                            (filters) => filters.radius = value,
-                                          );
+                                          _changeFilters((filters) {
+                                            filters.automaticRadius =
+                                                value == 0;
+                                            if (value != 0) {
+                                              filters.radius = value;
+                                            }
+                                          });
                                         }
                                       },
                                     ),
@@ -570,6 +637,18 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                 ),
               ),
+            if (automaticRadius && coverage != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Text(
+                    '${tr(context, 'Načtené Shouty do')} $coverage km · '
+                    '${tr(context, 'automaticky až 50 km')}',
+                    key: const ValueKey('feed-automatic-coverage'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ),
             if (!widget.isLoading &&
                 widget.spatial != null &&
                 widget.filters.order == FeedOrder.nearest &&
@@ -597,12 +676,32 @@ class _FeedPageState extends State<FeedPage> {
             else if (shouts.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: EmptyState(
-                  icon: Icons.location_off_outlined,
-                  title: tr(
-                    context,
-                    'V tomto okolí zatím nejsou žádné shouty.',
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    EmptyState(
+                      icon: Icons.location_off_outlined,
+                      title: tr(
+                        context,
+                        'V tomto okolí zatím nejsou žádné shouty.',
+                      ),
+                    ),
+                    if (widget.spatial != null &&
+                        !automaticRadius &&
+                        widget.filters.radius < 50) ...[
+                      Text(tr(context, 'Hledat ve větším okolí?')),
+                      const SizedBox(height: 12),
+                      FilledButton.tonal(
+                        key: const ValueKey('feed-expand-radius'),
+                        onPressed: widget.spatial!.refreshing
+                            ? null
+                            : () => _changeFilters((filters) {
+                                filters.automaticRadius = true;
+                              }),
+                        child: Text(tr(context, 'Hledat až do 50 km')),
+                      ),
+                    ],
+                  ],
                 ),
               )
             else
