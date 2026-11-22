@@ -999,8 +999,15 @@ stránky má 64 752–67 167 B nekomprimovaného JSON včetně dosavadních meta
 a completion/news tokenů. To zůstává prostor pro další optimalizaci,
 není to měření placených přenosů či produkční latence/5 000 souběžných relací.
 
-**Nasazení zatím neprovedeno:** po úspěšném úplném CI přesného commitu pouze
-Hosting shoutout-dev-46c81. Vrátit lze aktuální 346ea6fb1866da8e. Functions,
+**DEV nasazení ověřené:** zdroj **211471bbdb9df36fde9b233adb4149f2e45adfc8** má [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533).
+První běh 45066283784 zastavil formát jednoho testovacího řádku; opravený zdroj
+211471b prošel celým CI, nic z neúspěšného kandidáta se nenasadilo. Pouze
+Hosting shoutout-dev-46c81 je **3881ef4d17f67aa8**: ověřeno všech 67 app souborů
+podle hashů (69 v inventáři včetně rezervovaných Firebase) a 8 HTTP odpovědí
+na obou doménách. Rules 476d216c-9208-4e5c-9143-f583cb82a3e9 a všech 20
+Functions mají původní revize/prostředky. Podklady build/b4b-badge-ci-proof.json
+a build/b4b-badge-hosting-after.json. Vrátit lze **346ea6fb1866da8e**.
+Rozložení je ověřené widget testy; nový ruční UI průchod se zatím netvrdí. Functions,
 Rules, data, Auth, Scheduler a prostředky se v tomto úseku nemění. Žádné nové
 živé fixture. Dosavadní GPS hláška zatím zůstane; její odstranění by nyní
 předstíralo zapnuté automatické okolí. B4 pauza/návrat, kompatibilní web a

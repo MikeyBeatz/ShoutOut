@@ -1,5 +1,11 @@
 # Vývojový a produkční web
 
+**Aktuální DEV web – sjednocení číslovek 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
+Zdroj 211471bbdb9df36fde9b233adb4149f2e45adfc8, success úplné CI 45066405533, Hosting **3881ef4d17f67aa8**.
+Ověřeno 67 app souborů / 8 HTTP odpovědí. Rules a všech 20 Functions beze změny;
+návrat **346ea6fb1866da8e**. Automatický geografický přesun je pouze místní,
+Home/GPS jej nevolají a žádný serverový host jej nezapíná. Následující weby jsou historie.
+
 **Aktuální DEV web – napojení novinek 22. listopadu:** [důkazy a hranice](../plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results).
 Zdroj 34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43, success úplné CI 45060709344, Hosting
 **346ea6fb1866da8e**. Všech 69 souborů / 8 HTTP odpovědí odpovídá release artefaktu.

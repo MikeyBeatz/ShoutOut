@@ -6,16 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválený probíhající úsek:** [jednotné číslovky a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
-Sdílené vnější umístění obou badge je připravené, včetně 1/99+/teček a úzkého
-světlého/tmavého zobrazení. Lokální server/client přesun zachovává původní
-publikační hranici, přečtení, hodinový termín, R5 a kotvu; Home/GPS jej nevolají,
-serverová volba je false. 474 Flutter testů a analýza prošly, samostatná
-emulátorová regrese 5/5 a měření 50/200/2 000 zdrojů jsou zapsané. Připravený
-prototyp neurčuje živou četnost ani nové globální pořadí při pohybu.
-Další krok je společný push/úplné CI přesného commitu a pouze DEV Hosting
-s badge opravou. Nasazení této změny zatím neproběhlo; aktuální web je níže
-uvedený 346ea6fb1866da8e. Functions/Rules/data se v tomto úseku nemění.
+**Poslední dokončený úsek:** [jednotné číslovky + místní geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
+Zdroj **211471bbdb9df36fde9b233adb4149f2e45adfc8**, [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533),
+DEV Hosting **3881ef4d17f67aa8**. Ověřeny hashe 67 app souborů a 8 HTTP odpovědí;
+Rules i 20 Functions zůstaly beze změny, návratový web **346ea6fb1866da8e**.
+474 Flutter testů, analýza bez nálezů a emulátorové rebase regrese prošly.
+Obě plovoucí číslovky používají stejnou vnější kotvu. Pohyb je pouze místní
+prototyp: Home/GPS jej nevolají, serverová volba false, žádné Functions
+se nenasadily. Před aktivací určit četnost/přesnost a pořadí při pohybu;
+stabilita kotvy není důkaz úplného globálního pořadí nenačtených karet.
+Bez nových živých fixture/Auth či změn dat. Nová ruční UI akceptace se netvrdí.
+Další práce B4: pauza/návrat, kompatibilní web a úklid původních manifestů;
+hotovou kladnou/expirační akceptaci neopakovat. Metriky zůstávají 60,33 % MVP.
 
 **Poslední uzavřený obsahový úsek: přímé zápisy v managed feedu.**
 [Důkazy a hranice](MVP_SERVER_PLAN.md#authority-audit): soukromé odpovědi,

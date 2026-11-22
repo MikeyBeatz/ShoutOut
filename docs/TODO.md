@@ -97,8 +97,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    je uklizený a tento dílčí důkaz je započítaný. Hotový test neopakovat.
    Další [konkrétní návrh: zarovnání badge a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal)
    je schválený a [připravený lokálně](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results):
-   474 Flutter testů, analýza bez nálezů, rebase 5/5 v emulátoru; čeká společné
-   úplné CI a pouze DEV web s badge opravou. Živý pohyb zatím vypnutý.
+   474 Flutter testů, analýza bez nálezů a rebase regrese prošly. Zdroj
+   211471b / [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533)
+   je pouze na DEV Hostingu **3881ef4d17f67aa8**; soubory/HTTP ověřené, Functions
+   a Rules nezměněné. Živý pohyb zatím vypnutý.
    Místní data nemazat a další
    fixture nevytvářet naslepo. Pauza/návrat a původní úklid stále čekají. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
