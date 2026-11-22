@@ -1013,3 +1013,65 @@ Rules, data, Auth, Scheduler a prostředky se v tomto úseku nemění. Žádné 
 předstíralo zapnuté automatické okolí. B4 pauza/návrat, kompatibilní web a
 původní úklid nadále čekají. Oprava již hotových částí nepřidává novou váhu
 do stupnic; aktualizují se jejich důkazy, nikoli stav celé akceptace.
+
+<a id="news-pause-acceptance"></a>
+
+### Živá pauza a kompatibilní web – 22. listopadu
+
+V rámci původního souhlasu s B4b proběhla inventura: 92 zdrojů, 38 původních
+Shoutů a pending žádost se shodným updateTime, feed control 12, news control
+2/active, Hosting 3881ef4d17f67aa8. Browser access host zůstal nedostupný;
+vlastník ověřuje otevřený anonymní klient, nepoužívají se konzolové skripty.
+
+Původní operátor z čistého 20206c4 / success úplného CI 44959541907 provedl
+schválenou news revizi **3/paused**, 2 atomické zápisy včetně technického headu.
+Vlastník potvrdil zachované karty a funkční plovoucí obnovu/detail. Po ověření
+původního úspěšného úplného CI 44935555088 a neměnné Hosting verze byl krátce
+nasazen kompatibilní web **fa20f566fc0ab82b / 8b1de68 / news off**. Šest HTTP
+odpovědí na obou DEV doménách odpovídá uloženým hashům; B2/B3/delta zůstaly true.
+Vlastník po Ctrl+R a nastavení 50 km potvrdil funkční feed i detail.
+
+Následně je vrácen aktuální **3881ef4d17f67aa8 / 211471b / news on**, opět
+se success úplným CI 45066405533 a šesti ověřenými HTTP odpověďmi. Původní
+operátor přešel na **4/active**, znovu 2 atomické zápisy. Feed control zůstává
+12; Rules a všech 20 Functions/revizí/prostředků se nezměnily. Nevznikly nové
+fixture/Auth a zatím se nic neuklízelo. Potvrzení návratu aktuálního UI ještě
+čeká. Důkazy build/b4b-final-before.json, -paused.json, -rollback.json,
+-restored.json; build/b4b-compatible-plan.json a -verify-old/-verify-current.json.
+
+**Nově potvrzená mezera:** čerstvá stránka načtená během paused vrací karty,
+ale žádný newsCheckpoint ani newsSignals. FeedNewsBinding proto zruší runtime
+a po opětovné aktivaci není čím zachytit změnu control headu. Dva nezávislé
+místní diagnostické testy aktuálního serveru a složeného klienta tento stav
+potvrdily: karty zůstanou, ale i po simulovaných 61 s je 0 odběrů a 0 news
+požadavků. Samotná ruční obnova po návratu tento nedostatek maskuje.
+Podklady build/b4b-paused-page-diagnosis.json / -final.log a
+build/b4b-paused-attachment-diagnosis_test.dart / .log. Nejde o tvrzení, že je
+konkrétní uživatelův účet právě v chybném stavu. Nový automatický návrat se
+neoznačuje jako hotový a společná B4 akceptace zůstává otevřená.
+
+<a id="news-pause-recovery-proposal"></a>
+
+### Návrh opravy návratu po stránce načtené během pauzy
+
+- U platné paused generace zachovat podepsanou hranici novinek a obnovitelný
+  kontext bez oblastních odběrů. Využít stávající dávkovou cestu, ochranu
+  četnosti a dosavadní omezené opakování; žádný nový pollovací interval.
+  Po active znovu převzít hlavičky a počet bez resetu baseline, karet či B2.
+- Během paused dál zakázat samotný count a čtení regionálních headů. Neměnit
+  Rules, soukromý control, Auth/App Check, UID/generaci/R5 ani hodinovou retenci.
+  Off a neplatný stav nesmějí vznikem kontextu získat přístup. Souběh režimů,
+  změnu účtu, smazání, výpadek a expiraci ověřit v emulátoru a složeném klientu.
+- Připravit nový navazující digestovaný operační plán **active 4 → paused 5 →
+  active 6**, vázaný na čerstvé verze controlu a původní inkarnaci. Neprodlužovat
+  ani přepisovat historický pětipoložkový plán. Zachovat feed control 12,
+  původních 38 zdrojů a pending žádost; bez nových fixture/Auth.
+- Jeden společný commit/push a úplné CI; potom pouze DEV getFeedPage a případný
+  potřebný web. getFeedPage má nadále europe-west3, min0/max1, concurrency1,
+  256 MiB / 15 s. Automatický geografický rebase zůstane vypnutý, ostatní
+  Functions/Rules/plánovače/prostředky, produkce a main se nemění. Ověřit nový
+  scénář na stávajících testech a pak pokračovat k původnímu úklidu.
+
+Toto je nový konkrétní zdrojový rozsah, zatím předkládaný ke schválení podle
+AGENTS.md. Dosavadní souhlas pokrývá pilot a pauzu/návrat, ne automaticky každou
+nově nalezenou implementační opravu. Úspěšný test staršího webu tuto chybu neruší.

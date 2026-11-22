@@ -102,7 +102,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    je pouze na DEV Hostingu **3881ef4d17f67aa8**; soubory/HTTP ověřené, Functions
    a Rules nezměněné. Živý pohyb zatím vypnutý.
    Místní data nemazat a další
-   fixture nevytvářet naslepo. Pauza/návrat a původní úklid stále čekají. Společná finální
+   fixture nevytvářet naslepo. [Pauza a starší kompatibilní web prošly ruční kontrolou](plans/feed/B4_DEV_ROLLOUT.md#news-pause-acceptance);
+   současný web je vrácený, news **4/active**, bez změn zdrojů/Rules/Functions.
+   Čeká potvrzení vráceného UI a schválení [opravy návratu po načtení během pauzy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal).
+   Automatický návrat novinek ani původní úklid nejsou hotové. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),

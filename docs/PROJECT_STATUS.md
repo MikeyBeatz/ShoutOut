@@ -6,6 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Právě ověřená část B4:** [pauza a kompatibilní web](plans/feed/B4_DEV_ROLLOUT.md#news-pause-acceptance).
+Vlastník potvrdil funkční obnovu/detail při news 3/paused a také na dočasném
+starším webu fa20f566fc0ab82b bez news. Aktuální web 3881ef4d17f67aa8 je už
+vrácený, news control **4/active**, feed control 12; Rules a 20 Functions beze
+změny, 38 původních zdrojů/pending žádost zachované. Žádný úklid zatím neproběhl.
+Čeká potvrzení vráceného UI. Nové místní diagnostické testy potvrdily ztrátu
+news kontextu u stránky načtené během pauzy; samočinný návrat se proto netvrdí.
+[Konkrétní oprava a DEV průchod 5/paused → 6/active](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal)
+jsou předložené ke schválení. Do souhlasu jen průzkum/diagnostika; zdroje
+aplikace se zatím neměnily. Kompletní B4/finální feed akceptace zůstává otevřená.
+
 **Poslední dokončený úsek:** [jednotné číslovky + místní geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
 Zdroj **211471bbdb9df36fde9b233adb4149f2e45adfc8**, [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533),
 DEV Hosting **3881ef4d17f67aa8**. Ověřeny hashe 67 app souborů a 8 HTTP odpovědí;
@@ -39,12 +50,11 @@ Zdroj **34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43**, success úplné CI 450607093
 DEV Hosting **346ea6fb1866da8e** a jeho 67 app souborů / 8 HTTP kontrol jsou ověřené.
 Rules i všech 20 Functions beze změny; návratový web 06df6da99db68e74.
 
-**Další konkrétní návrh:** [sjednotit umístění číslovek a lokálně připravit geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal).
-Zvonkový badge nyní obaluje ikonu, refresh celý FAB; rozdíl je potvrzený.
-GPS hláška porovnává souřadnice bez tolerance. Pohyb má zatím jen lokální model
-(18 syntetických případů), žádné živé automatické přesouvání se nezapínalo.
-Vlastník nový rozsah schválil; místní výsledek je uvedený výše. Nepovažovat
-dosavadní hlášku za cílové chování.
+**Připomínky k badge a pohybu:** [schválený úsek je dokončený](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
+Oba plovoucí badge už obalují celý FAB; historický rozdíl ikonové kotvy je
+opravený. Serverový/klientský pohybový prototyp je místně ověřený, ale zůstává
+vypnutý. GPS hláška proto zatím používá dosavadní porovnání souřadnic;
+nepovažovat ji za cílové chování ani lokální prototyp za živou aktivaci.
 Společná B4b/finální feed akceptace zůstává otevřená: pauza/návrat, kompatibilní
 web a úklid původních manifestů. Neopakovat hotový kladný/expirační test.
 Běžné okno feedu je na žádost vlastníka odložené, bez smazání místní fronty.
