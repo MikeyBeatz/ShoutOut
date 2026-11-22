@@ -89,8 +89,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Vlastník našel Network / Offline; po obnovení připojení feed i změna dosahu
    fungují, přetrvávající prodleva zatím není změřená. Samostatně reprodukovaná
    blokace B2 odloženou značkou není potvrzenou příčinou tohoto incidentu.
-   Pokračovat v akceptaci číslovky; místní data nemazat,
-   C zatím nevytvářet. Nasazení je splněné,
+   [Pozdější C a jeden výslovně vyžádaný náhradní test](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis)
+   zatím akceptaci nesplnily: vlastník číslovku neviděl. Před dalším testem
+   je navržená [oprava napojení a lokální návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
+   Místní data nemazat a další fixture nevytvářet naslepo. Nasazení je splněné,
    společná akceptace zatím ne. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

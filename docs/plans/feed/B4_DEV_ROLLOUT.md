@@ -600,6 +600,9 @@ audit zbývající autority a kompletní produkční akceptaci podle serverovéh
 
 ## B4b – ověřené DEV nasazení 22. listopadu, otevřená akceptace
 
+**Aktuální překážka:** [živý test číslovky a diagnostika návratu/pohybu](#news-ui-diagnosis).
+Následující nasazovací důkazy zůstávají platné; UI akceptace tím není splněná.
+
 Zdroj **20206c4a4d8b186c54947c04212d6a4c6ec5625f** má
 [success úplné CI 44959541907](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44959541907).
 Ověřen přesný SHA, všechny požadované kroky a čistá pracovní kopie
@@ -714,3 +717,79 @@ nepřepisovaly souběžné checkpointy. Před refresh/reset testem zachovat pův
 Automatické ovládání okna ShoutOut zamítla URL bezpečnostní kontrola, proto
 další UI kroky vyžadují ruční pomoc. Feed-b4-accept a feed-final-accept
 zůstávají otevřené. Po jejich důkazech uklidit pouze manifestové sloty.
+
+<a id="news-ui-diagnosis"></a>
+
+## B4b – neúspěšná živá akceptace a diagnostika 22. listopadu
+
+Po potvrzení „sleduji“ vznikl původní C v 19:01:19.906 UTC s expirací
+19:02:19.906 UTC. Vlastník průběh nepozoroval a výslovně požádal „zkus to
+ještě jednou“. Tím povolil jednu náhradní fixture nad původní tři sloty;
+původnímu C se platnost neprodlužovala a původní manifest se nepřepisoval.
+Náhradní C mvp-b4b-repeat-15af0889caf1-C vznikl v 19:03:31.760 UTC a expiroval
+v 19:04:31.760 UTC. Opakování má samostatný manifest v čisté release kopii:
+build/b4b-dev-release/docs/local/b4b-c-repeat-2026-11-22.json,
+digest 9f91b10b72eebde76eaaf89e12574834285dbc6eee128e080bf1891ba37ea49b.
+Je v něm jen binding C; žádné nové A/B ani Auth účty nevznikly.
+
+**Výsledek je neúspěch, nikoli splněná expirace číslovky:** vlastník uvedl
+„nic se neobjevilo“. Potvrdil TestBusiness a viditelný „MVP restart 22.11. 025“;
+zobrazila se pouze hláška o změně polohy. Obě C byly čtením ověřené jako
+active během jejich platnosti, s publicStates v feed-v3, a následně expired.
+News control zůstal revision 2 / active. Původních 38 Shoutů a pending žádost
+mají zachované updateTime. Kód publisheru je beze změny z čistého zdroje
+20206c4 / success úplné CI 44959541907; potvrzené zápisy prošly společným writerem.
+
+Cloud Logging po 19:00 UTC obsahuje běžná getFeedPage volání s Auth/App Check
+VALID / HTTP 200, poslední v 19:00:52.302 UTC. Během obou C nebyl evidovaný
+další požadavek; TestBusiness feedNews quota má poslední update 17:17:23.355 UTC.
+Aktuální CDN app-config má serverFeedNews/serverDeltaFeed/serverSpatialFeed true.
+To podporuje chybějící spuštění klientského sledování; neprokazuje konkrétní
+stav otevřeného prohlížeče ani neopravňuje oslabit B2 bariéru.
+
+Lokální diagnostika složených stávajících komponent reprodukuje možný souběh:
+stránka je potvrzená v FeedSessionController, změna aktivity zruší dokončení
+hostu a jeho configure(newsSignals) se přeskočí. Návrat pak jen zavolá pulse
+na runtime bez kontextu: 0 odběrů / 0 news požadavků. Kontrolní opětovné
+napojení již potvrzené baseline spustí odběr i počet 1 bez změny karet.
+Jeden diagnostický test prošel; jde o reprodukovatelnou chybu životního cyklu,
+ne o důkaz, že přesně tento souběh nastal u vlastníka. Aplikační zdroje se neměnily.
+Podklady: build/b4b-home-resume-diagnosis_test.dart / .log,
+build/b4b-resume-preflight.json, build/b4b-news-failure-read.json,
+build/b4b-c-observe.json,
+build/b4b-c-expired-observe.json a b4b-c-repeat-active-observe.json /
+b4b-c-repeat-expired-observe.json. Samostatný opakovací wrapper
+build/b4b-repeat-c.mjs používá nezměněný ověřený publisher/cleanup operátor;
+nejde o nový aplikační modul. Další fixture bez konkrétní potřeby nevytvářet.
+
+**Upřesnění pohybu:** v _noticeSpatialMovement je skutečně přímé porovnání
+latitude/longitude bez tolerance či kontroly accuracy; hlášku proto může
+vyvolat GPS šum. Jde o kontrolu při návratu do aplikace, nikoli hotové
+automatické sledování jízdy. Vlastník požaduje automatické doplnění geograficky
+platných karet a odebrání těch mimo okolí bez opakované ruční obnovy při jízdě.
+Nové publikace mají dál čekat pod číslovkou; automatický pohyb nesmí bezděčně
+spotřebovat/resetovat jejich baseline. Toto nové upřesnění zaznamenat do návrhu,
+nepovažovat nynější upozornění za cílové chování.
+
+<a id="news-ui-fix-proposal"></a>
+
+### Navržený konkrétní další úsek
+
+1. Lokálně opravit koordinaci potvrzené feed baseline a news runtime při
+   návratu do popředí, změně karty a přerušení dokončení načtení. Připojit jen
+   aktuální projekt/účet/relaci, bez duplicitních odběrů a bez obnovení karet.
+   Ověřit přímo hosta, změnu účtu, výpadek a zánik obrazovky; diagnostický test
+   převést na trvalou regresi. Provozní četnost, prostředky i Rules se nemění.
+2. Současně navrhnout a na syntetickém pohybu lokálně ověřit automatickou
+   změnu okolí: odlišit přesnost GPS od skutečného přesunu, zachovat kotvu
+   scrollu a platné karty, využít existující index/cache a oddělit geografické
+   doplnění od nových publikací. Doložit dotazy/přenosy při stání, chůzi a jízdě
+   i vztah k B2 synchronizaci, read pořadí a starým kurzorům. Konkrétní meze
+   a provozní zapojení předložit po měření; bez změny trvalého ukládání polohy.
+
+Zatím jde o návrh ke konkrétnímu souhlasu podle AGENTS.md; aplikační opravu ani
+živé automatické geografické přepínání tento diagnostický checkpoint nezavádí.
+B4b/finální feed akceptace zůstávají false, bez nového procentního kreditu.
+Pauza/návrat, návratový web a úklid původního i náhradního manifestu čekají
+na funkční pozorující klient. Další testování nesmí přepsat novější DEV Rules
+476d216c-9208-4e5c-9143-f583cb82a3e9 ani vrátit starý web místo Auto artefaktu.

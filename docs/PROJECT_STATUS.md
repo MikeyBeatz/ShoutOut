@@ -17,10 +17,18 @@ Hosting 06df6da99db68e74 a všech 20 Functions zůstaly beze změny; bez nových
 Auth účtů a živých testovacích zápisů. Čtení, role, retence, moderace a vlastní
 soukromé mazání zůstávají zachované. Návratový ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2.
 
-**Další krok:** dokončit pozorovanou B4b číslovku/expiraci/pauzu/návrat a úklid
-schváleného pilotu s připraveným klientem. Samostatný další kódový návrh je
-serverové soukromé mazání a moderace; nový rozsah předem předložit vlastníkovi.
-Běžné okno feedu je na jeho žádost odložené, bez smazání místní fronty.
+**Další krok:** [oprava napojení novinek a návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
+Živý C test vlastník nepozoroval; na jeho výslovnou žádost vznikl jeden
+samostatný náhradní C na 60 s. U něj potvrdil „nic se neobjevilo“, TestBusiness
+a viditelný restart 025. Obě fixture jsou expirované, index/38 původních zdrojů
+a pending žádost ověřené; news stále 2/active. Během testu není evidovaný news
+požadavek. Jeden lokální test reprodukuje možnou ztrátu napojení při přerušení
+dokončení stránky; kontrolní rebind funguje. GPS hláška skutečně porovnává
+souřadnice bez tolerance. [Důkazy a konkrétní návrh](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis).
+Aplikační oprava čeká na souhlas; neskrývat neúspěch novou fixture ani jej
+nezapočítat do akceptace. Pauza/návrat/úklid zůstávají otevřené.
+Samostatný další serverový návrh je soukromé mazání/moderace. Běžné okno feedu
+je na žádost vlastníka odložené, bez smazání místní fronty.
 
 **Samostatná serverová kontrola závěrečného feedu prošla:** oba účty 50 + 2,
 52 jedinečných karet, jedna baseline přes stránky, potvrzené unread-first
