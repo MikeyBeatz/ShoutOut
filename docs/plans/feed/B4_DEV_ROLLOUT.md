@@ -1264,6 +1264,12 @@ ne měření účtu, cloudu ani přesnosti skutečné GPS. Reprodukce
 build/feed-movement-policy-simulation_test.dart, výstup
 build/feed-movement-policy-simulation.json; souhrn je také v připojeném měření.
 
+Dokumentační zdroj 3729a4b doplnil tento výsledek i do statického JSON měření.
+Současný tools/ci_scope.mjs považuje takový soubor za plný rozsah; následný
+nadbytečný běh 45079862014 byl úmyslně zrušen. Lokální check_docs/progress
+prošly, aplikace/artefakt zůstávají z 78d6a3f s úspěšným úplným CI. Selektor
+ani pravidla vydání se neměnila; dokumentační zdroj se nepoužívá pro rollout.
+
 <a id="movement-manual-acceptance"></a>
 
 ### Jediný čekající ruční průchod a následný úklid
