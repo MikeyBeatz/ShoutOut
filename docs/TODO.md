@@ -76,9 +76,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    indexy dokončené, news active / feed control 12, Rules/dvě Functions/drain ověřené,
    Hosting ca327f10112ef349 / news on. Pilotní A i B existují; B vznikl přes klienta
    TestBusiness s validním Auth/App Check a je adoptovaný. Interní count po B je 1.
-   **Nyní vyšetřit chybu načtení feedu / změny dosahu:** lokálně reprodukovaná
-   blokace B2 při odložené značce starého nedostupného obsahu je hypotéza pro
-   konkrétní prohlížeč; čeká porovnání s anonymním oknem. Místní data nemazat,
+   Vlastník našel Network / Offline; po obnovení připojení feed i změna dosahu
+   fungují, přetrvávající prodleva zatím není změřená. Samostatně reprodukovaná
+   blokace B2 odloženou značkou není potvrzenou příčinou tohoto incidentu.
+   Pokračovat v akceptaci číslovky; místní data nemazat,
    C zatím nevytvářet. Nasazení je splněné,
    společná akceptace zatím ne. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.

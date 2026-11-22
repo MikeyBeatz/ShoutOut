@@ -24,11 +24,12 @@ Před publikací B oběma účtům interní jádro
 vrací 1 kartu, news kontext s 36 heads a count 0 (30 SDK reads / 1 quota zápis).
 Nejde o validní callable/UI důkaz. Auth účty, produkce/main nezměněné.
 Po B vrací interní count běžnému účtu 1 (48 SDK reads); nejde o UI důkaz.
-**Akceptaci nyní blokuje chyba feedu:** vlastník hlásí neúspěšné načtení a změnu
-dosahu ponechanou na 5 km. Skutečná odpověď jádra prošla klientským parserem.
-Lokální diagnostický test reprodukuje blokaci obnovy při odložené B2 značce
-nedostupného starého obsahu; příčina v konkrétním prohlížeči zatím není potvrzená.
-Probíhá porovnání s novým anonymním oknem, bez mazání místních dat či změny kódu.
+**Vlastník následně zjistil Network / Offline:** po obnovení připojení feed
+funguje a dosah lze změnit, ale změna podle něj trvá dlouho. Prodleva zatím
+není změřená ani připsaná konkrétní fázi. Původní chybu nyní neopravovat
+uvolněním synchronizační podmínky. Lokální diagnostický test reprodukuje
+samostatné riziko odložené B2 značky nedostupného starého obsahu; není
+potvrzenou příčinou tohoto uživatelského incidentu. Bez změny aplikačního kódu.
 Podrobné důkazy a další krok jsou v [pilotním výsledku](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results).
 Zatím nevytvářet C: 60s okno začít až při připraveném pozorujícím klientu.
 Následuje ověření číslovky/odečtení/obnovy, otevřeného UI při pauze/návratu

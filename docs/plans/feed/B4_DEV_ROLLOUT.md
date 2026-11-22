@@ -685,8 +685,17 @@ b4b-user-failure-logs.json, b4b-fixture-b-adopt.log, b4b-bright-new-b.log,
 b4b-wire-diagnosis.log a b4b-deferred-diagnosis.log. Dva místní diagnostické
 testy prošly; nejde o novou úplnou CI ani o potvrzení příčiny v prohlížeči.
 
-Nejprve dokončit diagnózu, poté count/odebrání/expiraci, obnovu a otevřeného
-klienta při pauze/návratu. **C zatím nevytvářet**;
+**Následné upřesnění vlastníka:** Network bylo nastavené na Offline. Po
+obnovení připojení feed funguje a dosah se změnil; vlastník hlásí delší čekání,
+bez měření konkrétní délky či fáze. Předchozí hypotézu B2 nepovažovat za
+potvrzenou příčinu jeho chyby a neopravovat ji naslepo. Žádná změna kódu ani
+mazání místní fronty kvůli incidentu neproběhly. Při změně dosahu aktuální
+klient nejprve potvrzuje B2 synchronizaci pro Nejblíž, potom zakládá novou
+relaci s novým radiusKm; filtr zobrazí až po úspěchu. B4 cache těl zůstává
+v témže projektu/účtu použitelná, nejde o povinný opětovný přenos všech textů.
+
+Pokračovat count/odebrání/expirací, obnovou a otevřeným klientem při
+pauze/návratu. **C zatím nevytvářet**;
 60sekundové okno zahájit až při připraveném pozorujícím klientu.
 Pro interní kontexty používá build/b4b-core-probe.mjs oddělený soubor každého
 účtu (b4b-core-Bright_Otter_182.json a b4b-core-TestBusiness.json), aby se
