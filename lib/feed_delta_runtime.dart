@@ -83,6 +83,7 @@ class FeedDeltaRuntime {
       },
     );
     client = FeedDeltaClient(
+      newsRecovery: WebEnvironment.current.serverFeedNews,
       project: project,
       currentUserId: () => auth.currentUser?.uid,
       send: send,

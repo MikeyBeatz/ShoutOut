@@ -51,6 +51,43 @@ async function fixture(t, size = 50) {
   return f;
 }
 
+test('opt-in paused page retains recovery proof; legacy/off stay unchanged and count stays denied', {skip:!enabled},async t=>{
+  const f=await fixture(t,2);
+  const change=(revision,mode)=>db.runTransaction(async tx=>{(await prepareNewsControlChange(tx,db,{v:1,revision,mode,...f.binding})).apply();});
+  const page=async modern=>f.step({newsRecovery:modern,context:{point:f.point,radiusKm:50,order:'nearest',category:null},cold:false},{newsRuntimeEnabled:true});
+  await change(2,'paused');const modern=await page(true),legacy=await page(false);
+  assert.equal(modern.state,'ready');assert(modern.newsCheckpoint);assert.equal(modern.bodyPage.newsSignals.recovering,true);
+  assert.equal(modern.bodyPage.newsSignals.heads,null);assert.equal(legacy.newsCheckpoint,undefined);
+  assert.equal(legacy.bodyPage.newsSignals,undefined);
+  for(const mode of ['news','news-signals'])await assert.rejects(f.step({mode,checkpoint:modern.newsCheckpoint},{newsRuntimeEnabled:true}),e=>e.details?.reason==='news-paused');
+  assert.equal((await db.doc(`rateLimits/${f.uid}/actions/feedNews`).get()).exists,false);
+  await f.publish(77);await change(3,'active');
+  const signals=await f.step({mode:'news-signals',checkpoint:modern.newsCheckpoint},{newsRuntimeEnabled:true});
+  assert.equal(signals.signals.baseline,modern.baseline);assert(signals.signals.heads._control);
+  assert.equal(signals.signals.recovering,undefined);
+  assert.equal((await f.news(modern.newsCheckpoint,{newsRuntimeEnabled:true})).count,1);
+  await change(4,'off');const off=await page(true);assert.equal(off.newsCheckpoint,undefined);assert.equal(off.bodyPage.newsSignals,undefined);
+});
+
+test('recovery: pause racing historical signal capture strips regional heads at final confirmation', {skip:!enabled},async t=>{
+  const f=await fixture(t,2);let paused=false;
+  f.database=new Proxy(db,{get(target,name){
+    if(name==='runTransaction')return (run,...opts)=>target.runTransaction(tx=>run(new Proxy(tx,{get(real,method){
+      if(method==='getAll')return async(...refs)=>{
+        const result=await real.getAll(...refs);
+        if(!paused&&refs.some(ref=>ref.path?.includes('/publicationHeads/'))){
+          paused=true;await db.runTransaction(async writer=>{(await prepareNewsControlChange(writer,db,{v:1,revision:2,mode:'paused',...f.binding})).apply();});
+        }
+        return result;
+      };
+      return typeof real[method]==='function'?real[method].bind(real):real[method];
+    }})),...opts);
+    return typeof target[name]==='function'?target[name].bind(target):target[name];
+  }});
+  const result=await f.step({newsRecovery:true,context:{point:f.point,radiusKm:50,order:'nearest',category:null},cold:false},{newsRuntimeEnabled:true});
+  assert(paused);assert.equal(result.bodyPage.newsSignals.recovering,true);assert.equal(result.bodyPage.newsSignals.heads,null);assert(result.newsCheckpoint);
+});
+
 test('coverage includes every sampled circle point, empty cells, date line and polar fallback', () => {
   for (const point of [{ latitude: 50.08, longitude: 14.44 }, { latitude: 0, longitude: 179.999 }, { latitude: 89.999, longitude: 0 }, { latitude: -89.999, longitude: -180 }]) {
     for (const radius of [1, 3, 5, 10, 20, 50]) {

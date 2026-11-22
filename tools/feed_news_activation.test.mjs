@@ -4,6 +4,14 @@ import { planNewsIndexes, inspectNewsIndexes, newsIndexFields, newsProject, asse
 import { verifyNewsRevisionDrain, b4WriterFunctions } from './feed_revision_drain.mjs';
 import { requiredTransitionChecks } from './feed_generation_transition.mjs';
 import { requiredCardChecks } from './feed_card_transition.mjs';
+import { main as recovery } from './feed_news_recovery.mjs';
+
+test('recovery CLI rejects unsafe target/path or incomplete approval before opening credentials',async()=>{
+  const options={openDatabase(){throw Error('must-not-open');}};
+  await assert.rejects(recovery(['transition','--project',newsProject,'--plan','build/plan.json'],options),/explicit-approval/);
+  await assert.rejects(recovery(['plan','--project','shoutout-production-a1b34','--plan','build/plan.json'],options),/explicit-dev/);
+  await assert.rejects(recovery(['plan','--project',newsProject,'--plan','../outside.json'],options),/workspace/);
+});
 
 function fields() { return Object.fromEntries(newsIndexFields.map(p => {
   const name = `projects/${newsProject}/databases/(default)/collectionGroups/${p}`;

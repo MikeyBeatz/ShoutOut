@@ -2,34 +2,18 @@ part of '../main.dart';
 
 class FeedFilters {
   String? selectedCategory;
-  double radius = 5;
-  bool automaticRadius = false;
+  double radius = 50;
   FeedOrder order = FeedOrder.nearest;
 
-  double get searchRadius => automaticRadius ? 50 : radius;
+  double get searchRadius => radius;
 
   FeedFilters copy() => FeedFilters()
     ..radius = radius
-    ..automaticRadius = automaticRadius
     ..order = order
     ..selectedCategory = selectedCategory;
 }
 
 const feedRadiusOptions = [1, 3, 5, 10, 20, 50];
-
-/// Presentation of the loaded page, never a replacement for its signed scope.
-/// A later page can extend this coverage without restarting the 50 km session.
-int? loadedFeedRadius(Iterable<double> distances) {
-  double? furthest;
-  for (final distance in distances) {
-    if (!distance.isFinite || distance < 0 || distance > 50) {
-      throw ArgumentError.value(distance, 'distance');
-    }
-    if (furthest == null || distance > furthest) furthest = distance;
-  }
-  if (furthest == null) return null;
-  return feedRadiusOptions.firstWhere((radius) => furthest! <= radius);
-}
 
 /// Apply at a new feed snapshot, not when personal read state changes mid-scroll.
 List<Shout> orderedFeedShouts(
@@ -278,11 +262,6 @@ class _FeedPageState extends State<FeedPage> {
         .where((shout) => !shout.businessSpotlight || shout.businessHighlighted)
         .toList();
     final shouts = visibleFeedShouts;
-    final automaticRadius =
-        widget.spatial != null && widget.filters.automaticRadius;
-    final coverage = automaticRadius
-        ? loadedFeedRadius(shouts.map((shout) => shout.distanceKm))
-        : null;
     final childIndices = {
       for (var i = 0; i < shouts.length; i++) shouts[i].id: i * 2,
     };
@@ -395,30 +374,13 @@ class _FeedPageState extends State<FeedPage> {
                                   Expanded(
                                     flex: 4,
                                     child: _CompactFilterDropdown<double>(
-                                      value: automaticRadius
-                                          ? 0
-                                          : widget.filters.radius,
+                                      value: widget.filters.radius,
                                       menuWidth: 200,
                                       hint: tr(context, 'Vzdálenost'),
                                       prefixIcon: Icons.location_on_outlined,
                                       style: filterValueStyle,
                                       hintStyle: filterLabelStyle,
                                       items: [
-                                        if (widget.spatial != null)
-                                          DropdownMenuItem<double>(
-                                            value: 0,
-                                            child: Center(
-                                              child: Text(
-                                                tr(
-                                                  context,
-                                                  'Auto (max. 50 km)',
-                                                ),
-                                                style: filterValueStyle,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ),
                                         ...feedRadiusOptions.map(
                                           (value) => DropdownMenuItem(
                                             value: value.toDouble(),
@@ -434,15 +396,6 @@ class _FeedPageState extends State<FeedPage> {
                                         ),
                                       ],
                                       selectedItemBuilder: (context) => [
-                                        if (widget.spatial != null)
-                                          Center(
-                                            child: Text(
-                                              tr(context, 'Auto'),
-                                              style: filterValueStyle,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
                                         for (final radius in feedRadiusOptions)
                                           Center(
                                             child: Text(
@@ -456,11 +409,7 @@ class _FeedPageState extends State<FeedPage> {
                                       onChanged: (value) {
                                         if (value != null) {
                                           _changeFilters((filters) {
-                                            filters.automaticRadius =
-                                                value == 0;
-                                            if (value != 0) {
-                                              filters.radius = value;
-                                            }
+                                            filters.radius = value;
                                           });
                                         }
                                       },
@@ -637,18 +586,6 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                 ),
               ),
-            if (automaticRadius && coverage != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Text(
-                    '${tr(context, 'Načtené Shouty do')} $coverage km · '
-                    '${tr(context, 'automaticky až 50 km')}',
-                    key: const ValueKey('feed-automatic-coverage'),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ),
             if (!widget.isLoading &&
                 widget.spatial != null &&
                 widget.filters.order == FeedOrder.nearest &&
@@ -687,7 +624,6 @@ class _FeedPageState extends State<FeedPage> {
                       ),
                     ),
                     if (widget.spatial != null &&
-                        !automaticRadius &&
                         widget.filters.radius < 50) ...[
                       Text(tr(context, 'Hledat ve větším okolí?')),
                       const SizedBox(height: 12),
@@ -696,7 +632,7 @@ class _FeedPageState extends State<FeedPage> {
                         onPressed: widget.spatial!.refreshing
                             ? null
                             : () => _changeFilters((filters) {
-                                filters.automaticRadius = true;
+                                filters.radius = 50;
                               }),
                         child: Text(tr(context, 'Hledat až do 50 km')),
                       ),

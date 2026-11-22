@@ -13,11 +13,13 @@ class FeedDeltaClient {
     this.onContext,
     this.onBaseline,
     this.currentState,
+    this.newsRecovery = false,
   });
   final String project;
   final String? Function() currentUserId;
   final Future<Object?> Function(Map<String, Object?>) send;
   final FeedBodyCache cache;
+  final bool newsRecovery;
   final void Function(Map<String, dynamic>)? onContext;
   final void Function(String, Map<String, dynamic>, String)? onBaseline;
   final Map<String, dynamic>? Function(String, String)? currentState;
@@ -118,6 +120,7 @@ class FeedDeltaClient {
       'format': 'delta-v1',
       'expectedUserId': uid,
       'cold': cache.isEmpty,
+      if (newsRecovery) 'newsRecovery': true,
     });
     guard();
     if (response is! Map) throw const FormatException('Invalid delta reply');
@@ -280,6 +283,13 @@ class FeedDeltaClient {
       throw const FormatException('Invalid signal work');
     }
     result.readUnits = reads;
+    final previous = _newsBaselines[result.baseline];
+    if (previous != null) {
+      if (previous.scopeStamp != result.scopeStamp) {
+        throw const FormatException('Foreign recovered news context');
+      }
+      _newsBaselines[result.baseline] = result;
+    }
     return result;
   }
 

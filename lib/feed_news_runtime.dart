@@ -13,10 +13,13 @@ class FeedNewsSignals {
     : baseline = value['baseline'] as String,
       generation = value['generation'] as String,
       incarnation = List<int>.from(value['incarnation'] as List),
+      recovering = value['recovering'] == true,
       heads = value['heads'] == null
           ? null
           : Map<String, String?>.from(value['heads'] as Map) {
     if (value['v'] != 1 ||
+        value.containsKey('recovering') && value['recovering'] is! bool ||
+        recovering && heads != null ||
         baseline.isEmpty ||
         !RegExp(r'^[a-z][a-z0-9-]{0,39}$').hasMatch(generation) ||
         incarnation.length != 2 ||
@@ -40,9 +43,11 @@ class FeedNewsSignals {
   }
   final String baseline, generation;
   final List<int> incarnation;
+  final bool recovering;
   final Map<String, String?>? heads;
   int? readUnits;
-  String get stamp => '$baseline:$generation:${incarnation.join(':')}';
+  String get scopeStamp => '$baseline:$generation:${incarnation.join(':')}';
+  String get stamp => '$scopeStamp:$recovering';
 }
 
 /// Host-controlled, active-view-only runtime. No transport, timers or listeners
@@ -277,6 +282,15 @@ class FeedNewsRuntime {
     final epoch = _epoch, context = _context!;
     _flight = true;
     try {
+      if (context.recovering) {
+        final result = await readHeads();
+        if (epoch != _epoch || !_active || _disposed) return;
+        if (result.scopeStamp != context.scopeStamp || result.recovering) {
+          throw const FormatException('Foreign news recovery context');
+        }
+        configure(result);
+        return;
+      }
       if (_trial && _now() >= _trialEnd) {
         // Include initial subscription reads, seven Rules dependencies and a
         // projection of subsequent updates over the same 60-second window.

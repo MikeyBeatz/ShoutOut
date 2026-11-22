@@ -13,6 +13,12 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 <a id="automatic-radius"></a>
 
+**Novější rozhodnutí vlastníka 22. listopadu:** připravit pouze ruční volby
+1/3/5/10/20/50 km, výchozí 50 km. Duplicitní Auto a text o dosahu načtených
+karet se odstraňují. Oba dřívější režimy používaly stejný serverový rozsah
+50 km a stejné stránkování. [Aktuální příprava a nasazení](B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+Následující návrh a rollout Auto uchovávají historii, neurčují novou cílovou UI.
+
 ### Automatický dosah – schválený úsek 22. listopadu
 
 Vlastník schválil přípravu až 50 vhodných Shoutů, rozšíření podle potřeby

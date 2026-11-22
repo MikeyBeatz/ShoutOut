@@ -131,7 +131,7 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
       context: { ...context, kind: 'complete' }, now: context.startedAt });
     let newsSignals = null;
     if (newsEnabled && newsRuntimeEnabled && !context.presentation) {
-      try { newsSignals = await captureNewsSignals(request, db, context, { historical: true, clock }); }
+      try { newsSignals = await captureNewsSignals(request, db, context, { historical: true, clock, allowPaused: context.newsRecovery === true }); }
       catch (error) {
         if (!['news-paused', 'news-off', 'invalid-news-control'].includes(error.details?.reason)) throw error;
       }
@@ -152,7 +152,8 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
     // of the original signed view, not a refresh or a new publication cutoff.
     if (input.mode === 'recenter') {
       if (!recenterEnabled) fail('failed-precondition', 'Feed movement is not enabled.');
-      if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'token', 'point', 'cold'].includes(k)) ||
+      if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'token', 'point', 'cold', 'newsRecovery'].includes(k)) ||
+          input.newsRecovery !== undefined && typeof input.newsRecovery !== 'boolean' ||
           typeof input.cold !== 'boolean' || !input.point ||
           Object.keys(input.point).some(k => !['latitude', 'longitude'].includes(k)) ||
           !Number.isFinite(input.point.latitude) || Math.abs(input.point.latitude) > 90 ||
@@ -181,7 +182,8 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
       const baseline = bodyDigest([prior.binding, snapshot]);
       const cursor = feedCursorCodec({ key: cursorKey }).start({ uid, project: db.projectId,
         readTime: snapshot.readTime, context: { snapshot, binding: prior.binding, baseline }, now: parent.startedAt });
-      return await getFeedDeltaOperation({ ...request, data: { format: 'delta-v1', expectedUserId: uid, cursor, cold: input.cold } }, db,
+      return await getFeedDeltaOperation({ ...request, data: { format: 'delta-v1', expectedUserId: uid, cursor, cold: input.cold,
+        ...(input.newsRecovery === true ? { newsRecovery: true } : {}) } }, db,
         { key, enabled, clock, workNodes, readOrdering, observeMetrics, preserveRetiredCursor, newsEnabled, newsRuntimeEnabled, recenterEnabled });
     }
     if (['news', 'news-signals'].includes(input.mode)) return await getFeedNewsOperation(request, db, { key, enabled: newsEnabled, runtime: newsRuntimeEnabled, clock, workNodes, observeMetrics });
@@ -227,7 +229,8 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
       const bodyPage = await finish(context, input.cold ? context.rows.map(row => row.id) : []);
       return bodyPage.redirect ? reset(bodyPage.redirect) : { version: 2, state: 'ready', baseline: context.baseline, expiresAt: context.expiresAt, next: null, bodyPage };
     }
-    if (input.mode !== undefined || Object.keys(input).some(k => !['format', 'expectedUserId', 'context', 'cursor', 'cold'].includes(k)) ||
+    if (input.mode !== undefined || Object.keys(input).some(k => !['format', 'expectedUserId', 'context', 'cursor', 'cold', 'newsRecovery'].includes(k)) ||
+        input.newsRecovery !== undefined && typeof input.newsRecovery !== 'boolean' ||
         typeof input.cold !== 'boolean') fail('invalid-argument', 'Invalid delta request.');
     const data = { expectedUserId: uid, ...(input.cursor ? { cursor: input.cursor } : { context: input.context }) };
     return await getFeedPageOperation({ ...request, data }, db, { key: cursorKey, clock, workNodes, readOrdering,
@@ -239,6 +242,7 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
       onSelected: async ({ snapshot, binding, decoded, rows, baseline, reading, readIds, next }) => {
         const selected = rows.map(row => routeOf({ ...row, read: reading && readIds.has(row.id) }));
         const context = { snapshot, binding, rows: selected, baseline, reading,
+          ...(input.newsRecovery === true ? { newsRecovery: true } : {}),
           startedAt: decoded.startedAt, expiresAt: decoded.expiresAt };
         const bodyPage = await finish(context, input.cold ? selected.map(row => row.id) : []);
         if (bodyPage.redirect) return reset(bodyPage.redirect);

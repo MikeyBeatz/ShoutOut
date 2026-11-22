@@ -11,11 +11,15 @@ Vlastník potvrdil funkční obnovu/detail při news 3/paused a také na dočasn
 starším webu fa20f566fc0ab82b bez news. Aktuální web 3881ef4d17f67aa8 je už
 vrácený, news control **4/active**, feed control 12; Rules a 20 Functions beze
 změny, 38 původních zdrojů/pending žádost zachované. Žádný úklid zatím neproběhl.
-Čeká potvrzení vráceného UI. Nové místní diagnostické testy potvrdily ztrátu
+Vlastník potvrdil vrácené UI, feed a detail pod TestBusiness. Místní testy potvrdily ztrátu
 news kontextu u stránky načtené během pauzy; samočinný návrat se proto netvrdí.
 [Konkrétní oprava a DEV průchod 5/paused → 6/active](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal)
-jsou předložené ke schválení. Do souhlasu jen průzkum/diagnostika; zdroje
-aplikace se zatím neměnily. Kompletní B4/finální feed akceptace zůstává otevřená.
+jsou výslovně schválené a [připravené místně](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results):
+474 Flutter / 100 tools testů, analýza bez nálezů, recovery emulátorové regrese.
+Součástí je schválené zjednodušení dosahů na ruční 1–50 km, výchozí 50, bez
+Auto a textu o dosahu načtených karet. Zatím bez nasazení; následuje společné
+úplné CI, pouze DEV getFeedPage + web a průchod pauzou 5 → návrat 6 bez nových
+fixture/Auth. Rules, prostředky a živý pohyb se nemění. Společná B4 akceptace je otevřená.
 
 **Poslední dokončený úsek:** [jednotné číslovky + místní geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
 Zdroj **211471bbdb9df36fde9b233adb4149f2e45adfc8**, [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533),

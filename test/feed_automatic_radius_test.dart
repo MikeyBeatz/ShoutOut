@@ -22,7 +22,7 @@ Map<String, dynamic> row(int id, double distance) => {
 
 void main() {
   testWidgets(
-    'automatic range and expansion fit a narrow view in every supported language',
+    'manual range and expansion fit a narrow view in every supported language',
     (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;
@@ -49,7 +49,7 @@ void main() {
                   onSave: (_) {},
                   onReaction: (_, {required bool like}) async {},
                   onNotifications: () {},
-                  filters: FeedFilters()..automaticRadius = automatic,
+                  filters: FeedFilters()..radius = automatic ? 50 : 5,
                   followedUserIds: const {},
                   showNotifications: false,
                   spatial: SpatialFeedPresentation(
@@ -77,35 +77,22 @@ void main() {
       }
     },
   );
-  test(
-    'automatic search uses the existing 50 km bound and preserves filters',
-    () {
-      final manual = FeedFilters()
-        ..radius = 5
-        ..selectedCategory = 'Dotaz'
-        ..order = FeedOrder.popular;
-      final automatic = manual.copy()..automaticRadius = true;
-      expect(manual.searchRadius, 5);
-      expect(automatic.searchRadius, 50);
-      expect(
-        automatic.radius,
-        5,
-      ); // A remembered manual value is not the scope.
-      expect(automatic.selectedCategory, 'Dotaz');
-      expect(automatic.order, FeedOrder.popular);
-      expect((automatic.copy()..automaticRadius = false).searchRadius, 5);
-    },
-  );
-
-  test('coverage is a display range over all loaded rows, not their order', () {
-    expect(loadedFeedRadius([]), isNull);
-    expect(loadedFeedRadius(List.filled(50, .8)), 1);
-    expect(loadedFeedRadius([20, .5, 4]), 20);
-    expect(loadedFeedRadius([20.0001, .5]), 50);
-    expect(loadedFeedRadius([50]), 50);
-    for (final invalid in [double.nan, double.infinity, -1.0, 50.01]) {
-      expect(() => loadedFeedRadius([invalid]), throwsArgumentError);
-    }
+  test('default is 50 km; manual copies preserve category and ordering', () {
+    expect(FeedFilters().radius, 50);
+    final manual = FeedFilters()
+      ..radius = 5
+      ..selectedCategory = 'Dotaz'
+      ..order = FeedOrder.popular;
+    final automatic = manual.copy()..radius = 50;
+    expect(manual.searchRadius, 5);
+    expect(automatic.searchRadius, 50);
+    expect(
+      automatic.radius,
+      50,
+    ); // The copied radius is the actual server scope.
+    expect(automatic.selectedCategory, 'Dotaz');
+    expect(automatic.order, FeedOrder.popular);
+    expect((automatic.copy()..radius = 5).searchRadius, 5);
   });
 
   test('one 50 km selection pages without repeated radius searches', () async {
@@ -138,7 +125,7 @@ void main() {
     );
     addTearDown(session.dispose);
     addTearDown(gateway.dispose);
-    final filters = FeedFilters()..automaticRadius = true;
+    final filters = FeedFilters()..radius = 50;
     await session.refresh(
       SpatialFeedContext(
         latitude: 50,
@@ -169,6 +156,7 @@ void main() {
       final scroll = ScrollController();
       addTearDown(scroll.dispose);
       final filters = FeedFilters()
+        ..radius = 5
         ..selectedCategory = 'Dotaz'
         ..order = FeedOrder.popular;
       FeedFilters? requested;
@@ -188,9 +176,7 @@ void main() {
             onSave: (_) {},
             onReaction: (_, {required bool like}) async {},
             onNotifications: () {},
-            filters: automatic
-                ? (filters.copy()..automaticRadius = true)
-                : filters,
+            filters: automatic ? (filters.copy()..radius = 50) : filters,
             followedUserIds: const {},
             showNotifications: false,
             spatial: SpatialFeedPresentation(
@@ -215,14 +201,11 @@ void main() {
       expect(requested, isNull);
       await tester.ensureVisible(expand);
       await tester.tap(expand);
-      expect(requested?.automaticRadius, isTrue);
+      expect(requested?.radius, 50);
       expect(requested?.searchRadius, 50);
       expect(requested?.selectedCategory, 'Dotaz');
       expect(requested?.order, FeedOrder.popular);
-      expect(
-        filters.automaticRadius,
-        isFalse,
-      ); // Commit only after successful load.
+      expect(filters.radius, 5); // Commit only after successful load.
       for (final child in [
         view(more: true),
         view(message: 'Feed se nepodařilo načíst. Zkus to znovu.'),
@@ -241,11 +224,11 @@ void main() {
   );
 
   testWidgets(
-    'automatic coverage grows with pages; choosing a radius becomes manual',
+    'coverage banner and duplicate Auto are absent; manual choice is committed later',
     (tester) async {
       final scroll = ScrollController();
       addTearDown(scroll.dispose);
-      final filters = FeedFilters()..automaticRadius = true;
+      final filters = FeedFilters()..radius = 50;
       FeedFilters? requested;
       Widget view(List<Shout> rows) => MaterialApp(
         locale: const Locale('cs'),
@@ -278,8 +261,8 @@ void main() {
       await tester.pumpWidget(view([decodeSpatialFeedItem(row(1, 15))]));
       await tester.pumpAndSettle();
       expect(
-        find.text('Načtené Shouty do 20 km · automaticky až 50 km'),
-        findsOneWidget,
+        find.byKey(const ValueKey('feed-automatic-coverage')),
+        findsNothing,
       );
       await tester.pumpWidget(
         view([
@@ -289,16 +272,18 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.text('Načtené Shouty do 50 km · automaticky až 50 km'),
-        findsOneWidget,
+        find.byKey(const ValueKey('feed-automatic-coverage')),
+        findsNothing,
       );
       await tester.tap(find.byType(DropdownButton<double>));
       await tester.pumpAndSettle();
+      expect(find.text('Auto'), findsNothing);
+      expect(find.text('Auto (max. 50 km)'), findsNothing);
       await tester.tap(find.text('3 km').last);
       await tester.pumpAndSettle();
-      expect(requested?.automaticRadius, isFalse);
+      expect(requested?.radius, 3);
       expect(requested?.searchRadius, 3);
-      expect(filters.automaticRadius, isTrue);
+      expect(filters.radius, 50);
       expect(tester.takeException(), isNull);
     },
   );

@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,33 %** — vážené dokončení podúseků
 
-Hotové úseky: **174/229**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **175/230**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **202/304**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **203/305**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -104,7 +104,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Místní data nemazat a další
    fixture nevytvářet naslepo. [Pauza a starší kompatibilní web prošly ruční kontrolou](plans/feed/B4_DEV_ROLLOUT.md#news-pause-acceptance);
    současný web je vrácený, news **4/active**, bez změn zdrojů/Rules/Functions.
-   Čeká potvrzení vráceného UI a schválení [opravy návratu po načtení během pauzy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal).
+   Vlastník potvrdil návrat UI pod TestBusiness a schválil [opravu návratu po načtení během pauzy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal).
+   [Místní příprava je ověřená](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results); čeká přesné úplné CI a DEV
+   getFeedPage + web. Schválené UI odstraní Auto i údaj o načteném dosahu;
+   ruční rozsahy 1–50 km budou začínat na 50 km.
    Automatický návrat novinek ani původní úklid nejsou hotové. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

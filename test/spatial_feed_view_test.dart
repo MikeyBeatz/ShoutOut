@@ -517,7 +517,7 @@ void main() {
       await tester.tap(find.text('10 km').last);
       await tester.pumpAndSettle();
       expect(requested?.radius, 10);
-      expect(filters.radius, 5);
+      expect(filters.radius, 50);
       expect(tester.takeException(), isNull);
     },
   );

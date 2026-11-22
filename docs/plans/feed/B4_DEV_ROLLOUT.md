@@ -1035,8 +1035,8 @@ Následně je vrácen aktuální **3881ef4d17f67aa8 / 211471b / news on**, opět
 se success úplným CI 45066405533 a šesti ověřenými HTTP odpověďmi. Původní
 operátor přešel na **4/active**, znovu 2 atomické zápisy. Feed control zůstává
 12; Rules a všech 20 Functions/revizí/prostředků se nezměnily. Nevznikly nové
-fixture/Auth a zatím se nic neuklízelo. Potvrzení návratu aktuálního UI ještě
-čeká. Důkazy build/b4b-final-before.json, -paused.json, -rollback.json,
+fixture/Auth a zatím se nic neuklízelo. Vlastník potvrdil také návrat aktuálního
+UI, feed a detail pod TestBusiness. Důkazy build/b4b-final-before.json, -paused.json, -rollback.json,
 -restored.json; build/b4b-compatible-plan.json a -verify-old/-verify-current.json.
 
 **Nově potvrzená mezera:** čerstvá stránka načtená během paused vrací karty,
@@ -1072,6 +1072,42 @@ neoznačuje jako hotový a společná B4 akceptace zůstává otevřená.
   Functions/Rules/plánovače/prostředky, produkce a main se nemění. Ověřit nový
   scénář na stávajících testech a pak pokračovat k původnímu úklidu.
 
-Toto je nový konkrétní zdrojový rozsah, zatím předkládaný ke schválení podle
-AGENTS.md. Dosavadní souhlas pokrývá pilot a pauzu/návrat, ne automaticky každou
-nově nalezenou implementační opravu. Úspěšný test staršího webu tuto chybu neruší.
+Vlastník výslovně schválil opravu i uvedený DEV průchod. Následně požádal
+odstranit údaj o dosahu načtených karet a zvolil pouze ruční dosahy 1–50 km,
+výchozí 50 km, bez duplicitního Auto.
+
+<a id="news-pause-recovery-results"></a>
+
+### Připravená oprava a dosahy – 22. listopadu
+
+Nový klient výslovně vyjedná newsRecovery=true. Jen taková stránka může během
+paused získat podepsaný checkpoint a kontext recovering bez regionálních
+headů. Samotné news/news-signals jsou při pauze dál odmítané před kvótovým
+zápisem; off nic neobnovuje. Kontroly účtu/generace/R5 zůstávají zachované.
+Po active klient převezme skutečné hlavičky přes dosavadní omezené opakování
+a přejde zpět na signalizaci; klidová nula nepokračuje v recovery polling.
+RAM kontext se aktualizuje, aby jej další Home binding nevrátil do paused.
+Starší klient bez vyjednání má dosavadní kontrakt; pořadí nasazení je proto
+getFeedPage → ověření připravené revize → nový web, vždy z přesného úplného CI.
+
+Nový tools/feed_news_recovery.mjs má zvláštní neměnný digestovaný plán,
+přesný DEV cíl, vazbu na původní manifest/inkarnaci a přechody 4 → 5 → 6.
+Odmítá drift původních dat, controlu, jinou revizi a změněný digest; souběžné
+opakování je no-op. Historický aktivační plán se neupravuje. Živý plán se
+připraví z čerstvého stavu; zatím žádná další kontrolní mutace neproběhla.
+
+UI má jeden ruční seznam 1/3/5/10/20/50 km, výchozí 50. Zmizely Auto i text
+„Načtené Shouty do…“. Rozšíření prázdného menšího okruhu nastaví explicitních
+50 km po kliknutí; dávky 50, cache, řazení a geografický serverový rozsah se
+nemění. Starší Auto důkazy zůstávají historií, nový výsledek je zatím místní.
+
+Místně prošlo 474 Flutter testů, analýza bez nálezů, 100 nástrojových testů
+a lint Functions. Společná news regrese 32/32 a poslední cílená recovery sada
+4/4 zahrnují souběh pauzy s historickým čtením, legacy/off, nulové pauzové
+kvótové zápisy, publikaci během pauzy, replay a souběh operátorů. Dokončení
+automatického návratu i jeho živá akceptace zatím čekají na rollout.
+
+Samostatně uzavřený kompatibilní web + návrat UI se eviduje v obou stupnicích
+jako feed-b4-compatible-web-accept: z dosud otevřené společné váhy 33/52
+dostává 11/18, zbývá 22/34 pro automatický návrat a zbytek společné akceptace
+s úklidem. Součet rodiče ani již dokončené váhy se nemění. Celé B4 zůstává otevřené.

@@ -16,7 +16,24 @@ class Host {
       project: 'project',
       currentUserId: () => uid,
       cache: FeedBodyCache(clock: () => now),
+      newsRecovery: true,
       send: (payload) async {
+        if (payload['mode'] == 'news-signals') {
+          headCalls++;
+          if (serverPaused) throw StateError('news-paused');
+          return {
+            'version': 1,
+            'state': 'signals',
+            'readUnits': 8,
+            'signals': {
+              'v': 1,
+              'baseline': 'base',
+              'generation': 'g',
+              'incarnation': [1, 0],
+              'heads': {'_control': null},
+            },
+          };
+        }
         if (payload['mode'] == 'news') {
           newsCalls++;
           if (pendingNews != null) return pendingNews!.future;
@@ -33,7 +50,8 @@ class Host {
           'baseline': 'base',
           'generation': 'g',
           'incarnation': [1, 0],
-          'heads': {'_control': null},
+          'heads': serverPaused ? null : {'_control': null},
+          if (serverPaused) 'recovering': true,
         };
         return reply;
       },
@@ -74,7 +92,13 @@ class Host {
     );
   }
   String? uid = 'viewer';
-  int now = 0, request = 0, newsCalls = 0, watches = 0;
+  int now = 0,
+      request = 0,
+      newsCalls = 0,
+      watches = 0,
+      headCalls = 0,
+      confirmedCount = 1;
+  bool serverPaused = false;
   bool active = true,
       loading = false,
       interruptCommit = false,
@@ -90,7 +114,7 @@ class Host {
     'version': 1,
     'state': 'ready',
     'checkpoint': 'signed-next',
-    'count': 1,
+    'count': confirmedCount,
     'capped': false,
     'baseline': 'base',
     'checkedAt': now,
@@ -154,6 +178,41 @@ class Host {
 }
 
 void main() {
+  testWidgets(
+    'page loaded during pause recovers without refresh, then returns to quiet signal mode',
+    (tester) async {
+      final h = Host()..serverPaused = true;
+      await h.refresh();
+      await h.tick(tester, 1);
+      expect(h.session.items, ['one']);
+      expect(h.watches, 0);
+      expect(h.headCalls, 1);
+      expect(h.newsCalls, 0);
+      await h.tick(tester, 6000);
+      expect(h.headCalls, 2);
+      expect(h.newsCalls, 0);
+      h.serverPaused = false;
+      await h.tick(tester, 12000);
+      await h.tick(tester, 1);
+      expect(h.watches, 1);
+      expect(h.newsCalls, 1);
+      expect(h.session.newsCount, 1);
+      expect(h.client.newsSignalsFor(h.session.baseline)!.recovering, false);
+      h.bind();
+      expect(h.watches, 1); // No flip back to the cached paused context.
+      final heads = h.headCalls;
+      // Confirm zero, then a quiet region must not keep polling its recovery.
+      h.confirmedCount = 0;
+      h.runtime.pulse(immediate: true);
+      await h.tick(tester, 1);
+      final count = h.newsCalls;
+      await h.tick(tester, 60000);
+      expect(h.headCalls, heads);
+      expect(h.newsCalls, count);
+      expect(h.session.items, ['one']);
+      await h.close();
+    },
+  );
   testWidgets(
     'committed page interrupted before host finalization resumes news without reloading cards',
     (tester) async {

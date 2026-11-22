@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { planNewsActivation, applyNewsTransition, assertNewsOriginals, validateNewsPlan } from '../tools/feed_news_activation.mjs';
+import { planNewsRecovery, applyNewsRecovery, validateNewsRecovery } from '../tools/feed_news_recovery.mjs';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'news-activation') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
@@ -16,6 +17,34 @@ async function fixture(t) {
   return { control, marker, original, request, plan: await planNewsActivation(db, { expectedSources: 1 }) };
 }
 const drain = { projectId: 'shoutout-dev-46c81', validated: true, functions: [{ function: 'createShout' }, { function: 'getFeedPage' }] };
+
+async function recoveryFixture(t) {
+  const f=await fixture(t);
+  for(const revision of [1,2,3,4])await applyNewsTransition(db,f.plan,revision,{drain});
+  return {...f,recovery:await planNewsRecovery(db,f.plan)};
+}
+test('recovery plan pins 4 to 5/6, replays lost responses and serializes concurrent operators', {skip:!enabled},async t=>{
+  const f=await recoveryFixture(t),head=f.marker.collection('publicationHeads').doc('_control'),before=await head.get();
+  assert.throws(()=>validateNewsRecovery({...f.recovery,transitions:[]},db.projectId),/approved-plan/);
+  await assert.rejects(applyNewsRecovery(db,f.recovery,7),/explicit-revision/);
+  const both=await Promise.all([applyNewsRecovery(db,f.recovery,5),applyNewsRecovery(db,f.recovery,5)]);
+  assert.equal(both.filter(r=>!r.replay).length,1);assert.equal(both.find(r=>!r.replay).writes,2);
+  assert(!(await head.get()).updateTime.isEqual(before.updateTime));
+  const paused=await head.get();assert.equal((await applyNewsRecovery(db,f.recovery,5)).writes,0);
+  assert((await head.get()).updateTime.isEqual(paused.updateTime));
+  assert.equal((await applyNewsRecovery(db,f.recovery,6)).mode,'active');
+  assert.equal((await applyNewsRecovery(db,f.recovery,6)).writes,0);
+  await assert.rejects(applyNewsRecovery(db,f.recovery,5),/control-drift/);
+  assert.equal((await f.control.get()).get('revision'),12);
+  assert.equal(await assertNewsOriginals(db,db,f.plan),2);
+});
+test('recovery rejects changed originals, control and reincarnation before any write', {skip:!enabled},async t=>{
+  const f=await recoveryFixture(t),ref=db.doc('feedNewsControl/current'),before=await ref.get();
+  await f.original.update({keep:false});await assert.rejects(applyNewsRecovery(db,f.recovery,5),/original-data-drift/);
+  assert((await ref.get()).updateTime.isEqual(before.updateTime));
+  await f.original.update({keep:true}); // A fresh original plan is deliberately required after drift.
+  await assert.rejects(planNewsRecovery(db,f.plan),/original-data-drift/);
+});
 test('guarded bootstrap, lost response replay, pause/reactivation and final safe pause preserve originals', { skip: !enabled }, async t => {
   const f = await fixture(t), ref = db.doc('feedIndexGenerations/feed-v3/publicationHeads/_control');
   assert.equal((await applyNewsTransition(db, f.plan, 1)).writes, 3);

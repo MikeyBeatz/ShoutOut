@@ -77,9 +77,9 @@ export async function prepareNewsControlChange(tx, db, desired) {
     tx.set(ref, desired); for (const [head, data] of edits) tx.set(head, data);
   } };
 }
-export async function newsControl(tx, db, binding, { writer = false, state = null, marker = null } = {}) {
+export async function newsControl(tx, db, binding, { writer = false, allowPaused = false, state = null, marker = null } = {}) {
   const control = validateNewsControl((await tx.get(db.doc('feedNewsControl/current'))).data());
-  if (!writer && control.mode !== 'active') reject(`news-${control.mode}`);
+  if (!writer && control.mode !== 'active' && !(allowPaused && control.mode === 'paused')) reject(`news-${control.mode}`);
   state ??= validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
   if (!['active', 'building'].includes(state.mode) || state.cardReadGenerationId !== control.generation ||
       !state.cardWriteGenerationIds?.includes(control.generation) || binding &&
@@ -109,12 +109,14 @@ export async function admitNewsRead(request, db, binding, clock) {
     tx.set(ref, credit.record);
   });
 }
-export async function captureNewsSignals(request, db, { binding, snapshot, baseline }, { historical = false, confirm = true, clock = () => new Date() } = {}) {
+export async function captureNewsSignals(request, db, { binding, snapshot, baseline }, { historical = false, confirm = true, allowPaused = false, clock = () => new Date() } = {}) {
   const cells = newsCoverage(snapshot.context.point, snapshot.context.radiusKm);
   if (cells !== null) cells.push('_control');
   const result = await db.runTransaction(async tx => {
     await requireEligibleActor({ request, db, reader: tx, now: clock() });
-    await newsControl(tx, db, binding);
+    const control = await newsControl(tx, db, binding, { allowPaused });
+    // Recovery carries no regional heads and grants no paused count access.
+    if (control.mode === 'paused') return { v: 1, baseline, generation: binding.generation, incarnation: binding.incarnation, heads: null, recovering: true };
     const docs = cells?.length ? await tx.getAll(...cells.map(cell => db.doc(`feedIndexGenerations/${binding.generation}/publicationHeads/${cell}`))) : [];
     const heads = cells === null ? null : Object.fromEntries(docs.map(doc => {
       const data = doc.data();
@@ -123,8 +125,11 @@ export async function captureNewsSignals(request, db, { binding, snapshot, basel
     }));
     return { v: 1, baseline, generation: binding.generation, incarnation: binding.incarnation, heads };
   }, { readOnly: true, ...(historical ? { readTime: new Timestamp(snapshot.readTime.seconds, snapshot.readTime.nanoseconds) } : {}) });
-  if (confirm) await db.runTransaction(async tx => {
-    await requireEligibleActor({ request, db, reader: tx, now: clock() }); await newsControl(tx, db, binding);
-  }, { readOnly: true });
+  if (confirm) {
+    const control = await db.runTransaction(async tx => {
+      await requireEligibleActor({ request, db, reader: tx, now: clock() }); return newsControl(tx, db, binding, { allowPaused });
+    }, { readOnly: true });
+    if (control.mode === 'paused') { result.heads = null; result.recovering = true; }
+  }
   return result;
 }
