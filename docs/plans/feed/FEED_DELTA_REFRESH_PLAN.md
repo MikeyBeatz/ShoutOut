@@ -132,6 +132,20 @@ zavřením všech anonymních oken obnovit feed, aby se místní značky odeslal
 anonymní lokální úložiště se zavřením všech těchto oken zaniká. Pozdější úklid
 nové dávky musí použít její vlastní manifest a společný writer; nesmí zasáhnout
 A/B/C, původní obsah ani skutečné značky účtů. Do skončení testu nic neuklízet.
+
+**Samostatný finální serverový průchod 22. listopadu 17:48 UTC:** interní
+getFeedDeltaOperation nad živým DEV, s confirmed-v1 a skutečným read revision,
+oběma účtům vrátil 50 + 2 a přesně 52 jedinečných ID (A/B + nová dávka),
+stejnou baseline napříč stránkami a monotónní unread-first skupiny. Bright_Otter
+má v tomto snapshotu 2 přečtené / 50 nepřečtených, TestBusiness 31 / 21.
+Při warm výběru se posílalo 0 těl; completion jedné chybějící karty vrátil
+právě 1 tělo a zachoval ID/verze/read skupiny celé stránky. Vše bez cloudových
+zápisů, skutečných uživatelských tokenů či změny jejich read značek. Podklad
+build/feed-final-read-proof.json / .log a provozní helper build/feed-final-read-proof.mjs.
+Nejde o cloudovou kapacitní/latency zkoušku, platný callable/UI průchod ani
+náhradu vlastníkovy akceptace. Restart a ruční rozšíření jsou znovu vyžádané;
+čekají také pozorované badge/pauza/návrat/C expirace a úklid. Kontrolované
+zbývající přechody 3/4 ani 60s C zatím nespotřebovávat bez připraveného UI.
 Při následném B4b rollback pilotu znovu vydat nový ověřený Auto web; starý
 web v čisté b4b-dev-release je historický artefakt.
 Nový seed ani Auth účty nejsou potřeba. Přesný cíl je projekt/site

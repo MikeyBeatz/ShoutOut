@@ -144,6 +144,37 @@ Attest zůstávají podmínkami pozdějších mobilních vydání.
 Hotovo, když upravený klient nemůže podvrhnout autora, čas, polohu, čítač,
 limit ani vytvořit více obsahů jedním oprávněným zápisem.
 
+<a id="authority-audit"></a>
+
+### Zbývající přímé zápisy – čtecí audit 22. listopadu
+
+Nejde o dokončenou implementaci content-remaining-authority ani celkový audit
+bezpečnosti. Nasazený DEV ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2 má
+shodu se zdrojem po normalizaci konců řádků. Pět izolovaných testů v emulátoru
+shoutout-rules-test prošlo s aktivní schemaVersion 2 / managed card projekcí:
+
+| Cesta | Ověřený výsledek | Další krok |
+|---|---|---|
+| Přímý čítač Shoutu / vytvoření komentáře | Zamítnuto | Zachovat uzavřenou projekci. |
+| privateReplies create | Povoleno i při blokaci odesílatele příjemcem a targetType privateReply bez rodičovské zprávy. | Uzavřít přímý create, zachovat createPrivateReply; podléhá schválení. |
+| Komentářové reactions | Samostatný like dokument je povolený, likesCount zůstane 0. | Uzavřít přímé reakce i čítače, zachovat toggleCommentReaction; podléhá schválení. |
+| reports create | Přímá tvorba Shout hlášení je povolená vedle serverové cesty. Základní validace existuje. | Do cutoveru zahrnout i commentReports/privateReplyReports; předem je konkrétně otestovat. |
+| privateReplies delete | Vlastní přímé smazání je povolené bez rate/receipt. | Samostatně navrhnout serverové mazání a zachování moderačního/archivního chování. |
+
+Návrh prvního navazujícího úseku byl předložen vlastníkovi: v managed režimu
+uzavřít jen create soukromých odpovědí, komentářové palce a create tří typů
+obsahových hlášení, otestovat existující serverové operace a po přesném CI
+nasadit pouze DEV Rules. Bez nových Auth účtů, živých testovacích zápisů,
+změn čtení, rolí, retence nebo produkce; přímé soukromé mazání a moderace
+zůstávají mimo tento první úsek. Do odpovědi jen průzkum, žádné úpravy Rules.
+Podklady: firestore.rules (comments/reactions/privateReplies/reports),
+functions/create_private_reply.js, functions/toggle_comment_reaction.js,
+functions/create_content_report.js a dosavadní tools/rules/firestore.rules.test.mjs.
+Nové provozní důkazy: build/content-authority-audit.test.mjs,
+build/content-authority-audit-results.json, build/content-authority-audit.json,
+build/content-authority-audit-emulator.log a build/content-authority-live-rules-proof.json.
+Emulátorová kontrola nevytvářela ani neměnila DEV/produkční data.
+
 Nový požadavek z 31. října 2026 doplňuje [read/refresh kontrakt feedu](plans/feed/FEED_READ_REFRESH_PLAN.md).
 Vlastník vybral celé A0–A3 i B1–B4 před MVP; viz
 [etapy](plans/feed/FEED_IMPLEMENTATION_STAGES.md). Unread-first pouze v Nejblíž;

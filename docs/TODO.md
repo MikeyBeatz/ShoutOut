@@ -107,6 +107,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
 2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
+   **Připravený další úsek:** [audit zbývající obsahové autority](MVP_SERVER_PLAN.md#authority-audit)
+   má pět emulátorových důkazů a shodu nasazených DEV Rules. První cutover
+   přímých private create / comment reaction / content report create je
+   předložen ke schválení; zatím bez zdrojových úprav či DEV mutací.
 
 ## Hranice MVP
 

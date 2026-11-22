@@ -6,6 +6,24 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Nejbližší proveditelný kódový úsek je uzavření zbývajících přímých obsahových zápisů.**
+[Omezený audit a konkrétní návrh](MVP_SERVER_PLAN.md#authority-audit): 5/5
+emulátorových scénářů potvrdilo přímou soukromou tvorbu přes blokaci, samostatné
+komentářové palce bez čítače, přímé hlášení a vlastní soukromé mazání. Shout
+čítače / comment create jsou naopak správně uzavřené. DEV Rules mají shodu
+se zdrojem. Ke schválení je nyní předložen první cutover tří existujících
+serverových cest; mazání/moderace mají zůstat samostatným navazujícím úsekem.
+Zdrojové Rules ani živá data se při auditu neměnily; před odpovědí neimplementovat.
+
+**Samostatná serverová kontrola závěrečného feedu prošla:** oba účty 50 + 2,
+52 jedinečných karet, jedna baseline přes stránky, potvrzené unread-first
+a warm 0 / refill 1 tělo. TestBusiness v tomto snapshotu 31 read / 21 unread,
+Bright_Otter 2 read / 50 unread. Čteno interním jádrem nad živým DEV bez
+zápisů; nejde o platformní callable ani UI akceptaci. Podklad
+build/feed-final-read-proof.json. Vlastník má vyžádané výsledky restartu a
+ručního rozšíření; C/pauzu/návrat ani úklid zatím neprovádět bez připraveného
+pozorujícího klienta. B4b/Auto/finální feed akceptace zůstávají otevřené.
+
 **Auto hledání je nasazené v DEV; čeká živá akceptace.**
 [Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius):
 výchozí prostorový dosah Auto/max. 50 km, pokrytí načtených karet a nabídka
