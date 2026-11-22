@@ -6,15 +6,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválené Auto hledání je připravené lokálně ve feature/feed-automatic-radius.**
+**Auto hledání je nasazené v DEV; čeká živá akceptace.**
 [Rozsah a důkazy](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius):
 výchozí prostorový dosah Auto/max. 50 km, pokrytí načtených karet a nabídka
 rozšíření prázdného ručního okruhu. Používá stávající serverový index/kurzor,
 bez nových Functions/Rules/dat. Šest nových testů + dosavadní cílené regrese
 (celkem 38 různých testů) prošlo, včetně úzké obrazovky/překladů.
 Místní celá sada před posledním layout testem měla 461 úspěchů; analýza bez
-nálezů. Čeká úplné CI, DEV web a živý průchod na existujícím A/B.
-Dosud nasazený web i backend jsou nadále níže uvedené B4b 20206c4.
+nálezů. Zdroj **6bef37c5af4410a3b87da9946005c70a71bbc1b6** má
+[success úplné CI 45020677812](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812).
+Hosting **06df6da99db68e74** je ověřený: 69 souborů (67 app + 2 Firebase),
+shoda gzip/raw hashů a 8 HTTP kontrol na obou DEV doménách. Backend zůstává
+níže uvedené B4b 20206c4. Vlastník dostal jediný UI průchod Auto → ručních
+5 km → nabídka rozšíření, bez nového seedu či mazání. Spojení pro Browser Use
+je nedostupné; tuto akceptaci nenahrazovat HTTP ověřením. Návratový web je
+ca327f10112ef349; po budoucím B4b rollback pilotu obnovit nynější Auto artefakt,
+nikoli historický web uložený v build/b4b-dev-release. Produkce/main nezměněné.
 
 **B4b je [nasazené a aktivní v DEV](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results); živá akceptace pokračuje.**
 Zdroj **20206c4a4d8b186c54947c04212d6a4c6ec5625f** má

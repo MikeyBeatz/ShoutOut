@@ -654,6 +654,11 @@ b4b-bright-baseline.log / b4b-bright-zero.log a b4b-business-baseline.log / b4b-
 build/b4b-dev-release/docs/local/b4b-pilot-state-v2.json; kořenová kopie je
 předstartovní podklad, nepoužívat ji pro další mutace. Operátor i jeho plán
 docs/local/b4b-activation-plan-v2.json spouštět z téže čisté release kopie.
+**Novější klient:** [Auto dosah](FEED_DELTA_REFRESH_PLAN.md#automatic-radius)
+je nyní nasazený ze 6bef37c / success úplné CI 45020677812, Hosting
+06df6da99db68e74. Backend i pilotní manifest zůstávají stejné. Při tomto
+B4b návratovém testu po obnově vydat nový Auto artefakt, nikoli znovu starý
+web 20206c4 uložený v b4b-dev-release; ten je pouze historický podklad.
 Podle živých důkazů je dokončené **feed-b4-dev**. Vlastník vytvořil
 **MVP B4b B 183ed3** pod TestBusiness: source
 84e4c14d44c679357231fb4993bf3b2ac6b381f3f89d16589f2022c4bdb98b20,

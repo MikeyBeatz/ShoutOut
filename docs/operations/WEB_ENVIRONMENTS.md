@@ -1,5 +1,13 @@
 # Vývojový a produkční web
 
+**Aktuální DEV web k 22. listopadu:** [Auto dosah/max. 50 km](../plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius)
+ze zdroje **6bef37c5af4410a3b87da9946005c70a71bbc1b6**, success úplné
+CI 45020677812, Hosting **06df6da99db68e74**. Všech 67 aplikačních souborů
+i osm HTTP kontrol na obou doménách odpovídá release artefaktu. Živý UI
+průchod čeká; backend/Rules/indexy/plánovače níže se neměnily. Návratový
+web ca327f10112ef349 zůstává evidovaný. Při B4b rollback pilotu následně
+obnovit nový Auto artefakt, nikoli starý web v b4b-dev-release.
+
 **Aktuální DEV k 22. listopadu:** [B4b je aktivní, akceptace pokračuje](../plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results).
 Zdroj 20206c4 / úplné CI 44959541907 success, Hosting ca327f10112ef349 / serverFeedNews true.
 CreateShout revize createshout-00007-viz, getFeedPage getfeedpage-00005-res,

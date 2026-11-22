@@ -58,7 +58,26 @@ ověření není důkaz cloudové latence; delší čekání po Offline zatím z
 Podklady: test/feed_automatic_radius_test.dart, lib/src/feed.dart,
 lib/src/home.dart a build/feed-automatic-radius-regression.log.
 
-Zbývá přesné úplné CI, DEV Hosting a živé ověření na existujících A/B pilotu.
+Zdroj **6bef37c5af4410a3b87da9946005c70a71bbc1b6** má
+[success úplné CI 45020677812](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45020677812).
+Prošly aplikační/browserové testy, 92 tools, Functions unit, 464 Rules/server,
+9 reader, 14 card, 13 transport/Rules/Chrome, 12 přechodových, 24 news,
+34 B2, 142 purge a 15 Storage scénářů, formát/analýza/lint i webový build.
+Nasazený je pouze Hosting **06df6da99db68e74** v shoutout-dev-46c81. Před
+nasazením ověřen přesný čistý commit, všechny povinné kroky CI a release
+manifest/cílový site. Po něm ověřeno všech 69 vzdálených souborů (67 app +
+2 Firebase) podle gzip hashů a osm skutečných HTTP raw hashů na obou doménách.
+Backend, Rules, indexy, plánovače i živé zdroje se kvůli tomuto úseku neměnily.
+Interní čtení TestBusiness / 50 km vrací obě existující karty; není to UI důkaz.
+Podklady: build/feed-automatic-radius-release-proof.json,
+build/feed-automatic-radius-ci.log, build/feed-automatic-radius-deploy.log,
+build/feed-automatic-radius-hosting-proof.json a build/feed-automatic-radius-server-probe.log.
+
+Zbývá živé ověření na existujícím A/B pilotu. Browser Use hlásí nedostupného
+browser hosta; vlastník byl požádán o Auto → ručních 5 km → nabídku rozšíření.
+Živou akceptaci nezavírat před odpovědí. Návratový Hosting je ca327f10112ef349.
+Při následném B4b rollback pilotu znovu vydat nový ověřený Auto web; starý
+web v čisté b4b-dev-release je historický artefakt.
 Nový seed ani Auth účty nejsou potřeba. Přesný cíl je projekt/site
 shoutout-dev-46c81; produkce/main se nemění. B4b badge/pauza/návrat/úklid
 zůstávají samostatně otevřené. Stávající nedokončená finální feed váha se dělí
