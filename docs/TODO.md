@@ -93,7 +93,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    zatím akceptaci nesplnily: vlastník číslovku neviděl. Před dalším testem
    je schválená [oprava napojení a lokální návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
    [Připravený kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results): 468 Flutter,
-   99 tools testů, analýza bez nálezů; úplné CI a DEV web čekají. Živý pohyb
+   99 tools testů, analýza bez nálezů; 34268e5 / úplné CI 45060709344
+   success, DEV Hosting 346ea6fb1866da8e je nasazený a zdrojově ověřený. Živý pohyb
    zatím vypnutý, číselné meze/rebase potřebují konkrétní navazující návrh.
    Místní data nemazat a další fixture nevytvářet naslepo. Nasazení je splněné,
    společná akceptace zatím ne. Společná finální

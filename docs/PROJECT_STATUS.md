@@ -28,9 +28,12 @@ souřadnice bez tolerance. [Důkazy a konkrétní návrh](plans/feed/B4_DEV_ROLL
 Vlastník schválil opravu a lokální návrh pohybu. [Kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results)
 jsou připravené: napojení potvrzené baseline i po přerušení hosta, 6 nových
 regresí, 38 cílených / 468 celých Flutter testů, analýza bez nálezů a 99 tools
-testů. Pohybový prototyp má 18 čistě syntetických případů; žádný živý watcher
-ani jeho nové parametry se nezapínají. Úplné CI a následný pouze DEV web
-čekají; neskrývat živý neúspěch novou fixture ani jej nezapočítat do akceptace.
+testů. Zdroj **34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43** má
+[success úplné CI 45060709344](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45060709344); DEV Hosting **346ea6fb1866da8e**
+je nasazený a ověřený (69 souborů / 8 HTTP kontrol). Rules i 20 Functions
+beze změny; návratový web 06df6da99db68e74. Žádné další fixture/Auth účty.
+Pohybový prototyp má 18 čistě syntetických případů; žádný živý watcher ani jeho
+nové parametry se nezapínají. Živou číslovku tím ještě nezapočítat do akceptace.
 Pauza/návrat/úklid zůstávají otevřené; další živé fixture nejsou tímto úsekem povolené.
 Samostatný další serverový návrh je soukromé mazání/moderace. Běžné okno feedu
 je na žádost vlastníka odložené, bez smazání místní fronty.

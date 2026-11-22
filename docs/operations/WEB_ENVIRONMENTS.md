@@ -1,5 +1,12 @@
 # Vývojový a produkční web
 
+**Aktuální DEV web – napojení novinek 22. listopadu:** [důkazy a hranice](../plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results).
+Zdroj 34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43, success úplné CI 45060709344, Hosting
+**346ea6fb1866da8e**. Všech 69 souborů / 8 HTTP odpovědí odpovídá release artefaktu.
+Auto/cache zůstávají součástí webu; pohybový prototyp se v aplikaci nepoužívá.
+Rules 476d216c-9208-4e5c-9143-f583cb82a3e9 i 20 Functions beze změny.
+Návratový web 06df6da99db68e74. Starší datované weby níže jsou historie.
+
 **Aktuální DEV Rules k 22. listopadu:** [uzavření přímých obsahových zápisů](../MVP_SERVER_PLAN.md#authority-audit)
 ze zdroje 17317e9aede8f6aa286c12365ac335d597a6867f, úplné CI 45056112263 success,
 ruleset 476d216c-9208-4e5c-9143-f583cb82a3e9. Shoda zdroje ověřená; Hosting a všech

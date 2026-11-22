@@ -797,7 +797,7 @@ na funkční pozorující klient. Další testování nesmí přepsat novější
 
 <a id="news-ui-fix-results"></a>
 
-### Oprava napojení a lokální model pohybu – připravený kód
+### Oprava napojení v DEV a lokální model pohybu
 
 Větev fix/feed-news-live-acceptance přidává FeedNewsBinding, který skutečný
 Home volá při změně potvrzené stránky, návratu do popředí, přepnutí sekce
@@ -814,7 +814,21 @@ transportem: 6 scénářů pro přerušené dokončení stránky, klidnou novou 
 publikaci bez duplicitních odběrů, návrat/sekce, chybu obnovy, změnu účtu se
 zpožděnou odpovědí a zánik/expiraci pohledu. Cílený společný průchod má 38/38,
 celá místní Flutter sada 468/468, analýza bez nálezů. Nástrojová sada 99/99
-zahrnuje 7 nových pohybových scénářů. Úplné CI a DEV rollout zatím čekají.
+zahrnuje 7 nových pohybových scénářů.
+Zdroj **34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43** má
+[success úplné CI 45060709344](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45060709344). Release build prošel,
+manifest je svázaný s čistým zdrojem a přesným CI (build/b4b-binding-ci-proof.json).
+Pouze DEV Hosting shoutout-dev-46c81 / **346ea6fb1866da8e** je nasazený.
+Z 69 vzdálených souborů má všech 67 aplikačních shodu gzip hashů
+s artefaktem; zbývající rezervované Firebase cesty jsou povolené. Ověřeno osm HTTP
+odpovědí (index/main/bootstrap/app-config) na obou DEV doménách.
+Rules 476d216c-9208-4e5c-9143-f583cb82a3e9 a všech 20 Functions i jejich prostředky
+jsou porovnané beze změny; žádný nový Auth účet ani živá fixture nevznikly.
+Podklady: build/b4b-binding-hosting-before.json / -after.json,
+build/b4b-binding-web-build.log, b4b-binding-full-tests.log a b4b-binding-tools.log.
+Návratový Hosting je 06df6da99db68e74, zachovat aktuální Rules a backend.
+Číslovka 1 a její odečtení nejsou tímto HTTP ověřením nově potvrzené;
+původní A/B/C i náhradní manifest čekají na společnou akceptaci a úklid.
 Původní živé selhání tím není zpětně označené jako úspěšné.
 
 Lokální [prototyp pohybu](../../../tools/feed_movement_prototype.mjs) má
