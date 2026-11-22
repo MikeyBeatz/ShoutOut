@@ -73,7 +73,7 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
     // here can make lazy slivers oscillate while estimating their new extent.
     // The measured card position, including concurrent later scrolling, is
     // restored in the same frame below.
-    widget.controller.position.correctPixels(0);
+    widget.controller.position.correctPixels(before == null ? 0 : top - before);
     final offset = widget.controller.offset, revision = ++_layout;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || revision != _layout || !widget.controller.hasClients) {
@@ -121,6 +121,16 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       );
     }
 
+    final positions = {
+      for (var i = 0; i < widget.items.length; i++)
+        widget.idOf(widget.items[i]): i,
+    };
+    final keyPositions = {
+      for (final entry in _cards.entries)
+        if (positions.containsKey(entry.key))
+          entry.value: positions[entry.key]!,
+    };
+
     if (_anchor == null) {
       return CustomScrollView(
         controller: widget.controller,
@@ -130,7 +140,9 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
           SliverToBoxAdapter(key: _center, child: const SizedBox.shrink()),
           ...widget.leadingSlivers,
           SliverList.builder(
+            key: const ValueKey('movement-initial'),
             itemCount: widget.items.length,
+            findChildIndexCallback: (key) => keyPositions[key],
             itemBuilder: (_, index) => row(index),
           ),
           ...widget.trailingSlivers,
@@ -144,12 +156,22 @@ class _FeedMovementViewState<T> extends State<FeedMovementView<T>> {
       slivers: [
         ...widget.leadingSlivers,
         SliverList.builder(
+          key: const ValueKey('movement-before'),
           itemCount: centerIndex,
+          findChildIndexCallback: (key) {
+            final i = keyPositions[key];
+            return i != null && i < centerIndex ? centerIndex - 1 - i : null;
+          },
           itemBuilder: (_, index) => row(centerIndex - 1 - index),
         ),
         SliverToBoxAdapter(key: _center, child: row(centerIndex)),
         SliverList.builder(
+          key: const ValueKey('movement-after'),
           itemCount: widget.items.length - centerIndex - 1,
+          findChildIndexCallback: (key) {
+            final i = keyPositions[key];
+            return i != null && i > centerIndex ? i - centerIndex - 1 : null;
+          },
           itemBuilder: (_, index) => row(centerIndex + 1 + index),
         ),
         ...widget.trailingSlivers,

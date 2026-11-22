@@ -1224,3 +1224,9 @@ měření latence ani důkaz 5 000 současných uživatelů.
 zdrojů a jednu žádost; 0 cloudových zápisů. Manifest zůstává seeded a všech
 50 restartovacích Shoutů se ponechává pro závěrečnou ruční kontrolu. Podklad
 build/feed-restart-cleanup-dryrun.log.
+
+Před rolloutem přidaná kontrola prvního snímku odhalila krátký posun, přestože
+po ustálení byla kotva správná. Oprava rozlišuje slivery před/za kotvou a
+jejich skutečné indexy a nastaví odpovídající posun před layoutem. Trvalá
+regrese nyní kontroluje i první vykreslení, nejen pumpAndSettle; první
+připravený commit se s tímto známým problémem nenasazuje.

@@ -109,6 +109,11 @@ void main() {
       await tester.pumpWidget(
         view([...inserted, ...rows.where((row) => row.id != 'shout-2')]),
       );
+      expect(
+        tester.getTopLeft(find.text(visible.title)).dy,
+        closeTo(y, .5),
+        reason: 'first frame before settling',
+      );
       await tester.pumpAndSettle();
       expect(tester.getTopLeft(find.text(visible.title)).dy, closeTo(y, .5));
       // Own deletion changes membership without a geographic revision.
