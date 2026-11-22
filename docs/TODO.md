@@ -96,7 +96,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    [Nový výslovně povolený C potvrdil číslovku 1 a odečtení po expiraci](plans/feed/B4_DEV_ROLLOUT.md#news-positive-acceptance);
    je uklizený a tento dílčí důkaz je započítaný. Hotový test neopakovat.
    Další [konkrétní návrh: zarovnání badge a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal)
-   čeká na schválení; živý pohyb zatím vypnutý. Místní data nemazat a další
+   je schválený a [připravený lokálně](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results):
+   474 Flutter testů, analýza bez nálezů, rebase 5/5 v emulátoru; čeká společné
+   úplné CI a pouze DEV web s badge opravou. Živý pohyb zatím vypnutý.
+   Místní data nemazat a další
    fixture nevytvářet naslepo. Pauza/návrat a původní úklid stále čekají. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),

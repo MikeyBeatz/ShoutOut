@@ -192,6 +192,70 @@ class FeedSessionController<T, C extends Object> {
     return flight;
   }
 
+  /// Local movement path; the host must authorize/pace location changes.
+  /// Preserve the reading sequence of retained cards. Newly eligible cards
+  /// follow it, then the canonical target cursor supplies further pages.
+  /// A manual refresh is still the operation that establishes a new full order.
+  Future<void> recenter(
+    C requested, {
+    required Future<FeedBatch<T>> Function(C context) loadMoved,
+    required bool Function(T item, C context) retain,
+    required bool Function(T item) isRead,
+    required T Function(T item, C context) relocate,
+  }) {
+    if (_disposed || !_active || _context == null || isRefreshing) {
+      return Future.value();
+    }
+    if (needsRefresh) return Future.error(const FeedSessionExpired());
+    final generation = ++_generation;
+    _refreshContext = requested;
+    _prefetchFlight = null;
+    _appendFlight = null;
+    _newsFlight = null;
+    late final Future<void> flight;
+    flight = Future.sync(() => loadMoved(requested))
+        .then((batch) {
+          if (_disposed || generation != _generation) return;
+          if (needsRefresh) throw const FeedSessionExpired();
+          if (batch.baseline.isEmpty || batch.newsCheckpoint == null) {
+            throw StateError('Unconfirmed feed movement');
+          }
+          final fresh = {for (final item in batch.items) idOf(item): item};
+          final remaining = _items
+              .where((item) => retain(item, requested))
+              .map((item) => fresh[idOf(item)] ?? relocate(item, requested));
+          final combined = _unique([...remaining, ...batch.items]);
+          final committed = [
+            ...combined.where((item) => !isRead(item)),
+            ...combined.where(isRead),
+          ];
+          _context = requested;
+          _items = committed;
+          _next = batch.next;
+          _baseline = batch.baseline;
+          _checkpoint = batch.newsCheckpoint;
+          _prepared = null;
+          // Counts from the old area are retained as unverified until checked
+          // against the new area; the original publication boundary survives.
+          _newsCurrent = false;
+          _newsDeadline = null;
+          _newsExpiryTimer?.cancel();
+          onChanged?.call();
+        })
+        .catchError((Object error) {
+          _handleExpiry(error, generation);
+          throw error;
+        })
+        .whenComplete(() {
+          if (identical(_refreshFlight, flight)) {
+            _refreshFlight = null;
+            _refreshContext = null;
+          }
+        });
+    _refreshFlight = flight;
+    return flight;
+  }
+
   Future<void> prefetch() {
     if (_disposed || !_active || isRefreshing) return Future.value();
     if (needsRefresh) {

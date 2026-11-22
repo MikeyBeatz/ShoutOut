@@ -1,5 +1,6 @@
 // Prepared B4 transport on the existing callable; activation remains off.
 import { createHmac } from 'node:crypto';
+import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { getFeedPageOperation } from './get_feed_page.js';
@@ -43,13 +44,15 @@ export async function getCompatibleFeedPageOperation(request, db, options) {
 }
 
 export async function getFeedDeltaOperation(request, db, { key, enabled = false, clock = () => new Date(),
-  workNodes = 32, readOrdering = null, observeMetrics = () => {}, preserveRetiredCursor = false, newsEnabled = false, newsRuntimeEnabled = false } = {}) {
+  workNodes = 32, readOrdering = null, observeMetrics = () => {}, preserveRetiredCursor = false, newsEnabled = false, newsRuntimeEnabled = false,
+  recenterEnabled = false } = {}) {
   const { uid } = requireCallableIdentity(request), input = request.data;
   if (!enabled) fail('failed-precondition', 'Delta feed is not enabled.');
   assertFeedRuntimeTarget(db);
   if (!input || input.format !== 'delta-v1' || input.expectedUserId !== uid) fail('invalid-argument', 'Invalid delta request.');
   const now = () => clock().getTime();
   const cursorKey = scopedKey(key, 'cursor'), bodyCodec = feedCursorCodec({ key: scopedKey(key, 'body') });
+  const movementCodec = recenterEnabled ? feedCursorCodec({ key: scopedKey(key, 'movement') }) : null;
   const liveContext = (generation, incarnation, revision) => ({ project: db.projectId, uid, generation, incarnation: JSON.stringify(incarnation), mode: 'card-v1', revision });
   async function capability(tx, state = null) {
     state ??= validateFeedIndexControl((await tx.get(db.doc('feedIndexControl/current'))).data());
@@ -137,11 +140,50 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
     return { schema: 1, project: db.projectId, uid, generation: binding.generation,
       incarnation: JSON.stringify(binding.incarnation), context: bodyDigest([baseline, snapshot]), expiresAt: deadline,
       token: proof, unreadFirst: context.reading === true, ...result,
+      ...(movementCodec && !context.presentation ? { movementToken: movementCodec.start({ uid, project: db.projectId,
+        readTime: snapshot.readTime, now: context.startedAt, context: { snapshot, binding, baseline,
+          reading: context.reading, startedAt: context.startedAt, expiresAt: deadline, kind: 'movement' } }) } : {}),
       ...(newsSignals ? { newsSignals } : {}),
       ...(newsEnabled && (!newsRuntimeEnabled || newsSignals) && !context.presentation ? { newsCheckpoint: feedNewsBaseline({ key, uid, project: db.projectId,
         snapshot, binding, baseline, startedAt: context.startedAt }) } : {}) };
   }
   try {
+    // Prepared only. No deployed host enables this option. Rebase is a child
+    // of the original signed view, not a refresh or a new publication cutoff.
+    if (input.mode === 'recenter') {
+      if (!recenterEnabled) fail('failed-precondition', 'Feed movement is not enabled.');
+      if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode', 'token', 'point', 'cold'].includes(k)) ||
+          typeof input.cold !== 'boolean' || !input.point ||
+          Object.keys(input.point).some(k => !['latitude', 'longitude'].includes(k)) ||
+          !Number.isFinite(input.point.latitude) || Math.abs(input.point.latitude) > 90 ||
+          !Number.isFinite(input.point.longitude) || Math.abs(input.point.longitude) > 180) fail('invalid-argument', 'Invalid feed movement.');
+      const parent = movementCodec.decode(input.token, { uid, project: db.projectId, now: now() });
+      const prior = parent.context;
+      if (prior.kind !== 'movement' || !prior.snapshot || !prior.binding ||
+          prior.startedAt !== parent.startedAt || prior.expiresAt !== parent.expiresAt) fail('invalid-argument', 'Invalid movement proof.');
+      await db.runTransaction(async tx => {
+        await actor(tx);
+        const current = await generation(tx, prior.binding);
+        if (current.control.cardReadGenerationId !== prior.binding.generation) throw new FeedSessionExpired();
+        const store = createFeedGenerationStore(db, prior.binding.generation, { cardProjection: true, contentIdentity: true });
+        // An R5 invalidation of the parent cannot be hidden by changing region.
+        await store.readHeaderRows(tx, [], { marker: current.marker, fenceSnapshot: prior.snapshot });
+      }, { readOnly: true });
+      const store = createFeedGenerationStore(db, prior.binding.generation, { cardProjection: true, contentIdentity: true });
+      const snapshot = await store.capturePortable({ ...prior.snapshot.context, point: input.point, now: now() },
+        { readTime: new Timestamp(prior.snapshot.readTime.seconds, prior.snapshot.readTime.nanoseconds) });
+      // Keep read groups frozen and exclude publications after the original
+      // database readTime, including backdated source.createdAt values.
+      if (prior.reading) Object.assign(snapshot.context, {
+        readPolicy: prior.snapshot.context.readPolicy, readRevision: prior.snapshot.context.readRevision,
+      });
+      snapshot.context.geographyRevision = (prior.snapshot.context.geographyRevision ?? 0) + 1;
+      const baseline = bodyDigest([prior.binding, snapshot]);
+      const cursor = feedCursorCodec({ key: cursorKey }).start({ uid, project: db.projectId,
+        readTime: snapshot.readTime, context: { snapshot, binding: prior.binding, baseline }, now: parent.startedAt });
+      return await getFeedDeltaOperation({ ...request, data: { format: 'delta-v1', expectedUserId: uid, cursor, cold: input.cold } }, db,
+        { key, enabled, clock, workNodes, readOrdering, observeMetrics, preserveRetiredCursor, newsEnabled, newsRuntimeEnabled, recenterEnabled });
+    }
     if (['news', 'news-signals'].includes(input.mode)) return await getFeedNewsOperation(request, db, { key, enabled: newsEnabled, runtime: newsRuntimeEnabled, clock, workNodes, observeMetrics });
     if (input.mode === 'liveContext') {
       if (Object.keys(input).some(k => !['format', 'expectedUserId', 'mode'].includes(k))) fail('invalid-argument', 'Invalid live context.');

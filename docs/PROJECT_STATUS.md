@@ -6,6 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválený probíhající úsek:** [jednotné číslovky a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
+Sdílené vnější umístění obou badge je připravené, včetně 1/99+/teček a úzkého
+světlého/tmavého zobrazení. Lokální server/client přesun zachovává původní
+publikační hranici, přečtení, hodinový termín, R5 a kotvu; Home/GPS jej nevolají,
+serverová volba je false. 474 Flutter testů a analýza prošly, samostatná
+emulátorová regrese 5/5 a měření 50/200/2 000 zdrojů jsou zapsané. Připravený
+prototyp neurčuje živou četnost ani nové globální pořadí při pohybu.
+Další krok je společný push/úplné CI přesného commitu a pouze DEV Hosting
+s badge opravou. Nasazení této změny zatím neproběhlo; aktuální web je níže
+uvedený 346ea6fb1866da8e. Functions/Rules/data se v tomto úseku nemění.
+
 **Poslední uzavřený obsahový úsek: přímé zápisy v managed feedu.**
 [Důkazy a hranice](MVP_SERVER_PLAN.md#authority-audit): soukromé odpovědi,
 komentářové palce/čítače a tvorba tří typů hlášení nyní vyžadují serverovou cestu.
@@ -30,7 +41,8 @@ Rules i všech 20 Functions beze změny; návratový web 06df6da99db68e74.
 Zvonkový badge nyní obaluje ikonu, refresh celý FAB; rozdíl je potvrzený.
 GPS hláška porovnává souřadnice bez tolerance. Pohyb má zatím jen lokální model
 (18 syntetických případů), žádné živé automatické přesouvání se nezapínalo.
-Nový zdrojový rozsah před úpravami schválit; nepovažovat hlášku za cílové chování.
+Vlastník nový rozsah schválil; místní výsledek je uvedený výše. Nepovažovat
+dosavadní hlášku za cílové chování.
 Společná B4b/finální feed akceptace zůstává otevřená: pauza/návrat, kompatibilní
 web a úklid původních manifestů. Neopakovat hotový kladný/expirační test.
 Běžné okno feedu je na žádost vlastníka odložené, bez smazání místní fronty.

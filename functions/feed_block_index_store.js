@@ -399,7 +399,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     return { ...committed, reads, attempts };
   }
 
-  async function open(input) {
+  async function open(input, { readTime: requestedReadTime = null } = {}) {
     const alive = sessionDeadline(elapsedClock);
     const c = context(input), ranges = directoryWindows(c.point, c.radiusKm);
     const metrics = { rootQueries: 0, rootDocuments: 0, emptyRootQueries: 0, nodeReads: 0, nodeFetchRequests: 0, nodeBytes: 0, cacheHits: 0, metadataExamined: 0 };
@@ -425,7 +425,7 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       const roots = [...result].map(([path, key]) => ({ hash: key, path, summary: null }));
       retention = await retentionFence(tx, marker, roots, null, metrics);
       return roots;
-    }, { readOnly: true });
+    }, { readOnly: true, ...(requestedReadTime ? { readTime: requestedReadTime } : {}) });
     alive();
     const frontier = new FeedMinHeap((a, b) => tupleCompare(a.key, b.key));
     const candidates = new FeedMinHeap((a, b) => tupleCompare(a.key, b.key)), seen = new Set();
@@ -612,9 +612,9 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
   }
 
   const readDigest = ids => createHash('sha256').update(canonical([...new Set(ids)].sort())).digest('hex');
-  async function capturePortable(input, { readIdsAt } = {}) {
+  async function capturePortable(input, { readIdsAt, readTime = null } = {}) {
     if (typeof input.uid !== 'string' || !input.uid.length) throw new Error('invalid-portable-context');
-    const view = await open(input), captured = views.get(view), c = captured.context;
+    const view = await open(input, { readTime }), captured = views.get(view), c = captured.context;
     const readIds = readIdsAt ? await readIdsAt(captured.readTime) : c.readIds;
     captured.alive();
     return clone({ v: 1, project: db.projectId, namespace, roots: captured.roots,

@@ -10,34 +10,14 @@ class NotificationBellButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool floating;
 
-  Widget _button(BuildContext context, int unread) {
-    final icon = Badge.count(
-      count: unread,
-      isLabelVisible: unread > 0,
-      child: Icon(
-        Icons.notifications_none_rounded,
-        color: floating ? null : Colors.white,
-      ),
-    );
-    return floating
-        ? FloatingActionButton.small(
-            key: const ValueKey('feed-notifications'),
-            heroTag: 'feed-notifications',
-            tooltip: tr(context, 'Oznámení'),
-            onPressed: onPressed,
-            child: icon,
-          )
-        : IconButton(
-            tooltip: tr(context, 'Oznámení'),
-            onPressed: onPressed,
-            icon: icon,
-          );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (Firebase.apps.isEmpty) {
-      return _button(context, 0);
+      return NotificationButton(
+        onPressed: onPressed,
+        floating: floating,
+        unread: 0,
+      );
     }
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return const SizedBox.shrink();
@@ -56,8 +36,50 @@ class NotificationBellButton extends StatelessWidget {
                 .where((document) => document.data()['readAt'] == null)
                 .length ??
             0;
-        return _button(context, unread);
+        return NotificationButton(
+          onPressed: onPressed,
+          floating: floating,
+          unread: unread,
+        );
       },
+    );
+  }
+}
+
+class NotificationButton extends StatelessWidget {
+  const NotificationButton({
+    super.key,
+    required this.onPressed,
+    required this.unread,
+    this.floating = false,
+  });
+  final VoidCallback onPressed;
+  final int unread;
+  final bool floating;
+
+  @override
+  Widget build(BuildContext context) {
+    if (floating) {
+      return FeedActionBadge(
+        count: unread,
+        child: FloatingActionButton.small(
+          key: const ValueKey('feed-notifications'),
+          heroTag: 'feed-notifications',
+          tooltip: tr(context, 'Oznámení'),
+          onPressed: onPressed,
+          child: const Icon(Icons.notifications_none_rounded),
+        ),
+      );
+    }
+    final icon = Badge.count(
+      count: unread,
+      isLabelVisible: unread > 0,
+      child: Icon(Icons.notifications_none_rounded, color: Colors.white),
+    );
+    return IconButton(
+      tooltip: tr(context, 'Oznámení'),
+      onPressed: onPressed,
+      icon: icon,
     );
   }
 }

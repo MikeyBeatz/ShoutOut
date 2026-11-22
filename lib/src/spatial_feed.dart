@@ -1,5 +1,32 @@
 part of '../main.dart';
 
+class FeedActionBadge extends StatelessWidget {
+  const FeedActionBadge({
+    super.key,
+    required this.count,
+    required this.child,
+    this.current = true,
+  });
+  final int count;
+  final bool current;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Badge(
+    alignment: AlignmentDirectional.topEnd,
+    offset: const Offset(-4, -4),
+    isLabelVisible: count > 0,
+    label: Text(
+      !current
+          ? '…'
+          : count > 99
+          ? '99+'
+          : '$count',
+    ),
+    child: child,
+  );
+}
+
 class FeedRefreshOverlay extends StatelessWidget {
   const FeedRefreshOverlay({
     super.key,
@@ -43,15 +70,9 @@ class FeedRefreshOverlay extends StatelessWidget {
                         if (onRefresh != null) const SizedBox(width: 8),
                       ],
                       if (onRefresh != null)
-                        Badge(
-                          isLabelVisible: newsCount > 0,
-                          label: Text(
-                            !newsCurrent
-                                ? '…'
-                                : newsCount > 99
-                                ? '99+'
-                                : '$newsCount',
-                          ),
+                        FeedActionBadge(
+                          count: newsCount,
+                          current: newsCurrent,
                           child: FloatingActionButton.small(
                             key: const ValueKey('spatial-feed-refresh'),
                             heroTag: 'refresh-feed',

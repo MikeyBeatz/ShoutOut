@@ -90,7 +90,31 @@ class FeedPageGateway<T> {
     cancelPending();
   }
 
-  Future<FeedBatch<T>> load(SpatialFeedContext context, Object? cursor) async {
+  Future<FeedBatch<T>> load(SpatialFeedContext context, Object? cursor) =>
+      _load(context, cursor);
+
+  /// Prepared transport, deliberately absent from Home/GPS wiring.
+  Future<FeedBatch<T>> recenter(
+    SpatialFeedContext context,
+    String proof, {
+    required SpatialFeedContext previous,
+  }) {
+    if (proof.isEmpty || proof.length > 262144) {
+      throw StateError('Invalid feed movement proof');
+    }
+    if (context.radiusKm != previous.radiusKm ||
+        context.order != previous.order ||
+        context.category != previous.category) {
+      throw StateError('Movement cannot change feed filters');
+    }
+    return _load(context, null, movementProof: proof);
+  }
+
+  Future<FeedBatch<T>> _load(
+    SpatialFeedContext context,
+    Object? cursor, {
+    String? movementProof,
+  }) async {
     final uid = currentUserId();
     if (_disposed || uid == null) throw StateError('No active feed account');
     if (cursor != null &&
@@ -113,7 +137,14 @@ class FeedPageGateway<T> {
       guard();
       final response = await send({
         'expectedUserId': uid,
-        if (token == null)
+        if (token == null && movementProof != null) ...{
+          'mode': 'recenter',
+          'token': movementProof,
+          'point': {
+            'latitude': context.latitude,
+            'longitude': context.longitude,
+          },
+        } else if (token == null)
           'context': {
             ...context.toPayload(),
             if (unreadFirst && context.order == 'nearest')

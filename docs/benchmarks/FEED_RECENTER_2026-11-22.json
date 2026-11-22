@@ -1,0 +1,113 @@
+{
+  "model": "Firestore emulator SDK operations/JSON bytes, not production billing or latency",
+  "report": [
+    {
+      "sources": 50,
+      "cold": {
+        "reads": 35,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 32708,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 34,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1899,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "pages": 1,
+      "selected": 50,
+      "movementProofBytes": 1581,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1755,
+        "responseBytes": 64752,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 3,
+        "requestBytes": 3742,
+        "responseBytes": 194148,
+        "maxCheckpointBytes": 0
+      }
+    },
+    {
+      "sources": 200,
+      "cold": {
+        "reads": 38,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 54438,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 34,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 1899,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "pages": 4,
+      "selected": 200,
+      "movementProofBytes": 1581,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1755,
+        "responseBytes": 66411,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 6,
+        "requestBytes": 8954,
+        "responseBytes": 396549,
+        "maxCheckpointBytes": 0
+      }
+    },
+    {
+      "sources": 2000,
+      "cold": {
+        "reads": 52,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 95011,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "warm": {
+        "reads": 40,
+        "queries": 2,
+        "writes": 0,
+        "sourceReads": 0,
+        "bytes": 2067,
+        "attempts": 6,
+        "signalWrites": 0
+      },
+      "pages": 40,
+      "selected": 2000,
+      "movementProofBytes": 1733,
+      "movementTransfer": {
+        "requests": 1,
+        "requestBytes": 1907,
+        "responseBytes": 67167,
+        "maxCheckpointBytes": 0
+      },
+      "transfer": {
+        "requests": 88,
+        "requestBytes": 232022,
+        "responseBytes": 2974591,
+        "maxCheckpointBytes": 0
+      }
+    }
+  ]
+}

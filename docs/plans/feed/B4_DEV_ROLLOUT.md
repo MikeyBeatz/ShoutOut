@@ -939,4 +939,70 @@ implementace, kterou lokální pohybový prototyp ještě nenahradil.
   serverové geografické přepínání zůstane vypnuté a Functions se nenasadí.
   Výsledky rebase, provozní meze a aktivační plán předložit samostatně.
 
-Toto je konkrétní návrh ke schválení, nikoli již schválená implementace.
+Vlastník 22. listopadu výslovně schválil celý tento rozsah. Automatické živé
+přesouvání tím schválené není; následuje místní výsledek a samostatný DEV web.
+
+<a id="badge-and-recenter-results"></a>
+
+### Jednotné číslovky a místní geografický rebase – 22. listopadu
+
+**Připravený kód:** oba plovoucí ovladače používají FeedActionBadge kolem
+celého FAB, se stejnou kotvou/odsazením. Neplovoucí zvonek zachovává dosavadní
+vzhled. Dva widget testy skutečného refresh/zvonku ověřují 1/99+/tečky/nulu,
+stisky, světlý/tmavý vzhled a šířku 320 px. Zachycený přesah 99+ je opravený.
+
+**Pohyb zůstává neaktivní:** getFeedDeltaOperation má důvěryhodnou volbu
+recenterEnabled, výchozí false. Žádný host ji nezapíná. Home/GPS nevolají
+novou cestu a DEV konfigurace se nemění. Samostatný podpisový účel movement
+používá stávající klíč, nevytváří nový secret. Potvrzení obsahuje jen kontext,
+nikoli 50 řádků stránky; completion/news token jej nemůže zastoupit.
+
+Server zachová původní databázové readTime, readRevision, UID, generaci,
+inkarnaci a hodinový termín. Nové oblasti čte historicky k původní hranici,
+takže ani nová publikace s dřívějším createdAt nevstoupí do rozpracované
+stránky; zůstává novinkou příslušného okolí. Nová podepsaná baseline má další
+geografickou revizi. Současná oprávnění, blokace, smazaní autoři, dostupnost,
+expirace a R5 se znovu kontrolují. R5 rodiče nelze obejít přesunem do jiné
+oblasti. Přesun neprodlužuje hodinovou platnost a nezapisuje B2 ani jiné údaje.
+
+Klientské jádro a gateway předají pouze nový bod a podepsané potvrzení,
+nedovolí zamíchat starý kurzor či změnit ostatní filtry. RAM potvrzení jsou
+oddělená účtem a mizí při změně účtu/generace či smazání. Body cache se používá
+dál. Nové okolí se potvrdí až s úplnou stránkou; chyba ponechá staré karty,
+okolí a checkpoint. Opožděné odpovědi po zrušení/zániku nepřepíšou relaci.
+Číslovka se nevynuluje, ale do ověření nového okolí je neaktuální.
+
+Samostatný FeedMovementView, dosud mimo Home, udrží skutečnou viditelnou
+kotvu při vložení 80 karet před ni, odstranění předchozích karet, změně
+výšek a odchodu samotné kotvy z okolí. Nejde jen o model offsetů.
+Místní slučování zachová pořadí již načtených platných karet uvnitř
+nepřečtených/přečtených, doplní nově nalezené a deduplikuje další stránky.
+**Není to důkaz úplného globálního pořadí všech dosud nenačtených karet při
+pohybu.** To znovu stanoví ruční obnova. Před aktivací je nutné tuto politiku
+výslovně předložit spolu s GPS mezemi; neoznačovat tento prototyp za hotové
+automatické chování aplikace. Při ztrátě news checkpointu se přesun nepotvrdí.
+
+**Místní ověření:** 474 Flutter testů, analýza bez nálezů, lint Functions;
+99 nástrojových testů. Dosavadní společná news regrese prošla 28/28, po
+doplnění poslední ochrany prošla samostatná rebase regrese 5/5. Zahrnuje
+změnu účtu, poškozený/cizí token, pauzu/generaci, R5, expiraci, mazání účtu
+během historického čtení, novou publikaci/přečtení a studený restart.
+Testy jsou zařazené i do úplného CI; jeho výsledek se ověří před nasazením.
+
+[Reprodukovatelné měření](../../benchmarks/FEED_RECENTER_2026-11-22.json):
+50/200/2 000 syntetických zdrojů, první stránka vždy nejvýše 50. Studená
+cesta 35/38/52 SDK reads, teplá 34/34/40; dvě directory queries, 0 zápisů
+a 0 čtení plných zdrojů. Kompletní procházení dalo 1/4/40 stránek bez duplicit.
+Podepsané potvrzení má 1 581–1 733 B a požadavek 1 755–1 907 B; dřívější
+reuse completion tokenu přenášel kolem 24 kB jen v požadavku. Odpověď první
+stránky má 64 752–67 167 B nekomprimovaného JSON včetně dosavadních metadata
+a completion/news tokenů. To zůstává prostor pro další optimalizaci,
+není to měření placených přenosů či produkční latence/5 000 souběžných relací.
+
+**Nasazení zatím neprovedeno:** po úspěšném úplném CI přesného commitu pouze
+Hosting shoutout-dev-46c81. Vrátit lze aktuální 346ea6fb1866da8e. Functions,
+Rules, data, Auth, Scheduler a prostředky se v tomto úseku nemění. Žádné nové
+živé fixture. Dosavadní GPS hláška zatím zůstane; její odstranění by nyní
+předstíralo zapnuté automatické okolí. B4 pauza/návrat, kompatibilní web a
+původní úklid nadále čekají. Oprava již hotových částí nepřidává novou váhu
+do stupnic; aktualizují se jejich důkazy, nikoli stav celé akceptace.

@@ -28,6 +28,14 @@ class FeedDeltaClient {
   bool _legacy = false;
   final _erased = <String>{};
   final _newsBaselines = <String, FeedNewsSignals>{};
+  final _movementProofs = <String, String>{};
+  // RAM only, scoped like body cache. No Home/GPS caller enables movement yet.
+  String? movementProofFor(String? baseline) {
+    final uid = currentUserId();
+    if (uid == null || uid != _viewer || _erased.contains(uid)) return null;
+    return _movementProofs[baseline];
+  }
+
   int lastNewsReadUnits = 0;
   FeedNewsSignals? newsSignalsFor(String? baseline) {
     final uid = currentUserId();
@@ -39,6 +47,7 @@ class FeedDeltaClient {
     if (uid == _viewer) return;
     _viewer = uid;
     _newsBaselines.clear();
+    _movementProofs.clear();
     _capabilityRevision = -1;
     _capabilityStamp = null;
     _legacy = false;
@@ -51,6 +60,7 @@ class FeedDeltaClient {
   void eraseAccount(String uid) {
     _erased.add(uid);
     _newsBaselines.clear();
+    _movementProofs.clear();
     if (_viewer == uid) {
       _epoch++;
       cache.bind(null);
@@ -77,7 +87,10 @@ class FeedDeltaClient {
             stamp != _capabilityStamp) {
       throw const FeedSessionExpired();
     }
-    if (_capabilityStamp != stamp) cache.clear();
+    if (_capabilityStamp != stamp) {
+      cache.clear();
+      _movementProofs.clear();
+    }
     _capabilityRevision = revision;
     _capabilityStamp = stamp;
     _legacy = mode == 'source-v1';
@@ -133,6 +146,18 @@ class FeedDeltaClient {
     if (wire['state'] == 'preparing') return {...wire, 'version': 1};
     final page = await _assemble(wire, scope, guard);
     final body = wire['bodyPage'];
+    if (body is Map &&
+        body['movementToken'] is String &&
+        wire['baseline'] is String) {
+      final proof = body['movementToken'] as String;
+      if (proof.isEmpty || proof.length > 262144) {
+        throw const FormatException('Invalid feed movement proof');
+      }
+      _movementProofs[wire['baseline'] as String] = proof;
+      while (_movementProofs.length > 2) {
+        _movementProofs.remove(_movementProofs.keys.first);
+      }
+    }
     if (body is Map && body['newsSignals'] is Map) {
       final signals = FeedNewsSignals.fromWire(body['newsSignals'] as Map);
       if (signals.baseline != wire['baseline']) {
