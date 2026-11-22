@@ -1230,3 +1230,6 @@ po ustálení byla kotva správná. Oprava rozlišuje slivery před/za kotvou a
 jejich skutečné indexy a nastaví odpovídající posun před layoutem. Trvalá
 regrese nyní kontroluje i první vykreslení, nejen pumpAndSettle; první
 připravený commit se s tímto známým problémem nenasazuje.
+Návrat z detailu navíc obnoví sledování a získá čerstvý fix i tehdy, když
+se zařízení už zastavilo a GPS sama nepošle další změnu. Zakrytá route
+geografické sledování odpojí; není třeba měnit kartu ani ručně obnovovat feed.

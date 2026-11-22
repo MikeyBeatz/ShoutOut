@@ -54,6 +54,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   bool _movementBusy = false;
   int _movementRevision = 0, _feedRefreshRevision = 0;
   int _positionEpoch = 0;
+  bool? _movementRouteCurrent;
   bool get _useMovement =>
       _useSpatialFeed && WebEnvironment.current.serverFeedMovement;
   bool _newsForeground = true;
@@ -442,6 +443,22 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final current = ModalRoute.of(context)?.isCurrent ?? true;
+    if (_movementRouteCurrent == current) return;
+    final returning = _movementRouteCurrent == false && current;
+    _movementRouteCurrent = current;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _syncMovement();
+      if (returning && _useMovement && _tab == 0 && _newsForeground) {
+        unawaited(_noticeSpatialMovement());
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _movement.dispose();
     unawaited(_movementPositions?.cancel());
@@ -697,6 +714,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   void _syncMovement() {
     final active =
         _useMovement &&
+        _movementRouteCurrent != false &&
         mounted &&
         _tab == 0 &&
         _newsForeground &&
