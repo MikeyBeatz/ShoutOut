@@ -25,8 +25,13 @@ a pending žádost ověřené; news stále 2/active. Během testu není evidovan
 požadavek. Jeden lokální test reprodukuje možnou ztrátu napojení při přerušení
 dokončení stránky; kontrolní rebind funguje. GPS hláška skutečně porovnává
 souřadnice bez tolerance. [Důkazy a konkrétní návrh](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis).
-Aplikační oprava čeká na souhlas; neskrývat neúspěch novou fixture ani jej
-nezapočítat do akceptace. Pauza/návrat/úklid zůstávají otevřené.
+Vlastník schválil opravu a lokální návrh pohybu. [Kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results)
+jsou připravené: napojení potvrzené baseline i po přerušení hosta, 6 nových
+regresí, 38 cílených / 468 celých Flutter testů, analýza bez nálezů a 99 tools
+testů. Pohybový prototyp má 18 čistě syntetických případů; žádný živý watcher
+ani jeho nové parametry se nezapínají. Úplné CI a následný pouze DEV web
+čekají; neskrývat živý neúspěch novou fixture ani jej nezapočítat do akceptace.
+Pauza/návrat/úklid zůstávají otevřené; další živé fixture nejsou tímto úsekem povolené.
 Samostatný další serverový návrh je soukromé mazání/moderace. Běžné okno feedu
 je na žádost vlastníka odložené, bez smazání místní fronty.
 

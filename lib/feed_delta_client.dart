@@ -29,7 +29,11 @@ class FeedDeltaClient {
   final _erased = <String>{};
   final _newsBaselines = <String, FeedNewsSignals>{};
   int lastNewsReadUnits = 0;
-  FeedNewsSignals? newsSignalsFor(String? baseline) => _newsBaselines[baseline];
+  FeedNewsSignals? newsSignalsFor(String? baseline) {
+    final uid = currentUserId();
+    if (uid == null || uid != _viewer || _erased.contains(uid)) return null;
+    return _newsBaselines[baseline];
+  }
 
   void retainViewer(String? uid) {
     if (uid == _viewer) return;

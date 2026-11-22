@@ -60,6 +60,7 @@ import 'feed_session.dart';
 import 'feed_page_gateway.dart';
 import 'feed_delta_runtime.dart';
 import 'feed_news_runtime.dart';
+import 'feed_news_binding.dart';
 import 'own_shouts_gateway.dart';
 import 'saved_shouts_gateway.dart';
 import 'shout_interaction_gate.dart';

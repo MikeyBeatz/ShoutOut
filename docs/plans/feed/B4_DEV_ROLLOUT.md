@@ -787,9 +787,74 @@ nepovažovat nynější upozornění za cílové chování.
    i vztah k B2 synchronizaci, read pořadí a starým kurzorům. Konkrétní meze
    a provozní zapojení předložit po měření; bez změny trvalého ukládání polohy.
 
-Zatím jde o návrh ke konkrétnímu souhlasu podle AGENTS.md; aplikační opravu ani
-živé automatické geografické přepínání tento diagnostický checkpoint nezavádí.
+Vlastník následně schválil opravu a lokální návrh pohybu: po úspěšném přesném
+úplném CI pouze DEV web, automatický pohyb zatím jen lokálně. Bez změn
+Functions, Rules, retence, prostředků, Auth účtů a dalších živých fixture.
 B4b/finální feed akceptace zůstávají false, bez nového procentního kreditu.
 Pauza/návrat, návratový web a úklid původního i náhradního manifestu čekají
 na funkční pozorující klient. Další testování nesmí přepsat novější DEV Rules
 476d216c-9208-4e5c-9143-f583cb82a3e9 ani vrátit starý web místo Auto artefaktu.
+
+<a id="news-ui-fix-results"></a>
+
+### Oprava napojení a lokální model pohybu – připravený kód
+
+Větev fix/feed-news-live-acceptance přidává FeedNewsBinding, který skutečný
+Home volá při změně potvrzené stránky, návratu do popředí, přepnutí sekce
+a dokončení obnovy. Kontext se připojuje podle potvrzené baseline nezávisle
+na tom, zda doběhl původní hostitelský finally. Skryté/načítané/expirované
+pohledy nemají aktivní odběry. FeedDeltaClient neposkytne kontext při změně
+UID, odhlášení nebo smazání účtu; chybějící kontext se bezpečně označí jednou
+v konzoli kódem missing-context bez výpisu baseline, UID či tokenů.
+Četnost 2/15/5 s, existující server, zdroje i oprávnění zůstávají stejné.
+
+Trvalý [test napojení](../../../test/feed_news_binding_test.dart) používá
+skutečný transportní adaptér, gateway, session, binding a runtime s fake
+transportem: 6 scénářů pro přerušené dokončení stránky, klidnou novou baseline,
+publikaci bez duplicitních odběrů, návrat/sekce, chybu obnovy, změnu účtu se
+zpožděnou odpovědí a zánik/expiraci pohledu. Cílený společný průchod má 38/38,
+celá místní Flutter sada 468/468, analýza bez nálezů. Nástrojová sada 99/99
+zahrnuje 7 nových pohybových scénářů. Úplné CI a DEV rollout zatím čekají.
+Původní živé selhání tím není zpětně označené jako úspěšné.
+
+Lokální [prototyp pohybu](../../../tools/feed_movement_prototype.mjs) má
+[testy](../../../tools/feed_movement_prototype.test.mjs) a reprodukovatelný report:
+`node tools/feed_movement_prototype.mjs --output build/feed-movement-report.json`.
+Je to 2 000 syntetických rovinných bodů v metrech, nikoli reálné polohy.
+Osmnáct případů porovnává 5/50 km, tři laboratorní politiky a 20 minut stání,
+chůze 1,4 m/s a jízdy 100 km/h s GPS šumem a deklarovanou přesností 25 m.
+Hranice níže nejsou schválené provozní parametry ani zapnutý watcher:
+
+| Laboratorní rezerva / min. odstup | Požadavky stání / chůze / vlak, včetně prvního | Největší posun před přepočtem ve vlaku |
+|---|---:|---:|
+| 100 m / 15 s | 1 / 12 / 81 | 445 m |
+| 250 m / 30 s | 1 / 6 / 41 | 850 m |
+| 500 m / 60 s | 1 / 4 / 21 | 1 695 m |
+
+Tabulka je pro ruční dosah 5 km; trasa má 1 201 polohových vzorků. Ve stání
+žádná politika neposlala další geografický požadavek kvůli kolísání GPS.
+U prostřední varianty model navštívil 239 nových metadatových buněk a 1 198
+znovu použil; načetl 386 jedinečných těl / 108 528 syntetických textových bytů
+na celou dvacetiminutovou jízdu (včetně počátečních 50 karet). Tyto hodnoty
+nejsou skutečné Firestore reads/bytes na drátě, účet, latence ani důkaz kapacity
+5 000 uživatelů: model vynechává přihlášení, ověření verzí, síťové obálky,
+skutečný tree layout a cache eviction. Počet přesných vzdálenostních kontrol
+je také evidovaný; geohash/řetězcové pořadí není vydáváno za vzdálenost.
+
+Prototyp ověřil přesný výběr 50 vůči nezávislému plnému seřazení, ořez mimo
+dosah/po expiraci, chybějící/zastaralé fixy, stabilní kotvu po vložení a
+deterministický návrat při jejím odebrání. Pozdější publikace zůstávají ve
+zvláštním počtu; geografický přepočet nemění publication cutoff. Jde o
+matematický model kotvy a členství, nikoli hotové Flutter scrollování či B3
+unread-first stránkování. Nic z prototypu se neimportuje do aplikace.
+
+**Doporučení pro další konkrétní návrh:** nepoužít jednu pevnou minutu při
+všech rychlostech. Spojit toleranci accuracy a rezervu pokrytí s rychlostí;
+zvolit přípustnou geografickou odchylku i horní četnost, ne jen interval.
+Existující podepsaný kurzor je vázaný na bod: živý přesun vyžaduje řízený rebase
+s vlastní geografickou revizí, zachováním publikačního cutoffu, read politiky,
+kotvy a deduplikace dalších stránek. Automatický pohyb nesmí spouštět B2 sync
+při každém GPS fixu ani tiše potvrdit čekající nové publikace. Výpadek zachová
+poslední potvrzené okolí s jedním stavem, ne výzvou po každém metru. Konkrétní
+rebase kontrakt, číselné meze a živé zapojení předložit zvlášť; GPS hláška se
+v nynějším schváleném webovém fixu ještě nemění.

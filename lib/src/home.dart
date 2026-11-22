@@ -48,6 +48,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   late final FeedSessionController<Shout, SpatialFeedContext> _spatialSession;
   final _spatialScroll = ScrollController();
   FeedNewsRuntime? _newsRuntime;
+  FeedNewsBinding? _newsBinding;
   bool _newsForeground = true;
   final Map<String, double> _spatialHeights = {};
   StreamSubscription<void>? _deltaContexts;
@@ -127,6 +128,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
           : null,
       idOf: (shout) => shout.id,
       onChanged: () {
+        _syncSpatialNews();
         if (mounted) setState(() {});
       },
     );
@@ -155,6 +157,13 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         onError: (error) => debugPrint(
           'Feed news detection failed: code=${liveDataFailureCode(error)}',
         ),
+      );
+      _newsBinding = FeedNewsBinding(
+        runtime: _newsRuntime!,
+        signalsFor: (baseline) =>
+            feedDeltaRuntime?.client.newsSignalsFor(baseline),
+        onMissingContext: () =>
+            debugPrint('Feed news detection unavailable: code=missing-context'),
       );
     }
     RegistrationTiming.finish('first-app-screen');
@@ -539,20 +548,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     } finally {
       if (mounted && attempt == _spatialRequest) {
         setState(() => _spatialLoading = false);
-        if (!_spatialFailed) {
-          final signals = feedDeltaRuntime?.client.newsSignalsFor(
-            _spatialSession.baseline,
-          );
-          if (signals != null) {
-            _newsRuntime?.configure(signals);
-          } else {
-            _newsRuntime?.clear();
-          }
-        }
-        _newsRuntime?.setActive(
-          _tab == 0 && _newsForeground,
-          freshBaseline: !_spatialFailed,
-        );
+        _syncSpatialNews(freshBaseline: !_spatialFailed);
       }
     }
   }
@@ -578,6 +574,17 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       if (propagate) rethrow;
     }
     if (mounted) setState(() {});
+  }
+
+  void _syncSpatialNews({bool freshBaseline = false}) {
+    if (!mounted) return;
+    _newsBinding?.update(
+      baseline: _spatialSession.baseline,
+      active: _tab == 0 && _newsForeground,
+      loading: _spatialLoading || _spatialSession.isRefreshing,
+      expired: _spatialSession.needsRefresh,
+      freshBaseline: freshBaseline,
+    );
   }
 
   Future<void> _spatialMore({bool prefetchOnly = false}) async {
@@ -623,7 +630,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       }
     }
     setState(() => _tab = index);
-    _newsRuntime?.setActive(index == 0 && _newsForeground && !_spatialLoading);
+    _syncSpatialNews();
     if (_useSpatialFeed && index == 0 && _spatialSession.context == null) {
       unawaited(_refreshSpatialFeed());
     } else if (_useSpatialFeed && index == 0) {
@@ -636,7 +643,6 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     if (!_useSpatialFeed) return;
     final active = state == AppLifecycleState.resumed && _tab == 0;
     _newsForeground = state == AppLifecycleState.resumed;
-    _newsRuntime?.setActive(active && !_spatialLoading);
     _spatialSession.setActive(active);
     if (!active) {
       _spatialGateway.cancelPending();
@@ -644,9 +650,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       ++_spatialRequest;
       _spatialLoading = false;
       _spatialLoadingMore = false;
+      _syncSpatialNews();
     } else if (_spatialSession.context == null) {
       unawaited(_refreshSpatialFeed());
     } else {
+      _syncSpatialNews();
       unawaited(_noticeSpatialMovement());
       _newsRuntime?.pulse(immediate: true);
     }

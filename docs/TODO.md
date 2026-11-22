@@ -91,7 +91,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    blokace B2 odloženou značkou není potvrzenou příčinou tohoto incidentu.
    [Pozdější C a jeden výslovně vyžádaný náhradní test](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis)
    zatím akceptaci nesplnily: vlastník číslovku neviděl. Před dalším testem
-   je navržená [oprava napojení a lokální návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
+   je schválená [oprava napojení a lokální návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
+   [Připravený kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results): 468 Flutter,
+   99 tools testů, analýza bez nálezů; úplné CI a DEV web čekají. Živý pohyb
+   zatím vypnutý, číselné meze/rebase potřebují konkrétní navazující návrh.
    Místní data nemazat a další fixture nevytvářet naslepo. Nasazení je splněné,
    společná akceptace zatím ne. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
