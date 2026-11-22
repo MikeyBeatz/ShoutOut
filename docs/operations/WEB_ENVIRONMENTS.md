@@ -1,6 +1,16 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web a reader – obnova po pauze 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+**Aktuální DEV web a reader – pohyb 22. listopadu:** [důkazy a čekající akceptace](../plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+Zdroj 78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88, success úplné CI 45077814590,
+Hosting **2d6ae9af70840b03**, getFeedPage **getfeedpage-00007-moc**, 100 % provozu.
+67 shodných app souborů / 8 HTTP kontrol. Ostatních 19 Functions, Rules,
+prostředky a plánovače zachované. Feed 12 / news 6/active; DEV pohyb zapnutý,
+produkční flag false a produkce nenasazená. Ruční UI akceptace čeká.
+Návratový kompatibilní web **6762922852bede94**; zachovat serverové protokoly,
+generace i místní fronty. Operátorský čistý checkout je
+build/feed-movement-release-47720ec, skutečný HEAD **78d6a3f** (název složky není SHA důkaz).
+
+**Předchozí DEV web a reader – obnova po pauze 22. listopadu:** [důkazy](../plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
 Zdroj b57f6b9793b70530369384cb07eee7f4e56af9c4, success úplné CI 45071219942,
 Hosting **6762922852bede94**, getFeedPage **getfeedpage-00006-niz**.
 Shodných 67 app souborů a 8 HTTP kontrol; ostatních 19 Functions, Rules

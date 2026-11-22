@@ -15,7 +15,8 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 **22. listopadu – aktuální návaznost:** [návrat po pauze a ruční dosahy](B4_DEV_ROLLOUT.md#news-pause-recovery-results)
 jsou ověřené v DEV (b57f6b9, news 6/active, feed 12). [Schválené zapojení pohybu](B4_DEV_ROLLOUT.md#movement-integration)
-se dokončuje jako jeden úsek; ruční kontrola na konci a potom úklid zbývajících
+je nasazené pouze v DEV z 78d6a3f / úplného CI 45077814590 success;
+ruční kontrola na konci a potom úklid zbývajících
 manifestů. Níže uvedené počáteční stavy pilotů jsou historie, nikoli současná
 inventura ani pokyn znovu publikovat testy.
 

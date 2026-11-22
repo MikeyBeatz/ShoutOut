@@ -161,5 +161,37 @@
         "maxCheckpointBytes": 0
       }
     }
-  ]
+  ],
+  "controllerSimulation": {
+    "scope": "Synthetic time/GPS through the actual Dart controller; no network or Firebase writes.",
+    "report": [
+      {
+        "scenario": "standing",
+        "seconds": 1200,
+        "gpsFixes": 1200,
+        "speedMetersPerSecond": 0,
+        "movementRequestsExcludingInitialLoad": 0,
+        "minimumIntervalMillis": 30000,
+        "accuracyMeters": 25
+      },
+      {
+        "scenario": "walking",
+        "seconds": 1200,
+        "gpsFixes": 1200,
+        "speedMetersPerSecond": 1.4,
+        "movementRequestsExcludingInitialLoad": 5,
+        "minimumIntervalMillis": 30000,
+        "accuracyMeters": 25
+      },
+      {
+        "scenario": "train",
+        "seconds": 1200,
+        "gpsFixes": 1200,
+        "speedMetersPerSecond": 27.77777777777778,
+        "movementRequestsExcludingInitialLoad": 40,
+        "minimumIntervalMillis": 30000,
+        "accuracyMeters": 25
+      }
+    ]
+  }
 }

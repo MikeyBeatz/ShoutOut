@@ -1233,3 +1233,71 @@ připravený commit se s tímto známým problémem nenasazuje.
 Návrat z detailu navíc obnoví sledování a získá čerstvý fix i tehdy, když
 se zařízení už zastavilo a GPS sama nepošle další změnu. Zakrytá route
 geografické sledování odpojí; není třeba měnit kartu ani ručně obnovovat feed.
+
+**DEV rollout dokončený, živá akceptace čeká:** zdroj
+**78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88** má [success úplné CI 45077814590](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45077814590).
+Nejprve nasazen a ověřen getFeedPage **getfeedpage-00007-moc**, 100 % provozu,
+staré revize retired, min0/max1/concurrency1/256 MiB/15 s zachované. Potom
+Hosting **2d6ae9af70840b03**, shodných 67 app souborů a 8 skutečných HTTP
+odpovědí na obou doménách. Ostatních 19 Functions a Rules 476d216c…a3e9 mají
+původní stav/prostředky. Feed control 12 a news 6/active, žádná migrace nebo
+indexová/Scheduler/Storage změna. Návratový web **6762922852bede94**.
+Podklady build/feed-movement-release-ci/-functions/-hosting.json a
+build/feed-movement-function-deploy.log / -hosting-deploy.log. Bez identity
+vrací endpoint HTTP 401/UNAUTHENTICATED, což je pouze negativní kontrola,
+nikoli úspěšný přihlášený pohybový průchod.
+
+Čerstvá inventura v 22:46 UTC: 91 zdrojů, původních 38 Shoutů a pending
+žádost s nezměněnými verzemi; podklad build/feed-movement-data-active.json.
+Nad rámec již schváleného C2 nevznikly žádné testovací zápisy nebo Auth mutace.
+Pro následný úklid je připravený čistý checkout build/feed-movement-release-47720ec
+na skutečném HEAD **78d6a3f** a stejné neměnné manifesty. Jeho název neurčuje
+zdroj, před spuštěním ověřit HEAD/čistotu/CI a digests znovu. Kanonické
+manifesty po dokončení synchronizovat se zachováním původních plánů/digestů.
+
+Dodatečná místní simulace používá přímo Dart FeedMovementController a jeden
+společný virtuální čas pro události i Timer: 1 200 GPS fixů / 20 minut pro
+stání, chůzi 1,4 m/s a jízdu 100 km/h. Výsledkem je **0 / 5 / 40** geografických
+požadavků nad rámec úvodního načtení; všechny rozestupy nejméně 30 s, nejistota
+25 m a šum do 15 m. Jde o syntetické časování, 0 sítí/databázových zápisů;
+ne měření účtu, cloudu ani přesnosti skutečné GPS. Reprodukce
+build/feed-movement-policy-simulation_test.dart, výstup
+build/feed-movement-policy-simulation.json; souhrn je také v připojeném měření.
+
+<a id="movement-manual-acceptance"></a>
+
+### Jediný čekající ruční průchod a následný úklid
+
+Prohlížečový host je stále nedostupný, potvrzeno novou inventurou. Nelze tím
+nahrazovat ruční UI důkaz. Vlastník požádal nechat ruční průchod až na konec;
+automatické kontroly, rollout a dry-run proto předcházejí této kontrole.
+Použít fungující anonymní kartu a existující TestBusiness, žádné nové Shouty
+nebo Auth účty. Přibližně tři minuty, bez konzolových skriptů:
+
+1. Otevřít https://shoutout-dev-46c81.web.app/?mvp=78d6a3f a Ctrl+R, povolit polohu.
+2. V DevTools F12 otevřít Ctrl+Shift+P → Show Sensors. V Location vybrat
+   Custom location/Other a zadat Latitude **50.5300**, Longitude **14.1300**,
+   Accuracy **25**. Každé pole potvrdit Tab. Ostatní nastavení neměnit.
+   [Oficiální postup Chrome](https://developer.chrome.com/docs/devtools/sensors);
+   [pole Accuracy v implementaci](https://chromium.googlesource.com/devtools/devtools-frontend/+/main/front_end/panels/sensors/SensorsView.ts).
+   Výchozích 150 m není pro schválený filtr do 100 m vhodných; pokud pole
+   Accuracy chybí, test zastavit a uvést to, limity ani ochrany neobcházet.
+3. V aplikaci nastavit **1 km**, jednou plovoucí obnova, počkat na „MVP restart…“
+   a posunout seznam o několik karet. Od této chvíle neobnovovat ručně.
+4. Po alespoň 30 s v popředí změnit jen Latitude na **50.5340** a potvrdit Tab.
+   Do dalšího cyklu + sítě se mají změnit vzdálenosti bez skoku scrollu a bez
+   hlášky „Poloha se změnila…“. Karty jsou stále do 1 km.
+5. Po dalším nejméně 30s odstupu změnit Latitude na **50.5420**. V tomto 1km
+   okruhu mají restartovací karty samy zmizet; dosah se automaticky nerozšíří.
+6. Po dalším nejméně 30s odstupu vrátit Latitude **50.5300**. Karty se mají
+   vrátit samy. Při každém čekání ponechat kartu aplikace viditelnou.
+7. Nakonec Sensors → No override, dosah **50 km** a jedna plovoucí obnova pro
+   návrat ke skutečné poloze. Popsat výsledek nebo první konkrétní chybu.
+
+Po potvrzení: z čistého uvedeného zdroje s úplným CI provést restart cleanup
+digest e29b1bf9…ef74, ověřit zachování původních 40/pending a potom původní
+A/B/C digest 86221a33…19fe. Ověřit 38 původních zdrojů, chybějící testovací
+publicStates, absenci testovacích cloudových read klíčů a neporušené ostatní
+read položky. Teprve poté dokončit společné akceptační díly; dosavadní kladnou
+číslovku, expiraci a kompatibilní rollback neopakovat. Délka nynějšího feedu
+po hodině vyžaduje obnovu nezávisle na pohybu a netvoří nový problém.

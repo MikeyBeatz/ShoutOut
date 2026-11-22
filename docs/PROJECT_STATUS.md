@@ -6,16 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Právě schválené a místně připravené:** [živé zapojení pohybu + poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
-Meze 30 s / 250 m + nejistota obou fixů, fix do 30 s a přesnost do 100 m;
-poslední potvrzené okolí při výpadku, úplné nové seřazení ruční obnovou.
-Klientské/serverové zapojení a nástroj úklidu restart 50 jsou připravené;
-zpráva níže o vypnutém pohybu platí pro dosud nasazený b57f6b9. Následuje
-společné úplné CI a DEV getFeedPage + web, pak jediný ruční průchod a úklid.
-Krátký náhradní C2 již uklizený: 1 zdroj / 0 read klíčů, původní data zachovaná.
-Zbývajících 50 restartovacích a původní A/B/C zatím ponechat pro závěr.
+**Nyní nasazené a automaticky ověřené:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+Zdroj **78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88**, [success úplné CI 45077814590](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45077814590).
+Hosting **2d6ae9af70840b03**, getFeedPage **getfeedpage-00007-moc**, 100 % provozu;
+staré revize retired, ostatních 19 Functions/Rules/prostředky zachované.
+Shodných 67 app souborů a 8 HTTP kontrol, serverFeedMovement true pouze DEV.
+Meze 30 s / 250 m + nejistota obou fixů, fix do 30 s a přesnost do 100 m.
+Automaticky ověřený je i první snímek, velké vložení/odebrání a návrat z pozadí;
+ruční UI/pohybová akceptace zatím neproběhla. [Jediný zbývající ruční průchod](plans/feed/B4_DEV_ROLLOUT.md#movement-manual-acceptance)
+je až na konci; po něm restart úklid 50 → původní A/B/C podle manifestů.
+Nástroj úklidu má místní/emulátorové testy a živý dry-run 50 kandidátů / 0 zápisů.
+C2 již uklizený: 1 zdroj / 0 read klíčů. Čerstvá inventura 91 zdrojů,
+38 původních a pending žádost zachované; feed control 12, news 6/active.
+Žádné nové fixture/Auth, migrace či produkční změny. Návratový web 6762922852bede94.
 
-**Aktuální DEV úsek B4:** [návrat novinek po pauze a ruční dosahy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+**Předchozí DEV úsek B4:** [návrat novinek po pauze a ruční dosahy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
 Zdroj **b57f6b9793b70530369384cb07eee7f4e56af9c4** má
 [success úplné CI 45071219942](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45071219942).
 Nasazený a ověřený je pouze DEV web **6762922852bede94** a getFeedPage
@@ -28,10 +33,10 @@ VALID. Feed control zůstává 12, všech 92 zdrojů včetně 38 původních a p
 news kvóty potvrzuje ukončení úspěšných count kontrol v klidu; automatický návrat
 je samostatně uzavřený. Následuje původní úklid; společná B4 akceptace zůstává otevřená.
 
-**Pohyb není dokončený:** vlastník znovu potvrdil hlášku „Poloha se změnila…“.
-Automatický přesun okolí je stále vypnutý; místní prototyp níže není živá funkce.
-Před jeho zapojením chybějí schválené číselné meze a živý průchod. Neoznačovat
-odstranění této hlášky ani automatické přizpůsobování okolí za hotové.
+**Pohyb má zapojený DEV kód, ale čeká živá akceptace:** původní hlášku
+„Poloha se změnila…“ aktivovaná větev nepoužívá. Při výpadku zachová poslední
+potvrzené okolí s jedním stavem. Nasazení ani simulace nenahrazují ruční průchod;
+starší vypnuté prototypy níže jsou historické checkpointy.
 
 **Předchozí dokončený úsek:** [jednotné číslovky + místní geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results).
 Zdroj **211471bbdb9df36fde9b233adb4149f2e45adfc8**, [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533),
@@ -1016,13 +1021,13 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 |---|---|
 | Projekt / Hosting site | `shoutout-dev-46c81` |
 | Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `b57f6b9793b70530369384cb07eee7f4e56af9c4` / `6762922852bede94`; úplné CI 45071219942 success. B2/B3/B4 aktivní; 67 app souborů a 8 HTTP kontrol na obou doménách shodných s releasem. Ruční dosahy 1–50 km, výchozí 50. |
+| Webový zdroj / Hosting verze | `78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88` / `2d6ae9af70840b03`; úplné CI 45077814590 success. B2/B3/B4 a pohyb aktivní pouze DEV; 67 app souborů / 8 HTTP kontrol. Ruční dosahy 1–50 km, výchozí 50. |
 | Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
 | Příprava mazání | Zdroj `8b1de68`, ACTIVE `prepareaccountdeletion-00004-jeh`; společný B4 writer |
 | Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
 | Účtové Functions | `8b1de68`, obě ACTIVE; request `00014-sux`, recovery `00014-pof`; 43 zdrojových modulů ověřeno, prostředky/read úklid zachované. |
 | B2 čtecí Functions | `bc4a6e1`, ACTIVE `syncreadbatch-00001-fox` / `getreadstatepage-00001-xub`, klíč v1, min0/max1/concurrency1/256 MiB/15 s, oba HTTP 401 bez identity/attestace; ZIP shodné s 10 soubory balíčku. |
-| Čtecí Functions | `b57f6b9`: ACTIVE `getfeedpage-00006-niz`, delta/V1 kompatibilita a vyjednaný newsRecovery; stávající klíč/limity, 100 % provozu, staré revize retired. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zachované. |
+| Čtecí Functions | `78d6a3f`: ACTIVE `getfeedpage-00007-moc`, delta/V1, newsRecovery a podepsaný rebase/retained metadata; stávající klíč/limity, 100 % provozu, staré revize retired. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zachované. |
 | Obsahové writery | ACTIVE `createshout-00007-viz` z 20206c4, `deleteshout-00004-wos`, `toggleshoutreaction-00010-toz`; společný B4 writer. Recovery rollout je neměnil. |
 | Další B4 writery | `8b1de68`: ACTIVE `createcomment-00005-ziz`, `deletecomment-00005-xec`, `toggleshoutsave-00007-kiz`; obsahový artefakt má 57 zdrojových modulů. toggleCommentReaction, createContentReport a createPrivateReply se tímto rolloutem neaktualizovaly. |
 | Firestore Rules | `476d216c-9208-4e5c-9143-f583cb82a3e9`, zdroj 17317e9; uzavření přímých obsahových zápisů, B4 publicStates a ochrany čítačů/ukládání. Recovery rollout je neměnil. |
@@ -1033,7 +1038,7 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 Aktuální recovery důkazy jsou v [živém protokolu](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results);
 původní desetifunkční přechod B4 v [dřívějším protokolu](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results).
 Poslední úsek aktualizoval pouze getFeedPage a web; ostatní nespojovat
-do jednoho nového artefaktu. Návrat webu tohoto úseku: 3881ef4d17f67aa8.
+do jednoho nového artefaktu. Návrat webu tohoto úseku: 6762922852bede94.
 Celkový návrat B4: operátorem reader feed-v2, zachovat
 všechny tři writery, přepnout kompatibilní web jen podle plánu; předchozí
 Hosting je 5b4d711b715a85e3 / fc795ad.

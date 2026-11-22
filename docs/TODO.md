@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,35 %** — vážené dokončení podúseků
 
-Hotové úseky: **178/234**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **179/234**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **206/309**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **207/309**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -55,19 +55,22 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Nyní ucelené zapojení pohybu a závěrečný úklid:** [schválené meze a připravený rozsah](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
-   Ruční průchod až po úplném CI a DEV nasazení; předem dokončit automatické
-   regrese a dry-run restart úklidu. C2 uklizený, zbývajících 50 restartovacích
-   Shoutů a původní A/B/C zůstávají pro závěr. Nasazený stav zatím b57f6b9 níže.
-   **Aktuálně nasazené ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
+   **Pohyb je nasazený v DEV, čeká už jen závěr:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+   78d6a3f / úplné CI 45077814590 success, Hosting **2d6ae9af70840b03**,
+   getFeedPage **00007-moc**. Automatické kontroly, simulace i živý dry-run
+   úklidu jsou hotové. [Jediný ruční průchod](plans/feed/B4_DEV_ROLLOUT.md#movement-manual-acceptance)
+   a potom restart 50 → původní A/B/C podle manifestů. C2 je již uklizený.
+   Ostatní Functions, Rules, prostředky a produkce zachované; neuzavírat
+   finální akceptaci před odpovědí a skutečným úklidem.
+   **Předchozí ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
    b57f6b9 / úplné CI 45071219942 success, DEV Hosting **6762922852bede94**,
    getFeedPage **00006-niz**. Vlastník potvrdil dosahy 1–50 km, výchozí 50, bez
    Auto/údaje o načteném dosahu a funkční obnovu/detail během 5/paused. Po
    6/active doložené úspěšné klientské volání s Auth/App Check VALID a dalších
    101 s bez změny news kvóty. Návrat novinek uzavřený; zbývá původní úklid.
    Ostatních 19 Functions a Rules zachované.
-   Hláška o změně polohy stále existuje; automatický pohyb je dosud vypnutý
-   a vyžaduje dokončení mezí/živého zapojení. Nezaměňovat s hotovým lokálním prototypem.
+   V tomto starším b57f6b9 byl pohyb vypnutý. Aktuální zapojení je výše;
+   samotný starší prototyp nebyl důkaz jeho živé funkčnosti.
    **Historické Auto hledání, nyní nahrazené ručním 50 km:** [původní chování a výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
    Klientská příprava a 38 různých cílených regresí jsou hotové; zdroj 6bef37c
    má success úplné CI 45020677812. DEV Hosting 06df6da99db68e74 je ověřený
