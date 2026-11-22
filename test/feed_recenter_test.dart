@@ -136,7 +136,7 @@ void main() {
             };
           }
           final result = fixtures.reply(body: requests.length == 1);
-        (result['bodyPage'] as Map)['movementToken'] = 'movement-proof';
+          (result['bodyPage'] as Map)['movementToken'] = 'movement-proof';
           result['baseline'] = requests.length == 1 ? 'base' : 'moved';
           result['next'] = requests.length == 1 ? 'old-cursor' : null;
           return result;
