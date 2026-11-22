@@ -17,26 +17,24 @@ Hosting 06df6da99db68e74 a všech 20 Functions zůstaly beze změny; bez nových
 Auth účtů a živých testovacích zápisů. Čtení, role, retence, moderace a vlastní
 soukromé mazání zůstávají zachované. Návratový ruleset 5dde23bc-6ede-4c90-a2e4-7e47ff3034d2.
 
-**Další krok:** [oprava napojení novinek a návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
-Živý C test vlastník nepozoroval; na jeho výslovnou žádost vznikl jeden
-samostatný náhradní C na 60 s. U něj potvrdil „nic se neobjevilo“, TestBusiness
-a viditelný restart 025. Obě fixture jsou expirované, index/38 původních zdrojů
-a pending žádost ověřené; news stále 2/active. Během testu není evidovaný news
-požadavek. Jeden lokální test reprodukuje možnou ztrátu napojení při přerušení
-dokončení stránky; kontrolní rebind funguje. GPS hláška skutečně porovnává
-souřadnice bez tolerance. [Důkazy a konkrétní návrh](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis).
-Vlastník schválil opravu a lokální návrh pohybu. [Kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results)
-jsou připravené: napojení potvrzené baseline i po přerušení hosta, 6 nových
-regresí, 38 cílených / 468 celých Flutter testů, analýza bez nálezů a 99 tools
-testů. Zdroj **34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43** má
-[success úplné CI 45060709344](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45060709344); DEV Hosting **346ea6fb1866da8e**
-je nasazený a ověřený (69 souborů / 8 HTTP kontrol). Rules i 20 Functions
-beze změny; návratový web 06df6da99db68e74. Žádné další fixture/Auth účty.
-Pohybový prototyp má 18 čistě syntetických případů; žádný živý watcher ani jeho
-nové parametry se nezapínají. Živou číslovku tím ještě nezapočítat do akceptace.
-Pauza/návrat/úklid zůstávají otevřené; další živé fixture nejsou tímto úsekem povolené.
-Samostatný další serverový návrh je soukromé mazání/moderace. Běžné okno feedu
-je na žádost vlastníka odložené, bez smazání místní fronty.
+**Poslední potvrzený klientský úsek:** [obnovené sledování, číslovka 1 a expirace](plans/feed/B4_DEV_ROLLOUT.md#news-positive-acceptance).
+Pod TestBusiness prošel Profil → feed skutečným callable (Auth/App Check VALID,
+HTTP 200 / 0,421 s). Vlastník zvlášť povolil jeden nový C na 60 s a potvrdil
+tečky → 1 → tečky → bez čísla. Tento C je uklizený: 1 zdroj / 0 read značek,
+38 původních zdrojů a pending žádost zachované; žádné Auth mutace.
+Zdroj **34268e5f2e2416f6c3e7c3f23cc4f82a4bd20d43**, success úplné CI 45060709344,
+DEV Hosting **346ea6fb1866da8e** a jeho 67 app souborů / 8 HTTP kontrol jsou ověřené.
+Rules i všech 20 Functions beze změny; návratový web 06df6da99db68e74.
+
+**Další konkrétní návrh:** [sjednotit umístění číslovek a lokálně připravit geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal).
+Zvonkový badge nyní obaluje ikonu, refresh celý FAB; rozdíl je potvrzený.
+GPS hláška porovnává souřadnice bez tolerance. Pohyb má zatím jen lokální model
+(18 syntetických případů), žádné živé automatické přesouvání se nezapínalo.
+Nový zdrojový rozsah před úpravami schválit; nepovažovat hlášku za cílové chování.
+Společná B4b/finální feed akceptace zůstává otevřená: pauza/návrat, kompatibilní
+web a úklid původních manifestů. Neopakovat hotový kladný/expirační test.
+Běžné okno feedu je na žádost vlastníka odložené, bez smazání místní fronty.
+Samostatný další serverový návrh je soukromé mazání/moderace.
 
 **Samostatná serverová kontrola závěrečného feedu prošla:** oba účty 50 + 2,
 52 jedinečných karet, jedna baseline přes stránky, potvrzené unread-first

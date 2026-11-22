@@ -872,3 +872,71 @@ při každém GPS fixu ani tiše potvrdit čekající nové publikace. Výpadek 
 poslední potvrzené okolí s jedním stavem, ne výzvou po každém metru. Konkrétní
 rebase kontrakt, číselné meze a živé zapojení předložit zvlášť; GPS hláška se
 v nynějším schváleném webovém fixu ještě nemění.
+
+<a id="news-positive-acceptance"></a>
+
+### Živé připojení, číslovka a expirace po opravě – 22. listopadu
+
+Vlastník pod TestBusiness obnovil 34268e5, provedl Profil → feed a ponechal
+aplikaci v popředí. Potvrdil normální zobrazení bez čísla. News quota skutečně
+změnila updateTime na 19:44:48.991 UTC; jediný odpovídající HTTP požadavek
+v 19:44:48.862 UTC má Auth/App Check VALID, HTTP 200 a trvání 0,421 s.
+To je platformní důkaz obnoveného připojení, ne jen interní jádro.
+Podklad build/b4b-news-reattachment-proof.json.
+
+Předchozí souhlas opravy vylučoval nové fixture. Vlastník proto následně
+výslovně schválil jeden nový 60sekundový C a odpověděl „Ano, sleduji tlačítko“.
+Samostatný manifest build/b4b-dev-release/docs/local/b4b-postfix-pilot-state.json
+má digest 673401539524da3901941860a590d89bdb20af4c244887af46e690b2e9c41058;
+vznikl pouze C mvp-b4b-postfix-0566d68ca95e-C, žádné A/B či Auth účty.
+Publikace 19:48:36.149 UTC, expirace 19:49:36.149 UTC. Během platnosti i po
+expiraci proběhly news požadavky; update quota po expiraci je 19:49:55.346 UTC.
+Cloud Logging dočasně odmítlo další diagnostický dotaz HTTP 429; nejde o chybu
+aplikačního callable. Pozdější ověření použilo přímo read-only technické dokumenty.
+
+Vlastník potvrdil „tři tečky, pak číslovka 1, pak zase tři tečky a místo pro
+číslo zmizelo úplně“. Tím jsou živě potvrzené kladná číslovka a odečtení po
+expiraci; tečky vyjadřují ověřovaný stav. Výslovné nové potvrzení stability
+scrollu z této odpovědi neodvozovat. C byl poté vyčištěný ověřeným operátorem:
+removed 1 / readKeys 0, 38 původních zdrojů a pending žádost zachované,
+authMutations 0. Jeho manifest je cleaned; ostatní pilotní manifesty se
+nečistily. Podklady build/b4b-postfix-expired-observe.json a manifest.cleanup.
+
+Dokončený dílčí důkaz se eviduje jako feed-b4-news-positive-accept. Z původní
+otevřené feed-b4-accept váhy 44 v MVP / 70 v backlogu dostává 11 / 18;
+zbývajících 33 / 52 ponechává původní společná akceptace. Již hotové váhy se
+nemění, původní závislosti se zachovají a finální feed brána zůstává otevřená.
+Čekají pauza/návrat, kompatibilní web a úklid původních manifestů.
+
+**Nové UI připomínky:** číslovka zvonku je uvnitř jeho 24px ikony, zatímco
+číslovka obnovy obaluje celý FloatingActionButton. Rozdílná kotva je tedy
+potvrzená ve zdroji, nikoli domnělá chyba počtu. GPS hláška je dosavadní
+implementace, kterou lokální pohybový prototyp ještě nenahradil.
+
+<a id="badge-and-recenter-proposal"></a>
+
+### Návrh dalšího uceleného úseku – jednotné badge a lokální přesun okolí
+
+- Sjednotit číslovky obou plovoucích tlačítek do stejného vnějšího pravého
+  horního rohu jednou sdílenou komponentou. Zachovat počty, 99+, stav ověřování,
+  neviditelnou nulu a ovládání; neplovoucí zvonek tím nepřekreslovat. Ověřit
+  zarovnání pro 1/99+/tečky ve světlém/tmavém vzhledu a úzkém viewportu.
+- Lokálně připravit serverový a klientský rebase geografického kontextu za
+  vypnutou volbou: nová geografická revize a podepsaný pokračovací kontext,
+  původní serverová publikační hranice (nikoli hodiny zařízení), stejná read
+  politika, UID/generace/R5 a původní hodinová platnost. Nová poloha nesmí
+  přijmout staré kurzory ani vynulovat počet čekajících publikací.
+- Přesun potvrdit atomicky až s úplnou novou stránkou, zachovat kotvu scrollu,
+  deduplikaci, cache těl a platné karty; při chybě ponechat dosavadní okolí.
+  Geografické doplnění starších příspěvků oddělit od nově publikovaných.
+  Žádná B2 synchronizace při každém GPS fixu. Číselné meze pro accuracy,
+  rezervu a četnost zůstávají laboratorní až do měření a dalšího rozhodnutí.
+- Zachovat stávající mez stránky 50, společný transakční rozpočet a ochrany;
+  ověřit souběh publikace/přečtení/expirace, pohyb přes oblasti, restart,
+  výpadek, starý kurzor, změnu účtu a operace/přenosy v emulátoru. Bez nových
+  živých kolekcí, migrace, Rules, Auth účtů, Scheduleru, prostředků či retence.
+- Po úspěšném přesném úplném CI pouze DEV web s opravou zarovnání; živé
+  serverové geografické přepínání zůstane vypnuté a Functions se nenasadí.
+  Výsledky rebase, provozní meze a aktivační plán předložit samostatně.
+
+Toto je konkrétní návrh ke schválení, nikoli již schválená implementace.

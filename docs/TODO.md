@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,33 %** — vážené dokončení podúseků
 
-Hotové úseky: **173/228**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **174/229**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **201/303**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **202/304**. Celé položky: **107/157**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
@@ -89,15 +89,15 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Vlastník našel Network / Offline; po obnovení připojení feed i změna dosahu
    fungují, přetrvávající prodleva zatím není změřená. Samostatně reprodukovaná
    blokace B2 odloženou značkou není potvrzenou příčinou tohoto incidentu.
-   [Pozdější C a jeden výslovně vyžádaný náhradní test](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis)
-   zatím akceptaci nesplnily: vlastník číslovku neviděl. Před dalším testem
-   je schválená [oprava napojení a lokální návrh automatického pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-proposal).
-   [Připravený kód a měření](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results): 468 Flutter,
+   [Původní selhání C](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis) vedlo
+   k [opravě napojení a lokálnímu modelu pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results): 468 Flutter,
    99 tools testů, analýza bez nálezů; 34268e5 / úplné CI 45060709344
-   success, DEV Hosting 346ea6fb1866da8e je nasazený a zdrojově ověřený. Živý pohyb
-   zatím vypnutý, číselné meze/rebase potřebují konkrétní navazující návrh.
-   Místní data nemazat a další fixture nevytvářet naslepo. Nasazení je splněné,
-   společná akceptace zatím ne. Společná finální
+   success, DEV Hosting 346ea6fb1866da8e je nasazený a zdrojově ověřený.
+   [Nový výslovně povolený C potvrdil číslovku 1 a odečtení po expiraci](plans/feed/B4_DEV_ROLLOUT.md#news-positive-acceptance);
+   je uklizený a tento dílčí důkaz je započítaný. Hotový test neopakovat.
+   Další [konkrétní návrh: zarovnání badge a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal)
+   čeká na schválení; živý pohyb zatím vypnutý. Místní data nemazat a další
+   fixture nevytvářet naslepo. Pauza/návrat a původní úklid stále čekají. Společná finální
    akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
    Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
    [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
