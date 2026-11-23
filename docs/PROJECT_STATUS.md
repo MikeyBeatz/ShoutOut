@@ -6,6 +6,20 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválené DEV navázání veřejného odstranění – příprava:** vlastník schválil
+[celý přechod a vymezený pilot](MVP_SERVER_PLAN.md#moderation-public-dev-proposal).
+Wrapper, nový řízený pilot a host/CLI testy jsou připravené; společný běh má
+41/41 emulátorových scénářů (včetně 5 nových pilotních), 2/2 host, 111 nástrojových
+a 519 Flutter testů prošlo. Dva původní konfigurační testy byly přizpůsobené
+aktivaci DEV přepínače; ověřují nezávislé vypnutí bez App Check. V source config/dev je nová volba
+true, prod false; aktuální živý web zatím zůstává 33853a9 / server 44e07a5.
+Následují společné regrese a úplné CI přesného aktivačního zdroje, nejdříve
+jen nová removeReportedPublicContent a existující cleanupOperationReceipts,
+potom DEV web. Zatím žádné živé zápisy/nasazení ani nová fixture. Pilot
+založit až při dostupném klientu; pouze 1 Shout/2 komentáře/2 hlášení,
+TestModerator, potom úklid se zachováním receipts. Rules/indexy/Auth/main/
+produkce beze změny, neoznačovat živou akceptaci před skutečným výsledkem.
+
 **Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
 větev feature/report-public-removal. Atomické odstranění Shoutu/komentáře,
 celá skupina do 50 hlášení, audit, 7denní replay a neaktivní klient jsou hotové.
@@ -19,7 +33,7 @@ včetně nových/starších serverových regresí, Rules, retence a webového bu
 serverPublicReportRemoval false v DEV i prod, bez wrapperu,
 nasazení, živých dat/Auth/Rules nebo změn prostředků. Připravený je
 [konkrétní další DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal),
-který zatím nebyl schválen. Zbývají také sankce, osiřelá hlášení a společný
+který vlastník následně schválil a připravuje se výše. Zbývají také sankce, osiřelá hlášení a společný
 audit/cutover autority; celý moderační milník není uzavřený.
 
 **Právě uzavřeno: [B4 a finální DEV regrese celého feedu](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).**

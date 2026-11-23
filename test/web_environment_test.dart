@@ -14,6 +14,7 @@ Map<String, dynamic> gatewayFixture() => {
   'serverReadSynchronization': false,
   'serverUnreadFeed': false,
   'serverContentReportDecisions': false,
+  'serverPublicReportRemoval': false,
 };
 
 void main() {

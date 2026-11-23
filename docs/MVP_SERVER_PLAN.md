@@ -3,7 +3,8 @@
 ## Aktuální stav a použití plánu
 
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
-Bez živého zapojení, wrapperu nebo aktivace; dosavadní DEV nasazení zachované.
+Navazující [DEV přechod je schválený a připravuje se](#moderation-public-dev-proposal);
+dosavadní živé DEV nasazení zůstává zachované do jeho ověření a přesného CI.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
@@ -1356,7 +1357,7 @@ váhy a backlog se nemění; tyto MVP díly již nemají samostatnou backlogovou
 
 <a id="moderation-public-local-results"></a>
 
-### Veřejné odstranění – místní výsledek
+### Veřejné odstranění – místní výsledek zdroje ea1fde9
 
 Jádro functions/remove_reported_public_content.js provede soft delete Shoutu
 nebo fyzické odstranění jednoho komentáře, uzavře přesnou aktuální skupinu
@@ -1420,7 +1421,11 @@ sankční cesty se tímto místním úsekem nepovažují za uzavřené moderačn
 
 <a id="moderation-public-dev-proposal"></a>
 
-### Konkrétní návrh navazujícího DEV přechodu – zatím neschválený
+### Schválený navazující DEV přechod – příprava
+
+Vlastník výslovně schválil celý níže uvedený úsek a pilot („Schvaluji celý
+DEV přechod a pilot“). Připravuje se jediný aktivační zdroj: nejprve jeho
+úplné CI a Functions, teprve po jejich ověření odpovídající DEV web.
 
 1. Připravit callable wrapper, řízený pilotní nástroj/digest a host testy,
    commit/push a úplné CI přesných aktivovaných zdrojů. Pouze DEV
@@ -1446,8 +1451,21 @@ sankční cesty se tímto místním úsekem nepovažují za uzavřené moderačn
    ponechat původních 7 dní, kvóty neresetovat, původní obsah/pending žádost
    a staré cleaned piloty zachovat. Produkce/main/role/retence beze změny.
 
-Nový živý wrapper/aktivace a fixture vyžadují konkrétní souhlas. Tento návrh
-je výstup schválené místní přípravy; sám nepovoluje nasazení ani seed.
+Konkrétní souhlas s tímto živým wrapperem/aktivací a fixture je již udělený;
+nerozšiřuje rozsah na jiné prostředí, Auth účty nebo jiné testovací zdroje.
+Pilotní nástroj má vlastní prefix/manifest a vyžaduje 38 původních zdrojů,
+pending žádost, přesné role/profily a inkarnace generací. Staré 91položkové
+plány se neupravují ani znovu nepoužívají. Nový seed nelze spustit po prvním
+rozhodnutí nebo po cleanup fázi. Obě rozhodnutí musí prokazatelně provést
+TestModerator a komentář před Shoutem; admin substituce se potichu nepřijímá.
+Cleanup chrání kontrolní komentář, cizí podstromy/hlášení a pokračuje po
+přerušení mezi odstraněním obsahu a read klíčů. Receipts a kvóty se nemažou.
+Společný místní běh má 41/41 emulátorových scénářů včetně 5 nových pilotních,
+2/2 host testy, 111 nástrojových a 519 Flutter testů. Dva konfigurační testy
+po aktivaci DEV přepínače nejprve selhaly; izolovaná fixture nyní přepínač
+výslovně vypíná a celý Flutter běh je zelený. Důkazy build/public-removal-
+activation-{emulator,flutter-final,tools}.log. Následuje přesné úplné CI.
+Živý seed až při dostupném klientu, ne předem během CI.
 
 <a id="account-deletion"></a>
 

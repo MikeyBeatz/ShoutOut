@@ -9,8 +9,8 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
-test('public report removal remains off and validates its own App Check gate', () => {
-  assert.notEqual(actualDev.serverPublicReportRemoval, true); assert.notEqual(loadConfig('prod').serverPublicReportRemoval, true);
+test('public report removal activates only DEV and validates its own App Check gate', () => {
+  assert.equal(actualDev.serverPublicReportRemoval, true); assert.notEqual(loadConfig('prod').serverPublicReportRemoval, true);
   assert.doesNotThrow(() => validateConfig({ ...actualDev, serverPublicReportRemoval: true }, 'dev'));
   for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverPublicReportRemoval: value }, 'dev'));
   const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) }; delete disabled.appCheckSiteKey;
@@ -74,7 +74,7 @@ test('B4 delta client is enabled only in DEV and requires all parent-counter gat
 });
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverContentReportDecisions: false, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
+const dev = { ...actualDev, serverPublicReportRemoval: false, serverContentReportDecisions: false, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
 
 test('B3 is enabled in DEV and requires the DEV spatial/read pair', () => {
   assert.equal(actualDev.serverUnreadFeed, true);

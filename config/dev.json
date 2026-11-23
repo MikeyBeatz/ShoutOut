@@ -16,6 +16,7 @@
   "serverPrivateReplyDeletion": true,
   "serverPrivateReportRemoval": true,
   "serverContentReportDecisions": true,
+  "serverPublicReportRemoval": true,
   "serverShoutReactions": true,
   "serverCommentReactions": true,
   "serverShoutSaves": true,

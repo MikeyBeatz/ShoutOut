@@ -290,7 +290,7 @@ void main() {
   );
 
   test(
-    'transport remains off in both environments and strictly requires a boolean and App Check',
+    'transport activates only DEV and strictly requires a boolean and App Check',
     () {
       final dev =
           jsonDecode(File('config/dev.json').readAsStringSync())
@@ -298,7 +298,12 @@ void main() {
       final prod =
           jsonDecode(File('config/prod.json').readAsStringSync())
               as Map<String, dynamic>;
-      expect(WebEnvironment.fromJson(dev).serverPublicReportRemoval, false);
+      expect(WebEnvironment.fromJson(dev).serverPublicReportRemoval, true);
+      final defaults = {...dev}..remove('serverPublicReportRemoval');
+      expect(
+        WebEnvironment.fromJson(defaults).serverPublicReportRemoval,
+        false,
+      );
       expect(WebEnvironment.fromJson(prod).serverPublicReportRemoval, false);
       expect(
         WebEnvironment.fromJson({

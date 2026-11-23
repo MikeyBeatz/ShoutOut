@@ -1,4 +1,4 @@
-// Local core only. No callable export or activation in the deployed hosts.
+// Atomic public removal core; the callable host supplies the managed writer.
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
