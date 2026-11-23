@@ -717,8 +717,12 @@ build/private-moderation-{emulator-final,functions,tools}.log,
 build/private-moderation-measurement.json.
 
 Do stupnice započítat pouze jádro a automatické ověření. Runtime balíčky nový
-modul neobsahují, což kontroluje tools/function_artifact.test.mjs. Úplné CI
-tohoto zdroje následuje po společném pushi. Žádný wrapper, klientská aktivace,
+modul neobsahují, což kontroluje tools/function_artifact.test.mjs. Zdroj
+**f1e32e9e1474498b4ce662878cc93558a31c3ee9** má
+[úspěšné úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001),
+včetně nové sady soukromé moderace a webového buildu. Přesný čistý commit
+a požadované kroky doložené v build/private-moderation-ci-proof.json.
+Žádný wrapper, klientská aktivace,
 živé změny Rules/dat ani nasazení tím nejsou dokončené. Stávající staff
 přímé mazání zatím zůstává v DEV otevřené; následné zapojení musí sladit
 obě klientské cesty, audit, úklid nového typu potvrzení a teprve potom Rules.

@@ -160,7 +160,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    znovu neseedovat. Implementace, ověření, DEV i akceptace této části uzavřené.
    **Nově dokončené místní jádro:** [atomické skrytí nahlášené soukromé odpovědi](MVP_SERVER_PLAN.md#moderation-private-local).
    37 emulátorových regresí (16 nových), 173 serverových unit testů,
-   104 nástrojových testů a lint prošly; společné úplné CI zatím čeká.
+   104 nástrojových testů a lint prošly; f1e32e9 má
+   [success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001).
    Započtené jsou jen jádro/ověření. Bez wrapperu, klientské aktivace, změn
    Rules či nasazení; staff přímá cesta je dosud otevřená. Následně připravit
    konkrétní zapojení a zbývající atomická rozhodnutí/regionální autoritu

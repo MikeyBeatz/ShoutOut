@@ -36,7 +36,9 @@ a uloží audit/potvrzení; uloženou roli i geografii ověřuje také při opak
 37 cílených emulátorových testů (16 nových), 173 serverových unit testů,
 104 nástrojových testů a lint prošly na Node 22. Integrační testy mimo
 emulátor jsou přeskočené, nikoli dodatečně započítané. První zásah 11 SDK
-reads / 3 writes, opakování 9 / 0. Úplné CI po společném pushi zatím čeká.
+reads / 3 writes, opakování 9 / 0. Zdroj **f1e32e9** má
+[success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001),
+včetně nové moderace, ostatních regresí a webového buildu; přesný čistý zdroj ověřený.
 Nový modul není v runtime balíčcích; wrapper, živý klient, Rules i nasazení
 se v tomto schváleném místním úseku nemění. Stávající přímá staff cesta je
 proto stále otevřená. Další obsahová práce: sladit serverové rozhodování,
