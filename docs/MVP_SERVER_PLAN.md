@@ -1633,6 +1633,21 @@ integračních případů; konečné drobné kontraktové/validační změny maj
 28/7/9 cílené běhy. Analyze/lint čisté. Přesné společné úplné CI ještě následuje.
 Podklady build/moderation-sanctions-{emulator-final,client-final,unit-final,flutter,tools,functions,analyze,lint}.log.
 
+Následný klientský audit odhalil před živou aktivací nepovolený preflight cizí
+soukromé zprávy. Opravená příprava soukromé sankce použije authorId ze snapshotu
+konkrétního hlášení a nikdy nečte cizí privateReplies dokument. Server dál
+transakčně ověřuje skutečného autora, příjemce, text, skupinu i roli; údaj
+z klienta není důvěryhodný důkaz. Veřejný zdroj a přímé zjištění se čtou jen
+jednou, opakování nevyžaduje nové čtení zdroje. **13/13** cílených klientských
+testů včetně zákazu soukromého čtení a analyze prošlo; podklady
+build/moderation-private-subject-{client,analyze}.log. Původní CI 45279278076
+bylo záměrně zrušeno během běhu kvůli této nalezené opravě; není dokladem
+ověření konečného zdroje. Následuje úplný běh opraveného commitu.
+Finální společný lokální běh **48/48** (29 sankčních, 11 osiřelých a 8
+authority případů), žádné přeskočení, je v
+build/moderation-checkpoint-emulator-final.log. Nová regrese ověřila čtyři
+varianty podvržení soukromého cíle bez zápisu sankce, reportu nebo receiptu.
+
 Rozpad zbývající nedokončené váhy moderation-decision **200** zůstává pevný:
 140 sankce (30 kód / 30 kontrola / 20 klient / 20 kontrola klienta / 20 DEV /
 20 akceptace), 40 osiřelá hlášení (4×10) a 20 společné uzavření přímých zápisů.
@@ -1701,6 +1716,34 @@ společný authority cutover ani nezapínat novou sankční cestu v DEV.
 Žádná část tohoto místního úseku se zatím nenasazuje; Rules, Scheduler, živá
 data, Auth, prostředky, produkce i main zůstávají beze změny. Ruční testy až
 po dokončení dostupných nezávislých příprav; dvě Business volby výše stále čekají.
+
+<a id="moderation-retention-followup-proposal"></a>
+
+#### Konkrétní návrh navazující opravy retenčních kopií
+
+Potvrzeno v account_purge_policy/job: copiedReport odstraňuje reason a
+contentSnapshot ze sanctions, ale ne z navazujícího warning nebo aktivní
+vazby. U smazaného moderátora se scrubují sankce/varování/revokace, nikoli
+moderatorId v cizím aktivním bans/contentRestrictions. Nová serverová sankce
+tyto historické kopie nezavádí, stále je však umí vytvořit. Proto před aktivací
+ověřit celou cestu místo pouhého testu hlavní sanctions kolekce.
+
+Navržený samostatný místní rozsah k potvrzení: do transakce odstraňující
+zkopírovaný důkaz připravit omezené dočištění reason u warning a odpovídající
+aktivní vazby. Vazbu určit přes přesné userId + sanctionId, nikdy nesmazat
+novější odlišný postih ani změnit expiresAt/permanent nebo vynucování zákazu.
+Varování dohledat omezeným dotazem na sanctionId, při nejednoznačné vazbě
+zastavit bez částečného zápisu. Reference moderátora v aktivních vazbách
+řešit pouze přidanými konečnými fázemi; stávající číselné fáze neměnit.
+Ověřit také souběh nového rozhodnutí s 60denním úklidem reportéra, aby již
+odstraněný důvod nevznikl znovu. Žádný globální scan ani prodloužení retence.
+
+Regrese: warning/ban/restriction, cizí nezasažený případ, novější vazba,
+restart mezi dávkami, souběh s moderací/revokací a reporter purge,
+ambiguita/rollback a pokračování původního purge jobu bez přečíslování fází.
+Po místním ověření společný push/CI a konkrétní začlenění do DEV plánu;
+do té doby žádné živé přepínače, migrace nebo zásahy do existujících jobů.
+Tento návrh je dosud **pouze audit a rozsah**, nikoli implementovaná oprava.
 
 <a id="account-deletion"></a>
 

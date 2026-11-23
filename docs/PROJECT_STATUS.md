@@ -27,6 +27,12 @@ retenčních kopií ještě nejsou hotové, nelze je započítat jako dokončen�
 Navazující **49/49** emulátorových regresí včetně osmi případů authority gate,
 44 cílených nástrojových a 7 unit/host testů prošlo, lint/dokumentace čisté.
 Zdrojový kontrolní bod je připravený pro společný push a přesné úplné CI.
+Při následné kontrole opraven soukromý klientský preflight: cizí zprávu čte
+jen server, klient použije snapshot hlášení. **13/13** klientských testů a
+analyze čisté. CI 45279278076 záměrně zrušeno během běhu; přesné nové úplné
+CI musí ověřit tuto konečnou opravu, předchozí běh se nezapočítává.
+Konečný místní společný běh **48/48** je zelený, lint také; klientské/zdrojové
+kontroly neznamenají živou akceptaci ani dokončený společný cutover.
 Žádná nová živá data, Auth účty, Rules ani prostředky; DEV zůstává na 87d6687.
 U Business zamítnutí/opakovaného podání a pozastavení se čeká na dvě produktové
 volby; do odpovědi na této části neměnit chování. Automatické testy průběžně,

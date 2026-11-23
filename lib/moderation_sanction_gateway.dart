@@ -20,6 +20,36 @@ const moderationSanctionActions = [
   'banPermanent',
 ];
 
+/// A reported private reply is reviewed from its report snapshot. Only the
+/// callable may load the actual foreign conversation and validate its author.
+class ModerationSanctionSubject {
+  const ModerationSanctionSubject(this.authorId, this.createdAtMillis);
+
+  final String authorId;
+  final int? createdAtMillis;
+}
+
+Future<ModerationSanctionSubject> loadModerationSanctionSubject({
+  required String targetType,
+  required bool fromReport,
+  required Future<ModerationSanctionSubject> Function() loadSource,
+  String? reportedPrivateAuthorId,
+}) async {
+  final privateReport = fromReport && targetType == 'privateReply';
+  final subject = privateReport
+      ? ModerationSanctionSubject(reportedPrivateAuthorId ?? '', null)
+      : await loadSource();
+  if (!RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(subject.authorId) ||
+      (!privateReport &&
+          (subject.createdAtMillis == null || subject.createdAtMillis! <= 0))) {
+    throw FirebaseFunctionsException(
+      code: 'failed-precondition',
+      message: 'The sanction target is unavailable or ambiguous.',
+    );
+  }
+  return subject;
+}
+
 class ModerationSanctionRequest {
   ModerationSanctionRequest({
     required this.userId,

@@ -43,7 +43,7 @@ Future<bool> _showServerContentSanction(
   required AccountRole role,
   required ContentReportTarget target,
   required String expectedTargetUserId,
-  DocumentSnapshot<Map<String, dynamic>>? sourceSnapshot,
+  ModerationSanctionSubject? sourceSubject,
   int? expectedCreatedAt,
   List<String>? reportIds,
   String? sourceReportId,
@@ -65,27 +65,15 @@ Future<bool> _showServerContentSanction(
       message: 'Complete the pending report decision first.',
     );
   }
-  final sourceRef = FirebaseFirestore.instance
-      .collection('shouts')
-      .doc(target.shoutId);
   final source = pending == null
-      ? sourceSnapshot ??
-            await (target.type == 'shout'
-                    ? sourceRef
-                    : sourceRef
-                          .collection(
-                            target.type == 'comment'
-                                ? 'comments'
-                                : 'privateReplies',
-                          )
-                          .doc(target.targetId))
-                .get(const GetOptions(source: Source.server))
+      ? sourceSubject ??
+            await _loadSanctionSubject(
+              target,
+              fromReport: reportIds != null,
+              reportedPrivateAuthorId: expectedTargetUserId,
+            )
       : null;
-  final sourceData = source?.data();
-  if (pending == null &&
-      (source?.exists != true ||
-          sourceData?['authorId'] != expectedTargetUserId ||
-          sourceData?['createdAt'] is! Timestamp)) {
+  if (pending == null && source?.authorId != expectedTargetUserId) {
     throw FirebaseFunctionsException(
       code: 'failed-precondition',
       message: 'The sanction target changed.',
@@ -93,8 +81,7 @@ Future<bool> _showServerContentSanction(
   }
   if (pending == null &&
       expectedCreatedAt != null &&
-      (source!.get('createdAt') as Timestamp).millisecondsSinceEpoch !=
-          expectedCreatedAt) {
+      source?.createdAtMillis != expectedCreatedAt) {
     throw FirebaseFunctionsException(
       code: 'failed-precondition',
       message: 'The sanction target changed.',
@@ -152,9 +139,7 @@ Future<bool> _showServerContentSanction(
                     if (reportIds != null)
                       'reportIds': reportIds
                     else
-                      'expectedCreatedAt':
-                          (source!.get('createdAt') as Timestamp)
-                              .millisecondsSinceEpoch,
+                      'expectedCreatedAt': source!.createdAtMillis,
                     'decision': decision,
                     'note': note,
                   },
@@ -170,6 +155,7 @@ Future<bool> _sanctionReportedContent(
   required ContentReportTarget target,
   required List<String> reportIds,
   required String sourceReportId,
+  String? reportedPrivateAuthorId,
   required String action,
   required String reasonHint,
 }) async {
@@ -185,38 +171,57 @@ Future<bool> _sanctionReportedContent(
       action: action,
     );
   }
-  final root = FirebaseFirestore.instance
-      .collection('shouts')
-      .doc(target.shoutId);
-  final source =
-      await (target.type == 'shout'
-              ? root
-              : root
-                    .collection(
-                      target.type == 'comment' ? 'comments' : 'privateReplies',
-                    )
-                    .doc(target.targetId))
-          .get(const GetOptions(source: Source.server));
-  final author = source.data()?['authorId'];
-  if (author is! String) {
-    throw FirebaseFunctionsException(
-      code: 'not-found',
-      message: 'The sanction target is unavailable.',
-    );
-  }
+  final source = await _loadSanctionSubject(
+    target,
+    fromReport: true,
+    reportedPrivateAuthorId: reportedPrivateAuthorId,
+  );
   if (!context.mounted) return false;
   return _showServerContentSanction(
     context,
     role: role,
     target: target,
-    expectedTargetUserId: author,
-    sourceSnapshot: source,
+    expectedTargetUserId: source.authorId,
+    sourceSubject: source,
     reportIds: reportIds,
     sourceReportId: sourceReportId,
     action: action,
     reasonHint: reasonHint,
   );
 }
+
+Future<ModerationSanctionSubject> _loadSanctionSubject(
+  ContentReportTarget target, {
+  required bool fromReport,
+  String? reportedPrivateAuthorId,
+}) => loadModerationSanctionSubject(
+  targetType: target.type,
+  fromReport: fromReport,
+  reportedPrivateAuthorId: reportedPrivateAuthorId,
+  loadSource: () async {
+    final root = FirebaseFirestore.instance
+        .collection('shouts')
+        .doc(target.shoutId);
+    final source =
+        await (target.type == 'shout'
+                ? root
+                : root
+                      .collection(
+                        target.type == 'comment'
+                            ? 'comments'
+                            : 'privateReplies',
+                      )
+                      .doc(target.targetId))
+            .get(const GetOptions(source: Source.server));
+    final data = source.data(),
+        author = data?['authorId'],
+        createdAt = data?['createdAt'];
+    return ModerationSanctionSubject(
+      author is String ? author : '',
+      createdAt is Timestamp ? createdAt.millisecondsSinceEpoch : null,
+    );
+  },
+);
 
 Future<bool> _showServerSanctionRevocation(
   BuildContext context,

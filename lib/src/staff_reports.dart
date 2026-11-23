@@ -278,6 +278,7 @@ class _StaffReportCard extends StatelessWidget {
         target: sanctionTarget,
         reportIds: group.reports.map((r) => r.id).toList(),
         sourceReportId: representative.id,
+        reportedPrivateAuthorId: representative.data()['authorId'] as String?,
         action: action,
         reasonHint: note.trim().isNotEmpty
             ? note

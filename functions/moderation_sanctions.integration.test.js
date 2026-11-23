@@ -62,6 +62,21 @@ for (const type of ['shout', 'comment', 'privateReply']) test(`${type}: warning 
   const time = receipt.updateTime; assert.deepEqual(await sanction(f.input(), db, f.clock(1000)), result); assert((await receipt.ref.get()).updateTime.isEqual(time));
   assert(receiptMayBePurged(receipt.data(), Timestamp.fromMillis(f.now.getTime() + 7 * day)));
 });
+test('private report hints never override the actual server author, recipient or immutable text', { skip: !enabled }, async t => {
+  for (const field of ['expectedTargetUserId', 'authorId', 'text', 'recipientId']) {
+    const f = await fixture(t, 'privateReply'), request = f.input();
+    if (field === 'expectedTargetUserId') request.data.expectedTargetUserId = f.reporter;
+    if (field === 'authorId') await f.reports[0].update({ authorId: f.reporter });
+    if (field === 'text') await f.reports[0].update({ text: 'Forged snapshot' });
+    if (field === 'recipientId') await f.source.update({ recipientId: f.peer, participants: [f.author, f.peer] });
+    const sourceBefore = await f.source.get(), reportBefore = await f.reports[0].get();
+    await assert.rejects(sanction(request, db, f.clock()), code('failed-precondition'));
+    assert(sourceBefore.updateTime.isEqual((await f.source.get()).updateTime));
+    assert(reportBefore.updateTime.isEqual((await f.reports[0].get()).updateTime));
+    assert.equal((await db.collection('sanctions').where('userId', '==', f.author).get()).size, 0);
+    assert.equal((await db.collection('serverOperations').where('userId', '==', f.mod).get()).size, 0);
+  }
+});
 for (const [action, policy] of Object.entries(sanctionActions)) test(`${action}: observation preserves the existing durations, authority, snapshot and retention`, { skip: !enabled }, async t => {
   const f = await fixture(t), actor = policy.role === 4 ? f.senior : f.mod, request = f.input(action, actor, action, 'observation');
   const result = await sanction(request, db, f.clock()), record = await db.doc(`sanctions/${result.sanctionId}`).get();

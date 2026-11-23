@@ -622,6 +622,7 @@ class _ReportList extends StatelessWidget {
         target: sanctionTarget,
         reportIds: (relatedReports ?? [report]).map((r) => r.id).toList(),
         sourceReportId: report.id,
+        reportedPrivateAuthorId: data['authorId'] as String?,
         action: action,
         reasonHint: data['reason'] as String? ?? '',
       );

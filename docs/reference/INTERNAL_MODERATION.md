@@ -245,6 +245,14 @@ v `bans/{uid}`. Zápis historie, aktivního postihu a uzavření hlášení prob
 atomicky. Firestore Rules odmítnou nový aktivní postih bez odpovídajícího
 záznamu v `sanctions`.
 
+Vlastník 23. listopadu schválil ochranu silnějšího aktivního postihu. Nové
+rozhodnutí se vždy zaznamená do historie, ale kratší nebo stejně dlouhý postih
+nepřepíše delší či trvalý aktivní ban/omezení. Ban a omezení tvorby se posuzují
+samostatně; zrušení je výslovná auditovaná akce a neobnovuje automaticky starší
+historické postihy. Toto pravidlo je zatím připravené v novém serverovém jádru,
+nikoli aktivní v DEV: [stav, testy a přechod](../MVP_SERVER_PLAN.md#moderation-sanctions-local).
+Starší klientskou cestu nelze považovat za důkaz jeho vynucení.
+
 Historie je neměnná z běžného klienta. Budoucí zrušení postihu musí vytvořit
 novou auditní událost; nesmí přepisovat původní rozhodnutí bez stopy.
 

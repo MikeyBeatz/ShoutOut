@@ -26,6 +26,92 @@ Matcher code(String expected) =>
 
 void main() {
   test(
+    'private report uses its snapshot without reading a foreign conversation',
+    () async {
+      var reads = 0;
+      final subject = await loadModerationSanctionSubject(
+        targetType: 'privateReply',
+        fromReport: true,
+        reportedPrivateAuthorId: 'reported-author',
+        loadSource: () async {
+          reads++;
+          throw StateError('private-conversation-must-not-be-read');
+        },
+      );
+      expect(subject.authorId, 'reported-author');
+      expect(subject.createdAtMillis, isNull);
+      expect(reads, 0);
+    },
+  );
+  test(
+    'missing or malformed private report identity fails without widening private reads',
+    () async {
+      for (final author in [null, '', 'foreign/path']) {
+        var reads = 0;
+        await expectLater(
+          loadModerationSanctionSubject(
+            targetType: 'privateReply',
+            fromReport: true,
+            reportedPrivateAuthorId: author,
+            loadSource: () async {
+              reads++;
+              throw StateError('must-not-read');
+            },
+          ),
+          throwsA(code('failed-precondition')),
+        );
+        expect(reads, 0);
+      }
+    },
+  );
+  test(
+    'public reports and direct observations load the actual subject once',
+    () async {
+      for (final target in ['shout', 'comment', 'privateReply']) {
+        for (final fromReport in [false, true]) {
+          if (target == 'privateReply' && fromReport) continue;
+          var reads = 0;
+          final subject = await loadModerationSanctionSubject(
+            targetType: target,
+            fromReport: fromReport,
+            reportedPrivateAuthorId: 'unused-client-hint',
+            loadSource: () async {
+              reads++;
+              return const ModerationSanctionSubject('actual-author', 1234);
+            },
+          );
+          expect(subject.authorId, 'actual-author');
+          expect(subject.createdAtMillis, 1234);
+          expect(reads, 1);
+        }
+      }
+    },
+  );
+  test(
+    'unavailable public subjects and revoked access propagate before any sanction request',
+    () async {
+      await expectLater(
+        loadModerationSanctionSubject(
+          targetType: 'comment',
+          fromReport: true,
+          loadSource: () async => const ModerationSanctionSubject('', null),
+        ),
+        throwsA(code('failed-precondition')),
+      );
+      await expectLater(
+        loadModerationSanctionSubject(
+          targetType: 'comment',
+          fromReport: true,
+          loadSource: () async => throw FirebaseFunctionsException(
+            code: 'permission-denied',
+            message: 'Access revoked',
+          ),
+        ),
+        throwsA(code('permission-denied')),
+      );
+    },
+  );
+  test(
     'one target coalesces double clicks and deeply freezes report identities',
     () async {
       final done = Completer<void>(), sent = <ModerationSanctionRequest>[];
