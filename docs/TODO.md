@@ -165,7 +165,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    [Konkrétní ucelený DEV návrh](MVP_SERVER_PLAN.md#private-deletion-dev-proposal)
    vlastník výslovně schválil včetně nové Function, klientské aktivace,
    podmíněného Rules přechodu a vymezeného malého pilotu. Nasazený přepínač true.
-   Kořenový Rules checkpoint má vlastní úplné CI; vydané Rules stále původní.
+   Kořenový Rules checkpoint 9fee32e má vlastní úplné CI 45098775591 success;
+   32 cílených místních regresí prošlo, vydané Rules stále původní.
    Další krok: připravený klient → nový pilot 1/2 → mazání obou účtů → Rules → úklid.
    Bez dostupného prohlížeče pilot zatím nevznikl; UI akceptaci nezavírat.
    Na odložené pohybové kontrole nezávisí. Moderátorskou atomickou operaci,

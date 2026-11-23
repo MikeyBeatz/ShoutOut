@@ -8,8 +8,10 @@ souborů a 8 HTTP kontrol shodných s artefaktem. Nová deletePrivateReply
 100 % provozu, schválené prostředky. Ostatních 19 Functions, oba minutové
 Scheduler joby, Rules **476d216c…a3e9**, feed 12/news 6/active, všech 91 zdrojů
 a původní žádosti zachované. Nový root Rules soubor je zatím jen připravený
-bezpečnostní checkpoint. Živý cutover až po přesném úplném CI a pozitivním
-klientském pilotu; žádná nová fixture/Auth zatím nevznikla. Návratový web před
+bezpečnostní checkpoint **9fee32e**, samostatné úplné CI **45098775591 success**.
+Živý cutover až po pozitivním klientském pilotu; žádná nová fixture/Auth zatím
+nevznikla. Operovat z čistého release zdroje 9fee32e, nikoli následného
+dokumentačního checkpointu. Návratový web před
 Rules je 37b697da10fbb5b1, po cutoveru kompatibilní 813f34b7555e272a.
 Produkce/main beze změny; odložený pohybový test a úklid nadále otevřené.
 

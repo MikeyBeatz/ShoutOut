@@ -550,13 +550,27 @@ build/private-deletion-release-{build,ci,before,functions,hosting}.json.
 **Samostatný místní Rules checkpoint:** kořenový návrh již v managed režimu
 odmítá běžné přímé mazání soukromé zprávy. Odpovídající staré regresní
 očekávání je upravené; čtení, legacy bez řídicího dokumentu a existující
-moderátorská cesta zůstávají zachované. Tento návrh vyžaduje samostatné
-úplné CI přesného zdroje a pozitivní živou kompatibilitu klienta, než smí
-být nasazen. Lokálně prošlo všech **32** cílených emulátorových regresí jádra,
+moderátorská cesta zůstávají zachované. Zdroj
+**9fee32e952378404baab13463470f8224366e79a** má
+[success samostatné úplné CI 45098775591](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591).
+Před nasazením ještě musí být doložena pozitivní živá kompatibilita klienta.
+Lokálně prošlo všech **32** cílených emulátorových regresí jádra,
 pilotu, návrhu Rules a stávajících obsahových operací. **Kořenový soubor
 není důkaz vydaných Rules.** Souhrn přesného
 CI checkpointu se ukládá do build/private-deletion-cutover-ci-proof.json;
-před mutací jeho stav znovu ověřit přímo na GitHubu.
+před mutací jeho stav znovu ověřit přímo na GitHubu. Závěrečná čtecí kontrola
+v 02:30 UTC znovu potvrdila 21 Functions, dva plánovače, všech 91 zdrojů,
+osm shodných HTTP odpovědí a přesnou shodu dosavadního živého Rules zdroje.
+Nový Rules soubor je připravený, nikoli vydaný; manifest je stále planned,
+nová fixture neexistuje a ověřovací nástroj měl 0 cloudových zápisů.
+
+Pro řízený pilotní nástroj a budoucí Rules rollout použít čistý výše uvedený
+zdroj **9fee32e** a `--ci-run 45098775591`; navazující dokumentační commit
+není nový aplikační zdroj s úplným CI. Před dočasným výběrem release commitu
+ověřit čistý pracovní strom a po operaci vrátit pracovní větev. Připravený
+manifest docs/local/private-reply-deletion-dev-pilot.json má digest
+**30fffa903a3b357aae7442a92c67a986236a2297f5d0a5b9fcdc954fe9b88d01**;
+jeho preconditions a připravenost klienta ověřit znovu před první mutací.
 
 **Nejbližší krok:** dostupný ovladatelný prohlížeč nebo připravený vlastník →
 čerstvý manifest/digest a schválený pilot 1 Shout / 2 zprávy → vlastní

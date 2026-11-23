@@ -21,11 +21,17 @@ plánovače zachované. DEV Hosting **813f34b7555e272a**, 67 shodných veřejný
 app souborů / 8 HTTP kontrol, serverPrivateReplyDeletion true. Všech 91 zdrojů,
 původní žádosti a feed 12/news 6/active zachované. Návratový web 37b697da10fbb5b1
 před Rules cutoverem; po něm používat kompatibilní 813f34b7555e272a.
-Kořenové Rules připravené pro samostatný bezpečnostní checkpoint, vydané Rules
+Kořenové Rules mají samostatný zdroj **9fee32e952378404baab13463470f8224366e79a** /
+[úplné CI 45098775591 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591), vydané Rules
 stále **476d216c-9208-4e5c-9143-f583cb82a3e9**. Prohlížečový host unavailable:
 živý pilot nevznikl, vlastní mazání obou účtů / Rules / úklid čekají na klienta.
 Přesné CI Rules checkpointu znovu ověřit před živou mutací, souhrn
-build/private-deletion-cutover-ci-proof.json. Produkce/main beze změny.
+build/private-deletion-cutover-ci-proof.json. Čtecí kontrola v 02:30 UTC znovu
+potvrdila celé DEV nasazení, osm HTTP odpovědí a ochranu původních dat.
+Manifest docs/local/private-reply-deletion-dev-pilot.json je pouze planned,
+digest 30fffa90…e9b88d01; živé zápisy vyžadují připraveného klienta.
+Pro pilot/Rules použít čistý release zdroj 9fee32e a jeho úplné CI; následný
+dokumentační checkpoint není novým nasazovaným zdrojem. Produkce/main beze změny.
 
 **Předchozí uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
 Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou
