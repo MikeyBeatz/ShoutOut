@@ -1232,8 +1232,8 @@ Vlastník potvrdil TestModerator. Stávající plán zůstal čerstvý a z čist
 report cooldownu. Pilot je **seeded**: nový Shout cf14d896…268a7797ccc,
 nadpis **MVP rozhodnuti ee9f4648**, 1 komentář, 1 soukromá odpověď,
 3 open hlášení a 6 vytvořovacích receipts. Původních 91 zdrojů a pending
-žádost zůstaly při každé transakci chráněné. Žádné moderační rozhodnutí
-zatím nebylo provedeno. Tento manifest znovu neplánovat ani neseedovat.
+žádost zůstaly při každé transakci chráněné. Následné moderační výsledky
+jsou níže; tento manifest znovu neplánovat ani neseedovat.
 
 Před ručními instrukcemi se zjistila klientská mezera: hlavní webový panel
 nabízel resolve pouze jako opakování už rozpracované akce; první prosté
@@ -1252,6 +1252,33 @@ build/report-decisions-choice-fix-{test,analyze}.log. Po úspěšném úplném C
 přesného opravného commitu pouze DEV web, žádné Functions/Rules/indexy/seed.
 Akceptaci ani další procentní kredit tím neuzavírat; následně dokončit
 správné TestModerator/Admin kroky a úklid původní jediné fixture.
+
+**První živá část je ověřená:** vlastník potvrdil schválení Shoutu a předání
+soukromého případu na původním webu 44e07a5. Server doložil skutečného
+it_moderator, úroveň 3, moderationScope global false / countries CZ /
+subdivisions CZ-42, nezměněnou roli a dva POST 200 se spárovaným Auth/App Check
+VALID. Receipts fe7b8083…4db759a8 (approve Shoutu) a 1d78f995…15de078d
+(escalate soukromé odpovědi) souhlasí s příslušnými auditními poli;
+obsah všech tří zdrojů zůstal přítomný. Stav hlášení resolved/open/escalated,
+celkem 8 receipts. Podklady build/report-decisions-moderator-first-proof.json
+a report-decisions-staff-scope-proof.json. Mimo přidělenou geografii se žádný
+živý pokus neprováděl; příslušné odmítnutí dokládá emulátor.
+
+**Oprava je nasazená:** 33853a9d0eb6fca61368217cf053140f5c6f3de4 má
+[úspěšné úplné CI 45202922410](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45202922410),
+včetně 512 Flutter a celé serverové/Rules/browserové sady s webovým buildem.
+Z čistého SHA vydán pouze DEV Hosting **565880d4664da7b2**; 67 app souborů,
+8 HTTP odpovědí obou domén a 2 generované Firebase soubory přesně ověřené.
+Všech 23 Functions, jejich revize/zdroje/prostředky, oba plánovače, Rules,
+92 zdrojů (91 původních + tato jedna fixture), jejich updateTime, pending
+žádost a feed/news zůstaly nezměněné. Žádný nový seed nebo serverový rollout.
+První čtecí inventura měla přechodný timeout cloudfunctions API, po opakování
+prošla bez změny prostředí. Důkazy build/report-decisions-choice-{ci,hosting-deploy}.log
+a report-decisions-choice-{cloud-before,cloud-after,release-proof}.json.
+Návratový web bf962d314d4380b7 by měl tutéž chybějící volbu; pro dokončení
+pilotu ponechat opravenou verzi. Čekají pouze resolve komentáře pod
+TestModerator a resolve eskalované soukromé odpovědi pod TestAdmin, potom
+ověření skutečných potvrzení a schválený úklid. Akceptace zůstává otevřená.
 
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
