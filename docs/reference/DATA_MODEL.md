@@ -1,6 +1,6 @@
 # Datový model Firestore
 
-**Místně připravená společná rozhodnutí, zatím neaktivní:**
+**Společná rozhodnutí – místní kontrakt a schválená DEV příprava:**
 [kontrakt a výsledky](../MVP_SERVER_PLAN.md#moderation-basic-local-results).
 decideContentReports používá stávající reports/commentReports/privateReplyReports
 a moderationClearances, bez nové kolekce. Technická sedmidenní receipt nese

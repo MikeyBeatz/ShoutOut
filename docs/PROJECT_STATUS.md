@@ -6,9 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Nyní schválený DEV přechod:** [společná moderační rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-dev-proposal).
+Připravuje se wrapper, řízený pilot a DEV aktivace; dosud nic nenasazeno ani
+neseedováno. V pracovním zdroji je příznak zapnutý pouze pro budoucí DEV build;
+produkční konfigurace, Rules, indexy a aktuálně vydaný web zůstávají zachované.
+Lokálně prošlo všech 20 rozhodovacích/pilotních emulátorových případů,
+32 klientských a 109 nástrojových testů, analyze bez nálezů a lint. Předchozí
+neúspěšné laboratorní pokusy byly opravené (inicializační revize fixture,
+odlišení databázového/transaction query readeru a nové konfigurační předpoklady).
+Následuje společný commit/push a úplné CI přesného zdroje.
+
 **Právě uzavřený místní úsek:** [společná bezpostihová rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-local)
 pro Shouty, komentáře a soukromé odpovědi, včetně neaktivního klienta a testů.
-serverContentReportDecisions zůstává false; bez wrapperu, nasazení, živých
+V tehdejším zdroji byl serverContentReportDecisions false; bez wrapperu, nasazení, živých
 dat, Auth změn a změn Rules. Níže uvedený dokončený pilot tím znovu neotevírat.
 **Místně hotovo:** společné approve/escalate/resolve, celé skupiny 50/51,
 audit/replay, neaktivní klient a účtové scrub fáze. 18 nových emulátorových
@@ -19,8 +29,9 @@ DEV navázání](MVP_SERVER_PLAN.md#moderation-basic-local-results). Zdroj
 **7746bbdc56b2db1abdd9965f9cea348ae82243f3** je commitnutý a pushnutý ve
 feature/report-decisions; [úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854)
 skončilo **success**, včetně 18 nových případů, celého 142testového retenčního
-průchodu a webového buildu. Nové runtime jádro zůstává mimo balíček Functions.
-**Další krok:** předložit konkrétní DEV přechod podle uvedeného návrhu;
+průchodu a webového buildu. Tehdejší runtime jádro bylo mimo balíček Functions;
+aktuální schválená příprava wrapperu a aktivace je popsaná výše.
+**Navazující DEV přechod už vlastník schválil, viz výše;**
 veřejné odstranění a sankce ještě brání úplnému uzavření moderačních Rules.
 Nasazení ani živá akceptace tohoto místního úseku zatím neproběhly.
 

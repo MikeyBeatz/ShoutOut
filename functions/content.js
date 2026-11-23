@@ -22,6 +22,7 @@ import { createContentReportOperation } from './create_content_report.js';
 import { deleteCommentOperation } from './delete_comment.js';
 import { deletePrivateReplyOperation } from './delete_private_reply.js';
 import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
+import { decideContentReportsOperation } from './decide_content_reports.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -104,6 +105,11 @@ export const removeReportedPrivateReply = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => removeReportedPrivateReplyOperation(request, getFirestore()));
+
+export const decideContentReports = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => decideContentReportsOperation(request, getFirestore()));
 
 export const deletePrivateReply = onCall({
   ...secureCallableOptions,

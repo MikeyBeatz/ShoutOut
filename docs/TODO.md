@@ -156,7 +156,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
    [úspěšné úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854),
    včetně 142 retenčních testů a webového buildu. Následuje konkrétní návrh DEV
-   přechodu; DEV/živá akceptace se tím nezapočítávají. Ostatní moderační cesty
+   přechodu, který již vlastník schválil a je [v přípravě](MVP_SERVER_PLAN.md#moderation-basic-dev-proposal).
+   DEV/živá akceptace se zatím nezapočítávají. Ostatní moderační cesty
    ještě brání úplné Rules uzávěře.
    **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
    App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI

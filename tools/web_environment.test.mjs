@@ -9,8 +9,10 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
-test('prepared content report decisions default off and require a strict App Check flag', () => {
-  assert.notEqual(actualDev.serverContentReportDecisions, true); assert.notEqual(loadConfig('prod').serverContentReportDecisions, true);
+test('content report decisions activate only DEV and require a strict App Check flag', () => {
+  assert.equal(actualDev.serverContentReportDecisions, true); assert.notEqual(loadConfig('prod').serverContentReportDecisions, true);
+  const defaults = { ...actualDev }; delete defaults.serverContentReportDecisions;
+  assert.doesNotThrow(() => validateConfig(defaults, 'dev'));
   assert.doesNotThrow(() => validateConfig({ ...actualDev, serverContentReportDecisions: true }, 'dev'));
   for (const invalid of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverContentReportDecisions: invalid }, 'dev'));
   const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) }; delete disabled.appCheckSiteKey;
@@ -64,7 +66,7 @@ test('B4 delta client is enabled only in DEV and requires all parent-counter gat
 });
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
+const dev = { ...actualDev, serverContentReportDecisions: false, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
 
 test('B3 is enabled in DEV and requires the DEV spatial/read pair', () => {
   assert.equal(actualDev.serverUnreadFeed, true);

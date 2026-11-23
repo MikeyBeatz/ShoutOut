@@ -348,7 +348,7 @@ void main() {
     },
   );
   test(
-    'new transport is strictly boolean, defaults off in both environments and requires App Check',
+    'transport is strictly boolean, activates only DEV and requires App Check',
     () {
       final dev =
           jsonDecode(File('config/dev.json').readAsStringSync())
@@ -356,7 +356,12 @@ void main() {
       final prod =
           jsonDecode(File('config/prod.json').readAsStringSync())
               as Map<String, dynamic>;
-      expect(WebEnvironment.fromJson(dev).serverContentReportDecisions, false);
+      expect(WebEnvironment.fromJson(dev).serverContentReportDecisions, true);
+      final defaults = {...dev}..remove('serverContentReportDecisions');
+      expect(
+        WebEnvironment.fromJson(defaults).serverContentReportDecisions,
+        false,
+      );
       expect(WebEnvironment.fromJson(prod).serverContentReportDecisions, false);
       expect(
         WebEnvironment.fromJson({

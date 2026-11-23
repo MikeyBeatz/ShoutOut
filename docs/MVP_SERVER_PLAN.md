@@ -1107,6 +1107,65 @@ unikátních testů. Log build/report-decisions-ci.log. Tím je schválený mís
    společný kompatibilní Rules cutover. Nové serverové napojení ani UI flag
    samy nejsou důkazem dokončené serverové autority celého milníku.
 
+<a id="moderation-basic-dev-proposal"></a>
+
+### Schválený DEV přechod společných rozhodnutí
+
+Vlastník 23. listopadu výslovně schválil celý navazující DEV úsek:
+callable decideContentReports, řízený pilot, testy/dokumentaci/metriky a
+společný commit/push. Po úspěšném úplném CI přesných zdrojů pouze projekt
+shoutout-dev-46c81: nová callable europe-west3, min 0 / max 1 instance,
+concurrency 1, 256 MiB a 15 s; aktualizace cleanupOperationReceipts a obou
+účtových Functions se stávajícími prostředky a plánovači, následně DEV web.
+Auth/App Check zůstávají vynucené. Bez změn Rules, rolí, sankcí, retence,
+Auth účtů, produkce, main nebo nových služeb.
+
+Všechny tři přesné pending dotazy byly před schválením úspěšně ověřené
+čtením DEV s nepřítomným testovacím ID: 0 výsledků, 0 zápisů. Nové indexy
+nejsou nyní potřeba; předchozí návrh nejvýše tří indexů je tím nahrazený.
+Nejde o kapacitní měření. Před worker aktualizací ověřit rozpracované purge
+joby: nové scrub fáze jsou pouze připojené na konec původního seznamu.
+Staré hotové joby ani původní pending žádost se ručně neotvírají.
+
+Pilot tvoří přesně 1 nový 24h Shout Bright_Otter_182 s testovací serverovou
+geografií CZ/CZ-42, 1 veřejný komentář a 1 soukromá odpověď TestBusiness,
+3 odpovídající hlášení. TestModerator (přesná úroveň 3 a přidělený region)
+schválí Shout, uzavře komentář bez opatření a předá soukromý případ seniorovi;
+TestAdmin (přesná úroveň 5) jej uzavře bez opatření. Nejde o nový postih.
+Případná ruční pomoc až po samostatných kontrolách a dostupném klientu;
+fixture nevytvářet zbytečně předem. Nástroj respektuje minutový report
+cooldown a umožní přípravu později dokončit bez resetu kvót.
+
+functions/content_report_decision_pilot.js a tools/content_report_decision_pilot.mjs
+mají nezávislý manifest chráněný digestem; nevyužívají cleaned staré piloty.
+Před mutací ověřují přesný čistý commit/úplné CI včetně rozhodovacího kroku,
+projekt, digest, původní zdroje/žádosti, inkarnace generací a neměnné role.
+Před úklidem vyžadují všechna čtyři skutečná serverová potvrzení a správné
+aktéry; administrativní seed není důkazem klientského průchodu.
+Úklid přes společný writer odstraní jen nové zdroje, 3 hlášení, jejich
+clearance, příslušná oznámení a read klíče tohoto Shoutu u čtyř testovacích
+účtů. Odmítne cizí potomky. Receipts zůstanou původních 7 dní, bez resetu
+kvót a Auth mutací; přerušení úklidu lze obnovit, cleaned manifest neseedovat.
+
+Návratový web je dosavadní kompatibilní b5703cec19978454 bez nového přepínače.
+Při rollbacku neodstraňovat receipts ani vracet starý account worker tak,
+aby zapomněl již zahájené nové scrub fáze. Aktuální DEV stav, přesný digest,
+CI, revize a skutečné výsledky se doplní až po jejich ověření; nyní pouze příprava.
+
+**Lokální checkpoint:** prošlo 20/20 rozhodovacích a pilotních emulátorových
+případů, 32 klientských, 109 nástrojových, lint a analyze bez nálezů.
+Pilotní testy skutečně provedly regionální/admin rozhodnutí a opakovaný
+úklid, zachovaly receipts, kvóty, původní zdroj a pending žádost a odmítly
+změnu role, digestu a cizího potomka. Posun testovacího rate času je výhradně
+v izolovaném emulátoru; provozní nástroj cooldown nezkracuje.
+Důkazy build/report-decision-pilot-{final,client,all-tools,lint,analyze}.log.
+Předchozí neúspěšné běhy odhalily opravenou inicializační revizi fixture,
+nesprávně sdílené query API pro databázi/transakci a zastaralé předpoklady
+testů při zapnutí nového DEV přepínače. Aktuální úplné ověření je oddělené
+od těchto pokusů. Čtecí DEV inventura potvrdila STANDARD, 22 Functions,
+2 plánovače, 91 zdrojů a 1 pending žádost; accountDeletionJobs/accountPurgeJobs
+jsou prázdné. Původní Hosting a Rules zachované, 0 živých zápisů.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

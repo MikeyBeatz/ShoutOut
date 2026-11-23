@@ -26,9 +26,19 @@ always select full checks; a green lightweight run is not release build proof.
 `npm --prefix tools run test:report-decisions` runs the isolated prepared
 approve/escalate/resolve core for all three content report types. It verifies
 complete bounded groups, concurrent reports/moderators, immutable retry,
-rollback, archive and retention behavior. The callable is not exported;
-serverContentReportDecisions defaults false in both web environments.
+rollback, archive and retention behavior, plus the bounded pilot. The approved
+DEV transition prepares the callable export and enables only the DEV config;
+the default and production remain false. Deployment is recorded separately.
 [Local results and the future DEV gate](../docs/MVP_SERVER_PLAN.md#moderation-basic-local-results).
+
+`node tools/content_report_decision_pilot.mjs plan|status|seed|cleanup` uses a
+new independent manifest, explicit DEV project, approved digest, clean exact
+full CI (including the decision step), and client readiness/completion flags.
+The actor JSON contains projectId, actors and staff (UID/nickname only).
+It creates one Shout/comment/private reply and three reports, respects report
+cooldown, and requires four correctly attributed server decisions before
+cleanup. Never reuse cleaned manifests. Receipts survive for seven days.
+[Approved scope](../docs/MVP_SERVER_PLAN.md#moderation-basic-dev-proposal).
 
 `npm --prefix tools run test:private-deletion` runs the prepared own-private-reply
 deletion operation and a derived Rules prototype in the isolated Firestore

@@ -1,4 +1,4 @@
-// Prepared core only. No callable export or live activation in this checkpoint.
+// Shared decision core; the callable host is exported separately in content.js.
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';

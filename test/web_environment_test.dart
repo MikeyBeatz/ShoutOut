@@ -13,6 +13,7 @@ Map<String, dynamic> gatewayFixture() => {
   'serverSpatialFeed': false,
   'serverReadSynchronization': false,
   'serverUnreadFeed': false,
+  'serverContentReportDecisions': false,
 };
 
 void main() {

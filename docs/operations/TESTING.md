@@ -12,7 +12,9 @@ Společná bezpostihová rozhodnutí mají samostatné
 `npm --prefix tools run test:report-decisions` a úplný CI krok
 Test prepared content report decisions (3 min). Ověřují všechny 3 typy
 hlášení, approve/escalate/resolve, celé skupiny 50/51, nový report během
-rozhodnutí, immutable replay, archivaci, auditní scrub a retenci.
+rozhodnutí, immutable replay, archivaci, auditní scrub a retenci. Sada nyní
+zahrnuje také řízený DEV pilot: obnovení cooldownu bez resetu v provozu,
+regionální/admin potvrzení, ochranu původních dat a bezpečný opakovaný úklid.
 [Místní výsledky a meze](../MVP_SERVER_PLAN.md#moderation-basic-local-results).
 Neexportovaný callable a vypnutý klient nejsou důkazem živé dostupnosti.
 
