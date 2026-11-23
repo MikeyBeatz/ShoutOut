@@ -24,6 +24,7 @@ import { deletePrivateReplyOperation } from './delete_private_reply.js';
 import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
 import { decideContentReportsOperation } from './decide_content_reports.js';
 import { removeReportedPublicContentOperation } from './remove_reported_public_content.js';
+import { sanctionContentOperation, revokeSanctionOperation } from './moderation_sanctions.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -116,6 +117,16 @@ export const removeReportedPublicContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => indexedOperation(removeReportedPublicContentOperation, request));
+
+export const sanctionContent = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => sanctionContentOperation(request, getFirestore()));
+
+export const revokeSanction = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => revokeSanctionOperation(request, getFirestore()));
 
 export const deletePrivateReply = onCall({
   ...secureCallableOptions,

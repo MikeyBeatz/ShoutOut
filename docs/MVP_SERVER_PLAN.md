@@ -5,6 +5,7 @@
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
 Navazující [DEV přechod, živá akceptace i úklid jsou uzavřené](#moderation-public-dev-complete);
 původní obsah a ostatní konfigurace jsou zachované. Celý moderační milník ještě není uzavřený.
+Probíhá [místní sankční pokračování](#moderation-sanctions-local), bez aktivace.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
@@ -1579,6 +1580,69 @@ Regionální živá regrese soukromého odstranění zůstává odložená samos
 veřejný pilot ji nenahrazuje. **Další úsek** vybrat ze zbývajících sankčních
 rozhodnutí, osiřelých hlášení a auditu/cutoveru autority, před zdrojovými úpravami
 předložit konkrétní rozsah podle AGENTS. Celý moderační milník zatím zůstává otevřený.
+
+<a id="moderation-sanctions-local"></a>
+
+### Navazující společné sankce – místní práce
+
+Vlastník po uzavření veřejné moderace požádal pokračovat samostatně na zbývající
+moderaci a ruční testy odložit na konec dostupné práce. Konkrétní pokračování:
+serverově sjednotit udělení sankce z hlášení i přímého zjištění a zrušení aktivního
+postihu, napojit klienta za vypnutou volbou a automaticky ověřit. Pouze místní
+práce/emulátor, následně společný push/CI; žádné nové živé fixture/Auth ani
+produkční rozhodnutí. Živý rozsah a provozní parametry doložit připravené zvlášť.
+
+Zachovat role 1–6 a jejich hierarchii, geografii ze zdroje, Auth/App Check,
+stávající 50členné skupiny hlášení, 7denní technická potvrzení a nynější retence
+postihů. Varování, omezení 1/7/30 dní a ban 1/7/30 dní; senior navíc dokumentované
+90denní omezení/ban a trvalý ban. Doklad source/author/role/deletion se čte
+v transakci, obsahový snapshot se bere ze serveru, nikoli z payloadu.
+Sankce, aktivní vazba/varování, celá skupina hlášení a receipt se uloží společně.
+Předchozí počet zůstává stávajících nejvýše 50 dohledaných postihů; nové
+automatické eskalace ani jinou frekvenční kvótu nezavádět.
+
+**Nově výslovně schváleno vlastníkem:** nový kratší postih nesmí zkrátit delší
+nebo trvalé aktivní omezení. Nové rozhodnutí zůstává v historii, stejná/kratší
+platnost zachová aktivní vazbu bez přepisu. Zrušení je samostatná oprávněná
+akce s auditním důvodem, nesmí smazat novější odlišnou vazbu. Automatické
+znovuzapínání starších historických postihů se nepřidává.
+
+Zrušení zachová původní neměnnou sankci/purgeAt; vlastní dočasný aktivní postih
+smí zrušit jeho moderátor, senior také cizí/trvalý. Hierarchie vůči cílovému účtu
+se ověřuje aktuálně. Regionální rozsah pro udělení vychází z rodičovského Shoutu;
+zrušení zatím zachovává autoritu dnešních Rules (hierarchie a vlastní/dočasný či senior).
+Úplný společný audit oprávnění a uzavření přímých zápisů zůstávají navazující brána.
+
+Připravené functions/moderation_sanctions.js a dva wrappery v content.js, zatím
+bez nasazení. Navržený host profil obou: europe-west3, min 0 / max 1, concurrency 1,
+256 MiB, 15 s; Auth/App Check ve společném obalu. Klientské napojení obou
+obrazovek hlášení, přímého zásahu i zrušení aktivního postihu má nový strict
+serverContentSanctions=false v DEV, v prod default false. Pole role, expirace,
+snapshot nebo libovolné čítače klient neposílá. Před potvrzením se čte jen počet
+historie (limit 50), nikoli celé záznamy; retry nevyžaduje znovu číst historii
+ani již odstraněný cíl. Nejasný výsledek zamkne původní důvod/volbu/ID a nabídne
+stejný požadavek. Zrušení dialogu neuzavře zdrojové hlášení jako dokončené.
+
+Konečných **28/28** emulátorových scénářů ověřuje 90denní omezení, 50/51,
+kolize/souběh, rollback, odnětí role/žádost o mazání, zachování silnější vazby,
+bezpečný replay zrušení i cleanup kopie důkazů podle skutečného sourceReportId
+(nezaměňovat reprezentativní hlášení s prvním lexikografickým ID skupiny).
+Sedm cílených unit/host a 9 konečných klientských testů zelených. Širší místní
+regrese měla **528 Flutter, 112 tools a 185 unit**, bez emulátoru přeskočeno 666
+integračních případů; konečné drobné kontraktové/validační změny mají následné
+28/7/9 cílené běhy. Analyze/lint čisté. Přesné společné úplné CI ještě následuje.
+Podklady build/moderation-sanctions-{emulator-final,client-final,unit-final,flutter,tools,functions,analyze,lint}.log.
+
+Rozpad zbývající nedokončené váhy moderation-decision **200** zůstává pevný:
+140 sankce (30 kód / 30 kontrola / 20 klient / 20 kontrola klienta / 20 DEV /
+20 akceptace), 40 osiřelá hlášení (4×10) a 20 společné uzavření přímých zápisů.
+Váha milníku se nemění; připravený kód nezapočítává nasazení ani ruční akceptaci.
+Připravená allowlist aktualizace úklidu technických potvrzení se nenasazuje.
+Žádné backendové čtení Auth účtů ani mutace živých uživatelů nejsou potřebné.
+
+**Otevřené Business volby:** po zamítnutí umožnit opravu/opětovné podání, a při
+pozastavení pouze zastavit nové publikace/propagaci, nebo navíc skrýt aktivní
+firemní Shouty. Vlastník má obě otázky předložené; do odpovědi nezavádět nové chování.
 
 <a id="account-deletion"></a>
 

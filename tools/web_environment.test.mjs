@@ -9,6 +9,17 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('prepared content sanctions are off, strict and require App Check independently', () => {
+  assert.equal(actualDev.serverContentSanctions, false);
+  assert.notEqual(loadConfig('prod').serverContentSanctions, true);
+  const omitted = { ...actualDev }; delete omitted.serverContentSanctions;
+  assert.doesNotThrow(() => validateConfig(omitted, 'dev'));
+  for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverContentSanctions: value }, 'dev'));
+  const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) };
+  delete disabled.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...disabled, serverContentSanctions: true }, 'dev'));
+});
+
 test('public report removal activates only DEV and validates its own App Check gate', () => {
   assert.equal(actualDev.serverPublicReportRemoval, true); assert.notEqual(loadConfig('prod').serverPublicReportRemoval, true);
   assert.doesNotThrow(() => validateConfig({ ...actualDev, serverPublicReportRemoval: true }, 'dev'));

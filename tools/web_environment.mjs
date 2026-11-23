@@ -83,6 +83,12 @@ export function validateConfig(config, environment) {
   if (Object.hasOwn(config, 'serverPublicReportRemoval') && typeof config.serverPublicReportRemoval !== 'boolean') {
     throw new Error('serverPublicReportRemoval must be a boolean.');
   }
+  if (Object.hasOwn(config, 'serverContentSanctions') && typeof config.serverContentSanctions !== 'boolean') {
+    throw new Error('serverContentSanctions must be a boolean.');
+  }
+  if (config.serverContentSanctions === true && !config.appCheckSiteKey) {
+    throw new Error('Server content sanctions require web App Check.');
+  }
   if (config.serverPublicReportRemoval === true && !config.appCheckSiteKey) {
     throw new Error('Server public report removal requires web App Check.');
   }

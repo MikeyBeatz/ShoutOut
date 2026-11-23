@@ -487,7 +487,8 @@ class _ReportList extends StatelessWidget {
           final actor = FirebaseAuth.instance.currentUser?.uid;
           final target =
               (_useServerContentReportDecisions ||
-                  _useServerPublicReportRemoval)
+                  _useServerPublicReportRemoval ||
+                  _useServerContentSanctions)
               ? _contentReportTarget(collection, data)
               : null;
           return Card(
@@ -509,7 +510,9 @@ class _ReportList extends StatelessWidget {
                     FirebaseAuth.instance.currentUser?.uid == actor,
                 pendingAction: () => target == null
                     ? null
-                    : _pendingContentReportDecision(target)?.decision,
+                    : _pendingContentReportDecision(target)?.decision ??
+                          _pendingContentSanction(target)?.payload['decision']
+                              as String?,
                 onError: (error) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -609,6 +612,20 @@ class _ReportList extends StatelessWidget {
     List<QueryDocumentSnapshot<Map<String, dynamic>>>? relatedReports,
   }) async {
     final data = report.data();
+    final sanctionTarget = _contentReportTarget(collection, data);
+    _checkPendingContentSanction(sanctionTarget, action);
+    if (_useServerContentSanctions &&
+        moderationSanctionActions.contains(action)) {
+      return _sanctionReportedContent(
+        context,
+        role: role,
+        target: sanctionTarget,
+        reportIds: (relatedReports ?? [report]).map((r) => r.id).toList(),
+        sourceReportId: report.id,
+        action: action,
+        reasonHint: data['reason'] as String? ?? '',
+      );
+    }
     if (_useServerContentReportDecisions || _useServerPublicReportRemoval) {
       final decisionTarget = _contentReportTarget(collection, data);
       final pending = _pendingContentReportDecision(decisionTarget);
@@ -1065,6 +1082,7 @@ String _sanctionActionLabel(String action) => switch (action) {
   'restrict1d' => 'Omezení tvorby na 1 den',
   'restrict7d' => 'Omezení tvorby na 7 dnů',
   'restrict30d' => 'Omezení tvorby na 30 dnů',
+  'restrict90d' => 'Omezení tvorby na 90 dnů',
   'ban1d' => 'Ban na 1 den',
   'ban7d' => 'Ban na 7 dnů',
   'ban30d' => 'Ban na 30 dnů',
@@ -1081,6 +1099,44 @@ Future<void> _showDirectModerationDialog(
   required String sourceContentId,
   required Map<String, dynamic> contentSnapshot,
 }) async {
+  if (_useServerContentSanctions) {
+    try {
+      final completed = await _showServerContentSanction(
+        context,
+        role: role,
+        target: (
+          type: sourceContentType,
+          shoutId: sourceContentType == 'shout'
+              ? sourceContentId
+              : contentSnapshot['shoutId'] as String,
+          targetId: sourceContentType == 'shout' ? null : sourceContentId,
+        ),
+        expectedTargetUserId: userId,
+        expectedCreatedAt: (contentSnapshot['createdAt'] as Timestamp?)
+            ?.millisecondsSinceEpoch,
+      );
+      if (completed && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Postih byl zaznamenán.')));
+      }
+    } on FirebaseException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _serverWriteFailureText(
+                context,
+                error,
+                fallback: 'Postih se nepodařilo uložit.',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+    return;
+  }
   final previous = await FirebaseFirestore.instance
       .collection('sanctions')
       .where('userId', isEqualTo: userId)

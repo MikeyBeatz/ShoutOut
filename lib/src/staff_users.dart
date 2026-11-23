@@ -321,6 +321,15 @@ class _UserSanctionCard extends StatelessWidget {
   }
 
   Future<void> _revoke(BuildContext context) async {
+    if (_useServerContentSanctions) {
+      final completed = await _showServerSanctionRevocation(
+        context,
+        sanction.id,
+        sanction.data()['userId'] as String,
+      );
+      if (completed && context.mounted) onRevoked();
+      return;
+    }
     final reasonController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,

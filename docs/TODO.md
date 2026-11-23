@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,81 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,83 %** — vážené dokončení podúseků
 
-Hotové úseky: **205/258**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **207/268**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -69,6 +69,15 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
 1. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
+   **Probíhá společný sankční úsek** na feature/moderation-sanctions:
+   [serverové udělení a zrušení postihu, klient a regrese](MVP_SERVER_PLAN.md#moderation-sanctions-local).
+   Zachovat stávající role, délky/retence a 50 hlášení. Ochrana silnějšího
+   aktivního postihu je nově výslovně schválená; Business dvě volby čekají.
+   Jádro/wrappery a klient jsou připravené za false; konečných 28/28 emulátorových
+   případů, 9 klientských a 7 unit/host prošlo, analyze/lint čisté. Širší běhy
+   528 Flutter / 112 tools / 185 unit jsou zelené; přesné úplné CI ještě následuje.
+   Pokračuje příprava osiřelých hlášení a společného auditu. Žádné nasazení/nové živé fixture;
+   automatické testy průběžně, ruční až po samostatné práci podle vlastníka.
    **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
    jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
    110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má

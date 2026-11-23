@@ -265,6 +265,27 @@ class _StaffReportCard extends StatelessWidget {
         message: 'Retry the original pending decision first.',
       );
     }
+    final sanctionTarget = _contentReportTarget(
+      group.collection,
+      representative.data(),
+    );
+    _checkPendingContentSanction(sanctionTarget, action);
+    if (_useServerContentSanctions &&
+        moderationSanctionActions.contains(action)) {
+      final completed = await _sanctionReportedContent(
+        context,
+        role: role,
+        target: sanctionTarget,
+        reportIds: group.reports.map((r) => r.id).toList(),
+        sourceReportId: representative.id,
+        action: action,
+        reasonHint: note.trim().isNotEmpty
+            ? note
+            : representative.data()['reason'] as String? ?? '',
+      );
+      if (!completed) throw _ModerationDecisionCancelled();
+      return;
+    }
     if (_useServerContentReportDecisions || _useServerPublicReportRemoval) {
       final target = _contentReportTarget(
         group.collection,
@@ -471,6 +492,9 @@ List<DropdownMenuItem<String>> staffReportDecisionItems({
     const _ReportDecisionOption('restrict1d', 'Omezit tvorbu na 1 den'),
     const _ReportDecisionOption('restrict7d', 'Omezit tvorbu na 7 dnů'),
     const _ReportDecisionOption('restrict30d', 'Omezit tvorbu na 30 dnů'),
+    if (_useServerContentSanctions &&
+        role.isAtLeast(AccountRole.seniorModerator))
+      const _ReportDecisionOption('restrict90d', 'Omezit tvorbu na 90 dnů'),
     const _ReportDecisionOption('ban1d', 'Ban na 1 den'),
     const _ReportDecisionOption('ban7d', 'Ban na 7 dnů'),
     const _ReportDecisionOption('ban30d', 'Ban na 30 dnů'),
@@ -492,6 +516,13 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
   String? _decision;
   bool _saving = false;
   String? _error;
+
+  ModerationSanctionRequest? get _pendingSanction => _pendingContentSanction(
+    _contentReportTarget(
+      widget.group.collection,
+      widget.group.representative.data(),
+    ),
+  );
 
   PrivateReportRemovalRequest? get _pendingRemoval =>
       widget.group.category == _StaffReportCategory.privateReply
@@ -521,6 +552,11 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       _decision = decision.decision;
       _noteController.text = decision.note;
     }
+    final sanction = _pendingSanction;
+    if (sanction != null) {
+      _decision = sanction.payload['decision'] as String;
+      _noteController.text = sanction.payload['note'] as String;
+    }
   }
 
   @override
@@ -545,6 +581,10 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       }
     } catch (error) {
       if (!mounted || FirebaseAuth.instance.currentUser?.uid != actor) return;
+      if (error is _ModerationDecisionCancelled) {
+        setState(() => _saving = false);
+        return;
+      }
       setState(() {
         _saving = false;
         _error = _serverWriteFailureText(
@@ -568,10 +608,15 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
           serverDecisions: _useServerContentReportDecisions,
           isEscalated: widget.group.isEscalated,
           role: widget.role,
-          pendingDecision: _pendingDecision?.decision,
+          pendingDecision:
+              _pendingDecision?.decision ??
+              _pendingSanction?.payload['decision'] as String?,
         ),
         onChanged:
-            _saving || _pendingRemoval != null || _pendingDecision != null
+            _saving ||
+                _pendingRemoval != null ||
+                _pendingDecision != null ||
+                _pendingSanction != null
             ? null
             : (value) => setState(() => _decision = value),
       ),
@@ -579,7 +624,10 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       TextField(
         controller: _noteController,
         enabled:
-            !_saving && _pendingRemoval == null && _pendingDecision == null,
+            !_saving &&
+            _pendingRemoval == null &&
+            _pendingDecision == null &&
+            _pendingSanction == null,
         maxLength: 500,
         maxLines: 2,
         decoration: const InputDecoration(
@@ -602,7 +650,7 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
                 )
               : const Icon(Icons.check),
           label: Text(
-            _pendingDecision == null
+            _pendingDecision == null && _pendingSanction == null
                 ? 'Uložit rozhodnutí'
                 : 'Zopakovat původní rozhodnutí',
           ),

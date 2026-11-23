@@ -299,6 +299,7 @@ Future<void> _decideContentReports(
   String decision, {
   String? note,
 }) async {
+  _checkPendingContentSanction(target, decision);
   if (!usesServerContentReportDecision(
     decision: decision,
     targetType: target.type,

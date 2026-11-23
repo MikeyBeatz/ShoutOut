@@ -6,6 +6,23 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Probíhá navazující moderace**, větev feature/moderation-sanctions. Vlastník
+po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
+na konec. [Konkrétní místní rozsah a otevřené volby](MVP_SERVER_PLAN.md#moderation-sanctions-local).
+Připravené jsou jádro/wrappery sanctionContent/revokeSanction i klient za
+serverContentSanctions=false. Konečný místní běh **28/28** emulátorových případů,
+7 cílených unit/host, 9 finálních klientských testů a analyze/lint prošly;
+širší běhy 528 Flutter / 112 tools / 185 unit také zelené (666 integračních bez
+emulátoru přeskočených). Přesné společné úplné CI ještě následuje.
+Vlastník výslovně schválil zachování silnějšího
+aktivního postihu; kratší/equivalentní nový zápis zůstane v historii a aktivní
+vazbu nezkrátí. Nyní navazuje příprava osiřelých hlášení a společného cutoveru;
+nasazení ani živá akceptace sankcí dosud hotové nejsou.
+Žádná nová živá data, Auth účty, Rules ani prostředky; DEV zůstává na 87d6687.
+U Business zamítnutí/opakovaného podání a pozastavení se čeká na dvě produktové
+volby; do odpovědi na této části neměnit chování. Automatické testy průběžně,
+ruční průchody až na konec dostupné samostatné práce. Staré cleaned piloty neobnovovat.
+
 **Veřejné moderační odstranění má uzavřenou DEV akceptaci i úklid.**
 [Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-complete).
 Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** má
@@ -33,9 +50,9 @@ build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json
 fáze **cleaned**, digest **c8e37fd7…c0639cc8**; nikdy znovu neseedovat. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
 dokumentační commit je nenahrazuje. Návratový kompatibilní web 565880d4664da7b2.
 
-**Další krok k MVP:** podle serverového plánu připravit konkrétní místní rozsah
-zbývajících sankčních rozhodnutí, osiřelých hlášení a společného auditu/cutoveru
-autority. Nový zdrojový rozsah předem schválit. Celý moderační milník zatím není
+**Další krok k MVP:** dokončit výše popsaný místní sankční úsek, potom osiřelá
+hlášení a společný audit/cutover autority. Nová produktová a provozní rozhodnutí
+předem schválit; dvě Business volby nyní čekají. Celý moderační milník zatím není
 uzavřený; regionální regrese soukromého odstranění zůstává samostatně odložená.
 Browser host je nedostupný a Windows ovládání bylo zastavené kontrolou URL;
 další UI vstupy až po novém ověření dostupnosti. Pro tento pilot další ruční test není potřeba.
