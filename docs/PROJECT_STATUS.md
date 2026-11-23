@@ -35,7 +35,10 @@ Kompatibilní návratový web 813f34b7555e272a, návratový ruleset 476d216c…a
 rozsahu. Vlastní mazání tím znovu neotevírat. Konkrétní další implementaci
 předložit podle závislostí; odložený pohybový test ani jeho úklid se tím neuzavírají.
 Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi
-jsou v detailu/oznámeních. Nový přehled konverzací není součástí této změny.
+jsou v detailu/oznámeních. Vlastník 23. listopadu zařadil jejich doplnění do
+této sekce [až po MVP](plans/roadmap/PRIVATE_REPLY_HISTORY.md), položka bl-158.
+Plán je zapsaný, implementace se nyní nezahajuje. Nová otevřená položka rozšiřuje
+jen celkový backlog ze 157 na 158; váhy dosavadních úseků a MVP se nemění.
 
 **Předchozí uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
 Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou

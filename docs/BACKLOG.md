@@ -7,6 +7,10 @@ Tento soubor je kanonická evidence požadavků. Původních 155 úkolů
 nový požadavek na feed a 1. listopadu přístup k retenčnímu archivu v administraci;
 Před změnou metrik 12. listopadu zde bylo 157 úkolů: 107 hotových a 50 otevřených.
 Aktuální souhrn podle podúseků se generuje níže.
+Dne 23. listopadu 2026 přibyla položka bl-158: soukromé odpovědi v Mé shouty
+→ Komentáře, výslovně po MVP. Původních 157 položek a jejich váhy zůstaly
+zachované; celkový backlog má nyní 158 položek. Nižší procento po rozšíření
+vyjadřuje nový otevřený rozsah, nikoli ztrátu dokončené práce. MVP se nemění.
 Při reorganizaci se žádný checkbox ani jeho stav nezměnil. Hotové bloky jsou zkrácené na názvy;
 jejich úplné požadavky, rozhodnutí a ověření jsou v odkazovaném nezměněném archivu.
 Bloky s otevřeným podúkolem zůstávají celé, včetně kontextu a již hotových podúkolů.
@@ -196,9 +200,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
+`███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
 
-Hotové úseky: **207/309**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **207/313**. Celé položky: **107/158**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.
@@ -742,3 +746,13 @@ projektu aplikace; distribuční a nákladové podrobnosti zůstávají v
 
 - [x] <a id="bl-157"></a> respektovat preference v `users/{uid}/settings/notifications`,
   - [Původní podrobnosti a ověření](archive/TODO_2026-10-29.md#8-push-notifikace-a-centrum-oznámení--po-mvp).
+
+## 9. Další požadavky po MVP
+
+- [ ] <a id="bl-158"></a> **Po MVP — Zpřístupnit soukromé odpovědi v Mé shouty → Komentáře.**
+  - Požadavek vlastníka z 23. listopadu: přidat soukromé odpovědi do této osobní
+    sekce; současný přehled zahrnuje pouze veřejné komentáře.
+  - Zachovat soukromí, účastnická oprávnění a dosavadní mazání/retence.
+    Nejde o zveřejnění zpráv ani nynější datovou migraci.
+  - Uspořádání přehledu a zahrnutí přijatých odpovědí potvrdit před implementací.
+    [Postup a akceptace](plans/roadmap/PRIVATE_REPLY_HISTORY.md).

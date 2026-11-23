@@ -21,13 +21,15 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`████████████████████████████░░░░░░░░░░░░` **70,26 %** — vážené dokončení podúseků
+`███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
 
-Hotové úseky: **207/309**. Celé položky: **107/157**; rozpracované: 7.
+Hotové úseky: **207/313**. Celé položky: **107/158**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
-Původních 157 hlavních položek zůstává zachovaných. Jejich podúseky mají pevné
-váhy a společnou [evidenci](progress.json); výpočet zahrnuje i práci po MVP.
+Původních 157 hlavních položek zůstává zachovaných; 23. listopadu přibyla
+jedna nová položka po MVP, celkem nyní 158. Nižší procento po rozšíření
+neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
+[evidenci](progress.json); výpočet zahrnuje i práci po MVP.
 
 ## Nejbližší práce
 
@@ -243,6 +245,10 @@ Po MVP patří vydání Androidu a iOS, kompletní placená Business monetizace,
 interaktivní tutorial, telefonní ověření, FCM push a fan-out sledujícím a
 obecné žebříčky či gamifikace. Tyto plány se neruší; zůstávají v detailním
 backlogu v [BACKLOG.md](BACKLOG.md) se štítkem **Po MVP**.
+
+Nově po MVP: [soukromé odpovědi v Mé shouty → Komentáře](plans/roadmap/PRIVATE_REPLY_HISTORY.md)
+podle [bl-158](BACKLOG.md#bl-158). Jde o osobní přehled se zachováním soukromí;
+do aktuálního dokončování MVP tuto implementaci nezařazovat.
 
 Osobní přečtení, synchronizace zařízení, unread-first v Nejblíž a číslovaný
 indikátor novinek (B1–B4) sem nepatří: vlastník je vybral před MVP.

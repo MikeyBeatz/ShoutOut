@@ -9,8 +9,9 @@ veřejné vydání [startovní brána](LAUNCH_READINESS.md).
 ## Pevné váhy a podúseky
 
 - Každý ze 24 MVP milníků má jednu stejnou váhu. Nezávisle má stejnou váhu
-  každá ze 157 backlogových položek, včetně historicky samostatných vnořených
-  checkboxů. Obě stupnice jsou oddělené pohledy, nesčítají se dohromady.
+  každá backlogová položka, včetně historicky samostatných vnořených checkboxů.
+  Původní základ má 157 položek; od 23. listopadu je s novým bl-158 celkem 158.
+  Obě stupnice jsou oddělené pohledy, nesčítají se dohromady.
 - Váha rodiče je technicky 10 000 bodů. Jeho podúseky si ji rozdělí; součet
   musí zůstat přesně 10 000. Žádný nový podúsek nepřidává rodiči další váhu.
 - Procento = součet vah dokončených podúseků / součet vah všech rodičů × 100.
@@ -430,4 +431,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | tutorial-complete: Dokončit celé schválené zadání průvodce | implementation | ⬜ | — |
 | tutorial-verify: Ověřit přerušení, návrat a persistence | verification | ⬜ | — |
 | tutorial-activate: Aktivace a živý průchod | acceptance | ⬜ | — |
+| private-history-code: Po MVP: soukromé odpovědi v osobním přehledu – implementace | implementation | ⬜ | [1](../docs/plans/roadmap/PRIVATE_REPLY_HISTORY.md) |
+| private-history-check: Po MVP: soukromý přehled – oprávnění a klientské regrese | verification | ⬜ | — |
+| private-history-dev: Po MVP: soukromý přehled – ověřené nasazení | deployment | ⬜ | — |
+| private-history-accept: Po MVP: soukromý přehled – živá akceptace obou typů účtů | acceptance | ⬜ | — |
 <!-- progress:details:end -->

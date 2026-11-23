@@ -9,3 +9,4 @@ Produktové/distribuční plány mají vlastní rozsah a schvalovací brány. Mo
 - [Vyhodnocení API událostí v okolí](EXTERNAL_EVENTS_EVALUATION.md)
 - [Karma, achievementy a kosmetické odměny](GAMIFICATION_MODEL.md)
 - [ShoutOut – plán mobilního testování a distribuce](MOBILE_DISTRIBUTION_PLAN.md)
+- [Soukromé odpovědi v Mé shouty → Komentáře – po MVP](PRIVATE_REPLY_HISTORY.md)

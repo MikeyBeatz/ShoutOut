@@ -429,7 +429,11 @@
     {"id":"tutorial-existing","title":"Připravený kontextový průvodce v klientu","phase":"implementation","complete":true,"evidence":["lib/interactive_tutorial.dart","docs/archive/BACKLOG_2026-11-12.txt"]},
     {"id":"tutorial-complete","title":"Dokončit celé schválené zadání průvodce","phase":"implementation","complete":false,"evidence":[]},
     {"id":"tutorial-verify","title":"Ověřit přerušení, návrat a persistence","phase":"verification","complete":false,"evidence":[]},
-    {"id":"tutorial-activate","title":"Aktivace a živý průchod","phase":"acceptance","complete":false,"evidence":[]}
+    {"id":"tutorial-activate","title":"Aktivace a živý průchod","phase":"acceptance","complete":false,"evidence":[]},
+    {"id":"private-history-code","title":"Po MVP: soukromé odpovědi v osobním přehledu – implementace","phase":"implementation","complete":false,"evidence":["docs/plans/roadmap/PRIVATE_REPLY_HISTORY.md"]},
+    {"id":"private-history-check","title":"Po MVP: soukromý přehled – oprávnění a klientské regrese","phase":"verification","complete":false,"evidence":[],"requires":["private-history-code"]},
+    {"id":"private-history-dev","title":"Po MVP: soukromý přehled – ověřené nasazení","phase":"deployment","complete":false,"evidence":[],"requires":["private-history-check"]},
+    {"id":"private-history-accept","title":"Po MVP: soukromý přehled – živá akceptace obou typů účtů","phase":"acceptance","complete":false,"evidence":[],"requires":["private-history-dev"]}
   ],
   "views":{
     "mvp":[
@@ -615,7 +619,8 @@
     {"id":"bl-154","parts":[{"section":"legacy-bl-154","weight":10000}]},
     {"id":"bl-155","parts":[{"section":"legacy-bl-155","weight":10000}]},
     {"id":"bl-156","parts":[{"section":"legacy-bl-156","weight":10000}]},
-    {"id":"bl-157","parts":[{"section":"legacy-bl-157","weight":10000}]}
+    {"id":"bl-157","parts":[{"section":"legacy-bl-157","weight":10000}]},
+    {"id":"bl-158","parts":[{"section":"private-history-code","weight":2500},{"section":"private-history-check","weight":2500},{"section":"private-history-dev","weight":2500},{"section":"private-history-accept","weight":2500}]}
     ]
   }
 }
