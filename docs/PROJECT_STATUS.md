@@ -12,7 +12,7 @@ platnost fixture se neprodlužuje a nové živé testy nejsou tím schválené.
 Nezávislý [audit soukromého mazání](MVP_SERVER_PLAN.md#private-deletion-preparation)
 vedl k následně schválenému a nyní dokončenému DEV přechodu níže.
 
-**Uzavřený DEV úsek:** [vlastní soukromé mazání – akceptace a úklid](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
+**Předchozí uzavřený DEV úsek:** [vlastní soukromé mazání – akceptace a úklid](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
 App zdroj **9c2e121** / úplné CI **45096691292 success**, Rules zdroj
 **9fee32e** / úplné CI **45098775591 success**. Hosting **813f34b7555e272a**,
 deletePrivateReply **00001-koz**, cleanup **00005-goh**; prostředky i ostatních
@@ -30,69 +30,42 @@ všech **91 původních zdrojů**, jejich updateTime, původní pending žádost
 Důkazy build/private-deletion-final-proof.json a související audit/simulace.
 Kompatibilní návratový web 813f34b7555e272a, návratový ruleset 476d216c…a3e9.
 
-**Právě dokončený místní úsek:** [soukromá moderace bez postihu](MVP_SERVER_PLAN.md#moderation-private-local).
-Serverové jádro atomicky odstraní jednu nahlášenou živou zprávu, uzavře hlášení
-a uloží audit/potvrzení; uloženou roli i geografii ověřuje také při opakování.
-37 cílených emulátorových testů (16 nových), 173 serverových unit testů,
-104 nástrojových testů a lint prošly na Node 22. Integrační testy mimo
-emulátor jsou přeskočené, nikoli dodatečně započítané. První zásah 11 SDK
-reads / 3 writes, opakování 9 / 0. Zdroj **f1e32e9** má
-[success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001),
-včetně nové moderace, ostatních regresí a webového buildu; přesný čistý zdroj ověřený.
-Původní checkpoint f1e32e9 neobsahoval wrapper ani klientské zapojení.
-V DEV zůstává přímá staff cesta otevřená do pozitivního klientského ověření;
-navazující runtime zapojení je již nasazené, jak dokládá následující záznam.
-**Nyní výslovně schválený celý navazující úsek:** [klient, wrapper a DEV přechod](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
-**Server/web jsou již v DEV:** [ověřené nasazení a původní pilot](MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
-0fa2774 / [success úplné CI 45147594322](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322).
-Hosting **b5703cec19978454**, nová removeReportedPrivateReply **00001-zec**,
-cleanup **00006-lum**, 100 % provozu a schválené prostředky. Ostatních 20
-Functions, oba plánovače a 91 původních zdrojů/pending žádost zachované.
-67 app souborů / 8 HTTP odpovědí shodných s release artefaktem. Původní Rules
-**e16b7a3d…59271** zůstávají; samostatný cutover ještě není provedený.
-500 Flutter testů, analyze bez nálezů, 107 nástrojových, 174 serverových unit
-a 46 emulátorových regresí prošly. CLI discovery timeout byl řešen jen
-lokálním čekáním 60 s, nikoli změnou běhových timeoutů.
-**Pilot byl seeded:** jeden nový Shout/dvě zprávy/jedno původně open hlášení, nonce
-**3a725093**, digest **c5801fcb…05c059d9**, celkem 92 zdrojů. Původní cleaned
-pilot se neobnovoval. Jen nové fixture byla přes společný writer doplněna
-označená syntetická geografie CZ/CZ-42, protože geografický trigger dosud
-není nasazený; geographyReady true, role beze změny. Ruční průchod již proběhl
-přes TestAdmin a vlastník výslovně schválil jeho přijetí níže. Čeká samostatné
-úplné CI pro připravený Rules zdroj, ověření a úklid. Celý DEV úsek a akceptace
-tedy ještě nejsou hotové; ostatní
-moderační rozhodnutí/sankce zůstávají navazující prací.
-Nezávislá [místní příprava kompatibility přísnějších Rules](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation)
-je ověřená: 34 serverových/pilotních a po opravě testovacího API 13 Rules
-regresí prošlo; starší nástroj neznovuotevře staff mazání a zákazy pokrývají
-všech šest úrovní rolí. Místní 4b4be9f se zahrne do společného push/úplného CI
-navazujícího Rules checkpointu; bez dalšího kreditu do stupnice.
-Kořenové firestore.rules jsou nyní připravené k uzavření, živá pravidla dosud
-zůstávají e16b7a3d…59271. Platnost nového
-pilotního Shoutu končí 24. listopadu v 10:53:49 SEČ; svévolně ji neprodlužovat
-ani nevytvářet náhradní pilot. Vlastní mazání po expiraci zůstává podle politiky
-možné, dostupnost moderačního průchodu je nutné ověřit před navázáním.
-Ovládání Windows bylo automaticky zastavené kvůli nespolehlivému určení URL;
-browser host je současně nedostupný. Pozitivní UI důkaz to nenahrazuje.
-Vlastní mazání tím znovu neotevírat. Odložený pohybový test ani jeho úklid
-se tím neuzavírají.
-**Následný živý průchod 23. listopadu:** vlastník potvrdil zmizení hlášení
-bez chyby. Čtecí audit doložil resolved/contentRemoved, jedinou serverovou
-receipt removeReportedPrivateReply, odstranění první zprávy a zachování druhé,
-všech 91 původních zdrojů a pending žádosti. Hash původních podkladů hlášení
-9400ced5…f93b je shodný. Aktérem je ale **TestAdmin / it_admin / úroveň 5**,
-nikoli plánovaný TestModerator / it_moderator. Původní pilotní pojistka proto
-správně odmítla tuto akci započítat. Vlastník poté výslovně schválil přijetí
-TestAdmin a [přesně omezený doplňkový plán](MVP_SERVER_PLAN.md#moderation-private-cutover-prepared),
-digest **873e936e…2d4770a**, v samostatném local accepted manifestu.
-Původní manifest/audit/role zůstaly beze změny. Regionální živý průchod není
-tím doložený. Po dočasném 429 jsou logy dostupné: Auth/App Check VALID,
-HTTP 200 se shodnou trace a serverovou latency 0,6426 s. Důkazy
-build/private-moderation-{actor-audit,decision-logs,acceptance-proof}.json.
-Živé Rules i fixture zůstávají před úplným CI a cutoverem zachované.
-Konečný místní cutover běh má 49/49 emulátorových testů bez přeskočení a čistý
-lint; zahrnuje přijatý admin plán, drift a opakovaný úklid. Příští krok:
-společný push/úplné CI, serverová simulace a pouze DEV Rules nasazení.
+**Poslední uzavřený DEV úsek:** [soukromé odstranění bez postihu – akceptace a úklid](MVP_SERVER_PLAN.md#moderation-private-dev-complete).
+App/server **0fa2774** / úplné CI **45147594322 success**; samostatné Rules a
+úklidový nástroj **40e127f** / [úplné CI 45164557897 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45164557897).
+Místních 49/49 cílených emulátorových testů prošlo; celý CI průchod zahrnuje
+aplikační testy, Rules, ostatní serverové regrese i webový build.
+DEV Rules **3de8f7d8-6658-4b24-951f-043eac8de297** mají ověřenou shodu zdroje
+a 16/16 scénářů oficiálního serverového simulátoru. Managed přímé private
+delete a contentRemoved jsou uzavřené, ostatní rozhodnutí/čtení zachované.
+Přímý autentizovaný HTTP DELETE z prohlížeče nebyl součástí této kontroly.
+
+Vlastník potvrdil živý průchod a výslovně přijal skutečného aktéra **TestAdmin**
+namísto plánovaného TestModerator. Serverová receipt/audit, Auth/App Check
+VALID, HTTP 200, nezměněné podklady a zachovaná druhá zpráva byly ověřené.
+Regionální živé oprávnění se tím netvrdí; jeho ruční regrese zůstává otevřená.
+Doplňkový manifest 873e936e…2d4770a je **cleaned**, původní c5801fcb…05c059d9
+zůstal beze změny jako historický podklad. Ani jeden znovu neseedovat.
+Uklizen pouze nový Shout, kontrolní zpráva, hlášení a příslušné notifikace;
+první zprávu už odstranilo skutečné rozhodnutí. Žádné potomky ani fixture
+cloudové read klíče nezůstaly. **5 potvrzení** ponechaných +7 dní beze změny,
+kvóty se neresetovaly. Všech **91 původních zdrojů a jejich updateTime**,
+původní pending žádost, feed 12/news 6/active, všech **22 Functions**,
+oba minutové plánovače a Hosting **b5703cec19978454** zachované.
+Callable **00001-zec** / cleanup **00006-lum**, prostředky beze změny.
+Důkazy build/private-moderation-rules-final.json a private-moderation-cleanup-check.json.
+Návratový ruleset **e16b7a3d…59271**; starší raw-delete web vracet až po
+odpovídajícím rollbacku Rules. Produkce, main, tagy a Auth účty beze změny.
+
+**Další práce:** zbývající atomická moderační rozhodnutí/sankce, regionální
+regrese a produkční aktivace podle [serverového plánu](MVP_SERVER_PLAN.md#moderation).
+Celý moderační milník se tím neuzavírá. Samostatný odložený pohybový test
+a jeho staré fixture zůstávají otevřené; toto přijetí je nenahrazuje.
+Historické lokální výsledky a schválené mezikroky jsou u
+[přípravy](MVP_SERVER_PLAN.md#moderation-private-local),
+[nasazení](MVP_SERVER_PLAN.md#moderation-private-dev-rollout) a
+[přijetí TestAdmin](MVP_SERVER_PLAN.md#moderation-private-cutover-prepared).
+
 Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi
 jsou v detailu/oznámeních. Vlastník 23. listopadu zařadil jejich doplnění do
 této sekce [až po MVP](plans/roadmap/PRIVATE_REPLY_HISTORY.md), položka bl-158.

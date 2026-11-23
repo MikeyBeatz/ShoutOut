@@ -1,15 +1,19 @@
 # Vývojový a produkční web
 
-**Aktuální DEV soukromá moderace, 23. listopadu:** [nasazení a otevřený pilot](../MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
+**Aktuální DEV soukromá moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
 Zdroj **0fa2774be634db27013e37ca511e8523c6a9f7c7**, success úplné CI **45147594322**.
 Hosting **b5703cec19978454**, serverPrivateReportRemoval true pouze DEV;
 nová callable **removereportedprivatereply-00001-zec**, cleanup **00006-lum**,
 schválené prostředky/100 % provozu. Celkem 22 Functions, ostatních 20 a oba
 minutové plánovače zachované, 67 app souborů a 8 HTTP odpovědí odpovídá artefaktu.
-Rules zůstávají **e16b7a3d-f363-499c-ad40-262471059271**. Návratový web
-**813f34b7555e272a** je v této dosud otevřené Rules fázi kompatibilní.
-Nová fixture je seeded, čeká skutečný TestModerator průchod; teprve po něm
-samostatný Rules cutover s úplným CI a úklid. Produkce/main/Auth beze změny.
+Samostatné Rules ze zdroje **40e127ff52f076b912179427c932a908da62d162** / success
+úplné CI **45164557897**: **3de8f7d8-6658-4b24-951f-043eac8de297**.
+Shoda zdroje a 16/16 serverových simulací vydané verze ověřené; managed
+přímé private delete/contentRemoved uzavřené. Pilot TestAdmin vlastník přijal,
+vymezená data uklizená, 5 potvrzení ponechaných +7 dní; původních 91 zdrojů
+a pending žádost zachované. Regionální živý průchod se tím netvrdí.
+Návratový ruleset **e16b7a3d…59271**; starší raw-delete web lze vrátit až po
+odpovídajícím rollbacku Rules. Produkce/main/Auth beze změny.
 
 **Předchozí DEV web a vlastní soukromé mazání, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#private-deletion-dev-complete).
 Zdroj 9c2e121706ea824d10282f06c778249b9b4a0f05, success úplné CI 45096691292.

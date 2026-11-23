@@ -95,7 +95,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,68 % | 140/144 |
-| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 53,00 % | 8/14 |
+| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 53,50 % | 10/14 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
 | [mvp-20: Projít všechny webové ruční regresní scénáře běžného, Business i moderačního účtu včetně pomalé nebo přerušované sítě.](TODO.md#mvp-20) | 0,00 % | 0/4 |
@@ -391,8 +391,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-private-remove-check: Místní soukromá moderace – autorita, opakování, rollback a archivní souběh | verification | ✅ | [1](../functions/remove_reported_private_reply.test.js), [2](../functions/remove_reported_private_reply.integration.test.js), [3](../tools/function_artifact.test.mjs), [4](../docs/MVP_SERVER_PLAN.md#moderation-private-local), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001) |
 | moderation-private-client-code: Soukromá moderace – wrapper, klient a omezený pilot | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-private-dev-proposal), [2](../lib/private_report_removal_gateway.dart), [3](../functions/content.js), [4](../functions/private_report_removal_pilot.js) |
 | moderation-private-client-check: Soukromá moderace – klientské, pilotní a Rules regrese | verification | ✅ | [1](../test/private_report_removal_test.dart), [2](../functions/private_reply_deletion_pilot.integration.test.js), [3](../tools/rules/private_report_removal.integration.test.mjs), [4](../docs/MVP_SERVER_PLAN.md#moderation-private-dev-proposal), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322), [6](../docs/MVP_SERVER_PLAN.md#moderation-private-deferred-preparation), [7](../docs/MVP_SERVER_PLAN.md#moderation-private-cutover-prepared) |
-| moderation-private-client-dev: Soukromá moderace – kompletní DEV přechod včetně Rules | deployment | ⬜ | — |
-| moderation-private-client-accept: Soukromá moderace – živá akceptace a úklid | acceptance | ⬜ | — |
+| moderation-private-client-dev: Soukromá moderace – kompletní DEV přechod včetně Rules | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-private-dev-complete), [2](../firestore.rules), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45164557897) |
+| moderation-private-client-accept: Soukromá moderace – živá akceptace a úklid | acceptance | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-private-dev-complete), [2](../functions/private_report_removal_pilot.js) |
 | moderation-decision: Zbývající serverová rozhodnutí, sankce, klient a provozní zapojení | implementation | ⬜ | — |
 | moderation-business: Zamítnutí/pozastavení Business účtu a audit | implementation | ⬜ | — |
 | moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | — |

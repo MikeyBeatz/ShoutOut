@@ -20,9 +20,9 @@ ale mají vlastní text a schvalovací proces.
 
 Místní serverové jádro pro jedno rozhodnutí **Skrýt soukromou odpověď bez
 postihu** je oddělené od dosavadního klienta: [rozsah, testy a hranice](../MVP_SERVER_PLAN.md#moderation-private-local).
-Navazující [server a klient jsou již v DEV](../MVP_SERVER_PLAN.md#moderation-private-dev-rollout),
-ale skutečný klientský pilot a následné uzavření přímých Rules cest ještě
-nejsou dokončené. Seskupená hlášení a ostatní rozhodnutí zůstávají
+Navazující [DEV přechod včetně Rules, akceptace a úklidu je uzavřený](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
+Vlastník přijal skutečný průchod TestAdmin; regionální živé oprávnění je
+nadále součástí otevřené ruční regrese. Seskupená hlášení a ostatní rozhodnutí zůstávají
 navazující prací; níže uvedené klientské chování není důkazem nové serverové autority.
 
 - **Implementováno** znamená, že chování existuje v klientovi nebo Firestore

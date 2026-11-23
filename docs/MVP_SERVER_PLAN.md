@@ -940,6 +940,55 @@ nástroji; opraveno na společné getAll, poté celý konečný běh prošel (80
 Důkazy build/private-moderation-cutover-{emulator-final,lint}.log.
 Samostatné úplné CI nového zdroje ještě následuje; místní úspěch není nasazení.
 
+<a id="moderation-private-dev-complete"></a>
+
+### Uzavřená DEV akceptace soukromého odstranění bez postihu
+
+App/server zdroj **0fa2774be634db27013e37ca511e8523c6a9f7c7** má
+[success úplné CI 45147594322](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322).
+Samostatný Rules/úklidový zdroj **40e127ff52f076b912179427c932a908da62d162**
+má [success úplné CI 45164557897](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45164557897),
+všech 39 úspěšných kroků včetně aplikačních testů, emulátorů a webového buildu.
+Z čistého přesného commitu nasazeny pouze DEV Firestore Rules:
+**3de8f7d8-6658-4b24-951f-043eac8de297**. Ověřená shoda vydaného zdroje po
+normalizaci konců řádků (SHA-256 cc10ccef…e66ca2). Oficiální serverový simulátor
+prošel 16/16 scénářů nad původním, navrženým i skutečně vydaným zdrojem:
+managed přímé soukromé delete/contentRemoved jsou DENY, čtení, noAction,
+escalation a nespravovaná kompatibilita zachované. Nejde o autentizovaný
+HTTP DELETE z prohlížeče. Místních 49 cílených emulátorových testů prošlo také.
+
+Vlastník potvrdil skutečný klientský průchod a výslovně přijal aktéra TestAdmin
+namísto TestModerator; přesná receipt/audit, Auth/App Check VALID, HTTP 200 a
+zachovaná kontrolní zpráva jsou doložené předchozími důkazy. Regionální živý
+průchod neproběhl a nepočítá se tím do úplné ruční regrese rolí. Přijatý
+manifest s digestem 873e936e…2d4770a je nyní **cleaned**; znovu neseedovat.
+Původní manifest/digest c5801fcb…05c059d9 zůstal beze změny a slouží jen jako
+historický podklad; nepoužívat jej k novým mutacím.
+
+Úklid přes společný indexový writer odstranil pouze nový Shout, jednu
+kontrolní soukromou zprávu a testovací hlášení; první zprávu už odstranilo
+skutečné rozhodnutí. Pod Shoutem nezůstaly žádné dokumenty a obě příslušné
+notifikace jsou nepřítomné. Žádné fixture read klíče nezůstaly u Bright,
+Business, Admin ani Moderator (před úklidem rovněž 0). **5 potvrzení** zůstalo
+beze změny updateTime do původního +7denního termínu; žádný reset kvót.
+Všech **91 původních Shoutů a jejich updateTime**, původní pending žádost,
+feed 12/news 6/active, 22 Functions, oba minutové plánovače a Hosting
+**b5703cec19978454** zachované. Nová callable stále **00001-zec**, cleanup
+**00006-lum**; prostředky se při tomto cutoveru neměnily. Žádné Auth mutace,
+produkce/main/tagy beze změny.
+
+Důkazy: build/private-moderation-rules-{before,after,final}.json,
+build/private-moderation-rules-simulation-{before,after}-proof.json,
+build/private-moderation-cleanup.log a build/private-moderation-cleanup-check.json.
+Návratový ruleset **e16b7a3d-f363-499c-ad40-262471059271** a jeho zdroj jsou
+uchované. Po aktuálním cutoveru ponechat web se serverovou cestou; návrat
+starého raw-delete klienta vyžaduje nejprve řízený rollback Rules.
+
+Implementace, automatické ověření, kompletní DEV přechod a živá akceptace
+**tohoto jednoho rozhodnutí** jsou uzavřené. Celý moderační milník, ostatní
+rozhodnutí/sankce, regionální živá regrese a produkční aktivace zůstávají
+otevřené. Odložený feedový test a jeho staré fixture se tím neuzavírají.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

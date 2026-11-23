@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,49 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,51 %** — vážené dokončení podúseků
 
-Hotové úseky: **189/246**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **191/246**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -158,30 +158,18 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    notifikací a cloudové read značky, 5 potvrzení ponechaných +7 dní;
    všech 91 původních zdrojů/pending žádost zachované. Manifest cleaned,
    znovu neseedovat. Implementace, ověření, DEV i akceptace této části uzavřené.
-   **Nově dokončené místní jádro:** [atomické skrytí nahlášené soukromé odpovědi](MVP_SERVER_PLAN.md#moderation-private-local).
-   37 emulátorových regresí (16 nových), 173 serverových unit testů,
-   104 nástrojových testů a lint prošly; f1e32e9 má
-   [success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001).
-   Započtené jsou jen jádro/ověření. Bez wrapperu, klientské aktivace, změn
-   Rules či nasazení; staff přímá cesta je dosud otevřená.
-   **Schválený navazující DEV přechod právě běží:** [přesný rozsah a pořadí](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
-   Příprava klienta/wrapperu/pilotu i Rules prototypu je lokálně ověřená:
-   500 Flutter, 107 nástrojových, 174 unit a 46 emulátorových testů, analyze/lint.
-   0fa2774 má success úplné CI 45147594322; [server a web jsou nasazené](MVP_SERVER_PLAN.md#moderation-private-dev-rollout):
-   Hosting b5703cec19978454, callable 00001-zec, cleanup 00006-lum; ostatních
-   20 Functions/plánovače/původní data zachované. Nový pilot 3a725093 je seeded,
-   geografie syntetické fixture připravená. Hlášení již odstranil TestAdmin;
-   vlastník výslovně schválil přijetí jeho skutečného průchodu. Doloženo
-   Auth/App Check VALID, HTTP 200, nezměněný snapshot a zachovaná druhá zpráva.
-   [Přijatý plán a připravený cutover](MVP_SERVER_PLAN.md#moderation-private-cutover-prepared)
-   mají samostatný digest 873e936e…2d4770a, původní manifest beze změny.
-   Regionální živé ověření tím netvrdit. Vydávané Rules připravené, živé nezměněné.
-   [Místní výsledek](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation):
-   34 serverových/pilotních + 13 Rules případů prošlo; starší nástroj zachová
-   přísnější prototyp. Navazující změny a jeho lokální commit zahrnout do
-   společného push/úplného CI Rules checkpointu.
-   Potom samostatné úplné CI/Rules → dokončení pilotu a úklid. Rules jsou stále
-   e16b7a3d…59271, celý DEV úsek ani akceptace se zatím nezapočítávají.
+   **Nově uzavřený DEV úsek:** [soukromé odstranění bez postihu](MVP_SERVER_PLAN.md#moderation-private-dev-complete).
+   App/server 0fa2774 / úplné CI 45147594322 success; samostatný Rules zdroj
+   40e127f / úplné CI 45164557897 success. Místních 49/49 emulátorových testů
+   a 16/16 serverových simulací vydaného Rules zdroje prošlo.
+   Rules **3de8f7d8…de297** mají ověřenou shodu zdroje a uzavřené managed
+   private delete/contentRemoved. Vlastník přijal skutečný průchod TestAdmin;
+   regionální živé ověření tím netvrdit. Vymezená fixture je uklizená,
+   5 potvrzení ponechaných +7 dní, kvóty beze resetu. Původních 91 zdrojů,
+   pending žádost, 22 Functions, oba plánovače a web b5703cec19978454 zachované.
+   Přijatý manifest je cleaned, původní je jen historický; znovu neseedovat.
+   Kompletní DEV/akceptace této operace se započítávají; celý moderační
+   milník a ostatní rozhodnutí zůstávají otevřené.
    Další atomická rozhodnutí/regionální autoritu připravit
    podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
    Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
