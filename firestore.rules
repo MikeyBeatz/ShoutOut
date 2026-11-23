@@ -1794,11 +1794,14 @@ service cloud.firestore {
         ).data.text == request.resource.data.text;
       allow get: if eligibleModerator();
       allow list: if eligibleModerator() && limited(50);
+      // contentRemoved and its audit are written atomically by the server.
+      // Existing approve/escalate/resolve/sanction decisions remain separate.
       allow update: if validReportUpdate(
         reportId,
         'privateReply_' + resource.data.shoutId + '_' +
           resource.data.privateReplyId
-      );
+      ) && (!managedFeedProjection() ||
+        request.resource.data.get('resolution', '') != 'contentRemoved');
       allow delete: if false;
     }
 
@@ -2314,11 +2317,9 @@ service cloud.firestore {
             )
           );
         allow update: if false;
-        // Ordinary deletion uses deletePrivateReply in managed environments.
-        // Existing moderator removal is closed by a separate decision rollout.
-        allow delete: if eligibleUser() &&
-          (isModerator() ||
-            (!managedFeedProjection() && resource.data.authorId == request.auth.uid));
+        // Managed deletion uses deletePrivateReply / removeReportedPrivateReply.
+        allow delete: if eligibleUser() && !managedFeedProjection() &&
+          (resource.data.authorId == request.auth.uid || isModerator());
       }
 
       match /reactions/{userId} {

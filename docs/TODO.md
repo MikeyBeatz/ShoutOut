@@ -170,13 +170,16 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    0fa2774 má success úplné CI 45147594322; [server a web jsou nasazené](MVP_SERVER_PLAN.md#moderation-private-dev-rollout):
    Hosting b5703cec19978454, callable 00001-zec, cleanup 00006-lum; ostatních
    20 Functions/plánovače/původní data zachované. Nový pilot 3a725093 je seeded,
-   geografie syntetické fixture připravená, hlášení open. Čeká jediná ruční
-   akce TestModerator, na žádost vlastníka odložená na později; bez ní
-   nepovažovat klientskou kompatibilitu za hotovou. Mezitím pouze místní
-   příprava kompatibility kandidáta Rules, bez změny vydaných pravidel.
+   geografie syntetické fixture připravená. Hlášení již odstranil TestAdmin;
+   vlastník výslovně schválil přijetí jeho skutečného průchodu. Doloženo
+   Auth/App Check VALID, HTTP 200, nezměněný snapshot a zachovaná druhá zpráva.
+   [Přijatý plán a připravený cutover](MVP_SERVER_PLAN.md#moderation-private-cutover-prepared)
+   mají samostatný digest 873e936e…2d4770a, původní manifest beze změny.
+   Regionální živé ověření tím netvrdit. Vydávané Rules připravené, živé nezměněné.
    [Místní výsledek](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation):
    34 serverových/pilotních + 13 Rules případů prošlo; starší nástroj zachová
-   přísnější prototyp. Push/úplné CI spojit s následným Rules checkpointem.
+   přísnější prototyp. Navazující změny a jeho lokální commit zahrnout do
+   společného push/úplného CI Rules checkpointu.
    Potom samostatné úplné CI/Rules → dokončení pilotu a úklid. Rules jsou stále
    e16b7a3d…59271, celý DEV úsek ani akceptace se zatím nezapočítávají.
    Další atomická rozhodnutí/regionální autoritu připravit

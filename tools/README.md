@@ -43,6 +43,12 @@ or `--clients-complete yes`. The operator validates clean exact full CI before
 opening the database, preserves existing data/roles/generations and refuses
 cleanup without the actual moderator decision receipt. It never submits that
 decision itself and never resets quotas or deletes seven-day receipts.
+After explicit owner acceptance of the actual TestAdmin decision,
+`acceptPrivateModerationDecision` can derive a separate read-only supplemental
+plan. It binds the original plan digest, exact receipt/report and actor stamps;
+it cannot seed data, reopen a report, rewrite a role or accept later drift.
+Keep the original manifest unchanged and use only the accepted manifest/digest
+for the subsequent guarded cleanup. [Accepted DEV case](../docs/MVP_SERVER_PLAN.md#moderation-private-cutover-prepared).
 
 Local, isolated [console-warning diagnostics](diagnostics/README.md) reproduce
 Flutter font warnings and inspect reCAPTCHA/CSP without modifying the app,

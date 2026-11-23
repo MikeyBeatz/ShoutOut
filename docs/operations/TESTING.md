@@ -23,6 +23,10 @@ Při [odložené ruční kontrole](../MVP_SERVER_PLAN.md#moderation-private-defe
 přibyl jeden případ zachování přísnějšího prototypu ve starším nástroji;
 Rules sada má nyní 13 testů a celkové cílené pokrytí 47. Nové zákazy zahrnují
 všech šest úrovní rolí; aktuální místní výsledek není nové úplné CI ani nasazení.
+Navazující [přijatý průchod TestAdmin](../MVP_SERVER_PLAN.md#moderation-private-cutover-prepared)
+přidává dva testy přesně vázaného doplňkového plánu. Konečný místní běh
+49/49 testů prošel nad připravenými vydávanými Rules; živé nasazení čeká
+samostatné úplné CI a kontrolu vydaného zdroje.
 
 Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
 CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný

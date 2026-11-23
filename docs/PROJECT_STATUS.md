@@ -43,7 +43,7 @@ Původní checkpoint f1e32e9 neobsahoval wrapper ani klientské zapojení.
 V DEV zůstává přímá staff cesta otevřená do pozitivního klientského ověření;
 navazující runtime zapojení je již nasazené, jak dokládá následující záznam.
 **Nyní výslovně schválený celý navazující úsek:** [klient, wrapper a DEV přechod](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
-**Server/web jsou již v DEV:** [ověřené nasazení a čekající průchod](MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
+**Server/web jsou již v DEV:** [ověřené nasazení a původní pilot](MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
 0fa2774 / [success úplné CI 45147594322](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322).
 Hosting **b5703cec19978454**, nová removeReportedPrivateReply **00001-zec**,
 cleanup **00006-lum**, 100 % provozu a schválené prostředky. Ostatních 20
@@ -53,22 +53,22 @@ Functions, oba plánovače a 91 původních zdrojů/pending žádost zachované.
 500 Flutter testů, analyze bez nálezů, 107 nástrojových, 174 serverových unit
 a 46 emulátorových regresí prošly. CLI discovery timeout byl řešen jen
 lokálním čekáním 60 s, nikoli změnou běhových timeoutů.
-**Pilot je seeded:** jeden nový Shout/dvě zprávy/jedno open hlášení, nonce
+**Pilot byl seeded:** jeden nový Shout/dvě zprávy/jedno původně open hlášení, nonce
 **3a725093**, digest **c5801fcb…05c059d9**, celkem 92 zdrojů. Původní cleaned
 pilot se neobnovoval. Jen nové fixture byla přes společný writer doplněna
 označená syntetická geografie CZ/CZ-42, protože geografický trigger dosud
-není nasazený; geographyReady true, role beze změny. Čeká jediná ruční akce
-TestModerator v Hlášení; vlastník tento průchod 23. listopadu odložil na později.
-Pozitivní doklad odstranění zatím chybí. Před úspěchem
-neuzavírat Rules ani neuklízet. Potom samostatné úplné CI pro Rules, ověření
-a úklid. Celý DEV úsek a akceptace tedy ještě nejsou hotové; ostatní
+není nasazený; geographyReady true, role beze změny. Ruční průchod již proběhl
+přes TestAdmin a vlastník výslovně schválil jeho přijetí níže. Čeká samostatné
+úplné CI pro připravený Rules zdroj, ověření a úklid. Celý DEV úsek a akceptace
+tedy ještě nejsou hotové; ostatní
 moderační rozhodnutí/sankce zůstávají navazující prací.
 Nezávislá [místní příprava kompatibility přísnějších Rules](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation)
 je ověřená: 34 serverových/pilotních a po opravě testovacího API 13 Rules
 regresí prošlo; starší nástroj neznovuotevře staff mazání a zákazy pokrývají
-všech šest úrovní rolí. Uložit místně, push/úplné CI spojit s následným
-Rules checkpointem po klientském testu; bez dalšího kreditu do stupnice.
-Kořenové firestore.rules i živá pravidla zůstávají beze změny. Platnost nového
+všech šest úrovní rolí. Místní 4b4be9f se zahrne do společného push/úplného CI
+navazujícího Rules checkpointu; bez dalšího kreditu do stupnice.
+Kořenové firestore.rules jsou nyní připravené k uzavření, živá pravidla dosud
+zůstávají e16b7a3d…59271. Platnost nového
 pilotního Shoutu končí 24. listopadu v 10:53:49 SEČ; svévolně ji neprodlužovat
 ani nevytvářet náhradní pilot. Vlastní mazání po expiraci zůstává podle politiky
 možné, dostupnost moderačního průchodu je nutné ověřit před navázáním.
@@ -76,6 +76,23 @@ Ovládání Windows bylo automaticky zastavené kvůli nespolehlivému určení 
 browser host je současně nedostupný. Pozitivní UI důkaz to nenahrazuje.
 Vlastní mazání tím znovu neotevírat. Odložený pohybový test ani jeho úklid
 se tím neuzavírají.
+**Následný živý průchod 23. listopadu:** vlastník potvrdil zmizení hlášení
+bez chyby. Čtecí audit doložil resolved/contentRemoved, jedinou serverovou
+receipt removeReportedPrivateReply, odstranění první zprávy a zachování druhé,
+všech 91 původních zdrojů a pending žádosti. Hash původních podkladů hlášení
+9400ced5…f93b je shodný. Aktérem je ale **TestAdmin / it_admin / úroveň 5**,
+nikoli plánovaný TestModerator / it_moderator. Původní pilotní pojistka proto
+správně odmítla tuto akci započítat. Vlastník poté výslovně schválil přijetí
+TestAdmin a [přesně omezený doplňkový plán](MVP_SERVER_PLAN.md#moderation-private-cutover-prepared),
+digest **873e936e…2d4770a**, v samostatném local accepted manifestu.
+Původní manifest/audit/role zůstaly beze změny. Regionální živý průchod není
+tím doložený. Po dočasném 429 jsou logy dostupné: Auth/App Check VALID,
+HTTP 200 se shodnou trace a serverovou latency 0,6426 s. Důkazy
+build/private-moderation-{actor-audit,decision-logs,acceptance-proof}.json.
+Živé Rules i fixture zůstávají před úplným CI a cutoverem zachované.
+Konečný místní cutover běh má 49/49 emulátorových testů bez přeskočení a čistý
+lint; zahrnuje přijatý admin plán, drift a opakovaný úklid. Příští krok:
+společný push/úplné CI, serverová simulace a pouze DEV Rules nasazení.
 Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi
 jsou v detailu/oznámeních. Vlastník 23. listopadu zařadil jejich doplnění do
 této sekce [až po MVP](plans/roadmap/PRIVATE_REPLY_HISTORY.md), položka bl-158.

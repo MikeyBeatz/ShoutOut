@@ -893,6 +893,53 @@ Dokumentační checkpoint 849e55f má success lehké CI 45152572378, které nen�
 náhradou aplikačního/Rules CI. Produkce, Auth, Functions, web, prostředky,
 Scheduler i živá data se při tomto pokračování neměnily.
 
+<a id="moderation-private-cutover-prepared"></a>
+
+### Přijatý skutečný průchod TestAdmin a příprava Rules cutoveru
+
+Vlastník 23. listopadu potvrdil zmizení hlášení bez chyby. Server doložil
+resolved/contentRemoved v 12:08:27 SEČ, odstranění první zprávy a zachování
+kontrolního pokračování i 91 původních zdrojů/pending žádosti. Původní podklady
+hlášení mají nezměněný hash 9400ced5…f93b. Rozhodnutí provedl **TestAdmin**,
+UID it_admin, úroveň 5, nikoli původně plánovaný TestModerator. Původní
+pojistka toto správně odmítla; vlastník následně výslovně schválil přijmout
+skutečný admin průchod a upravit pouze kontrolovaný plán úklidu.
+
+Po dočasném 429 doložen jediný úspěšný POST, HTTP 200 a Auth/App Check VALID
+se stejnou trace; serverová latency 0,6426 s. Důkazy:
+build/private-moderation-actor-audit.json a build/private-moderation-decision-logs.json.
+Regionální živé oprávnění není tímto průchodem doložené; regiony zůstávají
+ověřené místně v původních serverových regresích.
+
+Read-only acceptPrivateModerationDecision vytvořil samostatný doplňkový plán
+docs/local/private-report-moderation-accepted-pilot.json, digest
+**873e936e49b56626ef5877afbd850669b0806197e8fba797372dc80d92d4770a**.
+Váže původní digest c5801fcb…05c059d9, přesný operation ID
+**d5a476d02508c508718db4373d8fa5885929e66dec38f4e7d72bf8605dc4d21a**,
+TestAdmin profil/roli a updateTime hlášení i receipt. Kontroluje navíc původního
+moderátora, zdroje, účastníky, generace a nezměněné podklady. Neumožňuje seed,
+změnu aktéra/rozhodnutí ani tichou obnovu potvrzení po driftu. Původní manifest
+zůstal byte-for-byte shodný (SHA-256 54a3f78d…fcb952), audit a role beze změny.
+Žádné cloudové zápisy při přijetí. Důkaz build/private-moderation-acceptance-proof.json.
+Původní manifest již nepoužívat pro seed/úklid tohoto přijatého průchodu.
+
+Vydávaný firestore.rules nyní obsahuje připravené dvě uzávěry: managed private
+delete pro všechny role a přímé contentRemoved u privateReplyReports. Ostatní
+rozhodnutí, čtení, nespravované prostředí a serverové operace zůstávají.
+Jde zatím o místní zdroj, nikoli živá pravidla. Následuje samostatné úplné CI
+přesného cutover commitu, serverová simulace před/po, pouze DEV Rules deploy,
+ověření shody vydaného zdroje a teprve pak úklid podle přijatého digestu.
+Functions/web ani prostředky není potřeba znovu nasazovat. Původní data,
+pending žádost, Auth, produkce a main zůstávají mimo změnu.
+
+Konečný místní běh: **49/49 emulátorových testů**, bez přeskočení, včetně
+doplňkového admin plánu, jeho zákazu opětovného seedování, změny role,
+receipt/report driftu, opakovaného úklidu a zachování přísnějších Rules.
+Lint prošel. První běh odhalil nepodporované reader.get v novém pomocném
+nástroji; opraveno na společné getAll, poté celý konečný běh prošel (80,7 s).
+Důkazy build/private-moderation-cutover-{emulator-final,lint}.log.
+Samostatné úplné CI nového zdroje ještě následuje; místní úspěch není nasazení.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

@@ -9,7 +9,7 @@ import { operationTestKey } from './test_helpers.js';
 import { syncReadBatchOperation } from './read_sync.js';
 import { readContentHash } from './read_sync_blocks.js';
 import { prepareNewsControlChange } from './feed_news_signals.js';
-import { planPrivateModerationPilot, seedPrivateModerationPilot, privateModerationPilotStatus, cleanupPrivateModerationPilot } from './private_report_removal_pilot.js';
+import { planPrivateModerationPilot, seedPrivateModerationPilot, privateModerationPilotStatus, cleanupPrivateModerationPilot, acceptPrivateModerationDecision } from './private_report_removal_pilot.js';
 import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'private-delete-pilot') : null, db = app ? getFirestore(app) : null;
@@ -127,4 +127,50 @@ test('moderation pilot cleanup preserves report, root and control conversation w
   await db.doc(`shouts/${f.state.shoutId}/comments/foreign`).create({ authorId: 'unrelated' });
   await assert.rejects(cleanupPrivateModerationPilot(db, f.moderation), /foreign-descendant/);
   const state = await privateModerationPilotStatus(db, f.moderation); assert(state.sourcePresent); assert(state.continuationPreserved); assert(state.decisionConfirmed);
+});
+
+async function acceptedAdminFixture(t) {
+  const f = await moderationFixture(t); await seedPrivateModerationPilot(db, f.moderation);
+  const admin = { uid: `admin-${randomUUID()}`, nickname: 'TestAdmin' };
+  await db.doc(`users/${admin.uid}`).set({ nickname: admin.nickname });
+  await db.doc(`users/${admin.uid}/legal/acceptance_2026_07_25`).set({});
+  await db.doc(`accountRoles/${admin.uid}`).set({ level: 5 });
+  f.roots.push(db.doc(`users/${admin.uid}`), db.doc(`accountRoles/${admin.uid}`));
+  t.after(async () => { for (const row of (await db.collection('serverOperations').where('userId', '==', admin.uid).get()).docs) await row.ref.delete(); });
+  await moderate({ ...f, moderator: admin });
+  const report = await db.doc(`privateReplyReports/${f.state.reportId}`).get();
+  const accepted = await acceptPrivateModerationDecision(db, f.moderation, report.get('decisionOperationId'));
+  return { ...f, admin, report, accepted };
+}
+test('explicit supplemental acceptance binds the actual admin decision without rewriting original plan, report, receipt or role', { skip: !enabled }, async t => {
+  const f = await acceptedAdminFixture(t), before = JSON.stringify(f.moderation);
+  await assert.rejects(privateModerationPilotStatus(db, f.moderation), /Expected values to be strictly equal/);
+  assert.notEqual(f.accepted.digest, f.moderation.digest); assert.equal(f.accepted.acceptedDecision.sourceDigest, f.moderation.digest);
+  assert.equal(JSON.stringify(f.moderation), before); assert.deepEqual(f.accepted.base, f.moderation.base);
+  await assert.rejects(seedPrivateModerationPilot(db, f.accepted), /accepted-plan-no-seed/);
+  const status = await privateModerationPilotStatus(db, f.accepted);
+  assert(status.decisionConfirmed && status.continuationPreserved); assert.equal(status.moderator, 'TestAdmin');
+  assert.equal((await f.report.ref.get()).updateTime.toMillis(), f.report.updateTime.toMillis());
+  const receipt = db.doc(`serverOperations/${status.decisionOperationId}`), stamp = (await receipt.get()).updateTime;
+  const cleanup = await cleanupPrivateModerationPilot(db, f.accepted);
+  assert.equal(cleanup.removed, 1); assert.equal(cleanup.messages, 1); assert.equal(cleanup.reportRemoved, 1);
+  assert.equal(cleanup.receiptsRemoved, 0); assert.equal((await receipt.get()).updateTime.toMillis(), stamp.toMillis());
+  assert.equal((await cleanupPrivateModerationPilot(db, f.accepted)).removed, 0);
+  assert((await f.original.get()).exists && (await f.pending.get()).exists);
+});
+test('supplemental acceptance rejects wrong decisions, digest tampering and later role, report or receipt drift before cleanup', { skip: !enabled }, async t => {
+  const f = await acceptedAdminFixture(t);
+  await assert.rejects(acceptPrivateModerationDecision(db, f.moderation, 'a'.repeat(64)));
+  await assert.rejects(privateModerationPilotStatus(db, { ...f.accepted, acceptedDecision: { ...f.accepted.acceptedDecision, operationId: 'b'.repeat(64) } }), /digest/);
+  await db.doc(`accountRoles/${f.admin.uid}`).update({ level: 6 });
+  await assert.rejects(cleanupPrivateModerationPilot(db, f.accepted), /accepted-role-drift/);
+  assert((await f.report.ref.get()).exists); assert((await db.doc(`shouts/${f.state.shoutId}`).get()).exists);
+  await db.doc(`accountRoles/${f.admin.uid}`).update({ level: 5 });
+  const fresh = await acceptPrivateModerationDecision(db, f.moderation, f.accepted.acceptedDecision.operationId);
+  await f.report.ref.update({ moderatorNote: 'Changed after acceptance' });
+  await assert.rejects(cleanupPrivateModerationPilot(db, fresh), /accepted-report-drift/);
+  const refreshed = await acceptPrivateModerationDecision(db, f.moderation, f.accepted.acceptedDecision.operationId);
+  await db.doc(`serverOperations/${refreshed.acceptedDecision.operationId}`).update({ result: { removed: false } });
+  await assert.rejects(cleanupPrivateModerationPilot(db, refreshed), /accepted-receipt-drift/);
+  assert((await db.doc(`shouts/${f.state.shoutId}/privateReplies/${f.state.replies[1].id}`).get()).exists);
 });
