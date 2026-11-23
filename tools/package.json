@@ -8,6 +8,7 @@
   "scripts": {
     "test:feed-news": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/feed_recenter.integration.test.js ../functions/feed_news.integration.test.js ../functions/feed_news_runtime.integration.test.js ../functions/feed_news_activation.integration.test.js ../functions/feed_news_pilot.integration.test.js rules/feed_news_access.integration.test.mjs\"",
     "test:read-runtime": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/read_sync_runtime.integration.test.js ../functions/retention_cleanup.integration.test.js ../functions/retention_runtime.integration.test.js\"",
+    "test:private-deletion": "firebase emulators:exec --config ../firebase.rules-test.json --only firestore --project shoutout-rules-test \"node --test --test-concurrency=1 ../functions/delete_private_reply.integration.test.js rules/private_reply_deletion.integration.test.mjs\"",
     "check:docs": "node check_docs.mjs",
     "progress:update": "node project_progress.mjs --write",
     "progress:check": "node project_progress.mjs --check",

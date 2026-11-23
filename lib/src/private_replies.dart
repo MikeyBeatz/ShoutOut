@@ -62,6 +62,7 @@ class PrivateReplyList extends StatelessWidget {
                 children: privateReplies
                     .map(
                       (reply) => PrivateReplyTile(
+                        key: ValueKey(reply.id),
                         interactionsOpen: interactionsOpen,
                         reply: reply,
                         onReply: () {
@@ -134,11 +135,19 @@ class PrivateReplyTile extends StatelessWidget {
               ),
               const Spacer(),
               if (own)
-                IconButton(
+                PrivateReplyDeleteButton(
                   tooltip: tr(context, 'Smazat'),
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => reply.reference.delete(),
-                  icon: const Icon(Icons.delete_outline, size: 19),
+                  isCurrent: () =>
+                      FirebaseAuth.instance.currentUser?.uid == uid,
+                  onDelete: () => _deleteOwnPrivateReply(reply.reference, uid),
+                  onError: (error) =>
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            _serverWriteFailureText(context, error),
+                          ),
+                        ),
+                      ),
                 ),
             ],
           ),

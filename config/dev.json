@@ -13,6 +13,7 @@
   "serverAccountDeletionFinalization": true,
   "serverCommentCreation": true,
   "serverPrivateReplyCreation": true,
+  "serverPrivateReplyDeletion": false,
   "serverShoutReactions": true,
   "serverCommentReactions": true,
   "serverShoutSaves": true,

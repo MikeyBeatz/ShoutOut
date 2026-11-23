@@ -247,6 +247,37 @@ final _commentDeletionGateway = CommentDeletionGateway(
   },
 );
 
+final _privateReplyDeletionGateway = PrivateReplyDeletionGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) => _serverContentOperations.call(
+    attempt: request.timedAttempt,
+    userId: request.userId,
+    operation: 'deletePrivateReply',
+    payload: request.toPayload(),
+  ),
+);
+
+Future<void> _deleteOwnPrivateReply(
+  DocumentReference<Map<String, dynamic>> reference,
+  String userId,
+) async {
+  if (kIsWeb && WebEnvironment.current.serverPrivateReplyDeletion) {
+    await _privateReplyDeletionGateway.delete(
+      userId: userId,
+      shoutId: reference.parent.parent!.id,
+      privateReplyId: reference.id,
+    );
+    return;
+  }
+  if (FirebaseAuth.instance.currentUser?.uid != userId) {
+    throw FirebaseFunctionsException(
+      code: 'unauthenticated',
+      message: 'The signed-in account changed.',
+    );
+  }
+  await reference.delete();
+}
+
 final _shoutDeletionGateway = ShoutDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {

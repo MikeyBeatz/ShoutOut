@@ -8,6 +8,20 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
+test('private reply deletion is disabled and validates its independent App Check gate', () => {
+  assert.notEqual(actualDev.serverPrivateReplyDeletion, true);
+  assert.notEqual(loadConfig('prod').serverPrivateReplyDeletion, true);
+  const config = { ...actualDev }; delete config.serverPrivateReplyDeletion;
+  assert.doesNotThrow(() => validateConfig(config, 'dev'));
+  assert.doesNotThrow(() => validateConfig({ ...config, serverPrivateReplyDeletion: true }, 'dev'));
+  for (const invalid of [null, 'true', 1, {}, []]) {
+    assert.throws(() => validateConfig({ ...config, serverPrivateReplyDeletion: invalid }, 'dev'));
+  }
+  const disabled = { ...config, ...Object.fromEntries(Object.keys(config).filter(k => k.startsWith('server')).map(k => [k, false])) };
+  delete disabled.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(disabled, 'dev'));
+  assert.throws(() => validateConfig({ ...disabled, serverPrivateReplyDeletion: true }, 'dev'));
+});
 test('movement activation remains DEV-only and depends on delta/news',()=>{
   assert.equal(actualDev.serverFeedMovement,true);assert.equal(loadConfig('prod').serverFeedMovement,false);
   for(const patch of [{serverFeedMovement:'yes'},{serverFeedNews:false},{serverDeltaFeed:false}])

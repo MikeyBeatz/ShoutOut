@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,35 %** — vážené dokončení podúseků
 
-Hotové úseky: **179/234**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **179/238**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -154,7 +154,10 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    testovacích zápisů. Soukromé mazání a moderace zůstávají dalším úsekem.
    **Nezávislá příprava 23. listopadu:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-preparation).
    8/8 izolovaných auditních scénářů hotových, bez živých zápisů. Připravený
-   konkrétní návrh serveru/klienta a místních testů; implementace čeká souhlas.
+   konkrétní návrh serveru/klienta a místních testů vlastník schválil.
+   [Místní implementace a regrese](MVP_SERVER_PLAN.md#private-deletion-local) hotové:
+   493 Flutter, 104 nástrojových a 40 cílených emulátorových testů; čeká úplné CI.
+   Přepínač false, žádné nasazení ani změna vydaných/kořenových Rules.
    Na odložené pohybové kontrole nezávisí. Moderátorskou atomickou operaci,
    regionální autoritu a živý cutover nezaměňovat za dokončení vlastního mazání.
 

@@ -23,6 +23,12 @@ always select full checks; a green lightweight run is not release build proof.
 
 ## Development utilities
 
+`npm --prefix tools run test:private-deletion` runs the prepared own-private-reply
+deletion operation and a derived Rules prototype in the isolated Firestore
+emulator. The candidate generator rejects unexpected source drift; it does not
+write or deploy firestore.rules. The client switch stays false and there is no
+new callable export in this slice. [Scope and evidence](../docs/MVP_SERVER_PLAN.md#private-deletion-local).
+
 Local, isolated [console-warning diagnostics](diagnostics/README.md) reproduce
 Flutter font warnings and inspect reCAPTCHA/CSP without modifying the app,
 connecting to user browser profiles, or writing Firebase data. They are opt-in,

@@ -9,9 +9,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 **Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
 samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;
 platnost fixture se neprodlužuje a nové živé testy nejsou tím schválené.
-Nezávisle dokončený [audit soukromého mazání a konkrétní další návrh](MVP_SERVER_PLAN.md#private-deletion-preparation):
-8/8 emulátorových scénářů, 0 živých zápisů. Další zdrojový úsek čeká na
-konkrétní souhlas; audit nemění aplikaci, Rules ani nasazení níže.
+Nezávisle dokončený [audit soukromého mazání](MVP_SERVER_PLAN.md#private-deletion-preparation):
+8/8 emulátorových scénářů, 0 živých zápisů. Vlastník následně výslovně schválil
+místní server/klient, bezpečné opakování a testy, bez živého zapojení.
+
+**Právě připravený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
+Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou
+hotové. 493 Flutter testů, 104 nástrojových testů, analýza/lint a 40 cílených
+serverových/Rules regresí prošly. Nová operace má 8 SDK reads / 3 writes,
+potvrzené opakování 6 / 0; nejde o cloudové měření ceny či výkonu.
+Čeká společný push/úplné CI. serverPrivateReplyDeletion je false, nový callable
+wrapper zatím neexistuje, vydané i kořenové Rules beze změny. Moderaci tato
+operace nenahrazuje; žádné nasazení, živé fixture/Auth či retenční změny.
 
 **Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
@@ -25,7 +34,7 @@ Nasazený pouze DEV Hosting **37b697da10fbb5b1**, ověřeno 67 app souborů a 8 
 odpovědí obou domén. Všech 20 Functions včetně getFeedPage **00007-moc**, Rules
 a prostředky beze změny; původních 38 zdrojů/pending žádost zachované, celkem
 91 zdrojů, feed 12/news 6/active. Návratový web **2d6ae9af70840b03**.
-Poslední ruční kontrola řazení/kotvy a následný úklid čekají; prohlížečový host
+Odložená ruční kontrola řazení/kotvy a následný úklid čekají; prohlížečový host
 byl znovu ověřen jako nedostupný. Finální akceptace se před odpovědí neuzavírá.
 
 **Předchozí nasazení pohybu:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).

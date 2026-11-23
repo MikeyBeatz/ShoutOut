@@ -284,6 +284,9 @@ oba moderátorské soubory a schválenou
 
 **Konkrétní následující místní úsek – návrh ke schválení:**
 
+Vlastník následně tento místní rozsah výslovně schválil. Živé nasazení,
+aktivace a nové testovací účty/data zůstávají mimo tento souhlas.
+
 - Serverové deletePrivateReply pro vlastní zprávu s Auth/App Check,
   ověřením způsobilosti a skutečného autora. Payload jen expectedUserId,
   shoutId, privateReplyId a idempotencyKey; bez klientského autora či textu.
@@ -311,6 +314,88 @@ ověření; odložený ruční test feedu tomu nebrání. Automatická provozní
 kapacita ani moderátorský audit se tímto dílčím krokem neprokazují.
 content-remaining-authority zůstává nedokončený; za samotný průzkum
 se nepřidává implementační kredit a pevné váhy se nemění.
+
+<a id="private-deletion-local"></a>
+
+### Vlastní soukromé mazání – místní příprava a regrese
+
+**Implementace hotová, úplné CI zatím čeká:** jádro
+[delete_private_reply.js](../functions/delete_private_reply.js) přijímá pouze
+expectedUserId, shoutId, privateReplyId a idempotencyKey. Auth/App Check,
+ověřený e-mail a způsobilost účtu kontroluje před účinkem; skutečného autora
+čte v transakci. Příjemce, vlastník Shoutu ani staff nezískají touto operací
+právo mazat cizí zprávu. Cizí a chybějící zpráva mají shodnou odpověď.
+Moderační odebrání zůstává samostatnou operací nad hlášením/rozhodnutím.
+
+Zdroj, společná delete kvóta 120/h s odstupem 1 s a body-free receipt vzniknou
+v jedné transakci. Opakování používá stejný původní timed key; nezapisuje,
+neobnovuje kvótu a znovu ověří způsobilost. Podporovaný seznam stávajícího
+7denního úklidu doplněn o deletePrivateReply; přesný termín se nemění.
+Operace nečte rodičovský Shout, index ani role, nemění čítače, pokračování
+konverzace, důkazy hlášení ani archiv. Mazání funguje i po expiraci, pod
+anonymním purged kontextem a při chybějícím rodiči; žádná rekurze či obnova dat.
+
+Session-scoped [gateway](../lib/private_reply_deletion_gateway.dart) uchovává
+nejistý požadavek přes zánik a znovuvytvoření tlačítka; nejde o perzistentní
+frontu přes zavření prohlížeče. Používá existující TimedOperationGateway a čas
+z Auth metadata. Dvojklik sdílí jeden let, změna účtu zablokuje nový transport
+a pozdní výsledek nehlásí jako úspěch jiného účtu. Vlastní koš ukáže průběh,
+dočasně se zakáže a chybu zobrazí jen ve stále platné obrazovce/účtu.
+Kartu odstraňuje potvrzený živý stream, nikoli předčasný optimistický zásah.
+serverPrivateReplyDeletion je výslovně **false** v DEV, chybějící volba má
+výchozí false i v produkci. Typ musí být bool; true samostatně vyžaduje App Check.
+Žádný nový callable export/provozní wrapper ani změna prostředků se nepřidává.
+
+**Rules jsou místní prototyp:** [generátor kandidáta](../tools/rules/private_reply_deletion_candidate.mjs)
+odvozuje úplný ruleset z nezměněného kořenového firestore.rules a při změně
+očekávaného místa se zastaví. Pouze v emulátoru uzavře běžný přímý delete
+v managed režimu active/building/paused/v1. Dosavadní staff delete a legacy
+režim bez control zůstanou funkční do samostatného moderačního cutoveru.
+Čtení účastníků a dotazy s vlastnictvím/limit 50 se nemění. Před živým
+uzavřením je nutná kompatibilita klientů, konkrétní DEV průchod a kontrola
+Rules; tento místní prototyp není zárukou bezpečnosti celé aplikace.
+
+**Místní výsledky:** 493 Flutter testů, 104 nástrojových testů, analýza bez
+nálezů a lint Functions. 40 emulátorových testů zahrnuje 12 nových serverových
+scénářů a 6 nových Rules scénářů plus 22 dosavadních regresí komentářového
+mazání a účtové archivace. Ověřeno: přesné vlastnictví a soukromé čtení,
+chybějící App Check/identity před DB, ochrana payloadu, paralelní opakování
+i odlišné klíče, rollback při selhání receipt, ban/pending/omezení tvorby,
+sdílená kvóta a hranice, sedmidenní replay/úklid, průběh/chyby/zánik UI a
+změna účtu. Útoky proti návrhu Rules: veřejný/neomezený list, cizí delete,
+podvržená role/vlastnictví/čas/účastníci/schema i velký text odmítnuté;
+klient nemůže vytvořit ani číst serverové potvrzení. Staff nezíská čtení zpráv.
+
+Archivující transakce i vlastní smazání mohou vyhrát souběh; vždy nastane
+jen jedno odstranění zdroje. Archivující vítěz zachová tělo i původní
+request createTime +60 dní; smazaný zdroj se nevytvoří znovu a ostatní
+účastníci zůstanou nezměnění. Předchozí samostatné mazání se nově nearchivuje,
+což zachovává již schválenou hranici archivace při zpracování smazání účtu.
+
+Měření jedné bezkonfliktní transakce: **8 SDK reads / 3 writes**, potvrzené
+opakování **6 reads / 0 writes**, žádné čtení Shoutu/indexu. Podklad
+build/private-deletion-measurement.json, výpisy build/private-deletion-{flutter,
+analyze-final,tools,integration,functions-unit}.log. Jde o emulátorové počty
+operací, ne cloudovou latenci, účtování či kapacitu 5 000 uživatelů.
+Trvalé regrese: [server](../functions/delete_private_reply.integration.test.js),
+[klient](../test/private_reply_deletion_test.dart),
+[Rules](../tools/rules/private_reply_deletion.integration.test.mjs).
+Příkaz npm --prefix tools run test:private-deletion má samostatný krok plného CI;
+nezatěžuje již dlouhý základní Rules krok dalším emulátorovým testem.
+
+Zbývající váha content-remaining-authority **44** se rozděluje na vlastní
+soukromé mazání **22** (kód/ověření/DEV/akceptace **6/6/5/5**) a další
+autoritu **22**. Dosavadní hotové váhy ani součet rodiče se nemění. Do plného
+ověření checkpointu zůstávají nové díly otevřené; nasazení/živou akceptaci
+nelze zavřít místním testem. Backlog tento původní serverový díl samostatně
+nevážil, proto mu nepřidávat dvojí nebo novou umělou váhu.
+
+**Další krok:** po přesném CI zapsat uzavření místní implementace/ověření;
+samostatně připravit konkrétní DEV wrapper, prostředky, aktivaci a kontrolu
+kompatibility před živým uzavřením běžného delete. Odložený test pohybu feedu
+zůstává otevřený a jeho fixture se touto prací nemění. Nový živý pilot ani
+produkci tento úsek nespouští. Regionální autorita a atomické rozhodování
+moderátorů nadále patří do následujícího serverového milníku.
 
 ## 4. Antispam a obsahová moderace — MVP
 
