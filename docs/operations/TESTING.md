@@ -11,6 +11,10 @@ Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktu
 Vlastní soukromé mazání má `npm --prefix tools run test:private-deletion`
 (server, odvozený Rules prototyp a souběh s archivací). V plném CI jde o vlastní
 krok, kořenové/vydané Rules se tím nepřepisují. [Výsledky a hranice](../MVP_SERVER_PLAN.md#private-deletion-local).
+Od 23. listopadu stejný krok zahrnuje i [místní atomickou soukromou moderaci](../MVP_SERVER_PLAN.md#moderation-private-local):
+functions/remove_reported_private_reply.integration.test.js, oprávnění/regiony,
+dva moderátoři, rollback, opakování a souběh s účtovou archivací. Nové jádro
+zatím není v žádném runtime wrapperu; úspěch testu neznamená živé vynucení.
 
 Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
 CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný

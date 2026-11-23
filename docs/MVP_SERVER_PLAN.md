@@ -663,6 +663,68 @@ a kompletní obsahový milník zůstávají otevřené.
 
 ## 5. Důvěryhodné moderátorské operace a audit — MVP
 
+<a id="moderation-private-local"></a>
+
+### Schválený místní úsek: skrytí soukromé odpovědi bez postihu
+
+Vlastník 23. listopadu schválil první atomickou operaci pro jedno hlášení
+soukromé odpovědi: odstranit živý kořen zprávy, uzavřít hlášení a společně
+uložit aktéra/rozhodnutí a technické potvrzení. Pouze místní serverové jádro
+a emulátor, dokumentace, commit/push a společné CI. Bez wrapperu, zapojení
+klienta, nasazení, změn Rules, živých dat či Auth účtů. Jiné rozhodnutí,
+sankce ani hromadné zpracování nejsou součástí tohoto úseku.
+
+Autorita vychází z uloženého accountRoles/moderators a stávajícího
+moderationScope: role 5–6 nebo explicitní global mají globální rozsah,
+jinak země/subdivision podle serverové geografie rodičovského Shoutu.
+Otevřené hlášení vyžaduje moderátora, eskalované alespoň seniora podle
+dosavadního rozdělení front. Scope se kontroluje i při opakování; neodvozuje
+se z callerových souřadnic nebo role v payloadu. Nejasný nebo chybějící cíl
+se odmítne bez změn. Chybějící region neopravňuje regionálního moderátora
+ke globálnímu zásahu. Žádná nová role, kvóta nebo retenční lhůta.
+
+Audit rozhodnutí zůstane u existujícího hlášení (resolvedBy, resolvedAt,
+resolution, vazba na operaci a případná dosavadní moderatorNote); textový
+snapshot se nepřepíše. Potvrzení nebude obsahovat text zprávy ani poznámku
+a použije již schválených 7 dní. Novou action doplnit také do místního
+allowlistu úklidu; před budoucí živou aktivací ji bude nutné nasadit v úklidu.
+Archiv, cizí konverzace, čítače a index feedu tato operace nemění.
+
+Ověření pokryje cizí region, změnu role/rozsahu, Auth/App Check, dva moderátory,
+opakování i ztracenou odpověď, selhání po přípravě delete, změnu inkarnace
+cíle a souběh s účtovou archivací. Příprava ani testy nejsou živé vynucení;
+stávající klientské moderátorské cesty zatím zůstávají funkční.
+
+Před implementací rozdělena pouze zbývající váha moderation-decision 1250:
+125 jádro, 125 jeho ověření, 1000 ostatní rozhodnutí/sankce/klient/provozní
+zapojení. Váha rodiče i dříve hotové úseky zůstávají stejné.
+
+**Místní výsledek 23. listopadu:** functions/remove_reported_private_reply.js
+provádí odstranění, update původního hlášení a body-free potvrzení v jedné
+transakci. Kontroluje uloženou roli/rozsah i při opakování, kanonickou vazbu
+hlášení na příjemce, původního autora/text a inkarnaci zdroje. Nově vytvořený
+zdroj pod stejnou cestou se nesmí odstranit na základě starého hlášení.
+Chybějící zdroj se odmítne; operace nehledá ani nemění retenční archiv.
+
+Node 22: **37/37 cílených emulátorových testů**, z toho 16 pro nové jádro;
+také souběh dvou moderátorů a skutečně paralelní archivace, opakování,
+změna role/geografie, rollback a přesná sedmidenní hranice. Celá serverová
+unit sada **173 passed / 595 skipped** (integrační testy bez emulátoru),
+**104 nástrojových testů** a lint prošly. Naměřeno **11 SDK reads / 3 writes**
+pro první zásah, **9 / 0** pro opakování bez konfliktu/retry. Nejde o cloudové
+měření ceny či latence. Důkazy jsou nové unit/integrační testy a místní
+build/private-moderation-{emulator-final,functions,tools}.log,
+build/private-moderation-measurement.json.
+
+Do stupnice započítat pouze jádro a automatické ověření. Runtime balíčky nový
+modul neobsahují, což kontroluje tools/function_artifact.test.mjs. Úplné CI
+tohoto zdroje následuje po společném pushi. Žádný wrapper, klientská aktivace,
+živé změny Rules/dat ani nasazení tím nejsou dokončené. Stávající staff
+přímé mazání zatím zůstává v DEV otevřené; následné zapojení musí sladit
+obě klientské cesty, audit, úklid nového typu potvrzení a teprve potom Rules.
+Seskupená hlášení, chybějící/archivované cíle, ostatní rozhodnutí a sankce
+zůstávají samostatnou navazující prací; tento základ řeší jedno živé hlášení.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

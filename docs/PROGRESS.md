@@ -95,7 +95,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,68 % | 140/144 |
-| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
+| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 52,50 % | 6/10 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
 | [mvp-20: Projít všechny webové ruční regresní scénáře běžného, Business i moderačního účtu včetně pomalé nebo přerušované sítě.](TODO.md#mvp-20) | 0,00 % | 0/4 |
@@ -387,7 +387,9 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-archive-target-check: Auditovaný detail nahlášeného archivovaného komentáře – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
 | moderation-archive-target-dev: Auditovaný detail nahlášeného archivovaného komentáře – nasazení DEV | deployment | ✅ | [1](../docs/PROJECT_STATUS.md#posledni-overene-nasazeni), [2](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
 | moderation-archive-target-accept: Auditovaný detail nahlášeného archivovaného komentáře – živá akceptace DEV | acceptance | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
-| moderation-decision: Atomické serverové rozhodnutí a audit | implementation | ⬜ | — |
+| moderation-private-remove-code: Místní atomické skrytí nahlášené soukromé odpovědi bez postihu | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-private-local), [2](../functions/remove_reported_private_reply.js) |
+| moderation-private-remove-check: Místní soukromá moderace – autorita, opakování, rollback a archivní souběh | verification | ✅ | [1](../functions/remove_reported_private_reply.test.js), [2](../functions/remove_reported_private_reply.integration.test.js), [3](../tools/function_artifact.test.mjs), [4](../docs/MVP_SERVER_PLAN.md#moderation-private-local) |
+| moderation-decision: Zbývající serverová rozhodnutí, sankce, klient a provozní zapojení | implementation | ⬜ | — |
 | moderation-business: Zamítnutí/pozastavení Business účtu a audit | implementation | ⬜ | — |
 | moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | — |
 | moderation-production: Produkční aktivace moderace | acceptance | ⬜ | — |

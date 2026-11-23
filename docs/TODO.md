@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,36 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,47 %** — vážené dokončení podúseků
 
-Hotové úseky: **185/240**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **187/242**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -158,8 +158,13 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    notifikací a cloudové read značky, 5 potvrzení ponechaných +7 dní;
    všech 91 původních zdrojů/pending žádost zachované. Manifest cleaned,
    znovu neseedovat. Implementace, ověření, DEV i akceptace této části uzavřené.
-   **Další obsahová část:** atomické moderátorské rozhodování a regionální
-   autorita podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
+   **Nově dokončené místní jádro:** [atomické skrytí nahlášené soukromé odpovědi](MVP_SERVER_PLAN.md#moderation-private-local).
+   37 emulátorových regresí (16 nových), 173 serverových unit testů,
+   104 nástrojových testů a lint prošly; společné úplné CI zatím čeká.
+   Započtené jsou jen jádro/ověření. Bez wrapperu, klientské aktivace, změn
+   Rules či nasazení; staff přímá cesta je dosud otevřená. Následně připravit
+   konkrétní zapojení a zbývající atomická rozhodnutí/regionální autoritu
+   podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
    Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
    Odložený pohybový test a jeho staré fixture jsou samostatné; žádné nové
    testy či prodlužování platnosti tím nejsou schválené.

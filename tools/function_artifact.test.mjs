@@ -27,6 +27,7 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('feed_b4_pilot.js'));
     assert(!actual.includes('feed_news_pilot.js'));
     assert(!actual.includes('private_reply_deletion_pilot.js'));
+    assert(!actual.includes('remove_reported_private_reply.js'));
     assert(!actual.includes('feed_news_lab.js'));
     assert(!actual.includes('feed_news_detection_model.js'));
     assert.equal(actual.includes('feed_serving_options.js'), entry === 'content.js');

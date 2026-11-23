@@ -30,10 +30,19 @@ všech **91 původních zdrojů**, jejich updateTime, původní pending žádost
 Důkazy build/private-deletion-final-proof.json a související audit/simulace.
 Kompatibilní návratový web 813f34b7555e272a, návratový ruleset 476d216c…a3e9.
 
-**Další obsahová práce:** atomické moderátorské rozhodnutí a zbývající
-[autorita](MVP_SERVER_PLAN.md#private-deletion-preparation), včetně regionálního
-rozsahu. Vlastní mazání tím znovu neotevírat. Konkrétní další implementaci
-předložit podle závislostí; odložený pohybový test ani jeho úklid se tím neuzavírají.
+**Právě dokončený místní úsek:** [soukromá moderace bez postihu](MVP_SERVER_PLAN.md#moderation-private-local).
+Serverové jádro atomicky odstraní jednu nahlášenou živou zprávu, uzavře hlášení
+a uloží audit/potvrzení; uloženou roli i geografii ověřuje také při opakování.
+37 cílených emulátorových testů (16 nových), 173 serverových unit testů,
+104 nástrojových testů a lint prošly na Node 22. Integrační testy mimo
+emulátor jsou přeskočené, nikoli dodatečně započítané. První zásah 11 SDK
+reads / 3 writes, opakování 9 / 0. Úplné CI po společném pushi zatím čeká.
+Nový modul není v runtime balíčcích; wrapper, živý klient, Rules i nasazení
+se v tomto schváleném místním úseku nemění. Stávající přímá staff cesta je
+proto stále otevřená. Další obsahová práce: sladit serverové rozhodování,
+klienta a zbývající autoritu; podstatné nové zapojení předložit ke schválení.
+Vlastní mazání tím znovu neotevírat. Odložený pohybový test ani jeho úklid
+se tím neuzavírají.
 Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi
 jsou v detailu/oznámeních. Vlastník 23. listopadu zařadil jejich doplnění do
 této sekce [až po MVP](plans/roadmap/PRIVATE_REPLY_HISTORY.md), položka bl-158.

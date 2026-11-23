@@ -18,6 +18,12 @@ ale mají vlastní text a schvalovací proces.
 
 ## Stav dokumentu
 
+Místní serverové jádro pro jedno rozhodnutí **Skrýt soukromou odpověď bez
+postihu** je oddělené od dosavadního klienta: [rozsah, testy a hranice](../MVP_SERVER_PLAN.md#moderation-private-local).
+Atomické odstranění/uzavření/audit a kontrola aktuálního scope zatím nejsou
+zapojené do živých cest. Seskupená hlášení a ostatní rozhodnutí zůstávají
+navazující prací; níže uvedené klientské chování není důkazem nové serverové autority.
+
 - **Implementováno** znamená, že chování existuje v klientovi nebo Firestore
   Rules a je pokryté automatickými testy.
 - **Navrženo** znamená schválený směr, který ještě nemusí mít hotové rozhraní,
