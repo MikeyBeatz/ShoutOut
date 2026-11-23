@@ -408,6 +408,116 @@ zůstává otevřený a jeho fixture se touto prací nemění. Nový živý pilo
 produkci tento úsek nespouští. Regionální autorita a atomické rozhodování
 moderátorů nadále patří do následujícího serverového milníku.
 
+<a id="private-deletion-dev-proposal"></a>
+
+### Vlastní soukromé mazání – návrh uceleného DEV přechodu
+
+Příprava 2826665 má success úplné CI 45091447773; dokumentační checkpoint
+2e1804b má success lehké CI 45093505578. Vlastník 23. listopadu výslovně
+schválil celý následující DEV přechod včetně implementace, push/CI a pilotu.
+Živé uzavření Rules nadále podmiňuje doložená klientská kompatibilita.
+
+**Čerstvá čtecí inventura, 23. listopadu 01:26 UTC:** pouze
+shoutout-dev-46c81: 20 ACTIVE Functions, deletePrivateReply dosud neexistuje.
+cleanupOperationReceipts je revision cleanupoperationreceipts-00004-zel,
+min0/max1/concurrency1/256 MiB/60 s. Dvě stávající Scheduler úlohy běží každou
+minutu; jejich nastavení se nenavrhuje změnit. Hosting 37b697da10fbb5b1,
+Rules 476d216c-9208-4e5c-9143-f583cb82a3e9, reader 00007-moc, feed control 12,
+news 6/active a writery feed-v1/v2/v3. 91 zdrojů, z toho 50 aktivních;
+38 původních Shoutů a pending žádost mají původní updateTime. Podklad
+build/private-deletion-dev-inventory.json, 0 cloudových zápisů. Prohlížečový
+host byl znovu ověřen jako unavailable; bez něj se UI akceptace netvrdí.
+
+**Navržený celý rozsah:**
+
+1. Připravit skutečný callable wrapper deletePrivateReply se stávajícími
+   Auth/App Check kontrolami: europe-west3, min0/max1, concurrency1,
+   256 MiB, 15 s. Aktualizovat stávající cleanupOperationReceipts kvůli nové
+   action, se stejnými prostředky, rozpočty a minutovým plánovačem. Žádný
+   nový Scheduler, klíč, index, migrace, globální App Check ani retence.
+2. Připravit řízený pilotní/ověřovací nástroj s přesným DEV projektem,
+   čistým zdrojem/úplným CI, manifestem a digestem, preconditions a bezpečným
+   opakováním. Před první mutací kontrolovat profil/role testovacích aktérů,
+   generace/control a chráněný původní obsah/žádost. Balíček musí obsahovat
+   pouze runtime závislosti, nikoli testy/laboratoře.
+3. Po úplném CI přesného zdroje nasadit pouze novou Function a uvedenou
+   existující cleanup Function, potom kompatibilní DEV web se zapnutým
+   serverPrivateReplyDeletion. Ověřit obě revize, prostředky a shodu webového
+   artefaktu; zbývajících 19 Functions, dva Scheduler joby, read/news control
+   a původní Rules zachovat. HTTP 401 bez identity je jen negativní kontrola.
+4. Připravit také kořenové Rules a aktualizované regresní očekávání pro
+   pozdější uzavření běžného přímého delete v managed režimu. Současný
+   generátor zpřesnit tak, aby bezpečně ověřil staré i již převedené znění
+   bez dvojí úpravy a bez přijetí neočekávané odchylky. Tento samostatný
+   bezpečnostní checkpoint musí mít vlastní úplné CI; Rules zatím **nenasazovat**.
+5. Živý pilot založit až při dostupném ovladatelném klientu nebo připravenosti
+   vlastníka ke krátké kontrole: nejvýše **1 nový 24h syntetický Shout a 2
+   navazující soukromé zprávy** mezi stávajícími Bright_Otter_182/TestBusiness.
+   Součástí jsou běžná testovací oznámení a technická potvrzení; žádné nové
+   ani mazané Auth účty. Shout projde společným indexovým writerem, zprávy
+   stávajícím createPrivateReply jádrem, aby měly kanonické účastníky/vazbu.
+   Nové ID oddělit od dosavadního odloženého restartovacího pilotu.
+6. Ověřit vlastní mazání obou účtů přes nový klient/callable, viditelný průběh,
+   přijetí Auth/App Check a odpovídající deletePrivateReply receipts; cizí
+   obsah, hlášení, role a archiv musí zůstat zachované. Je-li prohlížeč
+   nedostupný, infrastrukturu a místní přípravu dokončit, ale pozitivní UI
+   důkaz a živé uzavření Rules neoznačit za splněné a ruční kontrolu nechat na konec.
+7. Teprve po doložené klientské kompatibilitě a úplném CI Rules checkpointu
+   nasadit přesně připravené DEV Rules. Ověřit vydaný zdroj, odmítnutí běžného
+   přímého delete a zachované účastnické čtení i existující staff cesty.
+   Starší otevřený web bude potřebovat obnovu; nativní přímá cesta bude
+   v managed DEV blokovaná, bez mobilní distribuce či nového App Check nastavení.
+8. Uklidit pouze nový manifest: testovací Shout přes společný writer, jeho
+   soukromé fixture, případné read značky tohoto nového ID a nová oznámení.
+   Technická potvrzení ponechat do původní 7denní lhůty pro aktualizovaný
+   úklid; skutečné spotřebované kvóty nevracet zpět. Cizí interakce znamenají
+   zastavení úklidu, nikoli kaskádové smazání. Dosavadních 91 zdrojů a původní
+   pending žádost zachovat; odložený pohybový test ani jeho úklid tím neuzavírat.
+
+**Návrat:** před nasazením uchovat dnešní web 37b697da10fbb5b1 a Rules 476d216c…a3e9.
+Před uzavřením Rules doložit návratový web, který již umí nové serverové
+mazání. Starší web bez tohoto gateway není po uzavření běžného delete
+kompatibilním samostatným rollbackem. Při širším návratu nejprve vrátit
+kompatibilní Rules, pak starý web; funkční endpoint a rozšířený úklid
+potvrzení zachovat, dokud je mohou potřebovat otevření klienti a receipts.
+Návrat nesmí obnovovat obsah nebo resetovat sdílené kvóty.
+
+Po schválení tento celek zahrnuje implementaci/pilotní nástroj, lokální regrese,
+seskupené commity/push a výše uvedené podmíněné DEV rollouty po přesném CI.
+Produkce, main, původní pending žádost, globální App Check a prostředky
+ostatních služeb se nemění. Nový živý rozsah se schvaluje jednou; rutinní
+provedení jeho podmínek pak pokrývá trvalý souhlas s rollouty. Souhlas je
+udělený; implementace probíhá, metriky DEV/akceptace zůstávají otevřené.
+
+**Příprava první nasazovací fáze, 23. listopadu:** wrapper má schválený
+profil a sdílenou ochranu Auth/App Check; DEV konfigurace zapíná nový gateway,
+produkční konfigurace zůstává vypnutá. Idempotentní renderer ověřuje staré
+i převedené Rules; kořenové/vydané Rules se v této fázi nemění.
+`tools/private_reply_deletion_pilot.mjs` vyžaduje přesný DEV projekt,
+čistý commit a úplné CI včetně soukromé regrese, digest a výslovně připraveného
+klienta. Manifest se ukládá před mutací. Tři pevné požadavky zakládají právě
+jeden 24h Shout a dvě navazující zprávy přes existující serverová jádra;
+opakování nezakládá nové ID ani neobnovuje smazané zprávy.
+Nástroj hlídá inkarnace/control a updateTime všech 91 dosavadních zdrojů
+i původních žádostí. Při nesouladu zastaví. Administrativní úklid nepřidává
+pozitivní delete receipts; ponechá skutečné kvóty i 7denní potvrzení a maže
+pouze nové ID, jeho dvě zprávy, oznámení a odpovídající cloudové read klíče.
+Cizí konverzace/interakce úklid zastaví. Pilotní modul není součástí runtime
+artefaktu Functions. Dosavadní helper úklidu read klíčů je sdílený, s volitelnou
+transakční kontrolou původních dat.
+
+Lokálně prošlo 493 Flutter testů, analýza bez nálezů, 106 nástrojových testů,
+21 cílených emulátorových testů (12 jádro, 3 pilot, 6 Rules návrh) a kontrola
+resource kontraktu wrapperu; lint a 170 serverových unit testů (579 integračních
+mimo emulátor přeskočeno). Podklady jsou v build/private-deletion-dev-*.log;
+nejde o živé měření. Připravený kód ani lokální test nenahrazují úplné CI,
+nasazení či UI akceptaci. Žádná nová živá fixture zatím nevznikla.
+
+Zbývající DEV váha 5 je před nasazením rozdělena na Functions/úklid 2,
+kompatibilní web 1 a podmíněný Rules cutover 2. Součet i váha rodiče zůstávají
+stejné; všechny tři části jsou zatím otevřené. Živá akceptace má dál vlastní
+váhu a podmínky, proto nelze přípravu zaměnit za dokončený milník.
+
 ## 4. Antispam a obsahová moderace — MVP
 
 - normalizovat text před kontrolou a detekovat opakovaný/velmi podobný obsah,

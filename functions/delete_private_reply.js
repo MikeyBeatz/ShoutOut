@@ -1,4 +1,4 @@
-// Prepared operation only; no callable export or live activation in this slice.
+// Transactional own-message deletion; moderator decisions use a separate path.
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';

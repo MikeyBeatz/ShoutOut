@@ -404,6 +404,7 @@ void main() {
             }
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
+            ..['serverPrivateReplyDeletion'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false
@@ -449,6 +450,7 @@ void main() {
             }
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
+            ..['serverPrivateReplyDeletion'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false
@@ -491,6 +493,7 @@ void main() {
           ...config,
           'appCheckSiteKey': null,
           'serverContentReports': false,
+          'serverPrivateReplyDeletion': false,
           'serverCommentDeletion': false,
           'serverShoutDeletion': false,
           'serverShoutSaves': false,
@@ -520,6 +523,7 @@ void main() {
         ...config,
         'appCheckSiteKey': null,
         'serverContentReports': false,
+        'serverPrivateReplyDeletion': false,
         'serverCommentDeletion': false,
         'serverShoutDeletion': false,
         'serverShoutSaves': false,
@@ -630,6 +634,7 @@ void main() {
         ...config,
         'appCheckSiteKey': null,
         'serverContentReports': false,
+        'serverPrivateReplyDeletion': false,
         'serverCommentDeletion': false,
         'serverShoutDeletion': false,
         'serverShoutSaves': false,
@@ -665,6 +670,7 @@ void main() {
           ...config,
           'appCheckSiteKey': null,
           'serverContentReports': false,
+          'serverPrivateReplyDeletion': false,
           'serverCommentDeletion': false,
           'serverShoutDeletion': false,
           'serverShoutSaves': false,

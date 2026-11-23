@@ -8,8 +8,8 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
-test('private reply deletion is disabled and validates its independent App Check gate', () => {
-  assert.notEqual(actualDev.serverPrivateReplyDeletion, true);
+test('private reply deletion activates only DEV and validates its independent App Check gate', () => {
+  assert.equal(actualDev.serverPrivateReplyDeletion, true);
   assert.notEqual(loadConfig('prod').serverPrivateReplyDeletion, true);
   const config = { ...actualDev }; delete config.serverPrivateReplyDeletion;
   assert.doesNotThrow(() => validateConfig(config, 'dev'));
@@ -138,7 +138,7 @@ test('comment deletion defaults off and independently requires a boolean and App
     assert.throws(() => validateConfig({ ...config, serverCommentDeletion: invalid }, 'dev'));
   }
   const withoutAppCheck = { ...config };
-  for (const key of ['serverShoutCreation', 'serverCommentCreation', 'serverPrivateReplyCreation',
+  for (const key of ['serverPrivateReplyDeletion', 'serverShoutCreation', 'serverCommentCreation', 'serverPrivateReplyCreation',
     'serverShoutReactions', 'serverCommentReactions', 'serverShoutSaves', 'serverContentReports', 'serverShoutDeletion', 'serverArchivedReportLookup', 'serverAccountDeletionPreparation', 'serverAccountDeletionFinalization']) withoutAppCheck[key] = false;
   delete withoutAppCheck.appCheckSiteKey;
   assert.doesNotThrow(() => validateConfig(withoutAppCheck, 'dev'));
@@ -154,7 +154,7 @@ test('content reports default off and independently require a boolean and App Ch
     assert.throws(() => validateConfig({...config,serverContentReports:invalid},'dev'));
   }
   const withoutAppCheck = {...config,serverShoutCreation:false,serverCommentCreation:false,
-    serverPrivateReplyCreation:false,serverShoutReactions:false,serverCommentReactions:false,serverShoutSaves:false,serverContentReports:false,serverCommentDeletion:false,serverShoutDeletion:false,serverArchivedReportLookup:false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false};
+    serverPrivateReplyCreation:false,serverShoutReactions:false,serverCommentReactions:false,serverShoutSaves:false,serverContentReports:false,serverPrivateReplyDeletion:false,serverCommentDeletion:false,serverShoutDeletion:false,serverArchivedReportLookup:false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false};
   delete withoutAppCheck.appCheckSiteKey;
   assert.doesNotThrow(() => validateConfig(withoutAppCheck,'dev'));
   assert.throws(() => validateConfig({...withoutAppCheck,serverContentReports:true},'dev'));
@@ -167,7 +167,7 @@ test('Shout saves default off and independently require App Check and a boolean'
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutSaves: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutSaves: 'true' }, 'dev'));
   const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverContentReports: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverContentReports: false, serverPrivateReplyDeletion: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
   delete config.appCheckSiteKey;
   assert.doesNotThrow(() => validateConfig(config, 'dev'));
   assert.throws(() => validateConfig({ ...config, serverShoutSaves: true }, 'dev'));
@@ -175,7 +175,7 @@ test('Shout saves default off and independently require App Check and a boolean'
 
 test('web App Check configuration gates server publishing', () => {
   const withoutAppCheck = { ...dev, serverShoutCreation: false,
-    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
+    serverCommentCreation: false, serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false, serverPrivateReplyDeletion: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
   delete withoutAppCheck.appCheckSiteKey;
   assert.throws(() => validateConfig({ ...withoutAppCheck, serverShoutCreation: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutCreation: 'true' }, 'dev'));
@@ -206,7 +206,7 @@ test('comment reactions have an independent optional flag requiring App Check', 
   assert.doesNotThrow(() => validateConfig({ ...defaults, serverCommentReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...defaults, serverCommentReactions: 'true' }, 'dev'));
   const config = { ...defaults, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: true, serverShoutSaves: false, serverContentReports: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: false, serverCommentReactions: true, serverShoutSaves: false, serverContentReports: false, serverPrivateReplyDeletion: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
   delete config.appCheckSiteKey;
   assert.throws(() => validateConfig(config, 'dev'));
 });
@@ -218,7 +218,7 @@ test('Shout reactions remain optional and require a boolean and App Check', () =
   assert.doesNotThrow(() => validateConfig({ ...dev, serverShoutReactions: true }, 'dev'));
   assert.throws(() => validateConfig({ ...dev, serverShoutReactions: 'true' }, 'dev'));
   const config = { ...dev, serverShoutCreation: false, serverCommentCreation: false,
-    serverPrivateReplyCreation: false, serverShoutReactions: true, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
+    serverPrivateReplyCreation: false, serverShoutReactions: true, serverCommentReactions: false, serverShoutSaves: false, serverContentReports: false, serverPrivateReplyDeletion: false, serverCommentDeletion: false, serverShoutDeletion: false, serverArchivedReportLookup: false, serverAccountDeletionPreparation: false, serverAccountDeletionFinalization: false };
   delete config.appCheckSiteKey;
   assert.throws(() => validateConfig(config, 'dev'));
 });

@@ -183,14 +183,14 @@ void main() {
     },
   );
   test(
-    'private deletion stays off, is strictly boolean and requires App Check independently',
+    'private deletion is active only in DEV, strictly boolean and independently requires App Check',
     () {
       for (final path in ['config/dev.json', 'config/prod.json']) {
         final config =
             jsonDecode(File(path).readAsStringSync()) as Map<String, dynamic>;
         expect(
           WebEnvironment.fromJson(config).serverPrivateReplyDeletion,
-          false,
+          path == 'config/dev.json',
         );
       }
       final config =

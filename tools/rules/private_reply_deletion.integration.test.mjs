@@ -40,7 +40,8 @@ after(async () => { if (db) await db.terminate(); if (app) await deleteApp(app);
 
 test('proposal compiles without modifying released Rules and rejects source drift', () => {
   assert.equal(readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'), source);
-  assert.notEqual(privateReplyDeletionCandidate(source), source.replaceAll('\r\n', '\n'));
+  const candidate = privateReplyDeletionCandidate(source);
+  assert.equal(privateReplyDeletionCandidate(candidate), candidate);
   assert.throws(() => privateReplyDeletionCandidate('unrelated rules'), /source-drift/);
   assert.throws(() => privateReplyDeletionCandidate(source + source), /source-drift/);
 });

@@ -20,6 +20,7 @@ import { toggleCommentReactionOperation } from './toggle_comment_reaction.js';
 import { toggleShoutSaveOperation } from './toggle_shout_save.js';
 import { createContentReportOperation } from './create_content_report.js';
 import { deleteCommentOperation } from './delete_comment.js';
+import { deletePrivateReplyOperation } from './delete_private_reply.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -97,6 +98,15 @@ export const deleteComment = onCall({
   memory: '256MiB',
   timeoutSeconds: 15,
 }, (request) => projectedOperation(deleteCommentOperation, request));
+
+export const deletePrivateReply = onCall({
+  ...secureCallableOptions,
+  minInstances: 0,
+  maxInstances: 1,
+  concurrency: 1,
+  memory: '256MiB',
+  timeoutSeconds: 15,
+}, request => deletePrivateReplyOperation(request, getFirestore()));
 
 export const createShout = onCall({
   ...secureCallableOptions,

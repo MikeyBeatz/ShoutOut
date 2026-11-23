@@ -22,11 +22,24 @@ Zdroj **282666562e034bc18314a3becfe9d8c203b05712** má
 [success úplné CI 45091447773](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45091447773),
 včetně nového soukromého kroku a webového buildu; doložen čistý přesný commit.
 Implementace/ověření započtené, DEV/živá akceptace otevřené.
-serverPrivateReplyDeletion je false, nový callable wrapper zatím neexistuje,
+Nasazený serverPrivateReplyDeletion je false; wrapper a aktivace se připravují,
 vydané i kořenové Rules beze změny. Moderaci tato
 operace nenahrazuje; žádné nasazení, živé fixture/Auth či retenční změny.
 Další návrh musí zahrnout i aktualizaci stávající cleanupOperationReceipts
 pro nový typ potvrzení, se stejným rozpočtem/časováním; ne jen nový callable.
+**Celý DEV přechod vlastník 23. listopadu výslovně schválil:** [rozsah a podmínky](MVP_SERVER_PLAN.md#private-deletion-dev-proposal).
+Čerstvá čtecí inventura v 01:26 UTC potvrzuje 20 Functions, 2 minutové
+plánovače, dosavadní Hosting/Rules/control, 91 zdrojů (50 aktivních) a
+nezměněných 38 původních zdrojů/pending žádost. Žádné živé zápisy. Navržené
+pilotní data vzniknou až při připraveném klientu; UI důkaz podmiňuje živé Rules.
+
+**Rozpracovaný schválený DEV přechod:** wrapper, DEV aktivace a omezený pilotní
+nástroj jsou připravené; 493 Flutter testů, analýza bez nálezů, 106 nástrojových
+testů, lint, 170 serverových unit testů (579 integračních mimo emulátor přeskočeno)
+a 21 cílených emulátorových regresí prošly. Čeká společný push/úplné CI a poté
+dvě Functions a kompatibilní DEV web. Kořenové/vydané Rules zatím beze změny,
+žádná nová živá fixture. Zbývající DEV váha 5 rozdělena 2/1/2 mezi Functions,
+web a podmíněný Rules cutover; nic z těchto nasazení dosud není započtené.
 
 **Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.

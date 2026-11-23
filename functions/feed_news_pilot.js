@@ -100,8 +100,9 @@ export async function adoptNewsClientFixture(db, plan) {
   const point = doc.get('location'); assert(Math.abs(point.latitude - plan.point.latitude) < .4 && Math.abs(point.longitude - plan.point.longitude) < .4, 'news-pilot-client-outside-region');
   return { id: doc.id, createdAt: doc.get('createdAt').toMillis(), expiresAt: doc.get('expiresAt').toMillis() };
 }
-async function removeReadKeys(db, plan, bindings, actor) {
+export async function removePilotReadKeys(db, plan, bindings, actor, beforeRead = async () => {}) {
   return db.runTransaction(async tx => {
+    await beforeRead(tx);
     const meta = db.doc(`users/${actor.uid}/readState/current`), state = await tx.get(meta), revision = state.get('revision') ?? 0;
     assert(Number.isSafeInteger(revision) && revision >= 0 && revision < Number.MAX_SAFE_INTEGER);
     const nodes = new Map(), changed = new Map(); let removed = 0, reads = 0;
@@ -152,7 +153,7 @@ export async function cleanupNewsPilot(db, plan, bindings) {
       index.apply(); if (source.exists) tx.delete(ref); for (const d of children) tx.delete(d.ref); return Number(source.exists);
     });
   }
-  let readKeys = 0; for (const actor of plan.actors) readKeys += await removeReadKeys(db, plan, bindings, actor);
+  let readKeys = 0; for (const actor of plan.actors) readKeys += await removePilotReadKeys(db, plan, bindings, actor);
   await fence(db, db, plan); return { removed, readKeys, originalsPreserved: plan.originals.length, requestsPreserved: plan.requests.length, authMutations: 0 };
 }
 // Expose only the existing safe control helper for tests; never mutate private

@@ -11,6 +11,7 @@ test('both real artifacts include runtime dependency closure and exclude all lab
   for (const [directory, entry] of [['functions-content', 'content.js'], ['functions-account-deletion', 'account_deletion_dev.js']]) {
     const artifact = prepareFunctionArtifact(root, directory, entry);
     assert.equal(artifact.files.includes('retention_runtime.js'), entry === 'content.js');
+    assert.equal(artifact.files.includes('delete_private_reply.js'), entry === 'content.js');
     for (const required of ['feed_runtime.js', 'feed_index_paths.js', 'feed_early_erasure_queue.js', 'feed_account_retention_runner.js',
       'feed_block_index_store.js', 'feed_account_retention_store.js', 'feed_index_gc_store.js']) assert(artifact.files.includes(required), required);
     const actual = readdirSync(artifact.target).filter(file => file.endsWith('.js')).sort();
@@ -25,6 +26,7 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('feed_b3_pilot.js'));
     assert(!actual.includes('feed_b4_pilot.js'));
     assert(!actual.includes('feed_news_pilot.js'));
+    assert(!actual.includes('private_reply_deletion_pilot.js'));
     assert(!actual.includes('feed_news_lab.js'));
     assert(!actual.includes('feed_news_detection_model.js'));
     assert.equal(actual.includes('feed_serving_options.js'), entry === 'content.js');
