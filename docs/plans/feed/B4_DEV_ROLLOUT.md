@@ -1358,7 +1358,21 @@ shoutout-dev-46c81**. Zachovat všech 20 Functions, Rules, control 12/news
 6/active, prostředky i testovací data. Návratový web je 2d6ae9af70840b03.
 Metriky se za opravu znovu nenavyšují; zbývající akceptace zůstává otevřená.
 
-**Poslední ruční kontrola až po nasazení:** stejné existující restartovací
+**DEV rollout dokončený:** zdroj **af4c3aa06fc65b7d429497cca73817d2d4529be2**,
+[success úplné CI 45085601243](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45085601243).
+Z čistého přesného zdroje sestaven a ověřen DEV artefakt; pouze Hosting
+**37b697da10fbb5b1**, 67 shodných app souborů a 8 HTTP kontrol na obou doménách.
+Všech 20 Functions, Rules 476d216c…a3e9 a prostředky mají původní stav.
+Inventura v 00:13 UTC: 91 zdrojů, všech 38 původních a pending žádost mají
+nezměněné verze, feed control 12/news 6/active. Žádné fixture/Auth mutace,
+úklid ani nová serverová konfigurace. Návratový web 2d6ae9af70840b03.
+Podklady build/feed-movement-order-release-{build,before,ci,hosting}.json,
+build/feed-movement-order-data-{before,active}.json a -hosting-deploy.log.
+Prohlížečový host znovu vrací unavailable, proto se živá UI akceptace netvrdí.
+Vlastník dostal jedinou cílenou kontrolu na konci; čeká odpověď, potom úklid.
+
+**Čekající poslední ruční kontrola:** otevřít
+https://shoutout-dev-46c81.web.app/?mvp=af4c3aa a Ctrl+R. Stejné existující restartovací
 karty pod TestBusiness, Sensors 50.5300/14.1300/25 m, dosah 1 km a jedna obnova.
 Po posunutí o několik karet změnit po alespoň 30 s Latitude na 50.5340.
 Po potvrzeném přesunu mají být karty uvnitř každé skupiny znovu podle nové

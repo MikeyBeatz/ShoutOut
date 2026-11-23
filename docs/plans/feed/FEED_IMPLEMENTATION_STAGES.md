@@ -15,7 +15,8 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 **23. listopadu – pořadí při pohybu:** vlastník po kontrole vzdáleností schválil
 [nové řazení v Nejblíž se stabilní viditelnou kartou](B4_DEV_ROLLOUT.md#movement-order).
-Místní implementace i automatické ověření hotové; následuje úplné CI a DEV web.
+Implementace i úplné CI 45085601243 success; pouze DEV web 37b697da10fbb5b1
+z af4c3aa je nasazený a automaticky ověřený. Ruční řazení/kotva a úklid čekají.
 Dosavadní server již vytváří správné globální stránky; jeho změna není potřebná.
 Nové publikace dál čekají na obnovu, hodinová hranice/read snapshot se nemění.
 

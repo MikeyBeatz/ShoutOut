@@ -1,6 +1,16 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web a reader – pohyb 22. listopadu:** [důkazy a čekající akceptace](../plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+**Aktuální DEV web – pořadí při pohybu 23. listopadu:** [důkazy a čekající kontrola](../plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+Zdroj **af4c3aa06fc65b7d429497cca73817d2d4529be2**, success úplné CI **45085601243**,
+Hosting **37b697da10fbb5b1**. Shoda 67 app souborů a 8 HTTP odpovědí obou domén.
+Všech 20 Functions zachováno včetně getFeedPage **getfeedpage-00007-moc**;
+Rules 476d216c…a3e9, prostředky, plánovače, feed 12/news 6/active beze změny.
+Čerstvá inventura 91 zdrojů / 38 původních a pending žádost zachované; žádné
+nové fixture/Auth ani datové zápisy. Ruční řazení/kotva a úklid zůstávají
+otevřené. Návratový web **2d6ae9af70840b03**, uložený původní manifest v
+build/feed-movement-order-rollback-manifest.json. Produkce/main se neměnily.
+
+**Předchozí DEV web a reader – pohyb 22. listopadu:** [důkazy a čekající akceptace](../plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
 Zdroj 78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88, success úplné CI 45077814590,
 Hosting **2d6ae9af70840b03**, getFeedPage **getfeedpage-00007-moc**, 100 % provozu.
 67 shodných app souborů / 8 HTTP kontrol. Ostatních 19 Functions, Rules,

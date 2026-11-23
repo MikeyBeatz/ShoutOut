@@ -6,17 +6,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Aktuální schválená oprava – místně hotová, zatím nenasazená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+**Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
 Klient při potvrzeném přesunu řadí nepřečtené/přečtené podle nové vzdálenosti,
 zachová viditelnou kotvu a vloží další serverové stránky na správná místa.
 Kurzor se průběžně dorovnává k viditelné části i přes stránky obsahující pouze
 již ponechané karty. 486 Flutter testů, analýza bez nálezů, 7 serverových
-regresí a cílený lint prošly. Serverové jádro/Rules/prostředky se nemění;
-následuje seskupený push/úplné CI a pouze DEV web, pak poslední ruční kontrola.
-Živá verze níže má dosavadní stabilní pořadí. Finální akceptace/úklid čekají.
+regresí a lint prošly. Zdroj **af4c3aa06fc65b7d429497cca73817d2d4529be2** má
+[success úplné CI 45085601243](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45085601243).
+Nasazený pouze DEV Hosting **37b697da10fbb5b1**, ověřeno 67 app souborů a 8 HTTP
+odpovědí obou domén. Všech 20 Functions včetně getFeedPage **00007-moc**, Rules
+a prostředky beze změny; původních 38 zdrojů/pending žádost zachované, celkem
+91 zdrojů, feed 12/news 6/active. Návratový web **2d6ae9af70840b03**.
+Poslední ruční kontrola řazení/kotvy a následný úklid čekají; prohlížečový host
+byl znovu ověřen jako nedostupný. Finální akceptace se před odpovědí neuzavírá.
 
-**Nyní nasazené a automaticky ověřené:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+**Předchozí nasazení pohybu:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
 Zdroj **78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88**, [success úplné CI 45077814590](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45077814590).
 Hosting **2d6ae9af70840b03**, getFeedPage **getfeedpage-00007-moc**, 100 % provozu;
 staré revize retired, ostatních 19 Functions/Rules/prostředky zachované.

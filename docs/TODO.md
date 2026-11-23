@@ -55,12 +55,13 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Právě dokončená místní oprava:** [živé pořadí v Nejblíž](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+   **Právě nasazená oprava:** [živé pořadí v Nejblíž](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
    Vlastník potvrdil aktualizaci vzdáleností, nově schválil i přeskládání karet
    při potvrzeném pohybu. 486 Flutter testů a 7 serverových regresí prošly;
-   čeká úplné CI, DEV web a krátká kontrola řazení/kotvy. Bez nového MVP kreditu
+   af4c3aa / úplné CI 45085601243 success, pouze DEV web **37b697da10fbb5b1**.
+   Čeká krátká kontrola řazení/kotvy. Bez nového MVP kreditu
    za opravu; společnou akceptaci uzavřít až po skutečném úklidu.
-   **Pohyb je nasazený v DEV, čeká už jen závěr:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
+   **Předchozí základ pohybu v DEV:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
    78d6a3f / úplné CI 45077814590 success, Hosting **2d6ae9af70840b03**,
    getFeedPage **00007-moc**. Automatické kontroly, simulace i živý dry-run
    úklidu jsou hotové. Původní ruční průchod vedl k uvedené změně řazení;
