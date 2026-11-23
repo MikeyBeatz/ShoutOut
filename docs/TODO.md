@@ -148,13 +148,16 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
 2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Nyní schválené a rozpracované:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
+   **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
    všech tří typů hlášení, místní server a neaktivní klient, testy a společné CI.
    Bez živých změn a bez otevírání dokončených pilotů. DEV přechod bude mít vlastní plán.
    [Místní výsledek](MVP_SERVER_PLAN.md#moderation-basic-local-results): jádro,
    neaktivní klient a testy hotové; 18 nových emulátorových, 15 purge, 509 Flutter,
-   108 nástrojových a 177 unit prošlo. Teď společný push/úplné CI; DEV/živá
-   akceptace se tím nezapočítávají. Ostatní moderační cesty ještě brání úplné Rules uzávěře.
+   108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
+   [úspěšné úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854),
+   včetně 142 retenčních testů a webového buildu. Následuje konkrétní návrh DEV
+   přechodu; DEV/živá akceptace se tím nezapočítávají. Ostatní moderační cesty
+   ještě brání úplné Rules uzávěře.
    **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
    App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI
    45098775591 success. Oba účty prošly skutečným UI/callable mazáním s Auth

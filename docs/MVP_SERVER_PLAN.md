@@ -1074,7 +1074,14 @@ nebo soukromá odpověď 12 / 3, jejich escalate/resolve 12 / 2; replay 9 / 0.
 50 komentářových hlášení 61 / 52; při 51 se nic nezapíše. Nejde o cloudový
 kapacitní, cenový ani latencový výsledek. Přidán samostatný úplný CI krok
 Test prepared content report decisions (3 min), bez emulátorů v lehkém CI.
-Konečný stav úplného CI přesného zdroje se doplní po společném pushi.
+Zdroj **7746bbdc56b2db1abdd9965f9cea348ae82243f3** je uložený a pushnutý ve
+feature/report-decisions. [Úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854)
+skončilo **success** 23. listopadu 2026 ve 14:00 SEČ. Prošlo 509 Flutter,
+108 nástrojových, 177 serverových unit, 18 nových rozhodovacích a celý
+142testový retenční průchod; také Rules/serverové regrese, browserové testy,
+analyze, lint a webový build. Sady se překrývají, počty se nesčítají na počet
+unikátních testů. Log build/report-decisions-ci.log. Tím je schválený místní
+úsek uzavřený; žádné nasazení ani živá data, Rules, prostředky či Auth změny.
 
 **Konkrétní návrh navázání, dosud bez souhlasu s provedením:**
 

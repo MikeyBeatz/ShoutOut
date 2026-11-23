@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Právě schválený místní úsek:** [společná bezpostihová rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-local)
+**Právě uzavřený místní úsek:** [společná bezpostihová rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-local)
 pro Shouty, komentáře a soukromé odpovědi, včetně neaktivního klienta a testů.
 serverContentReportDecisions zůstává false; bez wrapperu, nasazení, živých
 dat, Auth změn a změn Rules. Níže uvedený dokončený pilot tím znovu neotevírat.
@@ -15,8 +15,14 @@ audit/replay, neaktivní klient a účtové scrub fáze. 18 nových emulátorov�
 případů a 15 purge regresí prošlo; rozšířený skutečný purge průchod také.
 509 Flutter, 108 nástrojových, 177 serverových unit testů, analyze a lint čisté.
 618 integračních případů bez emulátoru přeskočeno. [Důkazy a konkrétní návrh
-DEV navázání](MVP_SERVER_PLAN.md#moderation-basic-local-results). Teď společný
-push/úplné CI přesného zdroje; nové runtime jádro zůstává mimo balíček Functions.
+DEV navázání](MVP_SERVER_PLAN.md#moderation-basic-local-results). Zdroj
+**7746bbdc56b2db1abdd9965f9cea348ae82243f3** je commitnutý a pushnutý ve
+feature/report-decisions; [úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854)
+skončilo **success**, včetně 18 nových případů, celého 142testového retenčního
+průchodu a webového buildu. Nové runtime jádro zůstává mimo balíček Functions.
+**Další krok:** předložit konkrétní DEV přechod podle uvedeného návrhu;
+veřejné odstranění a sankce ještě brání úplnému uzavření moderačních Rules.
+Nasazení ani živá akceptace tohoto místního úseku zatím neproběhly.
 
 **Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
 samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;
