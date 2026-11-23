@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,67 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,68 %** — vážené dokončení podúseků
 
-Hotové úseky: **197/252**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **199/252**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -23,7 +23,7 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 <!-- progress:backlog:start -->
 `███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
 
-Hotové úseky: **207/313**. Celé položky: **107/158**; rozpracované: 7.
+Hotové úseky: **209/313**. Celé položky: **108/158**; rozpracované: 6.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných; 23. listopadu přibyla
@@ -51,111 +51,30 @@ Vlastník potvrdil odstranění fontové hlášky; zbývající
 je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
 čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
 
-**Poslední uzavřený živý úsek:** [B4 metadata/cache – DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
+**Předchozí uzavřený živý úsek:** [B4 metadata/cache – DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
 Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 120 nových fixture a 138 jejich cloudových značek; původních 38 zdrojů a
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
-1. **Dokončit úspornou obnovu s novinkami v B4.**
-   **Obnovený závěrečný test:** [stav a schválená oprava úklidu](plans/feed/B4_DEV_ROLLOUT.md#movement-cleanup-resume).
-   Ruční řazení/kotva ještě čekají; počáteční chyba načtení odezněla, příčina
-   není potvrzená. Zachovat fixture do výsledku, původní expiraci neprodlužovat.
-   Úklidový plán zohlední jen expiraci původních A/B, nástroj zachová receipts
-   do jejich vlastní sedmidenní lhůty. Bez nasazení aplikace či nových fixture.
-   **Právě nasazená oprava:** [živé pořadí v Nejblíž](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
-   Vlastník potvrdil aktualizaci vzdáleností, nově schválil i přeskládání karet
-   při potvrzeném pohybu. 486 Flutter testů a 7 serverových regresí prošly;
-   af4c3aa / úplné CI 45085601243 success, pouze DEV web **37b697da10fbb5b1**.
-   Krátká kontrola řazení/kotvy je na žádost vlastníka odložená na později.
-   Testovací data zatím zachovat, platnost svévolně neprodlužovat. Bez nového MVP kreditu
-   za opravu; společnou akceptaci uzavřít až po skutečném úklidu.
-   **Předchozí základ pohybu v DEV:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
-   78d6a3f / úplné CI 45077814590 success, Hosting **2d6ae9af70840b03**,
-   getFeedPage **00007-moc**. Automatické kontroly, simulace i živý dry-run
-   úklidu jsou hotové. Původní ruční průchod vedl k uvedené změně řazení;
-   po její závěrečné kontrole restart 50 → původní A/B/C podle manifestů. C2 je již uklizený.
-   Ostatní Functions, Rules, prostředky a produkce zachované; neuzavírat
-   finální akceptaci před odpovědí a skutečným úklidem.
-   **Předchozí ruční dosahy:** [návrat novinek po pauze a zjednodušení](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results).
-   b57f6b9 / úplné CI 45071219942 success, DEV Hosting **6762922852bede94**,
-   getFeedPage **00006-niz**. Vlastník potvrdil dosahy 1–50 km, výchozí 50, bez
-   Auto/údaje o načteném dosahu a funkční obnovu/detail během 5/paused. Po
-   6/active doložené úspěšné klientské volání s Auth/App Check VALID a dalších
-   101 s bez změny news kvóty. Návrat novinek uzavřený; zbývá původní úklid.
-   Ostatních 19 Functions a Rules zachované.
-   V tomto starším b57f6b9 byl pohyb vypnutý. Aktuální zapojení je výše;
-   samotný starší prototyp nebyl důkaz jeho živé funkčnosti.
-   **Historické Auto hledání, nyní nahrazené ručním 50 km:** [původní chování a výsledky](plans/feed/FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
-   Klientská příprava a 38 různých cílených regresí jsou hotové; zdroj 6bef37c
-   má success úplné CI 45020677812. DEV Hosting 06df6da99db68e74 je ověřený
-   na obou doménách. Vlastník potvrdil fungující Auto v novém anonymním okně;
-   původní místní problém není tím vyřešený. Na jeho žádost je připravených
-   50 nových 24h restartovacích Shoutů, oddělených od A/B/C pilotu. Anonymní
-   restart/Auto průchod vlastník potvrdil; běžné okno stále selhává a jeho
-   diagnostiku výslovně odložil. Příčina není potvrzená; neupravovat naslepo
-   B2 ani nemazat místní frontu. Po testech uklízet jen příslušný manifest, ne cizí data.
-   B4b akceptaci tím nezavírat; po jeho rollbacku obnovit nový Auto web.
-   **Nyní nasazené:** metadata/cache B4, feed-v3 a deset Functions ze zdroje
-   8b1de68 / úspěšné úplné CI 44935555088, Hosting fa20f566fc0ab82b.
-   [Živé důkazy nasazení](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results):
-   oba účty prošly 50 → 100 → 120, warm 0/refill 1 tělo, promo a serverový
-   rollback/nový audit. [UI akceptace i úklid jsou uzavřené](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
-   **Nyní:** [schválený lokální B4b](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-proposal)
-   pro úsporné signály/číslovku novinek, klienta a měření; pouze nové publikace.
-   [Lokální výsledek a návrh četnosti](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
-   je uzavřený: e8c0c9c / úplné CI 44944929884 success.
-   [Konkrétní provozní návrh](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
-   vlastník schválil celý. [Lokální implementace a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
-   jsou uzavřené: oblastní/technický signál, úplné pokrytí, čtecí Rules,
-   četnost/adaptace a news kvóta; 3d381f8 / úplné CI 44953434700 success.
-   [Konkrétní DEV aktivace a malý společný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
-   jsou připravené podle čerstvé čtecí inventury: dvě Functions, tři indexové
-   výjimky a tři nové fixture. Vlastník schválil celý úsek včetně nástroje,
-   CI a živého ověření. Zdroj 20206c4 má success úplné CI 44959541907;
-   [DEV nasazení je ověřené](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results):
-   indexy dokončené, news active / feed control 12, Rules/dvě Functions/drain ověřené,
-   Hosting ca327f10112ef349 / news on. Pilotní A i B existují; B vznikl přes klienta
-   TestBusiness s validním Auth/App Check a je adoptovaný. Interní count po B je 1.
-   Vlastník našel Network / Offline; po obnovení připojení feed i změna dosahu
-   fungují, přetrvávající prodleva zatím není změřená. Samostatně reprodukovaná
-   blokace B2 odloženou značkou není potvrzenou příčinou tohoto incidentu.
-   [Původní selhání C](plans/feed/B4_DEV_ROLLOUT.md#news-ui-diagnosis) vedlo
-   k [opravě napojení a lokálnímu modelu pohybu](plans/feed/B4_DEV_ROLLOUT.md#news-ui-fix-results): 468 Flutter,
-   99 tools testů, analýza bez nálezů; 34268e5 / úplné CI 45060709344
-   success, DEV Hosting 346ea6fb1866da8e je nasazený a zdrojově ověřený.
-   [Nový výslovně povolený C potvrdil číslovku 1 a odečtení po expiraci](plans/feed/B4_DEV_ROLLOUT.md#news-positive-acceptance);
-   je uklizený a tento dílčí důkaz je započítaný. Hotový test neopakovat.
-   Další [konkrétní návrh: zarovnání badge a lokální geografický rebase](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-proposal)
-   je schválený a [připravený lokálně](plans/feed/B4_DEV_ROLLOUT.md#badge-and-recenter-results):
-   474 Flutter testů, analýza bez nálezů a rebase regrese prošly. Zdroj
-   211471b / [success úplné CI 45066405533](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45066405533)
-   je pouze na DEV Hostingu **3881ef4d17f67aa8**; soubory/HTTP ověřené, Functions
-   a Rules nezměněné. Živý pohyb zatím vypnutý.
-   Místní data nemazat a další
-   fixture nevytvářet naslepo. [Pauza a starší kompatibilní web prošly ruční kontrolou](plans/feed/B4_DEV_ROLLOUT.md#news-pause-acceptance);
-   současný web je vrácený, news **4/active**, bez změn zdrojů/Rules/Functions.
-   Vlastník potvrdil návrat UI pod TestBusiness a schválil [opravu návratu po načtení během pauzy](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-proposal).
-   [Oprava je nyní nasazená](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results),
-   současný stav je výše. Původní úklid není hotový. Společná finální
-   akceptace B4 zahrne i interaktivní UI rollback. Tentýž pilot neopakovat.
-   Předchozí [lokální přechod a rollback](plans/feed/B4_DEV_ROLLOUT.md#local-transition-results),
-   [klientské zapojení a nákladové meze](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results),
-   [P1 a všechny writery](plans/feed/FEED_STATE_STORAGE_PROPOSAL.md#p1-results) i
-   [transakční reader](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results)
-   jsou uzavřené; jejich datované vypnuté konfigurace nejsou současný DEV stav.
-   Celé B4 zahrnuje verze/metadatové porovnání, přenos rozdílů a cache,
-   úsporné signály i oddělený počet novinek, který nemění rozpracované
-   pořadí. B2 má schválený přenos při spuštění/obnově feedu; detekce novinek B4 je otevřená.
-   [Etapy a závislosti](plans/feed/FEED_IMPLEMENTATION_STAGES.md#aktualni-stav).
-   Celé A0–A3 i B1–B4 patří před MVP; uzavření A2/A3 a B1–B3 v DEV nemění
-   automaticky celý serverový milník. Doložené podúseky posouvají váženou stupnici
-   podle [nové metodiky](PROGRESS.md).
-2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
+**Uzavřený feed:** [B4 a finální DEV regrese](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
+Vlastník přijal řazení při pohybu i stabilní čtenou kartu. Po úplném CI
+45218543240 success ze zdroje a8d13eb uklizeno 53 testovacích Shoutů a 54
+cloudových read klíčů. Původních 38 zdrojů/pending žádost, 21 receipts,
+ostatní data a provozní konfigurace zachované. Manifesty cleaned; znovu
+neseedovat. Nové rollouty ani Auth účty nevznikly. A0–A3/B1–B4 mají hotovou
+společnou DEV akceptaci; kapacitní a produkční brány tím uzavřené nejsou.
+Diagnóza původního běžného okna zůstává samostatně odložená, bez mazání
+místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
+
+1. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
+   **Následuje konkrétní návrh veřejného serverového odstranění v moderaci;**
+   další otevřené části jsou sankce a společný Rules cutover. Nový rozsah
+   před implementací předložit ke schválení; níže jsou důkazy uzavřených částí.
    **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
    všech tří typů hlášení, místní server a neaktivní klient, testy a společné CI.
-   Bez živých změn a bez otevírání dokončených pilotů. DEV přechod bude mít vlastní plán.
+   Jde o historický místní checkpoint; navazující DEV přechod je uzavřený níže.
    [Místní výsledek](MVP_SERVER_PLAN.md#moderation-basic-local-results): jádro,
    neaktivní klient a testy hotové; 18 nových emulátorových, 15 purge, 509 Flutter,
    108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
@@ -194,8 +113,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Další atomická rozhodnutí/regionální autoritu připravit
    podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
    Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
-   Odložený pohybový test a jeho staré fixture jsou samostatné; žádné nové
-   testy či prodlužování platnosti tím nejsou schválené.
+   Pohybový test i staré feed fixture jsou nyní uzavřené výše. Regionální
+   živá regrese soukromého odstranění zůstává otevřená; přijatý TestAdmin
+   průchod a novější approve/resolve/escalate ji nenahrazují.
 
 ## Hranice MVP
 

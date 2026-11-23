@@ -2,47 +2,24 @@
 
 [Hlavní rozcestník](../../README.md) · [Aktuální stav](../../PROJECT_STATUS.md)
 
-A0–A3/B1–B4 celé před MVP. Platný směr je progresivní; lokální laboratorní parametry nejsou provozní limity. Aktuální pořadí určuje implementační plán.
+**23. listopadu: A0–A3/B1–B4 mají [uzavřenou finální DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).**
+Hotové jsou B2 synchronizace, B3 unread-first, B4 metadata/cache/číslovka,
+ruční dosahy 1–50 km s výchozím 50 km a pohyb s živým pořadím a stabilní kartou.
+Všech 53 zbývajících testovacích Shoutů a 54 cloudových read klíčů je uklizených;
+38 původních zdrojů a 21 receipts zachovaných. Další ruční pohybový test nečeká.
+Přesné nasazení a další serverovou práci určuje PROJECT_STATUS.
 
-Vlastník 22. listopadu schválil [Auto dosah/max. 50 km a nabídku rozšíření prázdného ručního okruhu](FEED_DELTA_REFRESH_PLAN.md#automatic-radius).
-Klientské řešení má success úplné CI 45020677812 / zdroj 6bef37c a ověřený
-DEV Hosting 06df6da99db68e74. Živá akceptace čeká. Nejde o novou serverovou
-datovou vrstvu ani uzavření B4b; backend stále odpovídá 20206c4.
-Vlastník potvrdil funkční nové anonymní okno. Na jeho žádost vznikla oddělená
-50položková 24h restartovací dávka; původních 40 zdrojů včetně A/B zachováno.
-Její manifest a důkazy jsou v témže odkazu; restart/ruční rozšíření čekají.
+[B2 akceptace](B2_DEV_ROLLOUT.md#b2-acceptance-complete) ·
+[B3 akceptace](B3_DEV_ROLLOUT.md#b3-acceptance-complete) ·
+[B4 metadata/cache](B4_DEV_ROLLOUT.md#delta-acceptance-complete) ·
+[B4 novinky, pohyb a společná regrese](B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
 
-B2 má od 18. listopadu [uzavřenou DEV akceptaci a úklid](B2_DEV_ROLLOUT.md#b2-acceptance-complete).
-B3 má od 20. listopadu [uzavřenou živou akceptaci i úklid](B3_DEV_ROLLOUT.md#b3-acceptance-complete).
-B4 metadata/cache mají [uzavřenou DEV akceptaci a úklid](B4_DEV_ROLLOUT.md#delta-acceptance-complete).
-Lokální B4b count má [úplné CI a měření](FEED_DELTA_REFRESH_PLAN.md#b4b-local-results);
-navazující [konkrétní provozní rozsah](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal)
-vlastník schválil. [Lokální implementace/měření](FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
-jsou uzavřené včetně úplného CI 44953434700 success ze zdroje 3d381f8.
-[Konkrétní DEV plán a malý společný pilot](B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
-vlastník schválil celý. [B4b je nasazené a aktivní v DEV](B4_DEV_ROLLOUT.md#news-dev-rollout-results)
-ze zdroje 20206c4 / úplné CI 44959541907 success. Živá akceptace a úklid zbývají;
-existují pilotní A i B, B prošel skutečným klientem s validním Auth/App Check.
-Vlastník našel zapnuté Network / Offline; po obnovení připojení feed a změna
-dosahu fungují, prodleva zatím není změřená. Samostatně reprodukované riziko
-odložené B2 značky není potvrzenou příčinou incidentu. C čeká na připravené
-pozorování, místní frontu nemazat.
-Následující přípravné etapy jsou datované podklady již nasazené metadata/cache vrstvy.
-B4a má [dokončený lokální základ a úplné CI](FEED_DELTA_REFRESH_PLAN.md#b4a-local-results).
-Další [lokální čtecí adaptér](FEED_DELTA_REFRESH_PLAN.md#b4-read-local-results) je dokončený s úspěšným úplným CI.
-Má zlevnit cold/refill při zachování aktuální dostupnosti a B3 textové identity.
-Další [konkrétní návrh provozní vrstvy a všech writerů](FEED_STATE_STORAGE_PROPOSAL.md)
-má [uzavřenou lokální implementaci a úplné CI](FEED_STATE_STORAGE_PROPOSAL.md#p1-results). Poté následuje klient/Rules,
-provozní přechod a B4 signály/číslovka. Kapacitní cíl produkce tím není prokázaný.
-[Klientské zapojení a Rules – konkrétní navazující návrh](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-proposal)
-je schválený a má [lokální implementaci a výsledky](FEED_STATE_STORAGE_PROPOSAL.md#client-integration-results);
-úplné CI 44917393562 je úspěšné. Další je řízený DEV přechod, nikoli nový
-souhlas s touž implementací. Nepřidává další očíslované P úseky.
-[Příprava operátoru, kompatibility a návratu B4](B4_DEV_ROLLOUT.md)
-má čtecí DEV inventuru a konkrétní další lokální rozsah ke schválení;
-neznamená povolení živé migrace.
-Předchozí lokální přechod, provozní vstup i živý rollout B3 jsou historie;
-neopakovat je jako otevřenou práci.
+Platný směr je progresivní. Historické Auto bylo nahrazené ručními dosahy;
+laboratorní parametry nejsou produkční kapacita. Kapacitní cíl 5 000 aktivních
+relací a veřejné vydání mají samostatnou startovní bránu. Diagnóza původního
+běžného okna zůstává odložená; místní frontu nemazat naslepo.
+Následující plány zachovávají také datované přípravné stavy, nikoli pokyny
+znovu migrovat, nasazovat nebo seedovat uzavřené piloty.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](FEED_A1_RESULTS.md)
 - [Sdílený prostorový index – lokální návrh a ověření](FEED_BLOCK_INDEX_PLAN.md)

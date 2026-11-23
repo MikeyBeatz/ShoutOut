@@ -13,6 +13,14 @@ s upozorněním, jinak výzvu k poloze. Unread-first pouze v Nejblíž.
 
 ### Aktuální stav a pořadí integrace
 
+**23. listopadu – finální DEV akceptace uzavřená:** [B4, pohyb a skutečný úklid](B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
+Vlastník potvrdil řazení i zachování čtené karty; 53 zbývajících fixture a
+54 cloudových read klíčů uklizeno po úplném CI a8d13eb. Původních 38 zdrojů,
+pending žádost a 21 receipts zachované. Celé A0–A3/B1–B4 tím mají uzavřenou
+DEV regresi; produkční kapacita/startovní brána zůstávají samostatné.
+Následující datované stavy jsou historie, jejich tehdejší čekající kroky
+neopakovat ani podle nich znovu vytvářet testovací data.
+
 **23. listopadu – pořadí při pohybu:** vlastník po kontrole vzdáleností schválil
 [nové řazení v Nejblíž se stabilní viditelnou kartou](B4_DEV_ROLLOUT.md#movement-order).
 Implementace i úplné CI 45085601243 success; pouze DEV web 37b697da10fbb5b1

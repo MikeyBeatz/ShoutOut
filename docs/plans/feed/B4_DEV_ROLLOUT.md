@@ -5,6 +5,11 @@
 
 ## Stav a rozsah
 
+**Aktuálně 23. listopadu: [B4 a společná finální DEV regrese feedu jsou uzavřené](#feed-final-acceptance-complete).**
+Vlastník přijal řazení při pohybu/kotvu; 50 restartovacích a 3 A/B/C fixture
+i 54 cloudových read klíčů jsou uklizené, 38 původních zdrojů zachovaných.
+Následující datované checkpointy uchovávají průběh, nikoli otevřené pokyny.
+
 21. listopadu 2026: **schválený lokální přechodový úsek je uzavřený**.
 Zdroj **cd21019d846aa018c8d7939ca62c994ba6082520** má
 [success úplné CI 44929196473](https://github.com/MikeyBeatz/ShoutOut/actions/runs/44929196473).
@@ -1433,3 +1438,54 @@ build/feed-pilot-cleanup-emulator.log; nové MVP body se za tuto opravu nepřid�
 Další krok: dokončit přesné úplné CI, poté při úspěšné
 ruční kontrole restart 50 → původní A/B/C. Do té doby žádné živé mazání,
 nasazení webu/Functions/Rules, změna Auth nebo prodloužení fixture.
+
+<a id="feed-final-acceptance-complete"></a>
+
+### B4 a společná finální DEV akceptace – uzavřeno 23. listopadu
+
+Vlastník pod TestBusiness potvrdil poslední průchod na aktuálním webu
+**33853a9**: po změně Latitude 50.5300 → 50.5340 bez obnovy zůstala čtená
+karta na místě a po ručním odscrollování nahoru bylo pořadí uvnitř obou
+skupin správně podle nové vzdálenosti. Dosah 1 km, původní restartovací
+sada; žádná nová fixture nebo prodlužování platnosti.
+Podklad build/feed-movement-manual-acceptance.json. Počáteční hláška o
+načtení odezněla před testem; její příčina se za diagnostikovanou nepovažuje.
+
+Oprava úklidu **a8d13ebd99836f1c1b9b14ccc716e1b4f02e3b0a** má
+[success úplné CI 45218543240](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45218543240),
+včetně skutečných emulátorových regresí zachování receipts, Rules, klienta,
+účtové retence a webového buildu. Živé mutace provedly původní operátory
+z čisté přesné kopie tohoto commitu po dokončení CI, pouze v
+**shoutout-dev-46c81**. Aplikace, Functions ani Rules se z tohoto zdroje nenasazovaly.
+
+V pořadí restart → A/B/C bylo odstraněno **50 + 3 Shoutů** a **50 + 4
+cloudových značek přečtení**, přes společný indexový writer. Oba kanonické
+manifesty mají phase **cleaned**; původní nezměněný restartovací manifest
+zůstává historickým podkladem a nesmí se podle něj znovu seedovat.
+Nový restartovací manifest/digest a původní A/B/C manifest jsou popsané
+[výše](#movement-cleanup-resume). Předúklidové kopie jsou v
+build/feed-{restart,news}-cleanup-preexecution.json. C2 byl uklizený dříve,
+neopakoval se. Logy build/feed-restart-cleanup-final.log a feed-news-cleanup-final.log.
+
+**Závěrečná nezávislá kontrola v 18:01 SEČ:** všech **53 kořenů i 53
+publicStates** je nepřítomných, žádné zbývající potomky ani cloudové read
+klíče těchto ID. Zachováno všech **38 původních Shoutů včetně updateTime**,
+pending žádost a **21 receipts včetně dat, updateTime i původní expirace**.
+Nezměnily se cizí read položky ani 15 kvót nesouvisejících s průběžným
+feed/read provozem; celkem zůstává 25 rate dokumentů. Feed/read kvóty
+otevřeného klienta nebyly resetované a jejich běžná aktivita se nevydává za chybu.
+Podklady build/feed-movement-cleanup-{before,after}.json a
+build/feed-movement-cleanup-final-proof.log.
+
+Porovnání cloudové inventury před/po potvrdilo stejných **23 Functions**, oba
+minutové plánovače, Hosting **565880d4664da7b2**, Rules
+**3de8f7d8-6658-4b24-951f-043eac8de297**, feed **12/feed-v3/active** a news
+**6/active**, bez účtových či purge jobů. Žádná Auth mutace, produkce/main/tagy
+beze změny. Podklady build/feed-movement-cleanup-cloud-{before,after}.json.
+
+Tím jsou uzavřené B4 i společná finální DEV regrese A0–A3/B1–B4, v návaznosti
+na dříve přijaté číslovky, expiraci, pause/recovery, kompatibilní UI rollback,
+stránkování, přečtení a interakce. Kapacitní cíl 5 000 aktivních relací,
+produkční aktivace a ostatní serverové/startovní brány tím nejsou prokázané.
+Samostatně odložená diagnóza původního běžného okna zůstává evidovaná;
+nezaměňovat ji za opravu nebo znovuotevření již přijaté pohybové regrese.

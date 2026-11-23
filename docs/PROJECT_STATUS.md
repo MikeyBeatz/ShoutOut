@@ -6,18 +6,29 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní obnovený odložený test:** [řazení feedu při pohybu a bezpečný úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-cleanup-resume).
-Vlastník 23. listopadu zahájil kontrolu na aktuálním webu 33853a9. První
-pokus zastavila chyba načtení; následně potvrdil, že feed znovu naběhl.
-Poslední getFeedPage volání mají HTTP 200 a Auth/App Check VALID; příčina
-původní chyby není tím potvrzená. Řazení/kotva zatím nejsou akceptované.
-Všech 50 restartovacích fixture bylo aktivních; původní expirace dnes
-18:23 SEČ se nemění. Vlastník schválil aktualizaci úklidového plánu jen pro
-expiraci A/B a opravu zachování sedmidenních receipts. Místní oprava ve
-fix/feed-pilot-cleanup prošla 3/3 emulátorovými případy, 2/2 manifestovými
-unit testy a cíleným lintem. Obě cesty včetně replay zachovaly receipt
-data/updateTime. Dosud žádné živé zápisy/nasazení.
-Úklid až po úplném CI přesného zdroje a úspěšném ručním testu.
+**Právě uzavřeno: [B4 a finální DEV regrese celého feedu](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).**
+TestBusiness potvrdil živé řazení při pohybu i zachování čtené karty na
+aktuálním webu 33853a9. Počáteční chyba načtení odezněla; příčina nepotvrzená.
+Úklidový zdroj **a8d13ebd99836f1c1b9b14ccc716e1b4f02e3b0a** /
+[úplné CI 45218543240 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45218543240),
+větev fix/feed-pilot-cleanup, 3/3 místní emulátorové a 2/2 manifestové testy,
+lint čistý. Opravené nástroje zachovávají sedmidenní receipts i při replay.
+Po úplném CI uklizeno pouze DEV: **50 restartovacích + 3 A/B/C Shouty a 54
+cloudových read klíčů**, přes společný writer. Oba aktuální manifesty cleaned,
+nikdy znovu neseedovat; původní restartovací manifest zůstal beze změny.
+Závěrečná inventura 18:01 SEČ: **38 původních Shoutů a pending žádost**,
+všechny jejich updateTime, **21 receipts**, cizí read položky a pasivní kvóty
+zachované; 0 fixture kořenů/publicStates/potomků/read klíčů.
+Všech **23 Functions**, oba plánovače, web **565880d4664da7b2**, Rules
+**3de8f7d8…de297**, feed 12/news 6/active beze změny. Žádná Auth mutace,
+nový rollout, změna produkce/main/tagů ani prodloužení testovacích dat.
+Další MVP úsek: veřejné serverové odstranění v moderaci, poté sankce a
+společný Rules cutover; nejprve konkrétní rozsah ke schválení. Regionální
+regrese soukromého odstranění a diagnóza původního běžného okna jsou
+samostatně odložené. Kapacitní/startovní brána zůstává otevřená.
+
+Následující datované checkpointy zachovávají důkazy dřívějších úseků;
+jejich tehdejší počty a otevřené feed testy nejsou současná inventura.
 
 **Právě uzavřený DEV úsek:** [společná moderační rozhodnutí – akceptace a úklid](MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
 Zdroj **44e07a5d18570ef2fc416d8387ed459bd55dd853** / [úplné CI 45196844737 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45196844737).
@@ -67,9 +78,10 @@ aktuální schválená příprava wrapperu a aktivace je popsaná výše.
 veřejné odstranění a sankce ještě brání úplnému uzavření moderačních Rules.
 Tento starší místní checkpoint sám nasazení nedokládal; navazující DEV výsledek je výše.
 
-**Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
-samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;
-platnost fixture se neprodlužuje a nové živé testy nejsou tím schválené.
+**Dříve odložená ruční kontrola feedu je nyní uzavřená výše.** Vlastník
+23. listopadu nejprve požádal pokračovat samostatně a vrátit se později;
+následně potvrdil řazení/kotvu a schválený úklid skutečně proběhl.
+Platnost se neprodlužovala a nové živé fixture nevznikly.
 Nezávislý [audit soukromého mazání](MVP_SERVER_PLAN.md#private-deletion-preparation)
 vedl k následně schválenému a nyní dokončenému DEV přechodu níže.
 
@@ -120,8 +132,8 @@ odpovídajícím rollbacku Rules. Produkce, main, tagy a Auth účty beze změny
 
 **Další práce:** zbývající atomická moderační rozhodnutí/sankce, regionální
 regrese a produkční aktivace podle [serverového plánu](MVP_SERVER_PLAN.md#moderation).
-Celý moderační milník se tím neuzavírá. Samostatný odložený pohybový test
-a jeho staré fixture zůstávají otevřené; toto přijetí je nenahrazuje.
+Celý moderační milník se tím neuzavírá. Tehdy odložený pohybový test
+a jeho staré fixture jsou následně uzavřené ve finální feed akceptaci výše.
 Historické lokální výsledky a schválené mezikroky jsou u
 [přípravy](MVP_SERVER_PLAN.md#moderation-private-local),
 [nasazení](MVP_SERVER_PLAN.md#moderation-private-dev-rollout) a
@@ -172,8 +184,8 @@ Nasazený pouze DEV Hosting **37b697da10fbb5b1**, ověřeno 67 app souborů a 8 
 odpovědí obou domén. Všech 20 Functions včetně getFeedPage **00007-moc**, Rules
 a prostředky beze změny; původních 38 zdrojů/pending žádost zachované, celkem
 91 zdrojů, feed 12/news 6/active. Návratový web **2d6ae9af70840b03**.
-Odložená ruční kontrola řazení/kotvy a následný úklid čekají; prohlížečový host
-byl znovu ověřen jako nedostupný. Finální akceptace se před odpovědí neuzavírá.
+Tehdy odložená ruční kontrola řazení/kotvy i úklid jsou následně uzavřené
+výše. Prohlížečový host byl při tomto starším checkpointu nedostupný.
 
 **Předchozí nasazení pohybu:** [pohyb v DEV + připravený poslední úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
 Zdroj **78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88**, [success úplné CI 45077814590](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45077814590).

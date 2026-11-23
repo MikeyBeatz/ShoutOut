@@ -39,11 +39,12 @@ Serverové fáze, klientský přechod, Rules cutover i závěrečný účtový t
 
 [Rozcestník feedu](plans/feed/README.md).
 
-Celé A0–A3/B1–B4 před MVP. Prostorový index, podepsaný kurzor, relace, stránkované API i Home jsou od 7. listopadu zapojené v DEV; vlastní historie je ověřená. Místní přečtení B1 je od 11. listopadu na DEV webu, má uživatelský důkaz značek/restartu; B1, regrese Uložených a společná DEV akceptace A2/A3 jsou uzavřené včetně úklidu fixture. B2 má od 18. listopadu [uzavřenou DEV synchronizaci, recovery a úklid](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete); B3 od 20. listopadu [uzavřenou živou akceptaci i úklid](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete). Další je B4: delta/cache a indikátor novinek. Přesné revize a kontroly určuje PROJECT_STATUS.
+Celé A0–A3/B1–B4 mají od 23. listopadu [uzavřenou finální DEV akceptaci a úklid](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete): prostorové API/index, relace/stránkování, místní i cloudové přečtení, unread-first, delta/cache, číslovka novinek a pohyb s živým pořadím/stabilní kartou. B2 má vlastní [důkazy synchronizace/recovery](plans/feed/B2_DEV_ROLLOUT.md#b2-acceptance-complete), B3 [živou akceptaci](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete). Produkční kapacita a vydání mají samostatnou startovní bránu; přesné revize a další serverovou práci určuje PROJECT_STATUS.
 
 - [A1 – lokální kontrakt feedu a výsledky prototypu](plans/feed/FEED_A1_RESULTS.md)
 - [B4 – uzavřená metadata/cache DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete)
-- [B4b – lokální číslovka novinek, měření a otevřené provozní zapojení](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
+- [B4b – lokální číslovka novinek a měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-local-results)
+- [B4 – novinky, pohyb a uzavřená finální DEV regrese](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete)
 - [B4b – schválený provozní rozsah](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-proposal) a [lokální implementace/měření](plans/feed/FEED_DELTA_REFRESH_PLAN.md#b4b-runtime-results)
 - [B4b – konkrétní DEV aktivace a společný závěrečný pilot](plans/feed/B4_DEV_ROLLOUT.md#news-dev-pilot-proposal)
 - [B4b – ověřené DEV nasazení a otevřená společná akceptace](plans/feed/B4_DEV_ROLLOUT.md#news-dev-rollout-results)

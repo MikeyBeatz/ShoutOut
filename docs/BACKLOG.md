@@ -55,7 +55,7 @@ nenahrazují produkční, bezpečnostní a distribuční bránu MVP.
 
 <a id="feed-read-refresh"></a>
 
-- [ ] <a id="bl-005"></a> **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
+- [x] <a id="bl-005"></a> **Navrhnout a po schválení zavést přečtení Shoutů, stabilní feed a refresh s počtem novinek.**
   **MVP — vlastník potvrdil celé A0–A3 i B1–B4 před vydáním.**
   - Nový požadavek vlastníka z 31. října 2026; rozšiřuje původní rozsah, nejde
     o přepsání historického dokončení základního feedu ani o další milník MVP.
@@ -202,7 +202,7 @@ Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 <!-- progress:backlog:start -->
 `███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
 
-Hotové úseky: **207/313**. Celé položky: **107/158**; rozpracované: 7.
+Hotové úseky: **209/313**. Celé položky: **108/158**; rozpracované: 6.
 <!-- progress:backlog:end -->
 
 Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.

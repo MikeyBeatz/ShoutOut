@@ -11,6 +11,11 @@ ověření v konkrétním implementačním úseku. Nevzniká další samostatný
 
 ## Cíl a ověřený výchozí stav
 
+**Aktuálně 23. listopadu:** [B4 i společná finální DEV regrese jsou uzavřené](B4_DEV_ROLLOUT.md#feed-final-acceptance-complete),
+včetně číslovky, pause/recovery, rollbacku, pohybu, živého řazení a úklidu
+zbývajících 53 fixture. Níže uvedené původní návrhy a vypnuté přípravné
+checkpointy nejsou současná provozní inventura ani zbývající implementace.
+
 <a id="automatic-radius"></a>
 
 **Novější rozhodnutí vlastníka 22. listopadu:** připravit pouze ruční volby

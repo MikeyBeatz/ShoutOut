@@ -1,5 +1,15 @@
 # Vývojový a produkční web
 
+**Aktuální inventura po závěrečném feed úklidu, 23. listopadu 18:01 SEČ:**
+[B4 a finální DEV akceptace uzavřené](../plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
+Uklizeno pouze 50 restartovacích a 3 A/B/C Shouty, 54 read klíčů; zůstává
+38 původních zdrojů a pending žádost, všech 21 receipts beze změny.
+Žádné nové nasazení: web **565880d4664da7b2** / zdroj **33853a9**, server
+nadále **44e07a5**, 23 Functions, oba minutové plánovače, Rules
+**3de8f7d8-6658-4b24-951f-043eac8de297**, feed 12/news 6/active beze změny.
+Úklidový zdroj **a8d13eb** / úplné CI **45218543240 success** se nenasazoval.
+Následující datované počty 91 zdrojů jsou před tímto schváleným úklidem.
+
 **Aktuální DEV společná moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
 Zdroj 44e07a5d18570ef2fc416d8387ed459bd55dd853 / úplné CI 45196844737 success,
 Aktuální Hosting **565880d4664da7b2** z opravného webového zdroje
