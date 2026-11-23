@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,47 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,49 %** — vážené dokončení podúseků
 
-Hotové úseky: **187/242**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **189/246**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -163,8 +163,14 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    104 nástrojových testů a lint prošly; f1e32e9 má
    [success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001).
    Započtené jsou jen jádro/ověření. Bez wrapperu, klientské aktivace, změn
-   Rules či nasazení; staff přímá cesta je dosud otevřená. Následně připravit
-   konkrétní zapojení a zbývající atomická rozhodnutí/regionální autoritu
+   Rules či nasazení; staff přímá cesta je dosud otevřená.
+   **Schválený navazující DEV přechod právě běží:** [přesný rozsah a pořadí](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
+   Příprava klienta/wrapperu/pilotu i Rules prototypu je lokálně ověřená:
+   500 Flutter, 107 nástrojových, 174 unit a 46 emulátorových testů, analyze/lint.
+   Úplné CI a živé nasazení zatím čekají, nic živě nezapočítávat.
+   Klient/wrapper/testy → úplné CI → DEV endpoint/úklid/web → pozitivní klientská
+   kompatibilita → samostatné CI/Rules → dokončení pilotu a úklid.
+   Další atomická rozhodnutí/regionální autoritu připravit
    podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
    Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
    Odložený pohybový test a jeho staré fixture jsou samostatné; žádné nové

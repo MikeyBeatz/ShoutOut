@@ -9,6 +9,8 @@ import { operationTestKey } from './test_helpers.js';
 import { syncReadBatchOperation } from './read_sync.js';
 import { readContentHash } from './read_sync_blocks.js';
 import { prepareNewsControlChange } from './feed_news_signals.js';
+import { planPrivateModerationPilot, seedPrivateModerationPilot, privateModerationPilotStatus, cleanupPrivateModerationPilot } from './private_report_removal_pilot.js';
+import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'private-delete-pilot') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
@@ -36,7 +38,7 @@ async function fixture(t) {
   await db.runTransaction(async tx => { (await prepareNewsControlChange(tx, db, { v: 1, revision: 1, mode: 'active', generation: 'feed-v3', incarnation: [generation.createTime.seconds, generation.createTime.nanoseconds] })).apply(); });
   const plan = await planPrivateDeletionPilot(db, actors, { expectedSources: 1 });
   const status = await privateDeletionPilotStatus(db, plan); roots.push(db.doc(`shouts/${status.shoutId}`));
-  return { plan, original, pending, actors, status, control };
+  return { plan, original, pending, actors, status, control, roots };
 }
 function input(uid, shoutId, privateReplyId, label) {
   return { auth: { uid, token: { email: 'fixture@example.test', email_verified: true } }, app: { appId: 'test' },
@@ -82,4 +84,47 @@ test('cleanup rejects foreign conversation and leaves source and both owned mess
   await db.doc(`shouts/${status.shoutId}/comments/foreign`).create({ authorId: 'someone-else' });
   await assert.rejects(cleanupPrivateDeletionPilot(db, f.plan), /foreign-descendant/);
   const after = await privateDeletionPilotStatus(db, f.plan); assert(after.sourcePresent); assert(after.replies.every(r => r.present));
+});
+
+async function moderationFixture(t) {
+  const f = await fixture(t), moderator = { uid: `mod-${randomUUID()}`, nickname: 'TestModerator' };
+  await db.doc(`users/${moderator.uid}`).set({ nickname: moderator.nickname });
+  await db.doc(`users/${moderator.uid}/legal/acceptance_2026_07_25`).set({});
+  await db.doc(`accountRoles/${moderator.uid}`).set({ level: 3, moderationScope: { global: true } });
+  f.roots.push(db.doc(`users/${moderator.uid}`), db.doc(`accountRoles/${moderator.uid}`));
+  const plan = await planPrivateModerationPilot(db, f.actors, moderator, { expectedSources: 1 });
+  const state = await privateModerationPilotStatus(db, plan);
+  f.roots.push(db.doc(`shouts/${state.shoutId}`), db.doc(`privateReplyReports/${state.reportId}`));
+  t.after(async () => { for (const row of (await db.collection('serverOperations').where('userId', '==', moderator.uid).get()).docs) await row.ref.delete(); });
+  return { ...f, moderation: plan, moderator, state };
+}
+async function moderate(f) {
+  await removeReportedPrivateReplyOperation({ auth: { uid: f.moderator.uid, token: { email: 'fixture@example.test', email_verified: true } }, app: { appId: 'test' },
+    data: { expectedUserId: f.moderator.uid, reportId: f.state.reportId, note: 'Synthetic moderator decision', idempotencyKey: operationTestKey('pilot-moderation', new Date()) } }, db);
+}
+test('moderation pilot adds one report, requires positive decision proof and cleans only its bounded fixture while retaining receipts', { skip: !enabled }, async t => {
+  const f = await moderationFixture(t), state = await seedPrivateModerationPilot(db, f.moderation);
+  assert.equal(state.reportStatus, 'open'); assert.equal(state.decisionConfirmed, false); assert(state.continuationPreserved);
+  assert.equal((await seedPrivateModerationPilot(db, f.moderation)).reportId, state.reportId);
+  await assert.rejects(cleanupPrivateModerationPilot(db, f.moderation), /positive-proof-required/);
+  await moderate(f); const confirmed = await privateModerationPilotStatus(db, f.moderation);
+  assert(confirmed.decisionConfirmed); assert(confirmed.continuationPreserved);
+  const cleanup = await cleanupPrivateModerationPilot(db, f.moderation); assert.equal(cleanup.messages, 1); assert.equal(cleanup.reportRemoved, 1);
+  assert.equal(cleanup.receiptsRemoved, 0); assert.equal((await cleanupPrivateModerationPilot(db, f.moderation)).removed, 0);
+  assert.equal((await db.collection('serverOperations').where('shoutId', '==', state.shoutId).get()).size, 5);
+  assert((await f.original.get()).exists); assert((await f.pending.get()).exists);
+});
+test('moderator role drift or modified digest prevents all moderation pilot content writes', { skip: !enabled }, async t => {
+  const f = await moderationFixture(t);
+  await assert.rejects(seedPrivateModerationPilot(db, { ...f.moderation, reportKey: 'changed' }), /digest/);
+  await db.doc(`accountRoles/${f.moderator.uid}`).update({ level: 1 });
+  await assert.rejects(seedPrivateModerationPilot(db, f.moderation), /role-drift/);
+  assert.equal((await db.doc(`shouts/${f.state.shoutId}`).get()).exists, false);
+  assert.equal((await db.doc(`privateReplyReports/${f.state.reportId}`).get()).exists, false);
+});
+test('moderation pilot cleanup preserves report, root and control conversation when foreign descendants appear', { skip: !enabled }, async t => {
+  const f = await moderationFixture(t); await seedPrivateModerationPilot(db, f.moderation); await moderate(f);
+  await db.doc(`shouts/${f.state.shoutId}/comments/foreign`).create({ authorId: 'unrelated' });
+  await assert.rejects(cleanupPrivateModerationPilot(db, f.moderation), /foreign-descendant/);
+  const state = await privateModerationPilotStatus(db, f.moderation); assert(state.sourcePresent); assert(state.continuationPreserved); assert(state.decisionConfirmed);
 });

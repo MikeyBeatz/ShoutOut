@@ -729,6 +729,80 @@ obě klientské cesty, audit, úklid nového typu potvrzení a teprve potom Rule
 Seskupená hlášení, chybějící/archivované cíle, ostatní rozhodnutí a sankce
 zůstávají samostatnou navazující prací; tento základ řeší jedno živé hlášení.
 
+<a id="moderation-private-dev-proposal"></a>
+
+### Schválený přechod soukromé moderace do DEV
+
+Vlastník 23. listopadu schválil celý navazující úsek: wrapper, obě klientské
+cesty skrytí bez postihu, zachování původního požadavku/poznámky při nejasném
+výsledku, testy, dokumentaci, push/CI a následný DEV pilot. Nový endpoint
+removeReportedPrivateReply: europe-west3, min 0 / max 1, concurrency 1,
+256 MiB, 15 s, stávající Auth/App Check. Aktualizace cleanupOperationReceipts
+zahrne již připravený typ potvrzení, bez změny prostředků a minutového plánu.
+
+Jeden přesný zdroj s úplným CI připraví wrapper i DEV web; nasadit nejprve
+endpoint/úklid, potom web s DEV přepínačem serverPrivateReportRemoval.
+Produkční konfigurace zůstane vypnutá. Poznámka a rozhodnutí se po nejasné
+odpovědi v otevřené relaci nesmějí změnit pod novým požadavkem. Obě obrazovky
+musí nabídnout bezpečné opakování bez následného přímého update hlášení.
+Neočekávaná skupina více starých soukromých hlášení se odmítne bez změn;
+kanonická soukromá zpráva má jediného příjemce a deterministické ID hlášení.
+
+Rules jsou nejprve jen kandidát v tools/rules/private_report_removal_candidate.mjs:
+při existujícím managed feed control uzavřít přímé delete soukromé zprávy všem
+rolím a přímé deklarování contentRemoved u soukromého hlášení. Stávající
+čtení, approve/escalate/resolve/sanction a nespravované prostředí zachovat.
+Teprve po pozitivní kompatibilitě klienta změnit vydávaný zdroj, samostatně
+otestovat a získat úplné CI před nasazením Rules do shoutout-dev-46c81.
+To není dokončení celé moderační autority: ostatní rozhodnutí mají další bránu.
+
+Pilot: jeden nový 24h Shout a dvě zprávy mezi Bright_Otter_182/TestBusiness,
+jedno hlášení přijaté zprávy a jedno odstranění přes TestModerator. Samostatný
+manifest nesmí obnovit předchozí cleaned pilot. Původní zdroje/žádost, role,
+generace a scope chrání čerstvá inventura a digest. Plánovací/čtecí operace
+nevytvářejí obsah; mutace vyžadují čistý přesný zdroj a úplné CI. Nástroj
+nevytváří moderátorské potvrzení sám: živá akceptace vyžaduje skutečného klienta.
+Kontrolní zpráva, snapshot hlášení a audit se před úklidem ověří, pak se
+odstraní pouze fixture přes společný indexový writer. Potvrzení zůstanou +7 dní,
+kvóty se neresetují, Auth účty se nemění. Ruční průchod až na konci podle
+dostupnosti prohlížeče. Žádná nová role, sankce, kvóta, retence, služba,
+Scheduler ani produkční/main změna.
+
+Návrat: před uzavřením Rules lze vrátit dosavadní DEV web; po uzavření musí
+zůstat klient se serverovou cestou, nebo se nejprve řízeně vrátit původní
+Rules. Samotný návrat starého raw-delete webu při uzavřených Rules není
+kompatibilní. Serverové potvrzení ani audit se návratem nemění.
+
+Před uzavřením úseku se ze zbývající moderation-decision váhy 1000 vyčleňuje
+25 klient/wrapper/pilot, 25 ověření, 25 kompletní DEV přechod a 25 živá
+akceptace/úklid. Zbytek 900 zůstává ostatním rozhodnutím a sankcím; dříve
+hotové váhy a celková váha milníku zůstávají stejné.
+
+**Příprava přechodu ověřená lokálně:** session gateway drží původní note/klíč
+i po zavření dialogu, obě obrazovky používají stejnou serverovou operaci;
+nejasný výsledek blokuje jiné rozhodnutí do bezpečného opakování. DEV přepínač
+je v připraveném zdroji true, produkční chybějící přepínač znamená false.
+Wrapper i kontrolovaný pilotní nástroj jsou připravené; žádné živé vytvoření
+obsahu nebo nové nasazení tím ještě není doložené.
+
+500 Flutter testů, následná cílená sada 30 testů a analyze bez nálezů;
+107 nástrojových testů, lint, 174 serverových unit testů (598 integračních
+bez emulátoru přeskočeno) a 46 cílených emulátorových testů prošly.
+Zahrnují tři nové pilotní regrese a šest případů kandidáta Rules, jejich
+kompilaci, role 1–6, podvržené audity, transakční batch, snapshot/čítače,
+čtení/fronty, chybějící rodič, approve/escalate/resolve a nespravovaný režim.
+Kandidát je prototyp pro dvě uvedené zápisové cesty, nikoli úplný audit všech
+dosavadních oprávnění. Před veřejným vydáním zůstává úplná moderační brána.
+Důkazy: test/private_report_removal_test.dart,
+functions/private_reply_deletion_pilot.integration.test.js,
+tools/rules/private_report_removal.integration.test.mjs a místní
+build/private-moderation-dev-{emulator-final,flutter-final,analyze-final,client-final,tools,functions}.log.
+Úplné CI následuje po společném pushi. Cílený kontrolní modul pro vývojový
+pilot je tools/private_report_removal_pilot.mjs; nevyrábí pozitivní UI důkaz.
+Browser host je nedostupný a Windows ovládání navíc automaticky skončilo,
+protože nešlo spolehlivě určit URL otevřené karty. Živá kompatibilita zatím
+není ověřená; žádné další UI vstupy po tomto zastavení neproběhly.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

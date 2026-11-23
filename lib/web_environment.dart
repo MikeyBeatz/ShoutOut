@@ -98,6 +98,15 @@ class WebEnvironment {
     if (serverCommentDeletion && key == null) {
       throw StateError('Server comment deletion requires web App Check.');
     }
+    final privateReportRemoval = json['serverPrivateReportRemoval'];
+    if (json.containsKey('serverPrivateReportRemoval') &&
+        privateReportRemoval is! bool) {
+      throw StateError('serverPrivateReportRemoval must be a boolean.');
+    }
+    serverPrivateReportRemoval = privateReportRemoval == true;
+    if (serverPrivateReportRemoval && key == null) {
+      throw StateError('Server private report removal requires web App Check.');
+    }
     final privateDeletion = json['serverPrivateReplyDeletion'];
     if (json.containsKey('serverPrivateReplyDeletion') &&
         privateDeletion is! bool) {
@@ -303,6 +312,7 @@ class WebEnvironment {
   late final bool serverArchivedReportLookup;
   late final bool serverCommentDeletion;
   late final bool serverPrivateReplyDeletion;
+  late final bool serverPrivateReportRemoval;
   late final bool serverShoutDeletion;
   late final bool serverAccountDeletionPreparation;
   late final bool serverAccountDeletionFinalization;

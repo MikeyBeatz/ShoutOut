@@ -26,8 +26,23 @@ always select full checks; a green lightweight run is not release build proof.
 `npm --prefix tools run test:private-deletion` runs the prepared own-private-reply
 deletion operation and a derived Rules prototype in the isolated Firestore
 emulator. The candidate generator rejects unexpected source drift; it does not
-write or deploy firestore.rules. The client switch stays false and there is no
-new callable export in this slice. [Scope and evidence](../docs/MVP_SERVER_PLAN.md#private-deletion-local).
+write or deploy firestore.rules. The client switch stayed false and there was no
+new callable export in that historical local slice. Own deletion is now in DEV;
+[current acceptance](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete).
+The same test command now includes reported private removal, its controlled
+pilot and derived Rules candidate. [Current preparation and DEV gate](../docs/MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
+
+`node tools/private_report_removal_pilot.mjs plan|status|seed|cleanup` reuses
+the bounded one-Shout/two-message fixture and adds exactly one report.
+Use an independent `--state docs/local/private-report-moderation-pilot.json`;
+never reuse the cleaned deletion manifest. All commands require explicit
+`--project shoutout-dev-46c81`; plan also requires `--actors` pointing to a local
+JSON with projectId, actors and moderator (UID/nickname only). Mutations require
+`--confirm-project`, `--ci-run`, `--approved-digest` and `--clients-ready yes`
+or `--clients-complete yes`. The operator validates clean exact full CI before
+opening the database, preserves existing data/roles/generations and refuses
+cleanup without the actual moderator decision receipt. It never submits that
+decision itself and never resets quotas or deletes seven-day receipts.
 
 Local, isolated [console-warning diagnostics](diagnostics/README.md) reproduce
 Flutter font warnings and inspect reCAPTCHA/CSP without modifying the app,

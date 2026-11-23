@@ -8,6 +8,15 @@ import { test } from 'node:test';
 import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
+
+test('private report removal has a strict independent App Check flag and remains off in production', () => {
+  assert.equal(actualDev.serverPrivateReportRemoval, true); assert.notEqual(loadConfig('prod').serverPrivateReportRemoval, true);
+  const config = { ...actualDev }; delete config.serverPrivateReportRemoval;
+  assert.doesNotThrow(() => validateConfig(config, 'dev'));
+  for (const invalid of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...config, serverPrivateReportRemoval: invalid }, 'dev'));
+  const disabled = { ...config, ...Object.fromEntries(Object.keys(config).filter(k => k.startsWith('server')).map(k => [k, false])) }; delete disabled.appCheckSiteKey;
+  assert.doesNotThrow(() => validateConfig(disabled, 'dev')); assert.throws(() => validateConfig({ ...disabled, serverPrivateReportRemoval: true }, 'dev'));
+});
 test('private reply deletion activates only DEV and validates its independent App Check gate', () => {
   assert.equal(actualDev.serverPrivateReplyDeletion, true);
   assert.notEqual(loadConfig('prod').serverPrivateReplyDeletion, true);
@@ -47,7 +56,7 @@ test('B4 delta client is enabled only in DEV and requires all parent-counter gat
 });
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
+const dev = { ...actualDev, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
 
 test('B3 is enabled in DEV and requires the DEV spatial/read pair', () => {
   assert.equal(actualDev.serverUnreadFeed, true);

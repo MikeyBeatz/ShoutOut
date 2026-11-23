@@ -257,12 +257,32 @@ class _StaffReportCard extends StatelessWidget {
     String note,
   ) async {
     final representative = group.representative;
+    if (group.category == _StaffReportCategory.privateReply &&
+        _pendingPrivateReportRemoval(representative.id) != null &&
+        action != 'remove') {
+      throw FirebaseFunctionsException(
+        code: 'already-exists',
+        message: 'Retry the original pending decision first.',
+      );
+    }
     if (action == 'approve') return _approveReports(note);
     if (action == 'escalate') return _escalateReports(note);
 
     if (group.category == _StaffReportCategory.privateReply) {
       final data = representative.data();
       if (action == 'remove') {
+        if (_useServerPrivateReportRemoval) {
+          // Canonical private reports have one recipient and one deterministic ID.
+          // Never resolve extra legacy rows separately after a server decision.
+          if (group.reports.length != 1) {
+            throw FirebaseFunctionsException(
+              code: 'failed-precondition',
+              message: 'Ambiguous private report group.',
+            );
+          }
+          await _removeReportedPrivateReply(representative.id, note: note);
+          return;
+        }
         await FirebaseFirestore.instance
             .collection('shouts')
             .doc(data['shoutId'] as String)
@@ -413,6 +433,21 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
   bool _saving = false;
   String? _error;
 
+  PrivateReportRemovalRequest? get _pendingRemoval =>
+      widget.group.category == _StaffReportCategory.privateReply
+      ? _pendingPrivateReportRemoval(widget.group.representative.id)
+      : null;
+
+  @override
+  void initState() {
+    super.initState();
+    final pending = _pendingRemoval;
+    if (pending != null) {
+      _decision = 'remove';
+      _noteController.text = pending.note;
+    }
+  }
+
   List<_ReportDecisionOption> get _options => [
     const _ReportDecisionOption('approve', 'Bez postihu – obsah je v pořádku'),
     if (!widget.group.isEscalated)
@@ -440,15 +475,19 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
   Future<void> _submit() async {
     final decision = _decision;
     if (decision == null || _saving) return;
+    final actor = FirebaseAuth.instance.currentUser?.uid;
+    if (actor == null) return;
     setState(() {
       _saving = true;
       _error = null;
     });
     try {
       await widget.onDecision(decision, _noteController.text.trim());
-      if (mounted) widget.onCompleted();
+      if (mounted && FirebaseAuth.instance.currentUser?.uid == actor) {
+        widget.onCompleted();
+      }
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || FirebaseAuth.instance.currentUser?.uid != actor) return;
       setState(() {
         _saving = false;
         _error = _serverWriteFailureText(
@@ -476,14 +515,14 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
               ),
             )
             .toList(),
-        onChanged: _saving
+        onChanged: _saving || _pendingRemoval != null
             ? null
             : (value) => setState(() => _decision = value),
       ),
       const SizedBox(height: 10),
       TextField(
         controller: _noteController,
-        enabled: !_saving,
+        enabled: !_saving && _pendingRemoval == null,
         maxLength: 500,
         maxLines: 2,
         decoration: const InputDecoration(

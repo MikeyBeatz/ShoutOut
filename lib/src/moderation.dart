@@ -337,6 +337,11 @@ class _PrivateReplyReportList extends StatelessWidget {
             .limit(_moderationPageSize)
             .liveSnapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(tr(context, 'Hlášení se nepodařilo načíst.')),
+            );
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -350,6 +355,7 @@ class _PrivateReplyReportList extends StatelessWidget {
             itemBuilder: (context, index) {
               final report = reports[index];
               final data = report.data();
+              final actor = FirebaseAuth.instance.currentUser?.uid;
               return Card(
                 color: const Color(0xFFFFF4E5),
                 child: ListTile(
@@ -358,9 +364,48 @@ class _PrivateReplyReportList extends StatelessWidget {
                   subtitle: Text(
                     '${tr(context, 'Soukromá odpověď')}: ${data['text'] ?? ''}',
                   ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (action) async {
+                  trailing: PrivateReportActionMenu(
+                    key: ValueKey((actor, report.id)),
+                    isCurrent: () =>
+                        FirebaseAuth.instance.currentUser?.uid == actor,
+                    hasPendingRemoval: () =>
+                        _pendingPrivateReportRemoval(report.id) != null,
+                    resolveLabel: tr(context, 'Označit jako vyřešené'),
+                    removeLabel: tr(context, 'Skrýt obsah bez postihu'),
+                    onError: (error) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            _serverWriteFailureText(
+                              context,
+                              error,
+                              fallback: 'Rozhodnutí se nepodařilo uložit.',
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    onDecision: (action) async {
+                      if (actor == null ||
+                          FirebaseAuth.instance.currentUser?.uid != actor) {
+                        throw FirebaseFunctionsException(
+                          code: 'unauthenticated',
+                          message: 'The signed-in account changed.',
+                        );
+                      }
+                      if (_pendingPrivateReportRemoval(report.id) != null &&
+                          action != 'remove') {
+                        throw FirebaseFunctionsException(
+                          code: 'already-exists',
+                          message: 'Retry the original pending decision first.',
+                        );
+                      }
                       if (action == 'remove') {
+                        if (_useServerPrivateReportRemoval) {
+                          await _removeReportedPrivateReply(report.id);
+                          return;
+                        }
                         await FirebaseFirestore.instance
                             .collection('shouts')
                             .doc(data['shoutId'] as String)
@@ -373,16 +418,6 @@ class _PrivateReplyReportList extends StatelessWidget {
                         'resolvedAt': FieldValue.serverTimestamp(),
                       });
                     },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'resolve',
-                        child: Text(tr(context, 'Označit jako vyřešené')),
-                      ),
-                      PopupMenuItem(
-                        value: 'remove',
-                        child: Text(tr(context, 'Odstranit z veřejnosti')),
-                      ),
-                    ],
                   ),
                 ),
               );

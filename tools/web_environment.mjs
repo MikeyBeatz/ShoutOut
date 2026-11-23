@@ -74,6 +74,12 @@ export function validateConfig(config, environment) {
   if (config.serverCommentDeletion === true && !config.appCheckSiteKey) {
     throw new Error('Server comment deletion requires web App Check.');
   }
+  if (Object.hasOwn(config, 'serverPrivateReportRemoval') && typeof config.serverPrivateReportRemoval !== 'boolean') {
+    throw new Error('serverPrivateReportRemoval must be a boolean.');
+  }
+  if (config.serverPrivateReportRemoval === true && !config.appCheckSiteKey) {
+    throw new Error('Server private report removal requires web App Check.');
+  }
   if (Object.hasOwn(config, 'serverPrivateReplyDeletion') && typeof config.serverPrivateReplyDeletion !== 'boolean') {
     throw new Error('serverPrivateReplyDeletion must be a boolean.');
   }

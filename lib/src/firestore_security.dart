@@ -247,6 +247,44 @@ final _commentDeletionGateway = CommentDeletionGateway(
   },
 );
 
+bool get _useServerPrivateReportRemoval =>
+    kIsWeb && WebEnvironment.current.serverPrivateReportRemoval;
+
+final _privateReportRemovalGateway = PrivateReportRemovalGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) => _serverContentOperations.call(
+    attempt: request.timedAttempt,
+    userId: request.userId,
+    operation: 'removeReportedPrivateReply',
+    payload: request.toPayload(),
+  ),
+);
+
+PrivateReportRemovalRequest? _pendingPrivateReportRemoval(String reportId) {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  return uid == null || !_useServerPrivateReportRemoval
+      ? null
+      : _privateReportRemovalGateway.pending(uid, reportId);
+}
+
+Future<void> _removeReportedPrivateReply(
+  String reportId, {
+  String? note,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) {
+    throw FirebaseFunctionsException(
+      code: 'unauthenticated',
+      message: 'The signed-in account changed.',
+    );
+  }
+  await _privateReportRemovalGateway.remove(
+    userId: uid,
+    reportId: reportId,
+    note: note ?? _pendingPrivateReportRemoval(reportId)?.note ?? '',
+  );
+}
+
 final _privateReplyDeletionGateway = PrivateReplyDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) => _serverContentOperations.call(

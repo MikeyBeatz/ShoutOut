@@ -31,6 +31,8 @@ function slots(plan) {
     { uid: a.uid, id: digest(`${a.uid}\ncreatePrivateReply\n${plan.keys[2]}`), data: { expectedUserId: a.uid, idempotencyKey: plan.keys[2], shoutId,
       targetType: 'privateReply', parentPrivateReplyId: firstId, text: 'MVP private deletion continuation' } }];
 }
+// Share the bounded fixture identity/fence with the independent moderation pilot.
+export { slots as privateDeletionPilotSlots, fence as privateDeletionPilotFence };
 export function validatePrivateDeletionPilot(db, plan) {
   target(db); const { digest: approved, ...data } = plan;
   assert.equal(approved, hash(data), 'private-pilot-digest'); assert.equal(plan.projectId, db.projectId);

@@ -405,6 +405,7 @@ void main() {
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
             ..['serverPrivateReplyDeletion'] = false
+            ..['serverPrivateReportRemoval'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false
@@ -451,6 +452,7 @@ void main() {
             ..remove('appCheckSiteKey')
             ..['serverContentReports'] = false
             ..['serverPrivateReplyDeletion'] = false
+            ..['serverPrivateReportRemoval'] = false
             ..['serverCommentDeletion'] = false
             ..['serverShoutDeletion'] = false
             ..['serverArchivedReportLookup'] = false

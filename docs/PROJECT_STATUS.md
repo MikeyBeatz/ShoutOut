@@ -39,10 +39,19 @@ emulátor jsou přeskočené, nikoli dodatečně započítané. První zásah 11
 reads / 3 writes, opakování 9 / 0. Zdroj **f1e32e9** má
 [success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001),
 včetně nové moderace, ostatních regresí a webového buildu; přesný čistý zdroj ověřený.
-Nový modul není v runtime balíčcích; wrapper, živý klient, Rules i nasazení
-se v tomto schváleném místním úseku nemění. Stávající přímá staff cesta je
-proto stále otevřená. Další obsahová práce: sladit serverové rozhodování,
-klienta a zbývající autoritu; podstatné nové zapojení předložit ke schválení.
+Původní checkpoint f1e32e9 neobsahoval wrapper ani klientské zapojení.
+V dosud nasazeném DEV zůstává přímá staff cesta otevřená; nové runtime
+zapojení je teprve v navazující přípravě níže.
+**Nyní výslovně schválený celý navazující úsek:** [klient, wrapper a DEV přechod](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
+Obě klientské cesty s bezpečným opakováním, wrapper, omezený pilot a kandidát
+Rules jsou připravené. 500 Flutter testů, cílených 30, analyze bez nálezů,
+107 nástrojových testů, lint, 174 serverových unit a 46 cílených emulátorových
+testů prošly; úplné CI zatím čeká. Žádné nové nasazení ani živá fixture zatím nejsou ověřené; nejprve
+testy/společné úplné CI, potom endpoint/úklid a web, po pozitivní kompatibilitě
+samostatné CI a uzavření Rules. Ruční kontrola až na konci. Ostatní
+moderační rozhodnutí/sankce zůstávají navazující prací.
+Ovládání Windows bylo automaticky zastavené kvůli nespolehlivému určení URL;
+browser host je současně nedostupný. Pozitivní UI důkaz to nenahrazuje.
 Vlastní mazání tím znovu neotevírat. Odložený pohybový test ani jeho úklid
 se tím neuzavírají.
 Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi

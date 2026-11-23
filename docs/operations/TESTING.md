@@ -14,7 +14,11 @@ krok, kořenové/vydané Rules se tím nepřepisují. [Výsledky a hranice](../M
 Od 23. listopadu stejný krok zahrnuje i [místní atomickou soukromou moderaci](../MVP_SERVER_PLAN.md#moderation-private-local):
 functions/remove_reported_private_reply.integration.test.js, oprávnění/regiony,
 dva moderátoři, rollback, opakování a souběh s účtovou archivací. Nové jádro
-zatím není v žádném runtime wrapperu; úspěch testu neznamená živé vynucení.
+v původním místním checkpointu nebylo v runtime wrapperu. Navazující
+[schválený DEV přechod](../MVP_SERVER_PLAN.md#moderation-private-dev-proposal)
+přidává wrapper, klientské regrese, tři testy pilotu a šest testů nového
+Rules kandidáta; celkem 46 cílených emulátorových případů. Úspěch přípravy
+neznamená živé vynucení. Vydávané Rules se mění až po klientské kompatibilitě.
 
 Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
 CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný
