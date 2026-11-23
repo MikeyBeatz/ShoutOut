@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,63 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,65 %** — vážené dokončení podúseků
 
-Hotové úseky: **195/252**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **196/252**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -155,9 +155,12 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    neaktivní klient a testy hotové; 18 nových emulátorových, 15 purge, 509 Flutter,
    108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
    [úspěšné úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854),
-   včetně 142 retenčních testů a webového buildu. Následuje konkrétní návrh DEV
-   přechodu, který již vlastník schválil a je [v přípravě](MVP_SERVER_PLAN.md#moderation-basic-dev-proposal).
-   DEV/živá akceptace se zatím nezapočítávají. Ostatní moderační cesty
+   včetně 142 retenčních testů a webového buildu.
+   **Navazující DEV je nyní nasazený:** [výsledky a čekající pilot](MVP_SERVER_PLAN.md#moderation-basic-dev-results).
+   44e07a5 / úplné CI 45196844737 success; web bf962d314d4380b7 a čtyři
+   cílené Functions ověřené. Zbývá TestModerator → seed → tři rozhodnutí →
+   TestAdmin dokončení → úklid. Pilot je zatím pouze planned, žádná nová data.
+   Nasazení je započtené, živá akceptace zůstává otevřená. Ostatní moderační cesty
    ještě brání úplné Rules uzávěře.
    **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
    App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI

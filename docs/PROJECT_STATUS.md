@@ -6,15 +6,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní schválený DEV přechod:** [společná moderační rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-dev-proposal).
-Připravuje se wrapper, řízený pilot a DEV aktivace; dosud nic nenasazeno ani
-neseedováno. V pracovním zdroji je příznak zapnutý pouze pro budoucí DEV build;
-produkční konfigurace, Rules, indexy a aktuálně vydaný web zůstávají zachované.
-Lokálně prošlo všech 20 rozhodovacích/pilotních emulátorových případů,
-32 klientských a 109 nástrojových testů, analyze bez nálezů a lint. Předchozí
-neúspěšné laboratorní pokusy byly opravené (inicializační revize fixture,
-odlišení databázového/transaction query readeru a nové konfigurační předpoklady).
-Následuje společný commit/push a úplné CI přesného zdroje.
+**Nyní nasazeno v DEV, čeká pouze klientský pilot:** [společná moderační rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-dev-results).
+Zdroj **44e07a5d18570ef2fc416d8387ed459bd55dd853** / [úplné CI 45196844737 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45196844737).
+Hosting **bf962d314d4380b7**, serverContentReportDecisions true jen DEV.
+Nová decideContentReports **00001-yak**; cleanup **00007-hoz**, account-created
+**00015-viw**, recovery **00015-huw**, prostředky ověřené / 100 % provozu.
+Zdrojové archivy všech čtyř Functions odpovídají balíčkům, 67 app souborů
+a 8 HTTP kontrol odpovídá release; chybějící Auth/App Check je odmítnut 401.
+Ostatních 19 Functions, oba plánovače, Rules, indexová konfigurace, všech 91
+původních zdrojů a pending žádost zachované; žádné rozpracované účtové/purge joby.
+Pilot je pouze **planned**, 0 nového obsahu. Jeho jediný manifest je v čisté
+release kopii build/report-decisions-release-44e07a5/docs/local/content-report-decision-pilot.json,
+digest **90be6018…57e30d02**. Mutace spouštět z této přesné kopie s úplným CI,
+nikoli z následného dokumentačního commitu. Čeká přihlášení TestModerator,
+potom teprve vymezený seed, 3 rozhodnutí, TestAdmin dokončení a úklid.
+Prohlížeč nepoužívat bez nového ověření dostupnosti; předchozí ovládání
+zastavila kontrola neověřené URL. Produkce/main/Auth beze změny.
 
 **Právě uzavřený místní úsek:** [společná bezpostihová rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-local)
 pro Shouty, komentáře a soukromé odpovědi, včetně neaktivního klienta a testů.
@@ -33,7 +40,7 @@ průchodu a webového buildu. Tehdejší runtime jádro bylo mimo balíček Func
 aktuální schválená příprava wrapperu a aktivace je popsaná výše.
 **Navazující DEV přechod už vlastník schválil, viz výše;**
 veřejné odstranění a sankce ještě brání úplnému uzavření moderačních Rules.
-Nasazení ani živá akceptace tohoto místního úseku zatím neproběhly.
+Tento starší místní checkpoint sám nasazení nedokládal; navazující DEV výsledek je výše.
 
 **Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
 samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;

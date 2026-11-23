@@ -1,15 +1,16 @@
 # Datový model Firestore
 
-**Společná rozhodnutí – místní kontrakt a schválená DEV příprava:**
+**Společná rozhodnutí – kontrakt a DEV zapojení:**
 [kontrakt a výsledky](../MVP_SERVER_PLAN.md#moderation-basic-local-results).
 decideContentReports používá stávající reports/commentReports/privateReplyReports
 a moderationClearances, bez nové kolekce. Technická sedmidenní receipt nese
 kanonická reportIds, targetType/shoutId/targetId, authorId, fingerprint,
 requiredRoleLevel a result(decision,count), bez obsahu/poznámky. Dokončení
 doplňuje resolvedBy/decisionOperationId; předání escalationOperationId
-vedle dosavadních escalatedBy/escalatedAt. Místně připravený konečný účtový
-purge odstraňuje vazby resolvedBy/escalatedBy po původní retenční lhůtě.
-Bez živých dat, exportu endpointu nebo změny vydaných Rules.
+vedle dosavadních escalatedBy/escalatedAt. Konečný účtový purge odstraňuje
+vazby resolvedBy/escalatedBy po původní retenční lhůtě. Callable, klientské
+zapojení i úklid jsou [nasazené v DEV](../MVP_SERVER_PLAN.md#moderation-basic-dev-results);
+pilot je zatím pouze plánovaný, vydané Rules se tím neměnily.
 
 Soukromá moderace má [uzavřený DEV přechod včetně Rules a pilotu](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
 removeReportedPrivateReply atomicky odstraní jeden živý kořen zprávy a doplní

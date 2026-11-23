@@ -1,6 +1,16 @@
 # Vývojový a produkční web
 
-**Aktuální DEV soukromá moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
+**Aktuální DEV společná moderace, 23. listopadu:** [nasazení a čekající pilot](../MVP_SERVER_PLAN.md#moderation-basic-dev-results).
+Zdroj 44e07a5d18570ef2fc416d8387ed459bd55dd853 / úplné CI 45196844737 success,
+Hosting bf962d314d4380b7, serverContentReportDecisions true jen DEV.
+decideContentReports 00001-yak, cleanup 00007-hoz, account-created 00015-viw,
+recovery 00015-huw; prostředky, zdroje a 100 % provozu ověřené. 67 app souborů
+a 8 HTTP odpovědí shodných, 401 bez identity/App Check. Celkem 23 Functions;
+ostatních 19, oba plánovače, Rules, 91 původních zdrojů a pending žádost zachované.
+Pilot zatím planned / bez nových dat; čeká skutečný TestModerator/Admin průchod.
+Návratový web b5703cec19978454, produkce/main/Auth beze změny.
+
+**Předchozí DEV soukromá moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
 Zdroj **0fa2774be634db27013e37ca511e8523c6a9f7c7**, success úplné CI **45147594322**.
 Hosting **b5703cec19978454**, serverPrivateReportRemoval true pouze DEV;
 nová callable **removereportedprivatereply-00001-zec**, cleanup **00006-lum**,

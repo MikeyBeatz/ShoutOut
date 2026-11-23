@@ -1166,6 +1166,63 @@ od těchto pokusů. Čtecí DEV inventura potvrdila STANDARD, 22 Functions,
 2 plánovače, 91 zdrojů a 1 pending žádost; accountDeletionJobs/accountPurgeJobs
 jsou prázdné. Původní Hosting a Rules zachované, 0 živých zápisů.
 
+<a id="moderation-basic-dev-results"></a>
+
+### DEV nasazení ověřené, klientský pilot čeká
+
+Zdroj **44e07a5d18570ef2fc416d8387ed459bd55dd853** má
+[úspěšné úplné CI 45196844737](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45196844737),
+dokončené 23. listopadu ve 15:58 SEČ. Prošlo 509 Flutter, 109 nástrojových,
+178 serverových unit, 20 rozhodovacích/pilotních emulátorových a 142 retenčních
+případů, ostatní browserové/Rules/serverové regrese, analyze, lint a webový build.
+620 integračních případů je v samostatném unit běhu přeskočených; překrývající
+sady se nesčítají na počet unikátních testů. Důkaz build/report-decisions-dev-ci.log.
+
+Ze samostatné čisté kopie uvedeného SHA byly cíleně nasazené pouze:
+
+| Function | Ověřená revize | Prostředky |
+|---|---|---|
+| decideContentReports | decidecontentreports-00001-yak | europe-west3, min 0 / max 1, concurrency 1, 256 MiB, 15 s |
+| cleanupOperationReceipts | cleanupoperationreceipts-00007-hoz | původní 0–1 / concurrency 1 / 256 MiB / 60 s |
+| accountDeletionRequestCreatedDev | accountdeletionrequestcreateddev-00015-viw | původní 0–1 / concurrency 1 / 256 MiB / 60 s |
+| resumeAccountDeletionJobsDev | resumeaccountdeletionjobsdev-00015-huw | původní 0–1 / concurrency 1 / 256 MiB / 60 s |
+
+Všechny ACTIVE, Node.js 22 a 100 % provozu na nových revizích; obsah jejich
+skutečných GCS zdrojových archivů přesně odpovídá připraveným balíčkům
+(66/66/48/48 souborů). Následně vydán DEV Hosting **bf962d314d4380b7**,
+serverContentReportDecisions true, produkční konfigurace beze změny.
+Všech 67 aplikačních souborů odpovídá gzip hashům vydané verze a 8 HTTP
+odpovědí obou DEV domén má přesnou shodu bajtů s releasem. Dva soubory
+__/firebase/init.js/init.json generuje Firebase a jejich hashe zůstaly
+shodné s předchozím vydáním; místní .last_build_id je podle Hosting ignore
+vyloučený. První kontrola počtu souborů tuto odlišnost nezohlednila; po
+jejím přesném rozlišení ověření prošlo, žádná změna app buildu nebyla potřebná.
+Nový endpoint odmítl požadavek bez identity/App Check HTTP 401. Platný
+klientský moderační průchod se tím ještě netvrdí.
+
+Ostatních **19 Functions**, oba minutové plánovače včetně retry/target
+parametrů, Rules **3de8f7d8-6658-4b24-951f-043eac8de297**, feed 12/news 6/active,
+91 původních zdrojů s jejich updateTime a 1 pending žádost zachované.
+Žádné existující accountDeletionJobs/accountPurgeJobs; nové fáze nikoho
+ručně nemigrovaly. Žádná Auth mutace, produkce/main/tagy či nové indexy.
+Důkazy build/report-decisions-{cloud-before,cloud-after,release-proof,source-proof}.json
+a report-decisions-{functions-deploy,hosting-deploy}.log.
+
+**Zbývající pilot:** nezávislý manifest z čtecího plánování má digest
+90be601822323c6e235336f200730e6e04112dd85e235d56a549296957e30d02, phase **planned**.
+Jeho kanonický soubor je nyní v čisté release kopii
+build/report-decisions-release-44e07a5/docs/local/content-report-decision-pilot.json;
+přesun zachoval bajty. Operátor, závislosti i jediný manifest jsou připravené
+tam, aby nový dokumentační commit neobcházel kontrolu přesného úplného CI.
+Mutace tímto souhlasem zůstávají schválené, ale obsah se založí až po potvrzení
+dostupného klienta TestModerator. Později ověřit čerstvost plánu a zastavit
+při driftu; dosud **žádný nový Shout/komentář/zpráva/hlášení nevznikl**.
+Po 3 rozhodnutích TestModerator a dokončení TestAdmin doložit serverové
+receipts/platný Auth a App Check, provést schválený úklid a teprve pak
+uzavřít moderation-basic-accept. Staré cleaned piloty ani odložený feedový
+test a jeho původní data tím znovu neotevírat. Návratový web b5703cec19978454;
+nové účtové scrub fáze a již vzniklá technická potvrzení při návratu zachovat.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,
