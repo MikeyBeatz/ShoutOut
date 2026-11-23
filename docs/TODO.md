@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,65 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,67 %** — vážené dokončení podúseků
 
-Hotové úseky: **196/252**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **197/252**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -156,15 +156,14 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
    [úspěšné úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854),
    včetně 142 retenčních testů a webového buildu.
-   **Navazující DEV je nyní nasazený:** [výsledky a čekající pilot](MVP_SERVER_PLAN.md#moderation-basic-dev-results).
-   44e07a5 / úplné CI 45196844737 success; web bf962d314d4380b7 a čtyři
-   cílené Functions ověřené. Zbývá TestModerator → seed → tři rozhodnutí →
-   TestAdmin dokončení → úklid. Pilot už je seeded; schválení Shoutu a předání
-   seniorovi potvrzené správným TestModerator i serverem. [Resolve volba](MVP_SERVER_PLAN.md#moderation-basic-choice-fix)
-   opravená v DEV webu 565880d4664da7b2 / 33853a9 / úplné CI 45202922410 success,
-   bez nového kreditu. Zbývají dvě resolve akce a úklid, nevytvářet další fixture.
-   Nasazení je započtené, živá akceptace zůstává otevřená. Ostatní moderační cesty
-   ještě brání úplné Rules uzávěře.
+   **Navazující DEV je uzavřený:** [akceptace a úklid](MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
+   Server 44e07a5 / úplné CI 45196844737 success; opravený web 33853a9 /
+   úplné CI 45202922410 success, Hosting 565880d4664da7b2. Všechny 4 živé
+   akce správných TestModerator/TestAdmin mají audit, HTTP 200 a platný
+   Auth/App Check. Jediný pilot je cleaned; 10 receipts a 23 rate dokumentů,
+   91 původních zdrojů/pending žádost zachované. Další konkrétní rozsah:
+   veřejné odstranění, následně sankce a společný Rules cutover. Celý
+   moderační milník zůstává otevřený; cleaned fixture znovu nevytvářet.
    **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
    App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI
    45098775591 success. Oba účty prošly skutečným UI/callable mazáním s Auth

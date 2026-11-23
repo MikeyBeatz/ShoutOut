@@ -10,7 +10,8 @@ doplňuje resolvedBy/decisionOperationId; předání escalationOperationId
 vedle dosavadních escalatedBy/escalatedAt. Konečný účtový purge odstraňuje
 vazby resolvedBy/escalatedBy po původní retenční lhůtě. Callable, klientské
 zapojení i úklid jsou [nasazené v DEV](../MVP_SERVER_PLAN.md#moderation-basic-dev-results);
-pilot je zatím pouze plánovaný, vydané Rules se tím neměnily.
+pilot je [ověřený a uklizený](../MVP_SERVER_PLAN.md#moderation-basic-dev-complete),
+technická potvrzení zachovávají původních 7 dní. Vydané Rules se tím neměnily.
 
 Soukromá moderace má [uzavřený DEV přechod včetně Rules a pilotu](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
 removeReportedPrivateReply atomicky odstraní jeden živý kořen zprávy a doplní

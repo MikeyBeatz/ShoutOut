@@ -1280,6 +1280,54 @@ pilotu ponechat opravenou verzi. Čekají pouze resolve komentáře pod
 TestModerator a resolve eskalované soukromé odpovědi pod TestAdmin, potom
 ověření skutečných potvrzení a schválený úklid. Akceptace zůstává otevřená.
 
+<a id="moderation-basic-dev-complete"></a>
+
+### Společná rozhodnutí – DEV akceptace a úklid uzavřené
+
+Vlastník potvrdil všechny čtyři klientské akce. První dvě proběhly na webu
+44e07a5; zbývající dvě na opraveném 33853a9, server po celou dobu 44e07a5.
+Skutečné receipts a audity odpovídají přesně schváleným aktérům a cílům:
+
+| Akce | Skutečný aktér | Serverové potvrzení |
+|---|---|---|
+| approve Shoutu | TestModerator / it_moderator, úroveň 3 | fe7b8083…4db759a8 |
+| resolve komentáře | TestModerator / it_moderator, úroveň 3 | 1ed6518d…b0f7e84d |
+| escalate soukromé odpovědi | TestModerator / it_moderator, úroveň 3 | 1d78f995…15de078d |
+| resolve předané soukromé odpovědi | TestAdmin / it_admin, úroveň 5 | 152ad3c7…2457d2e7 |
+
+Všechny 4 POST vracejí HTTP 200, každé má spárované Auth a App Check VALID
+na revizi decidecontentreports-00001-yak. Obsah/metadata všech tří zdrojů
+zůstaly do úklidu beze změny včetně updateTime. Všechna hlášení byla resolved:
+contentApproved/noAction/noAction, správné resolvedBy a zachované
+escalatedBy/escalationOperationId; clearance patřila správnému moderátorovi.
+TestModerator scope zůstal global false, countries CZ a subdivisions CZ-42;
+zamítnutí jiné geografie je ověřené emulátorem, ne tímto pozitivním pilotem.
+Důkaz build/report-decisions-acceptance-before-cleanup.json.
+
+Následný schválený cleanup z čistého serverového SHA 44e07a5 a jeho úplného
+CI odstranil **pouze 1 nový Shout, 1 komentář, 1 soukromou odpověď,
+3 hlášení, 1 clearance a 2 příslušná oznámení** (9 dokumentů + indexový plán).
+Nezůstali žádní potomci ani cloudové read klíče této fixture u čtyř
+testovacích účtů; read cleanup našel 0 klíčů. Všech **10 technických potvrzení**
+zůstalo do původní +7denní lhůty bez změny obsahu nebo updateTime a všech
+**23 rate dokumentů** čtyř účtů bylo zachováno stejně. Žádný reset kvót,
+Auth mutace ani další seed. Jediný manifest s digestem 90be6018…57e30d02 je
+**cleaned**, nikdy znovu nepoužívat k seedování.
+
+Závěrečné ověření 23. listopadu v **16:42 SEČ** potvrdilo všech 91 původních
+Shoutů a jejich updateTime, původní pending žádost, feed 12/news 6/active,
+23 Functions včetně přesných revizí/zdrojů/prostředků, oba minutové plánovače,
+Rules 3de8f7d8-6658-4b24-951f-043eac8de297 a Hosting 565880d4664da7b2.
+Produkce, main, tagy, Auth účty, retence a indexová konfigurace beze změny.
+Podklady build/report-decisions-cleanup-{baseline,proof}.json,
+report-decisions-cloud-final.json a report-decisions-final-proof.json.
+
+Implementace, automatické ověření, DEV nasazení a živá akceptace **tohoto
+společného základního rozhodování** jsou uzavřené. Veřejné odstranění,
+sankce, jejich auditní atomické operace a společný Rules cutover zůstávají
+navazujícími úseky celého milníku; produkční start ani další live fixture
+se tím neschvalují. Odložený feedový test a jeho původní data zůstávají zachované.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

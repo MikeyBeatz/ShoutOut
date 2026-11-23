@@ -22,8 +22,9 @@ ale mají vlastní text a schvalovací proces.
 všech tří typů hlášení mají ověřené místní jádro. Role, region, skupina a audit
 se ověřují v transakci. [Schválený DEV přechod](../MVP_SERVER_PLAN.md#moderation-basic-dev-proposal)
 je [nasazený pouze v DEV](../MVP_SERVER_PLAN.md#moderation-basic-dev-results),
-včetně callable a klientského příznaku. Platný klientský pilot a jeho úklid
-zatím čekají; celková moderační autorita ještě není uzavřená.
+včetně callable a klientského příznaku. [Klientský pilot i úklid jsou uzavřené](../MVP_SERVER_PLAN.md#moderation-basic-dev-complete):
+správný TestModerator provedl approve/resolve/escalate, správný TestAdmin
+dokončil předaný případ. Celková moderační autorita ještě není uzavřená.
 
 Místní serverové jádro pro jedno rozhodnutí **Skrýt soukromou odpověď bez
 postihu** je oddělené od dosavadního klienta: [rozsah, testy a hranice](../MVP_SERVER_PLAN.md#moderation-private-local).

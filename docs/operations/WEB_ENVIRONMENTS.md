@@ -1,6 +1,6 @@
 # Vývojový a produkční web
 
-**Aktuální DEV společná moderace, 23. listopadu:** [nasazení a čekající pilot](../MVP_SERVER_PLAN.md#moderation-basic-dev-results).
+**Aktuální DEV společná moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
 Zdroj 44e07a5d18570ef2fc416d8387ed459bd55dd853 / úplné CI 45196844737 success,
 Aktuální Hosting **565880d4664da7b2** z opravného webového zdroje
 33853a9d0eb6fca61368217cf053140f5c6f3de4 / úplné CI 45202922410 success;
@@ -10,8 +10,11 @@ decideContentReports 00001-yak, cleanup 00007-hoz, account-created 00015-viw,
 recovery 00015-huw; prostředky, zdroje a 100 % provozu ověřené. 67 app souborů
 a 8 HTTP odpovědí shodných, 401 bez identity/App Check. Celkem 23 Functions;
 ostatních 19, oba plánovače, Rules, 91 původních zdrojů a pending žádost zachované.
-Pilot seeded: 1 nový Shout/komentář/soukromá odpověď, 3 hlášení. TestModerator
-ověřil approve/escalate (platný Auth/App Check, 200); čekají 2 resolve a úklid.
+Pilot **cleaned**: všechny 4 akce správných TestModerator/Admin ověřené,
+4×HTTP 200 a Auth/App Check VALID. Nový Shout/komentář/soukromá odpověď,
+3 hlášení, clearance a 2 oznámení uklizené, 0 potomků/cloudových read klíčů.
+10 receipts a 23 rate dokumentů beze změny, 91 původních zdrojů/pending
+žádost zachované. Znovu neseedovat, společný Rules cutover ještě není hotový.
 Návratový web b5703cec19978454, produkce/main/Auth beze změny.
 
 **Předchozí DEV soukromá moderace, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).

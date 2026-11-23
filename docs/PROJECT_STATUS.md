@@ -6,7 +6,7 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nyní nasazeno v DEV, čeká pouze klientský pilot:** [společná moderační rozhodnutí](MVP_SERVER_PLAN.md#moderation-basic-dev-results).
+**Právě uzavřený DEV úsek:** [společná moderační rozhodnutí – akceptace a úklid](MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
 Zdroj **44e07a5d18570ef2fc416d8387ed459bd55dd853** / [úplné CI 45196844737 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45196844737).
 Aktuální web **565880d4664da7b2** z opravného zdroje **33853a9** /
 [úplné CI 45202922410 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45202922410),
@@ -17,18 +17,21 @@ Zdrojové archivy všech čtyř Functions odpovídají balíčkům, 67 app soubo
 a 8 HTTP kontrol odpovídá release; chybějící Auth/App Check je odmítnut 401.
 Ostatních 19 Functions, oba plánovače, Rules, indexová konfigurace, všech 91
 původních zdrojů a pending žádost zachované; žádné rozpracované účtové/purge joby.
-Pilot je **seeded**: přesně 1 Shout, komentář a soukromá odpověď; původní
-3 hlášení jsou nyní resolved/open/escalated a je doložených 8 receipts.
-TestModerator potvrdil schválení Shoutu i předání soukromého případu;
-správný it_moderator / úroveň 3 / CZ,CZ-42 / Auth a App Check VALID / 2×HTTP 200.
-[Chybějící resolve výběr](MVP_SERVER_PLAN.md#moderation-basic-choice-fix) je opravený
-a DEV web nasazený; 67 app hashů/8 HTTP odpovědí shodných, všech 23 Functions,
-plánovače, Rules a 92 zdrojů zachované. Nezačínat další seed ani serverový rollout.
-Jediný manifest je v čisté
+Vlastník potvrdil všechna čtyři rozhodnutí. Správný TestModerator provedl
+approve Shoutu, resolve komentáře a escalate soukromé odpovědi; TestAdmin
+dokončil soukromé resolve. Serverové receipts/audity a 4×HTTP 200 s Auth/App
+Check VALID ověřené, obsah zůstal do úklidu nezměněný. Úklid odstranil jen
+3 zdroje, 3 hlášení, 1 clearance a 2 oznámení; žádné potomky/read klíče.
+Všech **10 receipts a 23 rate dokumentů** zachováno včetně updateTime.
+Jediný manifest je **cleaned**, nikdy znovu neseedovat, a zůstává v čisté
 release kopii build/report-decisions-release-44e07a5/docs/local/content-report-decision-pilot.json,
 digest **90be6018…57e30d02**. Mutace spouštět z této přesné kopie s úplným CI,
-nikoli z následného dokumentačního commitu. Čeká už jen TestModerator resolve
-komentáře, TestAdmin resolve eskalované soukromé odpovědi a následný úklid.
+nikoli z následného dokumentačního commitu. Závěrečná inventura 16:42 SEČ:
+91 původních zdrojů a jejich updateTime, pending žádost, všech 23 Functions,
+oba plánovače, web 565880d4664da7b2 a Rules zachované. Produkce/main/Auth beze změny.
+**Další krok:** předložit konkrétní rozsah serverového veřejného odstranění;
+sankce a společný kompatibilní Rules cutover jsou další otevřené části
+celého moderačního milníku. Jeho celé uzavření se tím zatím netvrdí.
 Prohlížeč nepoužívat bez nového ověření dostupnosti; předchozí ovládání
 zastavila kontrola neověřené URL. Produkce/main/Auth beze změny.
 
