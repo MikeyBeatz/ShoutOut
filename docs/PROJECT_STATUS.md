@@ -40,15 +40,27 @@ reads / 3 writes, opakování 9 / 0. Zdroj **f1e32e9** má
 [success úplné CI 45136851001](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45136851001),
 včetně nové moderace, ostatních regresí a webového buildu; přesný čistý zdroj ověřený.
 Původní checkpoint f1e32e9 neobsahoval wrapper ani klientské zapojení.
-V dosud nasazeném DEV zůstává přímá staff cesta otevřená; nové runtime
-zapojení je teprve v navazující přípravě níže.
+V DEV zůstává přímá staff cesta otevřená do pozitivního klientského ověření;
+navazující runtime zapojení je již nasazené, jak dokládá následující záznam.
 **Nyní výslovně schválený celý navazující úsek:** [klient, wrapper a DEV přechod](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
-Obě klientské cesty s bezpečným opakováním, wrapper, omezený pilot a kandidát
-Rules jsou připravené. 500 Flutter testů, cílených 30, analyze bez nálezů,
-107 nástrojových testů, lint, 174 serverových unit a 46 cílených emulátorových
-testů prošly; úplné CI zatím čeká. Žádné nové nasazení ani živá fixture zatím nejsou ověřené; nejprve
-testy/společné úplné CI, potom endpoint/úklid a web, po pozitivní kompatibilitě
-samostatné CI a uzavření Rules. Ruční kontrola až na konci. Ostatní
+**Server/web jsou již v DEV:** [ověřené nasazení a čekající průchod](MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
+0fa2774 / [success úplné CI 45147594322](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322).
+Hosting **b5703cec19978454**, nová removeReportedPrivateReply **00001-zec**,
+cleanup **00006-lum**, 100 % provozu a schválené prostředky. Ostatních 20
+Functions, oba plánovače a 91 původních zdrojů/pending žádost zachované.
+67 app souborů / 8 HTTP odpovědí shodných s release artefaktem. Původní Rules
+**e16b7a3d…59271** zůstávají; samostatný cutover ještě není provedený.
+500 Flutter testů, analyze bez nálezů, 107 nástrojových, 174 serverových unit
+a 46 emulátorových regresí prošly. CLI discovery timeout byl řešen jen
+lokálním čekáním 60 s, nikoli změnou běhových timeoutů.
+**Pilot je seeded:** jeden nový Shout/dvě zprávy/jedno open hlášení, nonce
+**3a725093**, digest **c5801fcb…05c059d9**, celkem 92 zdrojů. Původní cleaned
+pilot se neobnovoval. Jen nové fixture byla přes společný writer doplněna
+označená syntetická geografie CZ/CZ-42, protože geografický trigger dosud
+není nasazený; geographyReady true, role beze změny. Čeká jediná ruční akce
+TestModerator v Hlášení, bez aktuálního dokladu odstranění. Před úspěchem
+neuzavírat Rules ani neuklízet. Potom samostatné úplné CI pro Rules, ověření
+a úklid. Celý DEV úsek a akceptace tedy ještě nejsou hotové; ostatní
 moderační rozhodnutí/sankce zůstávají navazující prací.
 Ovládání Windows bylo automaticky zastavené kvůli nespolehlivému určení URL;
 browser host je současně nedostupný. Pozitivní UI důkaz to nenahrazuje.

@@ -782,8 +782,8 @@ hotové váhy a celková váha milníku zůstávají stejné.
 i po zavření dialogu, obě obrazovky používají stejnou serverovou operaci;
 nejasný výsledek blokuje jiné rozhodnutí do bezpečného opakování. DEV přepínač
 je v připraveném zdroji true, produkční chybějící přepínač znamená false.
-Wrapper i kontrolovaný pilotní nástroj jsou připravené; žádné živé vytvoření
-obsahu nebo nové nasazení tím ještě není doložené.
+Wrapper i kontrolovaný pilotní nástroj jsou připravené; samotná místní příprava
+ještě nedokládala živé vytvoření obsahu ani nové nasazení. Aktuální rollout níže.
 
 500 Flutter testů, následná cílená sada 30 testů a analyze bez nálezů;
 107 nástrojových testů, lint, 174 serverových unit testů (598 integračních
@@ -797,11 +797,69 @@ Důkazy: test/private_report_removal_test.dart,
 functions/private_reply_deletion_pilot.integration.test.js,
 tools/rules/private_report_removal.integration.test.mjs a místní
 build/private-moderation-dev-{emulator-final,flutter-final,analyze-final,client-final,tools,functions}.log.
-Úplné CI následuje po společném pushi. Cílený kontrolní modul pro vývojový
+Úplné CI přípravy je doložené níže. Cílený kontrolní modul pro vývojový
 pilot je tools/private_report_removal_pilot.mjs; nevyrábí pozitivní UI důkaz.
 Browser host je nedostupný a Windows ovládání navíc automaticky skončilo,
 protože nešlo spolehlivě určit URL otevřené karty. Živá kompatibilita zatím
 není ověřená; žádné další UI vstupy po tomto zastavení neproběhly.
+
+<a id="moderation-private-dev-rollout"></a>
+
+### Nasazený server/web, čekající klientská kompatibilita
+
+Zdroj **0fa2774be634db27013e37ca511e8523c6a9f7c7** má
+[success úplné CI 45147594322](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45147594322).
+Z ověřeného čistého zdroje vznikl release artefakt; nasazeno pouze DEV:
+removeReportedPrivateReply **removereportedprivatereply-00001-zec**,
+cleanupOperationReceipts **cleanupoperationreceipts-00006-lum** a Hosting
+**b5703cec19978454**. Obě služby mají 100 % provozu, staré revize jsou retired;
+prostředky zůstaly podle schválení. Nepřihlášený POST nové callable vrátil 401.
+Zachováno ostatních 20 Functions, oba minutové plánovače i 91 původních Shoutů,
+jejich updateTime, původní pending žádost a feed 12/news 6/active. Ověřeno
+67 veřejných app souborů a 8 HTTP odpovědí obou DEV domén proti artefaktu.
+Návratový web je **813f34b7555e272a**. Rules jsou stále původní
+**e16b7a3d-f363-499c-ad40-262471059271**; jejich nový cutover dosud neproběhl.
+
+První nasazovací pokus skončil ještě při místním discovery po 10 s, před
+nahráním zdroje. Čerstvá inventura potvrdila nezměněné prostředí. Opakování
+použilo CLI-only FUNCTIONS_DISCOVERY_TIMEOUT=60 podle
+[oficiálního postupu](https://firebase.google.com/docs/functions/tips#avoid_deployment_timeouts_during_initialization);
+běhové timeouty 15/60 s ani prostředky se neměnily. Následné nasazení/provoz
+ověřené. Důkazy: build/private-moderation-release-{ci,build,before,functions,hosting}.json
+a samostatný discovery-timeout log.
+
+Nový manifest **docs/local/private-report-moderation-pilot.json**, digest
+**c5801fcb190c182d4e590c4c8bfb820899507e22306cbddc1d295b0685c059d9**,
+je nyní **seeded**. Vznikl přesně jeden 24h Shout **MVP private deletion 3a725093**,
+dvě navazující zprávy a jedno hlášení
+**MVP private moderation 3a725093. Remove after verification.**
+První zpráva je od TestBusiness příjemci Bright_Otter_182; kontrolní pokračování
+patří Bright_Otter_182. Hlášení je open, obě zprávy přítomné, odstranění ani
+pozitivní moderátorský doklad zatím neexistují. Čtyři seed operace vytvořily
+čtyři technická potvrzení; cloudWrites:0 v čtecím statusu není součet zápisů
+celého pilotu. Celkem 92 Shoutů = 91 původních + jediná nová fixture.
+
+Čerstvá inventura potvrdila, že enrichShoutGeography v DEV dosud není
+nasazená. Žádné automatické obohacení proto není předpokladem tohoto pilotu.
+Pouze nové vlastněné fixture byla jednorázově doplněna označená syntetická
+geografie CZ / CZ-42 přes již otestované finishShoutGeography a společný
+indexový writer, s kontrolou inkarnace/updateTime, digestu a původních dat.
+GeographyReady je nyní true, TestModerator má stále svůj stávající regionální
+rozsah. Bez Google požadavku, doplnění původních Shoutů, nového triggeru nebo
+změny role. Důkaz build/private-moderation-fixture-geography-proof.json.
+Skutečný geografický rollout/backfill nadále patří k otevřenému milníku 13.
+
+**Čekající jediný ruční průchod:** nové anonymní okno s
+https://shoutout-dev-46c81.web.app/?mvp=0fa2774, TestModerator → Hlášení →
+výše uvedený případ → Skrýt obsah bez postihu → jednou Uložit rozhodnutí.
+Backend musí potvrdit skutečnou receipt/aktéra, zachovaný report snapshot,
+kontrolní zprávu, Auth/App Check VALID a úspěšný POST. Zatím jen čtecí
+build/private-moderation-live-audit.json a before-ui snapshot hash; nejsou
+pozitivním UI důkazem. Až poté vydat kandidáta Rules se samostatným úplným
+CI, ověřit skutečný ruleset a uklidit vymezená testovací data. Do té doby
+Rules ani fixture neměnit. Automatická kontrola zastavila Windows ovládání
+kvůli nespolehlivému určení URL; další UI akce nebyly provedené. Celá DEV
+váha a živá akceptace zůstávají otevřené. Produkce, main a Auth účty beze změny.
 
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné

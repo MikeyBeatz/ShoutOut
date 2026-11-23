@@ -1,5 +1,17 @@
 # Datový model Firestore
 
+Soukromá moderace má [DEV wrapper a klientské zapojení, pilot ještě čeká](../MVP_SERVER_PLAN.md#moderation-private-dev-rollout).
+removeReportedPrivateReply atomicky odstraní jeden živý kořen zprávy a doplní
+do původního privateReplyReports dokumentu status resolved, resolution
+contentRemoved, resolvedAt, resolvedBy, decisionOperationId a případnou
+moderatorNote do 500 znaků. Snapshot textu/důvodu a původní identity se
+nepřepisuje. Technické serverOperations potvrzení nese pouze UID aktéra,
+reportId/shoutId/privateReplyId, requiredRoleLevel, fingerprint, výsledek
+removed: true a standardní sedmidenní createdAt/keyVersion/expiresAt.
+Text ani poznámka se do potvrzení nekopírují; replay znovu ověřuje aktuální
+roli a rozsah. Nová auditní pole nepovolují klientský zápis; živé uzavření
+přímého delete/contentRemoved vyžaduje ještě popsaný kompatibilní cutover.
+
 Serverová callable `createShout` používá `serverOperations/{hash}`
 pro idempotenci: `userId`, `action: createShout`, `fingerprint`, `shoutId`,
 `createdAt`. Hash ID je odvozen z UID a klíče požadavku. Záznam vzniká atomicky

@@ -167,9 +167,13 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Schválený navazující DEV přechod právě běží:** [přesný rozsah a pořadí](MVP_SERVER_PLAN.md#moderation-private-dev-proposal).
    Příprava klienta/wrapperu/pilotu i Rules prototypu je lokálně ověřená:
    500 Flutter, 107 nástrojových, 174 unit a 46 emulátorových testů, analyze/lint.
-   Úplné CI a živé nasazení zatím čekají, nic živě nezapočítávat.
-   Klient/wrapper/testy → úplné CI → DEV endpoint/úklid/web → pozitivní klientská
-   kompatibilita → samostatné CI/Rules → dokončení pilotu a úklid.
+   0fa2774 má success úplné CI 45147594322; [server a web jsou nasazené](MVP_SERVER_PLAN.md#moderation-private-dev-rollout):
+   Hosting b5703cec19978454, callable 00001-zec, cleanup 00006-lum; ostatních
+   20 Functions/plánovače/původní data zachované. Nový pilot 3a725093 je seeded,
+   geografie syntetické fixture připravená, hlášení open. Čeká jediná ruční
+   akce TestModerator; bez ní nepovažovat klientskou kompatibilitu za hotovou.
+   Potom samostatné úplné CI/Rules → dokončení pilotu a úklid. Rules jsou stále
+   e16b7a3d…59271, celý DEV úsek ani akceptace se zatím nezapočítávají.
    Další atomická rozhodnutí/regionální autoritu připravit
    podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
    Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
