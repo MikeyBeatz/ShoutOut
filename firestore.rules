@@ -2314,8 +2314,11 @@ service cloud.firestore {
             )
           );
         allow update: if false;
+        // Ordinary deletion uses deletePrivateReply in managed environments.
+        // Existing moderator removal is closed by a separate decision rollout.
         allow delete: if eligibleUser() &&
-          (resource.data.authorId == request.auth.uid || isModerator());
+          (isModerator() ||
+            (!managedFeedProjection() && resource.data.authorId == request.auth.uid));
       }
 
       match /reactions/{userId} {

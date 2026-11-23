@@ -518,6 +518,54 @@ kompatibilní web 1 a podmíněný Rules cutover 2. Součet i váha rodiče zůs
 stejné; všechny tři části jsou zatím otevřené. Živá akceptace má dál vlastní
 váhu a podmínky, proto nelze přípravu zaměnit za dokončený milník.
 
+<a id="private-deletion-dev-results"></a>
+
+### Vlastní soukromé mazání – DEV server/web a připravený Rules checkpoint
+
+**První nasazovací fáze je ověřená:** zdroj
+**9c2e121706ea824d10282f06c778249b9b4a0f05** má
+[success úplné CI 45096691292](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45096691292),
+včetně nového pilotního kroku a webového buildu. Čistý přesný commit,
+hash artefaktu a moduly Functions ověřeny před nasazením. Pouze DEV
+shoutout-dev-46c81: nová **deletePrivateReply / deleteprivatereply-00001-koz**,
+aktualizovaná **cleanupOperationReceipts / cleanupoperationreceipts-00005-goh**.
+Obě revize připravené, 100 % provozu; čtyři staré cleanup revize retired.
+Callables 0–1 instance / concurrency1 / 256 MiB / 15 s, cleanup stejný profil
+se 60 s. Dva stávající minutové Scheduler joby zachovaly nastavení;
+ostatních 19 Functions beze změny. Neautentizované volání vrací očekávané
+401; to není pozitivní klientský důkaz.
+
+DEV Hosting **813f34b7555e272a**, serverPrivateReplyDeletion true.
+Ověřeno všech 67 veřejných app souborů proti manifestu a osm HTTP odpovědí
+obou domén. Předchozí verze **37b697da10fbb5b1** je návratová před Rules
+cutoverem; nový web 813f34b7555e272a je kompatibilní návratová verze pro
+budoucí cutover. Manifest navíc obsahuje neveřejný pomocný soubor, který
+Hosting podle ignore pravidla nevydává. Rules stále
+**476d216c-9208-4e5c-9143-f583cb82a3e9**. Všech **91 dosavadních zdrojů**,
+všechny původní žádosti, feed control 12 a news 6/active mají stejný stav
+i updateTime zdrojů/žádostí jako před nasazením. Žádná nová živá fixture ani
+Auth změna, produkce/main beze změny. Důkazy:
+build/private-deletion-release-{build,ci,before,functions,hosting}.json.
+
+**Samostatný místní Rules checkpoint:** kořenový návrh již v managed režimu
+odmítá běžné přímé mazání soukromé zprávy. Odpovídající staré regresní
+očekávání je upravené; čtení, legacy bez řídicího dokumentu a existující
+moderátorská cesta zůstávají zachované. Tento návrh vyžaduje samostatné
+úplné CI přesného zdroje a pozitivní živou kompatibilitu klienta, než smí
+být nasazen. Lokálně prošlo všech **32** cílených emulátorových regresí jádra,
+pilotu, návrhu Rules a stávajících obsahových operací. **Kořenový soubor
+není důkaz vydaných Rules.** Souhrn přesného
+CI checkpointu se ukládá do build/private-deletion-cutover-ci-proof.json;
+před mutací jeho stav znovu ověřit přímo na GitHubu.
+
+**Nejbližší krok:** dostupný ovladatelný prohlížeč nebo připravený vlastník →
+čerstvý manifest/digest a schválený pilot 1 Shout / 2 zprávy → vlastní
+mazání obou účtů s Auth/App Check a receipts → podmíněné DEV Rules → úklid.
+Prohlížečový host byl při přípravě znovu unavailable, proto zatím žádná pilotní
+data nevznikla a pozitivní akceptace se netvrdí. Nepřenášet sem splnění
+odloženého pohybového testu. Započtené pouze dvě doložené nasazovací části
+(Functions 2, web 1); Rules 2 a živá akceptace 5 zůstávají otevřené.
+
 ## 4. Antispam a obsahová moderace — MVP
 
 - normalizovat text před kontrolou a detekovat opakovaný/velmi podobný obsah,

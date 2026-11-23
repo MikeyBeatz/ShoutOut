@@ -142,8 +142,8 @@ test('existing private callable keeps canonical participants, idempotency and pa
   const received = await assertSucceeds(getDocs(query(collection(client('recipient'), 'shouts/parent/privateReplies'), where('recipientId', '==', 'recipient'), limit(50))));
   assert.equal(received.size, 1);
   await assertFails(updateDoc(doc(client('writer'), path), { authorId: 'outsider' }));
-  // Explicitly outside this cutover: the current own-delete path remains.
-  await assertSucceeds(deleteDoc(doc(client('writer'), path)));
+  // Managed own deletion now requires the confirmed server operation.
+  await assertFails(deleteDoc(doc(client('writer'), path)));
 });
 
 test('comment callable maintains exact counters and one receipt for retries under managed Rules', async () => {

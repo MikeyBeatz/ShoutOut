@@ -1,6 +1,19 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – pořadí při pohybu 23. listopadu:** [důkazy a čekající kontrola](../plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+**Aktuální DEV web a soukromé mazání, 23. listopadu:** [důkazy a čekající pilot](../MVP_SERVER_PLAN.md#private-deletion-dev-results).
+Zdroj 9c2e121706ea824d10282f06c778249b9b4a0f05, success úplné CI 45096691292.
+Hosting **813f34b7555e272a**, serverPrivateReplyDeletion true; 67 veřejných app
+souborů a 8 HTTP kontrol shodných s artefaktem. Nová deletePrivateReply
+**deleteprivatereply-00001-koz**, cleanupOperationReceipts **00005-goh**, obě
+100 % provozu, schválené prostředky. Ostatních 19 Functions, oba minutové
+Scheduler joby, Rules **476d216c…a3e9**, feed 12/news 6/active, všech 91 zdrojů
+a původní žádosti zachované. Nový root Rules soubor je zatím jen připravený
+bezpečnostní checkpoint. Živý cutover až po přesném úplném CI a pozitivním
+klientském pilotu; žádná nová fixture/Auth zatím nevznikla. Návratový web před
+Rules je 37b697da10fbb5b1, po cutoveru kompatibilní 813f34b7555e272a.
+Produkce/main beze změny; odložený pohybový test a úklid nadále otevřené.
+
+**Předchozí DEV web – pořadí při pohybu 23. listopadu:** [důkazy a čekající kontrola](../plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Zdroj **af4c3aa06fc65b7d429497cca73817d2d4529be2**, success úplné CI **45085601243**,
 Hosting **37b697da10fbb5b1**. Shoda 67 app souborů a 8 HTTP odpovědí obou domén.
 Všech 20 Functions zachováno včetně getFeedPage **getfeedpage-00007-moc**;

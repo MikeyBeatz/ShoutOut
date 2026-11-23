@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,36 %** — vážené dokončení podúseků
 
-Hotové úseky: **181/240**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **183/240**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -158,12 +158,16 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    [Místní implementace a regrese](MVP_SERVER_PLAN.md#private-deletion-local) hotové:
    493 Flutter, 104 nástrojových a 40 cílených emulátorových testů;
    2826665 / úplné CI 45091447773 success. Implementace a ověření uzavřené,
-   DEV nasazení/živá akceptace otevřené. Navazující DEV návrh musí zahrnout
-   nový wrapper i stávající úklid potvrzení, před živým uzavřením Rules ověřit klienta.
+   [DEV Functions a web jsou nasazené](MVP_SERVER_PLAN.md#private-deletion-dev-results):
+   9c2e121 / úplné CI 45096691292 success, Hosting 813f34b7555e272a,
+   deletePrivateReply 00001-koz a cleanup 00005-goh. 19 ostatních Functions,
+   dva plánovače a všech 91 zdrojů/původní žádosti zachované.
    [Konkrétní ucelený DEV návrh](MVP_SERVER_PLAN.md#private-deletion-dev-proposal)
    vlastník výslovně schválil včetně nové Function, klientské aktivace,
-   podmíněného Rules přechodu a vymezeného malého pilotu. Implementace probíhá.
-   Nasazený přepínač zatím false, žádná změna vydaných/kořenových Rules.
+   podmíněného Rules přechodu a vymezeného malého pilotu. Nasazený přepínač true.
+   Kořenový Rules checkpoint má vlastní úplné CI; vydané Rules stále původní.
+   Další krok: připravený klient → nový pilot 1/2 → mazání obou účtů → Rules → úklid.
+   Bez dostupného prohlížeče pilot zatím nevznikl; UI akceptaci nezavírat.
    Na odložené pohybové kontrole nezávisí. Moderátorskou atomickou operaci,
    regionální autoritu a živý cutover nezaměňovat za dokončení vlastního mazání.
 

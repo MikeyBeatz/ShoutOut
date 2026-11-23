@@ -13,7 +13,21 @@ Nezávisle dokončený [audit soukromého mazání](MVP_SERVER_PLAN.md#private-d
 8/8 emulátorových scénářů, 0 živých zápisů. Vlastník následně výslovně schválil
 místní server/klient, bezpečné opakování a testy, bez živého zapojení.
 
-**Uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
+**Nově ověřené DEV nasazení:** [vlastní soukromé mazání – výsledky a další krok](MVP_SERVER_PLAN.md#private-deletion-dev-results).
+9c2e121706ea824d10282f06c778249b9b4a0f05 / úplné CI 45096691292 success.
+deletePrivateReply **00001-koz**, cleanupOperationReceipts **00005-goh**,
+100 % provozu a schválené prostředky; ostatních 19 Functions a oba minutové
+plánovače zachované. DEV Hosting **813f34b7555e272a**, 67 shodných veřejných
+app souborů / 8 HTTP kontrol, serverPrivateReplyDeletion true. Všech 91 zdrojů,
+původní žádosti a feed 12/news 6/active zachované. Návratový web 37b697da10fbb5b1
+před Rules cutoverem; po něm používat kompatibilní 813f34b7555e272a.
+Kořenové Rules připravené pro samostatný bezpečnostní checkpoint, vydané Rules
+stále **476d216c-9208-4e5c-9143-f583cb82a3e9**. Prohlížečový host unavailable:
+živý pilot nevznikl, vlastní mazání obou účtů / Rules / úklid čekají na klienta.
+Přesné CI Rules checkpointu znovu ověřit před živou mutací, souhrn
+build/private-deletion-cutover-ci-proof.json. Produkce/main beze změny.
+
+**Předchozí uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
 Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou
 hotové. 493 Flutter testů, 104 nástrojových testů, analýza/lint a 40 cílených
 serverových/Rules regresí prošly. Nová operace má 8 SDK reads / 3 writes,
@@ -22,24 +36,23 @@ Zdroj **282666562e034bc18314a3becfe9d8c203b05712** má
 [success úplné CI 45091447773](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45091447773),
 včetně nového soukromého kroku a webového buildu; doložen čistý přesný commit.
 Implementace/ověření započtené, DEV/živá akceptace otevřené.
-Nasazený serverPrivateReplyDeletion je false; wrapper a aktivace se připravují,
-vydané i kořenové Rules beze změny. Moderaci tato
+V tomto předchozím místním checkpointu byl přepínač false, bez wrapperu a změn
+Rules. Moderaci tato
 operace nenahrazuje; žádné nasazení, živé fixture/Auth či retenční změny.
-Další návrh musí zahrnout i aktualizaci stávající cleanupOperationReceipts
-pro nový typ potvrzení, se stejným rozpočtem/časováním; ne jen nový callable.
+Navazující nasazení výše zahrnuje i aktualizaci stávající cleanupOperationReceipts
+pro nový typ potvrzení, se stejným rozpočtem/časováním.
 **Celý DEV přechod vlastník 23. listopadu výslovně schválil:** [rozsah a podmínky](MVP_SERVER_PLAN.md#private-deletion-dev-proposal).
 Čerstvá čtecí inventura v 01:26 UTC potvrzuje 20 Functions, 2 minutové
 plánovače, dosavadní Hosting/Rules/control, 91 zdrojů (50 aktivních) a
 nezměněných 38 původních zdrojů/pending žádost. Žádné živé zápisy. Navržené
 pilotní data vzniknou až při připraveném klientu; UI důkaz podmiňuje živé Rules.
 
-**Rozpracovaný schválený DEV přechod:** wrapper, DEV aktivace a omezený pilotní
+**Příprava schváleného DEV přechodu:** wrapper, DEV aktivace a omezený pilotní
 nástroj jsou připravené; 493 Flutter testů, analýza bez nálezů, 106 nástrojových
 testů, lint, 170 serverových unit testů (579 integračních mimo emulátor přeskočeno)
-a 21 cílených emulátorových regresí prošly. Čeká společný push/úplné CI a poté
-dvě Functions a kompatibilní DEV web. Kořenové/vydané Rules zatím beze změny,
-žádná nová živá fixture. Zbývající DEV váha 5 rozdělena 2/1/2 mezi Functions,
-web a podmíněný Rules cutover; nic z těchto nasazení dosud není započtené.
+a 21 cílených emulátorových regresí prošly. Následné úplné CI a nasazení jsou
+doložené výše. Z DEV váhy 5 započtené Functions 2 a web 1; podmíněný Rules
+cutover 2 a samostatná živá akceptace zůstávají otevřené.
 
 **Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
