@@ -8,6 +8,10 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+Vlastní soukromé mazání má `npm --prefix tools run test:private-deletion`
+(server, odvozený Rules prototyp a souběh s archivací). V plném CI jde o vlastní
+krok, kořenové/vydané Rules se tím nepřepisují. [Výsledky a hranice](../MVP_SERVER_PLAN.md#private-deletion-local).
+
 Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
 CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný
 Chrome transport proti Firestore emulátoru. Windows lze předat absolutní

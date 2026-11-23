@@ -13,14 +13,20 @@ Nezávisle dokončený [audit soukromého mazání](MVP_SERVER_PLAN.md#private-d
 8/8 emulátorových scénářů, 0 živých zápisů. Vlastník následně výslovně schválil
 místní server/klient, bezpečné opakování a testy, bez živého zapojení.
 
-**Právě připravený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
+**Uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
 Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou
 hotové. 493 Flutter testů, 104 nástrojových testů, analýza/lint a 40 cílených
 serverových/Rules regresí prošly. Nová operace má 8 SDK reads / 3 writes,
 potvrzené opakování 6 / 0; nejde o cloudové měření ceny či výkonu.
-Čeká společný push/úplné CI. serverPrivateReplyDeletion je false, nový callable
-wrapper zatím neexistuje, vydané i kořenové Rules beze změny. Moderaci tato
+Zdroj **282666562e034bc18314a3becfe9d8c203b05712** má
+[success úplné CI 45091447773](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45091447773),
+včetně nového soukromého kroku a webového buildu; doložen čistý přesný commit.
+Implementace/ověření započtené, DEV/živá akceptace otevřené.
+serverPrivateReplyDeletion je false, nový callable wrapper zatím neexistuje,
+vydané i kořenové Rules beze změny. Moderaci tato
 operace nenahrazuje; žádné nasazení, živé fixture/Auth či retenční změny.
+Další návrh musí zahrnout i aktualizaci stávající cleanupOperationReceipts
+pro nový typ potvrzení, se stejným rozpočtem/časováním; ne jen nový callable.
 
 **Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.

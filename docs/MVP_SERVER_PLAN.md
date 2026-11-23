@@ -319,7 +319,11 @@ se nepřidává implementační kredit a pevné váhy se nemění.
 
 ### Vlastní soukromé mazání – místní příprava a regrese
 
-**Implementace hotová, úplné CI zatím čeká:** jádro
+**Implementace a úplné CI dokončené:** zdroj
+**282666562e034bc18314a3becfe9d8c203b05712**, [success CI 45091447773](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45091447773).
+Ověřený čistý přesný commit, úspěšný nový private-deletion krok i webový build.
+Neproběhlo žádné nasazení; podklad build/private-deletion-ci-proof.json.
+Jádro
 [delete_private_reply.js](../functions/delete_private_reply.js) přijímá pouze
 expectedUserId, shoutId, privateReplyId a idempotencyKey. Auth/App Check,
 ověřený e-mail a způsobilost účtu kontroluje před účinkem; skutečného autora
@@ -356,7 +360,9 @@ uzavřením je nutná kompatibilita klientů, konkrétní DEV průchod a kontrol
 Rules; tento místní prototyp není zárukou bezpečnosti celé aplikace.
 
 **Místní výsledky:** 493 Flutter testů, 104 nástrojových testů, analýza bez
-nálezů a lint Functions. 40 emulátorových testů zahrnuje 12 nových serverových
+nálezů a lint Functions; mimo emulátor 169 Functions testů prošlo a 576
+emulátorových scénářů bylo správně přeskočených, nikoli vydávaných za úspěch.
+40 cílených emulátorových testů zahrnuje 12 nových serverových
 scénářů a 6 nových Rules scénářů plus 22 dosavadních regresí komentářového
 mazání a účtové archivace. Ověřeno: přesné vlastnictví a soukromé čtení,
 chybějící App Check/identity před DB, ochrana payloadu, paralelní opakování
@@ -385,14 +391,19 @@ nezatěžuje již dlouhý základní Rules krok dalším emulátorovým testem.
 
 Zbývající váha content-remaining-authority **44** se rozděluje na vlastní
 soukromé mazání **22** (kód/ověření/DEV/akceptace **6/6/5/5**) a další
-autoritu **22**. Dosavadní hotové váhy ani součet rodiče se nemění. Do plného
-ověření checkpointu zůstávají nové díly otevřené; nasazení/živou akceptaci
-nelze zavřít místním testem. Backlog tento původní serverový díl samostatně
+autoritu **22**. Dosavadní hotové váhy ani součet rodiče se nemění. Po plném
+CI započtena jen implementace a automatické ověření (6 + 6); DEV a živá
+akceptace zůstávají otevřené. Backlog tento původní serverový díl samostatně
 nevážil, proto mu nepřidávat dvojí nebo novou umělou váhu.
 
-**Další krok:** po přesném CI zapsat uzavření místní implementace/ověření;
-samostatně připravit konkrétní DEV wrapper, prostředky, aktivaci a kontrolu
-kompatibility před živým uzavřením běžného delete. Odložený test pohybu feedu
+**Další krok:** samostatně připravit konkrétní DEV wrapper, prostředky,
+aktivaci a kontrolu kompatibility před živým uzavřením běžného delete.
+Součástí navazujícího nasazení musí být také **aktualizace existující
+cleanupOperationReceipts** se zde doplněným podporovaným action, bez změny
+časování a pracovních mezí. Starý živý whitelist nový typ zatím nezná;
+samotné nasazení nového callable by nestačilo pro fyzický 7denní úklid.
+Logický zákaz pozdního opakování je nezávislý na době fyzického úklidu.
+Odložený test pohybu feedu
 zůstává otevřený a jeho fixture se touto prací nemění. Nový živý pilot ani
 produkci tento úsek nespouští. Regionální autorita a atomické rozhodování
 moderátorů nadále patří do následujícího serverového milníku.
