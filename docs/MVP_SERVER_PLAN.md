@@ -1524,8 +1524,8 @@ hlášení „MVP public removal ada057d3 comment. Remove after verification.“
 Server potvrzuje TestModerator (it_moderator, role 3), target komentář absent,
 commentsCount **2 → 1**, kontrolní komentář beze změny a celý aktuální publicState
 feed-v3 shodný se zdrojem. Hlášení resolved/contentRemoved/resolvedBy odpovídá
-novému receipt **577ddc02…fe69a208**; všech 6 receiptů projde kontrolou původního
-7denního termínu. Shout je stále active a jeho hlášení open. Důkaz
+novému receipt **577ddc02…fe69a208** s ověřeným 7denním termínem; celkem je
+přítomných 6 receipts. Shout je stále active a jeho hlášení open. Důkaz
 build/public-removal-comment-proof.json; žádný další živý zápis při této kontrole.
 Vlastník nyní dostal poslední akci stejného testu s důvodem
 „MVP public removal ada057d3 shout. Remove after verification.“. Potom
