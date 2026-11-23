@@ -449,6 +449,39 @@ class _ReportDecisionPanel extends StatefulWidget {
   State<_ReportDecisionPanel> createState() => _ReportDecisionPanelState();
 }
 
+List<DropdownMenuItem<String>> staffReportDecisionItems({
+  required bool serverDecisions,
+  required bool isEscalated,
+  required AccountRole role,
+  String? pendingDecision,
+}) {
+  final options = [
+    if (serverDecisions || pendingDecision == 'resolve')
+      const _ReportDecisionOption('resolve', 'Označit jako vyřešené'),
+    const _ReportDecisionOption('approve', 'Bez postihu – obsah je v pořádku'),
+    if (!isEscalated || pendingDecision == 'escalate')
+      const _ReportDecisionOption('escalate', 'Odeslat senior moderátorovi'),
+    const _ReportDecisionOption('remove', 'Skrýt obsah bez postihu'),
+    const _ReportDecisionOption('warning', 'Udělit varování'),
+    const _ReportDecisionOption('restrict1d', 'Omezit tvorbu na 1 den'),
+    const _ReportDecisionOption('restrict7d', 'Omezit tvorbu na 7 dnů'),
+    const _ReportDecisionOption('restrict30d', 'Omezit tvorbu na 30 dnů'),
+    const _ReportDecisionOption('ban1d', 'Ban na 1 den'),
+    const _ReportDecisionOption('ban7d', 'Ban na 7 dnů'),
+    const _ReportDecisionOption('ban30d', 'Ban na 30 dnů'),
+    if (role.isAtLeast(AccountRole.seniorModerator))
+      const _ReportDecisionOption('ban90d', 'Ban na 90 dnů'),
+    if (role.isAtLeast(AccountRole.seniorModerator))
+      const _ReportDecisionOption('banPermanent', 'Trvalý ban'),
+  ];
+  return options
+      .map(
+        (option) =>
+            DropdownMenuItem(value: option.value, child: Text(option.label)),
+      )
+      .toList();
+}
+
 class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
   final _noteController = TextEditingController();
   String? _decision;
@@ -484,26 +517,6 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       _noteController.text = decision.note;
     }
   }
-
-  List<_ReportDecisionOption> get _options => [
-    if (_pendingDecision?.decision == 'resolve')
-      const _ReportDecisionOption('resolve', 'Označit jako vyřešené'),
-    const _ReportDecisionOption('approve', 'Bez postihu – obsah je v pořádku'),
-    if (!widget.group.isEscalated || _pendingDecision?.decision == 'escalate')
-      const _ReportDecisionOption('escalate', 'Odeslat senior moderátorovi'),
-    const _ReportDecisionOption('remove', 'Skrýt obsah bez postihu'),
-    const _ReportDecisionOption('warning', 'Udělit varování'),
-    const _ReportDecisionOption('restrict1d', 'Omezit tvorbu na 1 den'),
-    const _ReportDecisionOption('restrict7d', 'Omezit tvorbu na 7 dnů'),
-    const _ReportDecisionOption('restrict30d', 'Omezit tvorbu na 30 dnů'),
-    const _ReportDecisionOption('ban1d', 'Ban na 1 den'),
-    const _ReportDecisionOption('ban7d', 'Ban na 7 dnů'),
-    const _ReportDecisionOption('ban30d', 'Ban na 30 dnů'),
-    if (widget.role.isAtLeast(AccountRole.seniorModerator))
-      const _ReportDecisionOption('ban90d', 'Ban na 90 dnů'),
-    if (widget.role.isAtLeast(AccountRole.seniorModerator))
-      const _ReportDecisionOption('banPermanent', 'Trvalý ban'),
-  ];
 
   @override
   void dispose() {
@@ -546,14 +559,12 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       DropdownButtonFormField<String>(
         initialValue: _decision,
         decoration: const InputDecoration(labelText: 'Rozhodnutí'),
-        items: _options
-            .map(
-              (option) => DropdownMenuItem(
-                value: option.value,
-                child: Text(option.label),
-              ),
-            )
-            .toList(),
+        items: staffReportDecisionItems(
+          serverDecisions: _useServerContentReportDecisions,
+          isEscalated: widget.group.isEscalated,
+          role: widget.role,
+          pendingDecision: _pendingDecision?.decision,
+        ),
         onChanged:
             _saving || _pendingRemoval != null || _pendingDecision != null
             ? null

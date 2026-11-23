@@ -1223,6 +1223,36 @@ uzavřít moderation-basic-accept. Staré cleaned piloty ani odložený feedový
 test a jeho původní data tím znovu neotevírat. Návratový web b5703cec19978454;
 nové účtové scrub fáze a již vzniklá technická potvrzení při návratu zachovat.
 
+<a id="moderation-basic-choice-fix"></a>
+
+### Založený pilot a oprava dostupnosti prostého uzavření
+
+Vlastník potvrdil TestModerator. Stávající plán zůstal čerstvý a z čistého
+44e07a5 se seed dokončil ve dvou krocích při zachování skutečného minutového
+report cooldownu. Pilot je **seeded**: nový Shout cf14d896…268a7797ccc,
+nadpis **MVP rozhodnuti ee9f4648**, 1 komentář, 1 soukromá odpověď,
+3 open hlášení a 6 vytvořovacích receipts. Původních 91 zdrojů a pending
+žádost zůstaly při každé transakci chráněné. Žádné moderační rozhodnutí
+zatím nebylo provedeno. Tento manifest znovu neplánovat ani neseedovat.
+
+Před ručními instrukcemi se zjistila klientská mezera: hlavní webový panel
+nabízel resolve pouze jako opakování už rozpracované akce; první prosté
+uzavření poskytovaly jen starší obrazovky, na které webový Profil nevede.
+Serverová operace a oprávnění existují, ale schválený klientský pilot by
+tak přes hlavní panel nebyl dokončitelný. Oprava v rámci stejného schváleného
+rozsahu zpřístupňuje „Označit jako vyřešené“ při zapnutém stávajícím
+serverContentReportDecisions. Vypnutá kompatibilní cesta, role, sankce,
+opakování a serverové parametry zůstávají stejné; bez nové produktové volby.
+
+Skutečné menu používá společnou staffReportDecisionItems funkci. Dva
+widgetové testy otevřou tento výběr a zvolí resolve pro open i escalated
+případ; třetí ověřuje neaktivní cestu a původní pending volby. Spolu s
+gateway/regresní sadou prošlo 12/12 testů a analyze bez nálezů. Důkazy
+build/report-decisions-choice-fix-{test,analyze}.log. Po úspěšném úplném CI
+přesného opravného commitu pouze DEV web, žádné Functions/Rules/indexy/seed.
+Akceptaci ani další procentní kredit tím neuzavírat; následně dokončit
+správné TestModerator/Admin kroky a úklid původní jediné fixture.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

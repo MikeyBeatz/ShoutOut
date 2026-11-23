@@ -15,11 +15,16 @@ Zdrojové archivy všech čtyř Functions odpovídají balíčkům, 67 app soubo
 a 8 HTTP kontrol odpovídá release; chybějící Auth/App Check je odmítnut 401.
 Ostatních 19 Functions, oba plánovače, Rules, indexová konfigurace, všech 91
 původních zdrojů a pending žádost zachované; žádné rozpracované účtové/purge joby.
-Pilot je pouze **planned**, 0 nového obsahu. Jeho jediný manifest je v čisté
+Pilot je nyní **seeded**: přesně 1 Shout, komentář, soukromá odpověď a 3 open
+hlášení, 6 technických potvrzení; report cooldown byl skutečně dodržen.
+Nezačínat další seed. Před instrukcemi byl zjištěn [chybějící resolve výběr](MVP_SERVER_PLAN.md#moderation-basic-choice-fix)
+v hlavním webovém panelu; oprava je lokálně připravená, 12 testů/analyze prošlo,
+čeká vlastní úplné CI a pouze DEV webový rollout. Functions/Rules znovu nenasazovat.
+Jediný manifest je v čisté
 release kopii build/report-decisions-release-44e07a5/docs/local/content-report-decision-pilot.json,
 digest **90be6018…57e30d02**. Mutace spouštět z této přesné kopie s úplným CI,
-nikoli z následného dokumentačního commitu. Čeká přihlášení TestModerator,
-potom teprve vymezený seed, 3 rozhodnutí, TestAdmin dokončení a úklid.
+nikoli z následného dokumentačního commitu. TestModerator už přihlášení potvrdil;
+čekají 3 rozhodnutí, TestAdmin dokončení a úklid.
 Prohlížeč nepoužívat bez nového ověření dostupnosti; předchozí ovládání
 zastavila kontrola neověřené URL. Produkce/main/Auth beze změny.
 

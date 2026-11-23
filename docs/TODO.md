@@ -159,7 +159,9 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    **Navazující DEV je nyní nasazený:** [výsledky a čekající pilot](MVP_SERVER_PLAN.md#moderation-basic-dev-results).
    44e07a5 / úplné CI 45196844737 success; web bf962d314d4380b7 a čtyři
    cílené Functions ověřené. Zbývá TestModerator → seed → tři rozhodnutí →
-   TestAdmin dokončení → úklid. Pilot je zatím pouze planned, žádná nová data.
+   TestAdmin dokončení → úklid. Pilot už je seeded (1 Shout, 2 navazující položky,
+   3 hlášení); čeká [oprava dostupnosti resolve volby](MVP_SERVER_PLAN.md#moderation-basic-choice-fix)
+   v hlavním panelu, bez nového kreditu. Nevytvářet další fixture.
    Nasazení je započtené, živá akceptace zůstává otevřená. Ostatní moderační cesty
    ještě brání úplné Rules uzávěře.
    **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
