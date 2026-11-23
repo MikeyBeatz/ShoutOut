@@ -1519,9 +1519,16 @@ Počáteční ověření 22:03 SEČ: active, commentsCount 2, oba komentáře p�
 obě hlášení open, 5 nových receipts; všech 21 původních receipts/updateTime
 zachovaných. Žádné nové Auth účty, reset kvót či změna původních zdrojů.
 Důkaz build/public-removal-seeded-proof.json; platnost do 24. listopadu 22:02 SEČ.
-Vlastník dostal jen první akci „Skrýt obsah bez postihu“ u hlášení
-„MVP public removal ada057d3 comment. Remove after verification.“. Před Shoutem
-serverově potvrdit 2 → 1 a zachovaný kontrolní komentář. Pak odstranit Shout,
+**První živá akce potvrzená:** vlastník provedl „Skrýt obsah bez postihu“ u
+hlášení „MVP public removal ada057d3 comment. Remove after verification.“ bez chyby.
+Server potvrzuje TestModerator (it_moderator, role 3), target komentář absent,
+commentsCount **2 → 1**, kontrolní komentář beze změny a celý aktuální publicState
+feed-v3 shodný se zdrojem. Hlášení resolved/contentRemoved/resolvedBy odpovídá
+novému receipt **577ddc02…fe69a208**; všech 6 receiptů projde kontrolou původního
+7denního termínu. Shout je stále active a jeho hlášení open. Důkaz
+build/public-removal-comment-proof.json; žádný další živý zápis při této kontrole.
+Vlastník nyní dostal poslední akci stejného testu s důvodem
+„MVP public removal ada057d3 shout. Remove after verification.“. Potom
 ověřit oba receipts/audity a
 provést chráněný úklid při zachování všech potvrzení do +7 dní a kvót.
 DEV nasazení se započítává, živá akceptace zůstává otevřená. Sankce, osiřelá

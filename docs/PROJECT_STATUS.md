@@ -24,10 +24,13 @@ pod TestModerator. Schválený nový test je založený: **MVP public removal ad
 doklad potvrzuje počet 2 a zachování všech 21 původních receipts včetně updateTime;
 38 původních zdrojů a pending žádost chrání manifestový fence. Platnost do
 24. listopadu **22:02 SEČ**. Neseedovat nový pilot ani neprodlužovat platnost.
-**Další krok:** vlastník má odstranit pouze hlášený komentář s důvodem
-„MVP public removal ada057d3 comment. Remove after verification.“ volbou
-„Skrýt obsah bez postihu“. Před Shoutem serverově ověřit 2 → 1 a kontrolní
-komentář; potom teprve druhá akce, audit a úklid. Akceptace zůstává false.
+**První akce je živě potvrzená:** vlastník hlásí bezchybný průchod. Serverový
+doklad build/public-removal-comment-proof.json potvrzuje přesného TestModerator,
+odstraněný cílový komentář, **2 → 1**, zachovaný kontrolní komentář, propojený
+contentRemoved audit/receipt a shodu živé projekce feed-v3. Shout zůstává active,
+jeho hlášení open, celkem 6 receipts. **Další krok:** vlastník má odstranit pouze
+hlášený Shout „MVP public removal ada057d3 shout. Remove after verification.“
+volbou „Skrýt obsah bez postihu“. Potom ověřit oba audity a úklid; akceptace false.
 Browser host není dostupný; alternativní Windows ovládání automatická
 kontrola zastavila pro neověřitelnou URL. Další UI vstupy neprovádět bez nového
 ověření dostupnosti. Jediný manifest je v čisté release kopii

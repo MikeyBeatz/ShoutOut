@@ -77,8 +77,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    zdroj 87d6687 / úplné CI 45238613178 success, nová veřejná callable,
    aktualizovaný cleanup a web 1974e34d52e2945b. Ostatní provoz a původní data
    zachované. TestModerator klient je potvrzený; schválený pilot **ada057d3** je
-   seeded (1 Shout / 2 komentáře / 2 hlášení). Čeká se na odstranění komentáře,
-   serverovou kontrolu 2 → 1, teprve potom odstranění Shoutu a úklid. Živá akceptace
+   seeded (původně 1 Shout / 2 komentáře / 2 hlášení). Komentář je živě ověřený:
+   TestModerator, 2 → 1, kontrolní zachovaný, audit a živá projekce správné.
+   Čeká se na odstranění testovacího Shoutu a úklid. Živá akceptace
    zůstává otevřená. UI ovládání zastavila kontrola
    neověřitelné URL; je potřeba ruční průchod. Další otevřené části
    jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
