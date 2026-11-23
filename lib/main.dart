@@ -53,6 +53,8 @@ import 'comment_deletion_gateway.dart';
 import 'private_reply_deletion_gateway.dart';
 import 'private_report_removal_gateway.dart';
 import 'private_report_action_menu.dart';
+import 'content_report_decision_gateway.dart';
+import 'report_decision_action_menu.dart';
 import 'private_reply_delete_button.dart';
 import 'shout_deletion_gateway.dart';
 import 'timed_operation_gateway.dart';

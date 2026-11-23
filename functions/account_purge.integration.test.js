@@ -64,11 +64,21 @@ test('existing maintenance tick prioritizes a due purge and shares its one-job/5
 
 test('purge starts at the exact original 60-day boundary and never calls Auth early', { skip: !enabled }, async () => {
   const f = await fixture(), before = await f.jobRef.get(), user = await f.user.get();
+  const auditTime = Timestamp.now(), reports = [];
+  for (const collection of ['reports', 'commentReports', 'privateReplyReports']) reports.push(await f.add(`${collection}/${randomUUID()}`, {
+    reporterId: 'foreign-reporter', authorId: 'foreign-author', reason: 'Preserve report evidence', resolvedAt: auditTime,
+    resolvedBy: f.uid, escalatedBy: f.uid, status: 'resolved', decisionOperationId: 'preserve-operation',
+  }));
   f.time(f.identity.requestCreateTime.toMillis() + accountRetentionMillis - 1);
   assert.equal((await f.run({ getUser() { assert.fail('early Auth'); } })).state, 'deferred');
   assert.ok((await f.jobRef.get()).updateTime.isEqual(before.updateTime)); assert.ok((await f.user.get()).updateTime.isEqual(user.updateTime));
+  for (const ref of reports) assert.equal((await ref.get()).get('resolvedBy'), f.uid);
   f.advance(1); await f.finish(); assert.equal((await f.request.get()).exists, false); assert.equal((await f.reservation.get()).exists, false);
   assert.deepEqual((await f.profile.get()).data(), { schemaVersion: 1, accountStatus: 'deleted' });
+  for (const ref of reports) {
+    const row = await ref.get(); assert(row.exists); assert.equal(row.get('resolvedBy'), undefined); assert.equal(row.get('escalatedBy'), undefined);
+    assert.equal(row.get('reason'), 'Preserve report evidence'); assert(row.get('resolvedAt').isEqual(auditTime)); assert.equal(row.get('decisionOperationId'), 'preserve-operation');
+  }
   assert.equal((await f.run({ getUser() { assert.fail('replay Auth'); } })).state, 'purged');
 });
 

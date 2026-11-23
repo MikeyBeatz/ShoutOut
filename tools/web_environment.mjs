@@ -77,6 +77,12 @@ export function validateConfig(config, environment) {
   if (Object.hasOwn(config, 'serverPrivateReportRemoval') && typeof config.serverPrivateReportRemoval !== 'boolean') {
     throw new Error('serverPrivateReportRemoval must be a boolean.');
   }
+  if (Object.hasOwn(config, 'serverContentReportDecisions') && typeof config.serverContentReportDecisions !== 'boolean') {
+    throw new Error('serverContentReportDecisions must be a boolean.');
+  }
+  if (config.serverContentReportDecisions === true && !config.appCheckSiteKey) {
+    throw new Error('Server report decisions require web App Check.');
+  }
   if (config.serverPrivateReportRemoval === true && !config.appCheckSiteKey) {
     throw new Error('Server private report removal requires web App Check.');
   }

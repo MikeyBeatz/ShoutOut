@@ -23,6 +23,13 @@ always select full checks; a green lightweight run is not release build proof.
 
 ## Development utilities
 
+`npm --prefix tools run test:report-decisions` runs the isolated prepared
+approve/escalate/resolve core for all three content report types. It verifies
+complete bounded groups, concurrent reports/moderators, immutable retry,
+rollback, archive and retention behavior. The callable is not exported;
+serverContentReportDecisions defaults false in both web environments.
+[Local results and the future DEV gate](../docs/MVP_SERVER_PLAN.md#moderation-basic-local-results).
+
 `npm --prefix tools run test:private-deletion` runs the prepared own-private-reply
 deletion operation and a derived Rules prototype in the isolated Firestore
 emulator. The candidate generator rejects unexpected source drift; it does not

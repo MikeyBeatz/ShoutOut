@@ -18,6 +18,12 @@ ale mají vlastní text a schvalovací proces.
 
 ## Stav dokumentu
 
+[Společné approve/escalate/resolve](../MVP_SERVER_PLAN.md#moderation-basic-local-results)
+všech tří typů hlášení jsou připravené místně včetně neaktivního klienta.
+Role, region, skupina a audit se ověřují v transakci; klientský příznak je
+false a endpoint není exportovaný. Dosavadní živé cesty tato příprava
+nemění a celková moderační autorita ještě není uzavřená.
+
 Místní serverové jádro pro jedno rozhodnutí **Skrýt soukromou odpověď bez
 postihu** je oddělené od dosavadního klienta: [rozsah, testy a hranice](../MVP_SERVER_PLAN.md#moderation-private-local).
 Navazující [DEV přechod včetně Rules, akceptace a úklidu je uzavřený](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).

@@ -10,11 +10,13 @@ class PrivateReportActionMenu extends StatefulWidget {
     required this.hasPendingRemoval,
     required this.resolveLabel,
     required this.removeLabel,
+    this.pendingDecision,
   });
   final Future<void> Function(String action) onDecision;
   final void Function(Object) onError;
   final bool Function() isCurrent, hasPendingRemoval;
   final String resolveLabel, removeLabel;
+  final String? Function()? pendingDecision;
 
   @override
   State<PrivateReportActionMenu> createState() =>
@@ -45,9 +47,25 @@ class _PrivateReportActionMenuState extends State<PrivateReportActionMenu> {
       : PopupMenuButton<String>(
           onSelected: _submit,
           itemBuilder: (_) => [
-            if (!widget.hasPendingRemoval())
-              PopupMenuItem(value: 'resolve', child: Text(widget.resolveLabel)),
-            PopupMenuItem(value: 'remove', child: Text(widget.removeLabel)),
+            if (widget.pendingDecision?.call() case final decision?
+                when decision != 'resolve')
+              const PopupMenuItem(
+                enabled: false,
+                child: Text('Dokonči původní rozhodnutí v Hlášení.'),
+              )
+            else ...[
+              if (!widget.hasPendingRemoval())
+                PopupMenuItem(
+                  value: 'resolve',
+                  child: Text(
+                    widget.pendingDecision?.call() == 'resolve'
+                        ? 'Zopakovat původní rozhodnutí'
+                        : widget.resolveLabel,
+                  ),
+                ),
+              if (widget.pendingDecision?.call() == null)
+                PopupMenuItem(value: 'remove', child: Text(widget.removeLabel)),
+            ],
           ],
         );
 }

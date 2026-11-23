@@ -9,6 +9,14 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('prepared content report decisions default off and require a strict App Check flag', () => {
+  assert.notEqual(actualDev.serverContentReportDecisions, true); assert.notEqual(loadConfig('prod').serverContentReportDecisions, true);
+  assert.doesNotThrow(() => validateConfig({ ...actualDev, serverContentReportDecisions: true }, 'dev'));
+  for (const invalid of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverContentReportDecisions: invalid }, 'dev'));
+  const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) }; delete disabled.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...disabled, serverContentReportDecisions: true }, 'dev'));
+});
+
 test('private report removal has a strict independent App Check flag and remains off in production', () => {
   assert.equal(actualDev.serverPrivateReportRemoval, true); assert.notEqual(loadConfig('prod').serverPrivateReportRemoval, true);
   const config = { ...actualDev }; delete config.serverPrivateReportRemoval;

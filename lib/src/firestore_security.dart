@@ -250,6 +250,68 @@ final _commentDeletionGateway = CommentDeletionGateway(
 bool get _useServerPrivateReportRemoval =>
     kIsWeb && WebEnvironment.current.serverPrivateReportRemoval;
 
+bool get _useServerContentReportDecisions =>
+    kIsWeb && WebEnvironment.current.serverContentReportDecisions;
+
+ContentReportTarget _contentReportTarget(
+  String collection,
+  Map<String, dynamic> data,
+) => (
+  type: switch (collection) {
+    'reports' => 'shout',
+    'commentReports' => 'comment',
+    'privateReplyReports' => 'privateReply',
+    _ => throw StateError('Unknown report collection.'),
+  },
+  shoutId: data['shoutId'] as String,
+  targetId: collection == 'reports'
+      ? null
+      : data[collection == 'commentReports' ? 'commentId' : 'privateReplyId']
+            as String,
+);
+
+final _contentReportDecisionGateway = ContentReportDecisionGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) => _serverContentOperations.call(
+    attempt: request.timedAttempt,
+    userId: request.userId,
+    operation: 'decideContentReports',
+    payload: request.toPayload(),
+  ),
+);
+
+ContentReportDecisionRequest? _pendingContentReportDecision(
+  ContentReportTarget target,
+) {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  return uid == null || !_useServerContentReportDecisions
+      ? null
+      : _contentReportDecisionGateway.pending(uid, target);
+}
+
+Future<void> _decideContentReports(
+  ContentReportTarget target,
+  List<String> reportIds,
+  String decision, {
+  String? note,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) {
+    throw FirebaseFunctionsException(
+      code: 'unauthenticated',
+      message: 'The signed-in account changed.',
+    );
+  }
+  final pending = _pendingContentReportDecision(target);
+  await _contentReportDecisionGateway.decide(
+    userId: uid,
+    target: target,
+    reportIds: pending?.reportIds ?? reportIds,
+    decision: decision,
+    note: note ?? pending?.note ?? '',
+  );
+}
+
 final _privateReportRemovalGateway = PrivateReportRemovalGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) => _serverContentOperations.call(

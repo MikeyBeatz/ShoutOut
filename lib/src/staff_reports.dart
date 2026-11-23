@@ -265,6 +265,28 @@ class _StaffReportCard extends StatelessWidget {
         message: 'Retry the original pending decision first.',
       );
     }
+    if (_useServerContentReportDecisions) {
+      final target = _contentReportTarget(
+        group.collection,
+        representative.data(),
+      );
+      final pending = _pendingContentReportDecision(target);
+      if (pending != null && action != pending.decision) {
+        throw FirebaseFunctionsException(
+          code: 'already-exists',
+          message: 'Retry the original pending decision first.',
+        );
+      }
+      if (['approve', 'escalate', 'resolve'].contains(action)) {
+        await _decideContentReports(
+          target,
+          group.reports.map((r) => r.id).toList(),
+          action,
+          note: note,
+        );
+        return;
+      }
+    }
     if (action == 'approve') return _approveReports(note);
     if (action == 'escalate') return _escalateReports(note);
 
@@ -438,6 +460,16 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       ? _pendingPrivateReportRemoval(widget.group.representative.id)
       : null;
 
+  ContentReportDecisionRequest? get _pendingDecision =>
+      !_useServerContentReportDecisions
+      ? null
+      : _pendingContentReportDecision(
+          _contentReportTarget(
+            widget.group.collection,
+            widget.group.representative.data(),
+          ),
+        );
+
   @override
   void initState() {
     super.initState();
@@ -446,11 +478,18 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       _decision = 'remove';
       _noteController.text = pending.note;
     }
+    final decision = _pendingDecision;
+    if (decision != null) {
+      _decision = decision.decision;
+      _noteController.text = decision.note;
+    }
   }
 
   List<_ReportDecisionOption> get _options => [
+    if (_pendingDecision?.decision == 'resolve')
+      const _ReportDecisionOption('resolve', 'Označit jako vyřešené'),
     const _ReportDecisionOption('approve', 'Bez postihu – obsah je v pořádku'),
-    if (!widget.group.isEscalated)
+    if (!widget.group.isEscalated || _pendingDecision?.decision == 'escalate')
       const _ReportDecisionOption('escalate', 'Odeslat senior moderátorovi'),
     const _ReportDecisionOption('remove', 'Skrýt obsah bez postihu'),
     const _ReportDecisionOption('warning', 'Udělit varování'),
@@ -515,14 +554,16 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
               ),
             )
             .toList(),
-        onChanged: _saving || _pendingRemoval != null
+        onChanged:
+            _saving || _pendingRemoval != null || _pendingDecision != null
             ? null
             : (value) => setState(() => _decision = value),
       ),
       const SizedBox(height: 10),
       TextField(
         controller: _noteController,
-        enabled: !_saving && _pendingRemoval == null,
+        enabled:
+            !_saving && _pendingRemoval == null && _pendingDecision == null,
         maxLength: 500,
         maxLines: 2,
         decoration: const InputDecoration(
@@ -544,7 +585,11 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.check),
-          label: const Text('Uložit rozhodnutí'),
+          label: Text(
+            _pendingDecision == null
+                ? 'Uložit rozhodnutí'
+                : 'Zopakovat původní rozhodnutí',
+          ),
         ),
       ),
     ],

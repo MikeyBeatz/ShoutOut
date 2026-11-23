@@ -35,6 +35,10 @@ export function accountPurgeStages(uid) {
     { action: 'storage', prefix: `bugReports/${uid}/` },
     ...['businessProfiles', 'businessApplications', 'rateLimits', 'bans', 'contentRestrictions', 'accountRoles', 'moderators', 'users']
       .map(collection => ({ action: 'delete', direct: `${collection}/${uid}` })),
+    // Append only: persisted purge jobs use numeric stage positions. Account
+    // deletion still fences ingress while these final actor references drain.
+    ...['reports', 'commentReports', 'privateReplyReports'].flatMap(c =>
+      ['resolvedBy', 'escalatedBy'].map(field => queryStage(c, field, 'scrub'))),
   ];
 }
 

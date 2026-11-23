@@ -8,6 +8,14 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+Společná bezpostihová rozhodnutí mají samostatné
+`npm --prefix tools run test:report-decisions` a úplný CI krok
+Test prepared content report decisions (3 min). Ověřují všechny 3 typy
+hlášení, approve/escalate/resolve, celé skupiny 50/51, nový report během
+rozhodnutí, immutable replay, archivaci, auditní scrub a retenci.
+[Místní výsledky a meze](../MVP_SERVER_PLAN.md#moderation-basic-local-results).
+Neexportovaný callable a vypnutý klient nejsou důkazem živé dostupnosti.
+
 Vlastní soukromé mazání má `npm --prefix tools run test:private-deletion`
 (server, odvozený Rules prototyp a souběh s archivací). V plném CI jde o vlastní
 krok, kořenové/vydané Rules se tím nepřepisují. [Výsledky a hranice](../MVP_SERVER_PLAN.md#private-deletion-local).

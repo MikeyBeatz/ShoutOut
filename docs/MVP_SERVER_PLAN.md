@@ -989,6 +989,117 @@ Implementace, automatické ověření, kompletní DEV přechod a živá akceptac
 rozhodnutí/sankce, regionální živá regrese a produkční aktivace zůstávají
 otevřené. Odložený feedový test a jeho staré fixture se tím neuzavírají.
 
+<a id="moderation-basic-local"></a>
+
+### Schválený místní úsek: společná rozhodnutí bez postihu
+
+Vlastník 23. listopadu schválil společné serverové schválení obsahu, předání
+seniorovi a prosté uzavření hlášení pro Shouty, komentáře a soukromé odpovědi.
+Rozhodnutí se týká celé aktuální skupiny nejvýše 50 otevřených/eskalovaných
+hlášení; klient posílá očekávaná ID a server je ověří omezeným transakčním
+dotazem. Zastaralá/neúplná skupina, překročení 50 nebo nejasný/revytvořený
+cíl se odmítne bez částečných zápisů. Schválení zachová neměnné clearance
+a dosavadní zákaz dalšího hlášení schváleného obsahu; prosté uzavření
+clearance nevytváří. Eskalované případy dokončuje alespoň senior.
+
+Uložená role, země/subdivision, Auth/App Check a účetní způsobilost se ověřují
+uvnitř transakce a také při opakování. Audit zůstává u původních hlášení;
+body-free technické potvrzení má dosavadních 7 dní. Poznámka, rozhodnutí
+i původní seznam ID zůstanou při nejasném výsledku v klientu neměnné.
+Ověřit dva moderátory, nové hlášení během rozhodování, změnu role/účtu,
+rollback, archivaci a konečný účtový úklid. Transakční izolaci a opakování
+posuzovat podle [oficiálního kontraktu Firestore](https://firebase.google.com/docs/firestore/transaction-data-contention),
+nikoli podle pouhého úspěchu klientského batch zápisu.
+
+Klientské napojení zůstane za novým serverContentReportDecisions=false;
+žádný callable wrapper ani aktivace, živé změny, Auth účty, Rules, nové
+sankce/role/limity, prostředky či retence. Zahrnuje dokumentaci/metriky,
+commit/push a společné úplné CI. Konkrétní DEV rollout/pilot bude připraven
+podle výsledků, nikoli automaticky proveden tímto místním souhlasem.
+
+Před dokončováním je ze zbývající moderation-decision váhy 900 vyčleněno:
+jádro 100, jeho ověření 100, klient 50, klientské ověření 50, budoucí DEV 50,
+živá akceptace/úklid 50; na ostatní rozhodnutí/sankce zůstává 500. Již hotové
+části, celková váha rodiče a váhy ostatních milníků zůstávají stejné.
+
+<a id="moderation-basic-local-results"></a>
+
+### Místní výsledek a navazující DEV brána
+
+functions/decide_content_reports.js řeší approve/escalate/resolve ve všech
+třech kolekcích. V transakci porovná úplnou aktuální skupinu s kanonickými
+očekávanými ID, ověří stav/inkarnaci cíle a autoritu a uloží všechny výsledky
+společně. Dotaz má 51. řádek jen pro zjištění překročení a přenáší pouze
+potřebná pole. Nevyžaduje novou kolekci, koordinační zápis ani změnu zdroje
+obsahu. Schválení vytvoří neměnnou moderationClearances; resolve má noAction;
+escalate uloží assignedRole/escalatedBy/escalatedAt a escalationOperationId.
+Dokončení ukládá resolvedBy/resolvedAt/decisionOperationId. Snapshoty, obsah,
+čítače, feed a poznámky jiných rozhodnutí se nepřepisují.
+
+Nová receipt action decideContentReports uchovává pouze technická ID, výsledek,
+požadovanou roli a fingerprint, bez důvodu/textu/poznámky. Sedmidenní cleanup
+allowlist je připravený místně. Konec dosavadní 60denní účtové retence navíc
+odstraní resolvedBy/escalatedBy u všech tří typů hlášení; šest scrub fází je
+**připojeno na konec** accountPurgeStages, žádný dřívější číselný index se
+neposunuje. Zdroj, role ani aktivní/původní živé joby se nyní neměnily.
+Nasazení později musí ověřit také kompatibilitu tehdy rozpracovaných jobů;
+hotové historické joby tento místní úsek znovu nespouští.
+
+Klientský ContentReportDecisionGateway drží jeden neměnný požadavek na
+účet/cíl i při nových ID ve frontě, opakované kliknutí sdílí jednu akci.
+Nejasný výsledek zachová původní note/decision/IDs a server-issued klíč;
+jednoznačné odmítnutí jej uvolní. Hlavní panel i starší seznamy jsou napojené
+za **serverContentReportDecisions=false**. Podporují průběh, chyby, bezpečné
+opakování, zánik obrazovky i změnu účtu. DEV/prod konfigurační soubory
+zůstaly beze změny, přepínač má přísný boolean/App Check gate a výchozí false.
+Žádný callable export; test runtime balíčků hlídá nepřítomnost nového jádra.
+
+Ověřeno: **509 Flutter testů**, včetně 9 nových; **108 nástrojových testů**;
+analyze bez nálezů, lint a **177 serverových unit testů**. 618 integračních
+testů v unit běhu bez emulátoru je přeskočených, nikoli dodatečný úspěch.
+Nových 18 emulátorových případů zahrnuje všechny 3×3 kombinace, 50/51,
+nové hlášení během transakce, dva moderátory, replay, poškozenou receipt,
+zastaralou inkarnaci, rollback po připravených změnách, archivaci a přesnou
+sedmidenní hranici. Samostatných 15 účtových purge regresí také prošlo.
+Místní důkazy build/report-decisions-{server-final,server-regression,client-final,flutter-final,analyze-final,functions-final,tools-final,lint-final}.log
+a build/report-decisions-measurement.json. První širší běh měl opravený
+testový předpoklad: regionální moderátor při chybějícím rodiči dostane
+permission-denied už při kontrole scope, nikoli vždy not-found.
+Rozšířený průchod skutečným purge workerem také prošel na přesné 60denní
+hranici: před termínem zachová všechny 3×2 actor vazby, po termínu je odstraní
+a ponechá důvod, čas a operation ID. Důkaz build/report-decisions-purge-boundary-final.log.
+
+SDK operace bez konfliktu: první Shout approve 11 reads / 3 writes, komentář
+nebo soukromá odpověď 12 / 3, jejich escalate/resolve 12 / 2; replay 9 / 0.
+50 komentářových hlášení 61 / 52; při 51 se nic nezapíše. Nejde o cloudový
+kapacitní, cenový ani latencový výsledek. Přidán samostatný úplný CI krok
+Test prepared content report decisions (3 min), bez emulátorů v lehkém CI.
+Konečný stav úplného CI přesného zdroje se doplní po společném pushi.
+
+**Konkrétní návrh navázání, dosud bez souhlasu s provedením:**
+
+1. Připravit callable decideContentReports a kompatibilní řízený DEV pilot;
+   navržený DEV profil je dosavadní callable min 0 / max 1, concurrency 1,
+   europe-west3, 256 MiB, 15 s, Auth/App Check. Produkční kapacita tím není určena.
+2. Připravit nejvýše 3 složené indexy podle dotazů: reports(shoutId,status),
+   commentReports(shoutId,commentId,status), privateReplyReports(shoutId,privateReplyId,status).
+   Aktuální katalog nemá tyto skupiny výslovně nastavené; přesný plán ověřit
+   proti tehdejším indexům. Bez TTL a bez nynějšího nasazení.
+3. Před aktivací aktualizovat stejný existující receipt cleanup a účtové
+   Functions pro auditní scrub, beze změny prostředků a plánovačů; doložit
+   čistý přesný commit/úplné CI, kompatibilitu jobů a návratový web.
+4. Navrhovaný pozdější pilot: 1 nový 24h Shout, 1 komentář, 1 soukromá
+   odpověď a 3 hlášení pod existujícími testovacími účty, bez Auth změn;
+   regionální TestModerator ověří approve/resolve/escalate, TestAdmin dokončí
+   eskalovaný případ. Přesná identita, geografie, digest a úklid mají být
+   součástí samostatně schváleného živého plánu. Nyní nic neseedovat.
+5. **Neuzavírat celé moderační Rules před dokončením ostatních rozhodnutí.**
+   Přímé sankční cesty dosud mohou uzavírat hlášení bez resolution; pouhé
+   blokování pojmenovaných noAction/contentApproved by nebylo úplnou uzávěrou.
+   Navržené pořadí: dokončit veřejné odstranění a sankční transakce, potom
+   společný kompatibilní Rules cutover. Nové serverové napojení ani UI flag
+   samy nejsou důkazem dokončené serverové autority celého milníku.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,

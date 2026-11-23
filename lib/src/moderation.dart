@@ -372,6 +372,11 @@ class _PrivateReplyReportList extends StatelessWidget {
                         _pendingPrivateReportRemoval(report.id) != null,
                     resolveLabel: tr(context, 'Označit jako vyřešené'),
                     removeLabel: tr(context, 'Skrýt obsah bez postihu'),
+                    pendingDecision: () => !_useServerContentReportDecisions
+                        ? null
+                        : _pendingContentReportDecision(
+                            _contentReportTarget('privateReplyReports', data),
+                          )?.decision,
                     onError: (error) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -400,6 +405,26 @@ class _PrivateReplyReportList extends StatelessWidget {
                           code: 'already-exists',
                           message: 'Retry the original pending decision first.',
                         );
+                      }
+                      if (_useServerContentReportDecisions) {
+                        final target = _contentReportTarget(
+                          'privateReplyReports',
+                          data,
+                        );
+                        final pending = _pendingContentReportDecision(target);
+                        if (pending != null && action != pending.decision) {
+                          throw FirebaseFunctionsException(
+                            code: 'already-exists',
+                            message:
+                                'Retry the original pending decision first.',
+                          );
+                        }
+                        if (action == 'resolve') {
+                          await _decideContentReports(target, [
+                            report.id,
+                          ], 'resolve');
+                          return;
+                        }
                       }
                       if (action == 'remove') {
                         if (_useServerPrivateReportRemoval) {
@@ -459,6 +484,10 @@ class _ReportList extends StatelessWidget {
         itemBuilder: (context, index) {
           final report = reports[index];
           final data = report.data();
+          final actor = FirebaseAuth.instance.currentUser?.uid;
+          final target = _useServerContentReportDecisions
+              ? _contentReportTarget(collection, data)
+              : null;
           return Card(
             child: ListTile(
               title: Text(data['reason'] as String? ?? ''),
@@ -472,9 +501,48 @@ class _ReportList extends StatelessWidget {
                 builder: (_) =>
                     _ReportDetailDialog(report: report, collection: collection),
               ),
-              trailing: PopupMenuButton<String>(
-                onSelected: (action) => _act(context, report, action),
-                itemBuilder: (context) => [
+              trailing: ReportDecisionActionMenu(
+                key: ValueKey((actor, report.id)),
+                isCurrent: () =>
+                    FirebaseAuth.instance.currentUser?.uid == actor,
+                pendingAction: () => target == null
+                    ? null
+                    : _pendingContentReportDecision(target)?.decision,
+                onError: (error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          _serverWriteFailureText(
+                            context,
+                            error,
+                            fallback: 'Rozhodnutí se nepodařilo uložit.',
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                onDecision: (action) async {
+                  await _act(
+                    context,
+                    report,
+                    action,
+                    relatedReports: target == null
+                        ? [report]
+                        : reports
+                              .where(
+                                (r) =>
+                                    _contentReportTarget(
+                                      collection,
+                                      r.data(),
+                                    ) ==
+                                    target,
+                              )
+                              .toList(),
+                  );
+                },
+                items: () => [
                   PopupMenuItem(
                     value: 'resolve',
                     child: Text(tr(context, 'Označit jako vyřešené')),
@@ -535,9 +603,28 @@ class _ReportList extends StatelessWidget {
   Future<bool> _act(
     BuildContext context,
     QueryDocumentSnapshot<Map<String, dynamic>> report,
-    String action,
-  ) async {
+    String action, {
+    List<QueryDocumentSnapshot<Map<String, dynamic>>>? relatedReports,
+  }) async {
     final data = report.data();
+    if (_useServerContentReportDecisions) {
+      final decisionTarget = _contentReportTarget(collection, data);
+      final pending = _pendingContentReportDecision(decisionTarget);
+      if (pending != null && action != pending.decision) {
+        throw FirebaseFunctionsException(
+          code: 'already-exists',
+          message: 'Retry the original pending decision first.',
+        );
+      }
+      if (action == 'resolve') {
+        await _decideContentReports(
+          decisionTarget,
+          (relatedReports ?? [report]).map((r) => r.id).toList(),
+          'resolve',
+        );
+        return true;
+      }
+    }
     final shoutRef = FirebaseFirestore.instance
         .collection('shouts')
         .doc(data['shoutId'] as String);
