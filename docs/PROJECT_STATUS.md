@@ -6,19 +6,28 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválené DEV navázání veřejného odstranění – příprava:** vlastník schválil
-[celý přechod a vymezený pilot](MVP_SERVER_PLAN.md#moderation-public-dev-proposal).
-Wrapper, nový řízený pilot a host/CLI testy jsou připravené; společný běh má
-41/41 emulátorových scénářů (včetně 5 nových pilotních), 2/2 host, 111 nástrojových
-a 519 Flutter testů prošlo. Dva původní konfigurační testy byly přizpůsobené
-aktivaci DEV přepínače; ověřují nezávislé vypnutí bez App Check. V source config/dev je nová volba
-true, prod false; aktuální živý web zatím zůstává 33853a9 / server 44e07a5.
-Následují společné regrese a úplné CI přesného aktivačního zdroje, nejdříve
-jen nová removeReportedPublicContent a existující cleanupOperationReceipts,
-potom DEV web. Zatím žádné živé zápisy/nasazení ani nová fixture. Pilot
-založit až při dostupném klientu; pouze 1 Shout/2 komentáře/2 hlášení,
-TestModerator, potom úklid se zachováním receipts. Rules/indexy/Auth/main/
-produkce beze změny, neoznačovat živou akceptaci před skutečným výsledkem.
+**Veřejné moderační odstranění je nasazené v DEV; zbývá živý pilot.**
+[Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-results).
+Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** má
+[úspěšné úplné CI 45238613178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178).
+Nová removeReportedPublicContent **00001-yaw**, cleanup **00008-fal**, web
+**1974e34d52e2945b**; serverPublicReportRemoval true jen DEV. Prostředky a
+100 % provozu ověřené; oba zdrojové archivy přesně odpovídají 67 souborům
+balíčku. Všech 67 app souborů a 8 HTTP kontrol obou domén odpovídá buildu;
+bez Auth/App Check callable odmítá 401. Ostatních 22 Functions, oba plánovače,
+Rules, feed/news, 38 původních Shoutů/pending žádost i jejich updateTime zachované.
+Žádné nové fixture, Auth změny nebo zásah do produkce/main.
+
+**Další krok:** ruční potvrzení přihlášení TestModerator v nově obnoveném DEV
+webu. Browser host není dostupný; alternativní Windows ovládání automatická
+kontrola zastavila pro neověřitelnou URL. Další UI vstupy neprovádět bez nového
+ověření dostupnosti. Teprve při dostupném klientu vytvořit schválený jeden
+24h Shout / dva komentáře / dvě hlášení; komentář odstranit před Shoutem,
+ověřit 2 → 1 a kontrolní komentář, pak audit a úklid. Akceptace zůstává false.
+Jediný budoucí manifest vytvořit jen v čisté release kopii
+build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json;
+zatím neexistuje. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
+dokumentační commit je nenahrazuje. Návratový kompatibilní web 565880d4664da7b2.
 
 **Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
 větev feature/report-public-removal. Atomické odstranění Shoutu/komentáře,

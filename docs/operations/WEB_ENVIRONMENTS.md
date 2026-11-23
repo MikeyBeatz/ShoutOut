@@ -1,5 +1,19 @@
 # Vývojový a produkční web
 
+**Aktuální DEV veřejná moderace, 23. listopadu 19:48 SEČ:**
+[nasazení ověřené, živý pilot čeká](../MVP_SERVER_PLAN.md#moderation-public-dev-results).
+Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** / úplné CI **45238613178 success**;
+web **1974e34d52e2945b**, serverPublicReportRemoval true jen DEV.
+Nová removeReportedPublicContent **00001-yaw**, cleanup **00008-fal**, prostředky
+a 100 % provozu ověřené; oba zdrojové archivy shodné s balíčkem. 67 app souborů,
+8 HTTP kontrol a 401 bez Auth/App Check ověřené. Ostatních 22 Functions,
+oba plánovače, Rules, 38 původních Shoutů/pending žádost i jejich updateTime
+beze změny. Žádná nová fixture/Auth, změna indexů, produkce nebo main.
+Další krok je TestModerator a schválený dvouakční pilot; založit až při
+dostupném klientu. Browser host je nedostupný a Windows UI kontrola zastavila
+pokus kvůli neověřitelné URL. Návratový kompatibilní web **565880d4664da7b2**.
+Následující datované inventury jsou starší checkpointy.
+
 **Aktuální inventura po závěrečném feed úklidu, 23. listopadu 18:01 SEČ:**
 [B4 a finální DEV akceptace uzavřené](../plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
 Uklizeno pouze 50 restartovacích a 3 A/B/C Shouty, 54 read klíčů; zůstává

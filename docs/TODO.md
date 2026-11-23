@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,77 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,79 %** — vážené dokončení podúseků
 
-Hotové úseky: **203/258**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **204/258**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -73,10 +73,12 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
    110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má
    [úspěšné úplné CI 45230513178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178).
-   Vlastník nyní schválil [konkrétní DEV přechod](MVP_SERVER_PLAN.md#moderation-public-dev-proposal):
-   připravuje se wrapper/pilot, source flag true jen DEV; živě zatím bez změn.
-   Následují společné regrese, úplné CI, dvě cílené Functions a DEV web,
-   poté jeden vymezený pilot přes TestModerator a úklid. Další otevřené části
+   [DEV nasazení je ověřené](MVP_SERVER_PLAN.md#moderation-public-dev-results):
+   zdroj 87d6687 / úplné CI 45238613178 success, nová veřejná callable,
+   aktualizovaný cleanup a web 1974e34d52e2945b. Ostatní provoz a původní data
+   zachované. Zbývá přihlášení TestModerator, teprve potom vymezený pilot a úklid;
+   dosud žádná nová fixture ani živá akceptace. UI ovládání zastavila kontrola
+   neověřitelné URL; je potřeba ruční průchod. Další otevřené části
    jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
    Níže jsou důkazy dříve uzavřených částí.
    **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)

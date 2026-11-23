@@ -3,8 +3,8 @@
 ## Aktuální stav a použití plánu
 
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
-Navazující [DEV přechod je schválený a připravuje se](#moderation-public-dev-proposal);
-dosavadní živé DEV nasazení zůstává zachované do jeho ověření a přesného CI.
+Navazující [DEV přechod je nasazený; zbývá pilot](#moderation-public-dev-results);
+původní obsah a ostatní konfigurace jsou zachované. Živá akceptace se zatím netvrdí.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
@@ -1466,6 +1466,57 @@ po aktivaci DEV přepínače nejprve selhaly; izolovaná fixture nyní přepína
 výslovně vypíná a celý Flutter běh je zelený. Důkazy build/public-removal-
 activation-{emulator,flutter-final,tools}.log. Následuje přesné úplné CI.
 Živý seed až při dostupném klientu, ne předem během CI.
+
+<a id="moderation-public-dev-results"></a>
+
+### Veřejné odstranění – ověřené DEV nasazení, pilot čeká
+
+23. listopadu 2026, ověřeno 19:48 SEČ. Zdroj
+**87d6687f17eafa670dcaf115665439bdd5597227**, větev feature/report-public-removal,
+[úplné CI 45238613178 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178).
+Místně 41/41 společných emulátorových případů, 2/2 host, 111 nástrojových a
+519 Flutter testů; analyze/lint čisté. První dva konfigurační testy byly opravené
+po aktivaci přepínače, celý závěrečný běh prošel. CI ověřilo také ostatní
+Rules/serverové sady, B2, retenci, Storage a webový build.
+
+Z čisté přesné release kopie nasazeno jen do **shoutout-dev-46c81**:
+
+- removeReportedPublicContent, revize **removereportedpubliccontent-00001-yaw**,
+  europe-west3, Node.js 22, min 0 / max 1, concurrency 1, 256 MiB, 15 s.
+- cleanupOperationReceipts, revize **cleanupoperationreceipts-00008-fal**,
+  stávající prostředky a minutový Scheduler zachované; 60 s.
+- Web **1974e34d52e2945b**, serverPublicReportRemoval true pouze DEV;
+  produkční konfigurace nezměněná. Návratový web **565880d4664da7b2** je kompatibilní.
+
+Obě revize mají 100 % provozu. Stažené zdrojové archivy odpovídají každý všem
+67 souborům připraveného balíčku; pilotní helper není v nasazovacím balíčku.
+Všech 67 veřejných app souborů odpovídá release, 8 HTTP kontrol obou domén
+je shodných a 2 generované Firebase konfigurace zachované. Neautentizovaný
+požadavek na novou callable vrací 401. Dotazy pendingContentReports pro Shout
+i komentář jsou živě spustitelné; žádné nové indexy nebyly potřeba ani změněny.
+
+Ostatních **22 Functions**, oba minutové plánovače, Rules
+**3de8f7d8-6658-4b24-951f-043eac8de297**, feed 12/news 6/active, všech
+**38 původních Shoutů a pending žádost včetně updateTime**, nulové účtové/purge
+joby zachované. Žádný nový Auth účet, fixture ani kvótový reset, změna produkce
+nebo main. Přednasazovací inventura obsahovala 21 stávajících receipts.
+
+Důkazy: build/public-removal-exact-activation-ci.json,
+build/public-removal-{read-preflight,prepared-artifacts,functions-proof,source-proof,web-proof}.json,
+build/public-removal-cloud-{before,predeploy,after-functions,after-web}.json a oba deploy logy.
+Nasazovací/pilotní kopie **build/public-removal-release-87d6687** zůstává čistá
+na přesném uvedeném SHA; mutační CLI vyžaduje jeho úplné CI. Budoucí jediný
+manifest docs/local/public-report-removal-pilot.json v této kopii dosud neexistuje.
+
+**Zbývá skutečná akceptace a úklid.** Browser host je nedostupný; při pokusu o
+nativní Windows ovládání automatická kontrola zastavila tento UI průchod,
+protože nedokázala spolehlivě určit aktuální URL. Další UI akce nebyly provedené.
+Po ručním přihlášení přesného TestModerator a obnovení webu teprve vytvořit
+schválený 24h Shout / dva komentáře / dvě hlášení. Odstranit nejdřív cílový
+komentář (2 → 1, kontrolní zůstane), poté Shout. Ověřit oba receipts/audity a
+provést chráněný úklid při zachování všech potvrzení do +7 dní a kvót.
+DEV nasazení se započítává, živá akceptace zůstává otevřená. Sankce, osiřelá
+hlášení a společný Rules cutover/audit autority nadále brání uzavření celého milníku.
 
 <a id="account-deletion"></a>
 
