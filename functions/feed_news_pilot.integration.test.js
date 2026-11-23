@@ -47,8 +47,15 @@ test('three slots enforce real-client B, idempotent A/C and scoped cleanup with 
     { shoutId: f.original.id, contentHash: readContentHash('Other', 'History'), expiresAt: (await f.original.get()).get('expiresAt').toMillis() },
   ] } };
   assert((await syncReadBatchOperation(input, db)).items.every(item => item.status === 'accepted'));
+  const receipt = db.doc(`serverOperations/${client.id}`); f.roots.push(receipt);
+  await receipt.create({ userId: f.actors[1].uid, shoutId: client.id, operation: 'createShout',
+    createdAt: Timestamp.fromMillis(createdAt), expiresAt: Timestamp.fromMillis(createdAt + 7 * 86400000) });
+  const beforeReceipt = await receipt.get();
   const result = await cleanupNewsPilot(db, f.plan, bindings); assert.equal(result.removed, 3); assert.equal(result.readKeys, 1);
   assert.equal((await cleanupNewsPilot(db, f.plan, bindings)).removed, 0);
+  const afterReceipt = await receipt.get();
+  assert.deepEqual(afterReceipt.data(), beforeReceipt.data());
+  assert(afterReceipt.updateTime.isEqual(beforeReceipt.updateTime));
   const remaining = (await db.collection(`users/${uid}/readBuckets`).get()).docs.flatMap(d => Object.values(d.get('entries') ?? {}));
   assert(remaining.some(r => r.shoutId === f.original.id)); assert(!remaining.some(r => r.shoutId === bindings.A.id));
   assert.equal((await f.original.get()).get('untouched'), true); assert.equal((await f.pending.get()).get('untouched'), true);
@@ -98,8 +105,15 @@ test('restart cleanup guards all fifty fixtures before writing, preserves unrela
     { shoutId: original.id, contentHash: readContentHash('Other', 'History'), expiresAt: original.get('expiresAt').toMillis() },
   ] } }, db);
   assert(accepted.items.every(item => item.status === 'accepted'));
+  const receipt = db.doc(`serverOperations/${rows[0].id}`); f.roots.push(receipt);
+  await receipt.create({ userId: uid, shoutId: rows[0].id, operation: 'toggleShoutSave',
+    createdAt: Timestamp.fromMillis(createdAt), expiresAt: Timestamp.fromMillis(createdAt + 7 * 86400000) });
+  const beforeReceipt = await receipt.get();
   const result = await cleanupRestart(db, state); assert.equal(result.removed, 50); assert.equal(result.readKeys, 1);
   assert.equal((await cleanupRestart(db, state)).removed, 0);
+  const afterReceipt = await receipt.get();
+  assert.deepEqual(afterReceipt.data(), beforeReceipt.data());
+  assert(afterReceipt.updateTime.isEqual(beforeReceipt.updateTime));
   const remaining = (await db.collection(`users/${uid}/readBuckets`).get()).docs.flatMap(doc => Object.values(doc.get('entries') ?? {}));
   assert.deepEqual(remaining.map(row => row.shoutId), [original.id]);
   assert.equal((await f.original.get()).updateTime.toMillis(), original.updateTime.toMillis());

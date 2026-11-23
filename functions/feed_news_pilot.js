@@ -146,7 +146,8 @@ export async function cleanupNewsPilot(db, plan, bindings) {
         else { assert(docs.size <= 2); for (const doc of docs.docs) { assert(actors.has(doc.id)); children.push(doc); } }
       }
       const receipts = await tx.get(db.collection('serverOperations').where('shoutId', '==', binding.id).limit(41));
-      assert(receipts.size <= 40); assert(receipts.docs.every(d => actors.has(d.get('userId')))); children.push(...receipts.docs);
+      assert(receipts.size <= 40); assert(receipts.docs.every(d => actors.has(d.get('userId'))));
+      // Fixture cleanup must not shorten the independent receipt retention window.
       const notifications = await tx.getAll(...plan.actors.flatMap(a => ['like', 'dislike'].map(kind => db.doc(`users/${a.uid}/notifications/reaction_${kind}_${binding.id}`))));
       children.push(...notifications.filter(d => d.exists));
       const index = await runtime.indexWriter.prepareBatch(tx, source.exists ? [{ id: binding.id, before: source.data(), after: null }] : [], { additionalWrites: children.length });

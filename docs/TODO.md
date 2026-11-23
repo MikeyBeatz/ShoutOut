@@ -57,6 +57,11 @@ Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
 pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
 
 1. **Dokončit úspornou obnovu s novinkami v B4.**
+   **Obnovený závěrečný test:** [stav a schválená oprava úklidu](plans/feed/B4_DEV_ROLLOUT.md#movement-cleanup-resume).
+   Ruční řazení/kotva ještě čekají; počáteční chyba načtení odezněla, příčina
+   není potvrzená. Zachovat fixture do výsledku, původní expiraci neprodlužovat.
+   Úklidový plán zohlední jen expiraci původních A/B, nástroj zachová receipts
+   do jejich vlastní sedmidenní lhůty. Bez nasazení aplikace či nových fixture.
    **Právě nasazená oprava:** [živé pořadí v Nejblíž](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
    Vlastník potvrdil aktualizaci vzdáleností, nově schválil i přeskládání karet
    při potvrzeném pohybu. 486 Flutter testů a 7 serverových regresí prošly;

@@ -52,7 +52,8 @@ async function sourcePlan(tx,db,p,row){
     else{assert(rows.size<=2);for(const child of rows.docs){assert(actors.has(child.id),'restart-cleanup-foreign-interaction');children.push(child);}}
   }
   const receipts=await tx.get(db.collection('serverOperations').where('shoutId','==',row.id).limit(41));
-  assert(receipts.size<=40);assert(receipts.docs.every(d=>actors.has(d.get('userId'))),'restart-cleanup-foreign-operation');children.push(...receipts.docs);
+  assert(receipts.size<=40);assert(receipts.docs.every(d=>actors.has(d.get('userId'))),'restart-cleanup-foreign-operation');
+  // Receipts retain their own seven-day lifecycle, including after fixture removal.
   const alerts=await tx.getAll(...p.actors.flatMap(a=>['like','dislike'].map(kind=>db.doc(`users/${a.uid}/notifications/reaction_${kind}_${row.id}`))));
   children.push(...alerts.filter(d=>d.exists));return{doc,children};
 }

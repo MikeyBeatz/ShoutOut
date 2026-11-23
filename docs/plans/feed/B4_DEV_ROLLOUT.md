@@ -1388,3 +1388,48 @@ scrollovat ručně nahoru; nemačkat obnovu, která by sama vytvořila nové po�
 Potom No override / 50 km / jedna obnova. Nepožadovat opakování již ověřené
 číslovky, expirace, pauzy ani celého původního pohybového průchodu. Při úspěchu
 restart 50 → původní A/B/C podle stávajících manifestů; bez nových fixture/Auth.
+
+<a id="movement-cleanup-resume"></a>
+
+### Obnovení kontroly a úklidového plánu – 23. listopadu
+
+Vlastník obnovil odložený test na aktuálním webu **33853a9**, nikoli rollbackem
+na historický af4c3aa. První pokus o načtení a změnu dosahu selhal, následně
+potvrdil opětovné načtení. Poslední dvě getFeedPage volání mají HTTP 200 a
+Auth/App Check VALID; příčina předchozí klientské chyby není prokázaná.
+Podklad build/feed-movement-load-error-logs.json. Ruční řazení/kotva zůstávají
+otevřené; nic nezapočítávat před skutečnou akceptací a úklidem.
+
+Inventura 16:50 SEČ doložila všech **50/50** restartovacích Shoutů i publicStates,
+aktivní pohyb a nezměněnou expiraci **23. listopadu 18:23:34 SEČ**. Podklady
+build/feed-movement-resume-status.json a build/feed-movement-cleanup-preflight.json.
+Původní úklid správně zastavil před zápisy: dva chráněné původní testy A/B
+mezitím expirovaly, jejich updateTime již neodpovídá manifestu.
+U obou ověřen původní titul/identita a status expired; ostatních 38 chráněných
+zdrojů a pending žádost odpovídají. Žádné rozšíření mazání ani nové fixture.
+
+Vlastník výslovně schválil nový úklidový manifest
+docs/local/feed-restart-cleanup-2026-11-23.json s digestem
+**9cdd773105af8178bd21a7c02c29857ac15f92bb9a1ba8af66f4d003587381ed**.
+Mění pouze dva zaznamenané updateTime po expiraci A/B, nikoli jejich data;
+původní manifest **e29b1bf9…293ef74** je zachovaný. Read-only dry-run nové
+varianty prošel: 50 kandidátů, 40 chráněných zdrojů, 1 žádost, **0 zápisů**;
+build/feed-restart-cleanup-proposed-dryrun.json. Původní A/B/C manifest zůstává
+v build/b4b-dev-release/docs/local/b4b-pilot-state-v2.json, digest
+**86221a3301eaff9e137bc4a5084c815c25c9057d4c4748478bd02e11244519fe**.
+
+Schválená místní oprava obou úklidových cest zachovává potvrzení operací
+včetně původního updateTime a expirace, i při opakovaném úklidu; neřeší jejich
+retenci vlastní předčasnou smazávací cestou. Guard počtu/vlastníka operací
+zůstává zachovaný. Restart nemá žádný související receipt; původní klientský B
+má jedno dosud platné potvrzení. Všech 21 aktuálních receipts musí zůstat
+zachovaných. Podklad build/feed-news-cleanup-preflight.json.
+
+Místní ověření: **3/3 emulátorové případy** včetně obou cleanup cest/replay,
+**2/2 manifestové unit testy** a cílený ESLint prošly. Zachovaná receipt data
+i updateTime ověřené skutečným čtením po každém úklidu. Podklad
+build/feed-pilot-cleanup-emulator.log; nové MVP body se za tuto opravu nepřidávají.
+
+Další krok: dokončit přesné úplné CI, poté při úspěšné
+ruční kontrole restart 50 → původní A/B/C. Do té doby žádné živé mazání,
+nasazení webu/Functions/Rules, změna Auth nebo prodloužení fixture.

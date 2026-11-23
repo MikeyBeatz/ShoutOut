@@ -6,6 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Nyní obnovený odložený test:** [řazení feedu při pohybu a bezpečný úklid](plans/feed/B4_DEV_ROLLOUT.md#movement-cleanup-resume).
+Vlastník 23. listopadu zahájil kontrolu na aktuálním webu 33853a9. První
+pokus zastavila chyba načtení; následně potvrdil, že feed znovu naběhl.
+Poslední getFeedPage volání mají HTTP 200 a Auth/App Check VALID; příčina
+původní chyby není tím potvrzená. Řazení/kotva zatím nejsou akceptované.
+Všech 50 restartovacích fixture bylo aktivních; původní expirace dnes
+18:23 SEČ se nemění. Vlastník schválil aktualizaci úklidového plánu jen pro
+expiraci A/B a opravu zachování sedmidenních receipts. Místní oprava ve
+fix/feed-pilot-cleanup prošla 3/3 emulátorovými případy, 2/2 manifestovými
+unit testy a cíleným lintem. Obě cesty včetně replay zachovaly receipt
+data/updateTime. Dosud žádné živé zápisy/nasazení.
+Úklid až po úplném CI přesného zdroje a úspěšném ručním testu.
+
 **Právě uzavřený DEV úsek:** [společná moderační rozhodnutí – akceptace a úklid](MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
 Zdroj **44e07a5d18570ef2fc416d8387ed459bd55dd853** / [úplné CI 45196844737 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45196844737).
 Aktuální web **565880d4664da7b2** z opravného zdroje **33853a9** /
