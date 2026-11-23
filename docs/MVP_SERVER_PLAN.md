@@ -3,8 +3,8 @@
 ## Aktuální stav a použití plánu
 
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
-Navazující [DEV přechod je nasazený; zbývá pilot](#moderation-public-dev-results);
-původní obsah a ostatní konfigurace jsou zachované. Živá akceptace se zatím netvrdí.
+Navazující [DEV přechod, živá akceptace i úklid jsou uzavřené](#moderation-public-dev-complete);
+původní obsah a ostatní konfigurace jsou zachované. Celý moderační milník ještě není uzavřený.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
@@ -1469,7 +1469,7 @@ activation-{emulator,flutter-final,tools}.log. Následuje přesné úplné CI.
 
 <a id="moderation-public-dev-results"></a>
 
-### Veřejné odstranění – ověřené DEV nasazení, pilot čeká
+### Veřejné odstranění – ověřené DEV nasazení a navazující pilot
 
 23. listopadu 2026, ověřeno 19:48 SEČ. Zdroj
 **87d6687f17eafa670dcaf115665439bdd5597227**, větev feature/report-public-removal,
@@ -1506,10 +1506,11 @@ build/public-removal-{read-preflight,prepared-artifacts,functions-proof,source-p
 build/public-removal-cloud-{before,predeploy,after-functions,after-web}.json a oba deploy logy.
 Nasazovací/pilotní kopie **build/public-removal-release-87d6687** zůstává čistá
 na přesném uvedeném SHA; mutační CLI vyžaduje jeho úplné CI. Budoucí jediný
-manifest docs/local/public-report-removal-pilot.json v této kopii je od 22:02 SEČ
-**seeded**, digest **c8e37fd7eaa0bef9e676b4b0b15c602d44892df9ec783f19a5a45d18c0639cc8**.
+manifest docs/local/public-report-removal-pilot.json v této kopii vznikl ve 22:02 SEČ,
+jeho konečná fáze je **cleaned**, digest
+**c8e37fd7eaa0bef9e676b4b0b15c602d44892df9ec783f19a5a45d18c0639cc8**. Znovu neseedovat.
 
-**Zbývá skutečná akceptace a úklid.** Browser host je nedostupný; při pokusu o
+**Průběh navazující akceptace, dokončené níže.** Browser host je nedostupný; při pokusu o
 nativní Windows ovládání automatická kontrola zastavila tento UI průchod,
 protože nedokázala spolehlivě určit aktuální URL. Další UI akce nebyly provedené.
 Vlastník následně potvrdil načteného TestModerator klienta. Ve 22:02 SEČ byl
@@ -1527,12 +1528,57 @@ feed-v3 shodný se zdrojem. Hlášení resolved/contentRemoved/resolvedBy odpov�
 novému receipt **577ddc02…fe69a208** s ověřeným 7denním termínem; celkem je
 přítomných 6 receipts. Shout je stále active a jeho hlášení open. Důkaz
 build/public-removal-comment-proof.json; žádný další živý zápis při této kontrole.
-Vlastník nyní dostal poslední akci stejného testu s důvodem
-„MVP public removal ada057d3 shout. Remove after verification.“. Potom
-ověřit oba receipts/audity a
-provést chráněný úklid při zachování všech potvrzení do +7 dní a kvót.
-DEV nasazení se započítává, živá akceptace zůstává otevřená. Sankce, osiřelá
+Vlastník následně provedl poslední akci stejného testu s důvodem
+„MVP public removal ada057d3 shout. Remove after verification.“ bez chyby.
+Oba receipts/audity a chráněný úklid jsou ověřené níže; potvrzení do +7 dní a
+kvóty zůstaly zachované. DEV nasazení i živá akceptace se započítávají. Sankce, osiřelá
 hlášení a společný Rules cutover/audit autority nadále brání uzavření celého milníku.
+
+<a id="moderation-public-dev-complete"></a>
+
+### Veřejné odstranění – živá akceptace a úklid uzavřené
+
+23. listopadu 2026, konečné ověření **22:21 SEČ**. Vlastník potvrdil oba UI
+průchody bez chyby. Přesný **TestModerator / it_moderator / role 3 / CZ/CZ-42**
+nejdřív odstranil cílový komentář, potom Shout. Po prvním rozhodnutí byl
+commentsCount **2 → 1**, kontrolní komentář beze změny a publicState feed-v3
+odpovídal zdroji. Po druhém rozhodnutí byl Shout deleted, kontrolní komentář
+stále zachovaný a publicState opět shodný. Obě hlášení byla resolved/contentRemoved,
+resolvedBy it_moderator, s odkazy na správné receipts. Pořadí, cíle, aktér,
+rozhodnutí i původní 7denní termíny moderačních potvrzení ověřené.
+
+Receipts: komentář **577ddc02…fe69a208**, Shout **c881aa3c…34a2a0c**. Cloudové
+logy potvrzují **2×POST HTTP 200**, Auth i App Check VALID; zvlášť 2×OPTIONS 204.
+Závěrečný kontrolní skript nejprve počítal i OPTIONS jako moderační požadavky;
+diagnostické rozlišení metod bylo opravené, aplikace se kvůli tomu neměnila.
+
+Chráněný cleanup z čistého zdroje **87d6687f17eafa670dcaf115665439bdd5597227** /
+[úplné CI 45238613178 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178)
+odstranil pouze **1 testovací Shout, kontrolní komentář, 2 hlášení a 1 oznámení**.
+Cílový komentář už odstranila první moderace. Žádní fixture potomci, živé
+publicStates, oznámení ani cloudové read klíče nezůstaly; cizí read položky zachované.
+Všech **28 serverOperations receipts a 26 rate dokumentů** při cleanupu zachováno
+včetně updateTime. Z nich všech 21 původních receipts odpovídá také předpilotnímu
+dokladu. Sedm testovacích potvrzení se nemaže ani neprodlužuje; ponecháno stávající
+automatické 7denní retenci. Kvóty se neresetovaly, žádná Auth mutace.
+
+Jediný kanonický manifest je **cleaned**:
+build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json,
+digest **c8e37fd7…c0639cc8**. Nikdy znovu neseedovat. Úplné CI/zdroj této kopie
+nadále určují mutační CLI; následné dokumentační commity je nenahrazují.
+
+Závěrečná inventura: **38 původních Shoutů a pending žádost včetně updateTime**,
+všech **24 Functions**, oba minutové plánovače, web **1974e34d52e2945b**, Rules
+**3de8f7d8-6658-4b24-951f-043eac8de297**, feed 12/news 6/active beze změny proti
+předpilotnímu stavu. Žádné účtové/purge joby. Produkce/main/role/retence nezasažené.
+
+Důkazy build/public-removal-{comment,before-cleanup,after-cleanup,final}-proof.json,
+build/public-removal-cloud-{before-pilot,final}.json a cleaned manifest.
+Akceptace je hotová, nový rollout ani další ruční test tohoto pilotu není potřeba.
+Regionální živá regrese soukromého odstranění zůstává odložená samostatně;
+veřejný pilot ji nenahrazuje. **Další úsek** vybrat ze zbývajících sankčních
+rozhodnutí, osiřelých hlášení a auditu/cutoveru autority, před zdrojovými úpravami
+předložit konkrétní rozsah podle AGENTS. Celý moderační milník zatím zůstává otevřený.
 
 <a id="account-deletion"></a>
 

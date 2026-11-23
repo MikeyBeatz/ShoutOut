@@ -1,7 +1,7 @@
 # Vývojový a produkční web
 
 **Aktuální DEV veřejná moderace, 23. listopadu 19:48 SEČ:**
-[nasazení ověřené, živý pilot čeká](../MVP_SERVER_PLAN.md#moderation-public-dev-results).
+[nasazení, živá akceptace i úklid dokončené](../MVP_SERVER_PLAN.md#moderation-public-dev-complete).
 Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** / úplné CI **45238613178 success**;
 web **1974e34d52e2945b**, serverPublicReportRemoval true jen DEV.
 Nová removeReportedPublicContent **00001-yaw**, cleanup **00008-fal**, prostředky
@@ -9,9 +9,14 @@ a 100 % provozu ověřené; oba zdrojové archivy shodné s balíčkem. 67 app s
 8 HTTP kontrol a 401 bez Auth/App Check ověřené. Ostatních 22 Functions,
 oba plánovače, Rules, 38 původních Shoutů/pending žádost i jejich updateTime
 beze změny. Žádná nová fixture/Auth, změna indexů, produkce nebo main.
-Další krok je TestModerator a schválený dvouakční pilot; založit až při
-dostupném klientu. Browser host je nedostupný a Windows UI kontrola zastavila
-pokus kvůli neověřitelné URL. Návratový kompatibilní web **565880d4664da7b2**.
+Pilot dokončený 22:21 SEČ: TestModerator provedl komentář 2 → 1 a potom
+Shout, oba audity a 2×POST HTTP 200 / Auth/App Check VALID ověřené. Úklid
+odstranil vymezených 5 dokumentů, všech 28 receipts a 26 rate dokumentů
+beze změny včetně updateTime, cizí read položky zachované. Manifest cleaned,
+znovu neseedovat. Původních 38 zdrojů/pending žádost i provozní konfigurace
+zachované. Další ruční test tohoto pilotu není potřeba. Browser host je
+nedostupný a Windows UI kontrola zastavila pokus kvůli neověřitelné URL.
+Návratový kompatibilní web **565880d4664da7b2**.
 Následující datované inventury jsou starší checkpointy.
 
 **Aktuální inventura po závěrečném feed úklidu, 23. listopadu 18:01 SEČ:**

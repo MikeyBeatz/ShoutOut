@@ -6,8 +6,8 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Veřejné moderační odstranění je nasazené v DEV; zbývá živý pilot.**
-[Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-results).
+**Veřejné moderační odstranění má uzavřenou DEV akceptaci i úklid.**
+[Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-complete).
 Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** má
 [úspěšné úplné CI 45238613178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178).
 Nová removeReportedPublicContent **00001-yaw**, cleanup **00008-fal**, web
@@ -18,25 +18,27 @@ bez Auth/App Check callable odmítá 401. Ostatních 22 Functions, oba plánova�
 Rules, feed/news, 38 původních Shoutů/pending žádost i jejich updateTime zachované.
 Nasazení nezakládalo fixture ani Auth účty a nezasáhlo produkci/main.
 
-**Aktuální pilot, 23. listopadu 22:03 SEČ:** vlastník potvrdil načteného klienta
-pod TestModerator. Schválený nový test je založený: **MVP public removal ada057d3**,
-1 aktivní Shout / 2 komentáře / 2 otevřená hlášení / 5 receipts. První serverový
-doklad potvrzuje počet 2 a zachování všech 21 původních receipts včetně updateTime;
-38 původních zdrojů a pending žádost chrání manifestový fence. Platnost do
-24. listopadu **22:02 SEČ**. Neseedovat nový pilot ani neprodlužovat platnost.
-**První akce je živě potvrzená:** vlastník hlásí bezchybný průchod. Serverový
-doklad build/public-removal-comment-proof.json potvrzuje přesného TestModerator,
-odstraněný cílový komentář, **2 → 1**, zachovaný kontrolní komentář, propojený
-contentRemoved audit/receipt a shodu živé projekce feed-v3. Shout zůstává active,
-jeho hlášení open, celkem 6 receipts. **Další krok:** vlastník má odstranit pouze
-hlášený Shout „MVP public removal ada057d3 shout. Remove after verification.“
-volbou „Skrýt obsah bez postihu“. Potom ověřit oba audity a úklid; akceptace false.
-Browser host není dostupný; alternativní Windows ovládání automatická
-kontrola zastavila pro neověřitelnou URL. Další UI vstupy neprovádět bez nového
-ověření dostupnosti. Jediný manifest je v čisté release kopii
+**Dokončeno 23. listopadu 22:21 SEČ:** vlastník pod přesným TestModerator
+potvrdil obě odstranění bez chyby. Komentář nejdřív: **2 → 1**, kontrolní
+komentář zachovaný, živá projekce/audit správné; potom Shout jako deleted.
+Oba receipts/audity propojené, role 3, dvě POST HTTP 200 a Auth/App Check VALID.
+Úklid přes writer odstranil pouze 1 Shout, kontrolní komentář, 2 hlášení a
+1 oznámení; žádné fixture potomky, živé stavy ani cloudové read klíče nezůstaly.
+Všech **28 receipts a 26 rate dokumentů** při úklidu beze změny včetně updateTime;
+21 původních receipts také zachovaných, cizí read položky beze změny. Původních
+38 Shoutů/pending žádost, všech 24 Functions, oba plánovače, Hosting, Rules,
+feed/news zachované. Žádná Auth mutace, nový rollout, reset kvót ani zásah do main/produkce.
+Jediný manifest je v čisté release kopii
 build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json;
-fáze **seeded**, digest **c8e37fd7…c0639cc8**. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
+fáze **cleaned**, digest **c8e37fd7…c0639cc8**; nikdy znovu neseedovat. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
 dokumentační commit je nenahrazuje. Návratový kompatibilní web 565880d4664da7b2.
+
+**Další krok k MVP:** podle serverového plánu připravit konkrétní místní rozsah
+zbývajících sankčních rozhodnutí, osiřelých hlášení a společného auditu/cutoveru
+autority. Nový zdrojový rozsah předem schválit. Celý moderační milník zatím není
+uzavřený; regionální regrese soukromého odstranění zůstává samostatně odložená.
+Browser host je nedostupný a Windows ovládání bylo zastavené kontrolou URL;
+další UI vstupy až po novém ověření dostupnosti. Pro tento pilot další ruční test není potřeba.
 
 **Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
 větev feature/report-public-removal. Atomické odstranění Shoutu/komentáře,

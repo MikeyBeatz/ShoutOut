@@ -95,7 +95,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
-| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 60,00 % | 21/26 |
+| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 60,50 % | 22/26 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
 | [mvp-20: Projít všechny webové ruční regresní scénáře běžného, Business i moderačního účtu včetně pomalé nebo přerušované sítě.](TODO.md#mvp-20) | 0,00 % | 0/4 |
@@ -403,7 +403,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-public-client: Neaktivní klient veřejného odstranění | implementation | ✅ | [1](../lib/content_report_decision_gateway.dart), [2](../lib/src/staff_reports.dart), [3](../lib/src/moderation.dart), [4](../lib/web_environment.dart), [5](../docs/MVP_SERVER_PLAN.md#moderation-public-local-results), [6](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178) |
 | moderation-public-client-check: Klientské regrese veřejného odstranění | verification | ✅ | [1](../test/public_report_removal_test.dart), [2](../tools/web_environment.test.mjs), [3](../docs/MVP_SERVER_PLAN.md#moderation-public-local-results), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178) |
 | moderation-public-dev: Veřejné moderační odstranění – DEV nasazení | deployment | ✅ | [1](../functions/content.js), [2](../config/dev.json), [3](../docs/MVP_SERVER_PLAN.md#moderation-public-dev-results), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178) |
-| moderation-public-accept: Veřejné moderační odstranění – živá akceptace a úklid | acceptance | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-public-dev-results) |
+| moderation-public-accept: Veřejné moderační odstranění – živá akceptace a úklid | acceptance | ✅ | [1](../functions/public_report_removal_pilot.js), [2](../tools/public_report_removal_pilot.mjs), [3](../docs/MVP_SERVER_PLAN.md#moderation-public-dev-complete), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178) |
 | moderation-decision: Zbývající serverová rozhodnutí, sankce, klient a provozní zapojení | implementation | ⬜ | — |
 | moderation-business: Zamítnutí/pozastavení Business účtu a audit | implementation | ⬜ | — |
 | moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | — |

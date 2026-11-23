@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,79 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,81 %** — vážené dokončení podúseků
 
-Hotové úseky: **204/258**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **205/258**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -76,12 +76,12 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    [DEV nasazení je ověřené](MVP_SERVER_PLAN.md#moderation-public-dev-results):
    zdroj 87d6687 / úplné CI 45238613178 success, nová veřejná callable,
    aktualizovaný cleanup a web 1974e34d52e2945b. Ostatní provoz a původní data
-   zachované. TestModerator klient je potvrzený; schválený pilot **ada057d3** je
-   seeded (původně 1 Shout / 2 komentáře / 2 hlášení). Komentář je živě ověřený:
-   TestModerator, 2 → 1, kontrolní zachovaný, audit a živá projekce správné.
-   Čeká se na odstranění testovacího Shoutu a úklid. Živá akceptace
-   zůstává otevřená. UI ovládání zastavila kontrola
-   neověřitelné URL; je potřeba ruční průchod. Další otevřené části
+   zachované. [Živá akceptace i úklid jsou uzavřené](MVP_SERVER_PLAN.md#moderation-public-dev-complete):
+   TestModerator, komentář 2 → 1 / kontrolní zachovaný, potom odstranění Shoutu;
+   oba audity a 2×HTTP 200 s Auth/App Check VALID ověřené. Manifest **ada057d3**
+   cleaned; všech 28 receipts a 26 rate dokumentů při úklidu zachováno, žádná
+   fixture/read klíč nezůstaly. Pro tento pilot další ruční test není potřeba.
+   Další otevřené části
    jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
    Níže jsou důkazy dříve uzavřených částí.
    **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
