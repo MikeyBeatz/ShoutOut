@@ -1,19 +1,22 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web a soukromé mazání, 23. listopadu:** [důkazy a čekající pilot](../MVP_SERVER_PLAN.md#private-deletion-dev-results).
+**Aktuální DEV web a soukromé mazání, 23. listopadu:** [uzavřená akceptace a úklid](../MVP_SERVER_PLAN.md#private-deletion-dev-complete).
 Zdroj 9c2e121706ea824d10282f06c778249b9b4a0f05, success úplné CI 45096691292.
 Hosting **813f34b7555e272a**, serverPrivateReplyDeletion true; 67 veřejných app
 souborů a 8 HTTP kontrol shodných s artefaktem. Nová deletePrivateReply
 **deleteprivatereply-00001-koz**, cleanupOperationReceipts **00005-goh**, obě
 100 % provozu, schválené prostředky. Ostatních 19 Functions, oba minutové
-Scheduler joby, Rules **476d216c…a3e9**, feed 12/news 6/active, všech 91 zdrojů
-a původní žádosti zachované. Nový root Rules soubor je zatím jen připravený
-bezpečnostní checkpoint **9fee32e**, samostatné úplné CI **45098775591 success**.
-Živý cutover až po pozitivním klientském pilotu; žádná nová fixture/Auth zatím
-nevznikla. Operovat z čistého release zdroje 9fee32e, nikoli následného
-dokumentačního checkpointu. Návratový web před
-Rules je 37b697da10fbb5b1, po cutoveru kompatibilní 813f34b7555e272a.
-Produkce/main beze změny; odložený pohybový test a úklid nadále otevřené.
+Scheduler joby, feed 12/news 6/active, všech 91 zdrojů a původní žádosti zachované.
+Rules **e16b7a3d-f363-499c-ad40-262471059271** ze zdroje **9fee32e** /
+samostatné úplné CI **45098775591 success** jsou nasazené, přesná shoda ověřena.
+Oba účty prošly skutečným UI/callable mazáním s Auth/App Check VALID;
+8/8 scénářů nad vydaným Rules zdrojem ověřil oficiální simulátor, nikoli
+autentizovaný HTTP DELETE z klienta. Pilot uklizený: 1 Shout, 2 notifikace,
+1 cloudový read klíč; 5 potvrzení ponecháno do +7 dní, žádné Auth změny.
+Manifest je cleaned, znovu neseedovat. Kompatibilní návratový web
+813f34b7555e272a, návratový ruleset 476d216c…a3e9. Starší web bez gateway
+samostatně po cutoveru nevracet. Produkce/main beze změny;
+odložený pohybový test a jeho úklid nadále otevřené.
 
 **Předchozí DEV web – pořadí při pohybu 23. listopadu:** [důkazy a čekající kontrola](../plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Zdroj **af4c3aa06fc65b7d429497cca73817d2d4529be2**, success úplné CI **45085601243**,

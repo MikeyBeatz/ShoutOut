@@ -9,29 +9,33 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 **Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
 samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;
 platnost fixture se neprodlužuje a nové živé testy nejsou tím schválené.
-Nezávisle dokončený [audit soukromého mazání](MVP_SERVER_PLAN.md#private-deletion-preparation):
-8/8 emulátorových scénářů, 0 živých zápisů. Vlastník následně výslovně schválil
-místní server/klient, bezpečné opakování a testy, bez živého zapojení.
+Nezávislý [audit soukromého mazání](MVP_SERVER_PLAN.md#private-deletion-preparation)
+vedl k následně schválenému a nyní dokončenému DEV přechodu níže.
 
-**Nově ověřené DEV nasazení:** [vlastní soukromé mazání – výsledky a další krok](MVP_SERVER_PLAN.md#private-deletion-dev-results).
-9c2e121706ea824d10282f06c778249b9b4a0f05 / úplné CI 45096691292 success.
-deletePrivateReply **00001-koz**, cleanupOperationReceipts **00005-goh**,
-100 % provozu a schválené prostředky; ostatních 19 Functions a oba minutové
-plánovače zachované. DEV Hosting **813f34b7555e272a**, 67 shodných veřejných
-app souborů / 8 HTTP kontrol, serverPrivateReplyDeletion true. Všech 91 zdrojů,
-původní žádosti a feed 12/news 6/active zachované. Návratový web 37b697da10fbb5b1
-před Rules cutoverem; po něm používat kompatibilní 813f34b7555e272a.
-Kořenové Rules mají samostatný zdroj **9fee32e952378404baab13463470f8224366e79a** /
-[úplné CI 45098775591 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591), vydané Rules
-stále **476d216c-9208-4e5c-9143-f583cb82a3e9**. Prohlížečový host unavailable:
-živý pilot nevznikl, vlastní mazání obou účtů / Rules / úklid čekají na klienta.
-Přesné CI Rules checkpointu znovu ověřit před živou mutací, souhrn
-build/private-deletion-cutover-ci-proof.json. Čtecí kontrola v 02:30 UTC znovu
-potvrdila celé DEV nasazení, osm HTTP odpovědí a ochranu původních dat.
-Manifest docs/local/private-reply-deletion-dev-pilot.json je pouze planned,
-digest 30fffa90…e9b88d01; živé zápisy vyžadují připraveného klienta.
-Pro pilot/Rules použít čistý release zdroj 9fee32e a jeho úplné CI; následný
-dokumentační checkpoint není novým nasazovaným zdrojem. Produkce/main beze změny.
+**Uzavřený DEV úsek:** [vlastní soukromé mazání – akceptace a úklid](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
+App zdroj **9c2e121** / úplné CI **45096691292 success**, Rules zdroj
+**9fee32e** / úplné CI **45098775591 success**. Hosting **813f34b7555e272a**,
+deletePrivateReply **00001-koz**, cleanup **00005-goh**; prostředky i ostatních
+19 Functions a oba minutové plánovače zachované. Vlastník potvrdil obě vlastní
+mazání; obě mají serverová potvrzení, Auth/App Check VALID a HTTP 200.
+Následně nasazen DEV ruleset **e16b7a3d-f363-499c-ad40-262471059271**,
+přesná shoda zdroje a 8/8 scénářů oficiálního serverového simulátoru ověřené.
+Přímý autentizovaný HTTP DELETE z prohlížeče nebyl součástí této kontroly.
+
+Uklizen pouze nový Shout, dvě notifikace a 1 cloudový read klíč; obě soukromé
+zprávy už smazali vlastníci. 5 potvrzení ponechaných do +7 dní, kvóty beze
+resetu. Manifest je **cleaned**, znovu neseedovat. Závěrečná kontrola 06:45 SEČ:
+všech **91 původních zdrojů**, jejich updateTime, původní pending žádost a feed
+12/news 6/active zachované. Žádná Auth změna, produkce/main beze změny.
+Důkazy build/private-deletion-final-proof.json a související audit/simulace.
+Kompatibilní návratový web 813f34b7555e272a, návratový ruleset 476d216c…a3e9.
+
+**Další obsahová práce:** atomické moderátorské rozhodnutí a zbývající
+[autorita](MVP_SERVER_PLAN.md#private-deletion-preparation), včetně regionálního
+rozsahu. Vlastní mazání tím znovu neotevírat. Konkrétní další implementaci
+předložit podle závislostí; odložený pohybový test ani jeho úklid se tím neuzavírají.
+Mé shouty → Komentáře dnes zahrnuje pouze veřejné komentáře; soukromé odpovědi
+jsou v detailu/oznámeních. Nový přehled konverzací není součástí této změny.
 
 **Předchozí uzavřený místní úsek:** [vlastní mazání soukromé odpovědi](MVP_SERVER_PLAN.md#private-deletion-local).
 Serverové jádro, session gateway, UI průběh/chyby a odvozený návrh Rules jsou
@@ -53,14 +57,14 @@ plánovače, dosavadní Hosting/Rules/control, 91 zdrojů (50 aktivních) a
 nezměněných 38 původních zdrojů/pending žádost. Žádné živé zápisy. Navržené
 pilotní data vzniknou až při připraveném klientu; UI důkaz podmiňuje živé Rules.
 
-**Příprava schváleného DEV přechodu:** wrapper, DEV aktivace a omezený pilotní
+**Ověření přípravy schváleného DEV přechodu:** wrapper, DEV aktivace a omezený pilotní
 nástroj jsou připravené; 493 Flutter testů, analýza bez nálezů, 106 nástrojových
 testů, lint, 170 serverových unit testů (579 integračních mimo emulátor přeskočeno)
 a 21 cílených emulátorových regresí prošly. Následné úplné CI a nasazení jsou
-doložené výše. Z DEV váhy 5 započtené Functions 2 a web 1; podmíněný Rules
-cutover 2 a samostatná živá akceptace zůstávají otevřené.
+doložené výše. Z DEV váhy 5 nyní započtené Functions 2, web 1 i Rules 2;
+samostatná živá akceptace vlastní soukromé operace je také uzavřená.
 
-**Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
+**Předchozí nasazená oprava feedu, součást novějšího webu:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
 Klient při potvrzeném přesunu řadí nepřečtené/přečtené podle nové vzdálenosti,
 zachová viditelnou kotvu a vloží další serverové stránky na správná místa.

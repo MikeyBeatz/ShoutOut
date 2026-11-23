@@ -93,7 +93,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
-| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,61 % | 138/144 |
+| [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,68 % | 140/144 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 50,00 % | 4/8 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
@@ -378,8 +378,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-private-delete-check: Vlastní soukromé mazání – transakce, archivace a klientské regrese | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-local), [2](../functions/delete_private_reply.integration.test.js), [3](../test/private_reply_deletion_test.dart), [4](../tools/rules/private_reply_deletion.integration.test.mjs), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45091447773) |
 | content-private-delete-functions-dev: Vlastní soukromé mazání – ověřené DEV Functions a úklid potvrzení | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45096691292) |
 | content-private-delete-web-dev: Vlastní soukromé mazání – kompatibilní DEV web | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45096691292) |
-| content-private-delete-dev: Vlastní soukromé mazání – ověřený DEV Rules cutover | deployment | ⬜ | — |
-| content-private-delete-accept: Vlastní soukromé mazání – živá akceptace DEV | acceptance | ⬜ | — |
+| content-private-delete-dev: Vlastní soukromé mazání – ověřený DEV Rules cutover | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591) |
+| content-private-delete-accept: Vlastní soukromé mazání – živá akceptace DEV | acceptance | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete) |
 | content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation) |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |

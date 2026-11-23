@@ -159,7 +159,7 @@ shoutout-rules-test prošlo s aktivní schemaVersion 2 / managed card projekcí:
 | privateReplies create | Povoleno i při blokaci odesílatele příjemcem a targetType privateReply bez rodičovské zprávy. | Uzavřít přímý create, zachovat createPrivateReply; cutover níže dokončený. |
 | Komentářové reactions | Samostatný like dokument je povolený, likesCount zůstane 0. | Uzavřít přímé reakce i čítače, zachovat toggleCommentReaction; cutover níže dokončený. |
 | reports create | Přímá tvorba Shout hlášení je povolená vedle serverové cesty. Základní validace existuje. | Do cutoveru zahrnout i commentReports/privateReplyReports; všechny tři jsou otestované v cutoveru níže. |
-| privateReplies delete | Vlastní přímé smazání je povolené bez rate/receipt. | Samostatně navrhnout serverové mazání a zachování moderačního/archivního chování. |
+| privateReplies delete | Původní audit: vlastní přímé smazání bylo povolené bez rate/receipt. | [Vlastní mazání nyní uzavřené v DEV](#private-deletion-dev-complete); atomická/regionální moderace zůstává samostatná. |
 
 Vlastník první navazující úsek schválil: v managed režimu
 uzavřít jen create soukromých odpovědí, komentářové palce a create tří typů
@@ -198,7 +198,8 @@ mobilní distribuce nebyla součástí této akceptace. Bez nových Auth účtů
 přímé cesty, proto jen jako odůvodněný návrat. Podklady:
 build/managed-content-cutover-regression.log,
 build/managed-content-cutover-ci-proof.json a build/managed-content-rules-after.json.
-Soukromé mazání a důvěryhodná moderace zůstávají další samostatné úseky.
+Navazující stav 23. listopadu: [vlastní soukromé mazání je uzavřené v DEV](#private-deletion-dev-complete);
+důvěryhodná atomická/regionální moderace zůstává dalším samostatným úsekem.
 
 V metrice se dosud otevřených 88 jednotek content-remaining-authority dělí
 na tento cutover (implementace 15, ověření 15, DEV nasazení 14) a zbývající
@@ -252,6 +253,10 @@ metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají
 <a id="private-deletion-preparation"></a>
 
 ### Nezávislá příprava vlastního mazání soukromých odpovědí – 23. listopadu
+
+Historický audit před serverovým cutoverem. Nynější vlastní mazání je
+[uzavřené v DEV](#private-deletion-dev-complete); níže zjištěná mezera běžného
+přímého delete již byla uzavřena. Moderátorská atomická/regionální část zůstává otevřená.
 
 Navazuje na zbývající privateReplies delete v [auditu autority](#authority-audit),
 nikoli na ruční akceptaci B4. Zdroj ověřený na b7ef32b, vydaný web dál
@@ -520,7 +525,9 @@ váhu a podmínky, proto nelze přípravu zaměnit za dokončený milník.
 
 <a id="private-deletion-dev-results"></a>
 
-### Vlastní soukromé mazání – DEV server/web a připravený Rules checkpoint
+### Vlastní soukromé mazání – DEV server/web a samostatný Rules checkpoint
+
+Stav první nasazovací fáze před pilotem; [finální výsledek je níže](#private-deletion-dev-complete).
 
 **První nasazovací fáze je ověřená:** zdroj
 **9c2e121706ea824d10282f06c778249b9b4a0f05** má
@@ -572,13 +579,67 @@ manifest docs/local/private-reply-deletion-dev-pilot.json má digest
 **30fffa903a3b357aae7442a92c67a986236a2297f5d0a5b9fcdc954fe9b88d01**;
 jeho preconditions a připravenost klienta ověřit znovu před první mutací.
 
-**Nejbližší krok:** dostupný ovladatelný prohlížeč nebo připravený vlastník →
+**Tehdejší navazující postup, dokončený níže:** dostupný ovladatelný prohlížeč nebo připravený vlastník →
 čerstvý manifest/digest a schválený pilot 1 Shout / 2 zprávy → vlastní
 mazání obou účtů s Auth/App Check a receipts → podmíněné DEV Rules → úklid.
 Prohlížečový host byl při přípravě znovu unavailable, proto zatím žádná pilotní
 data nevznikla a pozitivní akceptace se netvrdí. Nepřenášet sem splnění
 odloženého pohybového testu. Započtené pouze dvě doložené nasazovací části
 (Functions 2, web 1); Rules 2 a živá akceptace 5 zůstávají otevřené.
+
+<a id="private-deletion-dev-complete"></a>
+
+### Vlastní mazání soukromých odpovědí – DEV akceptace a úklid uzavřené
+
+Vlastník 23. listopadu potvrdil připravený TestBusiness a následně rychlé
+mazání při průchodu oběma účty. Vznikl pouze schválený Shout
+**MVP private deletion d20abeb8** na 24 hodin a dvě navazující soukromé zprávy.
+Skutečné klientské operace pod TestBusiness i Bright_Otter_182 odstranily
+vlastní zprávy a vytvořily dvě kanonická deletePrivateReply potvrzení.
+Obě volání mají Auth/App Check **VALID**, HTTP 200; samotné POST požadavky
+trvaly 0,650 s a 0,129 s (nezahrnuje CORS ani celý klientský průběh).
+Účty nemají moderátorskou roli ani legacy marker. Zprávy nezmizely
+administrativním úklidem; byly odstraněné už před ním.
+
+Po tomto důkazu byl z čistého **9fee32e952378404baab13463470f8224366e79a** /
+[úplné CI 45098775591 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591)
+nasazen pouze DEV firestore:rules. Vydaný ruleset je
+**e16b7a3d-f363-499c-ad40-262471059271**, přesná shoda zdroje ověřena přes API,
+SHA-256 normalizovaného zdroje **26c795cd…9c91dcc3**. Ostatní Functions,
+Hosting, dva plánovače a prostředky se nezměnily. Návratový ruleset
+476d216c-9208-4e5c-9143-f583cb82a3e9 je uložený; kompatibilní web zůstává
+**813f34b7555e272a**. Starý web bez serverového mazání samotný nevracet.
+
+Odmítnutí přímého běžného delete bylo ověřeno v emulátoru a pomocí
+[oficiálního Rules test API](https://firebase.google.com/docs/reference/rules/rest/v1/projects/test)
+nad přesně vydaným zdrojem: všech **8/8 modelových scénářů** prošlo.
+Párové srovnání před přechodem prokázalo ALLOW starého a DENY nového own-delete;
+zachované je čtení autora/příjemce, odmítnutí cizího čtení, dosavadní staff
+delete a legacy bez spravovaného feedu. Simulace používá explicitní kontexty
+a mocks; není to autentizovaný HTTP DELETE z běžného prohlížeče.
+Živé klientské důkazy se týkají skutečného callable mazání obou účtů.
+Samostatné atomické moderátorské rozhodování se tím neuzavírá.
+
+**Úklid dokončený:** jeden nový Shout odstraněn společným indexovým writerem,
+dvě testovací notifikace a **1 cloudový read klíč** tohoto ID odstraněny.
+Soukromé zprávy už byly pryč. **5 technických potvrzení** zůstává do vlastních
+serverových termínů +7 dní, kvóty se neresetovaly. Manifest
+docs/local/private-reply-deletion-dev-pilot.json je **cleaned**; znovu neseedovat.
+Závěrečná kontrola v **06:45 SEČ** potvrdila návrat na **91 původních zdrojů**,
+jejich původní updateTime, jednu původní pending žádost a feed 12/news 6/active.
+Všech 21 Functions, dva minutové joby, web i nový Rules release zachované.
+Žádné nové/mazané Auth účty, produkce ani main. Podklady:
+build/private-deletion-{live-audit,final-proof,rules-after}.json a
+build/private-deletion-rules-simulation-after-proof.json. Pole cloudWrites:0
+ve čtecím statusu je jen měření této kontroly; seed provedl tři zapisující
+operace a tento údaj není celkový počet pilotních zápisů.
+
+Poznámka vlastníka k dohledání konverzace: **Mé shouty → Komentáře** nyní
+načítá jen collectionGroup('comments') v lib/src/saved.dart. Soukromé zprávy
+se zobrazují v detailu Shoutu / přes oznámení; nový přehled konverzací nebyl
+v tomto úseku zaveden. Odložená akceptace pohybu a její staré fixture zůstávají
+samostatné. Vlastní soukromé mazání je uzavřené; další autorita/moderace
+a kompletní obsahový milník zůstávají otevřené.
 
 ## 4. Antispam a obsahová moderace — MVP
 

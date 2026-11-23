@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,36 %** — vážené dokončení podúseků
 
-Hotové úseky: **183/240**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **185/240**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -146,31 +146,21 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
 2. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Poslední uzavřený úsek:** [audit a část zbývající obsahové autority](MVP_SERVER_PLAN.md#authority-audit).
-   První cutover
-   přímých private create / comment reaction / content report create je
-   dokončený v DEV: 11/11 cílených, 475/475 širších testů, úplné CI 45056112263
-   success a vydané Rules se shodou zdroje. Web/Functions beze změny, bez živých
-   testovacích zápisů. Soukromé mazání a moderace zůstávají dalším úsekem.
-   **Nezávislá příprava 23. listopadu:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-preparation).
-   8/8 izolovaných auditních scénářů hotových, bez živých zápisů. Připravený
-   konkrétní návrh serveru/klienta a místních testů vlastník schválil.
-   [Místní implementace a regrese](MVP_SERVER_PLAN.md#private-deletion-local) hotové:
-   493 Flutter, 104 nástrojových a 40 cílených emulátorových testů;
-   2826665 / úplné CI 45091447773 success. Implementace a ověření uzavřené,
-   [DEV Functions a web jsou nasazené](MVP_SERVER_PLAN.md#private-deletion-dev-results):
-   9c2e121 / úplné CI 45096691292 success, Hosting 813f34b7555e272a,
-   deletePrivateReply 00001-koz a cleanup 00005-goh. 19 ostatních Functions,
-   dva plánovače a všech 91 zdrojů/původní žádosti zachované.
-   [Konkrétní ucelený DEV návrh](MVP_SERVER_PLAN.md#private-deletion-dev-proposal)
-   vlastník výslovně schválil včetně nové Function, klientské aktivace,
-   podmíněného Rules přechodu a vymezeného malého pilotu. Nasazený přepínač true.
-   Kořenový Rules checkpoint 9fee32e má vlastní úplné CI 45098775591 success;
-   32 cílených místních regresí prošlo, vydané Rules stále původní.
-   Další krok: připravený klient → nový pilot 1/2 → mazání obou účtů → Rules → úklid.
-   Bez dostupného prohlížeče pilot zatím nevznikl; UI akceptaci nezavírat.
-   Na odložené pohybové kontrole nezávisí. Moderátorskou atomickou operaci,
-   regionální autoritu a živý cutover nezaměňovat za dokončení vlastního mazání.
+   **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
+   App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI
+   45098775591 success. Oba účty prošly skutečným UI/callable mazáním s Auth
+   a App Check VALID. DEV Rules **e16b7a3d-f363-499c-ad40-262471059271** mají
+   přesnou shodu zdroje a 8/8 scénářů serverové simulace; přímý autentizovaný
+   HTTP DELETE z prohlížeče tato kontrola neměřila. Hosting 813f34b7555e272a,
+   Functions/prostředky/plánovače zachované. Nový pilot je uklizený včetně
+   notifikací a cloudové read značky, 5 potvrzení ponechaných +7 dní;
+   všech 91 původních zdrojů/pending žádost zachované. Manifest cleaned,
+   znovu neseedovat. Implementace, ověření, DEV i akceptace této části uzavřené.
+   **Další obsahová část:** atomické moderátorské rozhodování a regionální
+   autorita podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
+   Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
+   Odložený pohybový test a jeho staré fixture jsou samostatné; žádné nové
+   testy či prodlužování platnosti tím nejsou schválené.
 
 ## Hranice MVP
 
