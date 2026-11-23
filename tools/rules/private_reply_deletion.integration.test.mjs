@@ -5,6 +5,7 @@ import { before, beforeEach, after, test } from 'node:test';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, query, where, limit, updateDoc, setDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { privateReplyDeletionCandidate } from './private_reply_deletion_candidate.mjs';
+import { privateReportRemovalCandidate } from './private_report_removal_candidate.mjs';
 import { deletePrivateReplyOperation as remove } from '../../functions/delete_private_reply.js';
 import { operationTestKey } from '../../functions/test_helpers.js';
 
@@ -44,6 +45,13 @@ test('proposal compiles without modifying released Rules and rejects source drif
   assert.equal(privateReplyDeletionCandidate(candidate), candidate);
   assert.throws(() => privateReplyDeletionCandidate('unrelated rules'), /source-drift/);
   assert.throws(() => privateReplyDeletionCandidate(source + source), /source-drift/);
+  const stricter = privateReportRemovalCandidate(candidate);
+  assert.equal(privateReplyDeletionCandidate(stricter), stricter);
+  assert.equal(privateReplyDeletionCandidate(stricter.replaceAll('\n', '\r\n')), stricter);
+  assert.throws(() => privateReplyDeletionCandidate(stricter + stricter), /source-drift/);
+  assert.throws(() => privateReplyDeletionCandidate(stricter.replace(
+    "      ) && (!managedFeedProjection() ||\n        request.resource.data.get('resolution', '') != 'contentRemoved');",
+    '      );')), /source-drift/);
 });
 test('building/active/paused/old generation close ordinary deletion even with a rate batch', async () => {
   for (const mode of ['building', 'active', 'paused', 'v1']) {
@@ -95,11 +103,30 @@ test('ownership/role/schema/timestamp tampering cannot reopen direct deletion', 
   await assertFails(deleteDoc(doc(f, path)));
   assert.equal((await db.doc(path).get()).get('authorId'), 'writer');
 });
-test('moderator removal stays compatible without conversation reads; unmanaged own deletion stays valid', async () => {
+test('moderator deletion follows the published transition stage; unmanaged own deletion stays valid', async () => {
   await assertFails(getDoc(doc(client('moderator'), path)));
-  await assertSucceeds(deleteDoc(doc(client('moderator'), path)));
+  const isDecisionCutover = privateReportRemovalCandidate(privateReplyDeletionCandidate(source)) === source.replaceAll('\r\n', '\n');
+  if (isDecisionCutover) await assertFails(deleteDoc(doc(client('moderator'), path)));
+  else await assertSucceeds(deleteDoc(doc(client('moderator'), path)));
   await db.doc(path).set({ authorId: 'writer', recipientId: 'recipient' });
   await db.doc('feedIndexControl/current').delete();
   await assertFails(deleteDoc(doc(client('recipient'), path)));
   await assertSucceeds(deleteDoc(doc(client('writer'), path)));
+});
+
+test('older own-deletion transition preserves the stricter prototype and the trusted own callable', async () => {
+  const prepared = privateReportRemovalCandidate(privateReplyDeletionCandidate(source));
+  await env.cleanup();
+  env = await initializeTestEnvironment({ projectId: 'shoutout-rules-test', firestore: {
+    host: '127.0.0.1', port: 8080, rules: privateReplyDeletionCandidate(prepared),
+  } });
+  for (const uid of ['writer', 'recipient', 'moderator']) await assertFails(deleteDoc(doc(client(uid), path)));
+  const now = new Date();
+  await remove({ auth: { uid: 'writer', token }, app: { appId: 'candidate' }, data: {
+    expectedUserId: 'writer', shoutId: 'parent', privateReplyId: 'message',
+    idempotencyKey: operationTestKey('stricter-own-cutover', now),
+  } }, db, () => now);
+  assert.equal((await db.doc(path).get()).exists, false);
+  assert.equal((await db.collection('serverOperations').where('userId', '==', 'writer').get()).size, 1);
+  assert.equal(readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'), source);
 });

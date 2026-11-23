@@ -171,7 +171,12 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Hosting b5703cec19978454, callable 00001-zec, cleanup 00006-lum; ostatních
    20 Functions/plánovače/původní data zachované. Nový pilot 3a725093 je seeded,
    geografie syntetické fixture připravená, hlášení open. Čeká jediná ruční
-   akce TestModerator; bez ní nepovažovat klientskou kompatibilitu za hotovou.
+   akce TestModerator, na žádost vlastníka odložená na později; bez ní
+   nepovažovat klientskou kompatibilitu za hotovou. Mezitím pouze místní
+   příprava kompatibility kandidáta Rules, bez změny vydaných pravidel.
+   [Místní výsledek](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation):
+   34 serverových/pilotních + 13 Rules případů prošlo; starší nástroj zachová
+   přísnější prototyp. Push/úplné CI spojit s následným Rules checkpointem.
    Potom samostatné úplné CI/Rules → dokončení pilotu a úklid. Rules jsou stále
    e16b7a3d…59271, celý DEV úsek ani akceptace se zatím nezapočítávají.
    Další atomická rozhodnutí/regionální autoritu připravit

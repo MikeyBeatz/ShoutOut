@@ -1,5 +1,7 @@
 // Idempotent cutover renderer. Its deployment is gated by positive client
 // compatibility; a prepared source file is not evidence of live Rules.
+import { privateReportRemovalCandidate } from './private_report_removal_candidate.mjs';
+
 export function privateReplyDeletionCandidate(source) {
   const before = `        allow update: if false;
         allow delete: if eligibleUser() &&
@@ -11,6 +13,13 @@ export function privateReplyDeletionCandidate(source) {
           (isModerator() ||
             (!managedFeedProjection() && resource.data.authorId == request.auth.uid));`;
   const normalized = source.replaceAll('\r\n', '\n');
+  // Re-running the older transition must preserve the complete stricter
+  // decision cutover, never reopen staff deletion or accept half a cutover.
+  if (normalized.includes('// Managed deletion uses deletePrivateReply / removeReportedPrivateReply.')) {
+    if (privateReportRemovalCandidate(normalized) !== normalized)
+      throw new Error('private-reply-delete-proposal-source-drift');
+    return normalized;
+  }
   const oldCount = normalized.split(before).length - 1, newCount = normalized.split(after).length - 1;
   if (oldCount === 0 && newCount === 1) return normalized;
   if (oldCount !== 1 || newCount !== 0) throw new Error('private-reply-delete-proposal-source-drift');

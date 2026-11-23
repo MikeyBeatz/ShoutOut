@@ -19,6 +19,10 @@ v původním místním checkpointu nebylo v runtime wrapperu. Navazující
 přidává wrapper, klientské regrese, tři testy pilotu a šest testů nového
 Rules kandidáta; celkem 46 cílených emulátorových případů. Úspěch přípravy
 neznamená živé vynucení. Vydávané Rules se mění až po klientské kompatibilitě.
+Při [odložené ruční kontrole](../MVP_SERVER_PLAN.md#moderation-private-deferred-preparation)
+přibyl jeden případ zachování přísnějšího prototypu ve starším nástroji;
+Rules sada má nyní 13 testů a celkové cílené pokrytí 47. Nové zákazy zahrnují
+všech šest úrovní rolí; aktuální místní výsledek není nové úplné CI ani nasazení.
 
 Lokální B4 klient má vlastní `npm --prefix tools run test:delta-client`;
 CI nastavuje `B4_BROWSER=1`, aby kromě Rules/API/měření běžel skutečný

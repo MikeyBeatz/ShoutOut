@@ -12,6 +12,7 @@ const { initializeApp, deleteApp } = sdk('firebase-admin/app'), { getFirestore, 
 const source = readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8');
 const path = 'shouts/parent/privateReplies/message', reportId = 'recipient_parent_message', reportPath = `privateReplyReports/${reportId}`;
 const token = { email: 'fixture@example.test', email_verified: true }; let env, app, db;
+const roles = { author: 1, recipient: 1, business: 2, mod: 3, senior: 4, admin: 5, owner: 6, other: 1 };
 const client = uid => env.authenticatedContext(uid, token).firestore();
 before(async () => {
   assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8080');
@@ -20,9 +21,9 @@ before(async () => {
 });
 beforeEach(async () => {
   await env.clearFirestore();
-  for (const uid of ['author', 'recipient', 'mod', 'owner', 'other']) {
+  for (const [uid, level] of Object.entries(roles)) {
     await db.doc(`users/${uid}`).set({ nickname: uid }); await db.doc(`users/${uid}/legal/acceptance_2026_07_25`).set({});
-    await db.doc(`accountRoles/${uid}`).set({ level: uid === 'owner' ? 6 : uid === 'mod' ? 3 : 1, moderationScope: { countries: ['CZ'] } });
+    await db.doc(`accountRoles/${uid}`).set({ level, moderationScope: { countries: ['CZ'] } });
   }
   await db.doc('feedIndexControl/current').set({ schemaVersion: 2, mode: 'active' });
   await db.doc('shouts/parent').set({ authorId: 'author', status: 'expired', geography: { schemaVersion: 1, countryCode: 'CZ' } });
@@ -41,7 +42,7 @@ test('prototype compiles, stays idempotent and refuses source drift without chan
 test('managed modes deny direct deletion for every role, forged removal audit and combined batches without partial writes', async () => {
   for (const mode of ['active', 'building', 'paused', 'off']) {
     await db.doc('feedIndexControl/current').set({ mode });
-    for (const uid of ['author', 'recipient', 'mod', 'owner', 'other']) {
+    for (const uid of Object.keys(roles)) {
       const f = client(uid); await assertFails(deleteDoc(doc(f, path)));
       await assertFails(updateDoc(doc(f, reportPath), { status: 'resolved', resolvedAt: serverTimestamp(), resolution: 'contentRemoved' }));
       await assertFails(updateDoc(doc(f, reportPath), { status: 'resolved', resolvedAt: serverTimestamp(), resolvedBy: uid, decisionOperationId: 'forged' }));

@@ -58,10 +58,20 @@ lokálním čekáním 60 s, nikoli změnou běhových timeoutů.
 pilot se neobnovoval. Jen nové fixture byla přes společný writer doplněna
 označená syntetická geografie CZ/CZ-42, protože geografický trigger dosud
 není nasazený; geographyReady true, role beze změny. Čeká jediná ruční akce
-TestModerator v Hlášení, bez aktuálního dokladu odstranění. Před úspěchem
+TestModerator v Hlášení; vlastník tento průchod 23. listopadu odložil na později.
+Pozitivní doklad odstranění zatím chybí. Před úspěchem
 neuzavírat Rules ani neuklízet. Potom samostatné úplné CI pro Rules, ověření
 a úklid. Celý DEV úsek a akceptace tedy ještě nejsou hotové; ostatní
 moderační rozhodnutí/sankce zůstávají navazující prací.
+Nezávislá [místní příprava kompatibility přísnějších Rules](MVP_SERVER_PLAN.md#moderation-private-deferred-preparation)
+je ověřená: 34 serverových/pilotních a po opravě testovacího API 13 Rules
+regresí prošlo; starší nástroj neznovuotevře staff mazání a zákazy pokrývají
+všech šest úrovní rolí. Uložit místně, push/úplné CI spojit s následným
+Rules checkpointem po klientském testu; bez dalšího kreditu do stupnice.
+Kořenové firestore.rules i živá pravidla zůstávají beze změny. Platnost nového
+pilotního Shoutu končí 24. listopadu v 10:53:49 SEČ; svévolně ji neprodlužovat
+ani nevytvářet náhradní pilot. Vlastní mazání po expiraci zůstává podle politiky
+možné, dostupnost moderačního průchodu je nutné ověřit před navázáním.
 Ovládání Windows bylo automaticky zastavené kvůli nespolehlivému určení URL;
 browser host je současně nedostupný. Pozitivní UI důkaz to nenahrazuje.
 Vlastní mazání tím znovu neotevírat. Odložený pohybový test ani jeho úklid

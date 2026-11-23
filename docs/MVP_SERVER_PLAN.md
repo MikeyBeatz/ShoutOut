@@ -861,6 +861,38 @@ Rules ani fixture neměnit. Automatická kontrola zastavila Windows ovládání
 kvůli nespolehlivému určení URL; další UI akce nebyly provedené. Celá DEV
 váha a živá akceptace zůstávají otevřené. Produkce, main a Auth účty beze změny.
 
+<a id="moderation-private-deferred-preparation"></a>
+
+### Místní pokračování během odloženého ručního testu
+
+Vlastník 23. listopadu odložil klientský průchod a požádal pokračovat samostatně.
+Kořenové firestore.rules ani živá pravidla se proto nemění; nová fixture se
+neuklízí, neobnovuje a její platnost se neprodlužuje.
+
+Starší privateReplyDeletionCandidate nyní přijme i úplný přísnější prototyp,
+aniž by znovu povolil přímé staff mazání. Odmítne duplicitní zdroj i neúplný
+přechod, kde chybí zákaz přímého contentRemoved. Regrese ověřuje stejný výsledek
+pro LF/CRLF a skutečný průchod vlastního serverového mazání pod přísnějšími
+pravidly. Zákazy přímého delete, falešného auditu a kombinovaných dávek jsou
+ověřené pro všech šest úrovní rolí v active/building/paused/off.
+
+34 serverových/pilotních případů prošlo v původním společném běhu;
+nový test přepnutí prototypu v něm nejprve selhal kvůli neexistující metodě
+testovacího SDK. Po opravě na podporované initializeTestEnvironment prošlo
+všech **13 Rules regresí**, bez přeskočení. Součet pokrytí je 47 různých případů,
+nikoli tvrzení o jednom závěrečném společném průchodu. Důkazy:
+tools/rules/private_reply_deletion_candidate.mjs,
+tools/rules/private_reply_deletion.integration.test.mjs,
+tools/rules/private_report_removal.integration.test.mjs a místní
+build/private-moderation-deferred-{emulator,rules-final}.log.
+
+Jde o místní přípravu stávajícího schváleného přechodu, bez dalšího MVP kreditu.
+Push a úplné CI se spojí s následným Rules checkpointem po skutečné klientské
+kompatibilitě; dosavadní úspěšné CI nedokládá tyto pozdější místní změny.
+Dokumentační checkpoint 849e55f má success lehké CI 45152572378, které není
+náhradou aplikačního/Rules CI. Produkce, Auth, Functions, web, prostředky,
+Scheduler i živá data se při tomto pokračování neměnily.
+
 - ponechat přidělení moderátora pouze v Admin SDK nebo jiném chráněném toku,
 - přesunout varování, bany, odstranění obsahu a uzavření hlášení do jedné
   idempotentní serverové operace,
