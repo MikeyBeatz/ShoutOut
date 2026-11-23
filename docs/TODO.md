@@ -59,7 +59,8 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    Vlastník potvrdil aktualizaci vzdáleností, nově schválil i přeskládání karet
    při potvrzeném pohybu. 486 Flutter testů a 7 serverových regresí prošly;
    af4c3aa / úplné CI 45085601243 success, pouze DEV web **37b697da10fbb5b1**.
-   Čeká krátká kontrola řazení/kotvy. Bez nového MVP kreditu
+   Krátká kontrola řazení/kotvy je na žádost vlastníka odložená na později.
+   Testovací data zatím zachovat, platnost svévolně neprodlužovat. Bez nového MVP kreditu
    za opravu; společnou akceptaci uzavřít až po skutečném úklidu.
    **Předchozí základ pohybu v DEV:** [výsledky a hranice](plans/feed/B4_DEV_ROLLOUT.md#movement-integration).
    78d6a3f / úplné CI 45077814590 success, Hosting **2d6ae9af70840b03**,
@@ -151,6 +152,11 @@ pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3
    dokončený v DEV: 11/11 cílených, 475/475 širších testů, úplné CI 45056112263
    success a vydané Rules se shodou zdroje. Web/Functions beze změny, bez živých
    testovacích zápisů. Soukromé mazání a moderace zůstávají dalším úsekem.
+   **Nezávislá příprava 23. listopadu:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-preparation).
+   8/8 izolovaných auditních scénářů hotových, bez živých zápisů. Připravený
+   konkrétní návrh serveru/klienta a místních testů; implementace čeká souhlas.
+   Na odložené pohybové kontrole nezávisí. Moderátorskou atomickou operaci,
+   regionální autoritu a živý cutover nezaměňovat za dokončení vlastního mazání.
 
 ## Hranice MVP
 

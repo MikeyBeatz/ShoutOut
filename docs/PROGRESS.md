@@ -374,7 +374,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-managed-cutover-code: Spravovaný feed – uzavření přímých odpovědí, reakcí a hlášení | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
 | content-managed-cutover-check: Uzavření přímých obsahových zápisů – regrese | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
 | content-managed-cutover-dev: Uzavření přímých obsahových zápisů – ověřené DEV Rules | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#authority-audit) |
-| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | — |
+| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation) |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
 | moderation-archive-target-check: Auditovaný detail nahlášeného archivovaného komentáře – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |

@@ -249,6 +249,69 @@ metrika zobrazení. Původní bezpečnostní kritéria této brány zůstávají
 
 <a id="antispam"></a>
 
+<a id="private-deletion-preparation"></a>
+
+### Nezávislá příprava vlastního mazání soukromých odpovědí – 23. listopadu
+
+Navazuje na zbývající privateReplies delete v [auditu autority](#authority-audit),
+nikoli na ruční akceptaci B4. Zdroj ověřený na b7ef32b, vydaný web dál
+af4c3aa / Hosting 37b697da10fbb5b1. Vlastník odložil pohybový test a požádal
+pokračovat samostatně; tento audit nemění jeho výsledek ani oprávnění.
+
+**Hotový pouze audit:** 8/8 izolovaných scénářů v emulátoru
+shoutout-rules-test, 0 živých zápisů/nových Auth účtů. Vlastní zprávu lze
+přímo smazat v managed active/building/paused i bez control dokumentu,
+bez receipt a delete kvóty. Soukromé čtení a vlastnictví fungují: příjemce,
+cizí a anonymní účet nemohou smazat kořen ani přepsat autora. Čekající žádost
+o smazání/ban blokují mazání aktéra; samotné omezení tvorby ne. Expirace či
+chybějící rodič smazání neblokují. Ostatní konverzace, existující archiv a
+Shout čítače se nemění. Nejde o celkový bezpečnostní audit aplikace.
+
+V obou moderátorských UI (lib/src/moderation.dart a lib/src/staff_reports.dart)
+je delete následovaný samostatným uzavřením hlášení. Test potvrdil přetrvávající
+otevřené hlášení při odmítnuté druhé změně; textový snapshot hlášení přežil.
+Přímé moderátorské delete navíc používá roli, ale nikoli vazbu na report či
+geografický rozsah – moderátor s rozsahem US mohl smazat CZ fixture, zatímco
+číst její text nemohl. Toto zařadit do [důvěryhodné moderace](#moderation),
+nezpřístupňovat kvůli tomu celé soukromé konverzace ani archiv.
+
+Auditní podklady v build/: private-deletion-audit.test.mjs,
+private-deletion-audit-results.json, private-deletion-audit-assessment.json
+a private-deletion-audit.log. Jde o lokální diagnostiku mimo runtime;
+opírá se o firestore.rules/privateReplies, lib/src/private_replies.dart,
+oba moderátorské soubory a schválenou
+[hranici účtové archivace](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md).
+
+**Konkrétní následující místní úsek – návrh ke schválení:**
+
+- Serverové deletePrivateReply pro vlastní zprávu s Auth/App Check,
+  ověřením způsobilosti a skutečného autora. Payload jen expectedUserId,
+  shoutId, privateReplyId a idempotencyKey; bez klientského autora či textu.
+- Stávající 7denní technické potvrzení a sdílený delete bucket ze serverového
+  mazání komentářů (120/h, odstup 1 s), vše v jedné transakci s odstraněním.
+  Opakování nesmí znovu spotřebovat kvótu, ztracená odpověď zachová původní
+  požadavek a změna účtu ho nesmí odeslat pod jinou identitou. Neodlišovat
+  cizí a nedostupnou zprávu způsobem odhalujícím její existenci.
+- Klientský gateway a obsluha vlastního koše včetně průběhu/chyby/bezpečného
+  opakování; integrace za vypnutou volbou. Příjemce nezíská právo mazat.
+  Zachovat mazání po expiraci i bez rodiče, ostatní zprávy, hlášení, archiv,
+  oznámení a čítače; žádný rekurzivní úklid ani přidání průběžné archivace.
+- Místní návrh uzavření běžného přímého delete v managed režimu až po
+  kompatibilním klientu; dosavadní moderátorské cesty ponechat funkční
+  do jejich samostatného atomického cutoveru. Oprávnění při tom nerozšiřovat.
+- Emulátorové a klientské regrese: vlastnictví, ban/pending, paralelní kliknutí,
+  ztracená odpověď/opakování, změna účtu, expirace/chybějící rodič,
+  souběh s účtovým archivátorem a zachování cizích dat. Změřit reads/writes,
+  doplnit trvalé testy, dokumentaci a společný commit/push/úplné CI.
+
+Tento návrh zatím nepovoluje nasazení nové Function, aktivaci klienta,
+živé uzavření Rules, nové živé fixture/Auth, změnu retence nebo produkce.
+Případný wrapper/prostředky a konkrétní DEV průchod předložit po místním
+ověření; odložený ruční test feedu tomu nebrání. Automatická provozní
+kapacita ani moderátorský audit se tímto dílčím krokem neprokazují.
+content-remaining-authority zůstává nedokončený; za samotný průzkum
+se nepřidává implementační kredit a pevné váhy se nemění.
+
 ## 4. Antispam a obsahová moderace — MVP
 
 - normalizovat text před kontrolou a detekovat opakovaný/velmi podobný obsah,

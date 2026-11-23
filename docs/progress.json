@@ -374,7 +374,7 @@
     {"id":"content-managed-cutover-code","title":"Spravovaný feed – uzavření přímých odpovědí, reakcí a hlášení","phase":"implementation","complete":true,"evidence":["docs/MVP_SERVER_PLAN.md#authority-audit"]},
     {"id":"content-managed-cutover-check","title":"Uzavření přímých obsahových zápisů – regrese","phase":"verification","complete":true,"evidence":["docs/MVP_SERVER_PLAN.md#authority-audit"],"requires":["content-managed-cutover-code"]},
     {"id":"content-managed-cutover-dev","title":"Uzavření přímých obsahových zápisů – ověřené DEV Rules","phase":"deployment","complete":true,"evidence":["docs/MVP_SERVER_PLAN.md#authority-audit"],"requires":["content-managed-cutover-check"]},
-    {"id":"content-remaining-authority","title":"Zbývající přímé zápisy, čítače, limity a souřadnice","phase":"implementation","complete":false,"evidence":[]},
+    {"id":"content-remaining-authority","title":"Zbývající přímé zápisy, čítače, limity a souřadnice","phase":"implementation","complete":false,"evidence":["docs/MVP_SERVER_PLAN.md#private-deletion-preparation"]},
     {"id":"content-production-accept","title":"Kompletní produkční akceptace obsahové brány","phase":"acceptance","complete":false,"evidence":[]},
     {"id":"moderation-archive-target-code","title":"Auditovaný detail nahlášeného archivovaného komentáře – implementace","phase":"implementation","complete":true,"evidence":["docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md"]},
     {"id":"moderation-archive-target-check","title":"Auditovaný detail nahlášeného archivovaného komentáře – automatické ověření","phase":"verification","complete":true,"evidence":["docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md"],"requires":["moderation-archive-target-code"]},

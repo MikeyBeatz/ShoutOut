@@ -1371,6 +1371,13 @@ build/feed-movement-order-data-{before,active}.json a -hosting-deploy.log.
 Prohlížečový host znovu vrací unavailable, proto se živá UI akceptace netvrdí.
 Vlastník dostal jedinou cílenou kontrolu na konci; čeká odpověď, potom úklid.
 
+V navazující odpovědi 23. listopadu vlastník uvedl, že na test nyní nemá čas,
+a požádal pokračovat nezávislou prací. Kontrola i úklid jsou výslovně odložené,
+nikoli úspěšné. Existující fixture zatím zachovat; původní aktivní platnost
+restartovacích karet končí 23. listopadu v 18:23 SEČ. Žádné tiché prodlužování
+nebo nový seed; pokud kontrola proběhne až po expiraci, nejprve upřesnit
+potřebný testovací podklad. Nová serverová práce může probíhat samostatně.
+
 **Čekající poslední ruční kontrola:** otevřít
 https://shoutout-dev-46c81.web.app/?mvp=af4c3aa a Ctrl+R. Stejné existující restartovací
 karty pod TestBusiness, Sensors 50.5300/14.1300/25 m, dosah 1 km a jedna obnova.

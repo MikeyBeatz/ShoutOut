@@ -6,6 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Vlastník odložil ruční kontrolu feedu:** 23. listopadu požádal pokračovat
+samostatně a vrátit se k testu později. Akceptace i úklid zůstávají otevřené;
+platnost fixture se neprodlužuje a nové živé testy nejsou tím schválené.
+Nezávisle dokončený [audit soukromého mazání a konkrétní další návrh](MVP_SERVER_PLAN.md#private-deletion-preparation):
+8/8 emulátorových scénářů, 0 živých zápisů. Další zdrojový úsek čeká na
+konkrétní souhlas; audit nemění aplikaci, Rules ani nasazení níže.
+
 **Aktuální oprava nasazená a automaticky ověřená:** [řazení při pohybu](plans/feed/B4_DEV_ROLLOUT.md#movement-order).
 Vlastník potvrdil změnu vzdáleností a požádal také o živé pořadí v Nejblíž.
 Klient při potvrzeném přesunu řadí nepřečtené/přečtené podle nové vzdálenosti,
