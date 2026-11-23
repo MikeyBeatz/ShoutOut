@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 23. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 24. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,83 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,86 %** — vážené dokončení podúseků
 
-Hotové úseky: **208/268**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **211/268**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -77,14 +77,15 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    místní implementační rozsah je předložen zvlášť.
    [Osiřelá hlášení a společná autorita](MVP_SERVER_PLAN.md#moderation-orphans-local):
    50 místních případů prošlo, nové volby vypnuté. Schválená retenční oprava
-   kopií má místní jádro a 5 cílených purge regresí; dokončit přesné společné CI
-   a navazující Rules/DEV plán. Živý přechod nezaměňovat s hotovým místním kódem.
+   kopií má místní jádro a 5 cílených purge regresí;
+   [přesné úplné CI 95e018f / 45283039166 success](MVP_SERVER_PLAN.md#moderation-local-ci-complete)
+   uzavřené včetně celé purge sady a webu. Další místní Business úsek a
+   společná Rules brána čekají na konkrétní souhlas, potom navazující DEV plán.
+   Živý přechod nezaměňovat s hotovým místním kódem.
    Ruční testy zůstávají na konec.
-   Jádro/wrappery a klient jsou připravené za false; konečných 28/28 emulátorových
-   případů, 9 klientských a 7 unit/host prošlo, analyze/lint čisté. Širší běhy
-   528 Flutter / 112 tools / 185 unit jsou zelené; přesné úplné CI ještě následuje.
-   Pokračuje příprava osiřelých hlášení a společného auditu. Žádné nasazení/nové živé fixture;
-   automatické testy průběžně, ruční až po samostatné práci podle vlastníka.
+   Jádro/wrappery a klient zůstávají za false. Výsledky 50/50 serverových,
+   13 klientských a celého CI jsou v plánu; DEV a živá akceptace sankcí nejsou
+   započítané. Automatické testy průběžně, ruční až na konec podle vlastníka.
    **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
    jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
    110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má

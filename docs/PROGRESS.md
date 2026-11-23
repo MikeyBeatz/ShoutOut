@@ -95,7 +95,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
-| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 61,10 % | 25/36 |
+| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 61,70 % | 28/36 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
 | [mvp-20: Projít všechny webové ruční regresní scénáře běžného, Business i moderačního účtu včetně pomalé nebo přerušované sítě.](TODO.md#mvp-20) | 0,00 % | 0/4 |
@@ -405,13 +405,13 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-public-dev: Veřejné moderační odstranění – DEV nasazení | deployment | ✅ | [1](../functions/content.js), [2](../config/dev.json), [3](../docs/MVP_SERVER_PLAN.md#moderation-public-dev-results), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178) |
 | moderation-public-accept: Veřejné moderační odstranění – živá akceptace a úklid | acceptance | ✅ | [1](../functions/public_report_removal_pilot.js), [2](../tools/public_report_removal_pilot.mjs), [3](../docs/MVP_SERVER_PLAN.md#moderation-public-dev-complete), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45238613178) |
 | moderation-sanction-code: Sankce a zrušení postihu – serverové jádro a wrappery | implementation | ✅ | [1](../functions/moderation_sanctions.js), [2](../functions/content.js), [3](../functions/moderation_retention.js), [4](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local), [5](../docs/MVP_SERVER_PLAN.md#moderation-retention-followup-proposal) |
-| moderation-sanction-check: Sankce a zrušení postihu – serverové regrese | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
+| moderation-sanction-check: Sankce a zrušení postihu – serverové regrese | verification | ✅ | [1](../functions/moderation_sanctions.integration.test.js), [2](../functions/moderation_retention.test.js), [3](../functions/account_purge.integration.test.js), [4](../docs/MVP_SERVER_PLAN.md#moderation-local-ci-complete), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45283039166) |
 | moderation-sanction-client: Sankce a zrušení postihu – klientské napojení | implementation | ✅ | [1](../lib/moderation_sanction_gateway.dart), [2](../lib/moderation_sanction_dialog.dart), [3](../lib/src/moderation_sanctions.dart), [4](../config/dev.json), [5](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
-| moderation-sanction-client-check: Sankce a zrušení postihu – klientské regrese | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
+| moderation-sanction-client-check: Sankce a zrušení postihu – klientské regrese | verification | ✅ | [1](../test/moderation_sanction_test.dart), [2](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45280367518) |
 | moderation-sanction-dev: Sankce a zrušení postihu – DEV aktivace | deployment | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-sanction-accept: Sankce a zrušení postihu – živá akceptace | acceptance | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-orphan-code: Bezpečné řešení osiřelých hlášení – implementace | implementation | ✅ | [1](../functions/decide_content_reports.js), [2](../functions/orphan_report_resolution.integration.test.js), [3](../docs/MVP_SERVER_PLAN.md#moderation-orphans-local) |
-| moderation-orphan-check: Bezpečné řešení osiřelých hlášení – regrese | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
+| moderation-orphan-check: Bezpečné řešení osiřelých hlášení – regrese | verification | ✅ | [1](../functions/orphan_report_resolution.integration.test.js), [2](../docs/MVP_SERVER_PLAN.md#moderation-local-ci-complete), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45283039166) |
 | moderation-orphan-dev: Bezpečné řešení osiřelých hlášení – DEV aktivace | deployment | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-orphan-accept: Bezpečné řešení osiřelých hlášení – živá akceptace | acceptance | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-decision: Společné uzavření přímých moderačních zápisů a audit autority | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |

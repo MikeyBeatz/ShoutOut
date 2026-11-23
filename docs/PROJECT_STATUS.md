@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 23. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 24. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -8,7 +8,10 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 **Probíhá navazující moderace**, větev feature/moderation-sanctions. Vlastník
 po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
-na konec. [Sankce, přímé zjištění a zrušení](MVP_SERVER_PLAN.md#moderation-sanctions-local)
+na konec. [Místní kontrolní bod uzavřený](MVP_SERVER_PLAN.md#moderation-local-ci-complete):
+**95e018f8f14aeb1d1bb9f9244f16c1041e802b25** /
+[úplné CI 45283039166 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45283039166).
+[Sankce, přímé zjištění a zrušení](MVP_SERVER_PLAN.md#moderation-sanctions-local)
 jsou připravené za serverContentSanctions=false; nový kratší postih zachová
 silnější aktivní vazbu. [Osiřelá hlášení a autorita](MVP_SERVER_PLAN.md#moderation-orphans-local)
 mají připravené uzavření bez další akce a výchozí vypnuté omezení obecných
@@ -19,8 +22,11 @@ Konečný místní společný běh **50/50** sankčních/osiřelých/authority p
 prošel, **13/13** klientských testů a analyze čisté. Dřívější společné rozhodovací
 regrese **49/49**, 44 cílených nástrojových testů a širší místní běhy jsou
 doložené v plánu; nepřičítat je znovu jako nové sekce. Přesné úplné CI
-soukromé klientské opravy 0cf1b87 běží, nová retenční změna vyžaduje vlastní
-navazující úplný kontrolní bod. Záměrně zrušený běh 45279278076 není důkaz.
+soukromé klientské opravy **0cf1b87 / 45280367518 success** prošlo a klientská
+ověřovací sekce je započítaná. Nová retenční změna **95e018f / 45283039166 success**
+má také uzavřené úplné CI včetně všech purge/regresí a webového buildu;
+serverové a osiřelé ověřovací sekce započítané. Záměrně
+zrušený běh 45279278076 není důkaz.
 
 Vlastník schválil [retenční opravu kopií](MVP_SERVER_PLAN.md#moderation-retention-followup-proposal):
 jádro je připravené, **5/5** cílených purge scénářů, 11 unit/host a kontrola
@@ -32,7 +38,8 @@ Celé Rules uzavření, DEV aktivace a živá akceptace nadále čekají.
 Business: vlastník potvrdil opravu/opětovné podání zamítnuté žádosti a při
 pozastavení blokaci nového publikování/propagace se zachováním údajů a doběhnutí
 starších běžných Shoutů. Přesný místní implementační rozsah je předložen zvlášť;
-dosud žádná nová Business implementace. DEV dál 87d6687, žádné živé zápisy,
+dosud žádná nová Business implementace. Také konkrétní místní Rules brána čeká
+na schválení. Poslední ověřený DEV dál 87d6687, žádné živé zápisy,
 Auth účty, Rules, prostředky, main ani produkce nezměněné. Staré cleaned piloty
 neobnovovat. Automatické kontroly průběžně; ruční průchody až na konec.
 

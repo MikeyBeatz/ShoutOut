@@ -1647,6 +1647,11 @@ Finální společný lokální běh **48/48** (29 sankčních, 11 osiřelých a 
 authority případů), žádné přeskočení, je v
 build/moderation-checkpoint-emulator-final.log. Nová regrese ověřila čtyři
 varianty podvržení soukromého cíle bez zápisu sankce, reportu nebo receiptu.
+Zdroj **0cf1b870a8d332d0b433bfe0177028ef8ad035ec** má
+[úspěšné úplné CI 45280367518](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45280367518).
+Započítává klientské regrese včetně soukromého preflightu; nová navazující
+retenční změna 95e018f ještě potřebuje své přesné úplné CI. Živá akceptace
+ani společné Rules uzavření tím nejsou dokončené.
 
 Rozpad zbývající nedokončené váhy moderation-decision **200** zůstává pevný:
 140 sankce (30 kód / 30 kontrola / 20 klient / 20 kontrola klienta / 20 DEV /
@@ -1774,11 +1779,70 @@ fáze (čekal retry a ponechal notifikační preference). Test opraven; opakovan
 cílený běh všech pěti nových případů zelený. Selhání nebylo ignorováno ani
 zaměněno za plný konečný průchod sady; přesné CI ověří celou kombinaci.
 Podklady build/moderation-retention-{core-final,purge-final,unit,artifact,lint}.log.
+Po doplnění fieldMask prošlo navíc všech 5 vybraných reporter/retention scénářů
+nad skutečným SDK a emulátorem (build/moderation-retention-fieldmask.log).
 
 Po případné budoucí aktivaci ponechat kompatibilní guard i maintenance zapnuté
 také při návratu klienta. Worker s vypnutými novými fázemi nesmí převzít job,
 který již vstoupil do přidaných fází; starší binární rollback není kompatibilní.
 Žádná změna existujících živých jobů tímto místním úsekem neproběhla.
+
+<a id="moderation-authority-local-proposal"></a>
+
+#### Návrh společného místního uzavření klientské moderační autority
+
+Předložit vlastníkovi: připravit výchozí vypnutou Rules bránu bez nové živé
+kolekce. Po budoucí aktivaci uzavře klientské zápisy sanctions, warnings,
+bans, contentRestrictions, sanctionRevocations, moderationClearances a update
+tří typů obsahových hlášení (reports/commentReports/privateReplyReports).
+Čtení, vlastní mazání obsahu, role a ostatní zápisy zůstanou podle dnešních
+pravidel; Business aktivaci ani přidělování rolí tento cutover neuzavírá.
+Serverové Admin SDK operace zůstávají funkční a jejich vlastní autorizace
+musí být doložená před živým zapnutím. Již připravené authorOnly pro
+deleteShout/deleteComment je součástí téhož přechodu.
+
+Místní testy celé Rules varianty před/po: běžný/Business/moderátor/senior/admin,
+vlastní čtení a čtení historie, přímé falešné rozhodnutí/sankce/revokace,
+atomické batch obcházení a odmítnutí update přes starý klient. Nový serverový
+průchod v téže emulátorové databázi musí dál projít s korektním auditem.
+Výchozí vypnutý soubor musí zachovat stávající regrese. Zahrnout dokumentaci
+a jeden společný push/CI; teprve podle výsledků sestavit konkrétní DEV plán
+včetně kompatibilního návratu (starý web s přímými zápisy po uzavření nestačí).
+Pouze místní příprava: bez nasazení, živých dat, Auth účtů, nových prostředků,
+Scheduleru nebo změny rolí/retencí. Samotný tento návrh není hotová Rules změna.
+
+Budoucí provozní pořadí doložit v konkrétním DEV plánu: kompatibilní serverové
+writery/guard a klient, potom ověřené Rules uzavření, až pak nová purge údržba.
+Pouhé zapnutí serverového guardu nechrání starou přímou klientskou cestu.
+Společná zdrojová volba proto nenahrazuje ověření skutečně nasazených zdrojů
+jednotlivých Functions. Rollback po vstupu jobů do nových fází musí ponechat
+kompatibilní worker a nové API, nikoli starý zdroj s vypnutou údržbou.
+
+<a id="moderation-local-ci-complete"></a>
+
+#### Uzavřený místní kontrolní bod – 24. listopadu
+
+Zdroj **95e018f8f14aeb1d1bb9f9244f16c1041e802b25** na
+feature/moderation-sanctions má
+[úspěšné úplné CI 45283039166](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45283039166).
+Prošly klientské testy/analýza, nástroje, serverové unit, celé dosavadní Rules
+a transakce, B4, soukromé/veřejné rozhodování, nová 50členná sada, B2,
+kompletní purge se všemi novými případy, Storage i webový build. Nejde jen
+o místní cílený běh ani dokumentační režim. Dřívější klientská oprava 0cf1b87
+má samostatné úspěšné úplné CI 45280367518.
+
+Připravené/ověřené jsou sankce a revokace, ochrana silnější vazby, soukromý
+preflight bez čtení cizí konverzace, osiřelé resolve, výchozí vypnuté authorOnly
+a nové retenční jádro s oběma návaznostmi. Započítané pouze příslušné kódové
+a ověřovací sekce. Společný authority cutover, DEV, živá akceptace, Business
+a celý moderační milník zůstávají otevřené. Retenční oprava nepřidává váhu.
+
+Žádný rollout, živý zápis, nový Auth účet, Rules změna, reset kvóty, migrace,
+změna prostředků/Scheduleru, main ani produkce. Nové volby stále false.
+Další konkrétní místní Business úsek i výše popsaná Rules brána jsou předložené
+vlastníkovi ke schválení; do souhlasu pouze průzkum. Budoucí DEV rozsah,
+testovací data a kompatibilní návrat připravit před jeho samostatným souhlasem.
+Ruční testy zatím nepotřebujeme, zůstávají na konec dostupné samostatné práce.
 
 <a id="account-deletion"></a>
 
