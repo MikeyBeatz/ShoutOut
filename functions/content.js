@@ -22,9 +22,9 @@ import { createContentReportOperation } from './create_content_report.js';
 import { deleteCommentOperation } from './delete_comment.js';
 import { deletePrivateReplyOperation } from './delete_private_reply.js';
 import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
-import { decideContentReportsOperation } from './decide_content_reports.js';
+import { decideContentReportsOperation, orphanReportResolutionEnabled } from './decide_content_reports.js';
 import { removeReportedPublicContentOperation } from './remove_reported_public_content.js';
-import { sanctionContentOperation, revokeSanctionOperation } from './moderation_sanctions.js';
+import { sanctionContentOperation, revokeSanctionOperation, managedModerationAuthorityEnabled } from './moderation_sanctions.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -34,13 +34,13 @@ if (getApps().length === 0) initializeApp();
 
 // One switch selects writer + early queue + purge coordinator together. The
 // queue is not scheduled here; activation requires the migration/runtime gate.
-function indexedOperation(operation, request) {
+function indexedOperation(operation, request, options = {}) {
   const runtime = createFeedRuntime(getFirestore(), { getUser: uid => getAuth().getUser(uid) });
-  return operation(request, runtime.database, () => new Date(), { indexWriter: runtime.indexWriter });
+  return operation(request, runtime.database, () => new Date(), { ...options, indexWriter: runtime.indexWriter });
 }
 
-function projectedOperation(operation, request) {
-  return feedRuntimeConfiguration.cardStateEnabled ? indexedOperation(operation, request) : operation(request, getFirestore());
+function projectedOperation(operation, request, options = {}) {
+  return feedRuntimeConfiguration.cardStateEnabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
 }
 
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
@@ -92,7 +92,7 @@ export const deleteShout = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, request => indexedOperation(deleteShoutOperation, request));
+}, request => indexedOperation(deleteShoutOperation, request, { authorOnly: managedModerationAuthorityEnabled }));
 
 export const deleteComment = onCall({
   ...secureCallableOptions,
@@ -101,7 +101,7 @@ export const deleteComment = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => projectedOperation(deleteCommentOperation, request));
+}, (request) => projectedOperation(deleteCommentOperation, request, { authorOnly: managedModerationAuthorityEnabled }));
 
 export const removeReportedPrivateReply = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
@@ -111,7 +111,7 @@ export const removeReportedPrivateReply = onCall({
 export const decideContentReports = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => decideContentReportsOperation(request, getFirestore()));
+}, request => decideContentReportsOperation(request, getFirestore(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled }));
 
 export const removeReportedPublicContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,

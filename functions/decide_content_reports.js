@@ -8,6 +8,8 @@ import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_
 import { isPurgedShoutContext } from './shout_context.js';
 
 const action = 'decideContentReports';
+const unavailableAction = 'resolveUnavailableContentReports';
+export const orphanReportResolutionEnabled = false;
 const collections = { shout: 'reports', comment: 'commentReports', privateReply: 'privateReplyReports' };
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const reportId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,386}$/.test(value);
@@ -43,6 +45,18 @@ function validateTarget(source, shout) {
   if (!source.exists || !shout.exists || isPurgedShoutContext(shout.data())) fail('not-found', 'The report target is unavailable.');
   if (!id(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp)) fail('failed-precondition', 'Invalid report target.');
 }
+function assertUnavailableReportGroup(reports, input) {
+  const ids = reports.docs.map(d => d.id).sort();
+  if (ids.length > 50 || JSON.stringify(ids) !== JSON.stringify(input.reportIds)) fail('failed-precondition', 'The report group changed.');
+  for (const report of reports.docs) {
+    const d = report.data(), suffix = input.targetType === 'shout' ? '' : `_${input.targetId}`;
+    if (!id(d.reporterId) || report.id !== `${d.reporterId}_${input.shoutId}${suffix}` || d.shoutId !== input.shoutId ||
+        !(d.createdAt instanceof Timestamp) || typeof d.reason !== 'string' || !d.reason ||
+        input.targetType === 'comment' && d.commentId !== input.targetId ||
+        input.targetType === 'privateReply' && (d.privateReplyId !== input.targetId || !id(d.authorId) ||
+          d.reporterId === d.authorId || typeof d.text !== 'string')) fail('failed-precondition', 'Invalid unavailable report target.');
+  }
+}
 export function assertContentReportGroup(reports, input, source) {
   const ids = reports.docs.map(d => d.id).sort();
   if (ids.length > 50) fail('failed-precondition', 'The report group exceeds the supported decision size.');
@@ -64,10 +78,13 @@ export function assertContentReportGroup(reports, input, source) {
   }
 }
 
-export async function decideContentReportsOperation(request, db, clock = () => new Date()) {
+export async function decideContentReportsOperation(request, db, clock = () => new Date(), { resolveUnavailableTargets = false } = {}) {
+  if (typeof resolveUnavailableTargets !== 'boolean') throw new Error('invalid-unavailable-report-option');
   const { uid } = requireCallableIdentity(request), input = validateContentReportDecision(request.data);
   if (uid !== input.expectedUserId) fail('unauthenticated', 'The signed-in account changed.');
   const fingerprint = digest(JSON.stringify(input)), receiptRef = db.doc(`serverOperations/${digest(`${uid}\n${action}\n${input.idempotencyKey}`)}`);
+  const unavailableRef = resolveUnavailableTargets && input.decision === 'resolve' ?
+    db.doc(`serverOperations/${digest(`${uid}\n${unavailableAction}\n${input.idempotencyKey}`)}`) : null;
   const shoutRef = db.doc(`shouts/${input.shoutId}`), sourceRef = input.targetType === 'shout' ? shoutRef :
     shoutRef.collection(input.targetType === 'comment' ? 'comments' : 'privateReplies').doc(input.targetId);
   const clearanceRef = db.doc(`moderationClearances/${input.targetType}_${input.shoutId}${input.targetId === undefined ? '' : `_${input.targetId}`}`);
@@ -76,42 +93,54 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) fail('failed-precondition', 'operation-clock-unavailable');
     const now = Timestamp.fromDate(date);
     await requireEligibleActor({ request, db, reader: tx, now: date });
-    const [role, legacy, receipt, shout] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef);
+    const [role, legacy, primaryReceipt, shout, unavailableReceipt] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef, ...(unavailableRef ? [unavailableRef] : []));
+    if (primaryReceipt.exists && unavailableReceipt?.exists) fail('failed-precondition', 'Ambiguous stored decision result.');
+    const receipt = unavailableReceipt?.exists ? unavailableReceipt : primaryReceipt;
     const level = privateReportModeratorLevel(role.data(), legacy.data());
     assertPrivateReportScope(role.data(), level, shout.data());
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
-      if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
+      const unavailable = unavailableReceipt?.exists === true;
+      if (stored.action !== (unavailable ? unavailableAction : action) || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
           stored.targetId !== input.targetId || JSON.stringify(stored.reportIds) !== JSON.stringify(input.reportIds) ||
-          !id(stored.authorId) || ![3, 4].includes(stored.requiredRoleLevel) ||
+          (unavailable ? stored.targetUnavailable !== true || stored.authorId !== undefined : !id(stored.authorId)) || ![3, 4].includes(stored.requiredRoleLevel) ||
           stored.result?.decision !== input.decision || stored.result?.count !== input.reportIds.length) fail('failed-precondition', 'Invalid stored decision result.');
       if (level < stored.requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
       return { decision: input.decision, count: input.reportIds.length };
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
-    validateTarget(source, shout);
-    if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
+    const unavailable = unavailableRef !== null && (!source.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
+    const contextChild = unavailableRef !== null && input.targetType !== 'shout' && source.exists && (!shout.exists || isPurgedShoutContext(shout.data()));
+    if (!unavailable && !contextChild) validateTarget(source, shout);
+    if (contextChild && (!id(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
+    if (!unavailable && clearance.exists) fail('failed-precondition', 'The content was already approved.');
     const reports = await tx.get(pendingContentReports(db, input));
-    assertContentReportGroup(reports, input, source);
+    if (unavailable) assertUnavailableReportGroup(reports, input);
+    else assertContentReportGroup(reports, input, source);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
+    if (unavailable && shout.exists && level < 5 && role.get('moderationScope')?.global !== true &&
+        reports.docs.some(d => shout.createTime.seconds > d.createTime.seconds || shout.createTime.seconds === d.createTime.seconds && shout.createTime.nanoseconds > d.createTime.nanoseconds)) {
+      fail('permission-denied', 'The original parent geography is unavailable.');
+    }
+    const operationRef = unavailable ? unavailableRef : receiptRef;
     if (input.decision === 'approve') tx.create(clearanceRef, {
       targetType: input.targetType, shoutId: input.shoutId, contentId: input.targetId ?? input.shoutId,
       moderatorId: uid, createdAt: now, reason: input.note || 'Obsah byl zkontrolován a je v pořádku.', sourceReportIds: input.reportIds,
     });
     for (const report of reports.docs) tx.update(report.ref, input.decision === 'escalate' ? {
       status: 'escalated', assignedRole: 'seniorModerator', escalatedBy: uid, escalatedAt: now,
-      escalationOperationId: receiptRef.id, ...(input.note ? { escalationNote: input.note } : {}),
+      escalationOperationId: operationRef.id, ...(input.note ? { escalationNote: input.note } : {}),
     } : {
       status: 'resolved', resolution: input.decision === 'approve' ? 'contentApproved' : 'noAction',
-      resolvedBy: uid, resolvedAt: now, decisionOperationId: receiptRef.id, ...(input.note ? { moderatorNote: input.note } : {}),
+      resolvedBy: uid, resolvedAt: now, decisionOperationId: operationRef.id, ...(input.note ? { moderatorNote: input.note } : {}),
     });
     const result = { decision: input.decision, count: reports.size };
-    tx.create(receiptRef, { ...retention, action, userId: uid, fingerprint, targetType: input.targetType,
+    tx.create(operationRef, { ...retention, action: unavailable ? unavailableAction : action, userId: uid, fingerprint, targetType: input.targetType,
       shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
-      reportIds: input.reportIds, authorId: source.get('authorId'), requiredRoleLevel, result, createdAt: now });
+      reportIds: input.reportIds, ...(unavailable ? { targetUnavailable: true } : { authorId: source.get('authorId') }), requiredRoleLevel, result, createdAt: now });
     return result;
   });
 }

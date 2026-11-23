@@ -18,6 +18,15 @@ Vlastník výslovně schválil zachování silnějšího
 aktivního postihu; kratší/equivalentní nový zápis zůstane v historii a aktivní
 vazbu nezkrátí. Nyní navazuje příprava osiřelých hlášení a společného cutoveru;
 nasazení ani živá akceptace sankcí dosud hotové nejsou.
+Navazující [osiřelá hlášení a audit autority](MVP_SERVER_PLAN.md#moderation-orphans-local)
+mají společný **39/39** místní průchod. Připravené je uzavření chybějícího cíle
+bez další akce, stále za vypnutou volbou. Dále se ověřuje výchozí vypnuté
+omezení obecných mazacích API na vlastní obsah; cizí odstranění musí po cutoveru
+použít auditovanou moderaci. Společné Rules uzavření a audit odvozených
+retenčních kopií ještě nejsou hotové, nelze je započítat jako dokončené.
+Navazující **49/49** emulátorových regresí včetně osmi případů authority gate,
+44 cílených nástrojových a 7 unit/host testů prošlo, lint/dokumentace čisté.
+Zdrojový kontrolní bod je připravený pro společný push a přesné úplné CI.
 Žádná nová živá data, Auth účty, Rules ani prostředky; DEV zůstává na 87d6687.
 U Business zamítnutí/opakovaného podání a pozastavení se čeká na dvě produktové
 volby; do odpovědi na této části neměnit chování. Automatické testy průběžně,

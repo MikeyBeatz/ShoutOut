@@ -1,4 +1,4 @@
-// Prepared server core. No host export or live activation.
+// Prepared server core and host declarations; no live activation.
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -7,6 +7,9 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { validateContentReportDecision, pendingContentReports, assertContentReportGroup } from './decide_content_reports.js';
 import { isPurgedShoutContext } from './shout_context.js';
+
+// Activate with the checked client/Rules cutover, never by deploying this preparation.
+export const managedModerationAuthorityEnabled = false;
 
 const day = 86400000, hash = value => createHash('sha256').update(value).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);

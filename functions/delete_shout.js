@@ -19,7 +19,8 @@ export function validateShoutDeletion(input) {
   return Object.fromEntries(fields.filter(key => input[key] !== undefined).map(key => [key, input[key]]));
 }
 
-export async function deleteShoutOperation(request, db, clock = () => new Date(), { indexWriter = null } = {}) {
+export async function deleteShoutOperation(request, db, clock = () => new Date(), { indexWriter = null, authorOnly = false } = {}) {
+  if (typeof authorOnly !== 'boolean') throw new Error('invalid-moderation-authority-option');
   const { uid } = requireCallableIdentity(request);
   const input = validateShoutDeletion(request.data);
   if (input.expectedUserId !== undefined && input.expectedUserId !== uid) fail('unauthenticated', 'The signed-in account changed.');
@@ -34,6 +35,7 @@ export async function deleteShoutOperation(request, db, clock = () => new Date()
     const authorize = async authorId => {
       if (typeof authorId !== 'string' || !authorId) fail('failed-precondition', 'Invalid stored Shout author.');
       if (authorId === uid) return;
+      if (authorOnly) fail('permission-denied', 'Use the audited moderation operation for foreign content.');
       const [role, legacy] = await transaction.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`));
       const level = role.data()?.level;
       if (!(Number.isSafeInteger(level) && level >= 3) && !legacy.exists) {

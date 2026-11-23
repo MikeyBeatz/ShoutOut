@@ -41,7 +41,8 @@ export function nextDeleteRate(data, now, eventId) {
     windowStartedAt: reset ? now : data.windowStartedAt, count };
 }
 
-export async function deleteCommentOperation(request, db, clock = () => new Date()) {
+export async function deleteCommentOperation(request, db, clock = () => new Date(), { authorOnly = false } = {}) {
+  if (typeof authorOnly !== 'boolean') throw new Error('invalid-moderation-authority-option');
   const { uid } = requireCallableIdentity(request);
   const input = validateCommentDeletion(request.data);
   if (input.expectedUserId !== undefined && input.expectedUserId !== uid) {
@@ -62,6 +63,7 @@ export async function deleteCommentOperation(request, db, clock = () => new Date
         fail('failed-precondition', 'Invalid stored comment author.');
       }
       if (authorId === uid) return; // Ordinary authors do not need two role reads.
+      if (authorOnly) fail('permission-denied', 'Use the audited moderation operation for foreign content.');
       const [role, legacyModerator] = await transaction.getAll(
         db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`));
       // Match hasRoleLevel(3) in current Rules, including the legacy membership.

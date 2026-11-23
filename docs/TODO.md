@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,83 %** — vážené dokončení podúseků
 
-Hotové úseky: **207/268**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **208/268**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -73,6 +73,10 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    [serverové udělení a zrušení postihu, klient a regrese](MVP_SERVER_PLAN.md#moderation-sanctions-local).
    Zachovat stávající role, délky/retence a 50 hlášení. Ochrana silnějšího
    aktivního postihu je nově výslovně schválená; Business dvě volby čekají.
+   [Osiřelá hlášení a společná autorita](MVP_SERVER_PLAN.md#moderation-orphans-local):
+   39 místních případů prošlo, obě nové volby vypnuté. Dokončit regrese obecných
+   mazacích API, společné CI a audit odvozených retenčních kopií; Rules a živý
+   přechod nezaměňovat s hotovým místním kódem. Ruční testy zůstávají na konec.
    Jádro/wrappery a klient jsou připravené za false; konečných 28/28 emulátorových
    případů, 9 klientských a 7 unit/host prošlo, analyze/lint čisté. Širší běhy
    528 Flutter / 112 tools / 185 unit jsou zelené; přesné úplné CI ještě následuje.

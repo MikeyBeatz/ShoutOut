@@ -1644,6 +1644,64 @@ Připravená allowlist aktualizace úklidu technických potvrzení se nenasazuje
 pozastavení pouze zastavit nové publikace/propagaci, nebo navíc skrýt aktivní
 firemní Shouty. Vlastník má obě otázky předložené; do odpovědi nezavádět nové chování.
 
+<a id="moderation-orphans-local"></a>
+
+### Osiřelá hlášení a autorita starších mazacích API – místní příprava
+
+Navazuje v témže schváleném společném moderačním úseku. Jádro
+decideContentReports umí za výchozím **orphanReportResolutionEnabled=false**
+uzavřít chybějící cíl jako vyřešený / noAction, se zachováním důkazů a auditu.
+Nevytváří fiktivního autora, neobnovuje obsah a netvrdí, že byl právě odstraněn.
+Existující klientské „Označit jako vyřešené“ je dostupné i při chybě detailu;
+payload a běžná rozhodnutí zůstávají kompatibilní. Chybějící nebo anonymizovaný
+rodič nedává regionální oprávnění. Znovu vytvořený rodič nemůže dodat novou
+geografii starému hlášení. Přeživší cizí komentář pod anonymním kontextem zůstane
+zachovaný; rozhodnutí ho nesmaže ani nevydává za chybějící.
+
+Samostatný body-free receipt resolveUnavailableContentReports má původních
+7 dní a ověřuje aktuální roli i při opakování. Kolize obou typů receiptů zastaví
+zápis. Vypnutí přípravy zachová běžné staré chování, ale již potvrzené osiřelé
+rozhodnutí starý wrapper nedokáže znovu potvrdit; při návratu proto ponechat
+kompatibilní nový wrapper a vypínat klientskou aktivaci. Nová větev resolve čte
+jeden další malý receipt; těla všech Shoutů se nenačítají.
+
+Společný místní běh sankcí a osiřelých hlášení: **39/39**, z toho 11 nových
+osiřelých případů (včetně výchozího vypnutí), 50/51, změna role, chybějící
+rodič, soukromé důkazy, starý receipt a uplynutí sedmidenního okna.
+Podklad build/moderation-orphans-emulator.log; lint čistý. Přesné úplné CI
+a živá aktivace jsou samostatné další kroky.
+
+Audit našel, že dosavadní deleteShout/deleteComment dovolují moderátorovi
+smazat cizí obsah mimo novou auditovanou cestu. Připravené **authorOnly**
+omezení za výchozím **managedModerationAuthorityEnabled=false** ponechá
+vlastní mazání (také po expiraci), ale odmítne cizí obsah i adminovi a i při
+opakování starého potvrzení. Veřejné odstranění musí použít již existující
+removeReportedPublicContent. Wrapper předává tuto volbu společně s dosavadním
+writerem; ostatní operace a jejich indexování se nemění. Přímá stará klientská
+moderace zůstává jen návratovou větví, do živého uzavření doložit přepínače
+serverových rozhodnutí/odstranění a klientskou kompatibilitu.
+
+Konečný samostatný běh **49/49** zahrnuje osm případů authority gate i 41
+stávajících regresí společného rozhodování, veřejného odstranění a pilotních
+nástrojů. Vlastní běžný/Business/moderátorský obsah i replay fungují; cizí obsah
+odmítnut u úrovní 3–6 a legacy moderátora, bez změny zdroje, rate nebo receipt.
+Sedm cílených unit/host, 44 nástrojových testů, lint a dokumentační kontroly
+prošly. Podklady build/moderation-authority-regression.log a
+build/moderation-checkpoint-{unit,tools}.log. Společný CI krok nyní obsahuje
+sankce, osiřelé cíle i authority gate; dosavadní rozhodovací sada zůstává navíc.
+
+**Společný audit není uzavřený:** zbývá navrhnout konkrétní uzavření přímých
+Rules zápisů a ověřit 60denní dočištění kopií důvodu v aktivních
+bans/contentRestrictions/warnings i reference moderátorů v aktivních vazbách.
+Stávající purge čistí sankční důkazy, původní report a některé auditní reference;
+to samo nedokládá odstranění všech těchto odvozených kopií. Číselné pozice
+existujících purge fází se nesmějí přeskládat. Bez této kontroly nezapočítat
+společný authority cutover ani nezapínat novou sankční cestu v DEV.
+
+Žádná část tohoto místního úseku se zatím nenasazuje; Rules, Scheduler, živá
+data, Auth, prostředky, produkce i main zůstávají beze změny. Ruční testy až
+po dokončení dostupných nezávislých příprav; dvě Business volby výše stále čekají.
+
 <a id="account-deletion"></a>
 
 ## 6. Zpracování žádosti o smazání účtu — MVP
