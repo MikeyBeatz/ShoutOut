@@ -2,6 +2,9 @@
 
 ## Aktuální stav a použití plánu
 
+**Schválená nynější místní práce:** [atomické veřejné odstranění bez postihu](#moderation-public-local).
+Bez živého zapojení, wrapperu nebo aktivace; dosavadní DEV nasazení zachované.
+
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
 nových příkazů k provedení. Přesné nasazení: [PROJECT_STATUS](PROJECT_STATUS.md).
@@ -1335,6 +1338,111 @@ se tím neschvalují. Odložený feedový test a jeho původní data zůstávaj�
 - ukládat kdo, kdy, proč a nad čím zásah provedl, bez nadbytečných osobních dat,
 - omezit četnost moderátorských akcí a chránit citlivé exporty,
 - přidat druhé potvrzení pro nevratné nebo hromadné zásahy.
+
+<a id="moderation-public-local"></a>
+
+Vlastník 23. listopadu schválil společný místní úsek: transakční odstranění
+nahlášeného Shoutu/veřejného komentáře, uzavření celé aktuální skupiny do
+50 hlášení, stávající autorita/geografie/Auth/App Check, audit a 7denní replay.
+Shout má dál soft delete; komentář se odstraní s úpravou počtu a živého stavu.
+Zůstávají dosavadní indexové writery, 450 zápisů, komentářová delete kvóta,
+archiv a retence. Klient za vypnutou volbou, regresní testy, dokumentace,
+metriky, commit/push a společné úplné CI. Bez wrapperu, nasazení, živých dat,
+Auth účtů, změn Rules, sankcí či nových limitů. DEV přechod předložit podle výsledků.
+Před dokončením se z dosavadní zbývající moderation-decision váhy 500
+odděluje jádro/ověření 60/60, klient/ověření 40/40, budoucí DEV/akceptace
+50/50; ostatním rozhodnutím a sankcím zůstává 200. Součet rodiče, hotové
+váhy a backlog se nemění; tyto MVP díly již nemají samostatnou backlogovou položku.
+
+<a id="moderation-public-local-results"></a>
+
+### Veřejné odstranění – místní výsledek
+
+Jádro functions/remove_reported_public_content.js provede soft delete Shoutu
+nebo fyzické odstranění jednoho komentáře, uzavře přesnou aktuální skupinu
+reports/commentReports a uloží resolvedBy/resolvedAt/decisionOperationId
+i technické potvrzení v jedné transakci. Sdílí kanonickou validaci skupin
+s decideContentReports. Nové hlášení před načtením skupiny, 51 řádků,
+neúplný seznam, změna inkarnace nebo již schválený obsah skončí bez zápisů.
+Shout vyžaduje použitelný indexový plán; komentář aktualizuje živý stav a
+počet přes stávající publisher. Společný rozpočet zůstává 450 zápisů.
+Pod anonymním kontextem lze dál globálně moderovat cizí komentář, aniž se
+obnoví původní tělo, identita nebo čítače smazaného Shoutu.
+
+Aktuální role/rozsah, způsobilost účtu, Auth/App Check se ověřují také při
+replay. Eskalovaná skupina vyžaduje existující úroveň 4; admin/owner mají
+dosavadní globální geografii. Komentář zachovává společnou kvótu delete
+120/h a odstup 1 s; replay ji znovu nečerpá. Shoutu nová kvóta nevzniká.
+Receipt neobsahuje text/důvod/poznámku, má původní 7denní limit a je zahrnutá
+do místního allowlistu cleanupOperationReceipts. Stávající účtové purge fáze
+ji již pokrývají přes userId/authorId a audit hlášení přes resolvedBy; žádné
+nové fáze ani posuny číselných stage indexů nevznikly.
+
+Obě klientské obrazovky používají společný ContentReportDecisionGateway,
+který váže celý neměnný požadavek a timed key na účet/cíl. Nejasný výsledek
+zachová volbu/poznámku/ID pro retry, potvrzení či jednoznačné odmítnutí jej
+uvolní. Route removeReportedPublicContent je oddělená od dosavadních základních
+rozhodnutí. Nová serverPublicReportRemoval je přísný boolean s App Check
+gate, **výchozí false a false v obou konfiguracích**. Host/export neexistuje
+a kontrola runtime balíčků vynucuje nepřítomnost nového jádra. DEV/prod
+konfigurace, Functions, Rules, živá data, Auth i prostředky zůstaly beze změny.
+
+Ověření: **16/16 konečných nových případů**, včetně dvou reálných generací,
+živých projekcí, staršího snapshotu, rozpočtu/rollbacku, 50/51 hlášení,
+dvou moderátorů, souběžného approve/remove, vlastního mazání, archivace,
+nového hlášení, replay/expiry i fyzického receipt cleanupu. Předchozí širší
+běh navíc doložil 18 základních rozhodovacích a 15 purge regresí; jeho jediný
+neúspěch byl příliš úzký testový název chyby rozpočtu (nižší indexový guard
+správně odmítl zápis). Konečných 16/16 netvrdit jako jeden lokální 49/49 běh.
+Prošlo **519 Flutter testů**, **110 nástrojových**, **179 serverových unit**,
+analyze bez nálezů a lint. 635 integračních testů v unit běhu bez emulátoru
+je přeskočených, nikoli úspěšně provedených. Důkazy build/public-removal-
+{server-final-all,server-regression,flutter,client,analyze-final,tools,functions,lint}.log.
+Počáteční testové předpoklady pro novou inkarnaci a čas později vytvořeného
+Shoutu byly opravené; produkční guardy se neoslabovaly.
+
+SDK měření pro dvě hlášení bez spravovaného indexu: Shout 12 reads / 4 writes,
+komentář 15 / 6, replay 9 / 0; nejde o cloudovou latenci/cenu nebo kapacitu.
+Podklady build/public-removal-{shout,comment}-measurement.json. Spravovaný
+index má své dodatečné blokové/projekční operace a zůstává pod společným limitem.
+Změny půjdou jedním společným pushem/úplným CI; jeho výsledek se eviduje zvlášť.
+
+Chybějící zdroj se v tomto odstraňovacím kontraktu neoznačí falešně za
+odstraněný. Pokud souběh vyhraje vlastní mazání/archivace, může hlášení zůstat
+otevřené; další obsluha osiřelých případů patří do zbývajícího rozhodovacího
+auditu před úplným Rules cutoverem. Staré deleteShout/deleteComment a přímé
+sankční cesty se tímto místním úsekem nepovažují za uzavřené moderační autority.
+
+<a id="moderation-public-dev-proposal"></a>
+
+### Konkrétní návrh navazujícího DEV přechodu – zatím neschválený
+
+1. Připravit callable wrapper, řízený pilotní nástroj/digest a host testy,
+   commit/push a úplné CI přesných aktivovaných zdrojů. Pouze DEV
+   shoutout-dev-46c81: removeReportedPublicContent v europe-west3, min 0 /
+   max 1 instance, concurrency 1, 256 MiB, 15 s, Auth/App Check.
+2. Před aktivací aktualizovat pouze existující cleanupOperationReceipts pro
+   nový receipt action, se stejnými prostředky a minutovým plánovačem.
+   Zbývající účtové scrub/delete fáze již podporují stejné auditní/receipt
+   fieldy; jejich pořadí ani živé joby neměnit. Nové indexy nyní návrh
+   nevyžaduje: používá tentýž pendingContentReports dotaz jako nasazený základ.
+   Před rolloutem doložit aktuální kompatibilitu a dotazy, ne ji pouze předpokládat.
+3. Zapnout serverPublicReportRemoval jen v DEV webu, ověřit artefakt/HTTP
+   a návrat na současný kompatibilní web. Rules nyní neměnit; společný
+   kompatibilní cutover počká na zbývající sankce a audit autority.
+4. Pilot: jeden nový 24h syntetický Shout Bright_Otter_182, dva komentáře
+   (cílový TestBusiness a kontrolní Bright_Otter_182) a dvě hlášení,
+   s vymezenou serverovou geografií CZ/CZ-42. Přes přesně TestModerator
+   odstranit nejdřív nahlášený komentář, ověřit počet 2 → 1 a zachování
+   kontrolního komentáře; pak odstranit Shout. Obě skupiny/audity/receipts
+   ověřit serverově, bez nového Auth účtu nebo postihu.
+5. Po akceptaci uklidit pouze tento manifest, cílová hlášení, kontrolní
+   komentář, související testovací oznámení/read klíče přes writer. Receipts
+   ponechat původních 7 dní, kvóty neresetovat, původní obsah/pending žádost
+   a staré cleaned piloty zachovat. Produkce/main/role/retence beze změny.
+
+Nový živý wrapper/aktivace a fixture vyžadují konkrétní souhlas. Tento návrh
+je výstup schválené místní přípravy; sám nepovoluje nasazení ani seed.
 
 <a id="account-deletion"></a>
 

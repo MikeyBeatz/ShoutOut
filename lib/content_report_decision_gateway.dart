@@ -7,6 +7,19 @@ import 'timed_operation_gateway.dart';
 
 typedef ContentReportTarget = ({String type, String shoutId, String? targetId});
 
+bool usesServerContentReportDecision({
+  required String decision,
+  required String targetType,
+  required bool decisionsEnabled,
+  required bool publicRemovalEnabled,
+}) =>
+    (decisionsEnabled &&
+        ['shout', 'comment', 'privateReply'].contains(targetType) &&
+        ['approve', 'escalate', 'resolve'].contains(decision)) ||
+    (publicRemovalEnabled &&
+        ['shout', 'comment'].contains(targetType) &&
+        decision == 'remove');
+
 class ContentReportDecisionRequest {
   ContentReportDecisionRequest({
     required this.userId,
@@ -21,6 +34,10 @@ class ContentReportDecisionRequest {
   final ContentReportTarget target;
   final List<String> reportIds;
   final timedAttempt = TimedOperationAttempt();
+
+  String get operation => decision == 'remove'
+      ? 'removeReportedPublicContent'
+      : 'decideContentReports';
 
   Map<String, dynamic> toPayload() => {
     'expectedUserId': userId,
@@ -79,7 +96,9 @@ class ContentReportDecisionGateway {
     if (ids.isEmpty ||
         ids.length > 50 ||
         ids.toSet().length != ids.length ||
-        !['approve', 'escalate', 'resolve'].contains(decision)) {
+        !(['approve', 'escalate', 'resolve'].contains(decision) ||
+            decision == 'remove' &&
+                ['shout', 'comment'].contains(target.type))) {
       return Future.error(
         FirebaseFunctionsException(
           code: 'invalid-argument',

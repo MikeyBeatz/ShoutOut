@@ -253,6 +253,9 @@ bool get _useServerPrivateReportRemoval =>
 bool get _useServerContentReportDecisions =>
     kIsWeb && WebEnvironment.current.serverContentReportDecisions;
 
+bool get _useServerPublicReportRemoval =>
+    kIsWeb && WebEnvironment.current.serverPublicReportRemoval;
+
 ContentReportTarget _contentReportTarget(
   String collection,
   Map<String, dynamic> data,
@@ -275,7 +278,7 @@ final _contentReportDecisionGateway = ContentReportDecisionGateway(
   send: (request) => _serverContentOperations.call(
     attempt: request.timedAttempt,
     userId: request.userId,
-    operation: 'decideContentReports',
+    operation: request.operation,
     payload: request.toPayload(),
   ),
 );
@@ -284,7 +287,8 @@ ContentReportDecisionRequest? _pendingContentReportDecision(
   ContentReportTarget target,
 ) {
   final uid = FirebaseAuth.instance.currentUser?.uid;
-  return uid == null || !_useServerContentReportDecisions
+  return uid == null ||
+          !(_useServerContentReportDecisions || _useServerPublicReportRemoval)
       ? null
       : _contentReportDecisionGateway.pending(uid, target);
 }
@@ -295,6 +299,14 @@ Future<void> _decideContentReports(
   String decision, {
   String? note,
 }) async {
+  if (!usesServerContentReportDecision(
+    decision: decision,
+    targetType: target.type,
+    decisionsEnabled: _useServerContentReportDecisions,
+    publicRemovalEnabled: _useServerPublicReportRemoval,
+  )) {
+    throw StateError('Server report operation is disabled.');
+  }
   final uid = FirebaseAuth.instance.currentUser?.uid;
   if (uid == null) {
     throw FirebaseFunctionsException(

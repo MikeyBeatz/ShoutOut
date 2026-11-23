@@ -9,6 +9,14 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('public report removal remains off and validates its own App Check gate', () => {
+  assert.notEqual(actualDev.serverPublicReportRemoval, true); assert.notEqual(loadConfig('prod').serverPublicReportRemoval, true);
+  assert.doesNotThrow(() => validateConfig({ ...actualDev, serverPublicReportRemoval: true }, 'dev'));
+  for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverPublicReportRemoval: value }, 'dev'));
+  const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) }; delete disabled.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...disabled, serverPublicReportRemoval: true }, 'dev'));
+});
+
 test('content report decisions activate only DEV and require a strict App Check flag', () => {
   assert.equal(actualDev.serverContentReportDecisions, true); assert.notEqual(loadConfig('prod').serverContentReportDecisions, true);
   const defaults = { ...actualDev }; delete defaults.serverContentReportDecisions;

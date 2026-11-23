@@ -265,7 +265,7 @@ class _StaffReportCard extends StatelessWidget {
         message: 'Retry the original pending decision first.',
       );
     }
-    if (_useServerContentReportDecisions) {
+    if (_useServerContentReportDecisions || _useServerPublicReportRemoval) {
       final target = _contentReportTarget(
         group.collection,
         representative.data(),
@@ -277,7 +277,12 @@ class _StaffReportCard extends StatelessWidget {
           message: 'Retry the original pending decision first.',
         );
       }
-      if (['approve', 'escalate', 'resolve'].contains(action)) {
+      if (usesServerContentReportDecision(
+        decision: action,
+        targetType: target.type,
+        decisionsEnabled: _useServerContentReportDecisions,
+        publicRemovalEnabled: _useServerPublicReportRemoval,
+      )) {
         await _decideContentReports(
           target,
           group.reports.map((r) => r.id).toList(),
@@ -494,7 +499,7 @@ class _ReportDecisionPanelState extends State<_ReportDecisionPanel> {
       : null;
 
   ContentReportDecisionRequest? get _pendingDecision =>
-      !_useServerContentReportDecisions
+      !(_useServerContentReportDecisions || _useServerPublicReportRemoval)
       ? null
       : _pendingContentReportDecision(
           _contentReportTarget(

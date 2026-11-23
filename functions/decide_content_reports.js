@@ -43,7 +43,7 @@ function validateTarget(source, shout) {
   if (!source.exists || !shout.exists || isPurgedShoutContext(shout.data())) fail('not-found', 'The report target is unavailable.');
   if (!id(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp)) fail('failed-precondition', 'Invalid report target.');
 }
-function validateReports(reports, input, source) {
+export function assertContentReportGroup(reports, input, source) {
   const ids = reports.docs.map(d => d.id).sort();
   if (ids.length > 50) fail('failed-precondition', 'The report group exceeds the supported decision size.');
   if (JSON.stringify(ids) !== JSON.stringify(input.reportIds)) fail('failed-precondition', 'The report group changed. Refresh before deciding.');
@@ -94,7 +94,7 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     validateTarget(source, shout);
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
     const reports = await tx.get(pendingContentReports(db, input));
-    validateReports(reports, input, source);
+    assertContentReportGroup(reports, input, source);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     if (input.decision === 'approve') tx.create(clearanceRef, {

@@ -485,7 +485,9 @@ class _ReportList extends StatelessWidget {
           final report = reports[index];
           final data = report.data();
           final actor = FirebaseAuth.instance.currentUser?.uid;
-          final target = _useServerContentReportDecisions
+          final target =
+              (_useServerContentReportDecisions ||
+                  _useServerPublicReportRemoval)
               ? _contentReportTarget(collection, data)
               : null;
           return Card(
@@ -607,7 +609,7 @@ class _ReportList extends StatelessWidget {
     List<QueryDocumentSnapshot<Map<String, dynamic>>>? relatedReports,
   }) async {
     final data = report.data();
-    if (_useServerContentReportDecisions) {
+    if (_useServerContentReportDecisions || _useServerPublicReportRemoval) {
       final decisionTarget = _contentReportTarget(collection, data);
       final pending = _pendingContentReportDecision(decisionTarget);
       if (pending != null && action != pending.decision) {
@@ -616,11 +618,16 @@ class _ReportList extends StatelessWidget {
           message: 'Retry the original pending decision first.',
         );
       }
-      if (action == 'resolve') {
+      if (usesServerContentReportDecision(
+        decision: action,
+        targetType: decisionTarget.type,
+        decisionsEnabled: _useServerContentReportDecisions,
+        publicRemovalEnabled: _useServerPublicReportRemoval,
+      )) {
         await _decideContentReports(
           decisionTarget,
           (relatedReports ?? [report]).map((r) => r.id).toList(),
-          'resolve',
+          action,
         );
         return true;
       }

@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **60,68 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **60,77 %** — vážené dokončení podúseků
 
-Hotové úseky: **199/252**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **203/258**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -69,9 +69,13 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
 1. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Následuje konkrétní návrh veřejného serverového odstranění v moderaci;**
-   další otevřené části jsou sankce a společný Rules cutover. Nový rozsah
-   před implementací předložit ke schválení; níže jsou důkazy uzavřených částí.
+   **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
+   jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
+   110 tools a 179 unit, analyze/lint. Následuje společný push/úplné CI a
+   [konkrétní DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal)
+   ke schválení. Bez živých změn, flag false v DEV i prod. Další otevřené části
+   jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
+   Níže jsou důkazy dříve uzavřených částí.
    **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
    všech tří typů hlášení, místní server a neaktivní klient, testy a společné CI.
    Jde o historický místní checkpoint; navazující DEV přechod je uzavřený níže.

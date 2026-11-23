@@ -6,6 +6,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
+větev feature/report-public-removal. Atomické odstranění Shoutu/komentáře,
+celá skupina do 50 hlášení, audit, 7denní replay a neaktivní klient jsou hotové.
+16/16 nových konečných případů, navíc 33 stávajících rozhodovacích/purge
+regresí; 519 Flutter, 110 nástrojových a 179 unit prošlo, analyze/lint čisté.
+Širší místní běh měl jeden opravený testový předpoklad rozpočtového guardu;
+netvrdí se jeden lokální konečný 49/49 průchod. Úplné CI přesného zdroje
+ještě následuje. serverPublicReportRemoval false v DEV i prod, bez wrapperu,
+nasazení, živých dat/Auth/Rules nebo změn prostředků. Připravený je
+[konkrétní další DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal),
+který zatím nebyl schválen. Zbývají také sankce, osiřelá hlášení a společný
+audit/cutover autority; celý moderační milník není uzavřený.
+
 **Právě uzavřeno: [B4 a finální DEV regrese celého feedu](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).**
 TestBusiness potvrdil živé řazení při pohybu i zachování čtené karty na
 aktuálním webu 33853a9. Počáteční chyba načtení odezněla; příčina nepotvrzená.
@@ -22,8 +35,8 @@ zachované; 0 fixture kořenů/publicStates/potomků/read klíčů.
 Všech **23 Functions**, oba plánovače, web **565880d4664da7b2**, Rules
 **3de8f7d8…de297**, feed 12/news 6/active beze změny. Žádná Auth mutace,
 nový rollout, změna produkce/main/tagů ani prodloužení testovacích dat.
-Další MVP úsek: veřejné serverové odstranění v moderaci, poté sankce a
-společný Rules cutover; nejprve konkrétní rozsah ke schválení. Regionální
+Navazující veřejné serverové odstranění má nyní místní výsledek výše;
+živý přechod, sankce a společný Rules cutover zbývají. Regionální
 regrese soukromého odstranění a diagnóza původního běžného okna jsou
 samostatně odložené. Kapacitní/startovní brána zůstává otevřená.
 
