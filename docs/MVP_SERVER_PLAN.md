@@ -1506,14 +1506,23 @@ build/public-removal-{read-preflight,prepared-artifacts,functions-proof,source-p
 build/public-removal-cloud-{before,predeploy,after-functions,after-web}.json a oba deploy logy.
 Nasazovací/pilotní kopie **build/public-removal-release-87d6687** zůstává čistá
 na přesném uvedeném SHA; mutační CLI vyžaduje jeho úplné CI. Budoucí jediný
-manifest docs/local/public-report-removal-pilot.json v této kopii dosud neexistuje.
+manifest docs/local/public-report-removal-pilot.json v této kopii je od 22:02 SEČ
+**seeded**, digest **c8e37fd7eaa0bef9e676b4b0b15c602d44892df9ec783f19a5a45d18c0639cc8**.
 
 **Zbývá skutečná akceptace a úklid.** Browser host je nedostupný; při pokusu o
 nativní Windows ovládání automatická kontrola zastavila tento UI průchod,
 protože nedokázala spolehlivě určit aktuální URL. Další UI akce nebyly provedené.
-Po ručním přihlášení přesného TestModerator a obnovení webu teprve vytvořit
-schválený 24h Shout / dva komentáře / dvě hlášení. Odstranit nejdřív cílový
-komentář (2 → 1, kontrolní zůstane), poté Shout. Ověřit oba receipts/audity a
+Vlastník následně potvrdil načteného TestModerator klienta. Ve 22:02 SEČ byl
+založen pouze schválený **MVP public removal ada057d3** (24h Shout Bright_Otter_182,
+cílový komentář TestBusiness a kontrolní Bright_Otter_182, dvě hlášení).
+Počáteční ověření 22:03 SEČ: active, commentsCount 2, oba komentáře přítomné,
+obě hlášení open, 5 nových receipts; všech 21 původních receipts/updateTime
+zachovaných. Žádné nové Auth účty, reset kvót či změna původních zdrojů.
+Důkaz build/public-removal-seeded-proof.json; platnost do 24. listopadu 22:02 SEČ.
+Vlastník dostal jen první akci „Skrýt obsah bez postihu“ u hlášení
+„MVP public removal ada057d3 comment. Remove after verification.“. Před Shoutem
+serverově potvrdit 2 → 1 a zachovaný kontrolní komentář. Pak odstranit Shout,
+ověřit oba receipts/audity a
 provést chráněný úklid při zachování všech potvrzení do +7 dní a kvót.
 DEV nasazení se započítává, živá akceptace zůstává otevřená. Sankce, osiřelá
 hlášení a společný Rules cutover/audit autority nadále brání uzavření celého milníku.

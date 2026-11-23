@@ -76,8 +76,10 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    [DEV nasazení je ověřené](MVP_SERVER_PLAN.md#moderation-public-dev-results):
    zdroj 87d6687 / úplné CI 45238613178 success, nová veřejná callable,
    aktualizovaný cleanup a web 1974e34d52e2945b. Ostatní provoz a původní data
-   zachované. Zbývá přihlášení TestModerator, teprve potom vymezený pilot a úklid;
-   dosud žádná nová fixture ani živá akceptace. UI ovládání zastavila kontrola
+   zachované. TestModerator klient je potvrzený; schválený pilot **ada057d3** je
+   seeded (1 Shout / 2 komentáře / 2 hlášení). Čeká se na odstranění komentáře,
+   serverovou kontrolu 2 → 1, teprve potom odstranění Shoutu a úklid. Živá akceptace
+   zůstává otevřená. UI ovládání zastavila kontrola
    neověřitelné URL; je potřeba ruční průchod. Další otevřené části
    jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
    Níže jsou důkazy dříve uzavřených částí.

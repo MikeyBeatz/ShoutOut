@@ -16,17 +16,23 @@ Nová removeReportedPublicContent **00001-yaw**, cleanup **00008-fal**, web
 balíčku. Všech 67 app souborů a 8 HTTP kontrol obou domén odpovídá buildu;
 bez Auth/App Check callable odmítá 401. Ostatních 22 Functions, oba plánovače,
 Rules, feed/news, 38 původních Shoutů/pending žádost i jejich updateTime zachované.
-Žádné nové fixture, Auth změny nebo zásah do produkce/main.
+Nasazení nezakládalo fixture ani Auth účty a nezasáhlo produkci/main.
 
-**Další krok:** ruční potvrzení přihlášení TestModerator v nově obnoveném DEV
-webu. Browser host není dostupný; alternativní Windows ovládání automatická
+**Aktuální pilot, 23. listopadu 22:03 SEČ:** vlastník potvrdil načteného klienta
+pod TestModerator. Schválený nový test je založený: **MVP public removal ada057d3**,
+1 aktivní Shout / 2 komentáře / 2 otevřená hlášení / 5 receipts. První serverový
+doklad potvrzuje počet 2 a zachování všech 21 původních receipts včetně updateTime;
+38 původních zdrojů a pending žádost chrání manifestový fence. Platnost do
+24. listopadu **22:02 SEČ**. Neseedovat nový pilot ani neprodlužovat platnost.
+**Další krok:** vlastník má odstranit pouze hlášený komentář s důvodem
+„MVP public removal ada057d3 comment. Remove after verification.“ volbou
+„Skrýt obsah bez postihu“. Před Shoutem serverově ověřit 2 → 1 a kontrolní
+komentář; potom teprve druhá akce, audit a úklid. Akceptace zůstává false.
+Browser host není dostupný; alternativní Windows ovládání automatická
 kontrola zastavila pro neověřitelnou URL. Další UI vstupy neprovádět bez nového
-ověření dostupnosti. Teprve při dostupném klientu vytvořit schválený jeden
-24h Shout / dva komentáře / dvě hlášení; komentář odstranit před Shoutem,
-ověřit 2 → 1 a kontrolní komentář, pak audit a úklid. Akceptace zůstává false.
-Jediný budoucí manifest vytvořit jen v čisté release kopii
+ověření dostupnosti. Jediný manifest je v čisté release kopii
 build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json;
-zatím neexistuje. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
+fáze **seeded**, digest **c8e37fd7…c0639cc8**. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
 dokumentační commit je nenahrazuje. Návratový kompatibilní web 565880d4664da7b2.
 
 **Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
