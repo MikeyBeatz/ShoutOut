@@ -12,8 +12,11 @@ celá skupina do 50 hlášení, audit, 7denní replay a neaktivní klient jsou h
 16/16 nových konečných případů, navíc 33 stávajících rozhodovacích/purge
 regresí; 519 Flutter, 110 nástrojových a 179 unit prošlo, analyze/lint čisté.
 Širší místní běh měl jeden opravený testový předpoklad rozpočtového guardu;
-netvrdí se jeden lokální konečný 49/49 průchod. Úplné CI přesného zdroje
-ještě následuje. serverPublicReportRemoval false v DEV i prod, bez wrapperu,
+netvrdí se jeden lokální konečný 49/49 průchod. Zdroj
+**ea1fde9b9460b018d21570ff551da790faa9bf9f** je commitnutý/pushnutý a má
+[úspěšné úplné CI 45230513178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178),
+včetně nových/starších serverových regresí, Rules, retence a webového buildu.
+serverPublicReportRemoval false v DEV i prod, bez wrapperu,
 nasazení, živých dat/Auth/Rules nebo změn prostředků. Připravený je
 [konkrétní další DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal),
 který zatím nebyl schválen. Zbývají také sankce, osiřelá hlášení a společný

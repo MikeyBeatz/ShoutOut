@@ -2,7 +2,7 @@
 
 ## Aktuální stav a použití plánu
 
-**Schválená nynější místní práce:** [atomické veřejné odstranění bez postihu](#moderation-public-local).
+**Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
 Bez živého zapojení, wrapperu nebo aktivace; dosavadní DEV nasazení zachované.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
@@ -1405,7 +1405,12 @@ SDK měření pro dvě hlášení bez spravovaného indexu: Shout 12 reads / 4 w
 komentář 15 / 6, replay 9 / 0; nejde o cloudovou latenci/cenu nebo kapacitu.
 Podklady build/public-removal-{shout,comment}-measurement.json. Spravovaný
 index má své dodatečné blokové/projekční operace a zůstává pod společným limitem.
-Změny půjdou jedním společným pushem/úplným CI; jeho výsledek se eviduje zvlášť.
+Zdroj **ea1fde9b9460b018d21570ff551da790faa9bf9f** je commitnutý/pushnutý a
+[úplné CI 45230513178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178)
+skončilo **success**. Zahrnuje nové veřejné odstranění, starší rozhodnutí,
+celou Rules/serverovou a retenční regresi, browserové testy, analyze/lint
+i webový build. Přesný výpis je build/public-removal-exact-ci.json.
+Tím je schválený místní úsek uzavřený; živá aktivace/akceptace se tím netvrdí.
 
 Chybějící zdroj se v tomto odstraňovacím kontraktu neoznačí falešně za
 odstraněný. Pokud souběh vyhraje vlastní mazání/archivace, může hlášení zůstat

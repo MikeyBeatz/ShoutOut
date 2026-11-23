@@ -71,8 +71,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
    **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
    jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
-   110 tools a 179 unit, analyze/lint. Následuje společný push/úplné CI a
-   [konkrétní DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal)
+   110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má
+   [úspěšné úplné CI 45230513178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178).
+   Následuje [konkrétní DEV návrh](MVP_SERVER_PLAN.md#moderation-public-dev-proposal)
    ke schválení. Bez živých změn, flag false v DEV i prod. Další otevřené části
    jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
    Níže jsou důkazy dříve uzavřených částí.
