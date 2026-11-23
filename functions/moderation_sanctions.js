@@ -7,6 +7,7 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { validateContentReportDecision, pendingContentReports, assertContentReportGroup } from './decide_content_reports.js';
 import { isPurgedShoutContext } from './shout_context.js';
+import { assertReportEvidenceRetention } from './moderation_retention.js';
 
 // Activate with the checked client/Rules cutover, never by deploying this preparation.
 export const managedModerationAuthorityEnabled = false;
@@ -108,6 +109,7 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
     const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
     if (reports) assertContentReportGroup(reports, { ...input, decision: 'resolve' }, source);
+    if (reports) await assertReportEvidenceRetention(tx, db, reports, now);
     const requiredRoleLevel = Math.max(policy.role, reports?.docs.some(d => d.get('status') === 'escalated') ? 4 : 3);
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     const previous = await tx.get(db.collection('sanctions').where('userId', '==', body.authorId).limit(50).select());

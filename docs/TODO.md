@@ -72,11 +72,14 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    **Probíhá společný sankční úsek** na feature/moderation-sanctions:
    [serverové udělení a zrušení postihu, klient a regrese](MVP_SERVER_PLAN.md#moderation-sanctions-local).
    Zachovat stávající role, délky/retence a 50 hlášení. Ochrana silnějšího
-   aktivního postihu je nově výslovně schválená; Business dvě volby čekají.
+   aktivního postihu je nově výslovně schválená. Business: oprava/opětovné podání
+   po zamítnutí, při pozastavení zastavit nové publikování/propagaci; přesný
+   místní implementační rozsah je předložen zvlášť.
    [Osiřelá hlášení a společná autorita](MVP_SERVER_PLAN.md#moderation-orphans-local):
-   39 místních případů prošlo, obě nové volby vypnuté. Dokončit regrese obecných
-   mazacích API, společné CI a audit odvozených retenčních kopií; Rules a živý
-   přechod nezaměňovat s hotovým místním kódem. Ruční testy zůstávají na konec.
+   50 místních případů prošlo, nové volby vypnuté. Schválená retenční oprava
+   kopií má místní jádro a 5 cílených purge regresí; dokončit přesné společné CI
+   a navazující Rules/DEV plán. Živý přechod nezaměňovat s hotovým místním kódem.
+   Ruční testy zůstávají na konec.
    Jádro/wrappery a klient jsou připravené za false; konečných 28/28 emulátorových
    případů, 9 klientských a 7 unit/host prošlo, analyze/lint čisté. Širší běhy
    528 Flutter / 112 tools / 185 unit jsou zelené; přesné úplné CI ještě následuje.

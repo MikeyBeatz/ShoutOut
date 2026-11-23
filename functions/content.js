@@ -25,6 +25,7 @@ import { removeReportedPrivateReplyOperation } from './remove_reported_private_r
 import { decideContentReportsOperation, orphanReportResolutionEnabled } from './decide_content_reports.js';
 import { removeReportedPublicContentOperation } from './remove_reported_public_content.js';
 import { sanctionContentOperation, revokeSanctionOperation, managedModerationAuthorityEnabled } from './moderation_sanctions.js';
+import { moderationEvidenceRetentionEnabled } from './moderation_retention.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -111,7 +112,7 @@ export const removeReportedPrivateReply = onCall({
 export const decideContentReports = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => decideContentReportsOperation(request, getFirestore(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled }));
+}, request => decideContentReportsOperation(request, getFirestore(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled, guardEvidenceRetention: moderationEvidenceRetentionEnabled }));
 
 export const removeReportedPublicContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,

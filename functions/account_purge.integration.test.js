@@ -8,6 +8,7 @@ import { runAccountPurgeJob, purgedShoutContext } from './account_purge_job.js';
 import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { runAccountMaintenanceTick } from './shout_expiration.js';
 import { accountPurgeStages } from './account_purge_policy.js';
+import { assertReportEvidenceRetention } from './moderation_retention.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'account-purge-tests') : null;
@@ -223,6 +224,90 @@ test('the cloud document pager explicitly disables auto-pagination and rejects o
     assert.deepEqual(await pager.list('users/fixture/legal'), { paths: ['users/fixture/legal/child0'], next: null });
     oversized = true; await assert.rejects(pager.list('users/fixture/legal'), /invalid-purge-list-response/); await pager.close();
   } finally { process.env.FIRESTORE_EMULATOR_HOST = previous; }
+});
+
+test('enabled moderation cleanup scrubs warning and active sanction copies without changing enforcement', { skip: !enabled }, async () => {
+  for (const type of ['warning', 'accountBan', 'contentRestriction']) {
+    const f = await fixture(); f.options.moderationCopiesEnabled = true;
+    const target = randomUUID(), report = await f.add(`reports/${randomUUID()}`, { reporterId: f.uid, shoutId: 'foreign', reason: 'Copied reporter reason' });
+    const sanction = await f.add(`sanctions/${randomUUID()}`, { userId: target, type, sourceReportId: report.id,
+      reason: 'Copied reporter reason', contentSnapshot: { text: 'Copied evidence' } });
+    const copyData = { userId: target, sanctionId: sanction.id, reason: 'Copied reporter reason', moderatorId: 'foreign-moderator',
+      expiresAt: type === 'accountBan' ? null : Timestamp.fromMillis(9999999999999), createdAt: Timestamp.fromMillis(1234) };
+    const copy = await f.add(type === 'warning' ? `warnings/${randomUUID()}` : `${type === 'accountBan' ? 'bans' : 'contentRestrictions'}/${target}`, copyData);
+    const other = await f.add(`bans/${randomUUID()}`, { userId: 'unrelated', reason: 'Keep reason', sanctionId: 'unrelated-sanction' });
+    const otherTime = (await other.get()).updateTime;
+    await f.finish();
+    const expectedCopy = { ...copyData }; delete expectedCopy.reason;
+    assert.deepEqual((await copy.get()).data(), expectedCopy);
+    assert.deepEqual((await sanction.get()).data(), { userId: target, type });
+    assert.equal((await report.get()).exists, false);
+    assert(otherTime.isEqual((await other.get()).updateTime));
+  }
+});
+
+test('moderation copy scrub preserves a replacement active sanction installed before its transaction', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.moderationCopiesEnabled = true;
+  const target = randomUUID(), report = await f.add(`reports/${randomUUID()}`, { reporterId: f.uid, shoutId: 'foreign', reason: 'Old reason' });
+  const sanction = await f.add(`sanctions/${randomUUID()}`, { userId: target, type: 'accountBan', sourceReportId: report.id, reason: 'Old reason' });
+  const pointer = await f.add(`bans/${target}`, { userId: target, sanctionId: sanction.id, reason: 'Old reason', expiresAt: null });
+  const replacement = { userId: target, sanctionId: randomUUID(), reason: 'New independent reason', expiresAt: null };
+  let replaced = false;
+  f.options.beforeCommit = async change => { if (!replaced && change.operation === 'copiedReport') { replaced = true; await pointer.set(replacement); } };
+  await f.finish(); assert(replaced); assert.deepEqual((await pointer.get()).data(), replacement);
+  assert.equal((await sanction.get()).get('reason'), undefined);
+});
+
+test('appended moderation reference stages resume an existing job without renumbering or lifting foreign restrictions', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.pageSize = 1;
+  const before = accountPurgeStages(f.uid), after = accountPurgeStages(f.uid, { moderationCopiesEnabled: true });
+  assert.deepEqual(after.slice(0, before.length), before); assert.equal(after.length, before.length + 2);
+  const copies = [];
+  for (const c of ['bans', 'contentRestrictions']) copies.push(await f.add(`${c}/${randomUUID()}`, {
+    userId: 'foreign', sanctionId: randomUUID(), moderatorId: f.uid, reason: 'Independent enforcement reason', expiresAt: null }));
+  assert.equal((await f.run()).state, 'purging');
+  // Represent an old job that really drained its previous final user stage.
+  await f.user.collection('settings').doc('notifications').delete();
+  await f.jobRef.update({ stage: before.length, stageCursor: null, selected: null, stack: [] });
+  f.options.moderationCopiesEnabled = true;
+  f.advance(1000);
+  await f.finish();
+  for (const copy of copies) { const data = (await copy.get()).data(); assert(data); assert.equal(data.moderatorId, undefined);
+    assert.equal(data.reason, 'Independent enforcement reason'); assert.equal(data.expiresAt, null); assert(data.sanctionId); }
+});
+
+test('ambiguous moderation warning copies stop the purge before any evidence or reason is partially scrubbed', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.moderationCopiesEnabled = true;
+  const target = randomUUID(), report = await f.add(`reports/${randomUUID()}`, { reporterId: f.uid, shoutId: 'foreign', reason: 'Keep until reviewed' });
+  const sanction = await f.add(`sanctions/${randomUUID()}`, { userId: target, type: 'warning', sourceReportId: report.id, reason: 'Keep until reviewed' });
+  const copies = [];
+  for (let i = 0; i < 2; i++) copies.push(await f.add(`warnings/${randomUUID()}`, { userId: target, sanctionId: sanction.id, reason: 'Keep until reviewed' }));
+  let result;
+  for (let n = 0; n < 20; n++) { result = await f.run(); if (result.state === 'needs-review') break; f.advance(1000); }
+  assert.equal(result.state, 'needs-review'); assert((await report.get()).exists);
+  assert.equal((await sanction.get()).get('reason'), 'Keep until reviewed');
+  for (const copy of copies) assert.equal((await copy.get()).get('reason'), 'Keep until reviewed');
+});
+
+test('a concurrent moderation copy either precedes reporter purge and is drained, or is fenced without recreating evidence', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.moderationCopiesEnabled = true;
+  const report = await f.add(`reports/${randomUUID()}`, { reporterId: f.uid, shoutId: 'foreign', reason: 'Concurrent copied reason' });
+  const target = randomUUID(), sanction = db.doc(`sanctions/${randomUUID()}`), warning = db.doc(`warnings/${randomUUID()}`);
+  roots.push(sanction, warning);
+  const beforeDeadline = Timestamp.fromMillis(f.identity.requestCreateTime.toMillis() + accountRetentionMillis - 1);
+  const copy = db.runTransaction(async tx => {
+    const source = await tx.get(report); if (!source.exists) throw new Error('source-already-purged');
+    await assertReportEvidenceRetention(tx, db, { docs: [source] }, beforeDeadline);
+    tx.create(sanction, { userId: target, type: 'warning', sourceReportId: report.id, reason: source.get('reason') });
+    tx.create(warning, { userId: target, sanctionId: sanction.id, reason: source.get('reason') });
+  });
+  const [copied, purged] = await Promise.allSettled([copy, f.finish()]);
+  assert.equal(purged.status, 'fulfilled');
+  if (copied.status === 'rejected') assert(copied.reason.code === 'failed-precondition' || copied.reason.message === 'source-already-purged', copied.reason);
+  assert.equal((await report.get()).exists, false);
+  for (const ref of [sanction, warning]) assert.equal((await ref.get()).get('reason'), undefined);
+  await assert.rejects(db.runTransaction(tx => assertReportEvidenceRetention(tx, db, { docs: [{ get: () => f.uid }] }, beforeDeadline)),
+    error => error.code === 'failed-precondition');
 });
 
 test('resuming after the final profile drain never recreates notification preferences', { skip: !enabled }, async () => {

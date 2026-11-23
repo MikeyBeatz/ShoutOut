@@ -6,6 +6,7 @@ import { requireCallableIdentity, requireEligibleActor } from './callable_securi
 import { receiptRetentionFields } from './operation_retention.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { isPurgedShoutContext } from './shout_context.js';
+import { assertReportEvidenceRetention } from './moderation_retention.js';
 
 const action = 'decideContentReports';
 const unavailableAction = 'resolveUnavailableContentReports';
@@ -78,8 +79,8 @@ export function assertContentReportGroup(reports, input, source) {
   }
 }
 
-export async function decideContentReportsOperation(request, db, clock = () => new Date(), { resolveUnavailableTargets = false } = {}) {
-  if (typeof resolveUnavailableTargets !== 'boolean') throw new Error('invalid-unavailable-report-option');
+export async function decideContentReportsOperation(request, db, clock = () => new Date(), { resolveUnavailableTargets = false, guardEvidenceRetention = false } = {}) {
+  if (typeof resolveUnavailableTargets !== 'boolean' || typeof guardEvidenceRetention !== 'boolean') throw new Error('invalid-unavailable-report-option');
   const { uid } = requireCallableIdentity(request), input = validateContentReportDecision(request.data);
   if (uid !== input.expectedUserId) fail('unauthenticated', 'The signed-in account changed.');
   const fingerprint = digest(JSON.stringify(input)), receiptRef = db.doc(`serverOperations/${digest(`${uid}\n${action}\n${input.idempotencyKey}`)}`);
@@ -119,6 +120,7 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     const reports = await tx.get(pendingContentReports(db, input));
     if (unavailable) assertUnavailableReportGroup(reports, input);
     else assertContentReportGroup(reports, input, source);
+    if (guardEvidenceRetention && input.decision === 'approve') await assertReportEvidenceRetention(tx, db, reports, now);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     if (unavailable && shout.exists && level < 5 && role.get('moderationScope')?.global !== true &&

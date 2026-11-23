@@ -7,6 +7,8 @@ import { sanctionContentOperation as sanction, revokeSanctionOperation as revoke
 import { operationTestKey } from './test_helpers.js';
 import { receiptMayBePurged } from './cleanup_operation_receipts.js';
 import { accountPurgeLinks, purgeScrubPatch } from './account_purge_policy.js';
+import { accountPurgeJobRef, accountRetentionMillis } from './account_purge_guard.js';
+import { decideContentReportsOperation as decideReports } from './decide_content_reports.js';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'sanction-core') : null, db = app ? getFirestore(app) : null;
 const day = 86400000, code = expected => e => e.code === expected;
@@ -76,6 +78,39 @@ test('private report hints never override the actual server author, recipient or
     assert.equal((await db.collection('sanctions').where('userId', '==', f.author).get()).size, 0);
     assert.equal((await db.collection('serverOperations').where('userId', '==', f.mod).get()).size, 0);
   }
+});
+test('reporter copies retain the original 60-day deadline and cannot reappear after purge ingress or completion', { skip: !enabled }, async t => {
+  for (const state of ['before', 'deadline', 'purging', 'purged']) {
+    const f = await fixture(t), requestRef = await f.add(`accountDeletionRequests/${f.reporter}`, { userId: f.reporter, status: 'pending' });
+    const created = (await requestRef.get()).createTime, deadline = created.toMillis() + accountRetentionMillis;
+    const date = new Date(deadline - (state === 'deadline' ? 0 : 1)), request = f.input();
+    request.data.idempotencyKey = operationTestKey(`retention-${state}`, date);
+    if (state === 'purging') {
+      const job = accountPurgeJobRef(db, { projectId: db.projectId, userId: f.reporter, requestCreateTime: created });
+      await f.add(job.path, { ingressClosedAt: Timestamp.fromMillis(deadline) });
+    }
+    if (state === 'purged') { await requestRef.delete(); await f.add(`publicProfiles/${f.reporter}`, { schemaVersion: 1, accountStatus: 'deleted' }); }
+    if (state === 'before') {
+      const result = await sanction(request, db, () => date);
+      assert.equal((await db.doc(`sanctions/${result.sanctionId}`).get()).get('reason'), request.data.note);
+    } else {
+      await assert.rejects(sanction(request, db, () => date), e => e.code === 'failed-precondition' && /report.*(retention|purge)/i.test(e.message));
+      assert.equal((await f.reports[0].get()).get('status'), 'open');
+      assert.equal((await db.collection('sanctions').where('userId', '==', f.author).get()).size, 0);
+      assert.equal((await db.collection('serverOperations').where('userId', '==', f.mod).get()).size, 0);
+    }
+  }
+});
+test('approval cannot create a clearance copying an expired reporter reason when the retention guard is enabled', { skip: !enabled }, async t => {
+  const f = await fixture(t), reporterRequest = await f.add(`accountDeletionRequests/${f.reporter}`, { userId: f.reporter, status: 'pending' });
+  const date = new Date((await reporterRequest.get()).createTime.toMillis() + accountRetentionMillis);
+  const request = f.input(), data = { ...request.data };
+  for (const field of ['expectedTargetUserId', 'mode', 'sourceReportId']) delete data[field];
+  request.data = { ...data, decision: 'approve', idempotencyKey: operationTestKey('expired-approval', date) };
+  await assert.rejects(decideReports(request, db, () => date, { guardEvidenceRetention: true }),
+    e => e.code === 'failed-precondition' && /retention expired/.test(e.message));
+  assert.equal((await f.reports[0].get()).get('status'), 'open');
+  assert.equal((await db.doc(`moderationClearances/comment_${f.shout.id}_${f.source.id}`).get()).exists, false);
 });
 for (const [action, policy] of Object.entries(sanctionActions)) test(`${action}: observation preserves the existing durations, authority, snapshot and retention`, { skip: !enabled }, async t => {
   const f = await fixture(t), actor = policy.role === 4 ? f.senior : f.mod, request = f.input(action, actor, action, 'observation');

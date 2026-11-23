@@ -5,7 +5,8 @@ const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
   ({ collection, field, action, group, operator });
 
-export function accountPurgeStages(uid) {
+export function accountPurgeStages(uid, { moderationCopiesEnabled = false } = {}) {
+  if (typeof moderationCopiesEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
   return [
     queryStage('shouts', 'authorId', 'freeze'),
     queryStage('reactions', 'actorId', 'delete', true), // Archived copies, not live counter-bearing votes.
@@ -39,6 +40,7 @@ export function accountPurgeStages(uid) {
     // deletion still fences ingress while these final actor references drain.
     ...['reports', 'commentReports', 'privateReplyReports'].flatMap(c =>
       ['resolvedBy', 'escalatedBy'].map(field => queryStage(c, field, 'scrub'))),
+    ...(moderationCopiesEnabled ? ['bans', 'contentRestrictions'].map(c => queryStage(c, 'moderatorId', 'scrub')) : []),
   ];
 }
 

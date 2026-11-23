@@ -16,6 +16,17 @@ kontroly a řešení sporů jsou stále otevřená; před vydáním se musí sch
 otestovat. Automatické ověřování firem přes ARES, VIES ani jiné registry není v
 plánu.
 
+### Schválené chování k doplnění
+
+Vlastník 23. listopadu potvrdil: zamítnutá žádost zobrazí důvod, zachová údaje
+a umožní jejich opravu a nové odeslání na stejném účtu. Business oprávnění
+vzniknou až po schválení. Pozastavení již aktivního Business účtu zastaví nové
+publikování a propagaci, ponechá přístup k údajům a důvodu a nechá starší běžné
+Shouty doběhnout. Opětovnou aktivaci smí provést admin/owner. Role se při
+pozastavení neodebere, aby se zákaz nedal obejít osobním publikováním.
+Jde o schválený produktový směr, dosud ne implementovaný ani nasazený tok;
+kritéria kontroly firem a řešení sporů tím nejsou rozhodnutá.
+
 ## Zásady kontroly
 
 ShoutOut není banka ani tržiště a Business účet nedostává oprávnění nakládat s

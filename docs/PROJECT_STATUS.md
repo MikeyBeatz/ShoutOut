@@ -8,35 +8,33 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 **Probíhá navazující moderace**, větev feature/moderation-sanctions. Vlastník
 po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
-na konec. [Konkrétní místní rozsah a otevřené volby](MVP_SERVER_PLAN.md#moderation-sanctions-local).
-Připravené jsou jádro/wrappery sanctionContent/revokeSanction i klient za
-serverContentSanctions=false. Konečný místní běh **28/28** emulátorových případů,
-7 cílených unit/host, 9 finálních klientských testů a analyze/lint prošly;
-širší běhy 528 Flutter / 112 tools / 185 unit také zelené (666 integračních bez
-emulátoru přeskočených). Přesné společné úplné CI ještě následuje.
-Vlastník výslovně schválil zachování silnějšího
-aktivního postihu; kratší/equivalentní nový zápis zůstane v historii a aktivní
-vazbu nezkrátí. Nyní navazuje příprava osiřelých hlášení a společného cutoveru;
-nasazení ani živá akceptace sankcí dosud hotové nejsou.
-Navazující [osiřelá hlášení a audit autority](MVP_SERVER_PLAN.md#moderation-orphans-local)
-mají společný **39/39** místní průchod. Připravené je uzavření chybějícího cíle
-bez další akce, stále za vypnutou volbou. Dále se ověřuje výchozí vypnuté
-omezení obecných mazacích API na vlastní obsah; cizí odstranění musí po cutoveru
-použít auditovanou moderaci. Společné Rules uzavření a audit odvozených
-retenčních kopií ještě nejsou hotové, nelze je započítat jako dokončené.
-Navazující **49/49** emulátorových regresí včetně osmi případů authority gate,
-44 cílených nástrojových a 7 unit/host testů prošlo, lint/dokumentace čisté.
-Zdrojový kontrolní bod je připravený pro společný push a přesné úplné CI.
-Při následné kontrole opraven soukromý klientský preflight: cizí zprávu čte
-jen server, klient použije snapshot hlášení. **13/13** klientských testů a
-analyze čisté. CI 45279278076 záměrně zrušeno během běhu; přesné nové úplné
-CI musí ověřit tuto konečnou opravu, předchozí běh se nezapočítává.
-Konečný místní společný běh **48/48** je zelený, lint také; klientské/zdrojové
-kontroly neznamenají živou akceptaci ani dokončený společný cutover.
-Žádná nová živá data, Auth účty, Rules ani prostředky; DEV zůstává na 87d6687.
-U Business zamítnutí/opakovaného podání a pozastavení se čeká na dvě produktové
-volby; do odpovědi na této části neměnit chování. Automatické testy průběžně,
-ruční průchody až na konec dostupné samostatné práce. Staré cleaned piloty neobnovovat.
+na konec. [Sankce, přímé zjištění a zrušení](MVP_SERVER_PLAN.md#moderation-sanctions-local)
+jsou připravené za serverContentSanctions=false; nový kratší postih zachová
+silnější aktivní vazbu. [Osiřelá hlášení a autorita](MVP_SERVER_PLAN.md#moderation-orphans-local)
+mají připravené uzavření bez další akce a výchozí vypnuté omezení obecných
+mazacích API na vlastní obsah. Soukromou zprávu čte pouze server, klient použije
+snapshot hlášení. Žádná z těchto novinek zatím není nasazená.
+
+Konečný místní společný běh **50/50** sankčních/osiřelých/authority případů
+prošel, **13/13** klientských testů a analyze čisté. Dřívější společné rozhodovací
+regrese **49/49**, 44 cílených nástrojových testů a širší místní běhy jsou
+doložené v plánu; nepřičítat je znovu jako nové sekce. Přesné úplné CI
+soukromé klientské opravy 0cf1b87 běží, nová retenční změna vyžaduje vlastní
+navazující úplný kontrolní bod. Záměrně zrušený běh 45279278076 není důkaz.
+
+Vlastník schválil [retenční opravu kopií](MVP_SERVER_PLAN.md#moderation-retention-followup-proposal):
+jádro je připravené, **5/5** cílených purge scénářů, 11 unit/host a kontrola
+obou balíčků prošly. Evidence po původních 60 dnech nevznikne znovu;
+novější zákaz a samotné vynucování zůstanou zachované. Společná volba
+moderationEvidenceRetentionEnabled=false drží wrapper i údržbu vypnuté.
+Celé Rules uzavření, DEV aktivace a živá akceptace nadále čekají.
+
+Business: vlastník potvrdil opravu/opětovné podání zamítnuté žádosti a při
+pozastavení blokaci nového publikování/propagace se zachováním údajů a doběhnutí
+starších běžných Shoutů. Přesný místní implementační rozsah je předložen zvlášť;
+dosud žádná nová Business implementace. DEV dál 87d6687, žádné živé zápisy,
+Auth účty, Rules, prostředky, main ani produkce nezměněné. Staré cleaned piloty
+neobnovovat. Automatické kontroly průběžně; ruční průchody až na konec.
 
 **Veřejné moderační odstranění má uzavřenou DEV akceptaci i úklid.**
 [Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-complete).

@@ -1655,9 +1655,12 @@ Váha milníku se nemění; připravený kód nezapočítává nasazení ani ru�
 Připravená allowlist aktualizace úklidu technických potvrzení se nenasazuje.
 Žádné backendové čtení Auth účtů ani mutace živých uživatelů nejsou potřebné.
 
-**Otevřené Business volby:** po zamítnutí umožnit opravu/opětovné podání, a při
-pozastavení pouze zastavit nové publikace/propagaci, nebo navíc skrýt aktivní
-firemní Shouty. Vlastník má obě otázky předložené; do odpovědi nezavádět nové chování.
+**Business produktové volby schválené:** zamítnutou žádost půjde opravit a
+znovu odeslat na stejném účtu. Pozastavení zastaví nové publikování/propagaci,
+ponechá přístup k údajům/důvodu a starší běžné Shouty nechá doběhnout; obnovit
+smí admin/owner. Business role zůstane kvůli zákazu obcházení osobní cestou.
+Přesný místní rozsah serverového sjednocení/klienta a testů je nyní předložen
+vlastníkovi zvlášť; samotná produktová volba nedokládá implementaci ani DEV stav.
 
 <a id="moderation-orphans-local"></a>
 
@@ -1715,7 +1718,7 @@ společný authority cutover ani nezapínat novou sankční cestu v DEV.
 
 Žádná část tohoto místního úseku se zatím nenasazuje; Rules, Scheduler, živá
 data, Auth, prostředky, produkce i main zůstávají beze změny. Ruční testy až
-po dokončení dostupných nezávislých příprav; dvě Business volby výše stále čekají.
+po dokončení dostupných nezávislých příprav; Business volby výše jsou již schválené.
 
 <a id="moderation-retention-followup-proposal"></a>
 
@@ -1743,7 +1746,39 @@ restart mezi dávkami, souběh s moderací/revokací a reporter purge,
 ambiguita/rollback a pokračování původního purge jobu bez přečíslování fází.
 Po místním ověření společný push/CI a konkrétní začlenění do DEV plánu;
 do té doby žádné živé přepínače, migrace nebo zásahy do existujících jobů.
-Tento návrh je dosud **pouze audit a rozsah**, nikoli implementovaná oprava.
+Vlastník tento místní rozsah výslovně schválil; implementace a ověření právě
+proběhly v jádru, přesné společné úplné CI ještě následuje. Živý zásah ani
+aktivace tím schválené nejsou.
+
+Připravené moderation_retention.js: warning dohledává limit 2 se selektivními
+poli; nejednoznačná kopie zastaví celý transakční scrub. Aktivní pointer se čte
+jedním přesným dokumentem a mění se jen při shodě userId/sanctionId. Dvě nové
+moderatorId fáze jsou pouze za původními pozicemi. Volba
+moderationEvidenceRetentionEnabled=false společně řídí approve guard a
+moderationCopiesEnabled v existujícím DEV workeru; nové sankce mají vlastní
+retention guard vždy. Žádné TTL ani nová plánovaná úloha.
+
+Před kopírováním se transakčně čtou jen userId/accountStatus a metadata času
+žádosti, případně ingressClosedAt odpovídajícího purge jobu. Horní mez je
+2 čtené dokumenty na reportéra a 1 navíc pouze při existující žádosti, nejvýše
+50 různých reportérů; nejde o měření cloudové ceny nebo propustnosti. Guard
+blokuje přesnou hranici +60 dní i dokončený purge a čtením jobu ohradí transakci
+zahájenou těsně před termínem. Pouhé ověření request času by souběh s již
+zahájeným úklidem dostatečně neohradilo. Běžné resolve/escalate nové kopie
+mimo původní hlášení nevytvářejí, approve guard je za vypnutou volbou.
+
+**50/50** společných lokálních scénářů, **5/5** cílených purge scénářů, **11**
+unit/host a **3** testy balíčků zelené; lint čistý. V prvním širším purge běhu
+prošlo 18/19: nový restartovací test nedostatečně simuloval doběhnutí původní
+fáze (čekal retry a ponechal notifikační preference). Test opraven; opakovaný
+cílený běh všech pěti nových případů zelený. Selhání nebylo ignorováno ani
+zaměněno za plný konečný průchod sady; přesné CI ověří celou kombinaci.
+Podklady build/moderation-retention-{core-final,purge-final,unit,artifact,lint}.log.
+
+Po případné budoucí aktivaci ponechat kompatibilní guard i maintenance zapnuté
+také při návratu klienta. Worker s vypnutými novými fázemi nesmí převzít job,
+který již vstoupil do přidaných fází; starší binární rollback není kompatibilní.
+Žádná změna existujících živých jobů tímto místním úsekem neproběhla.
 
 <a id="account-deletion"></a>
 

@@ -10,6 +10,7 @@ import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { purgeActivity } from './account_purge_activity.js';
 import { stepAccountPurgeStorage } from './account_purge_storage.js';
 import { purgedShoutContext, isPurgedShoutContext } from './shout_context.js';
+import { prepareSanctionCopyScrub } from './moderation_retention.js';
 export { purgedShoutContext } from './shout_context.js';
 
 const marker = { schemaVersion: 1, accountStatus: 'deleted' };
@@ -19,16 +20,16 @@ const keyValid = key => typeof key === 'string' && key.length >= 3 && key.length
 export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
-  indexErasureCoordinator = null,
+  indexErasureCoordinator = null, moderationCopiesEnabled = false,
 } = {}) {
-  if (!Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
+  if (typeof moderationCopiesEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||
       indexErasureCoordinator !== null && (typeof indexErasureCoordinator.step !== 'function' || typeof indexErasureCoordinator.prepareFinish !== 'function')) {
     throw new Error('invalid-account-purge-options');
   }
   const jobRef = accountPurgeJobRef(db, identity), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`),
     mainRef = db.doc(`accountDeletionJobs/${jobRef.id}`), profileRef = db.doc(`publicProfiles/${identity.userId}`),
-    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId), token = randomUUID();
+    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled }), token = randomUUID();
   const now = () => { const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-purge-clock'); return Timestamp.fromDate(date); };
   const header = await jobRef.get();
   if (!header.exists) return { state: 'purged', examined: 0 };
@@ -155,9 +156,13 @@ export async function runAccountPurgeJob(identity, db, auth, {
         const selected = { path: source.ref.path, createTime: source.createTime ?? null, link: 0,
           source: ['archive', 'comment', 'privateReply', 'shout', 'report'].includes(stage.action) ? purgeSourceIdentity(source, stage.action) : null };
         if (stage.action === 'scrub' || stage.action === 'evidence') {
-          await commitProgress(job.version, { scrubbedCount: job.scrubbedCount + 1 }, async transaction => {
+          const progress = { scrubbedCount: job.scrubbedCount + 1 };
+          await commitProgress(job.version, progress, async transaction => {
             const fresh = await transaction.get(source.ref);
             if (!fresh.exists || !samePurgeTime(fresh.createTime, source.createTime) || !validatePurgeSelection(fresh, stage, identity.userId)) throw new AccountPurgeNeedsReview('purge-scrub-replaced');
+            const copies = moderationCopiesEnabled && stage.action === 'evidence' ? await prepareSanctionCopyScrub(transaction, db, fresh) : null;
+            progress.scrubbedCount = job.scrubbedCount + 1 + (copies?.count ?? 0);
+            copies?.apply();
             transaction.update(source.ref, purgeScrubPatch(fresh.data(), stage.action === 'evidence' ? 'copiedReport' : 'scrub', stage.field));
           });
         } else {
@@ -176,10 +181,11 @@ export async function runAccountPurgeJob(identity, db, auth, {
         }
         if ((await source.ref.listCollections()).length) throw new AccountPurgeNeedsReview('unexpected-linked-evidence-descendants');
         if (beforeCommit) await beforeCommit({ path: source.ref.path, operation: link.action });
-        await commitProgress(job.version, {
+        const progress = {
           ...(link.direct ? { selected: { ...selected, link: selected.link + 1 } } : {}),
           [link.action === 'delete' ? 'deletedCount' : 'scrubbedCount']: job[link.action === 'delete' ? 'deletedCount' : 'scrubbedCount'] + 1,
-        }, async transaction => {
+        };
+        await commitProgress(job.version, progress, async transaction => {
           const root = await transaction.get(db.doc(selected.path)), fresh = await transaction.get(source.ref);
           if (!root.exists || !samePurgeTime(root.createTime, selected.createTime) || !validatePurgeSelection(root, stage, identity.userId)) {
             throw new AccountPurgeNeedsReview('purge-linked-root-replaced');
@@ -192,6 +198,9 @@ export async function runAccountPurgeJob(identity, db, auth, {
             }
           }
           if (!fresh.exists || !samePurgeTime(fresh.updateTime, source.updateTime)) throw new AccountPurgeConflict('purge-linked-evidence-changed');
+          const copies = moderationCopiesEnabled && link.action === 'copiedReport' ? await prepareSanctionCopyScrub(transaction, db, fresh) : null;
+          if (copies) progress.scrubbedCount = job.scrubbedCount + 1 + copies.count;
+          copies?.apply();
           if (link.action === 'delete') transaction.delete(source.ref, { lastUpdateTime: fresh.updateTime });
           else transaction.update(source.ref, purgeScrubPatch(fresh.data(), link.action, null, link));
         });
