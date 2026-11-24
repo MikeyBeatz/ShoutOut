@@ -29,8 +29,9 @@ Manifest v docs/local má fázi account-ready, server checking/revize 2;
 zatím žádný pilotní Shout, komentář, zpráva, hlášení ani postih.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
 s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
-s platným Auth/App Check. Název firmy zůstal původní; čeká upřesnění vlastníka,
-zda jej skutečně měnil. Do té doby neschvalovat ani nezakládat další obsah. Původních 38 zdrojů
+s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba ukládání
+není potvrzená a změna pole v živém resubmit zatím není ověřená. Následuje
+schválení téže žádosti TestAdmin; zatím nezakládat další obsah. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

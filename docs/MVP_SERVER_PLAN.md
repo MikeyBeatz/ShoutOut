@@ -2157,6 +2157,12 @@ vlastník byl požádán upřesnit, zda pole upravoval, nebo jen znovu odeslal �
 Do odpovědi žádné schválení, opakované zamítnutí, přepis dat ani další fixture.
 Živý přenos upraveného pole ani celá akceptace tím nejsou označené za ověřené.
 
+Vlastník následně upřesnil, že dodatek „oprava“ mohl zapomenout, protože jej
+nepovažoval za součást názvu. Nelze tvrdit ztrátu změny ani opravu chyby klienta;
+živé resubmit upraveného pole zůstává nedoložené. Pokračovat schválením stejné
+žádosti přes TestAdmin bez dalšího zamítnutí, resetu revize či změny auditů.
+Dosavadní schválený pilot a jeho jediná inkarnace se nemění.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

@@ -77,8 +77,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    ověřené. Původních 38 Shoutů/pending žádost zachované.
    **Probíhá jediný již schválený živý pilot, pak úklid.** TestAdmin ověřil
    zamítnutí; dočasný účet provedl resubmit, server checking/revize 2 se správným
-   auditem. Název zůstal původní; před schválením čeká potvrzení, zda jej vlastník
-   měnil. Manifest account-ready; zatím žádný nový obsah/postih.
+   auditem. Vlastník mohl dodatek názvu zapomenout; změna pole živě neověřená,
+   chyba nepotvrzená. Následuje schválení TestAdmin. Manifest account-ready;
+   zatím žádný nový obsah/postih.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
