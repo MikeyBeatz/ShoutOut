@@ -2331,6 +2331,26 @@ ani obsah nemazat. Po serverovém ověření pokračovat stejným pilotem: sankc
 revokace a osiřelé resolve, teprve potom řízený úklid. Akceptaci ani celý milník
 neoznačovat hotové před dokončením. Oprava nepřidala nové váhy ani další MVP kredit.
 
+**Reaktivace ověřená 24. listopadu 19:27 UTC:** vlastník potvrdil uložení bez
+chyby. Server active / revize 5, Business profil active, role business/level 2
+a první pobočka zachované. Audit reactivate od it_admin
+**5e8e122612febbd39ba25fb655870090b0311b3ee380542f82bd3fb92b62489a**,
+POST HTTP 200 a Auth/App Check VALID. Ověřena celá posloupnost pěti Business
+auditů i receipts (reject/resubmit/approve/suspend/reactivate), správní aktéři,
+revize 1–5 a původních +7 dní. Důkaz build/modbiz-reactivation-proof.json;
+čtecí pilotní fence potvrdil původních 38 zdrojů. Nejde o nový rollout/datový zápis.
+
+Vlastník je dostupný pro navazující testy. Předán jeden blok pod přesným
+TestModerator: hlášení „MVP modbiz 926a31d2 shout. Remove after verification.“
+→ Udělit varování / potvrzení postihu; potom v detailu „MVP moderation Business
+926a31d2“ u „MVP f794f930926a31d2 comment 2“ přes Moderovat nejprve ban 7 dní,
+potom ban 1 den. Žádná jiná hlášení, mazání, revokace nebo nový obsah.
+Při chybě či nenalezeném cíli zastavit; po potvrzení všech tří serverově
+ověřit aktéra/audit/receipt a zachování 7denní aktivní vazby. Navazující ruční
+kroky: přihlášení dočasné fixture pro ban UI, TestAdmin revokace silnějšího
+postihu, dostupnost reaktivovaného účtu bez skutečné nové publikace, osiřelé
+resolve a zbývající soukromé hlášení; teprve potom řízený úklid jediné fixture.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

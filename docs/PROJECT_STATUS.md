@@ -32,9 +32,9 @@ Původních 38 Shoutů/pending žádost beze změny, žádné účtové joby.
 **Probíhá schválený společný živý pilot, potom úklid.** Vlastník potvrdil
 přihlášení TestAdmin; vytvořen právě jeden nový dočasný ověřený Auth účet
 a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
-Manifest v docs/local má fázi content-ready; ověřené pozastavení suspended/revize 4,
-Business profil suspended, zachovaná role 2 i aktivní první pobočka. Připraven právě jeden pilotní
-Shout, dva komentáře, jedna soukromá odpověď a tři otevřená hlášení; zatím bez postihu.
+Manifest v docs/local má fázi content-ready; reaktivace potvrzená active/revize 5,
+Business profil active, zachovaná role 2 i aktivní první pobočka. Připraven právě jeden pilotní
+Shout, dva komentáře, jedna soukromá odpověď a tři hlášení. Sankční část nyní probíhá.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
 s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
 s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba ukládání
@@ -51,9 +51,11 @@ Místně 15 klientských / 23 emulátorových / 113 nástrojových kontrol, oba 
 vizuálně prověřené; celý následný CI prošel. Webové otisky a osm HTTP kontrol
 na obou doménách souhlasí. Vlastník potvrdil „vše funguje“ u čitelnosti/Detailu,
 krátkého stavu při publikování a Profil → Odhlásit se s návratem na přihlášení.
-Opakovaný serverový status stále suspended/revize 4, bez postihů a s otevřenými
-třemi hlášeními. **Další krok: TestAdmin → Znovu aktivovat stejnou firmu**,
-teprve po ověření navázat sankcemi. Další obsah nezakládat. Původních 38 zdrojů
+Reaktivace TestAdmin potvrzená klientem, auditem i HTTP 200 s Auth/App Check VALID;
+všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhlasí.
+**Další krok předaný uživateli:** TestModerator udělí varování přes hlášení Shoutu,
+potom nad druhým komentářem ban 7 dní a ban 1 den. Při chybě zastavit; po všech
+třech ověřit silnější aktivní ban před revokací. Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

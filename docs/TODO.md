@@ -87,8 +87,11 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    parser chrání Profil, lišta/odhlášení čitelné, důvod přes Detail a krátký stav
    při publikování. Server/Rules, 19 kontrolovaných dokumentů a původní data zachované.
    Vlastník potvrdil celou ruční kontrolu opravy (lišta/Detail, krátká zpráva při
-   publikování, Profil/odhlášení). **Další krok: reaktivace TestAdmin**, potom
-   zbývající sankční pilot/úklid. Celá pilotní akceptace stále otevřená.
+   publikování, Profil/odhlášení). **Reaktivace TestAdmin ověřená** active/revize 5,
+   všech pět Business auditů/receipts správně. **Další krok: blok TestModerator**
+   varování přes hlášení Shoutu → přímý ban 7 dní → ban 1 den u druhého komentáře;
+   potom serverová kontrola silnější vazby, revokace a zbytek pilotu/úklid.
+   Celá pilotní akceptace stále otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
