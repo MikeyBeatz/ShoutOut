@@ -1936,6 +1936,12 @@ Místní aktivní/baseline Rules kompilují a prošlo 20 cílených scénářů,
 96 historických případů, 22 společných Business/pilotních, 24 klientských a
 36 nástrojových kontrol. Analýza a lint čisté. Přesné úplné CI následuje.
 
+První úplné CI db13fed / 45374082977 skončilo u dvou starších konfiguračních
+Flutter testů: jejich gatewayFixture nevypínala nově zapnuté Business/sankční
+volby před odebráním App Check. Opravená pouze fixture, kontrola skutečné
+konfigurace nebyla oslabena. Celá místní klientská sada **543/543** následně
+prošla. Neúspěšný běh není použitý pro nasazení; přesné nové úplné CI je povinné.
+
 Historické allow-testy ve firestore.rules.test, managed_content_cutover a
 private_report_removal záměrně používají legacyModerationRules: přepne jen dva
 přesně označené konstantní guardy. Nevydává ani nemění soubor. Ostatní současné
