@@ -80,7 +80,11 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    auditem. Vlastník mohl dodatek názvu zapomenout; změna pole živě neověřená,
    chyba nepotvrzená. Schválení TestAdmin ověřené: active/revize 3, profil/role 2
    a první pobočka. Manifest content-ready: 1 Shout / 2 komentáře / 1 zpráva /
-   3 hlášení, zatím bez postihu. Následuje pozastavení a kontrola dočasným účtem.
+   3 hlášení, zatím bez postihu. Pozastavení TestAdmin ověřené: suspended/revize 4,
+   zachovaná role 2/pobočka/starší Shout. [Oprava UI a fixture čeká konkrétní souhlas](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal):
+   chybný typ barev testovacího avataru lokálně shodí Profil; lišta má slabý
+   kontrast a při pokusu o publikování má zobrazovat krátký stav. Reaktivaci
+   ani další živé zápisy zatím neprovádět; pilotní akceptace otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

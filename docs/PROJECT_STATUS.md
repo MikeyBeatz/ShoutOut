@@ -25,15 +25,21 @@ Původních 38 Shoutů/pending žádost beze změny, žádné účtové joby.
 **Probíhá schválený společný živý pilot, potom úklid.** Vlastník potvrdil
 přihlášení TestAdmin; vytvořen právě jeden nový dočasný ověřený Auth účet
 a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
-Manifest v docs/local má fázi content-ready; ověřené schválení active/revize 3,
-Business profil, role 2 i aktivní první pobočka. Připraven právě jeden pilotní
+Manifest v docs/local má fázi content-ready; ověřené pozastavení suspended/revize 4,
+Business profil suspended, zachovaná role 2 i aktivní první pobočka. Připraven právě jeden pilotní
 Shout, dva komentáře, jedna soukromá odpověď a tři otevřená hlášení; zatím bez postihu.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
 s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
 s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba ukládání
 není potvrzená a změna pole v živém resubmit zatím není ověřená. Schválení TestAdmin
-má správný audit/receipt a HTTP 200 s platným Auth/App Check. Následuje pozastavení
-TestAdmin a kontrola dočasným účtem; další obsah nezakládat. Původních 38 zdrojů
+má správný audit/receipt a HTTP 200 s platným Auth/App Check. Pozastavení má také
+správný audit/receipt a platné Auth/App Check; dřívější Shout zůstává active.
+**Pilot pozastaven na UI nálezu:** nevýrazná lišta, důvod místo krátkého stavu
+při pokusu publikovat a šedý Profil bez odhlášení. Poslední problém lokálně
+reprodukovaný z vadné fixture: generátor uložil dvě barvy avataru jako int,
+AvatarStyle.fromProfile je přetypovává na String. Je to chyba testovací přípravy,
+nikoli důkaz odebrání Business přístupu. [Konkrétní oprava čeká schválení](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal);
+zatím žádná změna aplikace/živých dat ani reaktivace. Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

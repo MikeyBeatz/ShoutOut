@@ -2185,6 +2185,46 @@ Další ruční krok uživateli předán: TestAdmin pozastaví pouze tuto firmu,
 dočasný účet ověří důvod, přístup k údajům, blokaci nového publikování/promování
 a zachování dřívějšího Shoutu. Reaktivaci zatím neprovádět.
 
+**Pozastavení serverově ověřené 24. listopadu 14:51 UTC:** suspended / revize 4,
+profil suspended, role business/level 2 zachovaná, první pobočka active,
+dosavadní Shout active. Správný suspend audit/receipt od it_admin
+**13c988008ae4fc1ec537ea96d7954ac9a171e5e886d782712226f0a5d98427c4**,
+POST HTTP 200 / Auth/App Check VALID. Původních 38 zdrojů zachovaných;
+build/modbiz-suspension-proof.json. Nejde zatím o ověření živé serverové
+publikace v pozastaveném stavu, její zákaz je pokrytý dřívější emulátorovou sadou.
+
+Vlastník vidí pozastavení, při kliknutí publikovat celý důvod; lišta má
+nevýrazný text/křiklavé pozadí. Ostatní karty fungují, ale Profil je šedý
+a odhlášení nedostupné. Zjištěno: pilotní generátor uložil avatarId=avatar_01,
+avatarBackgroundStart=1 a avatarBackgroundEnd=2 do users i publicProfiles.
+Klientský AvatarStyle.fromProfile přetypovává obě barvy na String?; přesná
+živá avatar data v místním build/modbiz_avatar_probe_test.dart reprodukují
+TypeError. Test prošel tím, že očekávaný pád potvrdil, **nejde o opravený klient**.
+Žádné živé zápisy, změna zdrojů aplikace ani reaktivace při diagnóze neproběhly.
+
+<a id="business-suspension-ui-repair-proposal"></a>
+
+##### Návrh opravy UI/fixture – čeká konkrétní schválení
+
+Vlastníkovi předložen jeden společný úsek podle AGENTS „Před úpravami … předlož
+konkrétní rozsah změny uživateli ke schválení“:
+
+- Opravit pilotní generátor na platné fox/teal/navy; u jediného dočasného UID
+  atomicky opravit pouze avatarId/avatarBackgroundStart/avatarBackgroundEnd
+  ve users/publicProfiles. Ověřit původní hodnoty, updateTime i pilotní fence;
+  mimo tyto dva dokumenty nezapisovat. Podklad před opravou uchovat lokálně.
+- Avatar parser chránit před chybnými typy stejným výchozím vzhledem,
+  aby vadný avatar neznepřístupnil Profil/odhlášení; doplnit regresi.
+- Klidnější kontrastní lišta, krátké „Účet pozastaven“, důvod dostupný přes Detail;
+  při pokusu o publikování pouze krátký stav. Oprávnění/stav/role se nemění.
+- Ověřit Profil/odhlášení a světlý/tmavý vzhled, generátor a cílenou opravu,
+  dokumentaci, společný push/úplné CI přesných zdrojů a pouze DEV web rollout.
+  Žádné Rules/Functions, nové účty/obsah, postihy, audit, retence nebo produkce.
+
+Dosavadní souhlas pokrýval pilot; tuto novou klientskou opravu a opravu již
+existujících testovacích dat znovu nevyvozovat automaticky. Do odpovědi jen
+diagnostika a záznamy, živý účet ponechat suspended/revize 4.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
