@@ -1927,6 +1927,10 @@ firem, duplicit a sporů ani produkční kapacita nejsou tímto úsekem vyřeše
 **Vlastník 24. listopadu výslovně schválil celý tento DEV přechod a pilot.**
 Stejný rozsah, fixture ani prostředky znovu neschvalovat; ruční průchody až na konec.
 
+**Aktualizace:** technické nasazení již dokončené, viz
+[živé důkazy níže](#moderation-business-dev-results). Následující příprava
+zachovává původní checkpoint; tvrzení „dosud nenasazeno“ popisuje tento starší stav.
+
 **Příprava 24. listopadu:** wrapper reviewBusinessApplication je nyní v content
 hostu se společným App Check, skutečným Admin Auth a schválenými prostředky.
 Zdrojové brány managedModerationAuthority/managedBusinessAuthority jsou true;
@@ -2040,6 +2044,99 @@ do přidaných fází ponechat kompatibilní worker i ingress guard; starý work
 s false není bezpečná návratová verze. Tento DEV profil neurčuje produkční
 kapacitu 5 000 souběžných uživatelů. Kritéria ruční kontroly firem/duplicit/sporů
 a společná předstartovní regrese zůstanou samostatným otevřeným krokem.
+
+<a id="moderation-business-dev-results"></a>
+
+#### Společný DEV přechod – nasazení a technické ověření 24. listopadu
+
+Nasazený zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
+feature/moderation-business-dev, [úspěšné úplné CI 45375019177](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177).
+Čistá detached release kopie build/moderation-business-release-db13fed má přes
+historický název HEAD **05fc1ed**; balíčky i release web byly připravené až z něj.
+První db13fed / CI 45374082977 selhal na dvou starších Flutter config fixtures;
+05fc1ed vypíná nové volby pouze v této testovací fixture. Celých 543 místních
+klientských testů i následné úplné CI prošly, neúspěšný zdroj se nenasazoval.
+
+Pouze **shoutout-dev-46c81**, dodržené pořadí:
+
+1. Sedm cílených content Functions a kompatibilní web; publikovaný Hosting
+   **507c7a0b950b74b2** je nová kompatibilní návratová verze po uzavření Rules.
+2. Ověřené skutečné balíčky, 100 % provozu na nových ready revizích;
+   všechny staré revize vyřazené (Active CONDITION_FAILED / RETIRED).
+3. Firestore Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**, přesná shoda
+   publikovaného textu se zdrojem; obě autoritativní brány true.
+4. Teprve potom dvě účtové Functions s moderationCopiesEnabled=true.
+   Před oběma přechody ověřeno nula accountDeletionJobs/accountPurgeJobs.
+
+| Function | Ověřená nová revize |
+|---|---|
+| sanctionContent | sanctioncontent-00001-bos |
+| revokeSanction | revokesanction-00001-cat |
+| reviewBusinessApplication | reviewbusinessapplication-00001-lek |
+| decideContentReports | decidecontentreports-00002-cod |
+| deleteShout | deleteshout-00005-xij |
+| deleteComment | deletecomment-00006-ror |
+| cleanupOperationReceipts | cleanupoperationreceipts-00009-nor |
+| accountDeletionRequestCreatedDev | accountdeletionrequestcreateddev-00016-yix |
+| resumeAccountDeletionJobsDev | resumeaccountdeletionjobsdev-00016-cib |
+
+Celkem **27 ACTIVE Functions**; ostatních 18 má shodné revize, source generace,
+hash i prostředky jako před přechodem. U devíti změněných ověřeno min 0/max 1,
+concurrency 1, 256 MiB; šest callable má 15 s, cleanup/oba workery 60 s.
+Oba minutové plánovače včetně URI/retry/deadline beze změny. Žádný nový Scheduler,
+index/TTL, globální App Check, main nebo produkční zásah.
+
+Z cloudových source ZIPů souhlasí každý ze **70** souborů content balíčku
+a **49** účtového balíčku včetně package/lock; žádné pilotní/testovací JS.
+Content ZIP SHA-256 a03d56db…f2790, account ZIP 49c8118d…099b0c.
+Hosting má 67 app souborů + 2 Firebase init; všechny raw/gzip otisky souhlasí,
+osm HTTP kontrol index/main/bootstrap/config na obou DEV doménách také.
+Lokální .last_build_id se v souladu s původním Hosting ignore nepublikuje.
+Tři nové callable bez Auth/App Check vrátily 401 UNAUTHENTICATED; ověřený
+přihlášený průchod tím není nahrazený.
+
+Nad **skutečně publikovaným** zdrojem proběhlo 20 Rules service simulací:
+přímé Business aktivace/role/profil/pobočka/audit, sankce/vazby/revokace/clearance
+a změny tří druhů hlášení odmítnuté; původní vlastní/admin/moderátorské get
+čtení zachované, anonymní/cizí běžné čtení odmítnuté. Existující moderátorský
+get žádosti byl v první pomocné simulaci chybně očekáván jako DENY; zdroj jej
+už před přechodem dovoloval. Opraveno pouze očekávání pomocné simulace,
+Rules ani oprávnění se kvůli tomu neměnily. Skutečné queue dotazy, batch útoky
+a before/after varianty pokrývá předchozí emulátorové CI. Nejde o úplný
+bezpečnostní audit ani autentizovaný přímý HTTP zápis do živých dat.
+
+Závěrečná kontrola **10:56:36 UTC**: 38 původních Shoutů a původní pending
+žádost včetně updateTime beze změny, účtové joby 0/0, feed/news/staff fence shodný.
+Žádný nový Auth účet ani pilotní obsah zatím nevznikl. Důkazy v ignorovaných
+build/modbiz-cloud-{before,content,final,hosting,sources}.json,
+build/modbiz-source-{content-proof,proof}.json, build/modbiz-rules-simulation.json,
+build/modbiz-callable-auth-proof.json a build/modbiz-quiet-latest.json.
+První pomocné porovnání metadat bylo opravené na stejnou JSON normalizaci
+undefined/chybějících polí; skutečné revize/source/prostředky se shodují.
+
+**Další krok: již schválený společný živý pilot a úklid.** Kanonický manifest
+docs/local/moderation-business-pilot-2026-11-24.json, fáze planned,
+digest **84f4aac021b69a9d858d668ccfe0dd4dece2b6c990092edafcb157ae23de5335**.
+Zatím pouze plán bez přihlašovacích údajů; provisioning až při dostupném klientovi.
+Začít TestAdmin → zamítnutí, fixture → oprava/resubmit, TestAdmin → schválení,
+teprve pak obsah, pozastavení/reaktivace, TestModerator → varování/ban 7d/ban 1d,
+TestAdmin → revokace silnějšího aktivního banu; nakonec osiřelé resolve,
+zbývající hlášení a řízený úklid. Zachovat receipts +7 dní a minimální marker;
+postihy a Auth smazání výhradně na novém dočasném UID. Kvóty neresetovat.
+Mutační nástroj spouštět z čisté release 05fc1ed s přesným CI, nikoli z pozdějšího
+dokumentačního HEAD. Před založením znovu ověřit platnost plánu a aktuální fence.
+
+Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
+24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
+určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
+akceptaci aplikace. Potřebná ruční součinnost zůstala na konec samostatné práce.
+Započítané čtyři DEV sekce (sankce, osiřelé resolve, Rules autorita, Business),
+živé akceptace a celý moderační milník zůstávají otevřené.
+
+Návrat po uzavření: ponechat serverová API/guardy a obě Rules brány;
+web vracet nejdříve na kompatibilní **507c7a0b950b74b2**, nikoli původní
+1974e34d52e2945b s přímou moderací. Účtový worker musí rozumět novým fázím;
+nevracet false po vstupu jobu. Živý rollback nebyl proveden ani tvrzený.
 
 <a id="moderation-local-ci-complete"></a>
 

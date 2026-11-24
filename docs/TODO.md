@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,22 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,28 %** — vážené dokončení podúseků
 
-Hotové úseky: **217/276**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **221/276**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -70,31 +70,19 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
    **Probíhá společný sankční úsek** na feature/moderation-sanctions:
-   [serverové udělení a zrušení postihu, klient a regrese](MVP_SERVER_PLAN.md#moderation-sanctions-local).
-   Zachovat stávající role, délky/retence a 50 hlášení. Ochrana silnějšího
-   aktivního postihu je nově výslovně schválená. Business: oprava/opětovné podání
-   po zamítnutí, při pozastavení zastavit nové publikování/propagaci; přesný
-   místní implementační rozsah je schválený a nyní připravený za false.
-   [Osiřelá hlášení a společná autorita](MVP_SERVER_PLAN.md#moderation-orphans-local):
-   50 místních případů prošlo, nové volby vypnuté. Schválená retenční oprava
-   kopií má místní jádro a 5 cílených purge regresí;
-   [přesné úplné CI 95e018f / 45283039166 success](MVP_SERVER_PLAN.md#moderation-local-ci-complete)
-   uzavřené včetně celé purge sady a webu. Společná Rules brána má 9/9 před/po
-   scénářů a úplné CI 0b68535 / 45335353004 success, zůstává vypnutá.
-   [Business příprava](MVP_SERVER_PLAN.md#business-review-local) má 15 serverových
-   scénářů a 12 nových klientských testů; **464c0ad / úplné CI 45339418090 success**
-   včetně celé regrese, purge, Storage a webu. Vlastník již schválil
-   [společného DEV přechodu](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal).
-   Ve větvi feature/moderation-business-dev je připravený wrapper, pilot i obě
-   aktivní Rules varianty; následuje přesné úplné CI a řízené nasazení. Živě
-   nové callable ani Business Rules zatím nejsou aktivní; backlogové Business
-   implementace zahrnující Rules je připravená, celé kritérium čeká živou akceptaci.
-   Žádný další ruční test nyní.
-   Živý přechod nezaměňovat s hotovým místním kódem.
-   Ruční testy zůstávají na konec.
-   Jádro/wrappery a klient zůstávají za false. Výsledky 50/50 serverových,
-   13 klientských a celého CI jsou v plánu; DEV a živá akceptace sankcí nejsou
-   započítané. Automatické testy průběžně, ruční až na konec podle vlastníka.
+   [Společný DEV přechod moderace a Business je nasazený](MVP_SERVER_PLAN.md#moderation-business-dev-results):
+   **05fc1ed / úplné CI 45375019177 success**, tři nové a šest aktualizovaných
+   Functions, web 507c7a0b950b74b2 a obě aktivní Rules brány. Údržba až po
+   uzavření přímých zápisů; skutečné zdroje, revize, prostředky a plánovače
+   ověřené. Původních 38 Shoutů/pending žádost zachované.
+   **Další krok: jediný již schválený živý pilot a úklid**, začít dostupným
+   klientem pod TestAdmin. Zatím žádný nový Auth účet/obsah, manifest planned.
+   Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
+   Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
+   Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
+   Sankce zachovají silnější aktivní postih; Business zamítnutí dovolí opravu
+   a opětovné podání, pozastavení blokuje nové publikování bez odebrání role.
+   Místní výsledky a historické úplné CI jsou v příslušných částech plánu.
    **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
    jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
    110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má
@@ -108,7 +96,7 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    cleaned; všech 28 receipts a 26 rate dokumentů při úklidu zachováno, žádná
    fixture/read klíč nezůstaly. Pro tento pilot další ruční test není potřeba.
    Další otevřené části
-   jsou sankce, osiřelá hlášení a společný Rules cutover/audit autority.
+   jsou živá akceptace sankcí/Business/osiřelých hlášení a celková předstartovní regrese.
    Níže jsou důkazy dříve uzavřených částí.
    **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
    všech tří typů hlášení, místní server a neaktivní klient, testy a společné CI.

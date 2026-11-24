@@ -6,79 +6,39 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Společný DEV přechod schválený 24. listopadu a připravený místně** na
-feature/moderation-business-dev: [rozsah a pořadí](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal).
-Nový Business callable, zapnuté DEV klientské/serverové volby a obě Rules brány
-jsou ve zdrojích; zatím žádný rollout ani živá fixture. Místně prošly aktivní
-Rules před/po, celý pilot v emulátoru včetně ztracené odpovědi Auth a opakovaného
-úklidu, 96 historických Rules scénářů, 24 klientských a 36 nástrojových kontrol.
-Analýza/lint čisté. Následuje společný push/úplné CI a ověření přesných artefaktů,
-potom API/web → uzavření Rules → účtová údržba. Stejný rozsah znovu neschvalovat.
-Nový dočasný Auth účet se založí až při dostupném klientovi; ruční testy na konec.
-Připravený úklid ponechá původní sedmidenní receipts a minimální veřejnou značku,
-stejně jako schválený kontrakt smazaného účtu. Původní obsah/účty nezasažené.
+**Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
+[Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
+Zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
+feature/moderation-business-dev, [úplné CI 45375019177 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177).
+Pouze shoutout-dev-46c81: tři nové callables, šest aktualizovaných Functions,
+web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.
+API/web → vyřazení starých revizí → uzavření přímých Rules zápisů → účtová
+retenční údržba. Nové DEV volby jsou true; produkční konfigurace nezměněná.
 
-**Místní Business příprava i úplné CI dokončené:**
-[výsledky a hranice](MVP_SERVER_PLAN.md#business-review-local), větev
-feature/business-moderation, zdroj **464c0ad0f8d690101b651373dbfc9e336b4cfce1** /
-[úplné CI 45339418090 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45339418090).
-Serverové approve/reject/suspend/reactivate/resubmit,
-verze žádosti, audit/receipt a klient za serverBusinessReview=false.
-**15/15** emulátorových, **3/3** unit a **12** nových klientských testů
-(38/38 s konfigurací/bránou), 34/34 cílených nástrojových/balíčkových kontrol.
-Pozastavení zachová roli/navigaci a zastaví nové publikování i promo na serveru;
-zamítnutý žadatel opraví údaje bez dalšího Auth účtu. Wrapper a živé Business
-Rules uzavření v tomto starším checkpointu ještě nebyly připravené. Celá dosavadní regrese,
-B2, purge, Storage a webový build v CI prošly. Následně vlastník schválil
-[konkrétním společným DEV přechodem](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal),
-včetně wrapperu/Business brány a jednoho nového dočasného Auth účtu.
-Aktuální příprava tohoto schváleného živého rozsahu je uvedená výše.
+Všech devět skutečných source archivů přesně odpovídá release balíčkům;
+27 ACTIVE Functions, ostatních 18 beze změny. Prostředky a oba minutové
+plánovače zachované, provoz 100 % na nových revizích. Webové otisky i osm HTTP
+kontrol obou domén souhlasí. Nad publikovanými Rules prošlo 20 simulací;
+nejsou náhradou živého přihlášeného pilotu. Tři nová API bez ověření odmítla 401.
+Původních 38 Shoutů/pending žádost beze změny, žádné účtové joby.
 
-[Společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
-má **0b68535329e9a10763edb9f3fb04bd919fa886b7** /
-[úplné CI 45335353004 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45335353004),
-9/9 před/po scénářů (59 společných). managedModerationAuthority zůstává false.
-Oba místní rozsahy vlastník výslovně schválil; znovu je neschvalovat.
-Žádné nasazení, živá data nebo Auth účty; ruční testy zůstávají až na konec.
-Čerstvá read-only DEV inventura: 24 ACTIVE Functions, nová 3 API chybějí,
-prostředky šesti dotčených Functions beze změny; veřejný web stále původní.
+**Zbývá schválený společný živý pilot a úklid.** Manifest v docs/local má
+fázi planned; žádný nový Auth účet ani obsah zatím nevznikl. Celý rozsah již
+vlastník schválil, znovu nevyžadovat souhlas. Začít dostupným klientem pod
+TestAdmin, teprve potom založit jedinou fixture. Browser host je nedostupný;
+24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
+Další UI vstupy až po novém ověření dostupnosti; nejde o závadu aplikace.
+Ruční průchody zůstaly na konci samostatné práce. Živá akceptace, Business
+kritéria duplicit/sporů a celý moderační milník zůstávají otevřené.
 
-**Probíhá navazující moderace**, předchozí větev feature/moderation-sanctions. Vlastník
-po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
-na konec. [Místní kontrolní bod uzavřený](MVP_SERVER_PLAN.md#moderation-local-ci-complete):
-**95e018f8f14aeb1d1bb9f9244f16c1041e802b25** /
-[úplné CI 45283039166 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45283039166).
-[Sankce, přímé zjištění a zrušení](MVP_SERVER_PLAN.md#moderation-sanctions-local)
-jsou připravené za serverContentSanctions=false; nový kratší postih zachová
-silnější aktivní vazbu. [Osiřelá hlášení a autorita](MVP_SERVER_PLAN.md#moderation-orphans-local)
-mají připravené uzavření bez další akce a výchozí vypnuté omezení obecných
-mazacích API na vlastní obsah. Soukromou zprávu čte pouze server, klient použije
-snapshot hlášení. Žádná z těchto novinek zatím není nasazená.
+Předchozí místní kontrolní body a výsledky jsou v
+[serverovém plánu](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal).
+První CI db13fed / 45374082977 selhalo na dvou starších konfiguračních testech;
+opravené pouze fixture, celých 543 Flutter testů i nové úplné CI prošly.
+Tento neúspěšný zdroj se nenasazoval. Metriky započítávají samostatně čtyři
+DEV sekce, nikoli živou akceptaci. Staré cleaned piloty znovu nevytvářet.
 
-Konečný místní společný běh **50/50** sankčních/osiřelých/authority případů
-prošel, **13/13** klientských testů a analyze čisté. Dřívější společné rozhodovací
-regrese **49/49**, 44 cílených nástrojových testů a širší místní běhy jsou
-doložené v plánu; nepřičítat je znovu jako nové sekce. Přesné úplné CI
-soukromé klientské opravy **0cf1b87 / 45280367518 success** prošlo a klientská
-ověřovací sekce je započítaná. Nová retenční změna **95e018f / 45283039166 success**
-má také uzavřené úplné CI včetně všech purge/regresí a webového buildu;
-serverové a osiřelé ověřovací sekce započítané. Záměrně
-zrušený běh 45279278076 není důkaz.
-
-Vlastník schválil [retenční opravu kopií](MVP_SERVER_PLAN.md#moderation-retention-followup-proposal):
-jádro je připravené, **5/5** cílených purge scénářů, 11 unit/host a kontrola
-obou balíčků prošly. Evidence po původních 60 dnech nevznikne znovu;
-novější zákaz a samotné vynucování zůstanou zachované. Společná volba
-moderationEvidenceRetentionEnabled=false drží wrapper i údržbu vypnuté.
-Celé Rules uzavření, DEV aktivace a živá akceptace nadále čekají.
-
-Business: vlastník potvrdil opravu/opětovné podání zamítnuté žádosti a při
-pozastavení blokaci nového publikování/propagace se zachováním údajů a doběhnutí
-starších běžných Shoutů. Přesný místní implementační rozsah i Rules brána již
-schválené; nejnovější příprava a další krok jsou výše. Poslední ověřený DEV
-dál 87d6687, žádné živé zápisy,
-Auth účty, Rules, prostředky, main ani produkce nezměněné. Staré cleaned piloty
-neobnovovat. Automatické kontroly průběžně; ruční průchody až na konec.
+## Předchozí uzavřené úseky
 
 **Veřejné moderační odstranění má uzavřenou DEV akceptaci i úklid.**
 [Důkazy a pokračování](MVP_SERVER_PLAN.md#moderation-public-dev-complete).
@@ -107,12 +67,8 @@ build/public-removal-release-87d6687/docs/local/public-report-removal-pilot.json
 fáze **cleaned**, digest **c8e37fd7…c0639cc8**; nikdy znovu neseedovat. Tato kopie má přesný zdroj/úplné CI pro mutační CLI, následný
 dokumentační commit je nenahrazuje. Návratový kompatibilní web 565880d4664da7b2.
 
-**Další krok k MVP:** dokončit výše popsaný místní sankční úsek, potom osiřelá
-hlášení a společný audit/cutover autority. Nová produktová a provozní rozhodnutí
-předem schválit; dvě Business volby nyní čekají. Celý moderační milník zatím není
-uzavřený; regionální regrese soukromého odstranění zůstává samostatně odložená.
-Browser host je nedostupný a Windows ovládání bylo zastavené kontrolou URL;
-další UI vstupy až po novém ověření dostupnosti. Pro tento pilot další ruční test není potřeba.
+Výše uvedený veřejný pilot je historicky uzavřený. Aktuální další krok a
+živý stav společné moderace jsou v úvodu tohoto přehledu.
 
 **Právě dokončený místní úsek:** [veřejné moderační odstranění](MVP_SERVER_PLAN.md#moderation-public-local-results),
 větev feature/report-public-removal. Atomické odstranění Shoutu/komentáře,
