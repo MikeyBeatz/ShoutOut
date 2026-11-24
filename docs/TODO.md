@@ -96,8 +96,10 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    kontrolami a lintem; **3ec9664 / úplné CI 45486072998 success**. Žádné změny auditu/rolí,
    regionální sankční průchod se netvrdí. Ban UI do 1. prosince i odhlášení
    potvrzené. Osiřelý komentář připraven, druhý zachovaný, počet/projekce 2 → 1.
-   [Schválené UI stavů a historie je místně ověřené](MVP_SERVER_PLAN.md#moderation-user-history-ui);
-   po vlastním úplném CI pouze DEV web, pak spojená ruční kontrola přehledu,
+   [UI stavů a historie je nasazené v DEV](MVP_SERVER_PLAN.md#moderation-user-history-ui):
+   **aa43ae1 / úplné CI 45491348488 success**, web **f8f0b0338d6eb03d**.
+   Otisky/8 HTTP kontrol ověřené, server/Rules/prostředky zachované.
+   Čeká spojená ruční kontrola přehledu,
    obnoveného přístupu a dvou zbývajících hlášení; teprve potom řízený úklid.
    Nové sankce ani obsah nezakládat.
    Celá pilotní akceptace stále otevřená.

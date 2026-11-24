@@ -2445,10 +2445,30 @@ splývající ikony při silném errorContainer; konečná varianta používá j
 odvozený od povrchu a kontrastní ikony/text, doplněný regresní kontrastní test.
 Důkazy test/staff_user_enforcement_test.dart,
 build/modbiz-history-{regressions,analysis,final-test}.log a
-build/modbiz-history-{dark,light}.png. Plánované vlastní úplné CI a pouze
-DEV web; do té doby stále nasazený web 3ffe71a / 2edf6b744dcbe95e.
-Potom jedna společná ruční kontrola na stávajícím pilotu, bez nových účtů,
-postihů nebo obsahu. Celá pilotní akceptace/úklid ani metriky tím nejsou uzavřené.
+build/modbiz-history-{dark,light}.png.
+
+**DEV nasazení ověřené 24. listopadu:** čistý zdroj
+**aa43ae18e3ebd0b5ed9a0be77d2c8f00010c6a74**, fix/moderation-user-history,
+[úplné CI 45491348488 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45491348488),
+všech 42 úspěšných kroků, odpovídající release build/manifest a přesný cíl ověřené.
+Pouze Hosting shoutout-dev-46c81: verze **f8f0b0338d6eb03d**, 67 app souborů
+shodných s manifestem; 8 HTTP 200 a shodné tělo na obou doménách. Hosting API
+navíc obsahuje 2 rezervované Firebase soubory, tedy 69 záznamů celkem.
+Všech 27 ACTIVE Functions včetně hashů/revizí/prostředků, oba plánovače a
+Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57** přesně shodné před/po.
+Čtecí fence ověřil původních 38 Shoutů/pending žádost; fixture dál active/revize 5,
+bez aktivního banu, zbývají právě dvě otevřená hlášení. Žádný další živý datový
+zápis, Auth účet, role, main nebo produkční nasazení tímto rolloutem nevznikly.
+Návratový web **2edf6b744dcbe95e**. Důkazy build/modbiz-history-{ci,build-proof}.json,
+build/modbiz-history-cloud-{before,after,hosting}.json a build/modbiz-history-deploy.log.
+
+Vlastníkovi předán jeden konečný blok: TestAdmin neaktivní přehled + skutečný
+konec/původní platnost zrušeného banu a resolve soukromého hlášení; dočasná
+fixture běžný přístup a formulář bez publikace/odhlášení; přesný TestModerator
+resolve osiřelého komentářového hlášení. Bez nových účtů, postihů nebo obsahu.
+Aktivní vizuální stav byl prověřený místně; současný účet má po revokaci správně
+neaktivní ban a novým postihem se to znovu nepřipravuje. Celá živá pilotní
+akceptace/úklid ani metriky tím nejsou uzavřené.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě

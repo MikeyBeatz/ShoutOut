@@ -15,18 +15,22 @@ původní web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da5
 API/web → vyřazení starých revizí → uzavření přímých Rules zápisů → účtová
 retenční údržba. Nové DEV volby jsou true; produkční konfigurace nezměněná.
 
-**Aktuální DEV web:** [oprava pozastaveného Profilu](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results),
+**Předchozí DEV web:** [oprava pozastaveného Profilu](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results),
 zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, fix/business-suspension-profile,
 [úplné CI 45424330633 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633),
 Hosting **2edf6b744dcbe95e**. Bezpečný avatar parser, čitelná neutrální lišta
 „Účet pozastaven“, důvod přes Detail, krátký stav při pokusu publikovat
 a kontrastní dostupné odhlášení. Server/Rules/prostředky se tímto rolloutem neměnily.
 
-**Nové schválené UI detailu uživatele je připravené místně:**
+**Aktuální DEV web – přehled detailu uživatele:**
 [stav banu/tvorby a historie](MVP_SERVER_PLAN.md#moderation-user-history-ui).
+Zdroj **aa43ae18e3ebd0b5ed9a0be77d2c8f00010c6a74**, fix/moderation-user-history,
+[úplné CI 45491348488 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45491348488),
+Hosting **f8f0b0338d6eb03d**. Shoda 67 app souborů a osm HTTP kontrol obou
+domén ověřené; všech 27 Functions, oba plánovače i Rules beze změny.
 23 cílených testů, analýza bez nálezů, následná barevná regrese a vizuální
-kontrola skutečného světlého/tmavého tématu prošly. Před DEV webem čeká vlastní
-úplné CI přesného zdroje. Žádné serverové pole ani datum auditu se nepřepisuje.
+kontrola skutečného světlého/tmavého tématu prošly. Živá ruční kontrola nového
+přehledu čeká; žádné serverové pole ani datum auditu se nepřepisuje.
 
 Všech devět skutečných source archivů přesně odpovídá release balíčkům;
 27 ACTIVE Functions, ostatních 18 beze změny. Prostředky a oba minutové
@@ -76,9 +80,11 @@ všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhla
 Po úplném CI nástroje připraven osiřelý cíl: odstraněný pouze první fixture
 komentář přes writer, druhý zachovaný, počet i živá projekce **2 → 1**,
 jeho hlášení nadále open. Nový seed ani Auth nevznikl.
-**Další krok:** úplné CI a DEV web nového přehledu, potom společná ruční kontrola
-historie, obnoveného přístupu bez nové publikace, osiřelé resolve a posledního
-soukromého hlášení. Úklid až po těchto důkazech;
+**Další krok předaný vlastníkovi v jednom bloku:** TestAdmin ověřit nový přehled
+a uzavřít pouze soukromé hlášení; dočasná fixture ověřit obnovený přístup a otevření
+formuláře bez publikace; přesný TestModerator uzavřít osiřelé komentářové hlášení.
+Serverově pak ověřit oba receipts/aktéry a provést původní řízený úklid.
+Úklid až po těchto důkazech;
 další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;

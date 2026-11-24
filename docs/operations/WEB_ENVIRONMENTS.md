@@ -1,6 +1,16 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – oprava pozastaveného Profilu, 24. listopadu:**
+**Aktuální DEV web – stav a historie postihů, 24. listopadu:**
+[Přehled a ověření](../MVP_SERVER_PLAN.md#moderation-user-history-ui).
+Zdroj **aa43ae18e3ebd0b5ed9a0be77d2c8f00010c6a74**, úplné CI **45491348488 success**,
+Hosting **f8f0b0338d6eb03d**. 67 app souborů/8 HTTP kontrol obou domén souhlasí.
+Pouze web: Ban/Omezení tvorby, červený aktivní stav, priorita účinných postihů
+a skutečný konec po zrušení s původní platností v detailu. Všech 27 Functions,
+oba plánovače a Rules beze změny; původních 38 zdrojů/pending žádost zachované.
+Fixture active/revize 5, ban už zrušený; dvě hlášení/ruční akceptace/úklid čekají.
+Návratový web **2edf6b744dcbe95e**. Nezakládat další fixture, produkce/main beze změny.
+
+**Předchozí DEV web – oprava pozastaveného Profilu, 24. listopadu:**
 [Nasazení a kontrola opravy](../MVP_SERVER_PLAN.md#business-suspension-ui-repair-results).
 Zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, úplné CI **45424330633 success**,
 Hosting **2edf6b744dcbe95e**; 67 app souborů a osm HTTP kontrol obou domén shodných.
