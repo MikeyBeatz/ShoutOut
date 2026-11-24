@@ -75,9 +75,10 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    Functions, web 507c7a0b950b74b2 a obě aktivní Rules brány. Údržba až po
    uzavření přímých zápisů; skutečné zdroje, revize, prostředky a plánovače
    ověřené. Původních 38 Shoutů/pending žádost zachované.
-   **Probíhá jediný již schválený živý pilot, pak úklid.** Vlastník je pod
-   TestAdmin ověřil první zamítnutí, server rejected/revize 1 a správný audit;
-   manifest account-ready. Čeká oprava/resubmit; zatím žádný nový obsah/postih.
+   **Probíhá jediný již schválený živý pilot, pak úklid.** TestAdmin ověřil
+   zamítnutí; dočasný účet provedl resubmit, server checking/revize 2 se správným
+   auditem. Název zůstal původní; před schválením čeká potvrzení, zda jej vlastník
+   měnil. Manifest account-ready; zatím žádný nový obsah/postih.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

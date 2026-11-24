@@ -2145,6 +2145,18 @@ ověřil původních 38 zdrojů a plánovaný auditní průchod. Následuje při
 dočasné fixture, oprava jen názvu na „MVP Business 926a31d2 oprava“ a resubmit;
 adresy/pobočku neměnit, nový Auth nevytvářet. Celá akceptace stále otevřená.
 
+**Opětovné podání potvrzené 24. listopadu 12:33 UTC:** vlastník odeslal žádost,
+server checking / revize 2. Audit resubmit má administratorId=null, receipt
+aktéra/authorId shodné s jediným dočasným UID, výsledek revize 2 a původních
+7 dní. Audit/receipt **2fdb88633115724592fb46020987a040b0a6d7bd979804fd5ae52b6a95e34003**;
+POST HTTP 200, Auth/App Check VALID. Původní adresy/souřadnice/identifikace
+pobočky zachované, Business profil ani role zatím nevznikly. Důkaz
+build/modbiz-resubmit-proof.json. **Název je stále MVP Business 926a31d2**,
+bez požadovaného dodatku „oprava“. To zatím nedokládá chybu ukládání;
+vlastník byl požádán upřesnit, zda pole upravoval, nebo jen znovu odeslal žádost.
+Do odpovědi žádné schválení, opakované zamítnutí, přepis dat ani další fixture.
+Živý přenos upraveného pole ani celá akceptace tím nejsou označené za ověřené.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

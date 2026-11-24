@@ -25,10 +25,12 @@ Původních 38 Shoutů/pending žádost beze změny, žádné účtové joby.
 **Probíhá schválený společný živý pilot, potom úklid.** Vlastník potvrdil
 přihlášení TestAdmin; vytvořen právě jeden nový dočasný ověřený Auth účet
 a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
-Manifest v docs/local má fázi account-ready, server rejected/revize 1;
+Manifest v docs/local má fázi account-ready, server checking/revize 2;
 zatím žádný pilotní Shout, komentář, zpráva, hlášení ani postih.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
-s Auth/App Check VALID. Čeká oprava a resubmit pod dočasným účtem. Původních 38 zdrojů
+s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
+s platným Auth/App Check. Název firmy zůstal původní; čeká upřesnění vlastníka,
+zda jej skutečně měnil. Do té doby neschvalovat ani nezakládat další obsah. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
