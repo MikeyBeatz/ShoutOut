@@ -69,7 +69,7 @@ class ProfileContent extends StatelessWidget {
             child: _ProfileWideAction(
               icon: Icons.logout_rounded,
               title: l10n.logout,
-              color: _shoutPrimary,
+              color: Theme.of(context).colorScheme.primary,
               onTap: onSignOut,
             ),
           ),

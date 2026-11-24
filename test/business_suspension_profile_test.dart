@@ -75,6 +75,11 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text('Fixture'), findsOneWidget);
         expect(find.text('Odhlásit se'), findsOneWidget);
+        final logout = tester.widget<Text>(find.text('Odhlásit se'));
+        expect(
+          contrast(logout.style!.color!, theme.colorScheme.surface),
+          greaterThanOrEqualTo(4.5),
+        );
         roles.add(AccountRole.business);
         await tester.pumpAndSettle();
         expect(find.text('Business'), findsOneWidget);

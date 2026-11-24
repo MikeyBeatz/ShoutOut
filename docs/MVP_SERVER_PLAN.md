@@ -2266,6 +2266,18 @@ ověřit neavatarová pole a provozní stav a nasadit jen DEV web. Potom krátk�
 kontrola Profilu/odhlášení a čitelnosti ve stávajícím pilotu; Functions/Rules
 zůstávají na 05fc1ed. Nevytvářet další obsah, účet ani nové váhy stupnice.
 
+Při místní vizuální kontrole skutečných app témat (render 390×720, načtené
+Roboto/Urbanist/MaterialIcons a avatar) zjištěn navíc málo kontrastní hardcoded
+teal odhlášení ve tmavém Profilu. V rámci schváleného zpřístupnění odhlášení
+jeho foreground nyní používá colorScheme.primary; přidaná regrese kontrastu
+v obou vzhledech. Místních 15 klientských případů znovu prošlo a oba PNG
+build/modbiz-profile-{light,dark}.png byly vizuálně zkontrolované.
+Nejde o živou browserovou akceptaci. První opravné CI a4e2699 / 45421922334
+zastavil nezahrnutý generovaný PROGRESS; doplněno v 9c6e34c. Jeho dokumentační
+CI 45422303586 success není důkaz pro nasazení. Úplný běh 45422011563 záměrně
+zrušen po doplnění barvy odhlášení; vyžadované nové úplné CI přesného zdroje
+před jakýmkoli opravným rolloutem/datovým zápisem. Tyto starší běhy nepoužít.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
