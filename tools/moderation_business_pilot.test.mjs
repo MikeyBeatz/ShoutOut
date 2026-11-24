@@ -6,9 +6,12 @@ const approve = ['--confirm-project', 'shoutout-dev-46c81', '--approved-digest',
 test('pilot requires explicit DEV, contained local state, explicit digest and readiness/acceptance', () => {
   assert.equal(parseModerationBusinessPilot(['plan', ...state]).mutating, false);
   assert.equal(parseModerationBusinessPilot(['avatar-plan', ...state]).mutating, false);
+  assert.equal(parseModerationBusinessPilot(['sanction-plan', ...state]).mutating, false);
+  assert.equal(parseModerationBusinessPilot(['status', ...state, '--approved-sanctions-digest', 'b'.repeat(64)]).mutating, false);
   assert.equal(parseModerationBusinessPilot(['account', ...state, ...approve, '--clients-ready', 'yes']).mutating, true);
   assert.equal(parseModerationBusinessPilot(['avatar-repair', ...state, ...approve, '--approved-repair-digest', 'b'.repeat(64)]).mutating, true);
-  for (const args of [['avatar-repair', ...state, ...approve], ['account', ...state, ...approve], ['cleanup', ...state, ...approve], ['content', ...state], ['unknown', ...state],
+  for (const args of [['status', ...state, '--approved-sanctions-digest', 'bad'], ['account', ...state, ...approve, '--clients-ready', 'yes', '--approved-sanctions-digest', 'b'.repeat(64)],
+    ['avatar-repair', ...state, ...approve], ['account', ...state, ...approve], ['cleanup', ...state, ...approve], ['content', ...state], ['unknown', ...state],
     ['plan', '--project', 'shoutout-production-a1b34', '--state', 'docs/local/a.json'], ['plan', '--project', 'shoutout-dev-46c81', '--state', 'docs/local-other/a.json'],
     ['plan', '--project', 'shoutout-dev-46c81', '--state', '../a.json'], ['plan', ...state, '--project', 'shoutout-dev-46c81']]) assert.throws(() => parseModerationBusinessPilot(args));
 });

@@ -12,6 +12,7 @@ import { reviewBusinessApplicationOperation as review } from './business_review.
 import { sanctionContentOperation as sanction, revokeSanctionOperation as revoke } from './moderation_sanctions.js';
 import { decideContentReportsOperation as decide } from './decide_content_reports.js';
 import { operationTestKey } from './test_helpers.js';
+import { planObservedAdminSanctions as planObserved } from './moderation_business_pilot.js';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'mod-business-pilot-test') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (db) await db.terminate(); if (app) await deleteApp(app); });
@@ -118,4 +119,38 @@ test('pilot lifecycle, cooldown retry, stronger sanction proof and resumable cle
   assert.equal((await cleanup(db, auth, p)).cleaned, true); assert.equal((await cleanup(db, auth, p)).cleaned, true); assert.equal(auth.deleted, 1);
   assert(!(await db.doc(`shouts/${s.shout}`).get()).exists); assert.equal((await f.original.get()).get('untouched'), true); assert.equal((await f.pending.get()).get('untouched'), true);
   for (const r of receipts) assert(r.update.isEqual((await db.doc(`serverOperations/${r.id}`).get()).updateTime));
+});
+test('explicit observed admin evidence is sealed, exact and optional through orphan handling and cleanup', { skip: !enabled }, async t => {
+  const f = await fixture(t), { p, s, auth, actors } = f; await ensureAuth(db, auth, p, 'Synthetic-password-12345'); await seedAccount(db, auth, p);
+  await f.business('reject', 0); await f.business('resubmit', 1); await f.business('approve', 2);
+  await seedContent(db, p); await db.doc(`rateLimits/${p.uid}/actions/comment`).update({ lastAt: Timestamp.fromMillis(Date.now() - 11000) }); await seedContent(db, p);
+  await f.business('suspend', 3); await f.business('reactivate', 4);
+  const root = await db.doc(`shouts/${s.shout}`).get();
+  await sanction(f.request(actors[3].uid, { mode: 'report', expectedTargetUserId: p.uid, targetType: 'shout', shoutId: s.shout,
+    reportIds: [s.reports[0]], sourceReportId: s.reports[0], decision: 'warning', note: 'Actual admin warning' }), db);
+  const observation = decision => f.request(actors[3].uid, { mode: 'observation', expectedTargetUserId: p.uid, targetType: 'shout', shoutId: s.shout,
+    expectedCreatedAt: root.get('createdAt').toMillis(), decision, note: 'Actual admin ban' });
+  const long = await sanction(observation('ban7d'), db); await sanction(observation('ban1d'), db);
+  await assert.rejects(status(db, p), /wrong-sanction-actor/);
+  const acceptedAdminSanctions = await planObserved(db, p), options = { acceptedAdminSanctions };
+  assert.equal((await status(db, p, options)).activeBan.sanctionId, long.sanctionId);
+  await assert.rejects(status(db, p, { acceptedAdminSanctions: { ...acceptedAdminSanctions, actorId: actors[2].uid } }), /observed-digest/);
+  const first = db.doc(`serverOperations/${acceptedAdminSanctions.rows[0].id}`), saved = (await first.get()).data();
+  await first.update({ fingerprint: 'changed' });
+  await assert.rejects(status(db, p, options), /observed-receipt-drift/);
+  await assert.rejects(cleanup(db, auth, p, options), /observed-receipt-drift/); assert.equal(auth.deleted, 0);
+  await first.set(saved);
+  const unknown = db.doc(`sanctions/${'f'.repeat(64)}`); await unknown.create({ userId: p.uid, moderatorId: actors[3].uid });
+  await assert.rejects(status(db, p, options), /observed-unplanned-sanction/);
+  await assert.rejects(cleanup(db, auth, p, options), /observed-unplanned-sanction/); assert.equal(auth.deleted, 0); await unknown.delete();
+  const longRef = db.doc(`sanctions/${long.sanctionId}`), longData = (await longRef.get()).data();
+  await longRef.update({ sourceContentType: 'comment' }); await assert.rejects(status(db, p, options)); await longRef.set(longData);
+  await revoke(f.request(actors[3].uid, { sanctionId: long.sanctionId, note: 'Approved actual admin revocation' }), db);
+  await orphan(db, p, options);
+  await decide(f.request(actors[2].uid, { targetType: 'comment', shoutId: s.shout, targetId: s.comments[0], reportIds: [s.reports[1]], decision: 'resolve', note: '' }), db, () => new Date(), { resolveUnavailableTargets: true });
+  await decide(f.request(actors[3].uid, { targetType: 'privateReply', shoutId: s.shout, targetId: s.privateReply, reportIds: [s.reports[2]], decision: 'resolve', note: '' }), db);
+  const receipts = (await db.collection('serverOperations').get()).docs;
+  assert.equal((await cleanup(db, auth, p, options)).cleaned, true); assert.equal(auth.deleted, 1);
+  for (const r of receipts) assert(r.updateTime.isEqual((await r.ref.get()).updateTime));
+  assert((await f.original.get()).exists); assert((await f.pending.get()).exists);
 });

@@ -38,10 +38,14 @@ Shout, dva komentáře, jedna soukromá odpověď a tři hlášení. Tři postih
 varování / ban 7 dní / ban 1 den, aktivní zůstává 7 dní do 1. prosince.
 **Odchylka pilotu:** všechny provedl it_admin nad Shoutem (varování report,
 bany přímé pozorování), nikoli it_moderator nad druhým komentářem.
-Původní status/úklidový guard to správně odmítá. Předloženo přijetí přesných
-tří potvrzení jako admin průchodu a úprava pouze ověřování/úklidu s testy/CI;
-do souhlasu žádné změny zdrojů, rolí ani auditů. Regionální sankční oprávnění
-tím nejsou živě prokázaná. Nezávisle čeká UI kontrola banu dočasným účtem.
+Vlastník výslovně přijal přesně tato tři potvrzení jako admin průchod.
+[Úprava ověřování/úklidu](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal)
+je místně ověřená: 24 emulátorových / 113 nástrojových kontrol a lint prošly.
+Samostatný místní důkaz váže původní digest, konkrétní UID, tři přesné receipts
+a jejich otisky; výchozí guard zůstává přísný. Před mutačním použitím čeká úplné
+CI přesného zdroje. Audit, role ani živá data se touto opravou nemění.
+Regionální sankční oprávnění tím nejsou živě prokázaná. Vlastník potvrdil
+obrazovku banu do 1. prosince a dostupné odhlášení.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
 s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
 s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba ukládání
@@ -60,9 +64,10 @@ na obou doménách souhlasí. Vlastník potvrdil „vše funguje“ u čitelnost
 krátkého stavu při publikování a Profil → Odhlásit se s návratem na přihlášení.
 Reaktivace TestAdmin potvrzená klientem, auditem i HTTP 200 s Auth/App Check VALID;
 všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhlasí.
-**Další krok předaný uživateli:** upřesnit přijetí skutečného TestAdmin průchodu
-a přihlásit dočasný účet pro obrazovku banu/odhlášení. Žádný postih zatím nerušit,
-ostatní hlášení nevyřizovat a další obsah nezakládat. Původních 38 zdrojů
+**Další krok předaný uživateli:** TestAdmin zrušit pouze aktivní sedmidenní ban
+dočasného UID. Potom ověřit obnovený přístup bez nové publikace, osiřelé resolve
+a poslední soukromé hlášení. Úklid až po těchto důkazech a úplném CI nástroje;
+další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

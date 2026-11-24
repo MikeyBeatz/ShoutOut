@@ -7,22 +7,24 @@ import { openDevPilotAuth } from './dev_pilot_auth.mjs';
 import { inspectTransitionRelease, assertTransitionRelease } from './feed_generation_transition.mjs';
 import { moderationBusinessProject as project, planModerationBusinessPilot, validateModerationBusinessPilot,
   ensureModerationBusinessAuth, seedModerationBusinessAccount, seedModerationBusinessContent, moderationBusinessPilotStatus,
-  orphanModerationBusinessComment, cleanupModerationBusinessPilot, planModerationBusinessAvatarRepair, repairModerationBusinessAvatar } from '../functions/moderation_business_pilot.js';
+  orphanModerationBusinessComment, cleanupModerationBusinessPilot, planModerationBusinessAvatarRepair, repairModerationBusinessAvatar,
+  planObservedAdminSanctions } from '../functions/moderation_business_pilot.js';
 const root = resolve(import.meta.dirname, '..');
 function inside(value) { const p = resolve(root, value), r = relative(root, p); if (!r || r.startsWith('..') || isAbsolute(r)) throw Error('mod-business-pilot-workspace-path-required'); return p; }
 export function parseModerationBusinessPilot(argv) {
   const [action, ...args] = argv, o = {};
-  if (!['plan', 'status', 'account', 'content', 'orphan', 'cleanup', 'avatar-plan', 'avatar-repair'].includes(action)) throw Error('mod-business-pilot-action-required');
-  const allowed = ['--project', '--state', '--ci-run', '--confirm-project', '--approved-digest', '--clients-ready', '--clients-complete', '--approved-repair-digest'];
+  if (!['plan', 'status', 'account', 'content', 'orphan', 'cleanup', 'avatar-plan', 'avatar-repair', 'sanction-plan'].includes(action)) throw Error('mod-business-pilot-action-required');
+  const allowed = ['--project', '--state', '--ci-run', '--confirm-project', '--approved-digest', '--clients-ready', '--clients-complete', '--approved-repair-digest', '--approved-sanctions-digest'];
   for (let i = 0; i < args.length; i += 2) { if (!allowed.includes(args[i]) || !args[i + 1] || args[i + 1].startsWith('--') || Object.hasOwn(o, args[i])) throw Error('mod-business-pilot-invalid-options'); o[args[i]] = args[i + 1]; }
   if (o['--project'] !== project || !o['--state']) throw Error('mod-business-pilot-explicit-dev-required');
   const file = inside(o['--state']), local = relative(resolve(root, 'docs/local'), file);
   if (!local || local.startsWith('..') || isAbsolute(local)) throw Error('mod-business-pilot-local-state-required');
-  const mutating = !['plan', 'status', 'avatar-plan'].includes(action);
+  const mutating = !['plan', 'status', 'avatar-plan', 'sanction-plan'].includes(action);
   if (mutating && (o['--confirm-project'] !== project || !/^\d+$/.test(o['--ci-run'] ?? '') || !/^[a-f0-9]{64}$/.test(o['--approved-digest'] ?? ''))) throw Error('mod-business-pilot-approval-required');
   if (['account', 'content'].includes(action) && o['--clients-ready'] !== 'yes') throw Error('mod-business-pilot-readiness-required');
   if (action === 'cleanup' && o['--clients-complete'] !== 'yes') throw Error('mod-business-pilot-acceptance-required');
   if (action === 'avatar-repair' && !/^[a-f0-9]{64}$/.test(o['--approved-repair-digest'] ?? '')) throw Error('mod-business-pilot-avatar-approval-required');
+  if (o['--approved-sanctions-digest'] !== undefined && (!['status', 'orphan', 'cleanup'].includes(action) || !/^[a-f0-9]{64}$/.test(o['--approved-sanctions-digest']))) throw Error('mod-business-pilot-sanction-approval-required');
   return { action, o, file, mutating };
 }
 export async function main(argv, { openDatabase = feedAdminDatabase, openAuth = openDevPilotAuth, inspectRelease = inspectTransitionRelease } = {}) {
@@ -39,7 +41,15 @@ export async function main(argv, { openDatabase = feedAdminDatabase, openAuth = 
     const persist = () => { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file + '.tmp', JSON.stringify(state, null, 2) + '\n'); renameSync(file + '.tmp', file); };
     if (action === 'plan') { state = { v: 1, phase: 'planned', plan: await planModerationBusinessPilot(db) }; persist(); return { digest: state.plan.digest, uid: state.plan.uid, originals: state.plan.base.originals.length, cloudWrites: 0 }; }
     const p = state.plan; validateModerationBusinessPilot(db, p);
-    if (action === 'status') return { phase: state.phase, ...await moderationBusinessPilotStatus(db, p) };
+    const accepted = o['--approved-sanctions-digest'];
+    if (accepted !== undefined && state.acceptedAdminSanctions?.digest !== accepted) throw Error('mod-business-pilot-sanction-approved-digest-required');
+    const options = { acceptedAdminSanctions: accepted ? state.acceptedAdminSanctions : null };
+    if (action === 'status') return { phase: state.phase, ...await moderationBusinessPilotStatus(db, p, options) };
+    if (action === 'sanction-plan') {
+      if (state.acceptedAdminSanctions || ['cleaning', 'cleaned'].includes(state.phase)) throw Error('mod-business-pilot-sanction-existing-or-cleaned');
+      state.acceptedAdminSanctions = await planObservedAdminSanctions(db, p); persist();
+      return { digest: state.acceptedAdminSanctions.digest, receipts: 3, actualActor: 'TestAdmin', targetType: 'shout', cloudWrites: 0 };
+    }
     if (action === 'avatar-plan') {
       if (state.avatarRepairPlan || ['cleaning', 'cleaned'].includes(state.phase)) throw Error('mod-business-pilot-avatar-existing-or-cleaned');
       state.avatarRepairPlan = await planModerationBusinessAvatarRepair(db, p); persist();
@@ -58,10 +68,10 @@ export async function main(argv, { openDatabase = feedAdminDatabase, openAuth = 
       const seeded = await seedModerationBusinessAccount(db, handle.auth, p); state.phase = 'account-ready'; state.auth = auth; persist(); return { uid: p.uid, email: p.email, ...seeded, passwordPrinted: false };
     }
     if (action === 'content') { const result = await seedModerationBusinessContent(db, p); state.phase = result.waitingForCooldown ? 'content-seeding' : 'content-ready'; persist(); return result; }
-    if (action === 'orphan') { const result = await orphanModerationBusinessComment(db, p); state.orphan = result; persist(); return result; }
+    if (action === 'orphan') { const result = await orphanModerationBusinessComment(db, p, options); state.orphan = result; persist(); return result; }
     if (state.phase === 'cleaned') return { ...state.cleanup, repeated: true };
     state.phase = 'cleaning'; persist(); handle = await openAuth(project);
-    const result = await cleanupModerationBusinessPilot(db, handle.auth, p); state.phase = 'cleaned'; delete state.credentials; state.cleanup = result; persist(); return result;
+    const result = await cleanupModerationBusinessPilot(db, handle.auth, p, options); state.phase = 'cleaned'; delete state.credentials; state.cleanup = result; persist(); return result;
   } finally { if (handle) await handle.close(); await db.terminate(); }
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main(process.argv.slice(2)).then(r => process.stdout.write(JSON.stringify(r) + '\n')).catch(e => {

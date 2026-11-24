@@ -173,8 +173,80 @@ export async function seedModerationBusinessContent(db, p) {
   } catch (e) { if (e.code === 'resource-exhausted') return { waitingForCooldown: true }; throw e; }
   return { waitingForCooldown: false, ...s };
 }
-export async function moderationBusinessPilotStatus(db, p) {
+const observedAdminPilot = Object.freeze({
+  uid: 'mvp_modbiz_f794f930926a31d2', pilotDigest: '84f4aac021b69a9d858d668ccfe0dd4dece2b6c990092edafcb157ae23de5335',
+  ids: ['a71f1dc563757c64fef5b0a91487e6ff52a89cb891c8081cb451d125e6d55b9a',
+    'b94f2f575bbf760ed22f4bdbdbbf78f4df8604aedde398e67f789e354286349e',
+    '109beaa0aa214fb04fd203983bfc6c48a07548c6ccc7982ceb3a41882497721a'],
+});
+const observedDecisions = ['warning', 'ban7d', 'ban1d'];
+function assertObservedReceipt(db, p, receipt, decision) {
+  const s = moderationBusinessSlots(p);
+  assert(receipt.exists, 'mod-business-pilot-observed-receipt-missing');
+  assert.equal(receipt.get('action'), 'sanctionContent'); assert.equal(receipt.get('userId'), p.actors[3].uid);
+  assert.equal(receipt.get('authorId'), p.uid); assert.equal(receipt.get('sanctionId'), receipt.id);
+  assert.equal(receipt.get('shoutId'), s.shout); assert.equal(receipt.get('targetType'), 'shout'); assert.equal(receipt.get('targetId'), undefined);
+  assert.equal(receipt.get('result.decision'), decision); assert.equal(receipt.get('requiredRoleLevel'), 3);
+  assert.deepEqual(receipt.get('reportIds'), decision === 'warning' ? [s.reports[0]] : []);
+  assert.equal(receipt.get('result.count'), decision === 'warning' ? 1 : 0);
+  assert.equal(receipt.get('expiresAt').toMillis() - receipt.get('createdAt').toMillis(), 7 * 86400000);
+  if (db.projectId === moderationBusinessProject) {
+    assert.equal(p.uid, observedAdminPilot.uid); assert.equal(p.digest, observedAdminPilot.pilotDigest);
+    assert.equal(receipt.id, observedAdminPilot.ids[observedDecisions.indexOf(decision)]);
+  }
+}
+function validateObservedPlan(db, p, accepted) {
+  validateModerationBusinessPilot(db, p);
+  const { digest: seal, ...body } = accepted;
+  assert.equal(seal, hash(body), 'mod-business-pilot-observed-digest');
+  assert.deepEqual(Object.keys(body).sort(), ['v', 'kind', 'projectId', 'uid', 'pilotDigest', 'shoutId', 'actorId', 'rows'].sort());
+  assert.equal(accepted.v, 1); assert.equal(accepted.kind, 'observed-admin-sanctions'); assert.equal(accepted.projectId, db.projectId);
+  assert.equal(accepted.uid, p.uid); assert.equal(accepted.pilotDigest, p.digest); assert.equal(accepted.actorId, p.actors[3].uid);
+  assert.equal(accepted.shoutId, moderationBusinessSlots(p).shout); assert.equal(accepted.rows.length, 3);
+  assert.deepEqual(accepted.rows.map(r => r.decision), observedDecisions); assert.equal(new Set(accepted.rows.map(r => r.id)).size, 3);
+  for (const row of accepted.rows) {
+    assert.deepEqual(Object.keys(row).sort(), ['id', 'decision', 'receiptHash'].sort()); assert(/^[a-f0-9]{64}$/.test(row.id)); assert(/^[a-f0-9]{64}$/.test(row.receiptHash));
+  }
+  if (db.projectId === moderationBusinessProject) {
+    assert.equal(p.uid, observedAdminPilot.uid); assert.equal(p.digest, observedAdminPilot.pilotDigest);
+    assert.deepEqual(accepted.rows.map(r => r.id), observedAdminPilot.ids);
+  }
+}
+async function observedEvidence(db, p, accepted) {
+  if (!accepted) return null;
+  validateObservedPlan(db, p, accepted);
+  const docs = await db.getAll(...accepted.rows.map(r => db.doc(`serverOperations/${r.id}`)));
+  docs.forEach((d, i) => {
+    assertObservedReceipt(db, p, d, accepted.rows[i].decision);
+    assert.equal(hash(d.data()), accepted.rows[i].receiptHash, 'mod-business-pilot-observed-receipt-drift');
+  });
+  return new Map(docs.map(d => [d.id, d]));
+}
+export async function planObservedAdminSanctions(db, p) {
+  await moderationBusinessFence(db, db, p);
+  const author = (await db.collection('serverOperations').where('authorId', '==', p.uid).limit(40).get()).docs;
+  assert(author.length < 40); const receipts = author.filter(d => d.get('action') === 'sanctionContent'); assert.equal(receipts.length, 3);
+  const rows = observedDecisions.map(decision => {
+    const found = receipts.filter(d => d.get('result.decision') === decision); assert.equal(found.length, 1);
+    assertObservedReceipt(db, p, found[0], decision); return { id: found[0].id, decision, receiptHash: hash(found[0].data()) };
+  });
+  const body = { v: 1, kind: 'observed-admin-sanctions', projectId: db.projectId, uid: p.uid, pilotDigest: p.digest,
+    shoutId: moderationBusinessSlots(p).shout, actorId: p.actors[3].uid, rows };
+  const accepted = { ...body, digest: hash(body) }; validateObservedPlan(db, p, accepted); return accepted;
+}
+function assertObservedSanction(p, s, d, receipt) {
+  assert(receipt, 'mod-business-pilot-observed-unplanned-sanction');
+  assert.equal(d.get('moderatorId'), p.actors[3].uid); assert.equal(d.get('userId'), p.uid);
+  assert.equal(d.get('sourceContentType'), 'shout'); assert.equal(d.get('sourceContentId'), s.shout);
+  assert.equal(d.get('sourceType'), receipt.get('result.decision') === 'warning' ? 'report' : 'moderatorObservation');
+  assert.equal(d.get('createdAt').toMillis(), receipt.get('createdAt').toMillis());
+  const days = receipt.get('result.decision') === 'ban7d' ? 7 : receipt.get('result.decision') === 'ban1d' ? 1 : null;
+  assert.equal(d.get('type'), days === null ? 'warning' : 'accountBan');
+  if (days !== null) assert.equal(d.get('expiresAt').toMillis() - d.get('createdAt').toMillis(), days * 86400000);
+}
+export async function moderationBusinessPilotStatus(db, p, { acceptedAdminSanctions = null } = {}) {
   await moderationBusinessFence(db, db, p); const s = moderationBusinessSlots(p);
+  const accepted = await observedEvidence(db, p, acceptedAdminSanctions);
   const application = await db.doc(`businessApplications/${p.uid}`).get(), root = await db.doc(`shouts/${s.shout}`).get();
   if (application.exists) assert.equal(application.get('pilotId'), p.nonce);
   if (root.exists) { assert.equal(root.get('authorId'), p.uid); assert.equal(root.get('title'), s.title); assert.equal(root.get('text'), s.text); }
@@ -182,7 +254,10 @@ export async function moderationBusinessPilotStatus(db, p) {
   const expected = ['reject', 'resubmit', 'approve', 'suspend', 'reactivate']; assert(audits.length <= 5);
   audits.forEach(d => { const i = d.get('revision') - 1; assert(i >= 0 && i < 5); assert.equal(d.get('action'), expected[i]); assert.equal(d.get('administratorId'), i === 1 ? null : p.actors[3].uid); });
   const sanctions = (await db.collection('sanctions').where('userId', '==', p.uid).get()).docs;
-  for (const d of sanctions) assert.equal(d.get('moderatorId'), p.actors[2].uid, 'mod-business-pilot-wrong-sanction-actor');
+  for (const d of sanctions) {
+    if (accepted) assertObservedSanction(p, s, d, accepted.get(d.id));
+    else assert.equal(d.get('moderatorId'), p.actors[2].uid, 'mod-business-pilot-wrong-sanction-actor');
+  }
   const reports = await db.getAll(...['reports', 'commentReports', 'privateReplyReports'].map((c, i) => db.doc(`${c}/${s.reports[i]}`)));
   for (const r of reports) if (r.exists) assert.equal(r.get('shoutId'), s.shout);
   const pointer = await db.doc(`bans/${p.uid}`).get();
@@ -191,14 +266,20 @@ export async function moderationBusinessPilotStatus(db, p) {
     activeBan: pointer.exists ? { sanctionId: pointer.get('sanctionId'), expiresAt: pointer.get('expiresAt')?.toMillis() } : null,
     reports: reports.map(d => ({ exists: d.exists, status: d.get('status') ?? null, resolution: d.get('resolution') ?? null })), comments: s.comments, originalsPreserved: p.base.originals.length, cloudWrites: 0 };
 }
-async function cleanupProof(db, p) {
+async function cleanupProof(db, p, acceptedAdminSanctions) {
+  const accepted = await observedEvidence(db, p, acceptedAdminSanctions);
   const s = moderationBusinessSlots(p), author = (await db.collection('serverOperations').where('authorId', '==', p.uid).limit(40).get()).docs;
+  if (accepted) {
+    const rows = (await db.collection('sanctions').where('userId', '==', p.uid).limit(4).get()).docs;
+    assert(rows.length <= 3, 'mod-business-pilot-observed-unplanned-sanction');
+    for (const row of rows) assertObservedSanction(p, s, row, accepted.get(row.id));
+  }
   assert(author.length < 40, 'mod-business-pilot-unbounded-proof');
   const business = author.filter(d => d.get('action') === 'reviewBusinessApplication').sort((a, b) => a.get('result.revision') - b.get('result.revision'));
   const actions = ['reject', 'resubmit', 'approve', 'suspend', 'reactivate']; assert.equal(business.length, 5, 'mod-business-pilot-business-proof-required');
   business.forEach((d, i) => { assert.equal(d.get('decision'), actions[i]); assert.equal(d.get('result.revision'), i + 1); assert.equal(d.get('userId'), i === 1 ? p.uid : p.actors[3].uid); });
   const sanctions = author.filter(d => d.get('action') === 'sanctionContent'); assert.equal(sanctions.length, 3, 'mod-business-pilot-sanction-proof-required');
-  for (const d of sanctions) { assert.equal(d.get('userId'), p.actors[2].uid); assert.equal(d.get('shoutId'), s.shout); }
+  for (const d of sanctions) { assert.equal(d.get('userId'), accepted?.has(d.id) ? p.actors[3].uid : p.actors[2].uid); assert.equal(d.get('shoutId'), s.shout); }
   assert.deepEqual(sanctions.map(d => d.get('result.decision')).sort(), ['ban1d', 'ban7d', 'warning']);
   const long = sanctions.find(d => d.get('result.decision') === 'ban7d'), short = sanctions.find(d => d.get('result.decision') === 'ban1d');
   const revocations = author.filter(d => d.get('action') === 'revokeSanction'); assert.equal(revocations.length, 1);
@@ -208,15 +289,15 @@ async function cleanupProof(db, p) {
   const receipts = (await db.collection('serverOperations').where('shoutId', '==', s.shout).limit(40).get()).docs; assert(receipts.length < 40);
   for (const report of s.reports) assert(receipts.some(d => ['sanctionContent', 'decideContentReports', 'resolveUnavailableContentReports'].includes(d.get('action')) && d.get('reportIds')?.includes(report)), 'mod-business-pilot-report-proof-required');
 }
-export async function orphanModerationBusinessComment(db, p) {
-  const status = await moderationBusinessPilotStatus(db, p); assert.equal(status.businessDecisions.length, 5); assert.equal(status.activeBan, null); assert(status.sanctions.length >= 3);
+export async function orphanModerationBusinessComment(db, p, options = {}) {
+  const status = await moderationBusinessPilotStatus(db, p, options); assert.equal(status.businessDecisions.length, 5); assert.equal(status.activeBan, null); assert(status.sanctions.length >= 3);
   const s = moderationBusinessSlots(p), safe = guarded(db, p), runtime = createFeedRuntime(safe, { getUser() { throw Error('mod-business-pilot-auth-forbidden'); } });
   const doc = await db.doc(`shouts/${s.shout}/comments/${s.comments[0]}`).get();
   if (!doc.exists) return { removed: false }; assert.equal(doc.get('authorId'), p.uid); assert.equal(doc.get('text'), `MVP ${p.nonce} comment 1`);
   const now = doc.readTime.toDate(); return deleteCommentOperation(request(p.uid, { shoutId: s.shout, commentId: doc.id, idempotencyKey: `op1_${doc.readTime.seconds}_${digest(p.nonce + ':orphan').slice(0, 32)}` }), runtime.database, () => now, { authorOnly: true });
 }
-export async function cleanupModerationBusinessPilot(db, auth, p) {
-  await moderationBusinessFence(db, db, p); await cleanupProof(db, p); const s = moderationBusinessSlots(p);
+export async function cleanupModerationBusinessPilot(db, auth, p, { acceptedAdminSanctions = null } = {}) {
+  await moderationBusinessFence(db, db, p); await cleanupProof(db, p, acceptedAdminSanctions); const s = moderationBusinessSlots(p);
   const root = db.doc(`shouts/${s.shout}`), safe = guarded(db, p), runtime = createFeedRuntime(safe, { getUser() { throw Error('mod-business-pilot-auth-forbidden'); } });
   const current = await root.get(); if (current.exists) { assert.equal(current.get('authorId'), p.uid); assert.equal(current.get('title'), s.title); assert.equal(current.get('text'), s.text); }
   let user; try { user = await auth.getUser(p.uid); } catch (e) { if (e.code !== 'auth/user-not-found') throw e; }

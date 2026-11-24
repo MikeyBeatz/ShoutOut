@@ -2353,7 +2353,7 @@ resolve a zbývající soukromé hlášení; teprve potom řízený úklid jedin
 
 <a id="moderation-business-observed-admin-proposal"></a>
 
-##### Zjištěný skutečný sankční průchod – čeká upřesnění plánu
+##### Přijatý skutečný sankční průchod – místní ověření nástroje
 
 Vlastník hlásí všechny tři kroky bez chyby. Čtecí kontrola 24. listopadu
 19:37 UTC zjistila **3** sankce i **3** propojené receipts pro správný dočasný
@@ -2374,16 +2374,28 @@ build/modbiz-sanction-actor-diagnostic.json a build/modbiz-sanction-logs.json.
 Původní status/orphan/cleanup guard správně odmítá wrong-sanction-actor;
 nebyl obejitý ani oslabený, při diagnóze žádný živý zápis.
 
-Předloženo vlastníkovi: přijmout **přesně tyto tři** skutečné serverové důkazy
-jako průchod TestAdmin nad Shoutem, upravit jen kontrolovaný ověřovací/úklidový
-nástroj a plán, doplnit testy úzce vymezené výjimky a úplné CI před mutačním
-použitím. Nepřepisovat původní audit, role, autora, zdroj ani jiné živé záznamy.
-Neoznačovat za živý regionální sankční test; ten zůstává doložený emulátorem.
-Do odpovědi jen čtení a dokumentace, žádná implementace ani opakované sankce.
+Vlastník výslovně schválil přijmout **přesně tyto tři** skutečné serverové důkazy
+jako průchod TestAdmin nad Shoutem a upravit pouze ověřovací/úklidový nástroj.
+Audit, role, autor, zdroj ani živé záznamy se nepřepisují. Regionální sankční
+oprávnění zůstávají doložená emulátorem, nikoli tímto admin průchodem.
+Vlastník také potvrdil „Účet je zablokován“ do **1. prosince** s odhlášením.
 
-Nezávisle vyžádaný ruční krok: dočasný účet → očekávané „Účet je zablokován“
-s koncem 1. prosince a dostupným odhlášením, pak odhlásit. Zatím žádná revokace
-nebo vyřízení dalších hlášení; platný sedmidenní ban zachovat pro kontrolu.
+Místní větev fix/moderation-pilot-evidence: readonly sanction-plan vytvořil
+samostatný zapečetěný důkaz v původním manifestu, bez přepsání původního plánu.
+Digest **e70a46e5fd5902b9ea61b5d056b903572074f619065b913968dac12be0e8a5b5**.
+V DEV je výjimka vázaná na původní digest/UID a tři výše uvedená ID; otisky
+celých receipts se znovu kontrolují. Bez výslovného --approved-sanctions-digest
+zůstává původní přísná cesta. Jiný postih, změna důkazu nebo zdroje se odmítne
+před úklidem Auth. Testy zahrnují celou navazující revokaci, osiřelé hlášení
+a restartovatelný úklid se zachováním receipts; **24/24** Business emulátorových
+a **113/113** nástrojových kontrol a cílený ESLint prošly. Logy
+build/modbiz-observed-emulator-final.log a build/modbiz-observed-tools.log.
+
+Před použitím mutací orphan/cleanup musí projít úplné CI přesného čistého
+zdroje; žádné nasazení aplikace, Functions nebo Rules tato úprava nepotřebuje.
+Nezávisle předán ruční krok TestAdmin: zrušit pouze aktivní sedmidenní ban;
+pak ověřit obnovený přístup bez nové publikace a obě zbývající hlášení.
+Celá živá akceptace i závěrečný úklid zatím zůstávají otevřené.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
