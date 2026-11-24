@@ -8,12 +8,19 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
-Zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
+Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
 feature/moderation-business-dev, [úplné CI 45375019177 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177).
 Pouze shoutout-dev-46c81: tři nové callables, šest aktualizovaných Functions,
-web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.
+původní web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.
 API/web → vyřazení starých revizí → uzavření přímých Rules zápisů → účtová
 retenční údržba. Nové DEV volby jsou true; produkční konfigurace nezměněná.
+
+**Aktuální DEV web:** [oprava pozastaveného Profilu](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results),
+zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, fix/business-suspension-profile,
+[úplné CI 45424330633 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633),
+Hosting **2edf6b744dcbe95e**. Bezpečný avatar parser, čitelná neutrální lišta
+„Účet pozastaven“, důvod přes Detail, krátký stav při pokusu publikovat
+a kontrastní dostupné odhlášení. Server/Rules/prostředky se tímto rolloutem neměnily.
 
 Všech devět skutečných source archivů přesně odpovídá release balíčkům;
 27 ACTIVE Functions, ostatních 18 beze změny. Prostředky a oba minutové
@@ -34,19 +41,16 @@ s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba uklá
 není potvrzená a změna pole v živém resubmit zatím není ověřená. Schválení TestAdmin
 má správný audit/receipt a HTTP 200 s platným Auth/App Check. Pozastavení má také
 správný audit/receipt a platné Auth/App Check; dřívější Shout zůstává active.
-**Pilot pozastaven na UI nálezu:** nevýrazná lišta, důvod místo krátkého stavu
-při pokusu publikovat a šedý Profil bez odhlášení. Poslední problém lokálně
-reprodukovaný z vadné fixture: generátor uložil dvě barvy avataru jako int,
-AvatarStyle.fromProfile je přetypovává na String. Je to chyba testovací přípravy,
-nikoli důkaz odebrání Business přístupu. [Konkrétní oprava výslovně schválená](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal)
-a připravená místně na fix/business-suspension-profile: bezpečný avatar parser,
-vykreslitelný Profil s dostupným odhlášením, neutrální kontrastní lišta a krátký
-stav při pokusu o publikování. Důvod zůstává přes Detail. Generátor používá fox/teal/navy;
-řízený avatar-plan/avatar-repair opraví jen 3 pole ve dvou fixture dokumentech.
-15/15 klientských, 23/23 společných emulátorových a 113/113 nástrojových testů,
-analyze/lint čisté. Následuje společný push/úplné CI, přesná atomická oprava dat
-a pouze DEV web. Zatím žádný nový rollout, živý zápis opravy nebo reaktivace.
-Další obsah nezakládat. Původních 38 zdrojů
+**UI nález opravený v DEV, čeká krátká ruční kontrola.** Šedý Profil byl
+reprodukovaný z chyby generátoru fixture (barvy avataru jako int). Po výslovném
+souhlasu a úplném CI atomicky opraveny jen avatarId a dvě barvy ve users/publicProfiles
+jediného dočasného UID, fox/teal/navy. Změna skutečně zasáhla dva dokumenty;
+19 kontrolovaných pilotních dokumentů/jejich updateTime a neavatarová pole
+obou opravených dokumentů beze změny. Nové účty/obsah/postihy nevznikly.
+Místně 15 klientských / 23 emulátorových / 113 nástrojových kontrol, oba vzhledy
+vizuálně prověřené; celý následný CI prošel. Webové otisky a osm HTTP kontrol
+na obou doménách souhlasí. Uživatel nyní ověří čitelnost, krátký stav při publikování
+a Profil → Odhlásit se. Reaktivaci až potom, další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

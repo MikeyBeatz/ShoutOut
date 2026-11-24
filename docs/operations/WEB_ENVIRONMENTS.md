@@ -1,6 +1,17 @@
 # Vývojový a produkční web
 
-**Aktuální DEV společná moderace a Business, 24. listopadu:**
+**Aktuální DEV web – oprava pozastaveného Profilu, 24. listopadu:**
+[Nasazení a kontrola opravy](../MVP_SERVER_PLAN.md#business-suspension-ui-repair-results).
+Zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, úplné CI **45424330633 success**,
+Hosting **2edf6b744dcbe95e**; 67 app souborů a osm HTTP kontrol obou domén shodných.
+Opravený avatar parser/Profil a čitelné pozastavení s dostupným odhlášením;
+po samostatném souhlasu atomicky opraveny jen 3 avatarové hodnoty ve dvou
+dokumentech jediného dočasného UID. Serverový zdroj stále **05fc1ed**, všech 27 Functions,
+Rules/prostředky/plánovače, původních 38 Shoutů/žádost i pilotní stav suspended/revize 4
+beze změny. Žádný nový účet/obsah/postih, main/produkce nezměněné.
+Zbývá ruční kontrola opravy a pokračování jediného pilotu, nikoli nový seed.
+
+**Předchozí DEV společná moderace a Business, 24. listopadu:**
 [Nasazení a technické ověření](../MVP_SERVER_PLAN.md#moderation-business-dev-results).
 Zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, úplné CI **45375019177 success**;
 Hosting **507c7a0b950b74b2**, Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.

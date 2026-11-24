@@ -2278,6 +2278,53 @@ CI 45422303586 success není důkaz pro nasazení. Úplný běh 45422011563 zám
 zrušen po doplnění barvy odhlášení; vyžadované nové úplné CI přesného zdroje
 před jakýmkoli opravným rolloutem/datovým zápisem. Tyto starší běhy nepoužít.
 
+<a id="business-suspension-ui-repair-results"></a>
+
+##### Oprava pozastaveného Profilu – DEV nasazení 24. listopadu
+
+Přesný zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, fix/business-suspension-profile,
+[úplné CI 45424330633 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633).
+Prošly všechny klientské/nástrojové/serverové/Rules/B4/B2/purge/Storage kontroly
+i webový build; nejde o lehký dokumentační běh. Místní 15/23/113 sady a vizuální
+ověření obou skutečných app témat popsané výše. Čistá release kopie
+build/business-profile-release-9c6e34c má přes historický název HEAD **3ffe71a**;
+finální web byl znovu sestaven po změně barvy odhlášení.
+
+Po úplném CI proveden schválený **avatar-repair** s původním pilotním digestem
+a opravným digestem **7c0d84a9…93c6af02**. Výsledek repaired=true / repeated=false /
+documentsWritten=2. V jedné transakci ověřené preimages/hashes/updateTime/fence;
+změněna pouze avatarId/Start/End ve users a publicProfiles dočasného
+mvp_modbiz_f794f930926a31d2 na fox/teal/navy. Původní hodnoty a updateTime zachované
+v ignorovaném avatarRepairPlan manifestu. Reaktivace, žádost, právní přijetí,
+role, Business data, obsah, audit, postihy a kvóty se tímto zápisem neměnily.
+
+Následně pouze **Hosting shoutout-dev-46c81** na verzi **2edf6b744dcbe95e**.
+67 app souborů + 2 Firebase init přesně odpovídá raw/gzip otiskům artefaktu;
+osm HTTP kontrol index/main/bootstrap/config na web.app a firebaseapp.com
+souhlasí. Místní .last_build_id je podle původního ignore nepublikovaný.
+Návratový kompatibilní web je 507c7a0b950b74b2, se zachováním opraveného avataru;
+žádný živý rollback se netvrdí. Zdroj Functions a Rules zůstává 05fc1ed,
+neproběhlo jejich nové nasazení, index/TTL/Scheduler ani prostředkové změny.
+
+Kontrola po opravě i po Hostingu (**15:44:36 UTC**) potvrdila přesnou shodu
+**19** kontrolovaných pilotních dokumentů včetně updateTime (Business data/role,
+obsah/hlášení, audit a potvrzení), shodná neavatarová pole obou opravených
+dokumentů a očekávané tři nové hodnoty. Původních 38 Shoutů/pending žádost a
+feed/news/staff fence zachované; všech 27 Functions včetně zdrojových generací,
+revizí a prostředků, Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57** i oba
+plánovače beze změny. Účet zůstává suspended / revize 4, role 2, původní
+Shout active, tři hlášení open, žádný postih. Nové účty ani další obsah nevznikly.
+Důkazy build/modbiz-profile-ci.json, build/modbiz-profile-live-{before,after}.json,
+build/modbiz-profile-cloud-hosting.json a lokální stav avatarRepair v manifestu.
+
+**Zbývá ruční kontrola opravy:** uživatel ve stejném anonymním okně pod dočasným
+účtem načte ?mvp=3ffe71a přes Ctrl+R, ověří čitelné „Účet pozastaven“, důvod jen
+v Detailu, krátký stav při Přidat Shout a Profil → Odhlásit se s návratem na
+přihlášení. Zatím nereaktivovat, žádné hlášení nevyřizovat a obsah nemazat.
+Po potvrzení pokračovat stejným pilotem: reaktivace TestAdmin, sankce TestModerator,
+revokace a osiřelé resolve, teprve potom řízený úklid. Akceptaci ani celý milník
+neoznačovat hotové před dokončením. Oprava nepřidala nové váhy ani další MVP kredit.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
