@@ -69,14 +69,15 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
 1. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
    úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
    a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Probíhá společný sankční úsek** na feature/moderation-sanctions:
+   **Probíhá společný sankční a Business úsek** na feature/moderation-business-dev:
    [Společný DEV přechod moderace a Business je nasazený](MVP_SERVER_PLAN.md#moderation-business-dev-results):
    **05fc1ed / úplné CI 45375019177 success**, tři nové a šest aktualizovaných
    Functions, web 507c7a0b950b74b2 a obě aktivní Rules brány. Údržba až po
    uzavření přímých zápisů; skutečné zdroje, revize, prostředky a plánovače
    ověřené. Původních 38 Shoutů/pending žádost zachované.
-   **Další krok: jediný již schválený živý pilot a úklid**, začít dostupným
-   klientem pod TestAdmin. Zatím žádný nový Auth účet/obsah, manifest planned.
+   **Probíhá jediný již schválený živý pilot, pak úklid.** Vlastník je pod
+   TestAdmin; nová dočasná fixture „MVP Business 926a31d2“ má žádost checking,
+   manifest account-ready. Čeká první zamítnutí; zatím žádný nový obsah/postih.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

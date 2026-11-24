@@ -1,6 +1,20 @@
 # Vývojový a produkční web
 
-**Aktuální DEV veřejná moderace, 23. listopadu 19:48 SEČ:**
+**Aktuální DEV společná moderace a Business, 24. listopadu:**
+[Nasazení a technické ověření](../MVP_SERVER_PLAN.md#moderation-business-dev-results).
+Zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, úplné CI **45375019177 success**;
+Hosting **507c7a0b950b74b2**, Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.
+Tři nové/šest aktualizovaných Functions, celkem 27 ACTIVE; skutečné balíčky,
+revize/100 % provozu i web ověřené, původní prostředky a oba plánovače zachované.
+DEV serverContentSanctions/serverBusinessReview a obě Rules brány true;
+účtová retenční údržba nasazená až po uzavření přímých zápisů.
+Živý pilot právě začal jediným novým dočasným Auth účtem po potvrzení
+připraveného TestAdmin; akceptace a úklid stále čekají. Produkce a main beze změny.
+Nejstarší kompatibilní návratový web po tomto Rules cutoveru je **507c7a0b950b74b2**;
+nevracet původní přímé moderační zápisy ani worker bez nových retenčních fází.
+Následující datované inventury jsou historické, nikoli aktuální release.
+
+**Předchozí DEV veřejná moderace, 23. listopadu 19:48 SEČ:**
 [nasazení, živá akceptace i úklid dokončené](../MVP_SERVER_PLAN.md#moderation-public-dev-complete).
 Zdroj **87d6687f17eafa670dcaf115665439bdd5597227** / úplné CI **45238613178 success**;
 web **1974e34d52e2945b**, serverPublicReportRemoval true jen DEV.

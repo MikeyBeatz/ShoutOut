@@ -22,10 +22,14 @@ kontrol obou domén souhlasí. Nad publikovanými Rules prošlo 20 simulací;
 nejsou náhradou živého přihlášeného pilotu. Tři nová API bez ověření odmítla 401.
 Původních 38 Shoutů/pending žádost beze změny, žádné účtové joby.
 
-**Zbývá schválený společný živý pilot a úklid.** Manifest v docs/local má
-fázi planned; žádný nový Auth účet ani obsah zatím nevznikl. Celý rozsah již
-vlastník schválil, znovu nevyžadovat souhlas. Začít dostupným klientem pod
-TestAdmin, teprve potom založit jedinou fixture. Browser host je nedostupný;
+**Probíhá schválený společný živý pilot, potom úklid.** Vlastník potvrdil
+přihlášení TestAdmin; vytvořen právě jeden nový dočasný ověřený Auth účet
+a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
+Manifest v docs/local má fázi account-ready, server checking/revize 0;
+zatím žádný pilotní Shout, komentář, zpráva, hlášení ani postih.
+Čeká první zamítnutí této jediné žádosti přes TestAdmin. Původních 38 zdrojů
+a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
+Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
 Další UI vstupy až po novém ověření dostupnosti; nejde o závadu aplikace.
 Ruční průchody zůstaly na konci samostatné práce. Živá akceptace, Business

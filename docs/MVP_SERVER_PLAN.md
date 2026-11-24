@@ -2126,6 +2126,15 @@ postihy a Auth smazání výhradně na novém dočasném UID. Kvóty neresetovat
 Mutační nástroj spouštět z čisté release 05fc1ed s přesným CI, nikoli z pozdějšího
 dokumentačního HEAD. Před založením znovu ověřit platnost plánu a aktuální fence.
 
+**Pilot zahájen:** vlastník potvrdil připravený TestAdmin. Z čisté release 05fc1ed
+po opětovném ověření úplného CI a fence založen jediný plánovaný dočasný Auth
+účet mvp_modbiz_f794f930926a31d2 a jeho profil/legal/Business žádost.
+Firma **MVP Business 926a31d2**, server checking / revize 0, manifest account-ready.
+Žádný nový Shout/komentář/zpráva/hlášení ani postih zatím nevznikly;
+všech 38 původních zdrojů zachovaných. Čeká první klientské zamítnutí přes TestAdmin;
+další kroky až po serverovém ověření výsledku. Předchozí „planned“ výše je stav
+před tímto výslovným potvrzením připravenosti. Žádný nový akceptační kredit.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
