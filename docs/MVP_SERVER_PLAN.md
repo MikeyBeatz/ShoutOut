@@ -2135,6 +2135,16 @@ všech 38 původních zdrojů zachovaných. Čeká první klientské zamítnutí
 další kroky až po serverovém ověření výsledku. Předchozí „planned“ výše je stav
 před tímto výslovným potvrzením připravenosti. Žádný nový akceptační kredit.
 
+**První klientský krok ověřený 24. listopadu 11:42 UTC:** vlastník hlásí
+zamítnutí bez chyby. Server rejected / revize 1, audit reject od it_admin
+(TestAdmin), shodný důvod; propojený receipt/audit
+00358d9c03e79b3d461e601471b6996b897e63db091cc7d36314c3fa077d5a09.
+Živé logy mají POST HTTP 200 a Auth/App Check VALID; důkazy
+build/modbiz-reject-proof.json a build/modbiz-reject-logs.json. Pilotní status
+ověřil původních 38 zdrojů a plánovaný auditní průchod. Následuje přihlášení
+dočasné fixture, oprava jen názvu na „MVP Business 926a31d2 oprava“ a resubmit;
+adresy/pobočku neměnit, nový Auth nevytvářet. Celá akceptace stále otevřená.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

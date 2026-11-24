@@ -76,8 +76,8 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    uzavření přímých zápisů; skutečné zdroje, revize, prostředky a plánovače
    ověřené. Původních 38 Shoutů/pending žádost zachované.
    **Probíhá jediný již schválený živý pilot, pak úklid.** Vlastník je pod
-   TestAdmin; nová dočasná fixture „MVP Business 926a31d2“ má žádost checking,
-   manifest account-ready. Čeká první zamítnutí; zatím žádný nový obsah/postih.
+   TestAdmin ověřil první zamítnutí, server rejected/revize 1 a správný audit;
+   manifest account-ready. Čeká oprava/resubmit; zatím žádný nový obsah/postih.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
