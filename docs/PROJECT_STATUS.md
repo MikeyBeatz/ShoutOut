@@ -6,16 +6,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Místní Business příprava dokončená, úplné CI následuje:**
+**Místní Business příprava i úplné CI dokončené:**
 [výsledky a hranice](MVP_SERVER_PLAN.md#business-review-local), větev
-feature/business-moderation. Serverové approve/reject/suspend/reactivate/resubmit,
+feature/business-moderation, zdroj **464c0ad0f8d690101b651373dbfc9e336b4cfce1** /
+[úplné CI 45339418090 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45339418090).
+Serverové approve/reject/suspend/reactivate/resubmit,
 verze žádosti, audit/receipt a klient za serverBusinessReview=false.
 **15/15** emulátorových, **3/3** unit a **12** nových klientských testů
 (38/38 s konfigurací/bránou), 34/34 cílených nástrojových/balíčkových kontrol.
 Pozastavení zachová roli/navigaci a zastaví nové publikování i promo na serveru;
 zamítnutý žadatel opraví údaje bez dalšího Auth účtu. Wrapper a živé Business
-Rules uzavření ještě nejsou připravené k aktivaci. Další krok: přesné úplné CI
-a konkrétní společný DEV plán, teprve pak souhlas s novým živým rozsahem.
+Rules uzavření ještě nejsou připravené k aktivaci. Celá dosavadní regrese,
+B2, purge, Storage a webový build v CI prošly. Další krok: souhlas s
+[konkrétním společným DEV přechodem](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal),
+včetně wrapperu/Business brány a jednoho nového dočasného Auth účtu.
+Současný místní souhlas tuto novou živou vrstvu a pilot nepokrývá.
 
 [Společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
 má **0b68535329e9a10763edb9f3fb04bd919fa886b7** /
@@ -23,6 +28,8 @@ má **0b68535329e9a10763edb9f3fb04bd919fa886b7** /
 9/9 před/po scénářů (59 společných). managedModerationAuthority zůstává false.
 Oba místní rozsahy vlastník výslovně schválil; znovu je neschvalovat.
 Žádné nasazení, živá data nebo Auth účty; ruční testy zůstávají až na konec.
+Čerstvá read-only DEV inventura: 24 ACTIVE Functions, nová 3 API chybějí,
+prostředky šesti dotčených Functions beze změny; veřejný web stále původní.
 
 **Probíhá navazující moderace**, předchozí větev feature/moderation-sanctions. Vlastník
 po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat

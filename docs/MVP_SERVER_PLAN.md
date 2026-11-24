@@ -1713,13 +1713,12 @@ prošly. Podklady build/moderation-authority-regression.log a
 build/moderation-checkpoint-{unit,tools}.log. Společný CI krok nyní obsahuje
 sankce, osiřelé cíle i authority gate; dosavadní rozhodovací sada zůstává navíc.
 
-**Společný audit není uzavřený:** zbývá navrhnout konkrétní uzavření přímých
-Rules zápisů a ověřit 60denní dočištění kopií důvodu v aktivních
-bans/contentRestrictions/warnings i reference moderátorů v aktivních vazbách.
-Stávající purge čistí sankční důkazy, původní report a některé auditní reference;
-to samo nedokládá odstranění všech těchto odvozených kopií. Číselné pozice
-existujících purge fází se nesmějí přeskládat. Bez této kontroly nezapočítat
-společný authority cutover ani nezapínat novou sankční cestu v DEV.
+**Společný audit není živě uzavřený:** navazující místní
+[retenční oprava](#moderation-retention-followup-proposal) a
+[Rules prototyp](#moderation-authority-local-proposal) jsou nyní připravené
+a ověřené úplným CI. Zbývá konkrétní společný DEV přechod a živá akceptace.
+Číselné pozice původních purge fází se nepřeskládávají. Místní kontrola sama
+nezapočítává živý authority cutover ani neaktivuje sankce v DEV.
 
 Žádná část tohoto místního úseku se zatím nenasazuje; Rules, Scheduler, živá
 data, Auth, prostředky, produkce i main zůstávají beze změny. Ruční testy až
@@ -1751,8 +1750,8 @@ restart mezi dávkami, souběh s moderací/revokací a reporter purge,
 ambiguita/rollback a pokračování původního purge jobu bez přečíslování fází.
 Po místním ověření společný push/CI a konkrétní začlenění do DEV plánu;
 do té doby žádné živé přepínače, migrace nebo zásahy do existujících jobů.
-Vlastník tento místní rozsah výslovně schválil; implementace a ověření právě
-proběhly v jádru, přesné společné úplné CI ještě následuje. Živý zásah ani
+Vlastník tento místní rozsah výslovně schválil; implementace a ověření
+jsou uzavřené zdrojem 95e018f a úplným CI 45283039166 success. Živý zásah ani
 aktivace tím schválené nejsou.
 
 Připravené moderation_retention.js: warning dohledává limit 2 se selektivními
@@ -1777,7 +1776,8 @@ unit/host a **3** testy balíčků zelené; lint čistý. V prvním širším pu
 prošlo 18/19: nový restartovací test nedostatečně simuloval doběhnutí původní
 fáze (čekal retry a ponechal notifikační preference). Test opraven; opakovaný
 cílený běh všech pěti nových případů zelený. Selhání nebylo ignorováno ani
-zaměněno za plný konečný průchod sady; přesné CI ověří celou kombinaci.
+zaměněno za plný konečný průchod sady; následné úplné CI 45283039166
+potvrdilo celou kombinaci včetně purge.
 Podklady build/moderation-retention-{core-final,purge-final,unit,artifact,lint}.log.
 Po doplnění fieldMask prošlo navíc všech 5 vybraných reporter/retention scénářů
 nad skutečným SDK a emulátorem (build/moderation-retention-fieldmask.log).
@@ -1813,7 +1813,7 @@ Výchozí vypnutý soubor musí zachovat stávající regrese. Zahrnout dokument
 a jeden společný push/CI; teprve podle výsledků sestavit konkrétní DEV plán
 včetně kompatibilního návratu (starý web s přímými zápisy po uzavření nestačí).
 Pouze místní příprava: bez nasazení, živých dat, Auth účtů, nových prostředků,
-Scheduleru nebo změny rolí/retencí. Samotný tento návrh není hotová Rules změna.
+Scheduleru nebo změny rolí/retencí. Místní prototyp není živé Rules uzavření.
 
 Budoucí provozní pořadí doložit v konkrétním DEV plánu: kompatibilní serverové
 writery/guard a klient, potom ověřené Rules uzavření, až pak nová purge údržba.
@@ -1906,12 +1906,100 @@ součástí trvalých testů. První publikační fixture postrádala avatar; do
 fixture nyní ověřuje konkrétní business-location-unavailable, nikoli libovolnou
 chybu precondition. Doklady build/business-review-{emulator,client,tools,unit}.log.
 Nový npm --prefix tools run test:business-review je samostatně zapojený do
-úplného CI. Přesné společné CI této Business přípravy ještě následuje.
+úplného CI. Zdroj **464c0ad0f8d690101b651373dbfc9e336b4cfce1** má
+[úspěšné úplné CI 45339418090](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45339418090).
+Prošel celý klient/analýza, nástroje, serverové unit/lint, všechny dosavadní
+Rules a serverové transakce, B4, moderace včetně 59 společných a 15 Business
+scénářů, B2, úplné purge, Storage i webový build. Oba ověřovací Business
+podúseky jsou uzavřené; DEV aktivace, živá akceptace a celý moderační milník
+zůstávají otevřené. Backlogové bl-081-work také ještě není celé splněné,
+protože zahrnuje navazující Business Rules přechod; jeho váha se zpětně nedělí.
 
 Žádné nové API zatím není nasazené; původní klientská aktivace a Business Rules
 jsou beze změny. Před živým přechodem dokončit wrapper a přímou Business autoritu,
 ověřit návratovou verzi, plán fixture a čerstvý přesný zdroj/CI. Kritéria kontroly
 firem, duplicit a sporů ani produkční kapacita nejsou tímto úsekem vyřešené.
+
+<a id="moderation-business-dev-next-proposal"></a>
+
+#### Navazující společný DEV přechod – návrh ke schválení
+
+Tento plán **není souhlas k implementaci dalšího rozsahu ani k živému pilotu**.
+Spojuje připravené sankce/osiřelá hlášení/retenci/Rules s místním Business tokem,
+aby se znovu neschvaloval každý drobný wrapper. Cíl výhradně shoutout-dev-46c81;
+produkce, main, nové tarify, role, sankční délky a retence beze změny.
+
+Podklad místní přípravy 464c0ad / úplné CI 45339418090 success. Čerstvé čtení
+DEV inventury 24. listopadu potvrdilo **24 ACTIVE Functions**, žádnou z níže
+uvedených tří nových callable a stejná omezení šesti aktualizovaných Functions.
+Veřejný app-config má dál serverPublicReportRemoval=true a nové volby chybějí
+(výchozí false). Nejde o nové nasazení ani úplný datový audit; před přechodem
+znovu ověřit živý stav, source archivy, CI a artefakty.
+
+Příprava po souhlasu:
+
+- Doplnit callable reviewBusinessApplication s dosavadním Auth/App Check
+  a businessReviewEnabled; otestovat host i skutečný balíček. Připravit
+  aktivaci managedModerationAuthorityEnabled, orphanReportResolutionEnabled,
+  moderationEvidenceRetentionEnabled a klientských serverContentSanctions /
+  serverBusinessReview, spolu se samostatnou Business Rules bránou.
+- Business brána uzavře původní přímé admin přidělení Business role, vytvoření
+  profilu/první pobočky, aktivaci žádosti, ruční potvrzení e-mailu a audit.
+  Zachová prvotní žádost, vlastní pending_email → checking/zrušení, vlastní
+  oprávněné úpravy údajů/poboček i stávající čtení. Nové resubmit je serverové.
+  Zvláštní testy před/po ověří batch obcházení a žádné rozšíření jiných rolí.
+- Připravit řízený pilot/úklid s digestem manifestu, přesným DEV cílem,
+  ověřeným čistým zdrojem/úplným CI a kontrolami inkarnací/updateTime.
+  Ověřit kompatibilní návratový web; starý web s přímou moderací po uzavření
+  Rules nestačí. Nové zdroje/release artefakty musí mít vlastní úplné CI.
+
+Navržený živý rozsah po přípravě a kontrolách:
+
+| Změna | DEV rozsah |
+|---|---|
+| Nové callables | sanctionContent, revokeSanction, reviewBusinessApplication; každá europe-west3, min 0/max 1, concurrency 1, 256 MiB, 15 s, App Check |
+| Stávající callables | decideContentReports (osiřelé resolve + retenční guard), deleteShout/deleteComment (authorOnly); stejná dosavadní omezení prostředků |
+| Stávající úklid | cleanupOperationReceipts; původní min 0/max 1, concurrency 1, 256 MiB, 60 s, minutový plánovač a rozpočty zachované |
+| Účtové Functions | accountDeletionRequestCreatedDev a resumeAccountDeletionJobsDev; stejné prostředky, 50/dávka, lease/retry a minutový plánovač; nové retenční fáze až po uzavření ingress |
+| Klient a Rules | DEV web, společná moderační brána a navazující Business brána; čtení/ostatní zápisy zachované |
+
+Pořadí: čerstvá inventura a záloha metadat → kompatibilní API/klient s guardy
+→ doložené doběhnutí starých volání → ověřené uzavření přímých Rules cest
+→ teprve nová purge údržba. Samotný serverový přepínač neuzavře staré klienty.
+Při neprokázaném doběhnutí, chybějícím indexu nebo driftu zdroje se přechod
+zastaví; nový index/migraci nespouštět bez konkretizace. Z nynějších query
+plyne potřeba stávajících indexů, nový index ani TTL se zde nenavrhuje.
+
+Navržený pilot: **jeden nový dočasný ověřený Auth účet**, vlastní syntetická
+Business žádost/profil/první pobočka a běžný profil/právní fixture; nejvýše
+**jeden 24h Shout, dva veřejné komentáře, jedna soukromá odpověď a tři hlášení**.
+Geografie pouze serverová testovací CZ/CZ-42. Ostatní účastníci jsou stávající
+Bright_Otter_182/TestBusiness/TestModerator/TestAdmin bez změny jejich rolí
+nebo postihů. Postih se vztáhne výhradně na nový dočasný účet.
+
+Ověřit reject → oprava stejného účtu → approve → suspend/zákaz nového Shoutu
+i promo → reactivate; původní běžný obsah musí zůstat. Nad syntetickým obsahem
+ověřit varování, časově omezený zákaz a jeho explicitní zrušení, audit,
+zachování silnější vazby, přímé zápisy odmítnuté Rules a uzavření jednoho
+již odstraněného komentáře jako osiřelého hlášení. Účtový rozsah/role ověřit
+ze skutečného aktéra; globální admin průchod nenahrazuje regionální test.
+Automatické kontroly průběžně, ruční průchody až na konec; data nevytvářet
+před dostupným klientem/uživatelem, aby pilot zbytečně neexpiroval.
+
+Po úspěchu odstranit výhradně tento nový Auth účet a data z jeho manifestu,
+včetně vlastních testovacích postihů, oznámení, clearance a read klíčů;
+Shout uklidit přes společný indexový writer. Technická potvrzení ponechat
+původních sedm dní, kvóty neresetovat. Původních 38 Shoutů, pending žádost
+a ostatní Auth/role nebudou cílem testu ani úklidu. Nasazená údržba obecně
+zpracuje způsobilé záznamy podle dosavadních pevných termínů; nejde o změnu
+retence nebo ruční posun starých jobů.
+
+Návrat: po uzavření Rules ponechat serverovou cestu a obě autoritativní brány;
+nevracet přímé klientské zápisy jen kvůli rollbacku webu. Po vstupu purge jobu
+do přidaných fází ponechat kompatibilní worker i ingress guard; starý worker
+s false není bezpečná návratová verze. Tento DEV profil neurčuje produkční
+kapacitu 5 000 souběžných uživatelů. Kritéria ruční kontroly firem/duplicit/sporů
+a společná předstartovní regrese zůstanou samostatným otevřeným krokem.
 
 <a id="moderation-local-ci-complete"></a>
 
