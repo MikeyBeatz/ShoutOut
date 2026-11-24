@@ -11,49 +11,70 @@ class ProfilePage extends StatelessWidget {
           .collection('users')
           .doc(uid)
           .liveSnapshots(),
-      builder: (context, snapshot) {
-        final profile = snapshot.data?.data();
-        final nickname = profile?['nickname'] as String? ?? 'Načítání…';
-        final avatarId = profile?['avatarId'] as String?;
-        final createdAt = (profile?['createdAt'] as Timestamp?)?.toDate();
-        final avatarStyle = profile == null
-            ? null
-            : AvatarStyle.fromProfile(profile);
-        final l10n = AppLocalizations.of(context)!;
-        return Column(
-          children: [
-            ProfileHeader(
-              nickname: nickname,
-              avatarId: avatarId,
-              avatarStyle: avatarStyle,
-              businessLogoPath: profile?['businessLogoPath'] as String?,
-              businessLogoVersion: profile?['businessLogoVersion'] as int?,
-              createdAt: createdAt,
+      builder: (context, snapshot) => ProfileContent(
+        userId: uid,
+        profile: snapshot.data?.data(),
+        roleStream: _watchAccountRole(uid),
+        onSignOut: FirebaseAuth.instance.signOut,
+      ),
+    );
+  }
+}
+
+/// Profile rendering stays usable independently of avatar data or role loading.
+class ProfileContent extends StatelessWidget {
+  const ProfileContent({
+    super.key,
+    required this.userId,
+    required this.profile,
+    required this.roleStream,
+    required this.onSignOut,
+  });
+  final String userId;
+  final Map<String, dynamic>? profile;
+  final Stream<AccountRole> roleStream;
+  final VoidCallback onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final nickname = profile?['nickname'] as String? ?? 'Načítání…';
+    final createdAt = (profile?['createdAt'] as Timestamp?)?.toDate();
+    final avatarStyle = profile == null
+        ? null
+        : AvatarStyle.fromProfile(profile);
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        ProfileHeader(
+          nickname: nickname,
+          avatarId: avatarStyle?.avatarId,
+          avatarStyle: avatarStyle,
+          businessLogoPath: profile?['businessLogoPath'] as String?,
+          businessLogoVersion: profile?['businessLogoVersion'] as int?,
+          createdAt: createdAt,
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
+            children: [
+              ProfileTileGrid(userId: userId, roleStream: roleStream),
+              const SizedBox(height: 18),
+            ],
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: _ProfileWideAction(
+              icon: Icons.logout_rounded,
+              title: l10n.logout,
+              color: _shoutPrimary,
+              onTap: onSignOut,
             ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
-                children: [
-                  ProfileTileGrid(userId: uid),
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: _ProfileWideAction(
-                  icon: Icons.logout_rounded,
-                  title: l10n.logout,
-                  color: _shoutPrimary,
-                  onTap: FirebaseAuth.instance.signOut,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -222,13 +243,14 @@ String _profileCreatedLabel(BuildContext context, DateTime? createdAt) {
 }
 
 class ProfileTileGrid extends StatelessWidget {
-  const ProfileTileGrid({super.key, required this.userId});
+  const ProfileTileGrid({super.key, required this.userId, this.roleStream});
 
   final String userId;
+  final Stream<AccountRole>? roleStream;
 
   @override
   Widget build(BuildContext context) => StreamBuilder<AccountRole>(
-    stream: _watchAccountRole(userId),
+    stream: roleStream ?? _watchAccountRole(userId),
     builder: (context, snapshot) {
       final tiles = <Widget>[
         ProfileActionTile(

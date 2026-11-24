@@ -92,13 +92,63 @@ export async function seedModerationBusinessAccount(db, auth, p) {
     const docs = await tx.getAll(...refs);
     if (docs[2].exists) { assert.equal(docs[2].get('userId'), p.uid); assert.equal(docs[2].get('pilotId'), p.nonce); return { seeded: false }; }
     assert(docs.every(d => !d.exists), 'mod-business-pilot-identity-collision');
-    const now = docs[0].readTime, profile = { nickname: p.nickname, avatarId: 'avatar_01', avatarBackgroundStart: 1, avatarBackgroundEnd: 2, avatarGradientDirection: 'horizontal' };
+    const now = docs[0].readTime, profile = { nickname: p.nickname, avatarId: 'fox', avatarBackgroundStart: 'teal', avatarBackgroundEnd: 'navy', avatarGradientDirection: 'horizontal' };
     tx.create(refs[0], { ...profile, email: p.email, pilotId: p.nonce }); tx.create(refs[1], profile);
     tx.create(db.doc(`users/${p.uid}/legal/acceptance_2026_07_25`), {});
     tx.create(refs[2], { userId: p.uid, countryCode: 'CZ', registrationNumber: '12345678', submittedCompanyName: p.nickname, submittedAddress: 'Synthetic 12', submittedCity: 'Usti', submittedPostalCode: '40001',
       initialLocationName: p.nickname, initialLocationAddress: 'Synthetic 12', initialLocationCity: 'Usti', initialLocationPostalCode: '40001', initialLocationCountryCode: 'CZ',
       initialLocation: new GeoPoint(50.53, 14.13), initialLocationGeohash: 'u2fhxxx', initialLocationProviderPlaceId: `fixture-${p.nonce}`, contactEmail: p.email, status: 'checking', submittedAt: now, pilotId: p.nonce });
     return { seeded: true };
+  });
+}
+const avatarBefore = Object.freeze({ avatarId: 'avatar_01', avatarBackgroundStart: 1, avatarBackgroundEnd: 2 });
+const avatarAfter = Object.freeze({ avatarId: 'fox', avatarBackgroundStart: 'teal', avatarBackgroundEnd: 'navy' });
+function avatarFields(data) { return Object.fromEntries(Object.keys(avatarAfter).map(k => [k, data[k]])); }
+function validateAvatarRepair(db, p, plan) {
+  validateModerationBusinessPilot(db, p);
+  const { digest: seal, ...body } = plan;
+  assert.equal(seal, hash(body), 'mod-business-pilot-avatar-digest');
+  assert.equal(plan.kind, 'moderation-business-avatar-repair'); assert.equal(plan.v, 1);
+  assert.equal(plan.projectId, db.projectId); assert.equal(plan.uid, p.uid); assert.equal(plan.pilotDigest, p.digest);
+  assert.deepEqual(plan.patch, avatarAfter);
+  assert.deepEqual(plan.rows.map(r => r.path), [`users/${p.uid}`, `publicProfiles/${p.uid}`]);
+  for (const row of plan.rows) { assert.deepEqual(row.fields, avatarBefore); assert.equal(row.updateTime.length, 2); assert(/^[a-f0-9]{64}$/.test(row.hash)); }
+}
+async function avatarRepairRows(db, p, tx) {
+  const refs = [`users/${p.uid}`, `publicProfiles/${p.uid}`].map(path => db.doc(path));
+  const [app, ...docs] = await tx.getAll(db.doc(`businessApplications/${p.uid}`), ...refs);
+  assert.equal(app.get('pilotId'), p.nonce); assert.equal(app.get('status'), 'suspended'); assert.equal(app.get('revision'), 4);
+  assert(docs.every(d => d.exists), 'mod-business-pilot-avatar-missing');
+  assert.equal(docs[0].get('pilotId'), p.nonce); assert(docs.every(d => d.get('nickname') === p.nickname));
+  return docs;
+}
+export async function planModerationBusinessAvatarRepair(db, p) {
+  return guarded(db, p).runTransaction(async tx => {
+    const docs = await avatarRepairRows(db, p, tx);
+    const rows = docs.map(d => {
+      assert.deepEqual(avatarFields(d.data()), avatarBefore, 'mod-business-pilot-avatar-unexpected');
+      return { path: d.ref.path, updateTime: stamp(d.updateTime), hash: hash(d.data()), fields: avatarFields(d.data()) };
+    });
+    const body = { v: 1, kind: 'moderation-business-avatar-repair', projectId: db.projectId, uid: p.uid, pilotDigest: p.digest, patch: avatarAfter, rows };
+    return { ...body, digest: hash(body) };
+  });
+}
+export async function repairModerationBusinessAvatar(db, p, plan) {
+  validateAvatarRepair(db, p, plan);
+  return guarded(db, p).runTransaction(async tx => {
+    const docs = await avatarRepairRows(db, p, tx);
+    const complete = docs.every(d => canonical(avatarFields(d.data())) === canonical(avatarAfter));
+    if (complete) {
+      docs.forEach((d, i) => assert.equal(hash({ ...d.data(), ...avatarBefore }), plan.rows[i].hash, 'mod-business-pilot-avatar-unrelated-drift'));
+      return { repaired: true, repeated: true, documentsWritten: 0 };
+    }
+    docs.forEach((d, i) => {
+      assert.deepEqual(avatarFields(d.data()), avatarBefore, 'mod-business-pilot-avatar-unexpected');
+      assert.deepEqual(stamp(d.updateTime), plan.rows[i].updateTime, 'mod-business-pilot-avatar-stale');
+      assert.equal(hash(d.data()), plan.rows[i].hash, 'mod-business-pilot-avatar-unrelated-drift');
+    });
+    for (const d of docs) tx.update(d.ref, avatarAfter);
+    return { repaired: true, repeated: false, documentsWritten: 2 };
   });
 }
 const request = (uid, data) => ({ ...identity(uid), data: { expectedUserId: uid, ...data } });

@@ -2204,7 +2204,10 @@ TypeError. Test prošel tím, že očekávaný pád potvrdil, **nejde o opraven�
 
 <a id="business-suspension-ui-repair-proposal"></a>
 
-##### Návrh opravy UI/fixture – čeká konkrétní schválení
+##### Oprava UI/fixture – schválený rozsah a místní výsledek
+
+**Vlastník výslovně schválil opravu i DEV ověření.** Stejný rozsah znovu
+neschvalovat; opravná data jsou stále výhradně původní dočasná fixture.
 
 Vlastníkovi předložen jeden společný úsek podle AGENTS „Před úpravami … předlož
 konkrétní rozsah změny uživateli ke schválení“:
@@ -2221,9 +2224,47 @@ konkrétní rozsah změny uživateli ke schválení“:
   dokumentaci, společný push/úplné CI přesných zdrojů a pouze DEV web rollout.
   Žádné Rules/Functions, nové účty/obsah, postihy, audit, retence nebo produkce.
 
-Dosavadní souhlas pokrýval pilot; tuto novou klientskou opravu a opravu již
-existujících testovacích dat znovu nevyvozovat automaticky. Do odpovědi jen
-diagnostika a záznamy, živý účet ponechat suspended/revize 4.
+Původní souhlas pokrýval pilot; nová klientská oprava a oprava již existujících
+testovacích dat mají nyní vlastní výslovný souhlas. Živý účet ponechat
+suspended/revize 4, další obsah ani účty nezakládat.
+
+**Místní příprava dokončená na fix/business-suspension-profile:**
+AvatarStyle.fromProfile ověřuje typ všech čtyř avatar polí a používá stávající
+fallback pro chybná, platná zachová. ProfilePage deleguje vykreslení na stejný
+ProfileContent s injektovaným odhlášením/role streamem; test tak vykresluje
+skutečný Profil s vadnými barvami a klikne na skutečnou akci odhlášení i po
+chybě role streamu. Žádná změna Auth chování nebo čtecích práv.
+
+BusinessAccessBoundary používá surfaceContainerHigh/onSurface, neutrální ikonu
+a krátké „Účet pozastaven“. Důvod není v liště ani ve snackbar při publikování;
+Detail ho nadále zobrazí. Společné showBusinessPublishingRestriction používá
+Home i widgetová regrese; aktivní Business cestu neblokuje. Testy měří kontrast
+textu/ikony/Detailu v obou Material vzhledech na kompaktním 390×720 viewportu,
+stav child/scroll se kvůli opravě znovu neinicializuje.
+
+Pilotní generátor nyní používá fox/teal/navy v users i publicProfiles.
+tools/moderation_business_pilot.mjs má čtecí avatar-plan a chráněné avatar-repair:
+vyžaduje původní i opravný digest a čistý přesný release/úplné CI. Opravný plán
+obsahuje jen dvě cesty dočasného UID, přesné 3 hodnoty před/po, hash celého
+dokumentu a původní updateTime. V transakci se ověří také původní pilotní fence,
+vlastní označení/inkarnace a suspended/revize 4. Zastaralý/míchaný/cizí stav
+zastaví obě změny; ztracená odpověď dovolí opakování bez dalších zápisů jen
+při shodě ostatních polí. Hash a updateTime nepovolují přepsat souběžnou změnu.
+
+Místně **15/15** klientských (nové test/business_suspension_profile_test.dart
+a dosavadní Business sada), **23/23** společných Business/Rules/pilotních
+emulátorových a **113/113** nástrojových testů; analyze i cílený ESLint čisté.
+Nová emulátorová regrese ověřila stale updateTime, cizí/tampered plán,
+chybu po první staged změně s rollbackem obou, opakování bez změny updateTime,
+zachování Business profilu/role/žádosti a všech receipts. Nejde zatím o živé ověření.
+
+Čtecí plán pro skutečnou fixture již uložený do ignorovaného manifestu,
+digest **7c0d84a958ce34c1f1ba9e88c26b7a7861a3833891b45407a4a4205d93c6af02**,
+2 dokumenty / 0 živých zápisů. Firestore (default) ověřen STANDARD / FIRESTORE_NATIVE,
+europe-west3. Po úspěšném úplném CI přesného opravného zdroje aplikovat tento plán,
+ověřit neavatarová pole a provozní stav a nasadit jen DEV web. Potom krátká
+kontrola Profilu/odhlášení a čitelnosti ve stávajícím pilotu; Functions/Rules
+zůstávají na 05fc1ed. Nevytvářet další obsah, účet ani nové váhy stupnice.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě

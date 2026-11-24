@@ -5,7 +5,8 @@ import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { planModerationBusinessPilot as planPilot, validateModerationBusinessPilot as validate, ensureModerationBusinessAuth as ensureAuth,
   seedModerationBusinessAccount as seedAccount, seedModerationBusinessContent as seedContent, moderationBusinessSlots as slots,
-  moderationBusinessPilotStatus as status, orphanModerationBusinessComment as orphan, cleanupModerationBusinessPilot as cleanup } from './moderation_business_pilot.js';
+  moderationBusinessPilotStatus as status, orphanModerationBusinessComment as orphan, cleanupModerationBusinessPilot as cleanup,
+  planModerationBusinessAvatarRepair as planAvatar, repairModerationBusinessAvatar as repairAvatar } from './moderation_business_pilot.js';
 import { prepareNewsControlChange } from './feed_news_signals.js';
 import { reviewBusinessApplicationOperation as review } from './business_review.js';
 import { sanctionContentOperation as sanction, revokeSanctionOperation as revoke } from './moderation_sanctions.js';
@@ -22,7 +23,7 @@ async function fixture(t) {
   await generation.create({ schemaVersion: 1, v: 2, cardReady: true, cardProjection: 1, accountRetention: true, readIdentity: 1, erasureRevision: 0, prunedThrough: -1 });
   await original.create({ untouched: true }); await pending.create({ untouched: true });
   for (const [n, a] of actors.entries()) {
-    await db.doc(`users/${a.uid}`).create({ nickname: a.nickname, avatarId: 'avatar_01', avatarBackgroundStart: 1, avatarBackgroundEnd: 2, avatarGradientDirection: 'horizontal' });
+    await db.doc(`users/${a.uid}`).create({ nickname: a.nickname, avatarId: 'fox', avatarBackgroundStart: 'teal', avatarBackgroundEnd: 'navy', avatarGradientDirection: 'horizontal' });
     await db.doc(`users/${a.uid}/legal/acceptance_2026_07_25`).create({});
     if (n > 0) await db.doc(`accountRoles/${a.uid}`).create({ role: n === 1 ? 'business' : n === 2 ? 'moderator' : 'administrator', level: n === 1 ? 2 : n === 2 ? 3 : 5, moderationScope: { countries: ['CZ'], global: n === 3 } });
   }
@@ -49,8 +50,47 @@ test('pilot digest/project/original fences and Auth incarnation prevent foreign 
   const f = await fixture(t); validate(db, f.p); assert.throws(() => validate(db, { ...f.p, uid: 'foreign' }));
   await ensureAuth(db, f.auth, f.p, 'Synthetic-password-12345'); await ensureAuth(db, f.auth, f.p, 'Synthetic-password-12345'); assert.equal(f.auth.created, 1);
   await seedAccount(db, f.auth, f.p); assert.equal((await seedAccount(db, f.auth, f.p)).seeded, false);
+  for (const c of ['users', 'publicProfiles']) {
+    const profile = (await db.doc(`${c}/${f.p.uid}`).get()).data();
+    assert.equal(profile.avatarId, 'fox'); assert.equal(profile.avatarBackgroundStart, 'teal'); assert.equal(profile.avatarBackgroundEnd, 'navy');
+  }
   await assert.rejects(cleanup(db, f.auth, f.p), /business-proof/); assert.equal(f.auth.deleted, 0);
   await f.original.update({ untouched: false }); await assert.rejects(ensureAuth(db, f.auth, f.p, 'Synthetic-password-12345'), /original-drift/); assert.equal(f.auth.created, 1);
+});
+test('avatar repair is exact, atomic, fenced, restartable and does not change Business identity', { skip: !enabled }, async t => {
+  const f = await fixture(t), { p, auth } = f; await ensureAuth(db, auth, p, 'Synthetic-password-12345'); await seedAccount(db, auth, p);
+  await f.business('reject', 0); await f.business('resubmit', 1); await f.business('approve', 2);
+  await assert.rejects(planAvatar(db, p));
+  await f.business('suspend', 3);
+  const refs = ['users', 'publicProfiles'].map(c => db.doc(`${c}/${p.uid}`));
+  for (const ref of refs) await ref.update({ avatarId: 'avatar_01', avatarBackgroundStart: 1, avatarBackgroundEnd: 2 });
+  const old = await db.getAll(...refs), plan = await planAvatar(db, p);
+  await assert.rejects(repairAvatar(db, p, { ...plan, uid: 'foreign' }), /avatar-digest/);
+  await refs[0].update({ unrelated: true });
+  await assert.rejects(repairAvatar(db, p, plan), /avatar-stale/);
+  assert(old[1].updateTime.isEqual((await refs[1].get()).updateTime));
+  const fresh = await planAvatar(db, p);
+  const keep = await db.getAll(db.doc(`businessApplications/${p.uid}`), db.doc(`businessProfiles/${p.uid}`), db.doc(`accountRoles/${p.uid}`));
+  const receipts = (await db.collection('serverOperations').get()).docs;
+  // Throw after the first staged update, before committing either document.
+  const failing = new Proxy(db, { get(target, key) {
+    if (key === 'runTransaction') return callback => target.runTransaction(tx => callback(new Proxy(tx, { get(transaction, method) {
+      if (method === 'update') return (ref, patch) => { if (ref.path === refs[1].path) throw Error('injected-avatar-failure'); return transaction.update(ref, patch); };
+      const value = transaction[method]; return typeof value === 'function' ? value.bind(transaction) : value;
+    } })));
+    const value = target[key]; return typeof value === 'function' ? value.bind(target) : value;
+  } });
+  const before = await db.getAll(...refs);
+  await assert.rejects(repairAvatar(failing, p, fresh), /injected-avatar-failure/);
+  (await db.getAll(...refs)).forEach((d, i) => assert(d.updateTime.isEqual(before[i].updateTime)));
+  assert.deepEqual(await repairAvatar(db, p, fresh), { repaired: true, repeated: false, documentsWritten: 2 });
+  const after = await db.getAll(...refs);
+  for (const [i, d] of after.entries()) assert.deepEqual(d.data(), { ...before[i].data(), avatarId: 'fox', avatarBackgroundStart: 'teal', avatarBackgroundEnd: 'navy' });
+  assert.deepEqual(await repairAvatar(db, p, fresh), { repaired: true, repeated: true, documentsWritten: 0 });
+  (await db.getAll(...refs)).forEach((d, i) => assert(d.updateTime.isEqual(after[i].updateTime)));
+  for (const d of [...keep, ...receipts]) assert(d.updateTime.isEqual((await d.ref.get()).updateTime));
+  await refs[0].update({ unrelated: false });
+  await assert.rejects(repairAvatar(db, p, fresh), /avatar-unrelated-drift/);
 });
 test('pilot lifecycle, cooldown retry, stronger sanction proof and resumable cleanup preserve originals and 7-day receipts', { skip: !enabled }, async t => {
   const f = await fixture(t), { p, s, auth, actors } = f; await ensureAuth(db, auth, p, 'Synthetic-password-12345'); await seedAccount(db, auth, p);

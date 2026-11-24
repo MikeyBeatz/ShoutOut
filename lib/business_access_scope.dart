@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+const businessSuspendedLabel = 'Účet pozastaven';
+
+bool showBusinessPublishingRestriction(BuildContext context) {
+  if (BusinessAccessScope.maybeOf(context)?.publishingAllowed != false) {
+    return false;
+  }
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(const SnackBar(content: Text(businessSuspendedLabel)));
+  return true;
+}
+
 class BusinessAccessScope extends InheritedWidget {
   const BusinessAccessScope({
     super.key,
@@ -37,20 +49,18 @@ class BusinessAccessBoundary extends StatelessWidget {
       children: [
         if (!publishingAllowed)
           Material(
-            color: Theme.of(context).colorScheme.errorContainer,
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
             child: SafeArea(
               bottom: false,
               child: ListTile(
+                iconColor: Theme.of(context).colorScheme.onSurface,
+                textColor: Theme.of(context).colorScheme.onSurface,
                 leading: const Icon(Icons.pause_circle_outline),
-                title: const Text('Business publikování je pozastavené.'),
-                subtitle: reason.isEmpty
-                    ? null
-                    : Text(
-                        reason,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                title: const Text(businessSuspendedLabel),
                 trailing: TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  ),
                   onPressed: () => showDialog<void>(
                     context: context,
                     builder: (context) => AlertDialog(

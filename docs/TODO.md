@@ -81,10 +81,13 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    chyba nepotvrzená. Schválení TestAdmin ověřené: active/revize 3, profil/role 2
    a první pobočka. Manifest content-ready: 1 Shout / 2 komentáře / 1 zpráva /
    3 hlášení, zatím bez postihu. Pozastavení TestAdmin ověřené: suspended/revize 4,
-   zachovaná role 2/pobočka/starší Shout. [Oprava UI a fixture čeká konkrétní souhlas](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal):
+   zachovaná role 2/pobočka/starší Shout. [Oprava UI a fixture schválená a místně ověřená](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal):
    chybný typ barev testovacího avataru lokálně shodí Profil; lišta má slabý
-   kontrast a při pokusu o publikování má zobrazovat krátký stav. Reaktivaci
-   ani další živé zápisy zatím neprovádět; pilotní akceptace otevřená.
+   kontrast a při pokusu o publikování má zobrazovat krátký stav. Připravený parser,
+   lišta/Profil a přesná atomická oprava mají 15 klientských / 23 emulátorových /
+   113 nástrojových testů; analyze/lint čisté. Následuje společné úplné CI,
+   oprava dvou fixture dokumentů a pouze DEV web; reaktivaci zatím neprovádět.
+   Pilotní akceptace zůstává otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

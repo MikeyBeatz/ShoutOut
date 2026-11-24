@@ -345,10 +345,12 @@ void main() {
       active.value = false;
       await tester.pumpAndSettle();
       expect(find.text('Profile 1 false'), findsOneWidget);
-      expect(find.text('Review required'), findsOneWidget);
+      expect(find.text(businessSuspendedLabel), findsOneWidget);
+      expect(find.text('Review required'), findsNothing);
       await tester.tap(find.text('Detail'));
       await tester.pumpAndSettle();
       expect(find.text('Pozastavení Business účtu'), findsOneWidget);
+      expect(find.text('Review required'), findsOneWidget);
       await tester.tap(find.text('Zavřít'));
       await tester.pumpAndSettle();
       active.value = true;

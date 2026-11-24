@@ -103,10 +103,15 @@ class AvatarStyle {
   };
 
   static AvatarStyle fromProfile(Map<String, dynamic>? profile) {
-    final avatarId = profile?['avatarId'] as String?;
-    final start = profile?['avatarBackgroundStart'] as String?;
-    final end = profile?['avatarBackgroundEnd'] as String?;
-    final directionName = profile?['avatarGradientDirection'] as String?;
+    String? text(String key) {
+      final value = profile?[key];
+      return value is String ? value : null;
+    }
+
+    final avatarId = text('avatarId');
+    final start = text('avatarBackgroundStart');
+    final end = text('avatarBackgroundEnd');
+    final directionName = text('avatarGradientDirection');
     return AvatarStyle(
       avatarId: avatarIds.contains(avatarId) ? avatarId! : fallback.avatarId,
       startColorId: colors.containsKey(start) ? start! : fallback.startColorId,

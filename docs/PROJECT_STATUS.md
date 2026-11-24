@@ -38,8 +38,15 @@ správný audit/receipt a platné Auth/App Check; dřívější Shout zůstává
 při pokusu publikovat a šedý Profil bez odhlášení. Poslední problém lokálně
 reprodukovaný z vadné fixture: generátor uložil dvě barvy avataru jako int,
 AvatarStyle.fromProfile je přetypovává na String. Je to chyba testovací přípravy,
-nikoli důkaz odebrání Business přístupu. [Konkrétní oprava čeká schválení](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal);
-zatím žádná změna aplikace/živých dat ani reaktivace. Další obsah nezakládat. Původních 38 zdrojů
+nikoli důkaz odebrání Business přístupu. [Konkrétní oprava výslovně schválená](MVP_SERVER_PLAN.md#business-suspension-ui-repair-proposal)
+a připravená místně na fix/business-suspension-profile: bezpečný avatar parser,
+vykreslitelný Profil s dostupným odhlášením, neutrální kontrastní lišta a krátký
+stav při pokusu o publikování. Důvod zůstává přes Detail. Generátor používá fox/teal/navy;
+řízený avatar-plan/avatar-repair opraví jen 3 pole ve dvou fixture dokumentech.
+15/15 klientských, 23/23 společných emulátorových a 113/113 nástrojových testů,
+analyze/lint čisté. Následuje společný push/úplné CI, přesná atomická oprava dat
+a pouze DEV web. Zatím žádný nový rollout, živý zápis opravy nebo reaktivace.
+Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
