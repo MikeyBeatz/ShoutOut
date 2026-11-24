@@ -78,8 +78,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    **Probíhá jediný již schválený živý pilot, pak úklid.** TestAdmin ověřil
    zamítnutí; dočasný účet provedl resubmit, server checking/revize 2 se správným
    auditem. Vlastník mohl dodatek názvu zapomenout; změna pole živě neověřená,
-   chyba nepotvrzená. Následuje schválení TestAdmin. Manifest account-ready;
-   zatím žádný nový obsah/postih.
+   chyba nepotvrzená. Schválení TestAdmin ověřené: active/revize 3, profil/role 2
+   a první pobočka. Manifest content-ready: 1 Shout / 2 komentáře / 1 zpráva /
+   3 hlášení, zatím bez postihu. Následuje pozastavení a kontrola dočasným účtem.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

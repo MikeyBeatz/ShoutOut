@@ -2163,6 +2163,28 @@ nepovažoval za součást názvu. Nelze tvrdit ztrátu změny ani opravu chyby k
 žádosti přes TestAdmin bez dalšího zamítnutí, resetu revize či změny auditů.
 Dosavadní schválený pilot a jeho jediná inkarnace se nemění.
 
+**Schválení ověřené 24. listopadu 12:40 UTC:** vlastník potvrdil úspěšné
+„Schválit a aktivovat“. Server active / revize 3, Business profil active,
+role business/level 2 přidělená it_admin a aktivní první pobočka s původními
+souřadnicemi. Audit/receipt
+**a578fbdc091f9cbdfc7fbc78447466f6d0b0a08e1e0411b8a0fe7f592177af47**,
+správný TestAdmin, 7denní receipt, POST HTTP 200 a Auth/App Check VALID.
+Důkaz build/modbiz-approval-proof.json. Opravený název při resubmit nadále
+není označený za živě ověřený.
+
+Po opětovné kontrole čisté release 05fc1ed/úplného CI spuštěn schválený
+content helper se stejnými ID/časovanými klíči. Druhý komentář narazil na
+skutečný cooldown; vyčkáno a původní operace zopakovaná bez resetu kvóty.
+Manifest **content-ready**: **1** aktivní 24h Shout „MVP moderation Business
+926a31d2“, **2** komentáře dočasného autora, **1** soukromá odpověď Bright →
+dočasný příjemce, **3** otevřená hlášení. Expirace Shoutu **25. listopadu
+12:40:55 UTC**. Kontrola 12:42 UTC potvrdila commentsCount=2, přesná ID,
+plánovaný obsah/autor/stav a původní fence; žádný nový Auth účet nebo další obsah.
+Důkaz build/modbiz-content-proof.json, původních 38 zdrojů zachovaných.
+Další ruční krok uživateli předán: TestAdmin pozastaví pouze tuto firmu,
+dočasný účet ověří důvod, přístup k údajům, blokaci nového publikování/promování
+a zachování dřívějšího Shoutu. Reaktivaci zatím neprovádět.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
