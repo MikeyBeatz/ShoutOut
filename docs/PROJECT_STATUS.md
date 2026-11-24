@@ -89,8 +89,17 @@ oba receipts s původními +7 dny. Všechna tři hlášení resolved.
 obsah i po odstranění zdroje. [Ověřená mezera a navržený místní úsek](MVP_SERVER_PLAN.md#reported-content-evidence-proposal):
 veřejné reporty mají pouze reference, běžné mazání komentář fyzicky odstraní;
 účtový archiv nevzniká při jednotlivém mazání. Samotný pilotní Shout stále existuje.
-Čeká rozhodnutí o počátku nové 60denní lhůty a schválení konkrétního místního
-úseku; do té doby žádná zdrojová implementace, migrace ani další živé mazání.
+Vlastník schválil místní úsek podkladů hlášení, ale místo lhůty od prvního
+hlášení požaduje prověřit obecný cyklus všech Shoutů: platnost → 7 dní vlastní
+historie → 60 dní archivu. [Výsledek kontroly a sjednocený návrh](MVP_SERVER_PLAN.md#content-lifecycle-retention-review).
+Obecný +60denní archiv po historii v původní dokumentaci není; dosavadní
+„všechny zprávy/komentáře“ se týká smazání účtu. Současný kód běžně dovolí až
+24 h, Business až 7 dní, ručně deleted Shout z vlastní historie vyřadí hned.
+Předložené rozšíření místního úseku: neveřejná kopie při vytvoření všech Shoutů/
+komentářů/soukromých odpovědí, historie 7 dní od skutečného konce včetně ručního
+smazání, pevný purge o 60 dní později; obvykle +68 dní, Business až +74 dní.
+Čeká souhlas s tímto širším rozsahem a sjednoceným termínem; kód/živá data
+se při kontrole dokumentace neměnily. Pilotní úklid zůstává odložený.
 Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;

@@ -103,8 +103,12 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    2×HTTP 200 / Auth/App Check VALID ověřené; všechna hlášení resolved.
    **Nový nález před úklidem:** [neveřejné zachování nahlášeného obsahu po samostatném smazání](MVP_SERVER_PLAN.md#reported-content-evidence-proposal).
    Veřejná hlášení mají nyní jen reference, samostatné mazání není účtový archiv.
-   Čeká počátek nové 60denní lhůty a schválení místního úseku; dosud žádný
-   nový kód, migrace či rollout této archivace. Úklid jediné fixture je odložený.
+   Místní podklady hlášení schválené; místo lhůty od hlášení vlastník navrhl
+   archiv všech Shoutů po sedmidenní historii. [Ověřená dokumentace a nový společný návrh](MVP_SERVER_PLAN.md#content-lifecycle-retention-review):
+   60 dní po konci historie, nikoli pevně +68 dní pro libovolnou platnost;
+   Business až +74 dní, ruční smazání nově 7 dní v historii. Rozšíření na
+   všechny Shouty/komentáře/soukromé odpovědi čeká souhlas. Žádný nový kód,
+   migrace či rollout této archivace. Úklid jediné fixture je odložený.
    Nové sankce ani obsah nezakládat.
    Předepsaný klientský průchod dokončený; úklid a nová retenční návaznost otevřené.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.

@@ -2529,11 +2529,76 @@ Vlastníkovi předložený **ucelený místní úsek**, dosud bez zdrojové impl
 - testy, měření, dokumentace, jeden společný push/CI; bez živé migrace,
   nasazení, dalších fixture/Auth účtů nebo změny DEV Rules/prostředků.
 
-**Otevřené rozhodnutí:** od kdy nových 60 dní. Doporučení předložené vlastníkovi:
-od prvního serverově potvrzeného hlášení daného obsahu; další hlášení, smazání
-ani vyřízení lhůtu neprodlužují, dřívější závazný účtový deadline má přednost.
-Alternativa předložená k volbě: od odstranění obsahu. Do odpovědi se nová lhůta,
-datová vrstva ani oprávnění neaktivují; dosavadní archiv a termíny se nemění.
+**Odpověď vlastníka:** místní úsek a testy schválil. Lhůtu od prvního hlášení
+nepřijal; požaduje prozkoumat původní myšlenku archivace všech příspěvků:
+platnost 24 h nebo ruční smazání → 7 dní vlastní historie → 60 dní archivu.
+Navrhl archiv založit hned a mazání +68 dní. Tento širší cyklus je prověřený
+níže; implementace původního úseku nezačala s neodsouhlaseným časovým pravidlem.
+
+<a id="content-lifecycle-retention-review"></a>
+
+##### Prověření celého životního cyklu – rozšíření místního návrhu k potvrzení
+
+**Dohledané původní podklady:**
+
+- Tento serverový plán v části exspirace i neměnný archiv
+  [původního plánu](archive/MVP_SERVER_PLAN_2026-11-03.txt) požadují fyzicky
+  odstranit Shout a podkolekce po sedmi dnech od expirace; další +60denní
+  archiv pro všechny běžné Shouty tam není. Texty v lib/legal.dart uvádějí
+  stejné sedmidenní pravidlo a nedokončenou DEV automatizaci.
+- [Schválený účtový archiv](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md#schválený-rozsah)
+  opravdu zahrnuje všechny existující zprávy a veřejné komentáře, nejen
+  nahlášené, ale při zpracování smazání celého účtu. Jeho pevný termín je
+  createTime žádosti +60 dní. Dřívější jednotlivé smazání nearchivuje.
+- [Vytvoření Shoutu](reference/PRODUCT_FLOWS.md#vytvoření-shoutu) a
+  functions/create_shout.js dovolují běžně 15 minut až 24 hodin (výchozí 2 h),
+  aktivnímu Business až 7 dní. Pevných +68 dní od vytvoření by neodpovídalo
+  navrženému cyklu u kratších Shoutů ani u delšího Business Shoutu.
+
+**Potvrzený kód:** get_own_shouts drží expirované položky do expiresAt +7 dní,
+bere jen status active/expired a status deleted vyřazuje hned. deleteShout
+zatím mění pouze status, deleteComment komentář fyzicky odstraní. Worker
+shout_expiration jen materializuje active → expired. Běžný sedmidenní fyzický
+purge Shoutů ještě hotový není; nelze tvrdit, že nyní automaticky probíhá
+cyklus historie → univerzální archiv → konečné odstranění.
+
+**Doporučená nová politika, zatím předložená ke schválení:**
+
+1. Neveřejný archivní podklad každého Shoutu a jeho veřejných komentářů i
+   soukromých odpovědí atomicky založit při vytvoření obsahu, nezávisle na
+   nahlášení. Hlášení odkazují na společný podklad/inkarnaci; nevytvářejí
+   další plné kopie a neprodlužují čas. Soukromou zprávu moderátor získá jen
+   přes příslušné hlášení, bez procházení konverzací. Přímé veřejné čtení archivu
+   se nepovoluje, obecná správa/export archivu zůstává samostatným úkolem.
+2. Konec veřejné platnosti je plánovaná expirace nebo dřívější serverově
+   potvrzené ruční odstranění. Vlastní historie Shoutu skončí o 7 dní později;
+   ručně smazané Shouty by se tedy nově zobrazovaly ve vlastní historii jen
+   ke čtení. Převod soukromých odpovědí do Mé shouty → Komentáře zůstává po MVP.
+3. Konečný termín obsahu je konec historie +60 dní, tedy skutečný konec
+   platnosti +67 dní. Datum připravit už při vytvoření podle expiresAt;
+   předčasné odstranění jej může zkrátit. Použije se i dřívější závazný
+   účtový termín; smazání účtu ani hlášení již dřívější konec neprodlužuje.
+   Cizí konverzace a anonymní rodičovský kontext respektují dosavadní vlastnictví.
+4. Čtení se na konci retence zavře podle serverového času a trvalý dávkový
+   úklid musí opravdu odstranit příslušná data/kopie/indexové vazby. Samotné
+   datum v dokumentu ani zmizení karty z UI nejsou fyzické smazání. Způsob,
+   náklady a dohánění dluhu se změří místně před provozním návrhem.
+
+| Případ | Konec veřejné platnosti od vytvoření | Konec historie | Konečné smazání |
+|---|---|---|---|
+| Běžný Shout na 24 h | +1 den | +8 dní | +68 dní |
+| Business Shout na 7 dní | +7 dní | +14 dní | +74 dní |
+| Výchozí Shout na 2 h | +2 h | +7 dní 2 h | +67 dní 2 h |
+| Ruční smazání po 3 h | +3 h | +7 dní 3 h | +67 dní 3 h |
+
+**Rozsah navíc oproti schváleným nahlášeným podkladům:** kopie i nenahlášeného
+obsahu při publikování, nový obecný životní cyklus a historie ručně smazaného
+Shoutu. Proto předložený jeden sjednocený místní úsek: potřebné writery/čtení/
+moderace/purge, účtové vazby, souběžné testy/restart, přesné deadline a rozpočty,
+měření operací/objemu, potřebné právní texty/dokumentace a společný push/CI.
+Bez živé migrace, dalších fixture/Auth, nasazení nebo změny provozních prostředků;
+DEV zapojení až podle naměřeného konkrétního plánu. Konečná podoba kontraktu,
+provozní četnost a indexové změny nejsou dosud implementované ani aktivní.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
