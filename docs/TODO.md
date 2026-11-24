@@ -80,7 +80,7 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    auditem. Vlastník mohl dodatek názvu zapomenout; změna pole živě neověřená,
    chyba nepotvrzená. Schválení TestAdmin ověřené: active/revize 3, profil/role 2
    a první pobočka. Manifest content-ready: 1 Shout / 2 komentáře / 1 zpráva /
-   3 hlášení, zatím bez postihu. Pozastavení TestAdmin ověřené: suspended/revize 4,
+   3 hlášení. Pozastavení TestAdmin ověřené: suspended/revize 4,
    zachovaná role 2/pobočka/starší Shout. [Oprava UI a fixture nasazená v DEV](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results):
    **3ffe71a / úplné CI 45424330633 success**, web **2edf6b744dcbe95e**.
    Atomicky opraveny jen 3 avatarová pole ve dvou dokumentech dočasného UID;
@@ -91,7 +91,7 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    všech pět Business auditů/receipts správně. Tři postihy už uložené a silnější
    aktivní 7denní ban zachovaný. **Odchylka:** všechny TestAdmin nad Shoutem,
    nikoli plánovaný TestModerator/komentář. [Vlastník přijal přesné admin důkazy](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal);
-   úzká volitelná výjimka nástroje prošla 24 emulátorovými / 113 nástrojovými
+   úzká volitelná výjimka nástroje prošla 24 emulátorovými / 115 nástrojovými
    kontrolami a lintem; před mutací čeká úplné CI. Žádné změny auditu/rolí,
    regionální sankční průchod se netvrdí. Ban UI do 1. prosince i odhlášení
    potvrzené. Následuje revokace TestAdmin, obnovený přístup, dvě zbývající

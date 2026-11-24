@@ -40,7 +40,7 @@ varování / ban 7 dní / ban 1 den, aktivní zůstává 7 dní do 1. prosince.
 bany přímé pozorování), nikoli it_moderator nad druhým komentářem.
 Vlastník výslovně přijal přesně tato tři potvrzení jako admin průchod.
 [Úprava ověřování/úklidu](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal)
-je místně ověřená: 24 emulátorových / 113 nástrojových kontrol a lint prošly.
+je místně ověřená: 24 emulátorových / 115 nástrojových kontrol a lint prošly.
 Samostatný místní důkaz váže původní digest, konkrétní UID, tři přesné receipts
 a jejich otisky; výchozí guard zůstává přísný. Před mutačním použitím čeká úplné
 CI přesného zdroje. Audit, role ani živá data se touto opravou nemění.

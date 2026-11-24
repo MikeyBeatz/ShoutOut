@@ -2388,8 +2388,11 @@ celých receipts se znovu kontrolují. Bez výslovného --approved-sanctions-dig
 zůstává původní přísná cesta. Jiný postih, změna důkazu nebo zdroje se odmítne
 před úklidem Auth. Testy zahrnují celou navazující revokaci, osiřelé hlášení
 a restartovatelný úklid se zachováním receipts; **24/24** Business emulátorových
-a **113/113** nástrojových kontrol a cílený ESLint prošly. Logy
-build/modbiz-observed-emulator-final.log a build/modbiz-observed-tools.log.
+a **115/115** nástrojových kontrol a cílený ESLint prošly. Test přepínačů
+pilotního nástroje je nově zahrnutý i v běžné test:tools sadě CI. Logy
+build/modbiz-observed-emulator-final.log a build/modbiz-observed-tools-ci.log.
+První úplné CI 45485542125 ze zdroje 1f64c6e bylo řízeně zastavené před
+doplněním této CI vazby; neslouží jako podklad pro mutace nebo nasazení.
 
 Před použitím mutací orphan/cleanup musí projít úplné CI přesného čistého
 zdroje; žádné nasazení aplikace, Functions nebo Rules tato úprava nepotřebuje.
