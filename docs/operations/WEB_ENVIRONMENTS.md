@@ -7,7 +7,9 @@ Hosting **f8f0b0338d6eb03d**. 67 app souborů/8 HTTP kontrol obou domén souhlas
 Pouze web: Ban/Omezení tvorby, červený aktivní stav, priorita účinných postihů
 a skutečný konec po zrušení s původní platností v detailu. Všech 27 Functions,
 oba plánovače a Rules beze změny; původních 38 zdrojů/pending žádost zachované.
-Fixture active/revize 5, ban už zrušený; dvě hlášení/ruční akceptace/úklid čekají.
+Fixture active/revize 5, ban už zrušený; závěrečný ruční blok potvrzený,
+obě zbývající hlášení serverově vyřešená správnými aktéry. Úklid odložený
+kvůli novému nálezu dostupnosti nahlášeného obsahu po smazání zdroje, viz plán.
 Návratový web **2edf6b744dcbe95e**. Nezakládat další fixture, produkce/main beze změny.
 
 **Předchozí DEV web – oprava pozastaveného Profilu, 24. listopadu:**

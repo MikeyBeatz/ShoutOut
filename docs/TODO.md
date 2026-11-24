@@ -99,10 +99,14 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    [UI stavů a historie je nasazené v DEV](MVP_SERVER_PLAN.md#moderation-user-history-ui):
    **aa43ae1 / úplné CI 45491348488 success**, web **f8f0b0338d6eb03d**.
    Otisky/8 HTTP kontrol ověřené, server/Rules/prostředky zachované.
-   Čeká spojená ruční kontrola přehledu,
-   obnoveného přístupu a dvou zbývajících hlášení; teprve potom řízený úklid.
+   Vlastník potvrdil celý závěrečný ruční blok, oba resolve receipts/aktéři a
+   2×HTTP 200 / Auth/App Check VALID ověřené; všechna hlášení resolved.
+   **Nový nález před úklidem:** [neveřejné zachování nahlášeného obsahu po samostatném smazání](MVP_SERVER_PLAN.md#reported-content-evidence-proposal).
+   Veřejná hlášení mají nyní jen reference, samostatné mazání není účtový archiv.
+   Čeká počátek nové 60denní lhůty a schválení místního úseku; dosud žádný
+   nový kód, migrace či rollout této archivace. Úklid jediné fixture je odložený.
    Nové sankce ani obsah nezakládat.
-   Celá pilotní akceptace stále otevřená.
+   Předepsaný klientský průchod dokončený; úklid a nová retenční návaznost otevřené.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.

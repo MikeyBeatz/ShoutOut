@@ -2470,6 +2470,71 @@ Aktivní vizuální stav byl prověřený místně; současný účet má po rev
 neaktivní ban a novým postihem se to znovu nepřipravuje. Celá živá pilotní
 akceptace/úklid ani metriky tím nejsou uzavřené.
 
+<a id="moderation-business-final-client-results"></a>
+
+##### Závěrečný klientský blok potvrzený, úklid odložený kvůli novému nálezu
+
+Vlastník 24. listopadu potvrdil „ano vše je v pořádku“ na celý blok: nové
+neaktivní stavy/historie a původní platnost, dočasný účet bez banu a otevření
+formuláře bez publikace/odhlášení, soukromé resolve a osiřelé resolve.
+Server potvrzuje přesné dva výsledky:
+
+- TestAdmin / it_admin, privateReply → resolve/noAction, count 1,
+  receipt **3ca546328413996f752f03a5887b4c94074ce78239661074dc21c7dd7d061e85**,
+  24. listopadu 21:59:08.592 UTC.
+- TestModerator / it_moderator, chybějící první komentář →
+  resolveUnavailableContentReports/noAction, count 1,
+  receipt **4e355d8aa9f71290c8e367a5975bff14a0746391265c9e85eb42f51fcc3fe298**,
+  22:07:17.149 UTC. To prokazuje tento regionální resolve průchod,
+  nikoli dřívější sankce, které zůstávají přijatým admin průchodem.
+
+Oba receipts mají správné ID zdroje/reportu/aktéra a původních +7 dní,
+2×POST HTTP 200 a 2×Auth/App Check VALID. Všechna 3 hlášení resolved,
+Business active/revize 5, ban absent, původních 38 zdrojů/pending žádost zachované.
+Důkazy build/modbiz-client-final-{proof,logs}.json. Při ověřování žádný živý zápis.
+Původní řízený úklid nebyl spuštěný: vlastník při tomto průchodu požaduje
+neveřejnou dostupnost nahlášeného obsahu i po smazání zdroje. Zbývající fixture
+zachovaná jako podklad; testovací stav content-ready, Auth účet nesmazaný.
+Metriky celé akceptace se před dokončením návaznosti/úklidu neuzavírají.
+
+<a id="reported-content-evidence-proposal"></a>
+
+##### Podklady nahlášeného obsahu nezávislé na živém zdroji – návrh čeká schválení
+
+**Ověřená současná mezera:** createContentReport ukládá u Shoutu a veřejného
+komentáře jen reference; u soukromé odpovědi i text a autora. Detail veřejného
+hlášení čte zdroj přímo. Jednotlivý deleteComment/removeReportedPublicContent
+komentář fyzicky odstraní bez evidence snapshotu. getArchivedCommentReportTarget
+umí jen archiv vzniklý při mazání celého účtu, ne běžně smazaný komentář.
+Samotný Shout tohoto pilotu stále existuje; chybí záměrně odstraněný první
+komentář. Z jeho původního veřejného hlášení nelze zpětně získat text.
+Text známý testovacímu manifestu nesmí být dodatečně vydávaný za zachovaný
+serverový důkaz. Dosavadní bezpečné resolve bez zdroje tedy funguje, ale
+nenahrazuje obsah potřebný pro posouzení nebo postih.
+
+Hranice účtové archivace zůstává podle
+[účtového plánu](plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md#schválený-rozsah):
+obsah existující při zpracování mazání účtu, pevně request createTime +60 dní;
+neobnovuje dříve fyzicky smazaný obsah. Nové uchování nahlášeného obsahu při
+jednotlivém mazání je samostatná retenční volba, ne již hotová univerzální archivace.
+
+Vlastníkovi předložený **ucelený místní úsek**, dosud bez zdrojové implementace:
+
+- atomicky se serverovým hlášením zachovat neměnný podklad Shoutu/komentáře/
+  soukromé odpovědi, s jednoznačnou inkarnací a bez klientem podvrženého textu;
+- moderaci zobrazit označený archivní podklad i bez zdroje/rodiče a bezpečně
+  na něj navázat dnešní rozhodování, role, geografii, souběh a idempotenci;
+- pevný deadline, hlídané kopie/vazby a běžný i účtový purge, bez prodlužování
+  vyřízením/opakováním; testy souběhu mazání, změny účtu, restartu a hranice retence;
+- testy, měření, dokumentace, jeden společný push/CI; bez živé migrace,
+  nasazení, dalších fixture/Auth účtů nebo změny DEV Rules/prostředků.
+
+**Otevřené rozhodnutí:** od kdy nových 60 dní. Doporučení předložené vlastníkovi:
+od prvního serverově potvrzeného hlášení daného obsahu; další hlášení, smazání
+ani vyřízení lhůtu neprodlužují, dřívější závazný účtový deadline má přednost.
+Alternativa předložená k volbě: od odstranění obsahu. Do odpovědi se nová lhůta,
+datová vrstva ani oprávnění neaktivují; dosavadní archiv a termíny se nemění.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

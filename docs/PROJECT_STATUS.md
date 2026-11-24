@@ -29,8 +29,8 @@ Zdroj **aa43ae18e3ebd0b5ed9a0be77d2c8f00010c6a74**, fix/moderation-user-history,
 Hosting **f8f0b0338d6eb03d**. Shoda 67 app souborů a osm HTTP kontrol obou
 domén ověřené; všech 27 Functions, oba plánovače i Rules beze změny.
 23 cílených testů, analýza bez nálezů, následná barevná regrese a vizuální
-kontrola skutečného světlého/tmavého tématu prošly. Živá ruční kontrola nového
-přehledu čeká; žádné serverové pole ani datum auditu se nepřepisuje.
+kontrola skutečného světlého/tmavého tématu prošly. Vlastník potvrdil nový
+přehled i celý závěrečný ruční blok; žádné datum auditu se nepřepisuje.
 
 Všech devět skutečných source archivů přesně odpovídá release balíčkům;
 27 ACTIVE Functions, ostatních 18 beze změny. Prostředky a oba minutové
@@ -79,13 +79,19 @@ Reaktivace TestAdmin potvrzená klientem, auditem i HTTP 200 s Auth/App Check VA
 všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhlasí.
 Po úplném CI nástroje připraven osiřelý cíl: odstraněný pouze první fixture
 komentář přes writer, druhý zachovaný, počet i živá projekce **2 → 1**,
-jeho hlášení nadále open. Nový seed ani Auth nevznikl.
-**Další krok předaný vlastníkovi v jednom bloku:** TestAdmin ověřit nový přehled
-a uzavřít pouze soukromé hlášení; dočasná fixture ověřit obnovený přístup a otevření
-formuláře bez publikace; přesný TestModerator uzavřít osiřelé komentářové hlášení.
-Serverově pak ověřit oba receipts/aktéry a provést původní řízený úklid.
-Úklid až po těchto důkazech;
-další obsah nezakládat. Původních 38 zdrojů
+jeho hlášení bylo následně uzavřené správným TestModerator. Nový seed ani Auth nevznikl.
+**Závěrečný ruční blok prošel:** přehled/obnovený přístup/formulář bez publikace
+i obě rozhodnutí. Server potvrdil TestAdmin resolve soukromého hlášení a
+TestModerator resolve osiřelého komentáře, 2×POST HTTP 200, Auth/App Check VALID,
+oba receipts s původními +7 dny. Všechna tři hlášení resolved.
+[Podklady a nový nález](MVP_SERVER_PLAN.md#moderation-business-final-client-results).
+**Úklid odložený kvůli kontrole podkladů.** Vlastník požaduje čitelný nahlášený
+obsah i po odstranění zdroje. [Ověřená mezera a navržený místní úsek](MVP_SERVER_PLAN.md#reported-content-evidence-proposal):
+veřejné reporty mají pouze reference, běžné mazání komentář fyzicky odstraní;
+účtový archiv nevzniká při jednotlivém mazání. Samotný pilotní Shout stále existuje.
+Čeká rozhodnutí o počátku nové 60denní lhůty a schválení konkrétního místního
+úseku; do té doby žádná zdrojová implementace, migrace ani další živé mazání.
+Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
