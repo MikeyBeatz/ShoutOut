@@ -88,14 +88,18 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    při publikování. Server/Rules, 19 kontrolovaných dokumentů a původní data zachované.
    Vlastník potvrdil celou ruční kontrolu opravy (lišta/Detail, krátká zpráva při
    publikování, Profil/odhlášení). **Reaktivace TestAdmin ověřená** active/revize 5,
-   všech pět Business auditů/receipts správně. Tři postihy už uložené a silnější
-   aktivní 7denní ban zachovaný. **Odchylka:** všechny TestAdmin nad Shoutem,
+   všech pět Business auditů/receipts správně. Tři postihy uložené, kratší ban
+   nezkrátil sedmidenní; jeho následná revokace TestAdmin také ověřená.
+   **Odchylka:** všechny TestAdmin nad Shoutem,
    nikoli plánovaný TestModerator/komentář. [Vlastník přijal přesné admin důkazy](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal);
    úzká volitelná výjimka nástroje prošla 24 emulátorovými / 115 nástrojovými
-   kontrolami a lintem; před mutací čeká úplné CI. Žádné změny auditu/rolí,
+   kontrolami a lintem; **3ec9664 / úplné CI 45486072998 success**. Žádné změny auditu/rolí,
    regionální sankční průchod se netvrdí. Ban UI do 1. prosince i odhlášení
-   potvrzené. Následuje revokace TestAdmin, obnovený přístup, dvě zbývající
-   hlášení a teprve potom řízený úklid; nové sankce ani obsah nezakládat.
+   potvrzené. Osiřelý komentář připraven, druhý zachovaný, počet/projekce 2 → 1.
+   [Schválené UI stavů a historie je místně ověřené](MVP_SERVER_PLAN.md#moderation-user-history-ui);
+   po vlastním úplném CI pouze DEV web, pak spojená ruční kontrola přehledu,
+   obnoveného přístupu a dvou zbývajících hlášení; teprve potom řízený úklid.
+   Nové sankce ani obsah nezakládat.
    Celá pilotní akceptace stále otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.

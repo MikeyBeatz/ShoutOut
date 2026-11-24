@@ -2394,11 +2394,61 @@ build/modbiz-observed-emulator-final.log a build/modbiz-observed-tools-ci.log.
 První úplné CI 45485542125 ze zdroje 1f64c6e bylo řízeně zastavené před
 doplněním této CI vazby; neslouží jako podklad pro mutace nebo nasazení.
 
-Před použitím mutací orphan/cleanup musí projít úplné CI přesného čistého
-zdroje; žádné nasazení aplikace, Functions nebo Rules tato úprava nepotřebuje.
-Nezávisle předán ruční krok TestAdmin: zrušit pouze aktivní sedmidenní ban;
-pak ověřit obnovený přístup bez nové publikace a obě zbývající hlášení.
-Celá živá akceptace i závěrečný úklid zatím zůstávají otevřené.
+Zdroj **3ec9664cf406fb18cdb531a0cad84689a5e07361** má
+[úspěšné úplné CI 45486072998](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45486072998),
+všechny potřebné kroky včetně Business/moderačních testů a webu. Ověřená čistá
+oddělená pracovní kopie; tato operátorová úprava nevyžaduje rollout aplikace,
+Functions ani Rules. Důkaz build/modbiz-observed-ci.json.
+
+**Revokace TestAdmin ověřená:** 24. listopadu **21:05:14.432 UTC**, audit
+sanctionRevocations/b94f2f57…6349e, správný UID/aktér a původní purgeAt;
+bans pointer odstraněný, kratší jednodenní záznam zachovaný. Receipt
+**aaca37c4bc6a2967de6bba7bc57688ae219691315d2e8e60a6d39b21543774a8**,
+result.revoked true a původních +7 dní. POST HTTP 200 / Auth a App Check VALID.
+Důkazy build/modbiz-revocation-proof.json a build/modbiz-revocation-logs.json.
+Původní expiresAt sankce se správně nemění; skutečný konec dokládá revokace.
+
+Po tomto CI schválený orphan krok ze stejného čistého zdroje odstranil pouze
+první syntetický komentář přes sdílený writer. Druhý zachovaný, zdrojový počet
+i publicStates projekce **2 → 1**, příslušné hlášení zůstává open a původních
+38 zdrojů/pending žádost zachované. Důkaz build/modbiz-orphan-proof.json;
+nejde o živou moderační akceptaci ani vlastní klientské mazání.
+Následuje obnovený přístup bez nové publikace a obě zbývající hlášení,
+společně s novým UI přehledem níže. Akceptace/úklid stále otevřené.
+
+<a id="moderation-user-history-ui"></a>
+
+##### Přehled stavu a historie uživatele – schválená klientská oprava
+
+Vlastník 24. listopadu výslovně schválil názvy „Ban“ a „Omezení tvorby“,
+stav aktivní/není aktivní a červenou ikonu při zákazu. Aktivní ban se v přehledu
+projeví také jako „Omezení tvorby – Aktivní kvůli banu“; nevytváří druhý postih.
+Aktuálně účinné pointery mají přednost v historii, jemně tónované pozadí,
+červený okraj a tučný název. Období vedle názvu se na úzkém displeji zalomí:
+dd.mm.rrrr–dd.mm.rrrr, u dosud trvalého postihu „trvale“, u varování datum udělení.
+Při předčasném zrušení se jako konec zobrazí uložené createdAt revokace;
+platnost se nezvětšuje pozdějším zrušením již expirovaného postihu.
+Původní plánovaná platnost zůstává v rozbaleném detailu, audit se nepřepisuje.
+
+Větev fix/moderation-user-history, lib/staff_user_enforcement.dart a zapojení
+v lib/src/staff_users.dart. Původní historie zůstává nejvýše 50 položek;
+pokud v první dávce chybí některý ze dvou účinných pointerů, dohledá se
+jednotlivě (nejvýše 2 dodatečná čtení), ověří vlastnictví a zařadí navrch.
+Bez nového indexu, změn serveru, oprávnění nebo retenčních dat. Podmínky
+zobrazení tlačítka revokace podle role/původního pointeru jsou zachované.
+
+Místně **23/23** cílených klientských testů (6 nových stav/čas/řazení/theme,
+dosavadní sankce a pozastavený Profil) a celá flutter analyze bez nálezů.
+Následná barevná regrese 6/6 a dvě vykreslení skutečných témat prošly;
+ověřené texty, datumy, barvy i ikony na šířce 390. Vizuální kontrola zachytila
+splývající ikony při silném errorContainer; konečná varianta používá jemný tón
+odvozený od povrchu a kontrastní ikony/text, doplněný regresní kontrastní test.
+Důkazy test/staff_user_enforcement_test.dart,
+build/modbiz-history-{regressions,analysis,final-test}.log a
+build/modbiz-history-{dark,light}.png. Plánované vlastní úplné CI a pouze
+DEV web; do té doby stále nasazený web 3ffe71a / 2edf6b744dcbe95e.
+Potom jedna společná ruční kontrola na stávajícím pilotu, bez nových účtů,
+postihů nebo obsahu. Celá pilotní akceptace/úklid ani metriky tím nejsou uzavřené.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě

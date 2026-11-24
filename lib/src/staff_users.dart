@@ -142,28 +142,51 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
           .limit(_moderationPageSize)
           .get(),
     ]);
-    final sanctions =
-        (results[4] as QuerySnapshot<Map<String, dynamic>>).docs.toList()
-          ..sort((a, b) {
-            final aTime = a.data()['createdAt'] as Timestamp?;
-            final bTime = b.data()['createdAt'] as Timestamp?;
-            return (bTime?.millisecondsSinceEpoch ?? 0).compareTo(
-              aTime?.millisecondsSinceEpoch ?? 0,
-            );
-          });
     final revocations = {
       for (final document
           in (results[5] as QuerySnapshot<Map<String, dynamic>>).docs)
         document.id: document.data(),
     };
+    final ban = (results[2] as DocumentSnapshot<Map<String, dynamic>>).data();
+    final restriction = (results[3] as DocumentSnapshot<Map<String, dynamic>>)
+        .data();
+    final now = DateTime.now();
+    final sanctions = await loadStaffSanctionHistory(
+      initial: (results[4] as QuerySnapshot<Map<String, dynamic>>).docs.map(
+        (document) => StaffSanctionRecord(
+          id: document.id,
+          data: document.data(),
+          revocation: revocations[document.id],
+        ),
+      ),
+      enforcement: StaffEnforcementState(
+        ban: ban,
+        restriction: restriction,
+        revocations: revocations,
+        now: now,
+      ),
+      userId: widget.userId,
+      limit: _moderationPageSize,
+      now: now,
+      loadMissing: (id) async {
+        final document = await firestore.collection('sanctions').doc(id).get();
+        final data = document.data();
+        return data == null
+            ? null
+            : StaffSanctionRecord(
+                id: document.id,
+                data: data,
+                revocation: revocations[document.id],
+              );
+      },
+    );
     return _StaffUserData(
       profile: (results[0] as DocumentSnapshot<Map<String, dynamic>>).data(),
       role: AccountRole.fromData(
         (results[1] as DocumentSnapshot<Map<String, dynamic>>).data(),
       ),
-      ban: (results[2] as DocumentSnapshot<Map<String, dynamic>>).data(),
-      restriction: (results[3] as DocumentSnapshot<Map<String, dynamic>>)
-          .data(),
+      ban: ban,
+      restriction: restriction,
       sanctions: sanctions,
       revocations: revocations,
     );
@@ -184,6 +207,12 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
           return const Center(child: CircularProgressIndicator());
         }
         final data = snapshot.data!;
+        final enforcement = StaffEnforcementState(
+          ban: data.ban,
+          restriction: data.restriction,
+          revocations: data.revocations,
+          now: DateTime.now(),
+        );
         return ListView(
           padding: const EdgeInsets.all(24),
           children: [
@@ -194,11 +223,7 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
             Text('UID: ${widget.userId}'),
             Text('Role: ${_staffRoleLabel(data.role)}'),
             const SizedBox(height: 20),
-            _ActiveEnforcementCard(title: 'Aktivní ban', active: data.ban),
-            _ActiveEnforcementCard(
-              title: 'Aktivní omezení tvorby',
-              active: data.restriction,
-            ),
+            StaffEnforcementSummary(state: enforcement),
             const SizedBox(height: 20),
             Text(
               'Historie postihů (${data.sanctions.length})',
@@ -210,9 +235,9 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
             for (final sanction in data.sanctions)
               _UserSanctionCard(
                 sanction: sanction,
-                revocation: data.revocations[sanction.id],
                 currentRole: widget.role,
-                activeSanctionIds: {
+                activeSanctionIds: enforcement.activeSanctionIds,
+                currentSanctionIds: {
                   if (data.ban?['sanctionId'] is String)
                     data.ban!['sanctionId'] as String,
                   if (data.restriction?['sanctionId'] is String)
@@ -227,96 +252,42 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
   );
 }
 
-class _ActiveEnforcementCard extends StatelessWidget {
-  const _ActiveEnforcementCard({required this.title, required this.active});
-
-  final String title;
-  final Map<String, dynamic>? active;
-
-  @override
-  Widget build(BuildContext context) {
-    final expiry = (active?['expiresAt'] as Timestamp?)?.toDate();
-    final isActive =
-        active != null && (expiry == null || expiry.isAfter(DateTime.now()));
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          isActive ? Icons.warning_amber : Icons.check_circle_outline,
-        ),
-        title: Text(title),
-        subtitle: Text(
-          isActive
-              ? '${active?['reason'] ?? ''}${expiry == null ? ' – trvale' : ' – do ${MaterialLocalizations.of(context).formatMediumDate(expiry)}'}'
-              : 'Není aktivní',
-        ),
-      ),
-    );
-  }
-}
-
 class _UserSanctionCard extends StatelessWidget {
   const _UserSanctionCard({
     required this.sanction,
-    required this.revocation,
     required this.currentRole,
     required this.activeSanctionIds,
+    required this.currentSanctionIds,
     required this.onRevoked,
   });
 
-  final QueryDocumentSnapshot<Map<String, dynamic>> sanction;
-  final Map<String, dynamic>? revocation;
+  final StaffSanctionRecord sanction;
   final AccountRole currentRole;
   final Set<String> activeSanctionIds;
+  final Set<String> currentSanctionIds;
   final VoidCallback onRevoked;
 
   @override
   Widget build(BuildContext context) {
-    final data = sanction.data();
+    final data = sanction.data;
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     final canRevoke =
-        revocation == null &&
-        activeSanctionIds.contains(sanction.id) &&
+        sanction.revocation == null &&
+        currentSanctionIds.contains(sanction.id) &&
         (currentRole.isAtLeast(AccountRole.seniorModerator) ||
             (data['moderatorId'] == currentUserId &&
                 data['permanent'] == false));
-    return Card(
-      child: ExpansionTile(
-        leading: Icon(revocation == null ? Icons.gavel_outlined : Icons.undo),
-        title: Text(_sanctionTypeLabel(data)),
-        subtitle: Text(
-          revocation == null
-              ? data['reason'] as String? ?? ''
-              : 'Zrušeno: ${revocation?['reason'] ?? ''}',
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SelectableText('Rozhodnutí: ${sanction.id}'),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Zdroj: ${data['sourceType'] ?? ''}'),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(_snapshotText(data['contentSnapshot'])),
-          ),
-          if (canRevoke) ...[
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
-                onPressed: () => _revoke(context),
-                icon: const Icon(Icons.undo),
-                label: const Text('Zrušit postih'),
-              ),
-            ),
-          ],
-        ],
-      ),
+    return StaffSanctionHistoryCard(
+      record: sanction,
+      active: sanction.active(activeSanctionIds, DateTime.now()),
+      sourceText: _snapshotText(data['contentSnapshot']),
+      revokeButton: canRevoke
+          ? OutlinedButton.icon(
+              onPressed: () => _revoke(context),
+              icon: const Icon(Icons.undo),
+              label: const Text('Zrušit postih'),
+            )
+          : null,
     );
   }
 
@@ -325,7 +296,7 @@ class _UserSanctionCard extends StatelessWidget {
       final completed = await _showServerSanctionRevocation(
         context,
         sanction.id,
-        sanction.data()['userId'] as String,
+        sanction.data['userId'] as String,
       );
       if (completed && context.mounted) onRevoked();
       return;
@@ -360,7 +331,7 @@ class _UserSanctionCard extends StatelessWidget {
     final reason = reasonController.text.trim();
     reasonController.dispose();
     if (confirmed != true || reason.isEmpty) return;
-    final data = sanction.data();
+    final data = sanction.data;
     final firestore = FirebaseFirestore.instance;
     final batch = firestore.batch();
     batch.set(firestore.collection('sanctionRevocations').doc(sanction.id), {
@@ -403,16 +374,9 @@ class _StaffUserData {
   final AccountRole role;
   final Map<String, dynamic>? ban;
   final Map<String, dynamic>? restriction;
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> sanctions;
+  final List<StaffSanctionRecord> sanctions;
   final Map<String, Map<String, dynamic>> revocations;
 }
-
-String _sanctionTypeLabel(Map<String, dynamic> data) => switch (data['type']) {
-  'warning' => 'Varování',
-  'contentRestriction' => 'Omezení tvorby',
-  'accountBan' => data['permanent'] == true ? 'Trvalý ban' : 'Dočasný ban',
-  _ => 'Postih',
-};
 
 String _snapshotText(Object? snapshot) {
   if (snapshot is! Map) return 'Snímek obsahu není dostupný.';

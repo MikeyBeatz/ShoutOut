@@ -22,6 +22,12 @@ Hosting **2edf6b744dcbe95e**. Bezpečný avatar parser, čitelná neutrální li
 „Účet pozastaven“, důvod přes Detail, krátký stav při pokusu publikovat
 a kontrastní dostupné odhlášení. Server/Rules/prostředky se tímto rolloutem neměnily.
 
+**Nové schválené UI detailu uživatele je připravené místně:**
+[stav banu/tvorby a historie](MVP_SERVER_PLAN.md#moderation-user-history-ui).
+23 cílených testů, analýza bez nálezů, následná barevná regrese a vizuální
+kontrola skutečného světlého/tmavého tématu prošly. Před DEV webem čeká vlastní
+úplné CI přesného zdroje. Žádné serverové pole ani datum auditu se nepřepisuje.
+
 Všech devět skutečných source archivů přesně odpovídá release balíčkům;
 27 ACTIVE Functions, ostatních 18 beze změny. Prostředky a oba minutové
 plánovače zachované, provoz 100 % na nových revizích. Webové otisky i osm HTTP
@@ -35,15 +41,18 @@ a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
 Manifest v docs/local má fázi content-ready; reaktivace potvrzená active/revize 5,
 Business profil active, zachovaná role 2 i aktivní první pobočka. Připraven právě jeden pilotní
 Shout, dva komentáře, jedna soukromá odpověď a tři hlášení. Tři postihy už uložené:
-varování / ban 7 dní / ban 1 den, aktivní zůstává 7 dní do 1. prosince.
+varování / ban 7 dní / ban 1 den; kratší nezkrátil původní sedmidenní ban.
+TestAdmin jej následně zrušil 24. listopadu 21:05 UTC: aktivní pointer odstraněný,
+audit zrušení i +7denní receipt správné, jednodenní historie zachovaná.
 **Odchylka pilotu:** všechny provedl it_admin nad Shoutem (varování report,
 bany přímé pozorování), nikoli it_moderator nad druhým komentářem.
 Vlastník výslovně přijal přesně tato tři potvrzení jako admin průchod.
 [Úprava ověřování/úklidu](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal)
 je místně ověřená: 24 emulátorových / 115 nástrojových kontrol a lint prošly.
 Samostatný místní důkaz váže původní digest, konkrétní UID, tři přesné receipts
-a jejich otisky; výchozí guard zůstává přísný. Před mutačním použitím čeká úplné
-CI přesného zdroje. Audit, role ani živá data se touto opravou nemění.
+a jejich otisky; výchozí guard zůstává přísný. Zdroj **3ec9664cf406fb18cdb531a0cad84689a5e07361** má
+[úspěšné úplné CI 45486072998](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45486072998).
+Audit, role ani živá data se touto opravou nemění.
 Regionální sankční oprávnění tím nejsou živě prokázaná. Vlastník potvrdil
 obrazovku banu do 1. prosince a dostupné odhlášení.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
@@ -64,9 +73,12 @@ na obou doménách souhlasí. Vlastník potvrdil „vše funguje“ u čitelnost
 krátkého stavu při publikování a Profil → Odhlásit se s návratem na přihlášení.
 Reaktivace TestAdmin potvrzená klientem, auditem i HTTP 200 s Auth/App Check VALID;
 všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhlasí.
-**Další krok předaný uživateli:** TestAdmin zrušit pouze aktivní sedmidenní ban
-dočasného UID. Potom ověřit obnovený přístup bez nové publikace, osiřelé resolve
-a poslední soukromé hlášení. Úklid až po těchto důkazech a úplném CI nástroje;
+Po úplném CI nástroje připraven osiřelý cíl: odstraněný pouze první fixture
+komentář přes writer, druhý zachovaný, počet i živá projekce **2 → 1**,
+jeho hlášení nadále open. Nový seed ani Auth nevznikl.
+**Další krok:** úplné CI a DEV web nového přehledu, potom společná ruční kontrola
+historie, obnoveného přístupu bez nové publikace, osiřelé resolve a posledního
+soukromého hlášení. Úklid až po těchto důkazech;
 další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
