@@ -7,8 +7,8 @@ const fields = { countryCode: 'cz', registrationNumber: '12345', submittedCompan
   initialLocationName: 'Branch', initialLocationAddress: 'Synthetic 2', initialLocationCity: '', initialLocationPostalCode: '', initialLocationCountryCode: 'cz', initialLocationProviderPlaceId: 'fixture',
   initialLocation: { latitude: 50.53, longitude: 14.13 } };
 const input = { expectedUserId: 'admin', applicationId: 'applicant', expectedRevision: 0, decision: 'reject', note: ' Concrete reason ', idempotencyKey: 'fixture-key' };
-test('Business preparation stays off and normalizes bounded fields/coordinates without trusting a client geohash', () => {
-  assert.equal(businessReviewEnabled, false);
+test('approved DEV Business core is enabled and normalizes bounded fields/coordinates without trusting a client geohash', () => {
+  assert.equal(businessReviewEnabled, true);
   const result = validateBusinessFields(fields); assert(result.initialLocation instanceof GeoPoint);
   assert.equal(result.countryCode, 'CZ'); assert.equal(result.initialLocationGeohash, encodeGeohash(50.53, 14.13));
   assert.equal(validateBusinessReview(input).note, 'Concrete reason');

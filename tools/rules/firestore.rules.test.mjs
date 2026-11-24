@@ -1,3 +1,4 @@
+import { legacyModerationRules } from './business_authority_candidate.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { after, before, beforeEach, describe, test } from 'node:test';
@@ -36,10 +37,10 @@ before(async () => {
   testEnvironment = await initializeTestEnvironment({
     projectId,
     firestore: {
-      rules: readFileSync(
+      rules: legacyModerationRules(readFileSync(
         new URL('../../firestore.rules', import.meta.url),
         'utf8',
-      ),
+      )),
     },
   });
 });

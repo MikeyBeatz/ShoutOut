@@ -38,12 +38,12 @@ Map<String, dynamic> application() => {
 
 void main() {
   test(
-    'prepared Business config stays off and requires a strict App Check gate',
+    'Business config enables only DEV and requires a strict App Check gate',
     () {
       final dev =
           jsonDecode(File('config/dev.json').readAsStringSync())
               as Map<String, dynamic>;
-      expect(WebEnvironment.fromJson(dev).serverBusinessReview, false);
+      expect(WebEnvironment.fromJson(dev).serverBusinessReview, true);
       expect(
         WebEnvironment.fromJson(
           jsonDecode(File('config/prod.json').readAsStringSync())

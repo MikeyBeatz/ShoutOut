@@ -26,6 +26,7 @@ import { decideContentReportsOperation, orphanReportResolutionEnabled } from './
 import { removeReportedPublicContentOperation } from './remove_reported_public_content.js';
 import { sanctionContentOperation, revokeSanctionOperation, managedModerationAuthorityEnabled } from './moderation_sanctions.js';
 import { moderationEvidenceRetentionEnabled } from './moderation_retention.js';
+import { reviewBusinessApplicationOperation, businessReviewEnabled } from './business_review.js';
 import { getArchivedCommentReportTargetOperation } from './archived_comment_report.js';
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
@@ -123,6 +124,14 @@ export const sanctionContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => sanctionContentOperation(request, getFirestore()));
+
+export const reviewBusinessApplication = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => {
+  if (!businessReviewEnabled) throw new HttpsError('failed-precondition', 'Business review is not enabled.');
+  return reviewBusinessApplicationOperation(request, getFirestore(), getAuth());
+});
 
 export const revokeSanction = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,

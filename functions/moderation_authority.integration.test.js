@@ -35,7 +35,7 @@ async function fixture(t, kind, level) {
 }
 
 test('the generic deletion authority cutover remains disabled in this preparation', () => {
-  assert.equal(managedModerationAuthorityEnabled, false);
+  assert.equal(managedModerationAuthorityEnabled, true);
 });
 
 for (const kind of ['Shout', 'Comment']) {

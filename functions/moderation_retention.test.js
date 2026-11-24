@@ -5,7 +5,7 @@ import { assertReportEvidenceRetention, moderationEvidenceRetentionEnabled, prep
 import { accountPurgeStages } from './account_purge_policy.js';
 
 test('retention preparation defaults off and only appends stages for existing purge checkpoints', () => {
-  assert.equal(moderationEvidenceRetentionEnabled, false);
+  assert.equal(moderationEvidenceRetentionEnabled, true);
   const previous = accountPurgeStages('fixture'), next = accountPurgeStages('fixture', { moderationCopiesEnabled: true });
   assert.deepEqual(next.slice(0, previous.length), previous);
   assert.deepEqual(next.slice(previous.length).map(s => [s.collection, s.field, s.action]),

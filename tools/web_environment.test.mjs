@@ -9,8 +9,8 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
-test('prepared Business review is off, strict and independently requires App Check', () => {
-  assert.equal(actualDev.serverBusinessReview, false);
+test('Business review is enabled in DEV, strict and independently requires App Check', () => {
+  assert.equal(actualDev.serverBusinessReview, true);
   assert.notEqual(loadConfig('prod').serverBusinessReview, true);
   for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverBusinessReview: value }, 'dev'));
   const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) };
@@ -18,8 +18,8 @@ test('prepared Business review is off, strict and independently requires App Che
   assert.throws(() => validateConfig({ ...disabled, serverBusinessReview: true }, 'dev'));
 });
 
-test('prepared content sanctions are off, strict and require App Check independently', () => {
-  assert.equal(actualDev.serverContentSanctions, false);
+test('content sanctions are enabled in DEV, strict and require App Check independently', () => {
+  assert.equal(actualDev.serverContentSanctions, true);
   assert.notEqual(loadConfig('prod').serverContentSanctions, true);
   const omitted = { ...actualDev }; delete omitted.serverContentSanctions;
   assert.doesNotThrow(() => validateConfig(omitted, 'dev'));
@@ -94,7 +94,7 @@ test('B4 delta client is enabled only in DEV and requires all parent-counter gat
 });
 // Individual optional-gateway tests must not inherit the active feed's
 // dependencies. The complete actual DEV configuration is checked separately.
-const dev = { ...actualDev, serverPublicReportRemoval: false, serverContentReportDecisions: false, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
+const dev = { ...actualDev, serverBusinessReview: false, serverContentSanctions: false, serverPublicReportRemoval: false, serverContentReportDecisions: false, serverPrivateReportRemoval: false, serverFeedMovement:false, serverFeedNews: false, serverDeltaFeed: false, serverSpatialFeed: false, serverReadSynchronization: false, serverUnreadFeed: false };
 
 test('B3 is enabled in DEV and requires the DEV spatial/read pair', () => {
   assert.equal(actualDev.serverUnreadFeed, true);

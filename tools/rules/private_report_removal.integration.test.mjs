@@ -1,3 +1,4 @@
+import { legacyModerationRules } from './business_authority_candidate.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -9,7 +10,8 @@ import { removeReportedPrivateReplyOperation as remove } from '../../functions/r
 import { operationTestKey } from '../../functions/test_helpers.js';
 const sdk = createRequire(new URL('../../functions/package.json', import.meta.url));
 const { initializeApp, deleteApp } = sdk('firebase-admin/app'), { getFirestore, Timestamp } = sdk('firebase-admin/firestore');
-const source = readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8');
+const deployedSource = readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8');
+const source = legacyModerationRules(deployedSource);
 const path = 'shouts/parent/privateReplies/message', reportId = 'recipient_parent_message', reportPath = `privateReplyReports/${reportId}`;
 const token = { email: 'fixture@example.test', email_verified: true }; let env, app, db;
 const roles = { author: 1, recipient: 1, business: 2, mod: 3, senior: 4, admin: 5, owner: 6, other: 1 };
@@ -37,7 +39,7 @@ test('prototype compiles, stays idempotent and refuses source drift without chan
   const candidate = privateReportRemovalCandidate(source); assert.equal(privateReportRemovalCandidate(candidate), candidate);
   assert.throws(() => privateReportRemovalCandidate('unrelated'), /source-drift/);
   assert.throws(() => privateReportRemovalCandidate(source + source), /source-drift/);
-  assert.equal(readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'), source);
+  assert.equal(readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'), deployedSource);
 });
 test('managed modes deny direct deletion for every role, forged removal audit and combined batches without partial writes', async () => {
   for (const mode of ['active', 'building', 'paused', 'off']) {

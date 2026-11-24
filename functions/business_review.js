@@ -10,7 +10,7 @@ const fail = (code, message) => { throw new HttpsError(code, message); };
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const hash = value => createHash('sha256').update(value).digest('hex');
 const email = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
-export const businessReviewEnabled = false;
+export const businessReviewEnabled = true;
 // Existing application constraints; branch names also obey locations.validLocation.
 const fields = Object.freeze({ countryCode: [2, 5], registrationNumber: [3, 40], submittedCompanyName: [2, 160],
   submittedAddress: [3, 200], submittedCity: [1, 100], submittedPostalCode: [2, 20], initialLocationName: [1, 80],

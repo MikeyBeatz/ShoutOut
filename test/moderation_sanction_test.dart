@@ -293,13 +293,16 @@ void main() {
     },
   );
   test(
-    'prepared server sanction flag is off in both environments and strictly requires App Check',
+    'server sanction flag is enabled only in DEV and strictly requires App Check',
     () {
       for (final environment in ['dev', 'prod']) {
         final json =
             jsonDecode(File('config/$environment.json').readAsStringSync())
                 as Map<String, dynamic>;
-        expect(WebEnvironment.fromJson(json).serverContentSanctions, false);
+        expect(
+          WebEnvironment.fromJson(json).serverContentSanctions,
+          environment == 'dev',
+        );
         for (final invalid in [null, 'true', 1]) {
           expect(
             () => WebEnvironment.fromJson({

@@ -10,7 +10,7 @@ import { assertReportEvidenceRetention } from './moderation_retention.js';
 
 const action = 'decideContentReports';
 const unavailableAction = 'resolveUnavailableContentReports';
-export const orphanReportResolutionEnabled = false;
+export const orphanReportResolutionEnabled = true;
 const collections = { shout: 'reports', comment: 'commentReports', privateReply: 'privateReplyReports' };
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const reportId = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,386}$/.test(value);

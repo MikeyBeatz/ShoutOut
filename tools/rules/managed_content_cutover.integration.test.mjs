@@ -1,3 +1,4 @@
+import { legacyModerationRules } from './business_authority_candidate.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -26,7 +27,7 @@ const control = mode => ({ schemaVersion: 2, revision: 12, mode, readGenerationI
 before(async () => {
   assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8080');
   env = await initializeTestEnvironment({ projectId: 'shoutout-rules-test', firestore: {
-    host: '127.0.0.1', port: 8080, rules: readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8'),
+    host: '127.0.0.1', port: 8080, rules: legacyModerationRules(readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8')),
   } });
   app = initializeApp({ projectId: 'shoutout-rules-test' }, 'managed-content-cutover'); db = getFirestore(app);
 });

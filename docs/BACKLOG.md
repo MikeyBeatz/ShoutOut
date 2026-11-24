@@ -200,9 +200,9 @@ dokument, pravidla, testy a případně veřejné právní texty.
 Aktuální počet zahrnuje nové zadání feedu a správu retenčního archivu.
 
 <!-- progress:backlog:start -->
-`███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,14 %** — vážené dokončení podúseků
 
-Hotové úseky: **209/313**. Celé položky: **108/158**; rozpracované: 6.
+Hotové úseky: **210/313**. Celé položky: **108/158**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Každá původní hlavní položka má stejnou pevnou váhu; podúseky ji rozdělují.
@@ -442,8 +442,8 @@ odložené nápady až za hlavními uživatelskými cestami.
   - [x] <a id="bl-080"></a> Přidat administrátorům a ownerovi frontu ověřených Business žádostí;
     ruční schválení atomicky vytvoří roli, profil, pobočku a audit.
   - [ ] <a id="bl-081"></a> **MVP** — Doplnit kontrolované zamítnutí a pozastavení Business žádosti
-    nebo aktivního účtu, včetně bezpečných stavových přechodů v Rules, odebrání
-    oprávnění, odůvodnění, auditu a odpovídajícího stavu v klientovi.
+    nebo aktivního účtu, včetně bezpečných stavových přechodů v Rules, blokace
+    nového firemního publikování při zachování role, odůvodnění, auditu a odpovídajícího stavu v klientovi.
   - [x] <a id="bl-082"></a> Při zamítnutém přidání, úpravě nebo smazání pobočky zachovat obrazovku,
     zobrazit lokalizovanou chybu a diagnostikovat pouze bezpečný Firebase kód.
   - [x] <a id="bl-083"></a> Nabídnout všechny země a území podle ISO 3166 s lokalizovaným vyhledáváním;

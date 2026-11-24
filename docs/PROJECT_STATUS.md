@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Společný DEV přechod schválený 24. listopadu a připravený místně** na
+feature/moderation-business-dev: [rozsah a pořadí](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal).
+Nový Business callable, zapnuté DEV klientské/serverové volby a obě Rules brány
+jsou ve zdrojích; zatím žádný rollout ani živá fixture. Místně prošly aktivní
+Rules před/po, celý pilot v emulátoru včetně ztracené odpovědi Auth a opakovaného
+úklidu, 96 historických Rules scénářů, 24 klientských a 36 nástrojových kontrol.
+Analýza/lint čisté. Následuje společný push/úplné CI a ověření přesných artefaktů,
+potom API/web → uzavření Rules → účtová údržba. Stejný rozsah znovu neschvalovat.
+Nový dočasný Auth účet se založí až při dostupném klientovi; ruční testy na konec.
+Připravený úklid ponechá původní sedmidenní receipts a minimální veřejnou značku,
+stejně jako schválený kontrakt smazaného účtu. Původní obsah/účty nezasažené.
+
 **Místní Business příprava i úplné CI dokončené:**
 [výsledky a hranice](MVP_SERVER_PLAN.md#business-review-local), větev
 feature/business-moderation, zdroj **464c0ad0f8d690101b651373dbfc9e336b4cfce1** /
@@ -16,11 +28,11 @@ verze žádosti, audit/receipt a klient za serverBusinessReview=false.
 (38/38 s konfigurací/bránou), 34/34 cílených nástrojových/balíčkových kontrol.
 Pozastavení zachová roli/navigaci a zastaví nové publikování i promo na serveru;
 zamítnutý žadatel opraví údaje bez dalšího Auth účtu. Wrapper a živé Business
-Rules uzavření ještě nejsou připravené k aktivaci. Celá dosavadní regrese,
-B2, purge, Storage a webový build v CI prošly. Další krok: souhlas s
+Rules uzavření v tomto starším checkpointu ještě nebyly připravené. Celá dosavadní regrese,
+B2, purge, Storage a webový build v CI prošly. Následně vlastník schválil
 [konkrétním společným DEV přechodem](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal),
 včetně wrapperu/Business brány a jednoho nového dočasného Auth účtu.
-Současný místní souhlas tuto novou živou vrstvu a pilot nepokrývá.
+Aktuální příprava tohoto schváleného živého rozsahu je uvedená výše.
 
 [Společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
 má **0b68535329e9a10763edb9f3fb04bd919fa886b7** /

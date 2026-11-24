@@ -35,7 +35,7 @@ async function fixture(t, type = 'comment', count = 1) {
   });
   return { uid, author, now, role, shout, source, reports, input, receipt, clock: (delta = 0) => () => new Date(now.getTime() + delta) };
 }
-test('the prepared unavailable-target feature defaults off', () => { assert.equal(orphanReportResolutionEnabled, false); });
+test('the approved DEV unavailable-target feature is enabled', () => { assert.equal(orphanReportResolutionEnabled, true); });
 for (const type of ['comment', 'privateReply']) test(`${type}: unavailable child resolves atomically without claiming removal, changing evidence or recreating content`, { skip: !enabled }, async t => {
   const f = await fixture(t, type), before = await f.reports[0].get(), parent = await f.shout.get(); await f.source.delete();
   const result = await decide(f.input(), db, f.clock(), option); assert.deepEqual(result, { decision: 'resolve', count: 1 });

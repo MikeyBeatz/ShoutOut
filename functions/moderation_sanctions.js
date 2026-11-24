@@ -10,7 +10,7 @@ import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
 
 // Activate with the checked client/Rules cutover, never by deploying this preparation.
-export const managedModerationAuthorityEnabled = false;
+export const managedModerationAuthorityEnabled = true;
 
 const day = 86400000, hash = value => createHash('sha256').update(value).digest('hex');
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);

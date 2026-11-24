@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { accountDeletionDevProposal, assertAccountDeletionDevTarget } from './account_deletion_dev.js';
 import { moderationEvidenceRetentionEnabled } from './moderation_retention.js';
 
-test('moderation copy maintenance shares the disabled report-retention gate', () => {
-  assert.equal(moderationEvidenceRetentionEnabled, false);
+test('moderation maintenance shares the approved DEV ingress gate', () => {
+  assert.equal(moderationEvidenceRetentionEnabled, true);
   assert.equal(accountDeletionDevProposal.moderationCopiesEnabled, moderationEvidenceRetentionEnabled);
 });
 

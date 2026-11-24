@@ -36,7 +36,10 @@ service cloud.firestore {
     }
 
     function managedModerationAuthority() {
-      return false; // moderation-authority-gate
+      return true; // moderation-authority-gate
+    }
+    function managedBusinessAuthority() {
+      return true; // business-authority-gate
     }
 
     function managedCardProjection() {
@@ -579,7 +582,7 @@ service cloud.firestore {
     match /accountRoles/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || eligibleModerator());
-      allow create: if eligibleAdministrator() &&
+      allow create: if !managedBusinessAuthority() && eligibleAdministrator() &&
         request.auth.uid != userId &&
         !exists(/databases/$(database)/documents/accountRoles/$(userId)) &&
         exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
@@ -924,6 +927,7 @@ service cloud.firestore {
           ]) &&
           request.resource.data.status == 'checking' &&
           request.resource.data.emailVerificationMethod == 'manual_admin' &&
+          !managedBusinessAuthority() &&
           request.resource.data.emailVerifiedBy == request.auth.uid &&
           request.resource.data.emailVerifiedAt == request.time
         ) ||
@@ -946,6 +950,7 @@ service cloud.firestore {
           ]) &&
           request.resource.data.status == 'active' &&
           request.resource.data.activationMethod == 'manual_admin' &&
+          !managedBusinessAuthority() &&
           request.resource.data.activatedBy == request.auth.uid &&
           request.resource.data.activatedAt == request.time
         );
@@ -975,7 +980,7 @@ service cloud.firestore {
         request.resource.data.billingEmail is string &&
         request.resource.data.billingEmail.size() <= 254 &&
         request.resource.data.updatedAt == request.time;
-      allow create: if eligibleAdministrator() &&
+      allow create: if !managedBusinessAuthority() && eligibleAdministrator() &&
         request.auth.uid != userId &&
         exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
         get(/databases/$(database)/documents/businessApplications/$(userId)).data.status == 'checking' &&
@@ -1025,7 +1030,7 @@ service cloud.firestore {
           isBusinessAccount();
         allow create: if
           (
-            eligibleAdministrator() &&
+            !managedBusinessAuthority() && eligibleAdministrator() &&
             request.auth.uid != userId &&
             exists(/databases/$(database)/documents/businessApplications/$(userId)) &&
             get(/databases/$(database)/documents/businessApplications/$(userId)).data.status == 'checking' &&
@@ -1093,7 +1098,7 @@ service cloud.firestore {
 
     match /businessActivationAudits/{auditId} {
       allow get, list: if eligibleAdministrator();
-      allow create: if eligibleAdministrator() &&
+      allow create: if !managedBusinessAuthority() && eligibleAdministrator() &&
         request.resource.data.keys().hasOnly([
           'applicationId', 'administratorId', 'action', 'createdAt'
         ]) &&

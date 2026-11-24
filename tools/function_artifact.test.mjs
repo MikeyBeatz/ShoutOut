@@ -28,8 +28,8 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('feed_news_pilot.js'));
     assert(!actual.includes('private_reply_deletion_pilot.js'));
     assert(!actual.includes('private_report_removal_pilot.js'));
-    // Business approval is a local core only; neither deployed host exports it.
-    assert(!actual.includes('business_review.js'));
+    assert(!actual.includes('moderation_business_pilot.js'));
+    assert.equal(actual.includes('business_review.js'), entry === 'content.js');
     assert.equal(actual.includes('decide_content_reports.js'), entry === 'content.js');
     assert(!actual.includes('content_report_decision_pilot.js'));
     assert.equal(actual.includes('remove_reported_public_content.js'), entry === 'content.js');

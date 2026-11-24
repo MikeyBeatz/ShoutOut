@@ -1922,9 +1922,43 @@ firem, duplicit a sporů ani produkční kapacita nejsou tímto úsekem vyřeše
 
 <a id="moderation-business-dev-next-proposal"></a>
 
-#### Navazující společný DEV přechod – návrh ke schválení
+#### Navazující společný DEV přechod – schválený rozsah
 
-Tento plán **není souhlas k implementaci dalšího rozsahu ani k živému pilotu**.
+**Vlastník 24. listopadu výslovně schválil celý tento DEV přechod a pilot.**
+Stejný rozsah, fixture ani prostředky znovu neschvalovat; ruční průchody až na konec.
+
+**Příprava 24. listopadu:** wrapper reviewBusinessApplication je nyní v content
+hostu se společným App Check, skutečným Admin Auth a schválenými prostředky.
+Zdrojové brány managedModerationAuthority/managedBusinessAuthority jsou true;
+serverové a DEV klientské volby také true. Produkční config zůstává bez nich.
+Dosud nenastalo žádné nasazení; stávající DEV pořád používá původní zdroj.
+Místní aktivní/baseline Rules kompilují a prošlo 20 cílených scénářů, dalších
+96 historických případů, 22 společných Business/pilotních, 24 klientských a
+36 nástrojových kontrol. Analýza a lint čisté. Přesné úplné CI následuje.
+
+Historické allow-testy ve firestore.rules.test, managed_content_cutover a
+private_report_removal záměrně používají legacyModerationRules: přepne jen dva
+přesně označené konstantní guardy. Nevydává ani nemění soubor. Ostatní současné
+access testy čtou aktivní zdroj. Samostatné authority/Business sady testují obě
+celé varianty a aktivní serverový průchod; staré allow-testy nejsou vydávané Rules.
+Aktivní guardy nepřidávají čtení/řídicí dokument a neřeší celkový bezpečnostní
+audit aplikace. Nový Business prototyp má ověřené role 1–6/legacy/anonymní,
+batch obcházení, nadměrná/chybná pole, cizí vlastnictví/časy/stavy a skutečné
+admin fronty; vlastní registrování/údaje/pobočky zůstávají zachované.
+
+Řízený tools/moderation_business_pilot.mjs má plan/status/account/content/orphan/
+cleanup, vyžaduje digest, přesný čistý release s úplným CI a schválenou
+připravenost klienta. Auth provisioning má jediné předem zvolené UID/e-mail,
+ověření inkarnace a opakovatelné navázání po ztracené odpovědi. Celý pilot prošel
+v emulátoru včetně zachování silnějšího banu, odvolání správného postihu,
+osiřelého resolve, cizích potomků odmítnutých před smazáním Auth, restartu úklidu
+a zachování updateTime receipts/původních dat. Místní zápis hesla zůstane pouze
+v ignorovaném docs/local manifestu a po úklidu se odstraní. Úklid nejdřív
+ověří serverová potvrzení všech pěti Business rozhodnutí, tří postihů,
+revokace a uzavření tří hlášení. Před odstraněním Auth zablokuje stale tokeny
+minimálním markerem a odstraněním vlastního profilu; marker bez PII zůstane.
+Nové minimum není změnou schváleného retenčního pravidla. Kvóty ostatních účtů
+se neresetují; skutečný cooldown se při živém seedování musí vyčkat.
 Spojuje připravené sankce/osiřelá hlášení/retenci/Rules s místním Business tokem,
 aby se znovu neschvaloval každý drobný wrapper. Cíl výhradně shoutout-dev-46c81;
 produkce, main, nové tarify, role, sankční délky a retence beze změny.

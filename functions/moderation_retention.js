@@ -2,7 +2,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { AccountPurgeNeedsReview, accountRetentionMillis, accountPurgeJobRef } from './account_purge_guard.js';
 
-export const moderationEvidenceRetentionEnabled = false;
+export const moderationEvidenceRetentionEnabled = true;
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 
 // The read participates in the same transaction as the new evidence copy. A

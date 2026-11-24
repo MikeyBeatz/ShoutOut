@@ -21,9 +21,9 @@ startovní brána se tím neobcházejí. [Evidence a pravidla](PROGRESS.md).
 ### Postup celého backlogu
 
 <!-- progress:backlog:start -->
-`███████████████████████████░░░░░░░░░░░░░` **69,82 %** — vážené dokončení podúseků
+`████████████████████████████░░░░░░░░░░░░` **70,14 %** — vážené dokončení podúseků
 
-Hotové úseky: **209/313**. Celé položky: **108/158**; rozpracované: 6.
+Hotové úseky: **210/313**. Celé položky: **108/158**; rozpracované: 7.
 <!-- progress:backlog:end -->
 
 Původních 157 hlavních položek zůstává zachovaných; 23. listopadu přibyla
@@ -83,10 +83,13 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    scénářů a úplné CI 0b68535 / 45335353004 success, zůstává vypnutá.
    [Business příprava](MVP_SERVER_PLAN.md#business-review-local) má 15 serverových
    scénářů a 12 nových klientských testů; **464c0ad / úplné CI 45339418090 success**
-   včetně celé regrese, purge, Storage a webu. Následuje schválení
+   včetně celé regrese, purge, Storage a webu. Vlastník již schválil
    [společného DEV přechodu](MVP_SERVER_PLAN.md#moderation-business-dev-next-proposal).
-   Nové callable ani Business Rules zatím nejsou aktivní; backlogové Business
-   kritérium zahrnující Rules není celé splněné. Žádný další ruční test nyní.
+   Ve větvi feature/moderation-business-dev je připravený wrapper, pilot i obě
+   aktivní Rules varianty; následuje přesné úplné CI a řízené nasazení. Živě
+   nové callable ani Business Rules zatím nejsou aktivní; backlogové Business
+   implementace zahrnující Rules je připravená, celé kritérium čeká živou akceptaci.
+   Žádný další ruční test nyní.
    Živý přechod nezaměňovat s hotovým místním kódem.
    Ruční testy zůstávají na konec.
    Jádro/wrappery a klient zůstávají za false. Výsledky 50/50 serverových,

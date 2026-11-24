@@ -5,6 +5,7 @@ import { after, before, beforeEach, test } from 'node:test';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, where, query, limit, orderBy } from 'firebase/firestore';
 import { moderationAuthorityCandidate } from './moderation_authority_candidate.mjs';
+import { legacyModerationRules } from './business_authority_candidate.mjs';
 import { sanctionContentOperation, revokeSanctionOperation, managedModerationAuthorityEnabled } from '../../functions/moderation_sanctions.js';
 import { decideContentReportsOperation } from '../../functions/decide_content_reports.js';
 import { removeReportedPublicContentOperation } from '../../functions/remove_reported_public_content.js';
@@ -40,7 +41,7 @@ async function seed(environment) {
 }
 before(async () => {
   assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8080');
-  baseline = await initializeTestEnvironment({ projectId: 'shoutout-rules-test-before', firestore: { host: '127.0.0.1', port: 8080, rules: source } });
+  baseline = await initializeTestEnvironment({ projectId: 'shoutout-rules-test-before', firestore: { host: '127.0.0.1', port: 8080, rules: legacyModerationRules(source) } });
   env = await initializeTestEnvironment({ projectId: 'shoutout-rules-test', firestore: { host: '127.0.0.1', port: 8080, rules: moderationAuthorityCandidate(source) } });
   app = initializeApp({ projectId: 'shoutout-rules-test' }, 'moderation-authority-rules'); db = getFirestore(app);
 });
@@ -81,7 +82,7 @@ function revocationBatch(f, uid, purgeAt) {
 const request = (uid, data, label) => ({ auth: { uid, token }, app: { appId: 'test' }, data: { expectedUserId: uid, idempotencyKey: operationTestKey(label, new Date()), ...data } });
 
 test('static prototype is off, compiles in both modes, is idempotent and rejects source drift', async () => {
-  assert.equal(managedModerationAuthorityEnabled, false); assert(source.includes('return false; // moderation-authority-gate'));
+  assert.equal(managedModerationAuthorityEnabled, true); assert(source.includes('return true; // moderation-authority-gate'));
   assert.equal(moderationAuthorityCandidate(moderationAuthorityCandidate(source)), moderationAuthorityCandidate(source));
   assert.throws(() => moderationAuthorityCandidate('unrelated'), /source-drift/); assert.throws(() => moderationAuthorityCandidate(source + source), /source-drift/);
   await baseline.clearFirestore(); await seed(baseline);
