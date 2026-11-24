@@ -12,7 +12,7 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 <!-- progress:mvp:start -->
 `████████████████████████░░░░░░░░░░░░░░░░` **60,86 %** — vážené dokončení podúseků
 
-Hotové úseky: **211/268**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **212/276**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -74,13 +74,14 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    Zachovat stávající role, délky/retence a 50 hlášení. Ochrana silnějšího
    aktivního postihu je nově výslovně schválená. Business: oprava/opětovné podání
    po zamítnutí, při pozastavení zastavit nové publikování/propagaci; přesný
-   místní implementační rozsah je předložen zvlášť.
+   místní implementační rozsah je schválený a nyní navazuje.
    [Osiřelá hlášení a společná autorita](MVP_SERVER_PLAN.md#moderation-orphans-local):
    50 místních případů prošlo, nové volby vypnuté. Schválená retenční oprava
    kopií má místní jádro a 5 cílených purge regresí;
    [přesné úplné CI 95e018f / 45283039166 success](MVP_SERVER_PLAN.md#moderation-local-ci-complete)
    uzavřené včetně celé purge sady a webu. Další místní Business úsek a
-   společná Rules brána čekají na konkrétní souhlas, potom navazující DEV plán.
+   společná Rules brána jsou schválené. Rules prototyp má 9/9 před/po scénářů,
+   zůstává vypnutý; následuje přesné společné CI a Business práce, potom DEV plán.
    Živý přechod nezaměňovat s hotovým místním kódem.
    Ruční testy zůstávají na konec.
    Jádro/wrappery a klient zůstávají za false. Výsledky 50/50 serverových,

@@ -1791,6 +1791,10 @@ který již vstoupil do přidaných fází; starší binární rollback není ko
 
 #### Návrh společného místního uzavření klientské moderační autority
 
+**Vlastník schválil místní přípravu i testy 24. listopadu.** Stejně schválil
+navazující místní Business úsek popsaný níže; další souhlas s těmito dvěma
+rozsahy nevyžadovat. Živá aktivace není součástí tohoto souhlasu.
+
 Předložit vlastníkovi: připravit výchozí vypnutou Rules bránu bez nové živé
 kolekce. Po budoucí aktivaci uzavře klientské zápisy sanctions, warnings,
 bans, contentRestrictions, sanctionRevocations, moderationClearances a update
@@ -1817,6 +1821,49 @@ Pouhé zapnutí serverového guardu nechrání starou přímou klientskou cestu.
 Společná zdrojová volba proto nenahrazuje ověření skutečně nasazených zdrojů
 jednotlivých Functions. Rollback po vstupu jobů do nových fází musí ponechat
 kompatibilní worker a nové API, nikoli starý zdroj s vypnutou údržbou.
+
+Připravený firestore.rules má **managedModerationAuthority=false** bez nového
+řídicího dokumentu. Žádná čtecí podmínka, role ani původní validátor se nemění;
+nová podmínka je jen u výše vyjmenovaných zápisů. Pomocník
+tools/rules/moderation_authority_candidate.mjs vytvoří pouze místní zapnutou
+variantu, kontroluje jedinou přesnou aktivační značku a drift odmítne.
+Vydávaný soubor ponechá vypnutý. Obě celé varianty se kompilují v emulátoru.
+
+**9/9** konečných scénářů prošlo (build/moderation-rules-gate-final.log).
+Před bránou procházejí platné warning/ban/restriction batch, revokace a
+clearance+approve; po zapnutí jsou odmítnuté včetně atomických batch a pro
+admina/ownera. Ověřeny role 1–6, legacy i anonymní, chybné typy/vlastnictví,
+nadměrný důvod, podkolekce a podvržený audit/receipt. Změna feed control na
+off/paused či jeho odstranění autoritu nevrátí. Vlastní warning/ban čtení,
+staff historie a všechny tři fronty podle skutečných klientských dotazů
+procházejí; cizí/soukromé a anonymní čtení zůstává odmítnuté. Serverové
+sankce/revokace, schválení, obě odstranění a vlastní mazání prošly ve stejné
+databázi. Nejde o úplný audit ostatních existujících oprávnění aplikace.
+První dva serverové testy měly neúplný laboratorní feed control; opravená
+fixture používá platný kontrakt a finální průchod je celý zelený. Žádná
+produkční pojistka kvůli testu nebyla oslabena. Přesné úplné CI ještě následuje.
+
+Před implementací je rozdělená pouze zbývající váha: původních 20 společné
+autority = 5 místní kód / 5 regrese / 10 živé uzavření. Původních 1 250 Business
+= 250 server / 250 kontrola / 200 klient / 150 kontrola klienta / 100 DEV /
+100 živá akceptace / 200 pravidla ruční kontroly a společná regrese. Váhy
+rodiče i již dokončená práce zůstávají beze změny; nové podúseky nepovolují
+nasazení. Business pravidla kontroly/duplicit/sporů zůstávají samostatně otevřená.
+
+<a id="business-review-local"></a>
+
+#### Schválený místní Business úsek
+
+Serverově sjednotit approve/reject/suspend/reactivate pro dnešního admin/owner
+a opravené resubmit stejného žadatele. Zachovat firemní roli při pozastavení,
+blokaci nového publikování/propagace na serveru a doběhnutí starších běžných
+Shoutů. Klient za vypnutou volbou; žádné nové registry, pravidla kontroly firem,
+role, kvóty, retenční lhůty ani živá data/Auth. Audit použije dosavadní soukromé
+businessActivationAudits se stejnými applicationId/administratorId vazbami na
+60denní úklid. Zachovat ochranu identity proti návratu smazaného účtu.
+Testy souběhu rozhodnutí/resubmit, opakování, změny role a mazání účtu;
+společný push/CI a konkrétní DEV návrh až podle výsledků. Implementace nyní
+navazuje na tento uložený Rules kontrolní bod.
 
 <a id="moderation-local-ci-complete"></a>
 

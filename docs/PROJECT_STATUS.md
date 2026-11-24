@@ -6,6 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Nově schválené 24. listopadu:** [společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
+a [místní Business tok](MVP_SERVER_PLAN.md#business-review-local). Rules prototyp
+je připravený za managedModerationAuthority=false, konečných **9/9** scénářů
+před/po prošlo včetně platných batch, rolí, dotazů i serverových operací.
+Přesné společné CI následuje; nyní navazuje Business implementace. Žádné živé
+nasazení nebo data. Nový souhlas s těmito místními rozsahy již nežádat.
+
 **Probíhá navazující moderace**, větev feature/moderation-sanctions. Vlastník
 po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
 na konec. [Místní kontrolní bod uzavřený](MVP_SERVER_PLAN.md#moderation-local-ci-complete):
@@ -37,9 +44,9 @@ Celé Rules uzavření, DEV aktivace a živá akceptace nadále čekají.
 
 Business: vlastník potvrdil opravu/opětovné podání zamítnuté žádosti a při
 pozastavení blokaci nového publikování/propagace se zachováním údajů a doběhnutí
-starších běžných Shoutů. Přesný místní implementační rozsah je předložen zvlášť;
-dosud žádná nová Business implementace. Také konkrétní místní Rules brána čeká
-na schválení. Poslední ověřený DEV dál 87d6687, žádné živé zápisy,
+starších běžných Shoutů. Přesný místní implementační rozsah i Rules brána již
+schválené; nejnovější příprava a další krok jsou výše. Poslední ověřený DEV
+dál 87d6687, žádné živé zápisy,
 Auth účty, Rules, prostředky, main ani produkce nezměněné. Staré cleaned piloty
 neobnovovat. Automatické kontroly průběžně; ruční průchody až na konec.
 

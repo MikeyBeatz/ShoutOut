@@ -15,6 +15,9 @@ rules_version = '2';
 // only by Admin callables. Their existing schemas/read/moderation rules below
 // remain valid; legacy validated writes apply only outside that managed state.
 // Private reply deletion is intentionally a separate lifecycle cutover.
+// Moderation authority prototype: sanctions, active bindings, revocations,
+// clearances and content-report decisions become server-owned when the
+// checked static gate is enabled. Existing validators/read queries stay intact.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -30,6 +33,10 @@ service cloud.firestore {
 
     function managedFeedProjection() {
       return exists(/databases/$(database)/documents/feedIndexControl/current);
+    }
+
+    function managedModerationAuthority() {
+      return false; // moderation-authority-gate
     }
 
     function managedCardProjection() {
@@ -587,7 +594,7 @@ service cloud.firestore {
     match /contentRestrictions/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || isModerator());
-      allow create, update: if eligibleModerator() &&
+      allow create, update: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
           'sanctionId'
@@ -617,7 +624,7 @@ service cloud.firestore {
           request.resource.data.sanctionId
         );
       allow list: if false;
-      allow delete: if eligibleModerator() &&
+      allow delete: if !managedModerationAuthority() && eligibleModerator() &&
         validRevocation(resource.data.sanctionId, userId);
     }
 
@@ -625,7 +632,7 @@ service cloud.firestore {
       allow get: if signedIn() &&
         (resource.data.userId == request.auth.uid || eligibleModerator());
       allow list: if eligibleModerator() && limited(50);
-      allow create: if eligibleModerator() &&
+      allow create: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'type', 'reason', 'createdAt', 'expiresAt', 'permanent',
           'moderatorId', 'status', 'sourceReportId', 'previousSanctionsCount',
@@ -700,7 +707,7 @@ service cloud.firestore {
       allow get: if signedIn() &&
         (resource.data.userId == request.auth.uid || eligibleModerator());
       allow list: if eligibleModerator() && limited(50);
-      allow create: if canRevokeSanction(sanctionId) &&
+      allow create: if !managedModerationAuthority() && canRevokeSanction(sanctionId) &&
         !exists(
           /databases/$(database)/documents/sanctionRevocations/$(sanctionId)
         ) &&
@@ -734,7 +741,7 @@ service cloud.firestore {
     match /bans/{userId} {
       allow get: if signedIn() &&
         (request.auth.uid == userId || isModerator());
-      allow create, update: if eligibleModerator() &&
+      allow create, update: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
           'sanctionId'
@@ -763,7 +770,7 @@ service cloud.firestore {
           eligibleSeniorModerator()
         );
       allow list: if false;
-      allow delete: if eligibleModerator() &&
+      allow delete: if !managedModerationAuthority() && eligibleModerator() &&
         validRevocation(resource.data.sanctionId, userId);
     }
 
@@ -779,7 +786,7 @@ service cloud.firestore {
           eligibleModerator()
         ) &&
         limited(50);
-      allow create: if eligibleModerator() &&
+      allow create: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'reason', 'createdAt', 'moderatorId', 'sanctionId'
         ]) &&
@@ -1598,7 +1605,7 @@ service cloud.firestore {
     }
 
     function validReportUpdate(reportId, clearanceId) {
-      return eligibleModerator() &&
+      return !managedModerationAuthority() && eligibleModerator() &&
         (
           (
             resource.data.status in ['open', 'escalated'] &&
@@ -1650,7 +1657,7 @@ service cloud.firestore {
     match /moderationClearances/{clearanceId} {
       allow get: if eligibleAdministrator();
       allow list: if eligibleAdministrator() && limited(50);
-      allow create: if eligibleModerator() &&
+      allow create: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'targetType', 'shoutId', 'contentId', 'createdAt', 'moderatorId',
           'reason', 'sourceReportIds'
