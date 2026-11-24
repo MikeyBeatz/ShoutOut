@@ -88,9 +88,11 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    při publikování. Server/Rules, 19 kontrolovaných dokumentů a původní data zachované.
    Vlastník potvrdil celou ruční kontrolu opravy (lišta/Detail, krátká zpráva při
    publikování, Profil/odhlášení). **Reaktivace TestAdmin ověřená** active/revize 5,
-   všech pět Business auditů/receipts správně. **Další krok: blok TestModerator**
-   varování přes hlášení Shoutu → přímý ban 7 dní → ban 1 den u druhého komentáře;
-   potom serverová kontrola silnější vazby, revokace a zbytek pilotu/úklid.
+   všech pět Business auditů/receipts správně. Tři postihy už uložené a silnější
+   aktivní 7denní ban zachovaný. **Odchylka:** všechny TestAdmin nad Shoutem,
+   nikoli plánovaný TestModerator/komentář. [Čeká přijetí přesných důkazů a úpravy kontrolního plánu](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal);
+   původní guard odmítá pokračovat, žádné změny auditu/rolí. Nezávisle čeká
+   ban UI dočasného účtu. Revokaci/úklid ani nové sankce zatím neprovádět.
    Celá pilotní akceptace stále otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.

@@ -2351,6 +2351,40 @@ kroky: přihlášení dočasné fixture pro ban UI, TestAdmin revokace silnějš
 postihu, dostupnost reaktivovaného účtu bez skutečné nové publikace, osiřelé
 resolve a zbývající soukromé hlášení; teprve potom řízený úklid jediné fixture.
 
+<a id="moderation-business-observed-admin-proposal"></a>
+
+##### Zjištěný skutečný sankční průchod – čeká upřesnění plánu
+
+Vlastník hlásí všechny tři kroky bez chyby. Čtecí kontrola 24. listopadu
+19:37 UTC zjistila **3** sankce i **3** propojené receipts pro správný dočasný
+UID a plánovaný Shout; původní fence/38 zdrojů zachované. Všechny ale vytvořil
+**it_admin (TestAdmin)** a cílem byl Shout, nikoli druhý komentář:
+
+| Rozhodnutí | Sankce = receipt | Zdroj |
+|---|---|---|
+| warning | a71f1dc563757c64fef5b0a91487e6ff52a89cb891c8081cb451d125e6d55b9a | report / shout |
+| ban7d | b94f2f575bbf760ed22f4bdbdbbf78f4df8604aedde398e67f789e354286349e | moderatorObservation / shout |
+| ban1d | 109beaa0aa214fb04fd203983bfc6c48a07548c6ccc7982ceb3a41882497721a | moderatorObservation / shout |
+
+Aktivní bans vazba správně odkazuje na **b94f2f57…6349e**, konec
+**1. prosince 2026 19:35:02.759 UTC**; kratší ban zůstal v historii a delší
+nepřepsal. První hlášení resolved/sanctioned. Tři POST HTTP 200 a tři
+Auth/App Check VALID ověřené v živých logs. Důkazy
+build/modbiz-sanction-actor-diagnostic.json a build/modbiz-sanction-logs.json.
+Původní status/orphan/cleanup guard správně odmítá wrong-sanction-actor;
+nebyl obejitý ani oslabený, při diagnóze žádný živý zápis.
+
+Předloženo vlastníkovi: přijmout **přesně tyto tři** skutečné serverové důkazy
+jako průchod TestAdmin nad Shoutem, upravit jen kontrolovaný ověřovací/úklidový
+nástroj a plán, doplnit testy úzce vymezené výjimky a úplné CI před mutačním
+použitím. Nepřepisovat původní audit, role, autora, zdroj ani jiné živé záznamy.
+Neoznačovat za živý regionální sankční test; ten zůstává doložený emulátorem.
+Do odpovědi jen čtení a dokumentace, žádná implementace ani opakované sankce.
+
+Nezávisle vyžádaný ruční krok: dočasný účet → očekávané „Účet je zablokován“
+s koncem 1. prosince a dostupným odhlášením, pak odhlásit. Zatím žádná revokace
+nebo vyřízení dalších hlášení; platný sedmidenní ban zachovat pro kontrolu.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

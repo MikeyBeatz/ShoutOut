@@ -34,7 +34,14 @@ přihlášení TestAdmin; vytvořen právě jeden nový dočasný ověřený Aut
 a jeho profil/právní přijetí/Business žádost „MVP Business 926a31d2“.
 Manifest v docs/local má fázi content-ready; reaktivace potvrzená active/revize 5,
 Business profil active, zachovaná role 2 i aktivní první pobočka. Připraven právě jeden pilotní
-Shout, dva komentáře, jedna soukromá odpověď a tři hlášení. Sankční část nyní probíhá.
+Shout, dva komentáře, jedna soukromá odpověď a tři hlášení. Tři postihy už uložené:
+varování / ban 7 dní / ban 1 den, aktivní zůstává 7 dní do 1. prosince.
+**Odchylka pilotu:** všechny provedl it_admin nad Shoutem (varování report,
+bany přímé pozorování), nikoli it_moderator nad druhým komentářem.
+Původní status/úklidový guard to správně odmítá. Předloženo přijetí přesných
+tří potvrzení jako admin průchodu a úprava pouze ověřování/úklidu s testy/CI;
+do souhlasu žádné změny zdrojů, rolí ani auditů. Regionální sankční oprávnění
+tím nejsou živě prokázaná. Nezávisle čeká UI kontrola banu dočasným účtem.
 První zamítnutí TestAdmin už potvrzené klientem, auditem/receipt a HTTP 200
 s Auth/App Check VALID. Resubmit je také potvrzený auditem/receipt a HTTP 200
 s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba ukládání
@@ -46,16 +53,16 @@ reprodukovaný z chyby generátoru fixture (barvy avataru jako int). Po výslovn
 souhlasu a úplném CI atomicky opraveny jen avatarId a dvě barvy ve users/publicProfiles
 jediného dočasného UID, fox/teal/navy. Změna skutečně zasáhla dva dokumenty;
 19 kontrolovaných pilotních dokumentů/jejich updateTime a neavatarová pole
-obou opravených dokumentů beze změny. Nové účty/obsah/postihy nevznikly.
+obou opravených dokumentů beze změny. Při této UI opravě nové účty/obsah/postihy nevznikly.
 Místně 15 klientských / 23 emulátorových / 113 nástrojových kontrol, oba vzhledy
 vizuálně prověřené; celý následný CI prošel. Webové otisky a osm HTTP kontrol
 na obou doménách souhlasí. Vlastník potvrdil „vše funguje“ u čitelnosti/Detailu,
 krátkého stavu při publikování a Profil → Odhlásit se s návratem na přihlášení.
 Reaktivace TestAdmin potvrzená klientem, auditem i HTTP 200 s Auth/App Check VALID;
 všech pět Business receipts/revizí/aktérů a původní 7denní lhůta souhlasí.
-**Další krok předaný uživateli:** TestModerator udělí varování přes hlášení Shoutu,
-potom nad druhým komentářem ban 7 dní a ban 1 den. Při chybě zastavit; po všech
-třech ověřit silnější aktivní ban před revokací. Další obsah nezakládat. Původních 38 zdrojů
+**Další krok předaný uživateli:** upřesnit přijetí skutečného TestAdmin průchodu
+a přihlásit dočasný účet pro obrazovku banu/odhlášení. Žádný postih zatím nerušit,
+ostatní hlášení nevyřizovat a další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.
