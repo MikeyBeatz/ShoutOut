@@ -41,7 +41,7 @@ s platným Auth/App Check. Vlastník mohl dodatek názvu zapomenout; chyba uklá
 není potvrzená a změna pole v živém resubmit zatím není ověřená. Schválení TestAdmin
 má správný audit/receipt a HTTP 200 s platným Auth/App Check. Pozastavení má také
 správný audit/receipt a platné Auth/App Check; dřívější Shout zůstává active.
-**UI nález opravený v DEV, čeká krátká ruční kontrola.** Šedý Profil byl
+**UI nález opravený v DEV a potvrzený vlastníkem.** Šedý Profil byl
 reprodukovaný z chyby generátoru fixture (barvy avataru jako int). Po výslovném
 souhlasu a úplném CI atomicky opraveny jen avatarId a dvě barvy ve users/publicProfiles
 jediného dočasného UID, fox/teal/navy. Změna skutečně zasáhla dva dokumenty;
@@ -49,8 +49,11 @@ jediného dočasného UID, fox/teal/navy. Změna skutečně zasáhla dva dokumen
 obou opravených dokumentů beze změny. Nové účty/obsah/postihy nevznikly.
 Místně 15 klientských / 23 emulátorových / 113 nástrojových kontrol, oba vzhledy
 vizuálně prověřené; celý následný CI prošel. Webové otisky a osm HTTP kontrol
-na obou doménách souhlasí. Uživatel nyní ověří čitelnost, krátký stav při publikování
-a Profil → Odhlásit se. Reaktivaci až potom, další obsah nezakládat. Původních 38 zdrojů
+na obou doménách souhlasí. Vlastník potvrdil „vše funguje“ u čitelnosti/Detailu,
+krátkého stavu při publikování a Profil → Odhlásit se s návratem na přihlášení.
+Opakovaný serverový status stále suspended/revize 4, bez postihů a s otevřenými
+třemi hlášeními. **Další krok: TestAdmin → Znovu aktivovat stejnou firmu**,
+teprve po ověření navázat sankcemi. Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;
 24. listopadu náhradní ovládání zastavila automatická kontrola neověřitelné URL.

@@ -2317,11 +2317,17 @@ Shout active, tři hlášení open, žádný postih. Nové účty ani další ob
 Důkazy build/modbiz-profile-ci.json, build/modbiz-profile-live-{before,after}.json,
 build/modbiz-profile-cloud-hosting.json a lokální stav avatarRepair v manifestu.
 
-**Zbývá ruční kontrola opravy:** uživatel ve stejném anonymním okně pod dočasným
-účtem načte ?mvp=3ffe71a přes Ctrl+R, ověří čitelné „Účet pozastaven“, důvod jen
-v Detailu, krátký stav při Přidat Shout a Profil → Odhlásit se s návratem na
-přihlášení. Zatím nereaktivovat, žádné hlášení nevyřizovat a obsah nemazat.
-Po potvrzení pokračovat stejným pilotem: reaktivace TestAdmin, sankce TestModerator,
+**Ruční kontrola opravy potvrzená:** vlastník odpověděl „vše funguje“ na celý
+průchod nové verze ?mvp=3ffe71a: čitelné „Účet pozastaven“, důvod přes Detail,
+krátký stav při Přidat Shout a vykreslený Profil → Odhlásit se s návratem na
+přihlášení. Tato UI oprava je uzavřená; zdroj/release/konfigurace se při potvrzení
+neměnily a není potřeba ji znovu testovat. Oba vzhledy byly místně vykreslené,
+živé potvrzení se vztahuje na uživatelovo aktuální prostředí, nikoli všechny prohlížeče.
+Následný čtecí status ověřil suspended/revize 4, zachované původní zdroje,
+tři otevřená hlášení a žádný postih. Žádné živé zápisy při této kontrole.
+**Další krok již předaný vlastníkovi:** TestAdmin → Business žádosti → Pozastavené
+Business → MVP Business 926a31d2 → Znovu aktivovat. Zatím žádné hlášení nevyřizovat
+ani obsah nemazat. Po serverovém ověření pokračovat stejným pilotem: sankce TestModerator,
 revokace a osiřelé resolve, teprve potom řízený úklid. Akceptaci ani celý milník
 neoznačovat hotové před dokončením. Oprava nepřidala nové váhy ani další MVP kredit.
 

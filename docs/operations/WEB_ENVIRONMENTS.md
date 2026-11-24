@@ -9,7 +9,8 @@ po samostatném souhlasu atomicky opraveny jen 3 avatarové hodnoty ve dvou
 dokumentech jediného dočasného UID. Serverový zdroj stále **05fc1ed**, všech 27 Functions,
 Rules/prostředky/plánovače, původních 38 Shoutů/žádost i pilotní stav suspended/revize 4
 beze změny. Žádný nový účet/obsah/postih, main/produkce nezměněné.
-Zbývá ruční kontrola opravy a pokračování jediného pilotu, nikoli nový seed.
+Vlastník potvrdil ruční kontrolu opravy včetně odhlášení a krátkého stavu při
+publikování. Následuje reaktivace a pokračování jediného pilotu, nikoli nový seed.
 
 **Předchozí DEV společná moderace a Business, 24. listopadu:**
 [Nasazení a technické ověření](../MVP_SERVER_PLAN.md#moderation-business-dev-results).

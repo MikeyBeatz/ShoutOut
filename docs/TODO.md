@@ -86,8 +86,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    Atomicky opraveny jen 3 avatarová pole ve dvou dokumentech dočasného UID;
    parser chrání Profil, lišta/odhlášení čitelné, důvod přes Detail a krátký stav
    při publikování. Server/Rules, 19 kontrolovaných dokumentů a původní data zachované.
-   **Další krok: krátká ruční kontrola Profilu/odhlášení a lišty**, potom
-   reaktivace a zbývající sankční pilot/úklid. Pilotní akceptace stále otevřená.
+   Vlastník potvrdil celou ruční kontrolu opravy (lišta/Detail, krátká zpráva při
+   publikování, Profil/odhlášení). **Další krok: reaktivace TestAdmin**, potom
+   zbývající sankční pilot/úklid. Celá pilotní akceptace stále otevřená.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
    Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
    Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
