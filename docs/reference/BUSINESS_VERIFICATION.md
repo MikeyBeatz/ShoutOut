@@ -8,9 +8,12 @@ administrátor nebo owner. Schválení atomicky vytvoří Business roli, profil,
 první pobočku a audit; vývojový projekt má také chráněný Admin SDK nástroj.
 Skutečný tok je v `PRODUCT_FLOWS.md` a technický model v `DATA_MODEL.md`.
 
-Současné administrátorské rozhraní umí žádost schválit a aktivovat. Zamítnutí
-žádosti ani pozastavení Business účtu zatím v klientovi a Firestore Rules není
-implementované. Pro veřejné webové MVP musí být ruční kontrola, aktivace,
+Nasazené administrátorské rozhraní umí žádost schválit a aktivovat. Místně je
+za vypnutou volbou připravený nový serverový a klientský tok schválení,
+zamítnutí, opravy žádosti, pozastavení a opětovné aktivace;
+[výsledky a přesné meze](../MVP_SERVER_PLAN.md#business-review-local).
+Callable wrapper a živé Business Rules uzavření zatím nejsou aktivované.
+Pro veřejné webové MVP musí být ruční kontrola, aktivace,
 zamítnutí a případné pozastavení účtu provozně dokončené. Přesná kritéria
 kontroly a řešení sporů jsou stále otevřená; před vydáním se musí schválit a
 otestovat. Automatické ověřování firem přes ARES, VIES ani jiné registry není v
@@ -24,7 +27,8 @@ vzniknou až po schválení. Pozastavení již aktivního Business účtu zastav
 publikování a propagaci, ponechá přístup k údajům a důvodu a nechá starší běžné
 Shouty doběhnout. Opětovnou aktivaci smí provést admin/owner. Role se při
 pozastavení neodebere, aby se zákaz nedal obejít osobním publikováním.
-Jde o schválený produktový směr, dosud ne implementovaný ani nasazený tok;
+Místní implementaci a testy vlastník schválil 24. listopadu; tok je připravený,
+dosud nenasazený. serverBusinessReview zůstává false a původní přímá cesta platí;
 kritéria kontroly firem a řešení sporů tím nejsou rozhodnutá.
 
 ## Zásady kontroly
@@ -48,8 +52,11 @@ v současném toku nevyžadují.
    veřejným vydáním je třeba stanovit, jak řešit nesoulad údajů, duplicitu
    firmy, spor o profil a změnu identifikačních údajů.
 4. Současné schválení atomicky vytvoří roli 2, Business profil, první pobočku,
-   stav žádosti a audit. Plánované zamítnutí a pozastavení musí uchovat
-   dohledatelný důvod.
+   stav žádosti a audit. Nové místní jádro doplňuje verzi žádosti, ověření
+   skutečného Auth e-mailu a důvod zamítnutí/pozastavení. Oprava zůstane na
+   stejném účtu bez Business oprávnění do nového schválení. Audit má pouze
+   původní applicationId/administratorId vazby a snímky stavu/verze, nikoli
+   kopie historických identit. Živý přechod ještě neproběhl.
 
 Přidělení a odebrání role zůstává důvěryhodnou operací. Veřejný odznak nesmí
 slibovat právní ověření vlastnictví firmy.

@@ -16,6 +16,8 @@ import 'app_locale.dart';
 import 'app_theme.dart';
 import 'avatar_style.dart';
 import 'business_application_state.dart';
+import 'business_access_scope.dart';
+import 'business_review_client.dart';
 import 'business_registration.dart';
 import 'email_verification.dart';
 import 'interactive_tutorial.dart';
@@ -34,6 +36,9 @@ class AuthGate extends StatelessWidget {
     stream: liveStreams.watch(
       ('auth', FirebaseAuth.instance),
       () => FirebaseAuth.instance.userChanges().map((user) {
+        if (useServerBusinessReview) {
+          businessReviewClient.retainViewer(user?.uid);
+        }
         liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
         interactionFeedback.retainViewer(user?.uid);
         readSessions.retainViewer(user?.uid);
@@ -284,7 +289,10 @@ class BusinessApplicationGate extends StatelessWidget {
           }
         });
       }
-      if (!requiresBusinessActivationChecks(applicationStatus)) {
+      if (!requiresBusinessActivationChecks(
+        applicationStatus,
+        allowSuspended: useServerBusinessReview,
+      )) {
         return _BusinessApplicationStatusPage(
           user: user,
           application: application,
@@ -336,7 +344,20 @@ class BusinessApplicationGate extends StatelessWidget {
                 role: role,
                 businessProfileExists: profileSnapshot.data!.exists,
                 businessProfile: profile,
+                allowSuspended: useServerBusinessReview,
               );
+              if (useServerBusinessReview &&
+                  [
+                    BusinessApplicationGateState.activeBusiness,
+                    BusinessApplicationGateState.suspendedBusiness,
+                  ].contains(gateState)) {
+                return BusinessAccessBoundary(
+                  publishingAllowed:
+                      gateState == BusinessApplicationGateState.activeBusiness,
+                  reason: profile?['reviewReason'] as String? ?? '',
+                  child: child,
+                );
+              }
               if (gateState == BusinessApplicationGateState.activeBusiness) {
                 return child;
               }
@@ -399,7 +420,9 @@ class _BusinessApplicationStatusPageState
     final description = widget.loadFailed
         ? 'Zkontroluj připojení a zkus stav načíst znovu.'
         : rejected
-        ? 'Žádost nyní nelze aktivovat. Pokud potřebuješ vysvětlení, kontaktuj podporu.'
+        ? useServerBusinessReview
+              ? 'Zkontroluj důvod zamítnutí, oprav údaje a odešli žádost znovu.'
+              : 'Žádost nyní nelze aktivovat. Pokud potřebuješ vysvětlení, kontaktuj podporu.'
         : suspended
         ? 'Business funkce jsou dočasně nedostupné. Pro další informace kontaktuj podporu.'
         : 'Kontaktní e-mail je potvrzený. Údaje firmy a první pobočku nyní ověřujeme.';
@@ -438,6 +461,25 @@ class _BusinessApplicationStatusPageState
                         businessTr(context, description),
                         textAlign: TextAlign.center,
                       ),
+                      if (useServerBusinessReview &&
+                          (rejected || suspended) &&
+                          (widget.application['reviewReason'] as String? ?? '')
+                              .isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: SelectableText(
+                            widget.application['reviewReason'] as String,
+                          ),
+                        ),
+                      if (useServerBusinessReview && rejected)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: OutlinedButton.icon(
+                            onPressed: _busy ? null : _editRejectedApplication,
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Opravit a znovu odeslat'),
+                          ),
+                        ),
                       if (companyName.isNotEmpty) ...[
                         const SizedBox(height: 20),
                         ListTile(
@@ -542,6 +584,41 @@ class _BusinessApplicationStatusPageState
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _editRejectedApplication() async {
+    final actor = widget.user.uid;
+    final pending = businessReviewClient.pending(actor, actor);
+    final original =
+        pending?.payload['application'] as Map? ?? widget.application;
+    final initial = Map<String, dynamic>.from(original)
+      ..['contactEmail'] =
+          widget.user.email ?? widget.application['contactEmail'];
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BusinessRegistrationPage(
+          initialApplication: initial,
+          hasPending: () => businessReviewClient.pending(actor, actor) != null,
+          onResubmit: (fields) {
+            final retry = businessReviewClient.pending(actor, actor);
+            return retry != null
+                ? businessReviewClient.retry(retry)
+                : businessReviewClient.execute(
+                    userId: actor,
+                    applicationId: actor,
+                    payload: {
+                      'decision': 'resubmit',
+                      'expectedRevision':
+                          widget.application['revision'] as int? ?? 0,
+                      'note': '',
+                      'application': fields,
+                    },
+                  );
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _cancelRegistration() async {

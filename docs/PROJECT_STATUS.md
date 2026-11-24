@@ -6,14 +6,25 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Nově schválené 24. listopadu:** [společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
-a [místní Business tok](MVP_SERVER_PLAN.md#business-review-local). Rules prototyp
-je připravený za managedModerationAuthority=false, konečných **9/9** scénářů
-před/po prošlo včetně platných batch, rolí, dotazů i serverových operací.
-Přesné společné CI následuje; nyní navazuje Business implementace. Žádné živé
-nasazení nebo data. Nový souhlas s těmito místními rozsahy již nežádat.
+**Místní Business příprava dokončená, úplné CI následuje:**
+[výsledky a hranice](MVP_SERVER_PLAN.md#business-review-local), větev
+feature/business-moderation. Serverové approve/reject/suspend/reactivate/resubmit,
+verze žádosti, audit/receipt a klient za serverBusinessReview=false.
+**15/15** emulátorových, **3/3** unit a **12** nových klientských testů
+(38/38 s konfigurací/bránou), 34/34 cílených nástrojových/balíčkových kontrol.
+Pozastavení zachová roli/navigaci a zastaví nové publikování i promo na serveru;
+zamítnutý žadatel opraví údaje bez dalšího Auth účtu. Wrapper a živé Business
+Rules uzavření ještě nejsou připravené k aktivaci. Další krok: přesné úplné CI
+a konkrétní společný DEV plán, teprve pak souhlas s novým živým rozsahem.
 
-**Probíhá navazující moderace**, větev feature/moderation-sanctions. Vlastník
+[Společná místní Rules brána](MVP_SERVER_PLAN.md#moderation-authority-local-proposal)
+má **0b68535329e9a10763edb9f3fb04bd919fa886b7** /
+[úplné CI 45335353004 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45335353004),
+9/9 před/po scénářů (59 společných). managedModerationAuthority zůstává false.
+Oba místní rozsahy vlastník výslovně schválil; znovu je neschvalovat.
+Žádné nasazení, živá data nebo Auth účty; ruční testy zůstávají až na konec.
+
+**Probíhá navazující moderace**, předchozí větev feature/moderation-sanctions. Vlastník
 po uzavření veřejného pilotu povolil pokračovat samostatně a ruční testy nechat
 na konec. [Místní kontrolní bod uzavřený](MVP_SERVER_PLAN.md#moderation-local-ci-complete):
 **95e018f8f14aeb1d1bb9f9244f16c1041e802b25** /

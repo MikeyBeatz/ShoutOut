@@ -52,57 +52,94 @@ class _ModerationContent extends StatelessWidget {
   }
 }
 
-class _BusinessApplicationList extends StatelessWidget {
+class _BusinessApplicationList extends StatefulWidget {
   const _BusinessApplicationList();
+  @override
+  State<_BusinessApplicationList> createState() =>
+      _BusinessApplicationListState();
+}
+
+class _BusinessApplicationListState extends State<_BusinessApplicationList> {
+  int _view = 0;
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-    stream: FirebaseFirestore.instance
-        .collection('businessApplications')
-        .where('status', whereIn: const ['pending_email', 'checking'])
-        .limit(50)
-        .liveSnapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return const Center(child: Text('Žádosti se nepodařilo načíst.'));
-      }
-      if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      final applications = snapshot.data!.docs;
-      if (applications.isEmpty) {
-        return const Center(child: Text('Žádné Business žádosti nečekají.'));
-      }
-      return ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: applications.length,
-        itemBuilder: (context, index) {
-          final application = applications[index];
-          final data = application.data();
-          final awaitingEmailState = data['status'] == 'pending_email';
-          return Card(
-            child: ListTile(
-              leading: const Icon(Icons.storefront_outlined),
-              title: Text(data['submittedCompanyName'] as String? ?? ''),
-              subtitle: Text(
-                '${awaitingEmailState ? 'E-mail ještě není potvrzený nebo se jeho stav dosud nesynchronizoval.\n' : ''}'
-                '${data['registrationNumber'] ?? ''}\n'
-                '${data['initialLocationName'] ?? ''} • ${data['initialLocationAddress'] ?? ''}',
-              ),
-              isThreeLine: true,
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => showDialog<void>(
-                context: context,
-                builder: (_) =>
-                    _BusinessApplicationDialog(application: application),
-              ),
-            ),
-          );
-        },
-      );
-    },
+  Widget build(BuildContext context) => Column(
+    children: [
+      if (useServerBusinessReview)
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              for (final entry in [
+                'Čekající žádosti',
+                'Aktivní Business',
+                'Pozastavené Business',
+              ].asMap().entries)
+                ChoiceChip(
+                  label: Text(entry.value),
+                  selected: _view == entry.key,
+                  onSelected: (_) => setState(() => _view = entry.key),
+                ),
+            ],
+          ),
+        ),
+      Expanded(
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('businessApplications')
+              .where(
+                'status',
+                whereIn: useServerBusinessReview && _view > 0
+                    ? [_view == 1 ? 'active' : 'suspended']
+                    : const ['pending_email', 'checking'],
+              )
+              .limit(50)
+              .liveSnapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Žádosti se nepodařilo načíst.'));
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final applications = snapshot.data!.docs;
+            if (applications.isEmpty) {
+              return const Center(
+                child: Text('Žádné Business žádosti nečekají.'),
+              );
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: applications.length,
+              itemBuilder: (context, index) {
+                final application = applications[index];
+                final data = application.data();
+                final awaitingEmailState = data['status'] == 'pending_email';
+                return Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.storefront_outlined),
+                    title: Text(data['submittedCompanyName'] as String? ?? ''),
+                    subtitle: Text(
+                      '${awaitingEmailState ? 'E-mail ještě není potvrzený nebo se jeho stav dosud nesynchronizoval.\n' : ''}'
+                      '${data['registrationNumber'] ?? ''}\n'
+                      '${data['initialLocationName'] ?? ''} • ${data['initialLocationAddress'] ?? ''}',
+                    ),
+                    isThreeLine: true,
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => showDialog<void>(
+                      context: context,
+                      builder: (_) =>
+                          _BusinessApplicationDialog(application: application),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    ],
   );
 }
 
@@ -146,9 +183,15 @@ class _BusinessApplicationDialogState
               '${data['submittedCity'] ?? ''} ${data['submittedPostalCode'] ?? ''}',
             ),
             row('Kontaktní e-mail', data['contactEmail']),
+            if (useServerBusinessReview) ...[
+              row('Stav žádosti', data['status']),
+              if ((data['reviewReason'] as String? ?? '').isNotEmpty)
+                row('Důvod posledního rozhodnutí', data['reviewReason']),
+            ],
             row(
               'Stav e-mailu',
-              readyForReview
+              readyForReview ||
+                      useServerBusinessReview && data['emailVerifiedAt'] != null
                   ? 'potvrzený'
                   : 'nepotvrzený nebo dosud nesynchronizovaný',
             ),
@@ -163,26 +206,33 @@ class _BusinessApplicationDialogState
           onPressed: _busy ? null : () => Navigator.pop(context),
           child: const Text('Zavřít'),
         ),
-        if (!readyForReview)
+        if (!readyForReview && !useServerBusinessReview)
           OutlinedButton.icon(
             onPressed: _busy ? null : _confirmEmailManually,
             icon: const Icon(Icons.mark_email_read_outlined),
             label: const Text('Potvrdit stav e-mailu ručně'),
           ),
-        FilledButton.icon(
-          onPressed: _busy || !readyForReview ? null : _activate,
-          icon: _busy
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.verified_outlined),
-          label: Text(
-            readyForReview
-                ? 'Schválit a aktivovat'
-                : 'Čeká na potvrzení e-mailu',
+        if (useServerBusinessReview)
+          FilledButton.icon(
+            onPressed: _busy ? null : _decideOnServer,
+            icon: const Icon(Icons.rule_outlined),
+            label: const Text('Rozhodnout'),
+          )
+        else
+          FilledButton.icon(
+            onPressed: _busy || !readyForReview ? null : _activate,
+            icon: _busy
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.verified_outlined),
+            label: Text(
+              readyForReview
+                  ? 'Schválit a aktivovat'
+                  : 'Čeká na potvrzení e-mailu',
+            ),
           ),
-        ),
       ],
     );
   }
@@ -224,6 +274,56 @@ class _BusinessApplicationDialogState
         );
         setState(() => _busy = false);
       }
+    }
+  }
+
+  Future<void> _decideOnServer() async {
+    final actor = FirebaseAuth.instance.currentUser?.uid;
+    if (actor == null) return;
+    final id = widget.application.id, data = widget.application.data();
+    final pending = businessReviewClient.pending(actor, id);
+    final choices = pending != null
+        ? [pending.payload['decision'] as String]
+        : switch (data['status']) {
+            'active' => ['suspend'],
+            'suspended' => ['reactivate'],
+            'pending_email' || 'checking' => ['approve', 'reject'],
+            _ => <String>[],
+          };
+    if (choices.isEmpty) return;
+    setState(() => _busy = true);
+    final completed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => BusinessReviewDialog(
+        applicationId: id,
+        companyName: data['submittedCompanyName'] as String?,
+        decisions: choices,
+        initialDecision: pending?.payload['decision'] as String?,
+        initialReason: pending?.payload['note'] as String? ?? '',
+        isCurrent: () => FirebaseAuth.instance.currentUser?.uid == actor,
+        hasPending: () => businessReviewClient.pending(actor, id) != null,
+        submit: (decision, note) {
+          final retry = businessReviewClient.pending(actor, id);
+          return retry != null
+              ? businessReviewClient.retry(retry)
+              : businessReviewClient.execute(
+                  userId: actor,
+                  applicationId: id,
+                  payload: {
+                    'decision': decision,
+                    'expectedRevision': data['revision'] as int? ?? 0,
+                    'note': note,
+                  },
+                );
+        },
+      ),
+    );
+    if (!mounted) return;
+    if (completed == true && FirebaseAuth.instance.currentUser?.uid == actor) {
+      Navigator.pop(context);
+    } else {
+      setState(() => _busy = false);
     }
   }
 

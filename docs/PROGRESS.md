@@ -95,7 +95,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 70,60 % | 12/17 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
-| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 61,75 % | 29/44 |
+| [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 66,30 % | 32/44 |
 | [mvp-18: Serverově vynutit pravidla současných bezplatných Business funkcí a zachovat oddělení oprávnění od budoucí ceny.](TODO.md#mvp-18) | 50,01 % | 3/6 |
 | [mvp-19: Dokončit audit překladů, přístupnosti a rozložení webu v mobilní i desktopové šířce pro všech sedm jazyků.](TODO.md#mvp-19) | 40,00 % | 2/5 |
 | [mvp-20: Projít všechny webové ruční regresní scénáře běžného, Business i moderačního účtu včetně pomalé nebo přerušované sítě.](TODO.md#mvp-20) | 0,00 % | 0/4 |
@@ -415,11 +415,11 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-orphan-dev: Bezpečné řešení osiřelých hlášení – DEV aktivace | deployment | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-orphan-accept: Bezpečné řešení osiřelých hlášení – živá akceptace | acceptance | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
 | moderation-authority-code: Společná moderační Rules brána – místní příprava | implementation | ✅ | [1](../firestore.rules), [2](../tools/rules/moderation_authority_candidate.mjs), [3](../tools/rules/moderation_authority.integration.test.mjs), [4](../docs/MVP_SERVER_PLAN.md#moderation-authority-local-proposal) |
-| moderation-authority-check: Společná moderační Rules brána – regrese před/po | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-authority-local-proposal) |
+| moderation-authority-check: Společná moderační Rules brána – regrese před/po | verification | ✅ | [1](../tools/rules/moderation_authority.integration.test.mjs), [2](../docs/MVP_SERVER_PLAN.md#moderation-authority-local-proposal), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45335353004) |
 | moderation-decision: Společné živé uzavření přímých moderačních zápisů a audit autority | deployment | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#moderation-sanctions-local) |
-| moderation-business-code: Business rozhodování – serverové jádro a audit | implementation | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
+| moderation-business-code: Business rozhodování – serverové jádro a audit | implementation | ✅ | [1](../functions/business_review.js), [2](../functions/business_review.integration.test.js), [3](../docs/MVP_SERVER_PLAN.md#business-review-local) |
 | moderation-business-check: Business rozhodování – serverové regrese | verification | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
-| moderation-business-client: Business rozhodování – klient za vypnutou volbou | implementation | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
+| moderation-business-client: Business rozhodování – klient za vypnutou volbou | implementation | ✅ | [1](../lib/business_review_gateway.dart), [2](../lib/business_review_dialog.dart), [3](../lib/business_registration.dart), [4](../test/business_review_test.dart), [5](../docs/MVP_SERVER_PLAN.md#business-review-local) |
 | moderation-business-client-check: Business rozhodování – klientské regrese | verification | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
 | moderation-business-dev: Business rozhodování – DEV aktivace | deployment | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
 | moderation-business-accept: Business rozhodování – živá akceptace | acceptance | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |

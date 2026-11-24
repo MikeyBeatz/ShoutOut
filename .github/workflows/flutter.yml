@@ -198,6 +198,12 @@ jobs:
         working-directory: tools
         run: npm run test:moderation-sanctions
 
+      - name: Test prepared Business review
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 4
+        working-directory: tools
+        run: npm run test:business-review
+
       - name: Test prepared B2 runtime
         if: steps.scope.outputs.full != 'false'
         # 10k real emulator uploads take ~6.7 min locally including fixture cleanup.

@@ -9,6 +9,15 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('prepared Business review is off, strict and independently requires App Check', () => {
+  assert.equal(actualDev.serverBusinessReview, false);
+  assert.notEqual(loadConfig('prod').serverBusinessReview, true);
+  for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverBusinessReview: value }, 'dev'));
+  const disabled = { ...actualDev, ...Object.fromEntries(Object.keys(actualDev).filter(k => k.startsWith('server')).map(k => [k, false])) };
+  delete disabled.appCheckSiteKey;
+  assert.throws(() => validateConfig({ ...disabled, serverBusinessReview: true }, 'dev'));
+});
+
 test('prepared content sanctions are off, strict and require App Check independently', () => {
   assert.equal(actualDev.serverContentSanctions, false);
   assert.notEqual(loadConfig('prod').serverContentSanctions, true);

@@ -86,6 +86,12 @@ export function validateConfig(config, environment) {
   if (Object.hasOwn(config, 'serverContentSanctions') && typeof config.serverContentSanctions !== 'boolean') {
     throw new Error('serverContentSanctions must be a boolean.');
   }
+  if (Object.hasOwn(config, 'serverBusinessReview') && typeof config.serverBusinessReview !== 'boolean') {
+    throw new Error('serverBusinessReview must be a boolean.');
+  }
+  if (config.serverBusinessReview === true && !config.appCheckSiteKey) {
+    throw new Error('Server Business review requires web App Check.');
+  }
   if (config.serverContentSanctions === true && !config.appCheckSiteKey) {
     throw new Error('Server content sanctions require web App Check.');
   }

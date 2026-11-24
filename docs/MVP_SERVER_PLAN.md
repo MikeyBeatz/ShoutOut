@@ -1795,7 +1795,7 @@ který již vstoupil do přidaných fází; starší binární rollback není ko
 navazující místní Business úsek popsaný níže; další souhlas s těmito dvěma
 rozsahy nevyžadovat. Živá aktivace není součástí tohoto souhlasu.
 
-Předložit vlastníkovi: připravit výchozí vypnutou Rules bránu bez nové živé
+Schválený rozsah: připravit výchozí vypnutou Rules bránu bez nové živé
 kolekce. Po budoucí aktivaci uzavře klientské zápisy sanctions, warnings,
 bans, contentRestrictions, sanctionRevocations, moderationClearances a update
 tří typů obsahových hlášení (reports/commentReports/privateReplyReports).
@@ -1841,7 +1841,11 @@ sankce/revokace, schválení, obě odstranění a vlastní mazání prošly ve s
 databázi. Nejde o úplný audit ostatních existujících oprávnění aplikace.
 První dva serverové testy měly neúplný laboratorní feed control; opravená
 fixture používá platný kontrakt a finální průchod je celý zelený. Žádná
-produkční pojistka kvůli testu nebyla oslabena. Přesné úplné CI ještě následuje.
+produkční pojistka kvůli testu nebyla oslabena. Zdroj
+**0b68535329e9a10763edb9f3fb04bd919fa886b7** má
+[úspěšné úplné CI 45335353004](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45335353004),
+včetně společné 59členné moderační sady a všech dosavadních kontrol/buildů.
+Rules brána nadále false, živé uzavření není započítané.
 
 Před implementací je rozdělená pouze zbývající váha: původních 20 společné
 autority = 5 místní kód / 5 regrese / 10 živé uzavření. Původních 1 250 Business
@@ -1862,8 +1866,52 @@ role, kvóty, retenční lhůty ani živá data/Auth. Audit použije dosavadní 
 businessActivationAudits se stejnými applicationId/administratorId vazbami na
 60denní úklid. Zachovat ochranu identity proti návratu smazaného účtu.
 Testy souběhu rozhodnutí/resubmit, opakování, změny role a mazání účtu;
-společný push/CI a konkrétní DEV návrh až podle výsledků. Implementace nyní
-navazuje na tento uložený Rules kontrolní bod.
+společný push/CI a konkrétní DEV návrh až podle výsledků.
+
+**Místně připraveno na feature/business-moderation:** functions/business_review.js
+obsahuje transakční stavový automat, bez callable exportu. Verze žádosti
+expectedRevision/revision (starý dokument = 0) ohradí zastaralé rozhodnutí;
+approve/reject přijímají pending_email/checking, resubmit jen vlastní rejected,
+suspend pouze active a reactivate pouze suspended. Schválení vytvoří roli 2,
+profil a pobočku initial atomicky s aplikací, auditem a sedmidenním receipt.
+Resubmit nepřidělí roli ani Business profil; e-mail pochází z ověřeného Auth,
+geohash přepočítává server. Admin/owner se ověřuje z accountRoles uvnitř téže
+transakce, před čtením cizího Auth. Zákaz, mazání/marker a privilegovaná cílová
+role operaci zastaví. App Check a ověřený e-mail jsou povinné.
+
+Audit nese applicationId/administratorId, action, revision, operationId,
+důvod, čas a předchozí/následný stav s verzí. Nedubluje celé žádosti, e-maily
+ani historická UID aktérů; původní aplikační/profile data mají dál stávající
+účtový archiv. Nové reviewedBy kopie nevznikají. Původní applicationId purge
+a administratorId scrub, activatedBy a assignedBy zůstávají použitelné;
+serverOperations má jen vazby, fingerprint a výsledek bez důvodu/obsahu.
+Přesné opakování používá tentýž receipt; změna payloadu nebo role jej nepřepíše.
+
+Klientský serverBusinessReview=false je explicitně v DEV, výchozí false
+v produkci i nativním běhu. Připravená fronta rozlišuje čekající/aktivní/
+pozastavené žádosti, dialog vyžaduje důvod zamítnutí/pozastavení. Opravený
+formulář zachová údaje, nezakládá další Auth účet, e-mail je pouze pro čtení.
+Nejasná odpověď zamkne původní payload i pokus; změna účtu zruší místní vazbu
+a opožděná odpověď nesmí potvrdit akci pro jinou relaci. Pozastavení zachová
+navigaci, profil a mazání účtu, zobrazí důvod a zakáže nové publikování; stávající
+createShout kontroluje status Business profilu transakčně. Původní Shouty se nemění.
+
+Ověřeno místně: **15/15** emulátorových scénářů, **3/3** unit validací,
+**12** nových klientských testů (**38/38** s dosavadní konfigurací/bránou),
+**34/34** nástrojových/balíčkových kontrol. Souběh dvou adminů a dvou oprav,
+odvolání role, ztracená odpověď, rollback auditu, mazání během Auth kontroly,
+skutečné publikování před/po pozastavení, všechny promo volby a osobní bypass,
+publikace souběžná s pozastavením, retenční vazby i zamknutí formuláře jsou
+součástí trvalých testů. První publikační fixture postrádala avatar; doplněná
+fixture nyní ověřuje konkrétní business-location-unavailable, nikoli libovolnou
+chybu precondition. Doklady build/business-review-{emulator,client,tools,unit}.log.
+Nový npm --prefix tools run test:business-review je samostatně zapojený do
+úplného CI. Přesné společné CI této Business přípravy ještě následuje.
+
+Žádné nové API zatím není nasazené; původní klientská aktivace a Business Rules
+jsou beze změny. Před živým přechodem dokončit wrapper a přímou Business autoritu,
+ověřit návratovou verzi, plán fixture a čerstvý přesný zdroj/CI. Kritéria kontroly
+firem, duplicit a sporů ani produkční kapacita nejsou tímto úsekem vyřešené.
 
 <a id="moderation-local-ci-complete"></a>
 
@@ -1886,8 +1934,8 @@ a celý moderační milník zůstávají otevřené. Retenční oprava nepřidá
 
 Žádný rollout, živý zápis, nový Auth účet, Rules změna, reset kvóty, migrace,
 změna prostředků/Scheduleru, main ani produkce. Nové volby stále false.
-Další konkrétní místní Business úsek i výše popsaná Rules brána jsou předložené
-vlastníkovi ke schválení; do souhlasu pouze průzkum. Budoucí DEV rozsah,
+Další konkrétní místní Business úsek i výše popsaná Rules brána byly následně
+schválené 24. listopadu; jejich aktuální výsledky jsou výše. Budoucí DEV rozsah,
 testovací data a kompatibilní návrat připravit před jeho samostatným souhlasem.
 Ruční testy zatím nepotřebujeme, zůstávají na konec dostupné samostatné práce.
 

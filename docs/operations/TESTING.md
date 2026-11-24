@@ -8,6 +8,15 @@ Kontrola dokumentace: `node tools/check_docs.mjs`; odkazy, kotvy, dohledatelnost
 metriky a registrované snímky, bez externích URL a neveřejných local souborů.
 Je zapojená v CI jako samostatný krok. Neověřuje nasazení ani právní aktuálnost.
 
+Místní Business stavový automat má `npm --prefix tools run test:business-review`
+a vlastní úplný CI krok (4 minuty). **15** emulátorových případů doplňují
+3 unit validace a 12 Flutter regresí v test/business_review_test.dart.
+Prověřují skutečnou Business publikaci, souběhy, opakování, změnu role/účtu,
+rollback, mazání účtu, opravu formuláře a retenční vazby; wrapper/živá akceptace
+tím hotové nejsou. [Přesný rozsah](../MVP_SERVER_PLAN.md#business-review-local).
+Společná moderační Rules brána má **9** před/po regresí ve stávajícím kroku
+test:moderation-sanctions (celkem 59); aktivační prototyp kořenové Rules nemění.
+
 Společná bezpostihová rozhodnutí mají samostatné
 `npm --prefix tools run test:report-decisions` a úplný CI krok
 Test prepared content report decisions (3 min). Ověřují všechny 3 typy

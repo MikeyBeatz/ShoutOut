@@ -98,6 +98,14 @@ class WebEnvironment {
     if (serverCommentDeletion && key == null) {
       throw StateError('Server comment deletion requires web App Check.');
     }
+    if (json.containsKey('serverBusinessReview') &&
+        json['serverBusinessReview'] is! bool) {
+      throw StateError('serverBusinessReview must be a boolean.');
+    }
+    serverBusinessReview = json['serverBusinessReview'] == true;
+    if (serverBusinessReview && key == null) {
+      throw StateError('Server Business review requires web App Check.');
+    }
     final privateReportRemoval = json['serverPrivateReportRemoval'];
     if (json.containsKey('serverContentSanctions') &&
         json['serverContentSanctions'] is! bool) {
@@ -340,6 +348,7 @@ class WebEnvironment {
   late final bool serverContentReportDecisions;
   late final bool serverPublicReportRemoval;
   late final bool serverContentSanctions;
+  late final bool serverBusinessReview;
   late final bool serverShoutDeletion;
   late final bool serverAccountDeletionPreparation;
   late final bool serverAccountDeletionFinalization;

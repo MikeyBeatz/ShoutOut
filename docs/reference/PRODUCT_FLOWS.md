@@ -53,6 +53,12 @@ z obrazovky Upravit profil nebo z Business registrace.
 
 ## Business registrace
 
+Místní navazující tok je připravený za serverBusinessReview=false:
+[zamítnutí/opětovné podání a pozastavení](../MVP_SERVER_PLAN.md#business-review-local).
+Oprava předvyplní původní údaje bez založení dalšího Auth účtu. Pozastavený
+Business zachová profil a navigaci, s důvodem a blokací nového publikování;
+role zůstane Business. Níže popsaný původní tok je zatím nadále nasazený.
+
 Business registrace je samostatný formulář ve stejném vizuálním stylu. Obsahuje:
 
 - zemi a lokální registrační identifikátor,

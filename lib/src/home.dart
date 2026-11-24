@@ -1428,6 +1428,19 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
               child: FloatingActionButton.extended(
                 heroTag: 'create-shout',
                 onPressed: () async {
+                  final businessAccess = BusinessAccessScope.maybeOf(context);
+                  if (businessAccess?.publishingAllowed == false) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          businessAccess!.reason.isEmpty
+                              ? 'Business publikování je pozastavené.'
+                              : businessAccess.reason,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   completeInteractiveTutorialAction(3);
                   final shout = await showDialog<Shout>(
                     context: context,

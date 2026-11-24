@@ -237,6 +237,16 @@ profilů, aby se bez přepisování historie změnil všude, kde se autor zobraz
 
 ## Business účet a provozovny
 
+Tabulka níže popisuje dosud nasazený tok. Místní příprava
+[Business rozhodování](../MVP_SERVER_PLAN.md#business-review-local) přidává
+revision žádosti, reviewedAt/reviewReason a resubmittedAt. Audit ve stejné
+businessActivationAudits nese action approve/reject/suspend/reactivate/resubmit,
+revision/operationId/reason a before/after obsahující jen status a revision.
+Aktér zůstane pouze v již uklízeném administratorId; nevzniká další reviewedBy.
+V serverOperations jsou pouze technické vazby a výsledek s původní 7denní
+lhůtou. Nová cesta nemá exportovaný callable a serverBusinessReview=false;
+Business Rules a živé dokumenty zatím změněné nejsou.
+
 | Cesta | Důležitá pole | Význam |
 |---|---|---|
 | `businessApplications/{uid}` | `countryCode`, `registrationNumber`, `submittedCompanyName`, fakturační adresa, `initialLocationName`, adresa a země provozovny, `initialLocation`, `initialLocationGeohash`, `initialLocationProviderPlaceId`, `contactEmail`, `status`, `submittedAt`; po ruční aktivaci `activatedAt`, `activatedBy`, `activationMethod` | Žádost vzniká ve stavu `pending_email`, po ověření přechází do `checking`. Administrátor nebo owner ji může ručně schválit; vývojový Admin SDK nástroj zvládá jen ověřený `pending_email`. Zamítnutí a pozastavení zatím chybí. |

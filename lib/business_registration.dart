@@ -16,7 +16,15 @@ import 'registration_timing.dart';
 const businessSupportEmail = 'support@shoutout.app';
 
 class BusinessRegistrationPage extends StatefulWidget {
-  const BusinessRegistrationPage({super.key});
+  const BusinessRegistrationPage({
+    super.key,
+    this.initialApplication,
+    this.onResubmit,
+    this.hasPending,
+  });
+  final Map<String, dynamic>? initialApplication;
+  final Future<void> Function(Map<String, dynamic> fields)? onResubmit;
+  final bool Function()? hasPending;
 
   @override
   State<BusinessRegistrationPage> createState() =>
@@ -37,10 +45,66 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
   final _confirmPassword = TextEditingController();
   Country _country = Country.parse('CZ');
   bool _busy = false;
+  bool _pending = false;
+  bool get _locked => _busy || _pending;
   String? _progress;
   bool _obscurePassword = true;
   bool _obscureConfirmation = true;
   AddressSelection? _locationSelection;
+
+  @override
+  void initState() {
+    super.initState();
+    final data = widget.initialApplication;
+    if (data == null) return;
+    for (final entry in <TextEditingController, String>{
+      _companyName: 'submittedCompanyName',
+      _registrationNumber: 'registrationNumber',
+      _address: 'submittedAddress',
+      _city: 'submittedCity',
+      _postalCode: 'submittedPostalCode',
+      _locationName: 'initialLocationName',
+      _locationAddress: 'initialLocationAddress',
+      _email: 'contactEmail',
+    }.entries) {
+      entry.key.text = data[entry.value] as String? ?? '';
+    }
+    try {
+      _country = Country.parse(data['countryCode'] as String? ?? 'CZ');
+    } catch (_) {
+      _country = Country.parse('CZ');
+    }
+    final point = data['initialLocation'];
+    final latitude = point is GeoPoint
+        ? point.latitude
+        : point is Map
+        ? point['latitude'] as num?
+        : null;
+    final longitude = point is GeoPoint
+        ? point.longitude
+        : point is Map
+        ? point['longitude'] as num?
+        : null;
+    if (latitude != null &&
+        longitude != null &&
+        latitude.isFinite &&
+        longitude.isFinite &&
+        (data['initialLocationProviderPlaceId'] as String? ?? '').isNotEmpty) {
+      _locationSelection = AddressSelection(
+        formatted: _locationAddress.text,
+        addressLine1: _locationAddress.text,
+        city: data['initialLocationCity'] as String? ?? '',
+        postalCode: data['initialLocationPostalCode'] as String? ?? '',
+        countryCode:
+            data['initialLocationCountryCode'] as String? ??
+            _country.countryCode,
+        latitude: latitude.toDouble(),
+        longitude: longitude.toDouble(),
+        placeId: data['initialLocationProviderPlaceId'] as String,
+      );
+    }
+    _pending = widget.hasPending?.call() ?? false;
+  }
 
   @override
   void dispose() {
@@ -75,7 +139,16 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(businessTr(context, 'Business registrace'))),
+    appBar: AppBar(
+      title: Text(
+        businessTr(
+          context,
+          widget.onResubmit == null
+              ? 'Business registrace'
+              : 'Oprava Business žádosti',
+        ),
+      ),
+    ),
     body: SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -117,7 +190,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                             ),
                             const SizedBox(height: 18),
                             InkWell(
-                              onTap: _busy ? null : _selectCountry,
+                              onTap: _locked ? null : _selectCountry,
                               borderRadius: BorderRadius.circular(4),
                               child: InputDecorator(
                                 decoration: InputDecoration(
@@ -176,7 +249,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                                 'Fakturační adresa / sídlo firmy',
                               ),
                               countryCode: _countryCode,
-                              enabled: !_busy,
+                              enabled: !_locked,
                               onSelected: (selection) {
                                 _city.text = selection.city;
                                 _postalCode.text = selection.postalCode;
@@ -239,7 +312,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                                 'Adresa pobočky/provozovny',
                               ),
                               countryCode: _countryCode,
-                              enabled: !_busy,
+                              enabled: !_locked,
                               onSelected: (selection) => setState(
                                 () => _locationSelection = selection,
                               ),
@@ -259,33 +332,35 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                               validator: _validateEmail,
                             ),
                             const SizedBox(height: 12),
-                            _passwordField(
-                              controller: _password,
-                              label: tr(context, 'Heslo'),
-                              obscure: _obscurePassword,
-                              onToggle: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
+                            if (widget.onResubmit == null)
+                              _passwordField(
+                                controller: _password,
+                                label: tr(context, 'Heslo'),
+                                obscure: _obscurePassword,
+                                onToggle: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                                validator: (value) => (value ?? '').length < 10
+                                    ? tr(
+                                        context,
+                                        'Heslo musí mít alespoň 10 znaků.',
+                                      )
+                                    : null,
                               ),
-                              validator: (value) => (value ?? '').length < 10
-                                  ? tr(
-                                      context,
-                                      'Heslo musí mít alespoň 10 znaků.',
-                                    )
-                                  : null,
-                            ),
                             const SizedBox(height: 12),
-                            _passwordField(
-                              controller: _confirmPassword,
-                              label: tr(context, 'Zopakovat heslo'),
-                              obscure: _obscureConfirmation,
-                              onToggle: () => setState(
-                                () => _obscureConfirmation =
-                                    !_obscureConfirmation,
+                            if (widget.onResubmit == null)
+                              _passwordField(
+                                controller: _confirmPassword,
+                                label: tr(context, 'Zopakovat heslo'),
+                                obscure: _obscureConfirmation,
+                                onToggle: () => setState(
+                                  () => _obscureConfirmation =
+                                      !_obscureConfirmation,
+                                ),
+                                validator: (value) => value != _password.text
+                                    ? tr(context, 'Hesla se neshodují.')
+                                    : null,
                               ),
-                              validator: (value) => value != _password.text
-                                  ? tr(context, 'Hesla se neshodují.')
-                                  : null,
-                            ),
                             const SizedBox(height: 18),
                             Text(
                               businessTr(
@@ -310,7 +385,11 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
                                   : Text(
                                       businessTr(
                                         context,
-                                        'Vytvořit business účet',
+                                        widget.onResubmit == null
+                                            ? 'Vytvořit business účet'
+                                            : _pending
+                                            ? 'Zopakovat původní požadavek'
+                                            : 'Odeslat opravenou žádost',
                                       ),
                                     ),
                             ),
@@ -418,6 +497,23 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
     String? Function(String?)? validator,
   }) => TextFormField(
     controller: controller,
+    enabled: !_locked,
+    readOnly: widget.onResubmit != null && identical(controller, _email),
+    maxLength: widget.onResubmit == null
+        ? null
+        : identical(controller, _companyName)
+        ? 160
+        : identical(controller, _registrationNumber)
+        ? 40
+        : identical(controller, _address)
+        ? 200
+        : identical(controller, _postalCode)
+        ? 20
+        : identical(controller, _locationName)
+        ? 80
+        : identical(controller, _email)
+        ? 254
+        : 100,
     keyboardType: keyboardType,
     autofillHints: autofillHints,
     inputFormatters: inputFormatters,
@@ -510,6 +606,7 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
   );
 
   Future<void> _submit() async {
+    if (_busy) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final location = _locationSelection;
     if (location == null ||
@@ -517,6 +614,47 @@ class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
       _message(
         businessTr(context, 'Vyberte adresu pobočky/provozovny z nabídky.'),
       );
+      return;
+    }
+    if (widget.onResubmit != null) {
+      setState(() {
+        _busy = true;
+        _progress = 'Odesílám opravenou žádost…';
+      });
+      try {
+        await widget.onResubmit!({
+          'countryCode': _countryCode,
+          'registrationNumber': _registrationNumber.text
+              .replaceAll(RegExp(r'\s'), '')
+              .toUpperCase(),
+          'submittedCompanyName': _companyName.text.trim(),
+          'submittedAddress': _address.text.trim(),
+          'submittedCity': _city.text.trim(),
+          'submittedPostalCode': _postalCode.text.trim(),
+          'initialLocationName': _locationName.text.trim(),
+          'initialLocationAddress': location.formatted.trim(),
+          'initialLocationCity': location.city.trim(),
+          'initialLocationPostalCode': location.postalCode.trim(),
+          'initialLocationCountryCode': location.countryCode,
+          'initialLocation': {
+            'latitude': location.latitude,
+            'longitude': location.longitude,
+          },
+          'initialLocationProviderPlaceId': location.placeId,
+        });
+        if (mounted) Navigator.pop(context, true);
+      } catch (_) {
+        if (mounted) {
+          setState(() => _pending = widget.hasPending?.call() ?? false);
+          _message(
+            _pending
+                ? 'Výsledek zatím není potvrzený. Zopakuj původní požadavek.'
+                : 'Opravenou žádost se nepodařilo odeslat. Zkontroluj údaje a zkus to znovu.',
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
       return;
     }
     setState(() {
