@@ -14,7 +14,10 @@ anonymizace cizích odpovědí a obnovitelný běžný purge. Vlastní deleted h
 má vypnutou variantu jen ke čtení; právní texty jsou připravené v sedmi jazycích.
 Nový serverový/klientský přepínač i Rules brána zůstávají false. Nic z toho
 není nasazené ani migrované. Místní testy zahrnuly oba zapnuté účtové průchody,
-50 zdrojů / 450 zápisů a skutečný indexový writer; úplné CI se ještě nedokončilo.
+50 zdrojů / 450 zápisů a skutečný indexový writer. Zdroj
+**cea00c02035963da42208db30c99cec5c7ce1e59** má
+[úspěšné úplné CI 45703037163](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45703037163),
+včetně aplikačních/browserových a serverových sad i webového buildu.
 Pauza nových těl zachovává splatný úklid; prošel také souběh dvou workerů.
 **Další krok ve schváleném rozsahu:** kompatibilita zbývajících SDK seznamů
 a úplné provozní napojení. Přísnější Rules se zatím nezapínají.

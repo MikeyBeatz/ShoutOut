@@ -2518,7 +2518,8 @@ obsah existující při zpracování mazání účtu, pevně request createTime 
 neobnovuje dříve fyzicky smazaný obsah. Nové uchování nahlášeného obsahu při
 jednotlivém mazání je samostatná retenční volba, ne již hotová univerzální archivace.
 
-Vlastníkovi předložený **ucelený místní úsek**, dosud bez zdrojové implementace:
+Původní předložený **místní úsek podkladů pouze nahlášeného obsahu**
+(následně rozšířený na společný cyklus níže):
 
 - atomicky se serverovým hlášením zachovat neměnný podklad Shoutu/komentáře/
   soukromé odpovědi, s jednoznačnou inkarnací a bez klientem podvrženého textu;
@@ -2543,8 +2544,9 @@ níže; implementace původního úseku nezačala s neodsouhlaseným časovým p
 s požadavkem po MVP cyklus znovu upravit/přepracovat. Konkrétní budoucí změna
 zatím určena není; [správa archivu po MVP](BACKLOG.md#archive-administration)
 zahrnuje i tuto revizi. Souhlas neaktivuje archiv v DEV ani nemění živá data.
-Probíhá implementace za výchozí vypnutou volbou; úplné místní ověření,
-společné CI, provozní plán a případný živý přechod dosud hotové nejsou.
+První místní jádro za výchozí vypnutou volbou má vlastní úplné CI níže;
+celková integrace čtení, úplné místní ověření provozního napojení, provozní
+plán a případný živý přechod dosud hotové nejsou.
 
 **Dohledané původní podklady:**
 
@@ -2680,7 +2682,11 @@ V indexové fixture bylo opravené příliš dlouhé ID generace; opakovaný
 skutečný indexový průchod prošel. Nový CI krok spouští celou transakční
 sadu i oba stavy Rules. Závěrečný společný běh nové sady, vlastní historie
 a Rules prošel ve všech 33 případech, včetně pauzy a dvou souběžných workerů.
-Úplné CI tohoto kontrolního bodu zatím čeká.
+Zdroj **cea00c02035963da42208db30c99cec5c7ce1e59** ve větvi
+feature/moderation-report-evidence má
+[úspěšné úplné CI 45703037163](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45703037163).
+Dokončily se i dosavadní aplikační/browserové, Rules, B4/B2, moderační,
+Business, účtové a Storage sady a sestavení DEV webu. Build není nasazení.
 První běh 45702002426 ze zdroje 8a93481 skončil před testy na formátování
 jednoho volání v moderačním dialogu; formát je opravený. Tento běh se nepočítá
 jako ověření a nic se z něj nenasazuje.
@@ -2704,8 +2710,25 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
    a indexové výjimky bez TTL. Pozdější převzetí živého starého těla nesmí být
    označené jako původní zachování při publikování. Odstraněný obsah se
    nevymýšlí ani neobnovuje z testovacího manifestu.
+   Při omezení indexace těla zachovat potřebné dotazy subjectUserIds,
+   threadId a content.replyToCommentId pro účtovou anonymizaci;
+   emulátor nepotvrzuje dostupnost těchto indexů v cloudu.
 4. Před aktivací určit novou právní verzi a kompatibilní přijetí podmínek;
    samotný připravený překlad a staré acceptance_2026_07_25 to neřeší.
+
+**Dohledané vstupy pro navazující kompatibilitu, dosud nepřepsané:**
+
+| Cesta aplikace | Současný skutečný dotaz | Co musí následující místní integrace ověřit |
+|---|---|---|
+| Mé komentáře (`lib/src/saved.dart`) | collectionGroup comments podle authorId, potom jednotlivé rodiče | Serverově ověřený konec každého rodiče bez globálního collectionGroup obejití; jeden nepřístupný rodič nesmí shodit celý seznam. Soukromé odpovědi sem nyní nepřidávat. |
+| Veřejný profil (`lib/src/following.dart`) | Shouty autora, active se filtruje až v klientu | Zachovat pouze dostupné veřejné položky a dosavadní živé interakce; nevracet cizí smazané tělo jako vlastní historii. |
+| Business propagace (`lib/src/business.dart`) | Prvních 50 Shoutů autora, promo filtr až v klientu | Zohlednit konec historie i smazané vlastní položky; odlišit chybu načtení od prázdného výsledku. |
+| Aktivní staff přehled (`lib/src/staff_shouts.dart`) | status active, přidělený region, createdAt | Zachovat serverově ověřený rozsah a expiraci; dostupnost moderovaného archivu řešit konkrétním hlášením, ne obecným SDK procházením. |
+| Home/promo (`lib/src/home.dart`) | B4 publicStates, při source-v1 návratu přímo shouts | Ověřit oba kontrakty i návrat již otevřeného klienta; přísná brána nesmí předběhnout kompatibilní seznamy. |
+
+Tato inventura není hotovým novým API ani důkazem kompatibility. Před aktivací
+zbývá také revize vlastnického čtení ručně smazaného těla v kandidátních Rules,
+přímých detailů a vazeb cizích konverzací. Výchozí false proto zůstává povinné.
 
 Žádná nová Function nebyla nasazená, nevznikla živá kolekce ani Scheduler,
 nevytvořil se Auth účet a nepoužil se starý pilotní úklid. Nový archiv ani

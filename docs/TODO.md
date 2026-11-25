@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,36 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,44 %** — vážené dokončení podúseků
 
-Hotové úseky: **222/278**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **223/278**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -40,8 +40,8 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
 [Připravený základ, měření a zbývající návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
 Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
 má přednost. Dokončit kompatibilitu SDK seznamů a provozní integraci; nové volby
-i Rules brána jsou false. Bez nasazení a živé migrace, úplné CI připravené práce
-ještě není uzavřené. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
+i Rules brána jsou false. Místní jádro má úspěšné úplné CI 45703037163;
+bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
 platí požadavek na další přepracování cyklu.
 
 **Drobná oprava IDE dokončená lokálně:** [vyloučení cizích Dart šablon npm](operations/TESTING.md#dart-dependency-templates).
