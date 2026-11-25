@@ -2676,6 +2676,9 @@ V indexové fixture bylo opravené příliš dlouhé ID generace; opakovaný
 skutečný indexový průchod prošel. Nový CI krok spouští celou transakční
 sadu i oba stavy Rules. Závěrečný společný běh nové sady, vlastní historie
 a Rules prošel ve všech 32 případech. Úplné CI tohoto kontrolního bodu zatím čeká.
+První běh 45702002426 ze zdroje 8a93481 skončil před testy na formátování
+jednoho volání v moderačním dialogu; formát je opravený. Tento běh se nepočítá
+jako ověření a nic se z něj nenasazuje.
 Prošlo také 8 cílených čistých serverových testů, 48 klientských testů,
 analýza bez nálezů a 46 kontrol nástrojů/metrik. Paralelní spuštění dvou
 Flutter příkazů narazilo na zámek SDK cache; samostatně opakované testy prošly.

@@ -998,9 +998,13 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
         _ => throw StateError('Unsupported content report'),
       };
       final response =
-          await FirebaseFunctions.instanceFor(region: 'europe-west3')
-              .httpsCallable('getLifecycleReportEvidence')
-          .call({'reportId': widget.report.id, 'targetType': type, 'expectedUserId': uid});
+          await FirebaseFunctions.instanceFor(
+            region: 'europe-west3',
+          ).httpsCallable('getLifecycleReportEvidence').call({
+            'reportId': widget.report.id,
+            'targetType': type,
+            'expectedUserId': uid,
+          });
       if (!mounted || FirebaseAuth.instance.currentUser?.uid != uid) {
         throw StateError('The signed-in account changed');
       }
