@@ -1,6 +1,6 @@
 // Inactive bounded adapter. No exported Scheduler host or live cadence.
 import { Timestamp, FieldPath } from 'firebase-admin/firestore';
-import { lifecycleEnabled, validateLifecycleThread } from './content_lifecycle.js';
+import { lifecycleEnabled, validateLifecycleThread, lifecycleControlUsable } from './content_lifecycle.js';
 import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { stepContentLifecycleTree, expireLifecycleAccountCopy, finishContentLifecycleThread } from './content_lifecycle_purge.js';
 
@@ -25,7 +25,7 @@ export async function runContentLifecycleMaintenance(db, { maxSteps, maxElapsedM
   let steps = 0, deleted = 0;
   const advance = async (candidate, phase, next = null, delay = 0) => db.runTransaction(async tx => {
     const [control, fresh] = await tx.getAll(db.doc('contentLifecycleControl/current'), candidate.ref);
-    if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active') fail('lifecycle-maintenance-paused');
+    if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-maintenance-paused');
     if (!fresh.exists) return;
     const header = validateLifecycleThread(fresh.data(), candidate.id);
     if (!same(header.sourceCreatedAt, candidate.get('sourceCreatedAt'))) fail('lifecycle-maintenance-replaced');
@@ -36,7 +36,7 @@ export async function runContentLifecycleMaintenance(db, { maxSteps, maxElapsedM
   });
   const drainReports = async (candidate, collection, now) => db.runTransaction(async tx => {
     const [control, fresh] = await tx.getAll(db.doc('contentLifecycleControl/current'), candidate.ref);
-    if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active') fail('lifecycle-maintenance-paused');
+    if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-maintenance-paused');
     if (!fresh.exists) return { complete: true, deleted: 0 };
     const h = validateLifecycleThread(fresh.data(), candidate.id);
     if (!same(h.sourceCreatedAt, candidate.get('sourceCreatedAt')) || now.toMillis() < h.retainUntil.toMillis()) fail('lifecycle-report-drain-not-due');
@@ -53,7 +53,7 @@ export async function runContentLifecycleMaintenance(db, { maxSteps, maxElapsedM
     if (!Number.isFinite(elapsed) || elapsed < 0) fail('invalid-lifecycle-work-clock');
     if (elapsed >= maxElapsedMillis) break;
     const now = stamp(clock), control = await db.doc('contentLifecycleControl/current').get();
-    if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active') return { state: 'paused', steps, deleted };
+    if (!lifecycleControlUsable(control, { allowPaused: true })) return { state: 'paused', steps, deleted };
     const row = (await db.collection('contentLifecycleThreads').where('maintenanceState', '==', 'pending')
       .where('nextMaintenanceAt', '<=', now).orderBy('nextMaintenanceAt').orderBy(FieldPath.documentId()).limit(1).get()).docs[0];
     if (!row) return { state: 'idle', steps, deleted };
@@ -91,7 +91,7 @@ export async function runContentLifecycleMaintenance(db, { maxSteps, maxElapsedM
       if ([1, 4, 8, 10, 13, 14].includes(error.code)) throw error;
       await db.runTransaction(async tx => {
         const [control, current] = await tx.getAll(db.doc('contentLifecycleControl/current'), row.ref);
-        if (control.get('mode') !== 'active' || !current.exists || !same(current.updateTime, row.updateTime)) return;
+        if (!lifecycleControlUsable(control, { allowPaused: true }) || !current.exists || !same(current.updateTime, row.updateTime)) return;
         const code = typeof error.message === 'string' && /^(?:invalid-)?lifecycle-[a-z0-9-]{1,60}$/.test(error.message) ? error.message : 'invalid-record';
         tx.update(row.ref, { maintenanceState: 'needs-review', maintenanceErrorCode: code });
       });

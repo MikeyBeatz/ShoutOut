@@ -138,6 +138,12 @@ export function lifecycleGeography(value) {
   return { schemaVersion: 1, countryCode: g.countryCode, ...(g.subdivisionCode ? { subdivisionCode: g.subdivisionCode } : {}) };
 }
 export function lifecycleEnabled(db) { return db?.[lifecycleBinding]?.enabled === true; }
+// Pausing ingress must not extend any already established retention deadline.
+// Unknown/off control still fails closed; it is not an alternate activation.
+export function lifecycleControlUsable(control, { allowPaused = false } = {}) {
+  return control?.get('schemaVersion') === 1 && Number.isSafeInteger(control.get('revision')) &&
+    control.get('revision') >= 1 && (control.get('mode') === 'active' || allowPaused && control.get('mode') === 'paused');
+}
 
 // Buffer SDK writes so the shared archive can complete all its reads first.
 // The original operation, archive, receipts and projections still commit once.
@@ -196,7 +202,9 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
       }
       if (!changes.size && !reports.length && !copies.length) { for (const w of writes) raw[w.method](...w.args); return result; }
       const control = await raw.get(db.doc('contentLifecycleControl/current'));
-      if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active' || !Number.isSafeInteger(control.get('revision')) || control.get('revision') < 1) fail('Content archive is not active.');
+      const createsBody = [...changes.values()].some(c => !c.before || c.after && !c.after.contentPurged &&
+        lifecycleBodyHash(c.before) !== lifecycleBodyHash(c.after) && !lifecycleReferenceRedaction(c.before, c.after));
+      if (!lifecycleControlUsable(control, { allowPaused: !createsBody })) fail('Content archive is not active.');
       const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-content-clock');
       const now = Timestamp.fromDate(date), extra = [], threads = new Map(), subjectCache = new Map();
       const readThread = async shoutId => {

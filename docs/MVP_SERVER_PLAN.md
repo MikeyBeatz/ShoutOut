@@ -2653,6 +2653,9 @@ je připravený níže; nejde o dokončenou integraci nebo povolení nasazení.
   → archiv → technické záznamy. Rozpočet předává volající, zkouška používá
   nejvýše 32 kroků / měkkých 10 s mezi transakcemi. Vadné neznámé potomky
   neodstraňuje, zaznamená needs-review; konflikt nezapočítá jako dokončení.
+  Platná pauza zastaví příjem nových těl a jejich běžné úpravy, nikoli
+  odstranění, účtovou anonymizaci nebo již splatný retenční úklid.
+  Neplatné/off řízení se odmítá; pauza neposouvá žádné datum.
 - Právní odstavec je připravený ve všech sedmi jazycích za vypnutou volbou.
   Aktivní právní verze se nemění. Rules mají výchozí vypnutý prototyp brány
   konce historie; archiv/řízení/journaly jsou pro SDK všech rolí neveřejné.
@@ -2672,14 +2675,18 @@ writerem a ověřuje zachování identity veřejného B4 těla.
 chybný dotaz přes dva časové rozsahy. Oprava využívá jediný rozsah publicUntil
 a ověřuje vazbu historyUntil = publicUntil +7 dní. Samostatně prošly oba
 úplné zapnuté účtové průchody, včetně zachování cizího těla a anonymizace.
+Opakovaný účtový průchod potvrdil stejný výsledek i při paused příjmu.
 V indexové fixture bylo opravené příliš dlouhé ID generace; opakovaný
 skutečný indexový průchod prošel. Nový CI krok spouští celou transakční
 sadu i oba stavy Rules. Závěrečný společný běh nové sady, vlastní historie
-a Rules prošel ve všech 32 případech. Úplné CI tohoto kontrolního bodu zatím čeká.
+a Rules prošel ve všech 33 případech, včetně pauzy a dvou souběžných workerů.
+Úplné CI tohoto kontrolního bodu zatím čeká.
 První běh 45702002426 ze zdroje 8a93481 skončil před testy na formátování
 jednoho volání v moderačním dialogu; formát je opravený. Tento běh se nepočítá
 jako ověření a nic se z něj nenasazuje.
-Prošlo také 8 cílených čistých serverových testů, 48 klientských testů,
+Navazující běh 45702300312 byl řízeně zastavený kvůli společnému ověření
+nové opravy pauzy. Ani tento nedokončený běh se nepočítá jako úspěšné CI.
+Prošlo také 9 cílených čistých serverových testů, 48 klientských testů,
 analýza bez nálezů a 46 kontrol nástrojů/metrik. Paralelní spuštění dvou
 Flutter příkazů narazilo na zámek SDK cache; samostatně opakované testy prošly.
 Měření a emulátorové případy jsou syntetické, nejde o nové živé uživatele.
@@ -2690,9 +2697,9 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
    veřejný profil, Business historie a aktivní staff přehled). Globální
    collectionGroup povolení nesmí obejít rodičovskou lhůtu; prototyp brány
    je proto nyní vypnutý. Nesmí se zapnout s nekompatibilním klientem.
-2. Úplné provozní napojení, chování pauzy vůči pevnému úklidu, souběžní
-   workeři, reálný společný rozpočet současných generací a náklady/dohánění
+2. Úplné provozní napojení, reálný společný rozpočet současných generací a náklady/dohánění
    dluhu. Místní runner ani příklad 32/10 neurčují produkční kapacitu.
+   Pauza a transakční souběh jsou doložené místně, nikoli živým provozem.
 3. Přesný přechod existujících zdrojů/hlášení, návaznosti všech starších kopií
    a indexové výjimky bez TTL. Pozdější převzetí živého starého těla nesmí být
    označené jako původní zachování při publikování. Odstraněný obsah se

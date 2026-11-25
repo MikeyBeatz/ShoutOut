@@ -78,9 +78,9 @@ test('opted-in lifecycle stages append to existing positions and purge only owne
   assert.equal((await foreign.get()).get('content.text'), 'Preserve foreign archive');
 });
 
-test('lifecycle account purge anonymizes foreign reply versions and parent context without losing the foreign body', { skip: !enabled }, async () => {
+test('lifecycle account purge during paused ingress anonymizes foreign reply versions and parent context without losing the foreign body', { skip: !enabled }, async () => {
   const f = await fixture(); f.options.contentLifecycleEnabled = true;
-  await f.add('contentLifecycleControl/current', { schemaVersion: 1, mode: 'active', revision: 1 });
+  await f.add('contentLifecycleControl/current', { schemaVersion: 1, mode: 'paused', revision: 2 });
   const createdAt = Timestamp.fromMillis(f.identity.requestCreateTime.toMillis() - 1),
     expiry = Timestamp.fromMillis(createdAt.toMillis() + 86400000), rootId = randomUUID();
   const rootPath = `shouts/${rootId}`, time = lifecycleTimes(expiry), foreign = `foreign-${randomUUID()}`;

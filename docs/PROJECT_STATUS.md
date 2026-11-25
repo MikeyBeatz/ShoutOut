@@ -15,8 +15,9 @@ má vypnutou variantu jen ke čtení; právní texty jsou připravené v sedmi j
 Nový serverový/klientský přepínač i Rules brána zůstávají false. Nic z toho
 není nasazené ani migrované. Místní testy zahrnuly oba zapnuté účtové průchody,
 50 zdrojů / 450 zápisů a skutečný indexový writer; úplné CI se ještě nedokončilo.
-**Další krok ve schváleném rozsahu:** kompatibilita zbývajících SDK seznamů,
-režim pauzy a úplné provozní napojení. Přísnější Rules se zatím nezapínají.
+Pauza nových těl zachovává splatný úklid; prošel také souběh dvou workerů.
+**Další krok ve schváleném rozsahu:** kompatibilita zbývajících SDK seznamů
+a úplné provozní napojení. Přísnější Rules se zatím nezapínají.
 Podrobný přechod starých dat a nová právní verze patří před jakoukoli aktivaci.
 Po MVP je zapsaná další revize cyklu. Starý živý pilot zůstává zachovaný.
 

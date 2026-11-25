@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Timestamp } from 'firebase-admin/firestore';
 import { lifecycleTimes, lifecycleDay, lifecycleArchiveKey, lifecycleReferenceRedaction,
-  createContentLifecycleDatabase, lifecycleBinding, lifecycleGeography } from './content_lifecycle.js';
+  createContentLifecycleDatabase, lifecycleBinding, lifecycleGeography, lifecycleControlUsable } from './content_lifecycle.js';
 import { runContentLifecycleMaintenance } from './content_lifecycle_maintenance.js';
 
 test('ordinary and Business deadlines are public end plus seven plus sixty days, without report extensions', () => {
@@ -49,4 +49,15 @@ test('country-only moderation scope survives the evidence projection without ext
   assert.deepEqual(lifecycleGeography({ geography: { schemaVersion: 1, countryCode: 'CZ' } }), { schemaVersion: 1, countryCode: 'CZ' });
   assert.deepEqual(lifecycleGeography({ geography: { schemaVersion: 1, countryCode: 'CZ', subdivisionCode: 'CZ-42', location: 'drop' } }),
     { schemaVersion: 1, countryCode: 'CZ', subdivisionCode: 'CZ-42' });
+});
+
+test('only valid active or explicitly allowed paused controls authorize retention work', () => {
+  const snapshot = data => ({ get: field => data[field] });
+  for (const mode of ['off', 'unknown', null]) assert(!lifecycleControlUsable(snapshot({ schemaVersion: 1, revision: 1, mode }), { allowPaused: true }));
+  const paused = snapshot({ schemaVersion: 1, revision: 2, mode: 'paused' });
+  assert(!lifecycleControlUsable(paused)); assert(lifecycleControlUsable(paused, { allowPaused: true }));
+  assert(lifecycleControlUsable(snapshot({ schemaVersion: 1, revision: 1, mode: 'active' })));
+  for (const revision of [undefined, 0, -1, 1.5, '1']) {
+    assert(!lifecycleControlUsable(snapshot({ schemaVersion: 1, revision, mode: 'paused' }), { allowPaused: true }));
+  }
 });

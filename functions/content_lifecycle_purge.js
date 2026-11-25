@@ -1,7 +1,7 @@
 // Local, resumable post-order primitive. No scheduler, live scan or activation.
 // A caller selects a known thread and supplies the established bounded pager.
 import { Timestamp } from 'firebase-admin/firestore';
-import { lifecycleEnabled, lifecycleSource, validateLifecycleThread } from './content_lifecycle.js';
+import { lifecycleEnabled, lifecycleSource, validateLifecycleThread, lifecycleControlUsable } from './content_lifecycle.js';
 import { accountArchiveEffectiveDeadline } from './account_content_archive.js';
 
 const same = (a, b) => a instanceof Timestamp && b instanceof Timestamp && a.isEqual(b);
@@ -33,7 +33,7 @@ export async function expireLifecycleAccountCopy(db, { threadId, clock = () => n
   return db.runTransaction(async tx => {
     const now = Timestamp.fromDate(clock());
     const [control, source] = await tx.getAll(db.doc('contentLifecycleControl/current'), candidate.ref);
-    if (control.get('mode') !== 'active' || control.get('schemaVersion') !== 1) fail('lifecycle-copy-paused');
+    if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-copy-paused');
     if (!source.exists) return { state: 'continuation', deleted: 0 };
     if (!same(source.createTime, candidate.createTime) || source.get('sourceShoutId') !== threadId) fail('lifecycle-copy-replaced');
     const deadline = await accountArchiveEffectiveDeadline(tx, db, source.data());
@@ -64,7 +64,7 @@ export async function stepContentLifecycleTree(db, { threadId, kind, archiveKey 
     if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) fail('invalid-lifecycle-purge-clock');
     const now = Timestamp.fromDate(date);
     const [control, header, journal] = await tx.getAll(db.doc('contentLifecycleControl/current'), headerRef, jobRef);
-    if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active' || !Number.isSafeInteger(control.get('revision')) || control.get('revision') < 1) fail('lifecycle-purge-paused');
+    if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-purge-paused');
     if (!header.exists) fail('lifecycle-purge-header-missing');
     const h = validateLifecycleThread(header.data(), threadId);
     const deadline = kind === 'source' ? h.historyUntil : h.retainUntil;
@@ -138,7 +138,7 @@ export async function finishContentLifecycleThread(db, { threadId, clock = () =>
   const ref = db.doc(`contentLifecycleThreads/${threadId}`);
   return db.runTransaction(async tx => {
     const [control, header, source] = await tx.getAll(db.doc('contentLifecycleControl/current'), ref, db.doc(`shouts/${threadId}`));
-    if (control.get('schemaVersion') !== 1 || control.get('mode') !== 'active') fail('lifecycle-finish-paused');
+    if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-finish-paused');
     if (!header.exists) return { state: 'complete', deleted: 0 };
     const data = validateLifecycleThread(header.data(), threadId), now = Timestamp.fromDate(clock());
     if (now.toMillis() < data.retainUntil.toMillis() || !(data.sourceDrainedAt instanceof Timestamp) || source.exists) fail('lifecycle-finish-not-ready');

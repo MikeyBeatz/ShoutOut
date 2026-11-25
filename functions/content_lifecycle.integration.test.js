@@ -448,7 +448,7 @@ test('maintenance observes pause/time bounds and quarantines malformed descendan
   let tick = 0;
   const bounded = await runContentLifecycleMaintenance(f.db, { ...options, maxElapsedMillis: 1, workClock: () => ++tick });
   assert.equal(bounded.steps, 0); assert((await f.root.get()).exists);
-  await f.raw.doc('contentLifecycleControl/current').update({ mode: 'paused', revision: 2 });
+  await f.raw.doc('contentLifecycleControl/current').update({ mode: 'off', revision: 2 });
   assert.equal((await runContentLifecycleMaintenance(f.db, options)).state, 'paused');
   await f.raw.doc('contentLifecycleControl/current').update({ mode: 'active', revision: 3 });
   const protectedRef = f.root.collection('unknown').doc('preserve'); await protectedRef.create({ preserve: true });
@@ -456,6 +456,39 @@ test('maintenance observes pause/time bounds and quarantines malformed descendan
   assert((await protectedRef.get()).exists); assert((await f.root.get()).exists);
   assert.equal((await f.raw.doc(`contentLifecycleThreads/${f.shoutId}`).get()).get('maintenanceState'), 'needs-review');
   assert.equal((await runContentLifecycleMaintenance(f.db, options)).state, 'idle');
+});
+
+test('paused ingress rejects new bodies but permits removal and timely cleanup; concurrent workers fence durable advancement', { skip: !enabled }, async t => {
+  const f = await fixture(t); await f.db.runTransaction(tx => tx.create(f.root, f.source));
+  await f.raw.doc('contentLifecycleControl/current').update({ mode: 'paused', revision: 2 });
+  const child = f.root.collection('comments').doc('not-created');
+  await assert.rejects(f.db.runTransaction(tx => tx.create(child, { authorId: f.source.authorId, text: 'Blocked', createdAt: f.source.createdAt })), /not active/);
+  await assert.rejects(f.db.runTransaction(async tx => { await tx.get(f.root); tx.update(f.root, { text: 'Blocked edit' }); }), /not active/);
+  assert(!(await child.get()).exists);
+  f.setNow(new Date(f.source.createdAt.toMillis() + 3600000));
+  await f.db.runTransaction(async tx => { await tx.get(f.root); tx.update(f.root, { status: 'deleted' }); });
+  const header = await f.raw.doc(`contentLifecycleThreads/${f.shoutId}`).get();
+  assert.equal(header.get('retainUntil').toMillis(), f.source.createdAt.toMillis() + 3600000 + 67 * lifecycleDay);
+  const now = header.get('retainUntil').toDate(); f.setNow(now);
+  let arrivals = 0, release;
+  const barrier = new Promise(resolve => { release = resolve; });
+  const beforeCommit = async () => { if (++arrivals === 2) release(); await barrier; };
+  const results = await Promise.allSettled([0, 1].map(() => stepContentLifecycleTree(f.db, {
+    threadId: f.shoutId, kind: 'source', pager: pagerFor(f), clock: () => now, beforeCommit,
+  })));
+  assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
+  assert.match(results.find(r => r.status === 'rejected').reason.message, /version-changed/);
+  assert.equal((await f.raw.doc(`contentLifecycleJobs/source_${f.shoutId}`).get()).get('version'), 2);
+  assert((await f.root.get()).exists);
+  const options = { maxSteps: 1, maxElapsedMillis: 10000, retryDelayMillis: 60000, clock: () => now,
+    pager: pagerFor(f), indexWriter: { prepare: async () => ({ apply() {} }) } };
+  let result, calls = 0;
+  do { result = await runContentLifecycleMaintenance(f.db, options); assert(++calls < 80); } while (result.state !== 'idle');
+  assert(!(await f.root.get()).exists);
+  assert(!(await header.ref.get()).exists);
+  assert((await f.raw.collection('contentLifecycleArchive').where('threadId', '==', f.shoutId).get()).empty);
+  assert((await f.raw.collection('contentLifecycleJobs').where('threadId', '==', f.shoutId).get()).empty);
+  assert.equal((await f.raw.doc('contentLifecycleControl/current').get()).get('mode'), 'paused');
 });
 
 test('archive writes share an actual feed-index transaction and leave B4 body identity unchanged', { skip: !enabled }, async t => {
