@@ -657,6 +657,11 @@ zůstat použitelné a bezpečné; placené kroky se přidají podle
     případný export/změny, audit a vztah ke konci retence. Neudělit automaticky
     celé moderační roli přímé klientské čtení všech soukromých zpráv.
   - [Rozsah uchování a návaznosti](plans/accounts/ACCOUNT_DELETION_REMAINING_PLAN.md).
+  - Po MVP znovu projít a upravit obecný životní cyklus archivu všech Shoutů,
+    komentářů a soukromých odpovědí. Vlastník 25. listopadu schválil místní
+    variantu konec platnosti +7 dní historie +60 dní archivu s výslovným
+    požadavkem na pozdější přepracování; konkrétní nová politika zatím není určena.
+    [Schválený místní rozsah](MVP_SERVER_PLAN.md#content-lifecycle-retention-review).
 
 - [ ] <a id="bl-133"></a> **MVP** — Ověřit produkční web pro běžné i Business účty včetně přístupu
   běžného uživatele k feedu a publikování. Moderátorské trasy `/admin` dál

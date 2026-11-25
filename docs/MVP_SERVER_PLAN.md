@@ -2537,7 +2537,14 @@ níže; implementace původního úseku nezačala s neodsouhlaseným časovým p
 
 <a id="content-lifecycle-retention-review"></a>
 
-##### Prověření celého životního cyklu – rozšíření místního návrhu k potvrzení
+##### Prověření celého životního cyklu – schválený místní rozsah
+
+**Schváleno vlastníkem 25. listopadu 2026:** celý níže uvedený místní rozsah,
+s požadavkem po MVP cyklus znovu upravit/přepracovat. Konkrétní budoucí změna
+zatím určena není; [správa archivu po MVP](BACKLOG.md#archive-administration)
+zahrnuje i tuto revizi. Souhlas neaktivuje archiv v DEV ani nemění živá data.
+Probíhá implementace za výchozí vypnutou volbou; úplné místní ověření,
+společné CI, provozní plán a případný živý přechod dosud hotové nejsou.
 
 **Dohledané původní podklady:**
 
@@ -2562,7 +2569,7 @@ shout_expiration jen materializuje active → expired. Běžný sedmidenní fyzi
 purge Shoutů ještě hotový není; nelze tvrdit, že nyní automaticky probíhá
 cyklus historie → univerzální archiv → konečné odstranění.
 
-**Doporučená nová politika, zatím předložená ke schválení:**
+**Schválená nová politika pro místní implementaci:**
 
 1. Neveřejný archivní podklad každého Shoutu a jeho veřejných komentářů i
    soukromých odpovědí atomicky založit při vytvoření obsahu, nezávisle na
@@ -2598,7 +2605,102 @@ moderace/purge, účtové vazby, souběžné testy/restart, přesné deadline a 
 měření operací/objemu, potřebné právní texty/dokumentace a společný push/CI.
 Bez živé migrace, dalších fixture/Auth, nasazení nebo změny provozních prostředků;
 DEV zapojení až podle naměřeného konkrétního plánu. Konečná podoba kontraktu,
-provozní četnost a indexové změny nejsou dosud implementované ani aktivní.
+provozní četnost a indexové změny nejsou dosud aktivní. První místní základ
+je připravený níže; nejde o dokončenou integraci nebo povolení nasazení.
+
+<a id="content-lifecycle-local-foundation"></a>
+
+##### Místní základ společného cyklu – 25. listopadu 2026
+
+**Připravený kód, všechny nové volby výchozí false:**
+
+- Společná transakční vrstva zachytí publikování Shoutu, komentáře i soukromé
+  odpovědi; její zápis, zdroj a dosavadní potvrzení/index se uloží společně,
+  nebo vůbec. Neměnné tělo je v contentLifecycleArchive, společný technický
+  termín a inkarnace v contentLifecycleThreads. Při ručním odstranění se
+  termín zkrátí v jedné hlavičce, bez hromadného přepisování cizích odpovědí.
+- Identita váže projekt, cestu, serverově určené createdAt a hash těla.
+  archivedAt je auditní čas, nikoli vydávaný Firestore createTime původního
+  dokumentu. Skutečné createTime se ukládá jen při pozdějším ověřeném čtení
+  existujícího zdroje; první zápis je chráněný atomickou vazbou a zákazem
+  opětovného použití již archivovaného ID. Starý neprovázaný zdroj se odmítne
+  s požadavkem na řízený přechod, nikoli automaticky adoptuje.
+- Hlášení uchová odkaz na konkrétní verzi a hrubý geografický rozsah.
+  Nová soukromá hlášení už nekopírují celé tělo. Čtecí jádro a zatím vypnutá
+  deklarace getLifecycleReportEvidence vyžadují Auth/App Check, stejný účet,
+  aktuální roli/region a konkrétní hlášení; soukromé konverzace nelze procházet.
+  Přístup má atomický audit. Schválení, uzavření, eskalace, odstranění i
+  postih mohou pracovat s podkladem po zániku zdroje/rodiče. Postih nově
+  ukládá odkaz místo další plné kopie těla. Nejasná skupina verzí selže celá.
+- Účtové čtení a kopie používají dřívější z obou termínů. Čtení kontroluje
+  žádost, minimální marker i uzavřený vstup účtového purge. Po dřívějším konci
+  se reakce jen odstraňují, nevzniká nová kopie. Volitelné účtové fáze se
+  přidávají na konec, nepřečíslují uložené journaly.
+- Účtový purge odstraní také automatický odkaz/prefix na smazaného autora
+  v historických verzích cizí odpovědi a ponechá její vlastní text. Taková
+  výjimka z neměnnosti je označená account-reference, drží původní hash
+  identity a nový hash anonymizovaného těla; UI ji výslovně označí jako
+  anonymizovaný podklad. Původní znění se po konci jeho retence nezachovává.
+  U cizích hlášení se odstraní původní rodičovský kontext/geografie;
+  bez ní regionální přístup selže, dosavadní globální autorita zůstává.
+- Vlastní historie má místní variantu stránky se status deleted a pevným
+  publicUntil +7 dní. Karta/detail zůstávají čitelné, neobnoví se interakce
+  ani přečtení smazaného Shoutu; další mazání téže karty se nenabízí.
+  Původní sedmidenní cesta bez nové volby je zachovaná.
+- Je připravený obnovitelný post-order úklid zdrojů, podkladů i přístupových
+  auditů, dočištění účtových kopií a odstranění technických journalů.
+  Nehostovaný dávkový adaptér projde zdroje → účtové kopie → hlášení/clearance
+  → archiv → technické záznamy. Rozpočet předává volající, zkouška používá
+  nejvýše 32 kroků / měkkých 10 s mezi transakcemi. Vadné neznámé potomky
+  neodstraňuje, zaznamená needs-review; konflikt nezapočítá jako dokončení.
+- Právní odstavec je připravený ve všech sedmi jazycích za vypnutou volbou.
+  Aktivní právní verze se nemění. Rules mají výchozí vypnutý prototyp brány
+  konce historie; archiv/řízení/journaly jsou pro SDK všech rolí neveřejné.
+  Kandidátní pravidla jsou místní prototyp, vyžadují další revizi kompatibility.
+
+**Měření lokální transakční vrstvy:** 50 nových Shoutů téhož autora znamená
+153 dokumentových čtení a 150 zápisů včetně zdrojů a archivů; sdílené účtové
+kontroly se načtou jednou. Samotná změna čítače má 1 read / 1 write, bez
+dalšího čtení či zápisu archivu. Měření nezahrnuje Auth/App Check, feed index,
+síťové přenosy, retry ani Functions a není účtem za cloud. Společný limit
+450 zápisů i nejvýše 50 zdrojů se kontroluje před skutečným zápisem.
+Samostatný emulátorový případ spojuje archiv se skutečným aktivním indexovým
+writerem a ověřuje zachování identity veřejného B4 těla.
+
+**Doložené místní kontroly:** 126 dosavadních serverových regresí; celé starší
+účtové purge/archivní sady prošly, nová vlastní historie nejprve odhalila
+chybný dotaz přes dva časové rozsahy. Oprava využívá jediný rozsah publicUntil
+a ověřuje vazbu historyUntil = publicUntil +7 dní. Samostatně prošly oba
+úplné zapnuté účtové průchody, včetně zachování cizího těla a anonymizace.
+V indexové fixture bylo opravené příliš dlouhé ID generace; opakovaný
+skutečný indexový průchod prošel. Nový CI krok spouští celou transakční
+sadu i oba stavy Rules. Závěrečný společný běh nové sady, vlastní historie
+a Rules prošel ve všech 32 případech. Úplné CI tohoto kontrolního bodu zatím čeká.
+Prošlo také 8 cílených čistých serverových testů, 48 klientských testů,
+analýza bez nálezů a 46 kontrol nástrojů/metrik. Paralelní spuštění dvou
+Flutter příkazů narazilo na zámek SDK cache; samostatně opakované testy prošly.
+Měření a emulátorové případy jsou syntetické, nejde o nové živé uživatele.
+
+**Stále otevřené v již schváleném místním rozsahu, bez dalšího nasazování:**
+
+1. Kompatibilita všech zbývajících SDK seznamů (zejména Mé komentáře,
+   veřejný profil, Business historie a aktivní staff přehled). Globální
+   collectionGroup povolení nesmí obejít rodičovskou lhůtu; prototyp brány
+   je proto nyní vypnutý. Nesmí se zapnout s nekompatibilním klientem.
+2. Úplné provozní napojení, chování pauzy vůči pevnému úklidu, souběžní
+   workeři, reálný společný rozpočet současných generací a náklady/dohánění
+   dluhu. Místní runner ani příklad 32/10 neurčují produkční kapacitu.
+3. Přesný přechod existujících zdrojů/hlášení, návaznosti všech starších kopií
+   a indexové výjimky bez TTL. Pozdější převzetí živého starého těla nesmí být
+   označené jako původní zachování při publikování. Odstraněný obsah se
+   nevymýšlí ani neobnovuje z testovacího manifestu.
+4. Před aktivací určit novou právní verzi a kompatibilní přijetí podmínek;
+   samotný připravený překlad a staré acceptance_2026_07_25 to neřeší.
+
+Žádná nová Function nebyla nasazená, nevznikla živá kolekce ani Scheduler,
+nevytvořil se Auth účet a nepoužil se starý pilotní úklid. Nový archiv ani
+celý moderační/životní milník nejsou touto přípravou uzavřené. Po MVP platí
+výslovný požadavek vlastníka na další revizi tohoto cyklu.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
@@ -2704,15 +2806,20 @@ Dílčí DEV stav 2. listopadu: 91d8d9b po CI 41399389084 materializuje uplynulo
 platnost pomocí active → expired, nejvýše 50 kandidátů ve volném minutovém
 ticku stávajícího plánovače. Živě 26/26 původních Shoutů měnilo pouze status;
 budoucí kontrola a potomci zachovaní. Sedmidenní fyzické mazání podkolekcí
-ještě implementované není. [Kontrakt a důkazy](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+ještě není provozně zapojené. [Kontrakt a důkazy](plans/accounts/ACCOUNT_AUTHORITY_AND_EXPIRATION.md).
+Nový [místní základ společného archivu](#content-lifecycle-local-foundation)
+je za vypnutými volbami; současné DEV chování tím není změněné.
 
 - pravidelně vyhledat Shouty po skončení platnosti podle serverového času,
 - změnit stav na expirovaný bez spoléhání na čas zařízení,
 - od expiresAt odmítnout nové změny palců Shoutu/komentářů a uložení,
   zachovat čtení a výjimky pro vlastní mazání, moderaci a účtový úklid;
   [schválené upřesnění a ověření](plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md#expired-interactions),
-- po sedmi dnech odstranit Shout i všechny podkolekce,
-- respektovat obsah zadržený kvůli hlášení nebo právnímu požadavku,
+- po sedmi dnech od expirace či dřívějšího odstranění vyčistit veřejný zdroj
+  a potomky; samostatný neveřejný podklad držet dalších 60 dní podle
+  [politiky schválené 25. listopadu](#content-lifecycle-retention-review),
+- hlášení ani rozhodnutí termín neprodlužují; dřívější závazný účtový konec
+  má přednost. Další právní režim se automaticky nezavádí,
 - zabránit osiřelým komentářům, reakcím, uložením a soukromým odpovědím,
 - měřit počet úspěšných, opakovaných a chybných zpracování.
 

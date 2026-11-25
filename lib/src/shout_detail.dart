@@ -65,7 +65,9 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             .collection('shouts')
             .doc(widget.shout.id);
         _liveShout =
-            (feedDeltaRuntime?.live.watch(widget.shout.id) ??
+            ((widget.shout.readOnlyHistory
+                        ? null
+                        : feedDeltaRuntime?.live.watch(widget.shout.id)) ??
                     watchLiveShoutState(
                       ref
                           .liveSnapshots(includeMetadataChanges: true)
@@ -73,7 +75,20 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
                             (shout) =>
                                 shout.exists || !shout.metadata.isFromCache,
                           )
-                          .map((shout) => shout.data()),
+                          .map((shout) {
+                            final data = shout.data();
+                            if (!widget.shout.readOnlyHistory) return data;
+                            if (data == null ||
+                                data['contentPurged'] == true ||
+                                data['authorId'] != uid ||
+                                data['historyUntil'] is! Timestamp ||
+                                !(data['historyUntil'] as Timestamp)
+                                    .toDate()
+                                    .isAfter(DateTime.now())) {
+                              return null;
+                            }
+                            return {...data, 'status': 'expired'};
+                          }),
                       ref
                           .collection('reactions')
                           .doc(uid)
@@ -101,14 +116,28 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
   }
 
   @override
-  Widget build(BuildContext context) => ShoutInteractionGate(
-    expiresAt: widget.shout.expiresAt,
-    enabled: widget.shout.status == ShoutStatus.active,
-    builder: (context, open) => _page(context, open && !_contentPurged),
-  );
+  Widget build(BuildContext context) => widget.shout.readOnlyHistory
+      ? ShoutInteractionGate(
+          expiresAt:
+              widget.shout.historyUntil ??
+              DateTime.fromMillisecondsSinceEpoch(0),
+          enabled: true,
+          builder: (context, retained) => retained
+              ? _page(context, false)
+              : Scaffold(
+                  appBar: AppBar(title: Text(tr(context, 'Shout'))),
+                  body: _purgedCard(),
+                ),
+        )
+      : ShoutInteractionGate(
+          expiresAt: widget.shout.expiresAt,
+          enabled: widget.shout.status == ShoutStatus.active,
+          builder: (context, open) => _page(context, open && !_contentPurged),
+        );
 
   bool get _canInteract =>
       !_contentPurged &&
+      !widget.shout.readOnlyHistory &&
       widget.shout.status == ShoutStatus.active &&
       widget.shout.expiresAt.isAfter(DateTime.now());
 
@@ -129,7 +158,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
         final value = snapshot.data;
         if (value != null) {
           _interactionReady = true;
-          if (value.status != null) {
+          if (value.status != null && !widget.shout.readOnlyHistory) {
             widget.shout.status = switch (value.status) {
               'deleted' => ShoutStatus.deleted,
               'expired' => ShoutStatus.expired,
@@ -238,6 +267,7 @@ class _ShoutDetailPageState extends State<ShoutDetailPage> {
             icon: const Icon(Icons.person_off_outlined),
           ),
         if (!_contentPurged &&
+            !widget.shout.readOnlyHistory &&
             widget.shout.authorId == FirebaseAuth.instance.currentUser?.uid)
           AsyncActionIconButton(
             onPressed: _deleteShout,

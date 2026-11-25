@@ -166,6 +166,13 @@ Shout decodeSpatialFeedItem(Map<String, dynamic> item) {
     }
     data[field] = Timestamp.fromMillisecondsSinceEpoch(millis.toInt());
   }
+  if (data['readOnlyHistory'] == true) {
+    final end = data['historyUntil'];
+    if (end is! num || !end.isFinite || end < 0 || end > 253402300799999) {
+      throw StateError('Invalid history deadline');
+    }
+    data['historyUntil'] = Timestamp.fromMillisecondsSinceEpoch(end.toInt());
+  }
   if (item.containsKey('read') && item['read'] is! bool) {
     throw StateError('Invalid feed read group');
   }
@@ -219,6 +226,11 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
 
   bool _accepts(Map<String, dynamic> data) {
     if (data['contentPurged'] == true) return false;
+    if (widget.shout.readOnlyHistory) {
+      return data['authorId'] == FirebaseAuth.instance.currentUser?.uid &&
+          data['historyUntil'] is Timestamp &&
+          (data['historyUntil'] as Timestamp).toDate().isAfter(DateTime.now());
+    }
     if (widget.ownSection == null) return data['status'] == 'active';
     if (!['active', 'expired'].contains(data['status']) ||
         data['expiresAt'] is! Timestamp) {
@@ -248,7 +260,9 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
         .collection('shouts')
         .doc(widget.shout.id);
     _subscription =
-        (feedDeltaRuntime?.live.watch(widget.shout.id) ??
+        ((widget.shout.readOnlyHistory
+                    ? null
+                    : feedDeltaRuntime?.live.watch(widget.shout.id)) ??
                 watchLiveShoutState(
                   ref
                       .liveSnapshots(includeMetadataChanges: true)
@@ -264,7 +278,9 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                         if (data == null || !_accepts(data)) {
                           return null;
                         }
-                        return data;
+                        return widget.shout.readOnlyHistory
+                            ? {...data, 'status': 'expired'}
+                            : data;
                       }),
                   ref
                       .collection('reactions')
@@ -293,7 +309,7 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
                 if (!mounted) return;
                 setState(() {
                   _interactionReady = true;
-                  if (value.status != null) {
+                  if (value.status != null && !widget.shout.readOnlyHistory) {
                     widget.shout.status = switch (value.status) {
                       'deleted' => ShoutStatus.deleted,
                       'expired' => ShoutStatus.expired,
@@ -343,6 +359,15 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.shout.readOnlyHistory) {
+      return ShoutInteractionGate(
+        expiresAt:
+            widget.shout.historyUntil ?? DateTime.fromMillisecondsSinceEpoch(0),
+        enabled: true,
+        builder: (context, retained) =>
+            retained ? _buildCard(context) : const SizedBox.shrink(),
+      );
+    }
     if (widget.requireSaved) {
       return ShoutInteractionGate(
         expiresAt: widget.shout.expiresAt,
@@ -392,7 +417,8 @@ class _SpatialShoutCardState extends State<_SpatialShoutCard> {
               onSave: widget.onSave,
               onReaction: widget.onReaction,
               showSaveCount: true,
-              showDeleteButton: widget.onDelete != null,
+              showDeleteButton:
+                  widget.onDelete != null && !widget.shout.readOnlyHistory,
               onDelete: widget.onDelete,
             ),
     );

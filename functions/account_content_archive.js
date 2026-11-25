@@ -3,11 +3,32 @@ import { prepareCardMutation } from './feed_card_state.js';
 import { createHash } from 'node:crypto';
 import { Timestamp, FieldPath } from 'firebase-admin/firestore';
 import { AccountDeletionRequestUnavailable } from './account_shout_hiding.js';
+import { validateLifecycleThread } from './content_lifecycle.js';
 
 const retentionMillis = 60 * 86400000;
 const identifier = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const same = (a, b) => a instanceof Timestamp && a.isEqual(b);
 export class AccountArchiveNeedsReview extends Error {}
+
+// A newly bound ordinary archive may expire sooner than the account's fixed
+// deadline. Legacy records retain their exact original account-only contract.
+export function validAccountArchiveDeadline(data) {
+  if (!(data?.requestCreateTime instanceof Timestamp) || !(data.retainUntil instanceof Timestamp)) return false;
+  const accountEnd = data.requestCreateTime.toMillis() + retentionMillis;
+  if (data.ordinaryRetainUntil === undefined) return data.retainUntil.toMillis() === accountEnd;
+  return data.ordinaryRetainUntil instanceof Timestamp &&
+    typeof data.contentArchiveKey === 'string' && /^[a-f0-9]{64}$/.test(data.contentArchiveKey) &&
+    data.retainUntil.toMillis() === Math.min(accountEnd, data.ordinaryRetainUntil.toMillis());
+}
+
+export async function accountArchiveEffectiveDeadline(tx, db, data) {
+  if (!validAccountArchiveDeadline(data)) throw new AccountArchiveNeedsReview('invalid-account-archive-deadline');
+  if (data.ordinaryRetainUntil === undefined) return data.retainUntil;
+  const thread = await tx.get(db.doc(`contentLifecycleThreads/${data.sourceShoutId}`));
+  if (!thread.exists) throw new AccountArchiveNeedsReview('missing-account-archive-thread');
+  const header = validateLifecycleThread(thread.data(), data.sourceShoutId);
+  return Timestamp.fromMillis(Math.min(data.retainUntil.toMillis(), header.retainUntil.toMillis()));
+}
 
 export function accountContentArchiveId(projectId, path, createTime) {
   if (typeof projectId !== 'string' || !projectId || typeof path !== 'string' || !(createTime instanceof Timestamp)) {
@@ -139,7 +160,7 @@ export async function drainArchivedCommentReactionsPage(identity, db, auth, opti
     const data = snapshot.data();
     if (!snapshot.exists || data.schemaVersion !== 1 || data.kind !== 'comment' ||
         data.retentionOwnerId !== identity.userId || !same(data.requestCreateTime, identity.requestCreateTime) ||
-        !same(data.retainUntil, c.retainUntil) || typeof data.reactionsComplete !== 'boolean' ||
+        !validAccountArchiveDeadline(data) || typeof data.reactionsComplete !== 'boolean' ||
         !/^shouts\/[A-Za-z0-9_-]{1,128}\/comments\/[A-Za-z0-9_-]{1,128}$/.test(data.sourcePath) ||
         accountContentArchiveId(db.projectId, data.sourcePath, data.sourceCreateTime) !== archiveId) {
       throw new AccountArchiveNeedsReview('invalid-comment-archive');
@@ -160,13 +181,15 @@ export async function drainArchivedCommentReactionsPage(identity, db, auth, opti
       c.check(request); const data = checkArchive(archive), time = c.now();
       if (parent.exists) throw new AccountArchiveNeedsReview('comment-recreated-during-drain');
       if (data.reactionsComplete) throw new AccountArchiveNeedsReview('reaction-created-after-drain');
-      const apply = await c.record(transaction, { kind: 'archive-reaction', archiveId, copied: source.exists ? 1 : 0 });
+      const retain = time.toMillis() < (await accountArchiveEffectiveDeadline(transaction, db, data)).toMillis();
+      const apply = await c.record(transaction, { kind: 'archive-reaction', archiveId, copied: source.exists && retain ? 1 : 0 });
       if (!source.exists) return false;
-      if (!same(source.createTime, candidate.createTime) || existing.exists) throw new AccountArchiveNeedsReview('reaction-archive-conflict');
-      transaction.create(copiedRef, { actorId: candidate.id, retentionOwnerId: identity.userId,
+      if (!same(source.createTime, candidate.createTime) || existing.exists && retain) throw new AccountArchiveNeedsReview('reaction-archive-conflict');
+      if (retain) transaction.create(copiedRef, { actorId: candidate.id, retentionOwnerId: identity.userId,
         sourceCreateTime: source.createTime, sourceUpdateTime: source.updateTime,
         archivedAt: time, content: source.data() });
-      transaction.delete(source.ref, { lastUpdateTime: source.updateTime }); apply(); return true;
+      else if (existing.exists) transaction.delete(copiedRef);
+      transaction.delete(source.ref, { lastUpdateTime: source.updateTime }); apply(); return retain;
     });
     if (changed) copied++;
   }

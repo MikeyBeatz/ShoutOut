@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
-import { accountContentArchiveId } from './account_content_archive.js';
+import { accountContentArchiveId, validAccountArchiveDeadline, accountArchiveEffectiveDeadline } from './account_content_archive.js';
 
 const fail = (code, text) => { throw new HttpsError(code, text); };
 const identifier = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
@@ -37,18 +37,20 @@ export async function getArchivedCommentReportTargetOperation(request, db, clock
     if (rows.docs[1]?.data().sourceCreateTime?.isEqual(archive.sourceCreateTime)) fail('failed-precondition', 'Ambiguous stored target.');
     if (archive.schemaVersion !== 1 || archive.kind !== 'comment' || archive.sourcePath !== sourcePath ||
         !(archive.sourceCreateTime instanceof Timestamp) || !(archive.requestCreateTime instanceof Timestamp) ||
-        archive.retainUntil.toMillis() !== archive.requestCreateTime.toMillis() + 60 * 86400000 ||
+        !validAccountArchiveDeadline(archive) ||
         accountContentArchiveId(db.projectId, sourcePath, archive.sourceCreateTime) !== snapshot.id ||
         !identifier(archive.content?.authorId) || archive.content.authorId !== archive.retentionOwnerId ||
         archive.content.authorId === data.reporterId || typeof archive.content.text !== 'string' ||
         !(archive.content.createdAt instanceof Timestamp)) fail('failed-precondition', 'Invalid stored archived target.');
+    const effectiveEnd = await accountArchiveEffectiveDeadline(transaction, db, archive);
+    if (now.toMillis() >= effectiveEnd.toMillis()) fail('not-found', 'The report target is unavailable.');
     const targetData = { authorId: archive.content.authorId, text: archive.content.text,
       createdAtMillis: Math.floor(archive.content.createdAt.toMillis()) };
     if (typeof archive.content.authorNickname === 'string') targetData.authorNickname = archive.content.authorNickname;
     transaction.create(snapshot.ref.collection('accessAudits').doc(auditId), {
       actorId: uid, roleLevel: Number.isSafeInteger(level) && level >= 3 ? level : 3,
-      reportId: report.id, action: 'read-reported-comment', readAt: now, retainUntil: archive.retainUntil,
+      reportId: report.id, action: 'read-reported-comment', readAt: now, retainUntil: effectiveEnd,
     });
-    return { targetData, archived: true, retainUntilMillis: archive.retainUntil.toMillis() };
+    return { targetData, archived: true, retainUntilMillis: effectiveEnd.toMillis() };
   });
 }

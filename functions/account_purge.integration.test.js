@@ -9,6 +9,8 @@ import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { runAccountMaintenanceTick } from './shout_expiration.js';
 import { accountPurgeStages } from './account_purge_policy.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
+import { lifecycleArchiveKey, lifecycleBodyHash, lifecycleTimes, createContentLifecycleDatabase } from './content_lifecycle.js';
+import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'account-purge-tests') : null;
@@ -51,6 +53,82 @@ async function fixture() {
     assert.fail('purge did not finish'); };
   return f;
 }
+
+test('opted-in lifecycle stages append to existing positions and purge only owned canonical bodies and their audits', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.contentLifecycleEnabled = true; f.options.moderationCopiesEnabled = true;
+  const old = accountPurgeStages(f.uid, { moderationCopiesEnabled: true });
+  const next = accountPurgeStages(f.uid, { moderationCopiesEnabled: true, contentLifecycleEnabled: true });
+  assert.deepEqual(next.slice(0, old.length), old);
+  const archive = async (uid, text) => {
+    const threadId = randomUUID(), sourcePath = `shouts/${threadId}/comments/comment`;
+    const content = { authorId: uid, text, createdAt: Timestamp.now() };
+    const key = lifecycleArchiveKey(db.projectId, sourcePath, content);
+    return f.add(`contentLifecycleArchive/${key}`, { schemaVersion: 1, kind: 'comment', subjectUserIds: [uid],
+      content, contentHash: lifecycleBodyHash(content), threadId, sourcePath, sourceCreatedAt: content.createdAt,
+      archivedAt: content.createdAt, threadCreatedAt: content.createdAt, state: {} });
+  };
+  const owned = await archive(f.uid, 'Owned archive');
+  const audit = await f.add(`${owned.path}/accessAudits/foreign-actor`, { actorId: 'foreign-actor' });
+  const foreign = await archive('foreign-author', 'Preserve foreign archive');
+  const report = await f.add(`reports/${randomUUID()}`, { authorId: f.uid, reporterId: 'foreign-reporter', status: 'resolved', reason: 'Owned subject' });
+  const commentReport = await f.add(`commentReports/${randomUUID()}`, { authorId: f.uid, reporterId: 'foreign-reporter', status: 'resolved', reason: 'Owned subject' });
+  await f.finish();
+  assert(!(await owned.get()).exists); assert(!(await audit.get()).exists);
+  assert(!(await report.get()).exists); assert(!(await commentReport.get()).exists);
+  assert.equal((await foreign.get()).get('content.text'), 'Preserve foreign archive');
+});
+
+test('lifecycle account purge anonymizes foreign reply versions and parent context without losing the foreign body', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.contentLifecycleEnabled = true;
+  await f.add('contentLifecycleControl/current', { schemaVersion: 1, mode: 'active', revision: 1 });
+  const createdAt = Timestamp.fromMillis(f.identity.requestCreateTime.toMillis() - 1),
+    expiry = Timestamp.fromMillis(createdAt.toMillis() + 86400000), rootId = randomUUID();
+  const rootPath = `shouts/${rootId}`, time = lifecycleTimes(expiry), foreign = `foreign-${randomUUID()}`;
+  await f.add(`contentLifecycleThreads/${rootId}`, { schemaVersion: 1, shoutId: rootId, sourceCreatedAt: createdAt,
+    archivedAt: createdAt, plannedExpiresAt: expiry, geography: { schemaVersion: 1, countryCode: 'CZ', subdivisionCode: 'CZ-42' }, ...time });
+  const publish = async (path, body, kind) => {
+    const key = lifecycleArchiveKey(db.projectId, path, body), hash = lifecycleBodyHash(body);
+    const ref = await f.add(path, { ...body, contentArchiveKey: key, contentHash: hash,
+      ...(kind === 'shout' ? { publicUntil: time.publicUntil, historyUntil: time.historyUntil } : {}) });
+    const archive = await f.add(`contentLifecycleArchive/${key}`, { schemaVersion: 1, kind, threadId: rootId, sourcePath: path,
+      sourceCreatedAt: createdAt, sourceCreateTime: (await ref.get()).createTime, threadCreatedAt: createdAt,
+      archivedAt: Timestamp.now(), subjectUserIds: [body.authorId], content: body, contentHash: hash, state: {} });
+    return { ref, archive };
+  };
+  const root = await publish(rootPath, { authorId: f.uid, authorNickname: 'Original', title: 'Owned parent', text: 'Owned parent text',
+    createdAt, expiresAt: expiry, status: 'expired', commentsCount: 2, likesCount: 0, dislikesCount: 0, savesCount: 0 }, 'shout');
+  await publish(`${rootPath}/comments/original`, { authorId: f.uid, text: 'Original comment', createdAt, likesCount: 0, dislikesCount: 0 }, 'comment');
+  const reply = await publish(`${rootPath}/comments/foreign`, { authorId: foreign, authorNickname: 'Foreign', text: '@Original Preserve this reply',
+    replyToCommentId: 'original', replyToNickname: 'Original', createdAt, likesCount: 0, dislikesCount: 0 }, 'comment');
+  const reporter = `reporter-${randomUUID()}`, report = await f.add(`commentReports/${reporter}_${rootId}_foreign`, {
+    reporterId: reporter, authorId: foreign, shoutId: rootId, commentId: 'foreign', reason: 'Synthetic foreign report', status: 'open',
+    createdAt: Timestamp.now(), contentArchiveKey: reply.archive.id, shoutArchiveKey: root.archive.id, parentContextPurged: false,
+    moderationGeography: { schemaVersion: 1, countryCode: 'CZ', subdivisionCode: 'CZ-42' },
+  });
+  const decorated = createContentLifecycleDatabase(db, { enabled: true, clock: f.options.clock });
+  let result;
+  for (let n = 0; n < 100; n++) {
+    result = await f.run(missing, f.options, decorated);
+    if (result.state === 'purged') break;
+    assert.equal(result.state, 'purging', JSON.stringify(result)); f.advance(1000);
+  }
+  assert.equal(result.state, 'purged');
+  for (const record of (await db.collection('contentLifecycleArchive').where('threadId', '==', rootId).get()).docs) roots.push(record.ref);
+  assert.equal((await reply.ref.get()).get('text'), 'Preserve this reply');
+  assert.equal((await reply.archive.get()).get('content.text'), 'Preserve this reply');
+  assert.equal((await reply.archive.get()).get('redactionKind'), 'account-reference');
+  assert.equal((await reply.archive.get()).get('content.replyToNickname'), undefined);
+  assert.equal((await report.get()).get('shoutArchiveKey'), undefined);
+  assert.equal((await report.get()).get('moderationGeography'), null);
+  const admin = `reader-${randomUUID()}`;
+  await f.add(`users/${admin}`, { nickname: 'Synthetic archive reader' });
+  await f.add(`users/${admin}/legal/acceptance_2026_07_25`, {});
+  await f.add(`accountRoles/${admin}`, { level: 5 });
+  const read = await getLifecycleReportEvidenceOperation({ auth: { uid: admin, token: { email: 'synthetic@example.test', email_verified: true } },
+    app: { appId: 'synthetic' }, data: { reportId: report.id, targetType: 'comment', expectedUserId: admin } }, decorated, f.options.clock);
+  assert.equal(read.targetData.text, 'Preserve this reply'); assert.equal(read.privacyRedacted, true);
+  assert.equal(read.parentData, undefined);
+});
 
 test('existing maintenance tick prioritizes a due purge and shares its one-job/50-step budget with other work', { skip: !enabled }, async () => {
   const f = await fixture(), expired = await f.add(`shouts/${randomUUID()}`, { authorId: 'foreign', status: 'active', expiresAt: Timestamp.fromMillis(1) });

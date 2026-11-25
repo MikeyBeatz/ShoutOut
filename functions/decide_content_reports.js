@@ -7,6 +7,8 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
+import { lifecycleEnabled } from './content_lifecycle.js';
+import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
 
 const action = 'decideContentReports';
 const unavailableAction = 'resolveUnavailableContentReports';
@@ -37,7 +39,7 @@ export function pendingContentReports(db, input) {
   let query = db.collection(collections[input.targetType]).where('shoutId', '==', input.shoutId);
   if (input.targetType !== 'shout') query = query.where(input.targetType === 'comment' ? 'commentId' : 'privateReplyId', '==', input.targetId);
   return query.where('status', 'in', ['open', 'escalated']).limit(51).select(
-    'reporterId', 'shoutId', 'status', 'createdAt', 'reason',
+    'reporterId', 'shoutId', 'status', 'createdAt', 'reason', 'authorId', 'contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged',
     ...(input.targetType === 'comment' ? ['commentId'] : input.targetType === 'privateReply' ? ['privateReplyId', 'authorId', 'text'] : []),
   );
 }
@@ -98,10 +100,12 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     if (primaryReceipt.exists && unavailableReceipt?.exists) fail('failed-precondition', 'Ambiguous stored decision result.');
     const receipt = unavailableReceipt?.exists ? unavailableReceipt : primaryReceipt;
     const level = privateReportModeratorLevel(role.data(), legacy.data());
-    assertPrivateReportScope(role.data(), level, shout.data());
+    if (!lifecycleEnabled(db)) assertPrivateReportScope(role.data(), level, shout.data());
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
+      if (lifecycleEnabled(db)) assertPrivateReportScope(role.data(), level,
+        stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
       const unavailable = unavailableReceipt?.exists === true;
       if (stored.action !== (unavailable ? unavailableAction : action) || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
@@ -112,13 +116,16 @@ export async function decideContentReportsOperation(request, db, clock = () => n
       return { decision: input.decision, count: input.reportIds.length };
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
-    const unavailable = unavailableRef !== null && (!source.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
+    const managed = lifecycleEnabled(db);
+    const unavailable = !managed && unavailableRef !== null && (!source.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
     const contextChild = unavailableRef !== null && input.targetType !== 'shout' && source.exists && (!shout.exists || isPurgedShoutContext(shout.data()));
-    if (!unavailable && !contextChild) validateTarget(source, shout);
+    if (!managed && !unavailable && !contextChild) validateTarget(source, shout);
     if (contextChild && (!id(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
     if (!unavailable && clearance.exists) fail('failed-precondition', 'The content was already approved.');
     const reports = await tx.get(pendingContentReports(db, input));
-    if (unavailable) assertUnavailableReportGroup(reports, input);
+    const evidence = managed ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) : null;
+    if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
+    else if (unavailable) assertUnavailableReportGroup(reports, input);
     else assertContentReportGroup(reports, input, source);
     if (guardEvidenceRetention && input.decision === 'approve') await assertReportEvidenceRetention(tx, db, reports, now);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
@@ -142,7 +149,8 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     const result = { decision: input.decision, count: reports.size };
     tx.create(operationRef, { ...retention, action: unavailable ? unavailableAction : action, userId: uid, fingerprint, targetType: input.targetType,
       shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
-      reportIds: input.reportIds, ...(unavailable ? { targetUnavailable: true } : { authorId: source.get('authorId') }), requiredRoleLevel, result, createdAt: now });
+      reportIds: input.reportIds, ...(unavailable ? { targetUnavailable: true } : { authorId: evidence?.content.authorId ?? source.get('authorId') }),
+      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), requiredRoleLevel, result, createdAt: now });
     return result;
   });
 }

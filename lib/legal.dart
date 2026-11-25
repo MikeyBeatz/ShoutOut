@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'l10n/legal_translations.dart';
 import 'l10n/text.dart';
+import 'content_lifecycle_policy.dart';
+import 'web_environment.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 const legalVersion = '2026-07-25';
 const _acceptanceDocument = 'acceptance_2026_07_25';
@@ -326,6 +329,24 @@ String _title(BuildContext context, LegalDocumentType type) => tr(
 );
 
 List<LegalSection> _document(String language, LegalDocumentType type) {
+  if (kIsWeb &&
+      WebEnvironment.current.serverContentLifecycle &&
+      type == LegalDocumentType.privacy) {
+    final original = _legacyDocument(language, type);
+    return [
+      for (var index = 0; index < original.length; index++)
+        index == 2
+            ? LegalSection(
+                original[index].title,
+                contentLifecyclePrivacyBody(language),
+              )
+            : original[index],
+    ];
+  }
+  return _legacyDocument(language, type);
+}
+
+List<LegalSection> _legacyDocument(String language, LegalDocumentType type) {
   final terms = type == LegalDocumentType.terms;
   if (language == 'en') return terms ? _enTerms : _enPrivacy;
   if (language == 'de') return terms ? _deTerms : _dePrivacy;

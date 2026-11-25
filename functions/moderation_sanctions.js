@@ -8,6 +8,8 @@ import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_
 import { validateContentReportDecision, pendingContentReports, assertContentReportGroup } from './decide_content_reports.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
+import { lifecycleEnabled } from './content_lifecycle.js';
+import { resolveLifecycleReportGroup, readLifecycleSourceBinding } from './content_lifecycle_evidence.js';
 
 // Activate with the checked client/Rules cutover, never by deploying this preparation.
 export const managedModerationAuthorityEnabled = true;
@@ -83,12 +85,15 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     const now = nowAt(clock), policy = sanctionActions[input.decision];
     await requireEligibleActor({ request, db, reader: tx, now: now.toDate() });
     const [role, legacy, receipt, shout] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef);
-    const level = privateReportModeratorLevel(role.data(), legacy.data()); assertPrivateReportScope(role.data(), level, shout.data());
+    const managed = lifecycleEnabled(db);
+    const level = privateReportModeratorLevel(role.data(), legacy.data());
+    if (!managed) assertPrivateReportScope(role.data(), level, shout.data());
     if (level < policy.role) fail('permission-denied', 'Senior moderator permission is required.');
     await targetAccount(tx, db, input.expectedTargetUserId, uid, level);
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
+      if (managed) assertPrivateReportScope(role.data(), level, stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.authorId !== input.expectedTargetUserId || stored.sanctionId !== sanctionRef.id ||
           stored.targetType !== input.targetType || stored.shoutId !== input.shoutId || stored.targetId !== input.targetId ||
@@ -99,16 +104,20 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
       return { sanctionId: sanctionRef.id, decision: input.decision, count: input.reportIds.length };
     }
     const source = input.targetType === 'shout' ? shout : await tx.get(sourceRef);
-    if (!source.exists || !shout.exists || isPurgedShoutContext(shout.data())) fail('not-found', 'The sanction source is unavailable.');
-    const body = source.data();
+    if (!managed && (!source.exists || !shout.exists || isPurgedShoutContext(shout.data()))) fail('not-found', 'The sanction source is unavailable.');
+    if (managed && input.targetType === 'privateReply' && input.mode !== 'report') fail('permission-denied', 'A private reply report is required.');
+    const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
+    const evidence = managed ? reports ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) :
+      await readLifecycleSourceBinding(tx, db, source, now) : null;
+    if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
+    const body = evidence?.content ?? source.data();
     if (body.authorId !== input.expectedTargetUserId || !(body.createdAt instanceof Timestamp) ||
         input.mode === 'observation' && body.createdAt.toMillis() !== input.expectedCreatedAt) fail('failed-precondition', 'The sanction source changed.');
     if (input.targetType === 'privateReply' && (typeof body.text !== 'string' || !id(body.recipientId) ||
         JSON.stringify(body.participants) !== JSON.stringify([body.authorId, body.recipientId]))) fail('failed-precondition', 'Invalid private source.');
     const clearance = await tx.get(db.doc(`moderationClearances/${input.targetType}_${input.shoutId}${input.targetId === undefined ? '' : `_${input.targetId}`}`));
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
-    const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
-    if (reports) assertContentReportGroup(reports, { ...input, decision: 'resolve' }, source);
+    if (reports && !managed) assertContentReportGroup(reports, { ...input, decision: 'resolve' }, source);
     if (reports) await assertReportEvidenceRetention(tx, db, reports, now);
     const requiredRoleLevel = Math.max(policy.role, reports?.docs.some(d => d.get('status') === 'escalated') ? 4 : 3);
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
@@ -122,7 +131,9 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     tx.create(sanctionRef, { userId: body.authorId, type: policy.type, reason: input.note, createdAt: now, expiresAt, permanent,
       moderatorId: uid, status: 'active', sourceReportId: input.sourceReportId ?? '', previousSanctionsCount: previous.size, purgeAt,
       sourceType: input.mode === 'report' ? 'report' : 'moderatorObservation', sourceContentType: input.targetType,
-      sourceContentId: input.targetId ?? input.shoutId, contentSnapshot: { ...body, shoutId: input.shoutId } });
+      sourceContentId: input.targetId ?? input.shoutId,
+      contentSnapshot: evidence ? { authorId: body.authorId, shoutId: input.shoutId, contentArchiveKey: evidence.archiveKey } : { ...body, shoutId: input.shoutId },
+      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}) });
     if (pointerRef) { if (next !== current) tx.set(pointerRef, next); }
     else tx.create(warningRef, { userId: body.authorId, reason: input.note, createdAt: now, moderatorId: uid, sanctionId: sanctionRef.id });
     for (const report of reports?.docs ?? []) tx.update(report.ref, { status: 'resolved', resolution: 'sanctioned', resolvedAt: now,
@@ -130,7 +141,7 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     const result = { sanctionId: sanctionRef.id, decision: input.decision, count: input.reportIds.length };
     tx.create(receiptRef, { ...retention, action, userId: uid, authorId: body.authorId, fingerprint, requiredRoleLevel, sanctionId: sanctionRef.id,
       targetType: input.targetType, shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
-      reportIds: input.reportIds, result, createdAt: now });
+      reportIds: input.reportIds, ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), result, createdAt: now });
     return result;
   });
 }

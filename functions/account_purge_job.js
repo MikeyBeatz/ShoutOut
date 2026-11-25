@@ -11,6 +11,7 @@ import { purgeActivity } from './account_purge_activity.js';
 import { stepAccountPurgeStorage } from './account_purge_storage.js';
 import { purgedShoutContext, isPurgedShoutContext } from './shout_context.js';
 import { prepareSanctionCopyScrub } from './moderation_retention.js';
+import { lifecycleEnabled, validateLifecycleArchive } from './content_lifecycle.js';
 export { purgedShoutContext } from './shout_context.js';
 
 const marker = { schemaVersion: 1, accountStatus: 'deleted' };
@@ -20,7 +21,7 @@ const keyValid = key => typeof key === 'string' && key.length >= 3 && key.length
 export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
-  indexErasureCoordinator = null, moderationCopiesEnabled = false,
+  indexErasureCoordinator = null, moderationCopiesEnabled = false, contentLifecycleEnabled = lifecycleEnabled(db),
 } = {}) {
   if (typeof moderationCopiesEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||
@@ -29,7 +30,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
   }
   const jobRef = accountPurgeJobRef(db, identity), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`),
     mainRef = db.doc(`accountDeletionJobs/${jobRef.id}`), profileRef = db.doc(`publicProfiles/${identity.userId}`),
-    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled }), token = randomUUID();
+    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled, contentLifecycleEnabled }), token = randomUUID();
   const now = () => { const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-purge-clock'); return Timestamp.fromDate(date); };
   const header = await jobRef.get();
   if (!header.exists) return { state: 'purged', examined: 0 };
@@ -170,7 +171,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
         }
         examined++; continue;
       }
-      const selected = job.selected, links = selected.source ? accountPurgeLinks(selected.source) : [];
+      const selected = job.selected, links = selected.source ? accountPurgeLinks(selected.source, { contentLifecycleEnabled }) : [];
       if (selected.link < links.length) {
         const link = links[selected.link];
         let query = link.direct ? null : link.group ? db.collectionGroup(link.collection) : db.collection(link.collection);
@@ -193,11 +194,18 @@ export async function runAccountPurgeJob(identity, db, auth, {
           if (selected.source?.archived && ['comment', 'privateReply'].includes(selected.source.kind)) {
             const livePath = `shouts/${selected.source.shoutId}/${selected.source.kind === 'comment' ? 'comments' : 'privateReplies'}/${selected.source.childId}`;
             const live = await transaction.get(db.doc(livePath));
-            if (live.exists && !samePurgeTime(live.createTime, selected.source.originalCreateTime)) {
+            if (live.exists && !(selected.source.originalApplicationCreatedAt
+              ? samePurgeTime(live.get('createdAt'), selected.source.originalApplicationCreatedAt)
+              : samePurgeTime(live.createTime, selected.source.originalCreateTime))) {
               throw new AccountPurgeNeedsReview('archived-source-recreated-before-linked-purge');
             }
           }
           if (!fresh.exists || !samePurgeTime(fresh.updateTime, source.updateTime)) throw new AccountPurgeConflict('purge-linked-evidence-changed');
+          if (link.action === 'lifecycleReply') {
+            try { validateLifecycleArchive(db, fresh.id, fresh.data()); }
+            catch { throw new AccountPurgeNeedsReview('invalid-lifecycle-reference-archive'); }
+            if (fresh.get('kind') !== 'comment') throw new AccountPurgeNeedsReview('invalid-lifecycle-reference-kind');
+          }
           const copies = moderationCopiesEnabled && link.action === 'copiedReport' ? await prepareSanctionCopyScrub(transaction, db, fresh) : null;
           if (copies) progress.scrubbedCount = job.scrubbedCount + 1 + copies.count;
           copies?.apply();

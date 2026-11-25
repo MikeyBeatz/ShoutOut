@@ -20,6 +20,34 @@ Map<String, dynamic> gatewayFixture() => {
 };
 
 void main() {
+  test('content lifecycle is off by default and rejects an invalid flag', () {
+    final config =
+        jsonDecode(File('config/dev.json').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(WebEnvironment.fromJson(config).serverContentLifecycle, isFalse);
+    expect(
+      () => WebEnvironment.fromJson({
+        ...config,
+        'serverContentLifecycle': 'true',
+      }),
+      throwsStateError,
+    );
+    expect(
+      WebEnvironment.fromJson({
+        ...config,
+        'serverContentLifecycle': true,
+      }).serverContentLifecycle,
+      isTrue,
+    );
+    expect(
+      () => WebEnvironment.fromJson({
+        ...config,
+        'environment': 'prod',
+        'serverContentLifecycle': true,
+      }),
+      throwsStateError,
+    );
+  });
   test('movement is DEV-only and requires news and delta', () {
     final dev =
         jsonDecode(File('config/dev.json').readAsStringSync())

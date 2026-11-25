@@ -1,12 +1,13 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { AccountPurgeNeedsReview } from './account_purge_guard.js';
+import { validateLifecycleArchive, lifecycleBodyHash } from './content_lifecycle.js';
 
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
   ({ collection, field, action, group, operator });
 
-export function accountPurgeStages(uid, { moderationCopiesEnabled = false } = {}) {
-  if (typeof moderationCopiesEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
+export function accountPurgeStages(uid, { moderationCopiesEnabled = false, contentLifecycleEnabled = false } = {}) {
+  if (typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
   return [
     queryStage('shouts', 'authorId', 'freeze'),
     queryStage('reactions', 'actorId', 'delete', true), // Archived copies, not live counter-bearing votes.
@@ -41,6 +42,10 @@ export function accountPurgeStages(uid, { moderationCopiesEnabled = false } = {}
     ...['reports', 'commentReports', 'privateReplyReports'].flatMap(c =>
       ['resolvedBy', 'escalatedBy'].map(field => queryStage(c, field, 'scrub'))),
     ...(moderationCopiesEnabled ? ['bans', 'contentRestrictions'].map(c => queryStage(c, 'moderatorId', 'scrub')) : []),
+    ...(contentLifecycleEnabled ? [
+      queryStage('contentLifecycleArchive', 'subjectUserIds', 'archive', false, 'array-contains'),
+      queryStage('reports', 'authorId', 'report'), queryStage('commentReports', 'authorId', 'report'),
+    ] : []),
   ];
 }
 
@@ -57,9 +62,18 @@ export function validatePurgeSelection(snapshot, stage, uid) {
     if (parts.length !== 2 || parts[0] !== stage.collection) return false;
     if (stage.collection === 'accountContentArchive') {
       const data = snapshot.data();
+      if (data.contentExpired === true && data.content && Object.keys(data.content).length === 0 &&
+          /^[a-f0-9]{64}$/.test(data.contentArchiveKey ?? '') && id(data.retentionOwnerId) &&
+          ['comment', 'privateReply'].includes(data.kind)) return true;
       if (data.kind === 'comment') return data.content?.authorId === uid;
       if (data.kind === 'privateReply') return data.content?.authorId === uid || data.content?.recipientId === uid;
       return ['shoutReaction', 'commentReaction'].includes(data.kind) && data.retentionOwnerId === uid && data.sourcePath?.split('/').at(-1) === uid;
+    }
+    if (stage.collection === 'contentLifecycleArchive') {
+      const data = snapshot.data();
+      try { validateLifecycleArchive({ projectId: snapshot.ref.firestore.projectId }, snapshot.id, data); } catch { return false; }
+      return data.schemaVersion === 1 && ['shout', 'comment', 'privateReply'].includes(data.kind) &&
+        (data.content?.authorId === uid || data.kind === 'privateReply' && data.content?.recipientId === uid);
     }
     return true;
   }
@@ -71,7 +85,8 @@ export function validatePurgeSelection(snapshot, stage, uid) {
       (stage.collection === 'notifications' || parts[3] === uid);
   }
   if (stage.field === 'actorId') {
-    return parts.length === 4 && parts[0] === 'accountContentArchive' && parts[2] === stage.collection &&
+    return parts.length === 4 && (parts[0] === 'accountContentArchive' ||
+      parts[0] === 'contentLifecycleArchive' && stage.collection === 'accessAudits') && parts[2] === stage.collection &&
       (stage.collection !== 'reactions' || parts[3] === uid);
   }
   return parts[0] === 'shouts' && parts.at(-1) === uid &&
@@ -82,7 +97,8 @@ export function validatePurgeSelection(snapshot, stage, uid) {
 export function purgeSourceIdentity(snapshot, action) {
   if (action === 'report') return { kind: 'report', reportId: snapshot.id };
   const data = snapshot.data(), sourcePath = action === 'archive' ? data.sourcePath : snapshot.ref.path;
-  if (action === 'archive' && !['comment', 'privateReply', 'shoutReaction', 'commentReaction'].includes(data.kind)) {
+  if (action === 'archive' && !['comment', 'privateReply', 'shoutReaction', 'commentReaction',
+    ...(snapshot.ref.parent.id === 'contentLifecycleArchive' ? ['shout'] : [])].includes(data.kind)) {
     throw new AccountPurgeNeedsReview('unknown-purge-archive-kind');
   }
   const kind = action === 'archive' ? data.kind : action;
@@ -93,10 +109,11 @@ export function purgeSourceIdentity(snapshot, action) {
     throw new AccountPurgeNeedsReview('unknown-purge-source-path');
   }
   return { kind, shoutId: parts[1] ?? null, childId: parts[3] ?? null,
-    archived: action === 'archive', originalCreateTime: action === 'archive' ? data.sourceCreateTime ?? null : snapshot.createTime };
+    archived: action === 'archive', originalCreateTime: action === 'archive' ? data.sourceCreateTime ?? null : snapshot.createTime,
+    ...(action === 'archive' && snapshot.ref.parent.id === 'contentLifecycleArchive' ? { originalApplicationCreatedAt: data.sourceCreatedAt } : {}) };
 }
 
-export function accountPurgeLinks(source) {
+export function accountPurgeLinks(source, { contentLifecycleEnabled = false } = {}) {
   const { kind, shoutId, childId } = source;
   if (kind === 'report') return [
     { collection: 'sanctions', filters: [['sourceReportId', source.reportId]], action: 'copiedReport' },
@@ -108,6 +125,8 @@ export function accountPurgeLinks(source) {
     { collection: 'sanctions', filters: [['contentSnapshot.shoutId', shoutId], ['contentSnapshot.replyToCommentId', childId]], action: 'sanctionReply' },
     { collection: 'commentReports', filters: [['shoutId', shoutId], ['commentId', childId]], action: 'delete' },
     { direct: `moderationClearances/comment_${shoutId}_${childId}`, action: 'delete' },
+    ...(contentLifecycleEnabled ? [{ collection: 'contentLifecycleArchive',
+      filters: [['threadId', shoutId], ['content.replyToCommentId', childId]], action: 'lifecycleReply' }] : []),
   ];
   if (kind === 'privateReply') return [
     { collection: 'privateReplyReports', filters: [['shoutId', shoutId], ['privateReplyId', childId]], action: 'delete' },
@@ -119,6 +138,9 @@ export function accountPurgeLinks(source) {
     { direct: `moderationClearances/shout_${shoutId}`, action: 'delete' },
     { collection: `shouts/${shoutId}/reactions`, filters: [], action: 'delete' },
     { collection: `shouts/${shoutId}/saves`, filters: [], action: 'delete' },
+    ...(contentLifecycleEnabled ? ['commentReports', 'privateReplyReports'].map(collection => ({ collection,
+      filters: [['shoutId', shoutId], ['parentContextPurged', false]], action: 'lifecycleContext' })) : []),
+    ...(contentLifecycleEnabled ? [{ direct: `contentLifecycleThreads/${shoutId}`, action: 'lifecycleHeader' }] : []),
   ];
   return [];
 }
@@ -132,6 +154,14 @@ function stripAutomaticReplyPrefix(data) {
 
 export function purgeScrubPatch(data, action, field = null, link = null) {
   const remove = FieldValue.delete();
+  if (action === 'lifecycleContext') return { shoutArchiveKey: remove, moderationGeography: null, parentContextPurged: true };
+  if (action === 'lifecycleHeader') return { geography: null };
+  if (action === 'lifecycleReply') {
+    const body = { ...data.content, ...stripAutomaticReplyPrefix(data.content ?? {}) };
+    delete body.replyToCommentId; delete body.replyToNickname;
+    return { content: body, contentHash: lifecycleBodyHash(body), redactedFromHash: data.redactedFromHash ?? data.contentHash,
+      privacyRedactedAt: FieldValue.serverTimestamp(), redactionKind: 'account-reference' };
+  }
   if (action === 'reply') return { replyToCommentId: remove, replyToNickname: remove, ...stripAutomaticReplyPrefix(data) };
   if (action === 'archivedReply') {
     const text = stripAutomaticReplyPrefix(data.content ?? {});

@@ -10,6 +10,30 @@ const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'own-p
 const db = app ? getFirestore(app) : null;
 after(async () => { if (app) { await db.terminate(); await deleteApp(app); } });
 const now = 1794300000000, clock = () => new Date(now);
+
+test('inactive lifecycle preserves legacy history; opted-in history includes manual deletion until the strict seventh-day boundary', { skip: !enabled }, async t => {
+  const f = await fixture(t, 3), batch = db.batch();
+  batch.update(f.refs[0], { status: 'deleted', publicUntil: Timestamp.fromMillis(now - 1), historyUntil: Timestamp.fromMillis(now + ownShoutRetentionMillis - 1) });
+  batch.update(f.refs[1], { status: 'deleted', publicUntil: Timestamp.fromMillis(now - ownShoutRetentionMillis), historyUntil: Timestamp.fromMillis(now) });
+  batch.update(f.refs[2], { publicUntil: Timestamp.fromMillis(now + 60000), historyUntil: Timestamp.fromMillis(now + 60000 + ownShoutRetentionMillis) });
+  await batch.commit();
+  assert((await page(request(f.uid, 'expired'), db, { clock })).items.length === 0);
+  const history = await page(request(f.uid, 'expired'), db, { clock, contentLifecycleEnabled: true });
+  assert.deepEqual(history.items.map(i => i.id), [f.refs[0].id]);
+  assert.equal(history.items[0].data.readOnlyHistory, true);
+  assert.equal(history.items[0].data.status, 'deleted');
+  assert.deepEqual((await page(request(f.uid), db, { clock, contentLifecycleEnabled: true })).items.map(i => i.id), [f.refs[2].id]);
+});
+
+test('lifecycle history preserves fifty-item pagination and account-bound cursors', { skip: !enabled }, async t => {
+  const f = await fixture(t, 51), batch = db.batch();
+  for (const ref of f.refs) batch.update(ref, { status: 'deleted', publicUntil: Timestamp.fromMillis(now - 1), historyUntil: Timestamp.fromMillis(now + ownShoutRetentionMillis - 1) });
+  await batch.commit();
+  const first = await page(request(f.uid, 'expired'), db, { clock, contentLifecycleEnabled: true });
+  const second = await page(request(f.uid, 'expired', first.next), db, { clock, contentLifecycleEnabled: true });
+  assert.equal(first.items.length, 50); assert.equal(second.items.length, 1); assert.equal(second.next, null);
+  assert.deepEqual([...first.items, ...second.items].map(i => i.id), f.refs.map(r => r.id));
+});
 function request(uid, section = 'active', after = null) {
   return { auth: { uid, token: { email: 'own@example.test', email_verified: true } }, app: { appId: 'fixture' },
     data: { expectedUserId: uid, section, after } };

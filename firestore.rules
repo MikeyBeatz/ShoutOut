@@ -42,6 +42,21 @@ service cloud.firestore {
       return true; // business-authority-gate
     }
 
+    function managedContentLifecycle() {
+      return false; // content-lifecycle-gate: local preparation only
+    }
+
+    function lifecycleHistoryReadable(data) {
+      return !managedContentLifecycle() ||
+        (data.get('historyUntil', null) is timestamp && request.time < data.historyUntil);
+    }
+
+    function lifecycleThreadReadable(shoutId) {
+      return !managedContentLifecycle() ||
+        (exists(/databases/$(database)/documents/shouts/$(shoutId)) &&
+          lifecycleHistoryReadable(get(/databases/$(database)/documents/shouts/$(shoutId)).data));
+    }
+
     function managedCardProjection() {
       let control = /databases/$(database)/documents/feedIndexControl/current;
       return exists(control) && get(control).data.get('schemaVersion', 1) == 2 &&
@@ -2112,12 +2127,13 @@ service cloud.firestore {
     }
 
     match /{path=**}/comments/{commentId} {
-      allow list: if eligibleUser() && limited(50);
+      allow list: if eligibleUser() && limited(50) && !managedContentLifecycle();
     }
 
     match /shouts/{shoutId} {
-      allow get: if eligibleUser();
-      allow list: if eligibleUser() && limited(50);
+      allow get: if eligibleUser() && (!managedContentLifecycle() || lifecycleHistoryReadable(resource.data));
+      allow list: if eligibleUser() && limited(50) &&
+        (!managedContentLifecycle() || resource.data.historyUntil > request.time);
       allow create: if canCreateContent() &&
         !managedFeedProjection() &&
         consumedRate('shout', shoutId) &&
@@ -2155,8 +2171,8 @@ service cloud.firestore {
               (oldType == 'dislike' ? 1 : 0);
         }
 
-        allow get: if eligibleUser();
-        allow list: if eligibleUser() && limited(50);
+        allow get: if eligibleUser() && lifecycleThreadReadable(shoutId);
+        allow list: if eligibleUser() && limited(50) && lifecycleThreadReadable(shoutId);
         allow create: if canCreateContent() &&
           !managedCardProjection() &&
           activeShout(shoutId) &&
@@ -2271,12 +2287,12 @@ service cloud.firestore {
       }
 
       match /privateReplies/{replyId} {
-        allow get: if eligibleUser() &&
+        allow get: if eligibleUser() && lifecycleThreadReadable(shoutId) &&
           (
             resource.data.authorId == request.auth.uid ||
             resource.data.recipientId == request.auth.uid
           );
-        allow list: if eligibleUser() &&
+        allow list: if eligibleUser() && lifecycleThreadReadable(shoutId) &&
           limited(50) &&
           (
             resource.data.authorId == request.auth.uid ||

@@ -9,6 +9,8 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { nextDeleteRate } from './delete_comment.js';
 import { prepareCardMutation } from './feed_card_state.js';
 import { isPurgedShoutContext } from './shout_context.js';
+import { lifecycleEnabled } from './content_lifecycle.js';
+import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPublicContent';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -39,10 +41,12 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     await requireEligibleActor({ request, db, reader: tx, now: date });
     const [role, legacy, receipt, shout] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef);
     const level = privateReportModeratorLevel(role.data(), legacy.data());
-    assertPrivateReportScope(role.data(), level, shout.data());
+    const managed = lifecycleEnabled(db);
+    if (!managed) assertPrivateReportScope(role.data(), level, shout.data());
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
+      if (managed) assertPrivateReportScope(role.data(), level, stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
           stored.targetId !== input.targetId || JSON.stringify(stored.reportIds) !== JSON.stringify(input.reportIds) ||
@@ -52,25 +56,28 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
       return { removed: true, count: input.reportIds.length };
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
-    if (!source.exists || !shout.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data())) fail('not-found', 'The report target is unavailable.');
-    if (!identifier(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp)) fail('failed-precondition', 'Invalid report target.');
+    const hasLiveBody = source.exists && !(input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
+    if (!managed && (!source.exists || !shout.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()))) fail('not-found', 'The report target is unavailable.');
+    if (!managed && (!identifier(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
     const reports = await tx.get(pendingContentReports(db, input));
-    assertContentReportGroup(reports, input, source);
+    const evidence = managed ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) : null;
+    if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
+    else assertContentReportGroup(reports, input, source);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     const body = shout.data();
     let plan, remainingComments, rateRef, rateData;
-    if (input.targetType === 'shout') {
+    if (input.targetType === 'shout' && hasLiveBody) {
       if (typeof indexWriter?.prepare !== 'function') fail('failed-precondition', 'The feed index writer is required.');
       plan = await indexWriter.prepare(tx, input.shoutId, body, { ...body, status: 'deleted' },
         { operationId: receiptRef.id, additionalWrites: reports.size + 1 });
       if (typeof plan?.apply !== 'function') throw new Error('invalid-public-removal-index-plan');
-    } else {
+    } else if (input.targetType === 'comment' && hasLiveBody) {
       rateRef = db.doc(`rateLimits/${uid}/actions/delete`);
       const rate = await tx.get(rateRef);
       rateData = nextDeleteRate(rate.data(), now, input.targetId);
-      if (!isPurgedShoutContext(body)) {
+      if (shout.exists && !isPurgedShoutContext(body)) {
         const count = body.commentsCount ?? 0;
         if (![body.likesCount, body.dislikesCount, body.savesCount, count].every(counter)) fail('failed-precondition', 'Invalid stored Shout counters.');
         remainingComments = Math.max(0, count - 1);
@@ -80,8 +87,8 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     }
     plan?.apply();
     if (input.targetType === 'shout') {
-      if (body.status !== 'deleted') tx.update(shoutRef, { status: 'deleted' });
-    } else {
+      if (hasLiveBody && body.status !== 'deleted') tx.update(shoutRef, { status: 'deleted' });
+    } else if (hasLiveBody) {
       tx.delete(sourceRef);
       if (remainingComments !== undefined) tx.update(shoutRef, { commentsCount: remainingComments });
       tx.set(rateRef, rateData);
@@ -93,7 +100,8 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     const result = { removed: true, count: reports.size };
     tx.create(receiptRef, { ...retention, action, userId: uid, fingerprint, targetType: input.targetType,
       shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
-      reportIds: input.reportIds, authorId: source.get('authorId'), requiredRoleLevel, result, createdAt: now });
+      reportIds: input.reportIds, authorId: evidence?.content.authorId ?? source.get('authorId'),
+      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), requiredRoleLevel, result, createdAt: now });
     return result;
   });
 }

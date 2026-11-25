@@ -198,6 +198,12 @@ jobs:
         working-directory: tools
         run: npm run test:moderation-sanctions
 
+      - name: Test inactive content lifecycle
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 4
+        working-directory: tools
+        run: npm run test:content-lifecycle
+
       - name: Test prepared Business review
         if: steps.scope.outputs.full != 'false'
         timeout-minutes: 4

@@ -31,6 +31,8 @@ import { getArchivedCommentReportTargetOperation } from './archived_comment_repo
 import { deleteShoutOperation } from './delete_shout.js';
 import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
 import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js';
+import { contentLifecycleConfiguration } from './content_lifecycle.js';
+import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
 
 if (getApps().length === 0) initializeApp();
 
@@ -42,8 +44,22 @@ function indexedOperation(operation, request, options = {}) {
 }
 
 function projectedOperation(operation, request, options = {}) {
-  return feedRuntimeConfiguration.cardStateEnabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
+  return feedRuntimeConfiguration.cardStateEnabled || contentLifecycleConfiguration.enabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
 }
+
+function lifecycleDatabase() {
+  const db = getFirestore();
+  return contentLifecycleConfiguration.enabled
+    ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }).database : db;
+}
+
+export const getLifecycleReportEvidence = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => {
+  if (!contentLifecycleConfiguration.enabled) throw new HttpsError('failed-precondition', 'Content lifecycle is not enabled.');
+  return getLifecycleReportEvidenceOperation(request, lifecycleDatabase());
+});
 
 export { cleanupOperationReceipts } from './receipt_cleanup_schedule.js';
 
@@ -108,12 +124,12 @@ export const deleteComment = onCall({
 export const removeReportedPrivateReply = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => removeReportedPrivateReplyOperation(request, getFirestore()));
+}, request => removeReportedPrivateReplyOperation(request, lifecycleDatabase()));
 
 export const decideContentReports = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => decideContentReportsOperation(request, getFirestore(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled, guardEvidenceRetention: moderationEvidenceRetentionEnabled }));
+}, request => decideContentReportsOperation(request, lifecycleDatabase(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled, guardEvidenceRetention: moderationEvidenceRetentionEnabled }));
 
 export const removeReportedPublicContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
@@ -123,7 +139,7 @@ export const removeReportedPublicContent = onCall({
 export const sanctionContent = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => sanctionContentOperation(request, getFirestore()));
+}, request => sanctionContentOperation(request, lifecycleDatabase()));
 
 export const reviewBusinessApplication = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
@@ -145,7 +161,7 @@ export const deletePrivateReply = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, request => deletePrivateReplyOperation(request, getFirestore()));
+}, request => deletePrivateReplyOperation(request, lifecycleDatabase()));
 
 export const createShout = onCall({
   ...secureCallableOptions,
@@ -172,7 +188,7 @@ export const createPrivateReply = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => createPrivateReplyOperation(request, getFirestore()));
+}, (request) => createPrivateReplyOperation(request, lifecycleDatabase()));
 
 export const toggleShoutReaction = onCall({
   ...secureCallableOptions,
@@ -190,7 +206,7 @@ export const toggleCommentReaction = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => toggleCommentReactionOperation(request, getFirestore()));
+}, (request) => toggleCommentReactionOperation(request, lifecycleDatabase()));
 
 export const toggleShoutSave = onCall({
   ...secureCallableOptions,
@@ -208,7 +224,7 @@ export const createContentReport = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => createContentReportOperation(request, getFirestore()));
+}, (request) => createContentReportOperation(request, lifecycleDatabase()));
 
 
 export const getArchivedCommentReportTarget = onCall({

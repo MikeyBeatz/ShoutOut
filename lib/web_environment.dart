@@ -42,6 +42,17 @@ class WebEnvironment {
       throw StateError('serverArchivedReportLookup must be a boolean.');
     }
     serverArchivedReportLookup = archivedReports == true;
+    final lifecycle = json['serverContentLifecycle'];
+    if (json.containsKey('serverContentLifecycle') && lifecycle is! bool) {
+      throw StateError('serverContentLifecycle must be a boolean.');
+    }
+    serverContentLifecycle = lifecycle == true;
+    if (serverContentLifecycle &&
+        (name != 'dev' || key == null || reportsGateway != true)) {
+      throw StateError(
+        'Content lifecycle requires DEV managed reports and App Check.',
+      );
+    }
     if (serverArchivedReportLookup && key == null) {
       throw StateError('Archived report lookup requires web App Check.');
     }
@@ -342,6 +353,7 @@ class WebEnvironment {
   late final bool serverShoutSaves;
   late final bool serverContentReports;
   late final bool serverArchivedReportLookup;
+  late final bool serverContentLifecycle;
   late final bool serverCommentDeletion;
   late final bool serverPrivateReplyDeletion;
   late final bool serverPrivateReportRemoval;

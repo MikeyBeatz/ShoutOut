@@ -4,6 +4,7 @@ import { requireCallableIdentity, requireEligibleActor } from './callable_securi
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { publicFeedBody } from './get_feed_page.js';
 import { distanceKm } from './feed_spatial.js';
+import { contentLifecycleConfiguration } from './content_lifecycle.js';
 
 export const ownShoutRetentionMillis = 7 * 86400000;
 const fail = () => { throw new HttpsError('invalid-argument', 'Invalid own Shout page.'); };
@@ -32,7 +33,18 @@ function inputFor(input, uid) {
 // Exposed for the CLI's read-only Query Explain too. createdAt's nonnegative
 // range permits its existing newest-first order alongside the expiry range.
 // Equality is always the verified actor, never a client-selected author.
-export function ownShoutsQuery(db, uid, section, now, after = null) {
+export function ownShoutsQuery(db, uid, section, now, after = null, { contentLifecycleEnabled = false } = {}) {
+  if (typeof contentLifecycleEnabled !== 'boolean') throw new Error('invalid-content-lifecycle-option');
+  if (contentLifecycleEnabled) {
+    let query = db.collection('shouts').where('authorId', '==', uid)
+      .where('status', 'in', section === 'active' ? ['active'] : ['active', 'expired', 'deleted'])
+      .where('createdAt', '>=', Timestamp.fromMillis(0));
+    query = section === 'active' ? query.where('publicUntil', '>', now) :
+      query.where('publicUntil', '<=', now).where('publicUntil', '>', Timestamp.fromMillis(now.toMillis() - ownShoutRetentionMillis));
+    query = query.orderBy('createdAt', 'desc').orderBy('publicUntil', 'desc').orderBy(FieldPath.documentId(), 'desc');
+    if (after) query = query.startAfter(timestamp(after.createdAt), timestamp(after.expiresAt), after.id);
+    return query.limit(50);
+  }
   let query = db.collection('shouts').where('authorId', '==', uid)
     .where('status', 'in', ['active', 'expired']).where('createdAt', '>=', Timestamp.fromMillis(0));
   query = section === 'active' ? query.where('expiresAt', '>', now) :
@@ -42,20 +54,27 @@ export function ownShoutsQuery(db, uid, section, now, after = null) {
   return query.limit(50);
 }
 
-export async function getOwnShoutsOperation(request, db, { clock = () => new Date() } = {}) {
+export async function getOwnShoutsOperation(request, db, { clock = () => new Date(), contentLifecycleEnabled = contentLifecycleConfiguration.enabled } = {}) {
   assertFeedRuntimeTarget(db);
   const { uid } = requireCallableIdentity(request), input = inputFor(request.data, uid), now = Timestamp.fromDate(clock());
   await requireEligibleActor({ request, db, now: now.toDate() });
-  const page = await ownShoutsQuery(db, uid, input.section, now, input.after).get();
+  const page = await ownShoutsQuery(db, uid, input.section, now, input.after, { contentLifecycleEnabled }).get();
   const items = page.docs.filter(doc => doc.get('contentPurged') !== true).map(doc => {
     const data = doc.data(), location = data.location;
+    if (contentLifecycleEnabled && (!(data.publicUntil instanceof Timestamp) || !(data.historyUntil instanceof Timestamp) ||
+        data.historyUntil.toMillis() !== data.publicUntil.toMillis() + ownShoutRetentionMillis ||
+        !(data.expiresAt instanceof Timestamp) || data.publicUntil.toMillis() > data.expiresAt.toMillis())) {
+      throw new HttpsError('data-loss', 'Invalid own history deadline.');
+    }
     return { id: doc.id, distanceKm: input.point && Number.isFinite(location?.latitude) && Number.isFinite(location?.longitude)
-      ? distanceKm(input.point, location) : 0, data: publicFeedBody(data) };
+      ? distanceKm(input.point, location) : 0, data: { ...publicFeedBody(data),
+        ...(contentLifecycleEnabled && input.section === 'expired' ? { readOnlyHistory: true,
+          historyUntil: data.historyUntil.toMillis(), publicUntil: data.publicUntil.toMillis() } : {}) } };
   });
   const last = page.docs.at(-1), stamp = value => [value.seconds, value.nanoseconds];
   // This unsigned cursor only skips inside the caller's own indexed query.
   // Recheck eligibility after network waits; no session or key is provisioned.
   await requireEligibleActor({ request, db, now: clock() });
   return { version: 1, items, next: page.size === 50 ? { userId: uid, section: input.section, id: last.id,
-    createdAt: stamp(last.get('createdAt')), expiresAt: stamp(last.get('expiresAt')) } : null };
+    createdAt: stamp(last.get('createdAt')), expiresAt: stamp(last.get(contentLifecycleEnabled ? 'publicUntil' : 'expiresAt')) } : null };
 }

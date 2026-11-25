@@ -25,5 +25,6 @@ Map<String, dynamic> decodeArchivedCommentTarget(Object? response) {
     ),
     if (target['authorNickname'] != null)
       'authorNickname': target['authorNickname'],
+    if (target['title'] is String) 'title': target['title'],
   };
 }

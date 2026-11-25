@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 24. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 25. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,28 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,36 %** — vážené dokončení podúseků
 
-Hotové úseky: **221/276**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **222/278**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -35,6 +35,14 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
+
+**Nyní: schválený místní společný archiv Shoutů, komentářů a soukromých odpovědí.**
+[Připravený základ, měření a zbývající návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
+Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
+má přednost. Dokončit kompatibilitu SDK seznamů a provozní integraci; nové volby
+i Rules brána jsou false. Bez nasazení a živé migrace, úplné CI připravené práce
+ještě není uzavřené. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
+platí požadavek na další přepracování cyklu.
 
 **Drobná oprava IDE dokončená lokálně:** [vyloučení cizích Dart šablon npm](operations/TESTING.md#dart-dependency-templates).
 Celá flutter analyze nyní bez nálezů; žádný nový MVP kredit, build či rollout.
@@ -107,8 +115,9 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    archiv všech Shoutů po sedmidenní historii. [Ověřená dokumentace a nový společný návrh](MVP_SERVER_PLAN.md#content-lifecycle-retention-review):
    60 dní po konci historie, nikoli pevně +68 dní pro libovolnou platnost;
    Business až +74 dní, ruční smazání nově 7 dní v historii. Rozšíření na
-   všechny Shouty/komentáře/soukromé odpovědi čeká souhlas. Žádný nový kód,
-   migrace či rollout této archivace. Úklid jediné fixture je odložený.
+   všechny Shouty/komentáře/soukromé odpovědi schválené 25. listopadu včetně
+   místní implementace/testů. Probíhá práce za vypnutou volbou; bez migrace
+   či rolloutu. Po MVP proběhne revize cyklu. Úklid jediné fixture je odložený.
    Nové sankce ani obsah nezakládat.
    Předepsaný klientský průchod dokončený; úklid a nová retenční návaznost otevřené.
    Browser host nedostupný, náhradní ovládání zastavila kontrola URL.

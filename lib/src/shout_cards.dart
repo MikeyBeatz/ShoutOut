@@ -91,7 +91,7 @@ class ShoutCard extends StatelessWidget {
     confirmedRead: shout.feedRead == true,
     builder: (context, read) => ShoutInteractionGate(
       expiresAt: shout.expiresAt,
-      enabled: shout.status == ShoutStatus.active,
+      enabled: shout.status == ShoutStatus.active && !shout.readOnlyHistory,
       builder: (context, open) => InteractionFeedbackBuilder(
         id: shout.id,
         feedback:
@@ -336,7 +336,8 @@ class ShoutCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              if (ReadTrackingScope.maybeOf(context) != null)
+              if (!shout.readOnlyHistory &&
+                  ReadTrackingScope.maybeOf(context) != null)
                 ReadTrackedContent(
                   content: ReadContent(
                     shoutId: shout.id,

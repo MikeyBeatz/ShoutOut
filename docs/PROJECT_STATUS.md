@@ -1,10 +1,24 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 24. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 25. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
+
+**Aktuální místní práce – společný archiv obsahu:**
+[základ a otevřené návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation),
+větev feature/moderation-report-evidence. Připravené atomické kopie všech
+tří typů obsahu, čtení konkrétního hlášení po smazání zdroje, účtové vazby,
+anonymizace cizích odpovědí a obnovitelný běžný purge. Vlastní deleted historie
+má vypnutou variantu jen ke čtení; právní texty jsou připravené v sedmi jazycích.
+Nový serverový/klientský přepínač i Rules brána zůstávají false. Nic z toho
+není nasazené ani migrované. Místní testy zahrnuly oba zapnuté účtové průchody,
+50 zdrojů / 450 zápisů a skutečný indexový writer; úplné CI se ještě nedokončilo.
+**Další krok ve schváleném rozsahu:** kompatibilita zbývajících SDK seznamů,
+režim pauzy a úplné provozní napojení. Přísnější Rules se zatím nezapínají.
+Podrobný přechod starých dat a nová právní verze patří před jakoukoli aktivaci.
+Po MVP je zapsaná další revize cyklu. Starý živý pilot zůstává zachovaný.
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
@@ -98,8 +112,10 @@ Obecný +60denní archiv po historii v původní dokumentaci není; dosavadní
 Předložené rozšíření místního úseku: neveřejná kopie při vytvoření všech Shoutů/
 komentářů/soukromých odpovědí, historie 7 dní od skutečného konce včetně ručního
 smazání, pevný purge o 60 dní později; obvykle +68 dní, Business až +74 dní.
-Čeká souhlas s tímto širším rozsahem a sjednoceným termínem; kód/živá data
-se při kontrole dokumentace neměnily. Pilotní úklid zůstává odložený.
+Vlastník 25. listopadu schválil celý širší místní rozsah a požaduje jeho
+revizi po MVP. Začala implementace za vypnutou volbou; neproběhlo nasazení,
+živá migrace ani změna dat. Místní ověření a společné CI ještě nejsou hotové.
+Pilotní úklid zůstává odložený.
 Další obsah nezakládat. Původních 38 zdrojů
 a původní žádost zachované; celý rozsah již schválený, znovu se nedotazovat.
 Browser host je nedostupný;

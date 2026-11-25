@@ -59,6 +59,8 @@ class Shout {
     this.businessHighlighted = false,
     this.businessSpotlight = false,
     this.businessExtendedDuration = false,
+    this.readOnlyHistory = false,
+    this.historyUntil,
   }) : feedCreatedAtMillis =
            feedCreatedAtMillis ?? createdAt.microsecondsSinceEpoch / 1000;
 
@@ -131,6 +133,10 @@ class Shout {
           data['businessSpotlight'] == true ||
           data['businessPromotion'] == 'spotlight',
       businessExtendedDuration: data['businessExtendedDuration'] == true,
+      readOnlyHistory: data['readOnlyHistory'] == true,
+      historyUntil: data['historyUntil'] is Timestamp
+          ? (data['historyUntil'] as Timestamp).toDate()
+          : null,
     );
   }
   final String id;
@@ -161,6 +167,8 @@ class Shout {
   final bool businessHighlighted;
   final bool businessSpotlight;
   final bool businessExtendedDuration;
+  final bool readOnlyHistory;
+  final DateTime? historyUntil;
   String displayedAuthor(String currentProfileNickname) {
     if (businessLocationId == null) return currentProfileNickname;
     if (businessAuthorFormat == 'branch') return author;
@@ -175,17 +183,20 @@ class Shout {
         : ShoutStatus.expired;
   }
 
-  bool get isActive => effectiveStatus == ShoutStatus.active;
+  bool get isActive =>
+      !readOnlyHistory && effectiveStatus == ShoutStatus.active;
 
   bool get isActiveSpotlightWithinRange =>
       businessSpotlight && isActive && distanceKm <= 20;
 
-  bool get isExpiredBeyondRetention =>
-      effectiveStatus == ShoutStatus.expired &&
-      DateTime.now().isAfter(expiresAt.add(_expiredShoutRetention));
+  bool get isExpiredBeyondRetention => readOnlyHistory
+      ? historyUntil?.isAfter(DateTime.now()) != true
+      : effectiveStatus == ShoutStatus.expired &&
+            DateTime.now().isAfter(expiresAt.add(_expiredShoutRetention));
 
-  bool get isRetainedExpired =>
-      effectiveStatus == ShoutStatus.expired && !isExpiredBeyondRetention;
+  bool get isRetainedExpired => readOnlyHistory
+      ? historyUntil?.isAfter(DateTime.now()) == true
+      : effectiveStatus == ShoutStatus.expired && !isExpiredBeyondRetention;
 
   int get reactionCount => likes + dislikes;
   double get dislikeRatio => reactionCount == 0 ? 0 : dislikes / reactionCount;

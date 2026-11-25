@@ -9,6 +9,15 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('content lifecycle stays inactive and requires DEV managed reports and App Check', () => {
+  assert.notEqual(actualDev.serverContentLifecycle, true);
+  assert.notEqual(loadConfig('prod').serverContentLifecycle, true);
+  validateConfig({ ...actualDev, serverContentLifecycle: true }, 'dev');
+  for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: value }, 'dev'));
+  assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: true }, 'prod'));
+  assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: true, appCheckSiteKey: undefined }, 'dev'));
+});
+
 test('Business review is enabled in DEV, strict and independently requires App Check', () => {
   assert.equal(actualDev.serverBusinessReview, true);
   assert.notEqual(loadConfig('prod').serverBusinessReview, true);

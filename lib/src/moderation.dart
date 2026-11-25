@@ -945,12 +945,18 @@ class _ReportTargetDetails {
     required this.targetData,
     this.focusCommentId,
     this.focusCommentCreatedAt,
+    this.archived = false,
+    this.parentData,
+    this.privacyRedacted = false,
   });
 
   final Shout? shout;
   final Map<String, dynamic>? targetData;
   final String? focusCommentId;
   final Timestamp? focusCommentCreatedAt;
+  final bool archived;
+  final Map<String, dynamic>? parentData;
+  final bool privacyRedacted;
 }
 
 class _ReportDetailDialog extends StatefulWidget {
@@ -982,6 +988,38 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
 
   Future<_ReportTargetDetails> _load() async {
     final data = widget.report.data();
+    if (kIsWeb && WebEnvironment.current.serverContentLifecycle) {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) throw StateError('Sign-in required');
+      final type = switch (widget.collection) {
+        'reports' => 'shout',
+        'commentReports' => 'comment',
+        'privateReplyReports' => 'privateReply',
+        _ => throw StateError('Unsupported content report'),
+      };
+      final response =
+          await FirebaseFunctions.instanceFor(region: 'europe-west3')
+              .httpsCallable('getLifecycleReportEvidence')
+          .call({'reportId': widget.report.id, 'targetType': type, 'expectedUserId': uid});
+      if (!mounted || FirebaseAuth.instance.currentUser?.uid != uid) {
+        throw StateError('The signed-in account changed');
+      }
+      return _ReportTargetDetails(
+        shout: null,
+        targetData: decodeArchivedCommentTarget(response.data),
+        archived: true,
+        privacyRedacted:
+            response.data is Map &&
+            (response.data as Map)['privacyRedacted'] == true,
+        parentData:
+            response.data is Map && (response.data as Map)['parentData'] is Map
+            ? decodeArchivedCommentTarget({
+                'archived': true,
+                'targetData': (response.data as Map)['parentData'],
+              })
+            : null,
+      );
+    }
     final shoutDocument = await FirebaseFirestore.instance
         .collection('shouts')
         .doc(data['shoutId'] as String)
@@ -1069,6 +1107,28 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (details.archived)
+                        _ReportDetailRow(
+                          label: 'Podklad',
+                          value: details.privacyRedacted
+                              ? 'Archivní kopie s anonymizovaným odkazem'
+                              : 'Archivní kopie při zveřejnění',
+                        ),
+                      if (details.parentData != null) ...[
+                        _ReportDetailRow(
+                          label: 'Původní Shout',
+                          value: details.parentData!['title'] as String? ?? '',
+                        ),
+                        _ReportDetailRow(
+                          label: 'Kontext',
+                          value: details.parentData!['text'] as String? ?? '',
+                        ),
+                      ],
+                      if (target?['title'] is String)
+                        _ReportDetailRow(
+                          label: 'Nadpis',
+                          value: target!['title'] as String,
+                        ),
                       _ReportDetailRow(
                         label: 'Obsah',
                         value:

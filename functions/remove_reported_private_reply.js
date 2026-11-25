@@ -4,6 +4,8 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { receiptRetentionFields } from './operation_retention.js';
+import { lifecycleEnabled } from './content_lifecycle.js';
+import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPrivateReply';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -50,13 +52,13 @@ export function assertPrivateReportScope(role, level, shout) {
   fail('permission-denied', 'The report is outside the moderator geography.');
 }
 
-function reportTarget(report) {
+function reportTarget(report, managed = false) {
   if (!report.exists) return unavailable();
   const data = report.data();
   if (!identifier(data.shoutId) || !identifier(data.privateReplyId) || !identifier(data.reporterId) ||
       !identifier(data.authorId) || data.reporterId === data.authorId ||
       report.id !== `${data.reporterId}_${data.shoutId}_${data.privateReplyId}` ||
-      typeof data.text !== 'string' || typeof data.reason !== 'string' || !data.reason ||
+      (!managed && typeof data.text !== 'string') || typeof data.reason !== 'string' || !data.reason ||
       !(data.createdAt instanceof Timestamp)) {
     fail('failed-precondition', 'Invalid stored private report.');
   }
@@ -98,22 +100,25 @@ export async function removeReportedPrivateReplyOperation(request, db, clock = (
       if (level < stored.requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
       // Check current authority, never the role supplied in an old request.
       const shout = await tx.get(db.doc(`shouts/${stored.shoutId}`));
-      assertPrivateReportScope(role.data(), level, shout.data());
+      assertPrivateReportScope(role.data(), level, lifecycleEnabled(db) && stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
       return { removed: true };
     }
-    const report = await tx.get(reportRef), data = reportTarget(report);
+    const managed = lifecycleEnabled(db), report = await tx.get(reportRef), data = reportTarget(report, managed);
     const requiredRoleLevel = data.status === 'escalated' ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     const sourceRef = db.doc(`shouts/${data.shoutId}/privateReplies/${data.privateReplyId}`);
     const [shout, source] = await tx.getAll(db.doc(`shouts/${data.shoutId}`), sourceRef);
-    assertPrivateReportScope(role.data(), level, shout.data());
-    assertTargetIncarnation(report, source, data);
-    tx.delete(sourceRef);
+    const evidence = managed ? await resolveLifecycleReportGroup(tx, db, { docs: [report] }, {
+      targetType: 'privateReply', shoutId: data.shoutId, targetId: data.privateReplyId, reportIds: [report.id], decision: 'remove',
+    }, source, now) : null;
+    assertPrivateReportScope(role.data(), level, evidence ? { geography: evidence.geography } : shout.data());
+    if (!managed) assertTargetIncarnation(report, source, data);
+    if (source.exists) tx.delete(sourceRef);
     tx.update(reportRef, { status: 'resolved', resolution: 'contentRemoved', resolvedAt: now,
       resolvedBy: uid, decisionOperationId: receiptRef.id, ...(input.note ? { moderatorNote: input.note } : {}) });
     tx.create(receiptRef, { ...retention, action, userId: uid, reportId: report.id,
       shoutId: data.shoutId, privateReplyId: data.privateReplyId, requiredRoleLevel,
-      fingerprint, result: { removed: true }, createdAt: now });
+      fingerprint, ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), result: { removed: true }, createdAt: now });
     // Report body/reason, archive, related messages, rate counters and feed stay intact.
     return { removed: true };
   });
