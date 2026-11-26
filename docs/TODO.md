@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,72 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,73 %** — vážené dokončení podúseků
 
-Hotové úseky: **234/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **235/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -47,9 +47,11 @@ má přednost. Připravené a úplným CI ověřené jsou jádro,
 [termíny účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
 Přesné zdroje a důkazy jsou v plánu a [PROJECT_STATUS](PROJECT_STATUS.md).
 
-**Právě dokončované ověření:** [původní verze těl a společné čtení účtových
+**Nově připravené a úplným CI ověřené:** [původní verze těl a společné čtení účtových
 kopií pro moderaci](MVP_SERVER_PLAN.md#content-lifecycle-account-evidence).
 Původní SDK čas/hash se zachová před zápisem metadat; nejasná verze se neodhaduje.
+Zdroj 98323a2 má [úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751)
+se 115 archivními případy včetně 19 nových a webovým buildem.
 
 **Následuje ve schváleném místním rozsahu:** řízený operátor/inventura a
 indexový plán, kompatibilita starých účtových běhů a nativních klientů,

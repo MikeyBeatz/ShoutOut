@@ -100,7 +100,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-11: Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.](TODO.md#mvp-11) | 20,00 % | 1/5 |
 | [mvp-12: Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči mimo Litoměřice.](TODO.md#mvp-12) | 50,00 % | 2/4 |
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
-| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 81,38 % | 25/35 |
+| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 81,52 % | 26/35 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 71,70 % | 38/44 |
@@ -335,7 +335,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | lifecycle-adopt-accounts-code: Přechod archivu – termíny účtových kopií | implementation | ✅ | [1](../functions/content_lifecycle_account_adoption.js), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption) |
 | lifecycle-adopt-accounts-check: Přechod archivu – ověření účtových termínů | verification | ✅ | [1](../functions/content_lifecycle_account_adoption.integration.test.js), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034) |
 | lifecycle-account-evidence-code: Přechod archivu – původní verze těl a společné čtení | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-evidence), [2](../functions/account_archive_lifecycle_binding.js), [3](../functions/content_lifecycle_account_evidence.js), [4](../functions/content_lifecycle_evidence.js), [5](../lib/archive_capture.dart) |
-| lifecycle-account-evidence-check: Přechod archivu – ověření verzí a moderačního čtení | verification | ⬜ | — |
+| lifecycle-account-evidence-check: Přechod archivu – ověření verzí a moderačního čtení | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-evidence), [2](../functions/account_archive_lifecycle_binding.test.js), [3](../functions/content_lifecycle_account_evidence.integration.test.js), [4](../test/archive_capture_test.dart), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751) |
 | lifecycle-operator-code: Přechod archivu – řízený operátor, inventura a indexový plán | implementation | ⬜ | — |
 | lifecycle-operator-check: Přechod archivu – ověření operátoru a indexů | verification | ⬜ | — |
 | lifecycle-compatibility-code: Přechod archivu – kompatibilita klientů a starých účtových běhů | implementation | ⬜ | — |

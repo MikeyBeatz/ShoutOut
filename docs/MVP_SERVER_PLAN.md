@@ -3135,7 +3135,13 @@ systému v sedmi jazycích a ukazuje původní SDK datum kopie.
 čtecích případů včetně doplněné sankce žijícího autora nad kopií smazaného
 příjemce. Prošlo 215 serverových unit testů (integrační skip není jejich
 ověření), lint, 4 klientské testy původu, analýza bez nálezů, 11 testů metrik
-a 3 kontroly balíčku Functions. Úplné CI přesného zdroje ještě není doložené.
+a 3 kontroly balíčku Functions. Zdroj
+**98323a2c9eeecfdd610a6d33b5e431f3ab5a0f01** má
+[úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751):
+115 archivních případů / 0 fail (včetně všech 19 nových čtecích), 215
+serverových unit pass / 830 integračních skip, dosavadní aplikační/browserové
+a serverové regrese, Rules, účtový/Storage úklid a webový build. Skip se
+nepočítá jako integrační ověření; ty mají vlastní emulátorové kroky.
 Čisté vnitřní čtení jednoho soukromého podkladu má 11 SDK dokumentových reads /
 5 volání, z toho 1 omezený dotaz; opakování ve stejné transakci 0 dalších reads,
 0 zápisů. Měření nezahrnuje čtení aktéra/hlášení, případný audit ani cloudové

@@ -95,17 +95,22 @@ Marker v2 zachovává původní SDK updateTime/hash před změnou metadat; v1
 nepředstírá důkaz těla. Reader používá konkrétní hlášení, původní region a
 pevné termíny; audit/receipt rozlišují skutečné účtové úložiště. Neznámá
 verze či náhradní zdroj/kopie se odmítá. Klient má samostatné označení původu.
-Prošlo 114 společných případů a následných 19 cílených včetně sankce; 215
-serverových unit testů, lint, 4 klientské testy, analýza bez nálezů, 11 testů
-metrik a 3 kontroly balíčku. Vnitřní čtení 11 SDK dokumentových reads / 5 volání,
+Zdroj **98323a2c9eeecfdd610a6d33b5e431f3ab5a0f01** má
+[úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751):
+115 archivních případů včetně 19 nových, 215 serverových unit pass / 830
+integračních skip, dosavadní regrese/Rules, účtový/Storage úklid a webový build.
+Místně prošly také lint, 4 klientské testy, analýza bez nálezů, 11 testů metrik
+a 3 kontroly balíčku. Vnitřní čtení 11 SDK dokumentových reads / 5 volání,
 opakování v téže transakci bez dalších reads; nejde o cloudové účtování.
-Úplné CI ještě není doložené. Nic se nenasazuje; nové volby jsou false.
+Nic se nenasazuje; nové volby jsou false. Další konkrétní práce: řízený
+operátor/inventura s indexovým plánem, poté kompatibilita starých účtových
+běhů a klientů a závěrečná integrace. Celá migrace zůstává otevřená.
 
 **Stupnice zpřesněná podle schválení vlastníka:** původních 98 +98 migračních
 bodů je rozděleno do sedmi implementačních/ověřovacích celků. První tři jsou
 doložené dosavadními úplnými CI; nasazení a akceptace zůstávají otevřené.
-Metriky generuje nástroj z progress.json; dnešní implementace má místní
-důkazy, společné ověření se započítá až po úplném CI. Podrobnosti v [metodice](PROGRESS.md).
+Metriky generuje nástroj z progress.json; nyní jsou doložené i implementace
+a úplné ověření čtvrtého celku (verze těl/čtení). Podrobnosti v [metodice](PROGRESS.md).
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
