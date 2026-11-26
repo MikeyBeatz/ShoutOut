@@ -438,6 +438,13 @@ skutečné archivedAt; původní createdAt obsahu se nepřepisuje. Tyto údaje j
 uvnitř již uklízené hlavičky/kopie, nevzniká další trvalá kolekce potvrzení.
 [Ochrany a omezení zdrojového převzetí](../MVP_SERVER_PLAN.md#content-lifecycle-source-adoption).
 
+Připravené legacyEvidenceBinding na starém obsahovém hlášení obsahuje pouze
+schemaVersion=1, digest převodu a jeho původní SDK reportCreateTime. Vazba na
+sdílené tělo/rodiče používá dosavadní contentArchiveKey/shoutArchiveKey; původní
+verze se dále ověřují přesnými SDK časy, soukromá zpráva i příjemcem a při
+převodu shodou původního hlášeného textu. Žádné procházení archivu ani nová
+retence. [Přechod hlášení a omezení důkazů](../MVP_SERVER_PLAN.md#content-lifecycle-report-adoption).
+
 ## Co je zdroj pravdy
 
 Prostorová vrstva používá soukromé `feedIndexControl/current`,

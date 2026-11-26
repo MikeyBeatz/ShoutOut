@@ -2964,6 +2964,50 @@ i pevný účtový termín; jejich přechod musí zachovat dostupné důkazy a d
 lhůtu. Chybějící rodič ani neznámý konec ručně smazaného Shoutu se nesmí
 doplnit odhadem. Tyto navazující případy tato zdrojová dávka ještě neřeší.
 
+<a id="content-lifecycle-report-adoption"></a>
+
+##### Místní přiřazení starších hlášení – pokračování přechodu
+
+Připravené soukromé jádro functions/content_lifecycle_report_adoption.js pro
+nejvýše 50 přesně vybraných hlášení. Plán váže projekt, digest, SDK inkarnaci
+a updateTime hlášení, obě kopie, hlavičku, účtový termín a řídicí dokument.
+Neobsahuje texty ani důvody; zápis vyžaduje výslovný digest a kompatibilní writery.
+Změna podkladů zastaví celou dávku. Není přidaný živý operátor ani CI/release brána.
+
+Staré hlášení lze připojit pouze k pozdějšímu transition zachování: původní
+SDK sourceUpdateTime cíle i rodiče musí být nejpozději SDK createTime hlášení,
+zachování naopak až po něm. Nestačí libovolná dřívější archivní verze, protože
+mohla být před hlášením nahrazena. Ověřuje se skutečná rodičovská inkarnace,
+identita autora a u soukromé odpovědi také příjemce a původní hlášený text.
+Geografie pochází z prokázané archivní verze rodiče, nikoli z dnešního Shoutu.
+Chybějící/pozměněný podklad, neúplná vazba a účtové mazání zůstávají blokované.
+Kontrola je konzervativní: i pozdější změna počítadla může vyžadovat zvláštní
+dořešení, pokud původní verzi nelze dokázat.
+
+Zápis doplní existující archivní klíče a legacyEvidenceBinding s původním SDK
+createTime hlášení a digestem převodu; nevytvoří novou kopii těla. Soukromý text
+se přestane duplikovat v hlášení. Důvod, status, původní datum a audit rozhodnutí
+se nemění. Opakování ani ztracená odpověď vazbu neobnovují novým termínem.
+Čtení/moderace ověřují původ i potom; společný moderační field mask načítá
+potřebné potvrzení. Zůstává konkrétní hlášení, dnešní role/region a původní konec
+retence. Anonymizovaný rodič zachová dosavadní globální/admin omezení.
+
+**Místní ověření:** prošlo 73 případů společné archivní, čtecí, migrační,
+runtime a Rules sady. Po rozšíření pokrytí prošla celá samostatná sada **22
+případů** přiřazení hlášení: všechny tři typy, rozhodnutí po zmizení zdroje,
+staré/nové hlášení ve stejné skupině, skutečné odstranění i postih, změny verzí,
+scope, restart/souběh a pevný termín. Tyto běhy se překrývají, nesčítají se.
+Prošly také tři přesné nanosekundové regrese původu (součást 212 serverových
+unit pass) a lint Functions; větve bez emulátoru nejsou tímto unit během
+ověřené. Dávka 50 hlášení má 50 deklarovaných zápisů metadat / 0 nových těl;
+zdrojové a archivní updateTime se nepřepisují. Není to měření ceny či cloudové
+kapacity. Nové úplné CI zatím čeká.
+Vše zůstává vypnuté; bez Rules změn, nasazení a živých dat. Celá migrace se tím
+neuzavírá. Staré accountContentArchive se zatím nepřevádějí: jejich původní SDK
+časy a účtový termín je nutné zachovat, pozdější scrub/reactionsComplete nesmí
+sloužit jako falešný důkaz původního těla. Chybějící rodiče, neznámá ruční
+smazání, celkový operátor/audit a kompatibilita starých klientů zůstávají otevřené.
+
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 
 Browser host byl nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna

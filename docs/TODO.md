@@ -61,6 +61,11 @@ zdroje 8d5b890 prošly. Navazují stará hlášení/účtové kopie, úplný ope
 audit pokrytí a klientská kompatibilita. Celá migrační váha zůstává otevřená;
 žádné nasazení ani živá migrace neproběhly.
 
+[Přiřazení starých hlášení](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption)
+je připravené místně: zachovaná prokazatelná verze, metadata bez duplikace
+těl a nezměněná původní retence; 22 cílených případů prošlo. Následují staré účtové kopie, celkový audit
+přechodu a klientská kompatibilita. Nové úplné CI zatím není dokončené.
+
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést
 [kontrolu hotových kroků a jejich návazností](LAUNCH_READINESS.md#completed-work-review).

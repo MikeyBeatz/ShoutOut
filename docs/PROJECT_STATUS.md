@@ -62,6 +62,14 @@ včetně společné regrese a webového buildu. Nové volby jsou false, bez nasa
 a živé migrace. Další krok: prokázané přiřazení starých hlášení a účtových kopií,
 pak celkový operátor/audit a klientská kompatibilita; celý přechod není uzavřený.
 
+**Navazující místní vazby starých hlášení připravené:** [rozsah a otevřené části](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption).
+Připravený převod metadat do 50 hlášení bez dalších kopií textů. Verze cíle
+i rodiče se prokazuje přesnými SDK časy; geografie se neodvozuje z dnešního
+rodiče. Prošlo 22 cílených případů, společný archivní běh 73 případů, 212
+serverových unit testů a lint; nové úplné CI zatím čeká. Staré účtové kopie,
+celkový migrační operátor/audit a klientská kompatibilita zůstávají otevřené.
+Žádné nasazení, Rules změny nebo živá data; nové volby zůstávají false.
+
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
 Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev

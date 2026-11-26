@@ -4,7 +4,8 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { isPurgedShoutContext } from './shout_context.js';
-import { validateLifecycleArchive, validateLifecycleThread, lifecycleSubjectDeadline, lifecycleArchiveKey, lifecycleBodyHash } from './content_lifecycle.js';
+import { validateLifecycleArchive, validateLifecycleThread, lifecycleSubjectDeadline, lifecycleArchiveKey, lifecycleBodyHash, lifecycleGeography } from './content_lifecycle.js';
+import { validLegacyReportBinding, reportArchiveVersionProven, reportArchivePairProven } from './content_lifecycle_report_provenance.js';
 
 const collections = { shout: 'reports', comment: 'commentReports', privateReply: 'privateReplyReports' };
 const identifier = v => typeof v === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v);
@@ -40,9 +41,10 @@ export async function readLifecycleReportEvidence(tx, db, report, targetType, no
   if (!archive.exists || !thread.exists) return absent();
   const data = archive.data(), header = validateLifecycleThread(thread.data(), r.shoutId);
   validateLifecycleArchive(db, archive.id, data);
+  const legacy = r.legacyEvidenceBinding !== undefined;
   if (data.sourcePath !== sourcePath || data.kind !== targetType || data.content.authorId !== r.authorId ||
       !data.threadCreatedAt.isEqual(header.sourceCreatedAt) || data.content.authorId === r.reporterId ||
-      data.archivedAt.toMillis() > report.createTime.toMillis() ||
+      legacy && !validLegacyReportBinding(report) || !reportArchiveVersionProven(archive, report, legacy) ||
       targetType === 'shout' && r.shoutArchiveKey !== archive.id ||
       targetType === 'privateReply' && data.content.recipientId !== r.reporterId) {
     fail('failed-precondition', 'The reported content identity changed.');
@@ -55,6 +57,9 @@ export async function readLifecycleReportEvidence(tx, db, report, targetType, no
   if (g !== null && (g?.schemaVersion !== 1 || typeof g.countryCode !== 'string' || !/^[A-Z]{2}$/.test(g.countryCode) ||
       g.subdivisionCode !== undefined && (typeof g.subdivisionCode !== 'string' || !/^[A-Z]{2}-[A-Z0-9-]{1,8}$/.test(g.subdivisionCode)) ||
       Object.keys(g).some(k => !['schemaVersion', 'countryCode', 'subdivisionCode'].includes(k)))) fail('failed-precondition', 'Invalid report geography.');
+  if (legacy && targetType === 'shout' && JSON.stringify(lifecycleGeography(data.content)) !== JSON.stringify(lifecycleGeography({ geography: g }))) {
+    fail('failed-precondition', 'The original reported geography changed.');
+  }
   let parentContent = null;
   if (targetType !== 'shout' && r.parentContextPurged !== true) {
     const path = `contentLifecycleArchive/${r.shoutArchiveKey}`;
@@ -63,10 +68,12 @@ export async function readLifecycleReportEvidence(tx, db, report, targetType, no
     if (parent.exists) {
       validateLifecycleArchive(db, parent.id, parent.data());
       if (parent.get('kind') !== 'shout' || parent.get('sourcePath') !== `shouts/${r.shoutId}` ||
-          !parent.get('threadCreatedAt').isEqual(header.sourceCreatedAt)) fail('failed-precondition', 'Invalid reported parent evidence.');
+          !parent.get('threadCreatedAt').isEqual(header.sourceCreatedAt) ||
+          legacy && (!reportArchivePairProven(archive, parent, report) ||
+            JSON.stringify(lifecycleGeography(parent.get('content'))) !== JSON.stringify(lifecycleGeography({ geography: g })))) fail('failed-precondition', 'Invalid reported parent evidence.');
       const parentEnd = await lifecycleSubjectDeadline(tx, db, parent.get('subjectUserIds'), header.retainUntil, cache.subjects);
       if (now.toMillis() < parentEnd.retainUntil.toMillis()) parentContent = parent.get('content');
-    }
+    } else if (legacy) return absent();
   }
   return Object.freeze({ kind: targetType, sourcePath, archiveRef: archive.ref, archiveKey: archive.id,
     content: data.content, finalState: data.state, geography: g, retainUntil: deadline.retainUntil,

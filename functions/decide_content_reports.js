@@ -39,7 +39,7 @@ export function pendingContentReports(db, input) {
   let query = db.collection(collections[input.targetType]).where('shoutId', '==', input.shoutId);
   if (input.targetType !== 'shout') query = query.where(input.targetType === 'comment' ? 'commentId' : 'privateReplyId', '==', input.targetId);
   return query.where('status', 'in', ['open', 'escalated']).limit(51).select(
-    'reporterId', 'shoutId', 'status', 'createdAt', 'reason', 'authorId', 'contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged',
+    'reporterId', 'shoutId', 'status', 'createdAt', 'reason', 'authorId', 'contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged', 'legacyEvidenceBinding',
     ...(input.targetType === 'comment' ? ['commentId'] : input.targetType === 'privateReply' ? ['privateReplyId', 'authorId', 'text'] : []),
   );
 }
