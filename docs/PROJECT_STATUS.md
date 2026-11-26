@@ -6,12 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Shout Flight: pripravena oprava ovladani a plynulosti**, fix/shout-flight-rendering.
-[Diagnoza, zmeny a overeni](reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
-Puvodni paleta ma spravny kontrast; pricina konkretni relace neni prokazana.
-Kresleny zvukovy prepinac s vlastnim pozadim, Ticker/repaint bez celeho buildu,
-zachovany 16ms simulacni krok a volitelne mistni FPS/p95. Nasleduje uplne CI
-a pouze DEV Hosting; zlepseni na fyzickem telefonu zatim nepotvrzene.
+**Shout Flight: oprava ovládání a plynulosti je nasazená v DEV.**
+[Diagnóza, měření a důkazy](reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
+Zdroj **d119d63672e8c4c58a60faf90eaeb5af585afda2**, fix/shout-flight-rendering,
+[úplné CI 45899417886 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45899417886),
+Hosting **2075374549f5b49b**. Ověřeno 68 veřejných souborů a čtyři na zrcadle;
+konfigurace stejná. Jen web; bez zásahů do serveru, Rules, Auth nebo dat.
+21 cílených testů, analýza a release prošly; 30 → 0 přestaveb stránky za 30 snímků.
+Příčina původní neviditelnosti konkrétní relace zůstává nepotvrzená; ovládání
+už nepoužívá font ikon. Telefon: zbývá potvrdit viditelnost a místní FPS/p95.
+Návratový Hosting **eefd806b17cb9ee5**. Bez dalšího MVP kreditu.
 
 
 **Hudba Shout Flight je nasazená v DEV:** [chování a důkazy](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).

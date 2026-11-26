@@ -1,6 +1,15 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – hudba Shout Flight, 26. listopadu:**
+**Aktuální DEV web – ovládání a plynulost Shout Flight, 26. listopadu:**
+[Diagnóza, měření a nasazení](../reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
+Zdroj **d119d63672e8c4c58a60faf90eaeb5af585afda2**, fix/shout-flight-rendering,
+[úplné CI 45899417886 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45899417886).
+Hosting **2075374549f5b49b**, 26. listopadu 21:57:15 UTC; 68 veřejných souborů
+a čtyři zrcadlené soubory souhlasí. Konfigurace beze změny; pouze web,
+žádné Functions/Rules/Auth/datové zásahy. Návrat **eefd806b17cb9ee5**.
+Telefon po této opravě zatím neověřen; FPS/p95 měří místně kadenci animace.
+
+**Předchozí DEV web – hudba Shout Flight, 26. listopadu:**
 [Chování a ověření](../reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
 Zdroj **1da51c1a2556035e8193dd4de787bf9330cc0e96**, větev feature/shout-flight-music-dev,
 [úplné CI 45893689471 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45893689471),

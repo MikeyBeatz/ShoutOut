@@ -169,12 +169,12 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
 
 ## Hranice MVP
 
-**Shout Flight: pripravena oprava ovladani a plynulosti**, fix/shout-flight-rendering.
-[Diagnoza, zmeny a overeni](reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
-Puvodni paleta ma spravny kontrast; pricina konkretni relace neni prokazana.
-Kresleny zvukovy prepinac s vlastnim pozadim, Ticker/repaint bez celeho buildu,
-zachovany 16ms simulacni krok a volitelne mistni FPS/p95. Nasleduje uplne CI
-a pouze DEV Hosting; zlepseni na fyzickem telefonu zatim nepotvrzene.
+**Shout Flight: oprava ovládání a plynulosti je v DEV.**
+[Diagnóza a důkazy](reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
+Kreslený přepínač, Ticker/repaint a místní FPS/p95; původní 16ms simulační krok.
+Zdroj d119d63 / úplné CI 45899417886 success / Hosting 2075374549f5b49b.
+21 cílených kontrol a živá shoda souborů prošly. Zbývá viditelnost a plynulost
+na fyzickém telefonu; původní příčina relace nepotvrzená. Bez nového MVP kreditu.
 
 
 **Vedlejší úkol vlastníka – hudba Shout Flight:** nasazená DEV smyčka,

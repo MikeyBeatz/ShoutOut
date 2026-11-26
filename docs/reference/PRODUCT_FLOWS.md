@@ -289,8 +289,9 @@ délka, přechod konce skladby na začátek smyčky a pauza. Opakování:
 `dart test --configuration=test/flight_music_chrome.yaml --platform chrome test/flight_music_browser.dart`.
 Konfigurace povoluje autoplay pouze tomuto izolovanému testu; nejde o změnu
 pravidel aplikace ani o poslechový test. Ovládání a chyba autoplay mají vlastní
-widgetové/unit testy s testovacím přehrávačem. Poslech na fyzickém Androidu/iOS ani
-poslechový DEV průchod zatím nebyly ověřené. Nový MVP kredit se za tuto vedlejší
+widgetové/unit testy s testovacím přehrávačem. Před prvním releasem nebyl ověřen
+poslech na fyzickém Androidu/iOS; vlastník následně potvrdil zvuk i na telefonu.
+Nový MVP kredit se za tuto vedlejší
 úpravu nepřidává; původní herní pravidla a skóre zůstávají zachované.
 
 DEV release **1da51c1a2556035e8193dd4de787bf9330cc0e96** má
@@ -339,6 +340,15 @@ hlubší diagnózu webu použít [Chrome Performance podle Flutteru](https://doc
 Důkazy: test/flight_rendering_test.dart (skutečné motivy, oba stavy, šířka,
 přestavby, FPS, pozadí i překrytí), test/flight_frame_clock_test.dart
 (30/60/120 Hz, dlouhý výpadek, reset a naměřená kadence), původní zvukové,
-fyzikální a čtyři herní widgetové regrese. Fyzický telefon po této změně
-zatím neověřen; nasazení až po úplném CI přesného zdroje, pouze DEV Hosting.
+fyzikální a čtyři herní widgetové regrese, celkem 21 cílených případů; analýza
+bez nálezů. Fyzický telefon po této změně zatím neověřen.
 MVP ani backlogové váhy se vedlejší herní úpravou nenavyšují.
+
+Nasazeno pouze DEV Hosting shoutout-dev-46c81, zdroj
+**d119d63672e8c4c58a60faf90eaeb5af585afda2**, fix/shout-flight-rendering,
+[úplné CI 45899417886 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45899417886).
+Hosting **2075374549f5b49b**, release 1795730235178000,
+26. listopadu 2026 21:57:15 UTC. Následně ověřena SHA-256 shoda všech
+68 veřejných souborů a index.html/app-config.json/main.dart.js/flutter_bootstrap.js
+také na firebaseapp.com. Konfigurace shodná s předchozím releasem,
+návratový Hosting **eefd806b17cb9ee5**. Bez Functions, Rules, Auth či datových změn.
