@@ -6,17 +6,24 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Probíhá schválené společné dokončení místní přípravy migrace:**
+**Hotová společná místní příprava migrace:**
 [rozsah a přechodové fáze](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation).
 Připravené capture-only oddělení, staré účtové běhy a nativní čtení,
 metadata vazeb hlášení bez kopií těl, indexový plán a obnovitelný operátor.
-Analýza bez nálezů, 22 klientských a 127 nástrojových testů prošlo.
-Závěrečné cílené regrese: 42 a následně 34 emulátorových případů, lint Functions a
-216 serverových unit případů prošlo (852 integračních skip nejsou ověření).
-Společné úplné CI naváže po jednom seskupeném pushi; nasazení není součástí úseku.
-Nové volby zůstávají false. Níže jsou důkazy předchozích dokončených úseků;
-Operátor/kompatibilita mají doloženou implementaci; jejich ověřovací podúseky
-zůstávají otevřené do dokončení společných kontrol a úplného CI.
+Zdroj **4544366dfc26a11c7f83c79ab8d406147abbcc6c** má
+[úspěšné úplné CI 45883719658](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45883719658):
+140 archivních případů, 482 Rules/transakcí, 150 případů konečného úklidu,
+127 nástrojových a 216 serverových unit případů; prošly také aplikační/browserové
+sady, analýza, lint a webový build. 858 integračních skip v unit kroku není důkazem
+jejich ověření; výše uvedené emulátorové sady skutečně běžely bez selhání.
+Operátor i kompatibilita mají uzavřenou implementaci a ověření ve stupnici.
+Nové volby zůstávají false; nic z tohoto cyklu není nasazené ani živě inventarizované.
+
+**Následuje závěrečná integrace a archivní revize před aktivací:**
+[kontrolní bod](MVP_SERVER_PLAN.md#content-lifecycle-integration-review), poté konkrétní
+provozní/návratový plán. Zvlášť vyřešit převod rodičů před novými komentáři,
+návrat po odstranění textových kopií, právní verzi, skutečné writery/Rules a
+fyzické nativní release podmínky. Tato celková brána ani živé nasazení se samotným CI neuzavírají.
 
 **Aktuální místní práce – společný archiv obsahu:**
 [základ a otevřené návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation),

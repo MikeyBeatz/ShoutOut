@@ -2840,6 +2840,8 @@ plan / inventory vytvoří obnovitelný průchod devíti kolekcemi/skupinami po
 nejvýše 50 dokumentech. Každá stránka kontroluje SDK inkarnace, formát generací,
 řídicí revize a předchozí hash; assemble odmítne chybějící či opakovanou stránku.
 Inventura obsahuje cesty, časy a hashe, nikoli nadpisy, texty, účastníky či polohu.
+SDK při výpočtu původních hashů čte data do paměti; nejde o tvrzení nulových
+čtení těl. Texty se neukládají do inventurních souborů ani výpisů operátoru.
 Vadné SDK hodnoty se označí bez vypsání obsahu. Souběžná změna starého zdroje
 nebo vznik staré účtové kopie atomicky změní legacyRevision; průchod je pak
 nutné naplánovat znovu. Nový obsah po SDK hranici musí zachytávat kompatibilní writer.
@@ -2885,12 +2887,15 @@ Nemění TTL, ponechá nesouvisející indexy, rozpracovaný index neduplikuje;
 neznámý explicitní override nebo stav k opravě předá k posouzení. Nástroj
 neprovádí síťovou inventuru ani živé založení indexů.
 
-**Kontroly tohoto úseku:** cílené klientské testy (22), analýza bez nálezů,
-127 testů nástrojů a lint Functions prošly místně. Závěrečná cílená regrese
-má 42 úspěšných emulátorových případů (operátor, staging a celý účtový purge)
-a následně 34 cílených případů s doplněnou regresí účtových reakcí a nepřevedeného rodiče;
-216 serverových unit případů prošlo, 852 integračních skip není důkazem jejich ověření.
-Úplná archivní/moderační regrese přesného výsledného commitu naváže v CI. Celkový timeout CI
+**Ověřeno:** zdroj **4544366dfc26a11c7f83c79ab8d406147abbcc6c**,
+[úspěšné úplné CI 45883719658](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45883719658).
+140 archivních případů, 482 Rules/transakcí, 150 případů konečného úklidu,
+127 nástrojových a 216 serverových unit případů prošlo; 858 integračních skip
+v samostatném unit kroku není integrační ověření. Úplné CI zahrnulo i moderaci,
+Business, B2, klientské/browserové sady, analýzu, lint a webový build.
+Místní cílené kontroly navíc zahrnuly 22 klientských testů, 42 emulátorových
+případů s purge a následně 34 s doplněnou regresí reakcí/nepřevedeného rodiče.
+Celkový timeout CI
 je 30 místo 25 minut a archivní krok má 6 místo 4 minut: předchozí úplný běh
 téměř vyčerpal 25 minut a rozšířená místní archivní sada trvala 258 sekund.
 Počet jobů ani prováděné kontroly se tím nemění.

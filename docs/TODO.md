@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,74 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,75 %** — vážené dokončení podúseků
 
-Hotové úseky: **237/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **239/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -47,15 +47,17 @@ má přednost. Připravené a úplným CI ověřené jsou jádro,
 [termíny účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
 Přesné zdroje a důkazy jsou v plánu a [PROJECT_STATUS](PROJECT_STATUS.md).
 
-**Nově připravené a úplným CI ověřené:** [původní verze těl a společné čtení účtových
+**Doložené předchozí jádro:** [původní verze těl a společné čtení účtových
 kopií pro moderaci](MVP_SERVER_PLAN.md#content-lifecycle-account-evidence).
 Původní SDK čas/hash se zachová před zápisem metadat; nejasná verze se neodhaduje.
 Zdroj 98323a2 má [úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751)
 se 115 archivními případy včetně 19 nových a webovým buildem.
 
-**Probíhá schválený společný místní úsek:** [řízený operátor/inventura,
+**Dokončený společný místní úsek:** [řízený operátor/inventura,
 indexový plán a kompatibilita](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation)
-starých účtových běhů a nativních klientů. Naváže závěrečná integrace
+starých účtových běhů a nativního čtení. Zdroj 4544366 má
+[úspěšné úplné CI 45883719658](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45883719658),
+včetně 140 archivních případů a webového buildu. Nyní naváže závěrečná integrace
 a provozní/návratový plán. Před DEV aktivací také archivní
 integrační revize. Nové přepínače a Rules brána jsou false; nic z tohoto cyklu
 není nasazené ani živě migrované. Celý milník ani původní pilotní úklid se
