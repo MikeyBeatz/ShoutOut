@@ -260,3 +260,35 @@ Klientský přechod a uzavření přímých zápisů ještě nejsou dokončené.
 Expirovaný Shout je v klientském modelu držen sedm dní. Serverová exspirace
 statusu je v DEV, sedmidenní fyzický úklid Shoutů a jejich potomků ještě hotový
 není. Account purge tyto dva různé životní cykly nenahrazuje.
+
+## Shout Flight – hudba ve hře
+
+Místní klientská úprava z 26. listopadu 2026, zatím bez nasazení. Stránka
+ShoutFlightPage používá samostatný přehrávač přes lib/flight_music.dart
+a audioplayers 6.8.1. Smyčka běží jen při otevřené hře v popředí; skrytí,
+neaktivita aplikace nebo překrytí jinou trasou ji pozastaví. Návrat pokračuje,
+pokud hráč hudbu neztlumil.
+Odchod stránku i přehrávač uvolní, včetně nedokončeného načítání. Nový pokus
+ve stejné hře nevytváří další přehrávač ani nerestartuje skladbu.
+
+Vpravo v horní liště je ikona zapnutí/vypnutí hudby s popisem v sedmi jazycích.
+Při odmítnutém autoplay či chybě zvuku zůstane hra použitelná; další kliknutí
+na hudbu nebo vstup do hry může zvuk zopakovat. Automatický start závisí také
+na [pravidlech prohlížeče](https://developer.chrome.com/blog/autoplay).
+
+Zvuk dodal vlastník jako Smoothed Outro.wav: stereo PCM, 48 kHz, 16 bitů,
+166,869 s / 32 755 966 bytů. Aplikační kopie assets/audio/shout_flight_music.mp3
+má 2 670 765 bytů, MP3 128 kbit/s, bez vloženého obrázku a zdrojových metadat;
+původní WAV se nemění. Výchozí hlasitost je 30 %. Asset je součástí klienta,
+nepřidává Firebase Storage, Functions ani serverovou synchronizaci.
+
+Ověřeno místně: osm cílených testů řízení zvuku a hry, analýza bez nálezů,
+dekódování MP3 a debug webový build pro DEV; otisk assetu souhlasí s build manifestem.
+Prošel také skutečný test MP3 v HTML mediálním přehrávači Chrome: načtení,
+délka, přechod konce skladby na začátek smyčky a pauza. Opakování:
+`dart test --configuration=test/flight_music_chrome.yaml --platform chrome test/flight_music_browser.dart`.
+Konfigurace povoluje autoplay pouze tomuto izolovanému testu; nejde o změnu
+pravidel aplikace ani o poslechový test. Ovládání a chyba autoplay mají vlastní
+widgetové/unit testy s testovacím přehrávačem. Poslech na fyzickém Androidu/iOS ani
+živý DEV průchod zatím nebyly ověřené. Nový MVP kredit se za tuto vedlejší
+úpravu nepřidává; původní herní pravidla a skóre zůstávají zachované.

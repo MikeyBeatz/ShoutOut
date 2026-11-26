@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'flight_score_store.dart';
+import 'flight_music.dart';
 
 double flightVelocityAfterTap(double velocity) => -.66;
 
@@ -91,13 +92,17 @@ class FlightGameState {
 }
 
 class ShoutFlightPage extends StatefulWidget {
-  const ShoutFlightPage({super.key});
+  const ShoutFlightPage({super.key, this.music});
+
+  /// The page owns and disposes this controller, including injected players.
+  final FlightMusicController? music;
 
   @override
   State<ShoutFlightPage> createState() => _ShoutFlightPageState();
 }
 
-class _ShoutFlightPageState extends State<ShoutFlightPage> {
+class _ShoutFlightPageState extends State<ShoutFlightPage>
+    with WidgetsBindingObserver {
   static const _frame = Duration(milliseconds: 16);
   static const _playerX = .25;
   final _random = math.Random();
@@ -108,11 +113,37 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
   bool _newRecord = false;
   double _spawnCountdown = .6;
   int _lastTimerTick = 0;
+  late final FlightMusicController _music;
+  bool _appActive = true;
+  bool _routeCurrent = true;
 
   @override
   void initState() {
     super.initState();
+    _music = widget.music ?? FlightMusicController();
+    _music.addListener(_musicChanged);
+    WidgetsBinding.instance.addObserver(this);
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _appActive = lifecycle == null || lifecycle == AppLifecycleState.resumed;
+    unawaited(_music.setForeground(_appActive));
     _loadBestScore();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _routeCurrent = ModalRoute.isCurrentOf(context) ?? true;
+    unawaited(_music.setForeground(_appActive && _routeCurrent));
+  }
+
+  void _musicChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appActive = state == AppLifecycleState.resumed;
+    unawaited(_music.setForeground(_appActive && _routeCurrent));
   }
 
   Future<void> _loadBestScore() async {
@@ -125,12 +156,16 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _music.removeListener(_musicChanged);
+    _music.dispose();
     _timer?.cancel();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _tap() {
+    unawaited(_music.retry());
     _focusNode.requestFocus();
     if (_game.gameOver) {
       _prepareGame();
@@ -277,7 +312,26 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(_flightText(context, _FlightText.title))),
+    appBar: AppBar(
+      title: Text(_flightText(context, _FlightText.title)),
+      actions: [
+        IconButton(
+          key: const Key('flight-music-toggle'),
+          tooltip: _flightText(
+            context,
+            _music.muted || _music.unavailable
+                ? _FlightText.musicOn
+                : _FlightText.musicOff,
+          ),
+          onPressed: () => unawaited(_music.toggle()),
+          icon: Icon(
+            _music.muted || _music.unavailable
+                ? Icons.volume_off_rounded
+                : Icons.volume_up_rounded,
+          ),
+        ),
+      ],
+    ),
     body: SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -389,6 +443,8 @@ enum _FlightText {
   start,
   instructions,
   newRecord,
+  musicOn,
+  musicOff,
 }
 
 String _flightText(BuildContext context, _FlightText key) {
@@ -405,6 +461,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Klepni do hry nebo stiskni mezerník. Proleť mezerami a nedotkni se okrajů.',
       _FlightText.newRecord: 'Nový rekord',
+      _FlightText.musicOn: 'Zapnout hudbu',
+      _FlightText.musicOff: 'Vypnout hudbu',
     },
     'en': {
       _FlightText.title: 'Shout Flight',
@@ -417,6 +475,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Tap the game or press Space. Fly through the gaps without touching the edges.',
       _FlightText.newRecord: 'New record',
+      _FlightText.musicOn: 'Turn music on',
+      _FlightText.musicOff: 'Turn music off',
     },
     'de': {
       _FlightText.title: 'Shout Flight',
@@ -430,6 +490,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Tippe ins Spiel oder drücke die Leertaste. Fliege durch die Lücken, ohne die Ränder zu berühren.',
       _FlightText.newRecord: 'Neuer Rekord',
+      _FlightText.musicOn: 'Musik einschalten',
+      _FlightText.musicOff: 'Musik ausschalten',
     },
     'pl': {
       _FlightText.title: 'Shout Flight',
@@ -443,6 +505,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Dotknij gry lub naciśnij spację. Przelatuj przez luki bez dotykania krawędzi.',
       _FlightText.newRecord: 'Nowy rekord',
+      _FlightText.musicOn: 'Włącz muzykę',
+      _FlightText.musicOff: 'Wyłącz muzykę',
     },
     'sk': {
       _FlightText.title: 'Shout Flight',
@@ -456,6 +520,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Ťukni do hry alebo stlač medzerník. Preleť medzerami a nedotkni sa okrajov.',
       _FlightText.newRecord: 'Nový rekord',
+      _FlightText.musicOn: 'Zapnúť hudbu',
+      _FlightText.musicOff: 'Vypnúť hudbu',
     },
     'uk': {
       _FlightText.title: 'Shout Flight',
@@ -469,6 +535,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Торкніться гри або натисніть пробіл. Пролітайте крізь отвори, не торкаючись країв.',
       _FlightText.newRecord: 'Новий рекорд',
+      _FlightText.musicOn: 'Увімкнути музику',
+      _FlightText.musicOff: 'Вимкнути музику',
     },
     'vi': {
       _FlightText.title: 'Shout Flight',
@@ -481,6 +549,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Chạm vào trò chơi hoặc nhấn phím cách. Bay qua các khoảng trống và tránh chạm mép.',
       _FlightText.newRecord: 'Kỷ lục mới',
+      _FlightText.musicOn: 'Bật nhạc',
+      _FlightText.musicOff: 'Tắt nhạc',
     },
   };
   return (values[language] ?? values['en']!)[key]!;

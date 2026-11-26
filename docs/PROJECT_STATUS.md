@@ -6,6 +6,16 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Vedlejší úkol – hudba Shout Flight:** místně připravená smyčka dodaného zvuku,
+ztlumení a zastavení při skrytí/odchodu. [Rozsah a důkazy](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Osm cílených testů, skutečná mediální smyčka v Chrome, analýza a debug webový
+build prošly. Větev feature/shout-flight-music; vlastník schválil DEV nasazení.
+Před rolloutem ověřit úplné CI přesného commitu a čistý release artefakt.
+Nasadit pouze Hosting projektu/site shoutout-dev-46c81; server a data se nemění.
+Zvuk je MP3 2,67 MB z dodaného WAV 32,8 MB; původní soubor zachovaný.
+Po tomto úkolu pokračuje
+níže uvedená archivní integrační revize.
+
 **Hotová společná místní příprava migrace:**
 [rozsah a přechodové fáze](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation).
 Připravené capture-only oddělení, staré účtové běhy a nativní čtení,

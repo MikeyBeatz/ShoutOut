@@ -216,6 +216,11 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
    živá regrese soukromého odstranění zůstává otevřená; přijatý TestAdmin
    průchod a novější approve/resolve/escalate ji nenahrazují.
 
+**Vedlejší úkol vlastníka – hudba Shout Flight:** připravená místní smyčka,
+ztlumení a řízení životního cyklu; [chování a ověření](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Osm cílených testů, mediální smyčka v Chrome, analýza a debug webový build
+prošly; nic není nasazené ani nově započítané do MVP.
+
 ## Hranice MVP
 
 Kapacitní cíl je 100 000 registrovaných účtů a 5 000 současně aktivních
