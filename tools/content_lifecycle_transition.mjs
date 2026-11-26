@@ -69,7 +69,10 @@ export async function main(argv, { openDatabase = feedAdminDatabase, inspectRele
     else validateLifecycleInventoryPlan(plan, projectId);
   }
   const page = options['--page'] ? validateLifecycleInventoryPage(plan, read(options['--page'])) : null;
-  if (action === 'resolve') return resolveLifecycleReportCandidates(plan, page, read(options['--archives']));
+  if (action === 'resolve') {
+    const value = resolveLifecycleReportCandidates(plan, page, read(options['--archives']));
+    return options['--output'] ? { file: save(options['--output'], value), writes: 0 } : value;
+  }
   if (action === 'assemble') {
     const value = assembleLifecycleInventory(plan, read(options['--pages']));
     return options['--output'] ? { file: save(options['--output'], value), digest: value.digest, writes: 0 } : value;

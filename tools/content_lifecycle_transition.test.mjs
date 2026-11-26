@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { join, resolve, relative, isAbsolute } from 'node:path';
 import { canonical } from '../functions/feed_block_index.js';
 import { requiredTransitionChecks } from './feed_generation_transition.mjs';
@@ -57,4 +57,28 @@ test('read-only inventory commands verify the opened project and always terminat
     openDatabase: async () => ({ projectId: 'wrong', async terminate() { closed = true; } }),
   }), /database-project-mismatch/);
   assert(closed);
+});
+
+test('offline candidate resolution saves the requested immutable output without opening a database', async t => {
+  const f = fixture(t), hash = value => createHash('sha256').update(canonical(value)).digest('hex');
+  const body = { v: 1, kind: 'content-lifecycle-inventory', projectId: project, batchSize: 50,
+    fence: { control: { createTime: [1, 0], captureFenceAt: [1, 0], legacyRevision: 0, revision: 1, mode: 'active', writerCommit: 'a'.repeat(40) }, feed: f.plan.feed } };
+  const plan = { ...body, digest: hash(body) }, collections = ['shouts', 'comments', 'privateReplies', 'accountContentArchive', 'reports', 'commentReports', 'privateReplyReports', 'contentLifecycleArchive', 'contentLifecycleThreads'];
+  const pages = []; let previous = null;
+  for (let phase = 0; phase < collections.length; phase++) {
+    const before = { ...(previous ?? { phase: 0, after: null, seen: 0, chain: plan.digest }) }, records = []; delete before.digest;
+    const pageDigest = hash({ planDigest: plan.digest, before, records });
+    const c = { planDigest: plan.digest, phase: phase + 1, after: null, seen: 0, chain: pageDigest };
+    const checkpoint = { ...c, digest: hash(c) };
+    pages.push({ collection: collections[phase], planDigest: plan.digest, before: previous, records, pageDigest, checkpoint, complete: phase === collections.length - 1, writes: 0 });
+    previous = checkpoint;
+  }
+  const files = { plan, page: pages[4], archives: [pages[7]] };
+  for (const [name, value] of Object.entries(files)) writeFileSync(join(f.dir, name + '.json'), JSON.stringify(value));
+  const args = ['resolve', '--project', project, '--plan', relative(root, join(f.dir, 'plan.json')), '--page', relative(root, join(f.dir, 'page.json')),
+    '--archives', relative(root, join(f.dir, 'archives.json')), '--output', relative(root, join(f.dir, 'resolved.json'))];
+  const options = { openDatabase() { assert.fail('offline action must not open a database'); } };
+  const result = await main(args, options); assert.equal(result.writes, 0);
+  assert.deepEqual(JSON.parse(readFileSync(result.file, 'utf8')), { reports: [], compatibility: [], blocked: [] });
+  await assert.rejects(main(args, options), e => e.code === 'EEXIST');
 });
