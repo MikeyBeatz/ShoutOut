@@ -49,14 +49,18 @@ včetně celé dosavadní regrese a webového buildu.
 a [souhrnná revize hotových MVP kroků](LAUNCH_READINESS.md#completed-work-review)
 po tomto cyklu před společnou regresí; obě zatím otevřené.
 
-**Rozpracované místní převzetí zdrojů:** [plán, rozsah a otevřené části](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption).
+**Místní jádro převzetí zdrojů připravené a ověřené:** [rozsah a otevřené části](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption).
 Připravený přesný digest dávky do 50 zdrojů, původní termíny, SDK inkarnace,
 společný indexový writer a odlišení pozdější kopie od atomického zápisu.
 Nejasné staré smazání a probíhající účtový úklid se nepřevádí odhadem.
 Starých hlášení/účtových kopií se tato dávka nedotýká; celkový přechod,
 klientská kompatibilita a integrační audit zůstávají otevřené. Prošlo 14 cílených
 migračních případů, společná archivní sada 52 případů a 18 klientských testů;
-analýza bez nálezů. Nové úplné CI zatím čeká, nové volby jsou false, bez živé migrace.
+analýza bez nálezů. Zdroj **8d5b8906dac5141a23ddc3d9b07f2e6a3bc0a054** má
+[úspěšné úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401),
+včetně společné regrese a webového buildu. Nové volby jsou false, bez nasazení
+a živé migrace. Další krok: prokázané přiřazení starých hlášení a účtových kopií,
+pak celkový operátor/audit a klientská kompatibilita; celý přechod není uzavřený.
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).

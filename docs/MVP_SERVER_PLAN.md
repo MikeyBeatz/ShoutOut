@@ -2937,7 +2937,7 @@ revize. Samotné jádro nekontroluje Git/CI a nemá živé CLI, callable ani Sch
 Žádný přepínač se nezapíná a žádná živá data se v této práci nečtou či nemění.
 Váha úplné migrace se nepovažuje za dokončenou jen kvůli tomuto jádru.
 
-**Místní výsledky, nové úplné CI ještě čeká:** 52 případů společné archivní,
+**Místní výsledky:** 52 případů společné archivní,
 čtecí, runtime a Rules sady prošlo; po zpřísnění SDK vazby rodiče a poslední
 kontroly času také celá samostatná migrační sada **14 případů**. Tyto běhy
 se překrývají a nesčítají se. Prošlo 18 klientských testů, celá analýza bez
@@ -2949,6 +2949,20 @@ během indexového plánování. Dávka 50 kořenů má 150 deklarovaných zápi
 (50 zdrojů +50 kopií +50 hlaviček), veřejné projekce/indexové záznamy v obou
 generacích mají shodné hodnoty i updateTime. Není to měření SDK čtení,
 RPC, ceny ani cloudové propustnosti. Skutečný UI průchod není provedený.
+
+Zdroj **8d5b8906dac5141a23ddc3d9b07f2e6a3bc0a054** má
+[úspěšné úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401),
+včetně konečné 14případové migrační sady, dosavadní aplikační/serverové regrese,
+Rules, browserových kontrol a webového buildu. Jde o místní jádro zdrojového
+převodu, nikoli ověření celé migrace nebo cloudového provozu. Bez nasazení.
+
+**Následující návaznost:** stará hlášení nesmějí novou kopii vydávat za stav
+z okamžiku hlášení. Současný reader záměrně odmítá pozdější zachování;
+případné přiřazení vyžaduje prokázanou verzi/inkarnaci a původní geografický
+rozsah. Starý accountContentArchive už obsahuje původní SDK createTime/updateTime
+i pevný účtový termín; jejich přechod musí zachovat dostupné důkazy a dřívější
+lhůtu. Chybějící rodič ani neznámý konec ručně smazaného Shoutu se nesmí
+doplnit odhadem. Tyto navazující případy tato zdrojová dávka ještě neřeší.
 
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 

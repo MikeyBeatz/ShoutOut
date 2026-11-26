@@ -55,8 +55,11 @@ zdroje 134cb96 prošly. Následuje přechod existujících dat/klientů a integr
 
 [Místní převzetí zdrojů](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption)
 má místní zdrojové jádro: přesný plán dávky, skutečný původ zachování a původní
-lhůty; 14 migračních případů prošlo, nové úplné CI čeká. Navazují stará hlášení/účtové kopie, úplný
-operátor a audit pokrytí i klientská kompatibilita. Celá migrační váha zůstává otevřená.
+lhůty; 14 migračních případů a
+[úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401)
+zdroje 8d5b890 prošly. Navazují stará hlášení/účtové kopie, úplný operátor,
+audit pokrytí a klientská kompatibilita. Celá migrační váha zůstává otevřená;
+žádné nasazení ani živá migrace neproběhly.
 
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést
