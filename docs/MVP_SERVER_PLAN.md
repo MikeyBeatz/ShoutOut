@@ -3073,7 +3073,10 @@ ztracená odpověď, mezistav purge a SDK nahrazení. Prošlo 214 serverových u
 testů (811 integračních skip není jejich ověření) a lint. U 50 soukromých kopií
 se stejným rodičem/účtem má zápis 112 SDK dokumentových reads / 6 čtecích volání /
 50 zápisů metadat / 0 nových těl. Nejde o cloudovou cenu či kapacitní záruku.
-Nové úplné CI zatím čeká.
+Zdroj **12785580e87241dd7a393bc96e111fc95ee7bb27** má
+[úspěšné úplné CI 45861268034](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034),
+včetně všech 96 archivních případů, dosavadní aplikační/browserové a serverové
+regrese, Rules, finálního účtového/Storage úklidu a webového buildu.
 
 Vše je místní a off, bez nasazení, živých dat, Auth účtů, Rules, Scheduleru či
 změny prostředků. Před živým spuštěním doplnit indexový plán (nové technické pole
@@ -3086,6 +3089,12 @@ Kompatibilní serverové čtení/worker musí předcházet zápisu nového marke
 starší validátor vyžadoval vedle ordinaryRetainUntil také contentArchiveKey.
 Po převodu tedy není návratová varianta server bez podpory lifecycleAccountBinding,
 i kdyby měl globální archivní přepínač vypnutý.
+Před jakýmkoli živým převodem ještě uzavřít původ těla pro společné moderační
+čtení: zápis metadat změní SDK updateTime kopie. Současný čtecí plán obsahuje
+jeho původní hodnotu, šestipolový marker ji však neuchovává jako důkaz verze.
+Navazující řešení musí před prvním zápisem zachovat potřebný původní SDK čas
+a hash těla, nebo výslovně ponechat verzi jako neprokázanou; metadata se nesmějí
+zpětně vydávat za původní neměnný obsah. Žádná živá kopie tím zatím změněná není.
 
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 

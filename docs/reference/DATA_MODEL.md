@@ -448,7 +448,9 @@ retence. [Přechod hlášení a omezení důkazů](../MVP_SERVER_PLAN.md#content
 Připravené převzetí starých accountContentArchive kopií přidává pouze
 lifecycleAccountBinding (schemaVersion, migrationDigest, archiveCreateTime,
 threadCreateTime, parentCreateTime a parentCreatedAt), ordinaryRetainUntil a
-contentExpired. Zde nevzniká společná kopie těla ani contentArchiveKey. Původní
+contentExpired. parentCreatedAt je původní aplikační createdAt rodiče;
+ostatní tři časy bindingu jsou skutečné SDK inkarnace. Zde nevzniká společná
+kopie těla ani contentArchiveKey. Původní
 sourceCreateTime/sourceUpdateTime, archivedAt, účastníci a účtový job zůstávají.
 Termín je minimum původního účtového a prokázaného běžného konce; SDK identita
 se kontroluje při čtení i úklidu. Nejde o důkaz původního hlášeného těla.

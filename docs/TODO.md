@@ -70,8 +70,10 @@ přechodu a kompatibilita klientů včetně nativního čtení soukromých hlá�
 
 [Termíny starých účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption)
 jsou připravené místně bez nových těl a prodlužování lhůt; 96 společných případů
-včetně 19 účtových prošlo. Nové úplné CI zatím čeká. Další návaznosti jsou
-společné moderační čtení účtových kopií, operátor/audit přechodu, kompatibilita
+včetně 19 účtových a
+[úplné CI 45861268034](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034)
+zdroje 1278558 prošly. Nejprve zachovat původní důkaz verze těla před převodem
+a dokončit společné moderační čtení účtových kopií; dále operátor/audit a kompatibilita
 starých účtových běhů a klientů a indexový plán. Celá migrační váha zůstává otevřená.
 
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího

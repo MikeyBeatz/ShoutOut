@@ -74,15 +74,19 @@ kompatibilita. Nativní detail stále čte původní textové pole hlášení;
 bez jeho přechodu nelze nový datový cyklus aktivovat pro tyto klienty.
 Žádné nasazení, Rules změny nebo živá data; nové volby zůstávají false.
 
-**Místní termíny starých účtových kopií připravené:** [rozsah, důkazy a návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
+**Místní termíny starých účtových kopií připravené a ověřené:** [rozsah, důkazy a návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
 Převod metadat do 50 kopií zachová původní žádost, SDK identity a pendingArchiveId;
 těla se neduplikují. Dřívější běžný termín omezí původních účtových 60 dní,
 mezistav dávkového purge neodstaví úklid účtu. Prošlo 96 společných případů
 včetně 19 nových, 214 serverových unit pass / 811 integračních skip a lint.
 Naměřeno 112 dokumentových SDK reads / 6 čtecích volání / 50 zápisů u 50 kopií
-jednoho rodiče; nejde o cloudovou kapacitu. Nové úplné CI zatím čeká.
-Společné moderační čtení těchto těl, celý operátor/audit, staré účtové běhy,
-klienti a indexový plán zůstávají otevřené. Nové volby false, žádná živá data
+jednoho rodiče; nejde o cloudovou kapacitu. Zdroj
+**12785580e87241dd7a393bc96e111fc95ee7bb27** má
+[úspěšné úplné CI 45861268034](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034),
+včetně 96 archivních případů a webového buildu.
+Další krok: před prvním zápisem zachovat důkaz původní verze těla pro společné
+moderační čtení. Následují celý operátor/audit, staré účtové běhy, klienti a
+indexový plán; vše zůstává otevřené. Nové volby false, žádná živá data
 ani nasazení; původní pilot zůstává zachovaný.
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
