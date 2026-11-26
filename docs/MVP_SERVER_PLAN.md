@@ -2700,7 +2700,7 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
 **Stále otevřené v již schváleném místním rozsahu, bez dalšího nasazování:**
 
 1. [Webové seznamy jsou připravené místně](#content-lifecycle-read-integration),
-   jejich nové úplné CI ještě čeká. Zbývá provozní kompatibilita starých
+   jejich úplné CI 45766451416 prošlo. Zbývá provozní kompatibilita starých
    a nativních klientů. Globální collectionGroup nesmí obejít rodičovskou
    lhůtu; prototyp brány je vypnutý a nesmí předběhnout kompatibilní klienty.
 2. Úplné provozní napojení, reálný společný rozpočet současných generací a náklady/dohánění
@@ -2739,7 +2739,7 @@ výslovný požadavek vlastníka na další revizi tohoto cyklu.
 
 ##### Navazující místní kompatibilita čtení – 26. listopadu 2026
 
-Pokračování již schváleného místního rozsahu. Připravované
+Pokračování již schváleného místního rozsahu. Připravené
 getLifecycleSourcePage rozlišuje pouze vlastní veřejné komentáře, veřejný
 profil, vlastní Business historii, aktivní regionální staff přehled a nejvýše
 dosavadních 50 kandidátů pro Home při source-v1 návratu. Soukromé zprávy ani
@@ -2770,7 +2770,11 @@ moderační archiv zůstává dostupný jen přes konkrétní hlášení.
 včetně vlastní historie a nemožnosti převzít komentář předcházející inkarnaci
 rodiče. Základní serverový běh má 205 pass / 746 skip bez emulátoru;
 skip není ověření příslušné integrační větve. Žádný skutečný UI průchod se netvrdí.
-Nové úplné CI dosud čeká. Skript test:content-lifecycle nově zahrnuje i reader.
+Zdroj **8e059e3899c9658966c4a6d9ce52b11bb3a2e5af** má
+[úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416):
+formát/analýza, aplikační a browserové testy, nástroje, serverové unit,
+Rules/transakce, B4, moderace, společný lifecycle, Business, B2, konečný účtový
+purge, Storage i webový build. Skript test:content-lifecycle zahrnuje i reader.
 První běh 45764931433 ze zdroje dd06a5b byl řízeně zastavený po dokončené B4
 regresi kvůli opravě překladače prázdného Business seznamu a zachování původního
 stylu nadpisu komentářů. Nedokončený běh není důkaz úspěšného úplného CI.
@@ -2781,6 +2785,14 @@ volání / 0 zápisů**. Nejde o počet HTTP požadavků uživatele ani cloudovo
 je započítané; archivační těla se nečtou. Běžné SDK point odběry UI jsou navíc;
 profil sdílí malý B4 stav, ostatní seznamy potřebují i dostupnost rodiče/komentáře.
 Provozní zátěžový profil a nativní routing tímto nejsou uzavřené.
+
+**Další již schválený místní krok:** volitelné propojení
+runContentLifecycleMaintenance se stávající cestou runAccountMaintenanceTick
+v functions/shout_expiration.js a jejím DEV wrapperem v
+functions/account_deletion_dev.js. Nejprve ověřit společný rozpočet, přednost
+splatných účtových povinností, dohánění dluhu běžného úklidu a souběžné
+inkarnace/generace. Samotný nový Scheduler ani živá četnost se nezavádí;
+konkrétní aktivaci musí předcházet výsledky měření a řízený přechod dat.
 
 **Před aktivací připravit a cloudově ověřit indexový plán:** nový COLLECTION_GROUP
 comments(authorId ASC, createdAt DESC) a COLLECTION

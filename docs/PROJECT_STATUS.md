@@ -19,12 +19,16 @@ není nasazené ani migrované. Místní testy zahrnuly oba zapnuté účtové p
 [úspěšné úplné CI 45703037163](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45703037163),
 včetně aplikačních/browserových a serverových sad i webového buildu.
 Pauza nových těl zachovává splatný úklid; prošel také souběh dvou workerů.
-**Navazující místní čtení připravené, nové úplné CI zatím čeká:**
+**Navazující místní webové čtení připravené a ověřené:**
 [serverové seznamy a web](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
 pro Mé komentáře, profil, Business historii, staff a Home source-v1. Dávka
 50 zdrojů má při dvou autorech 108 dokumentových reads / 4 dávková volání /
 0 zápisů; nepočítá živé SDK odběry ani cloudový provoz. Ověřená řídká stránka,
-kurzory, role/region, scroll, opakování a odmítnutí staré odpovědi. Vše je off.
+kurzory, role/region, scroll, opakování a odmítnutí staré odpovědi. Zdroj
+**8e059e3899c9658966c4a6d9ce52b11bb3a2e5af** má
+[úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416),
+včetně všech serverových regresí a webového buildu. Vše je off; živá UI akceptace
+ani nativní kompatibilita se tím netvrdí.
 **Další krok ve schváleném rozsahu:** úplné provozní napojení a přechod dat;
 před aktivací také nativní/staré klienty, indexy a ověřitelný návrat.
 Přísnější Rules jsou stále místní prototyp a nezapínají se.

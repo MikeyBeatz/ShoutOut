@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,52 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,60 %** — vážené dokončení podúseků
 
-Hotové úseky: **224/280**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **225/280**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -40,7 +40,9 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
 [Připravený základ, měření a zbývající návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
 Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
 má přednost. Navazující [webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
-jsou připravené místně, jejich úplné CI čeká. Dokončit provozní integraci a
+jsou připravené místně a mají
+[úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416)
+zdroje 8e059e3. Dokončit provozní integraci a
 přechod dat, indexy i kompatibilitu nativních/starých klientů; nové volby
 i Rules brána jsou false. Původní jádro má úspěšné úplné CI 45703037163;
 bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
