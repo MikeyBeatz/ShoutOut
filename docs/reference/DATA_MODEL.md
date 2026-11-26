@@ -422,13 +422,30 @@ Po purge zůstává veřejný profil pouze `{schemaVersion: 1, accountStatus:
 'deleted', contentPurged: true}`; bez cizích potomků se odstraní i kořen.
 Dočasný `authorId` při zmrazení slouží pouze dokončení vlastnického průchodu.
 
+## Připravený společný archiv obsahu
+
+Nový cyklus je místní příprava za vypnutou volbou, nikoli nasazená změna
+retence. [Přesný stav](../MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
+contentLifecycleThreads/{shoutId} váže původní inkarnaci a konec veřejné
+platnosti, dalších 7 dní historie a 60 dní archivu; navazuje omezený purge.
+contentLifecycleArchive/{hash} váže konkrétní tělo, zdrojovou cestu a vlastníky.
+Přímé klientské čtení/zápis archivu se nepovoluje; moderace používá konkrétní hlášení.
+
+Připravený původ captureMode=atomic-write znamená kopii v transakci zápisu;
+transition znamená pozdější převzetí existujícího zdroje. U transition jsou
+povinné původní SDK sourceCreateTime/sourceUpdateTime, migrationDigest a
+skutečné archivedAt; původní createdAt obsahu se nepřepisuje. Tyto údaje jsou
+uvnitř již uklízené hlavičky/kopie, nevzniká další trvalá kolekce potvrzení.
+[Ochrany a omezení zdrojového převzetí](../MVP_SERVER_PLAN.md#content-lifecycle-source-adoption).
+
 ## Co je zdroj pravdy
 
-Připravovaná prostorová vrstva používá soukromé `feedIndexControl/current`,
+Prostorová vrstva používá soukromé `feedIndexControl/current`,
 `feedIndexGenerations/{generation}` a `feedIndexMaintenance`. Schéma instalace,
 provozních úloh, indexů a aktuální stav přepínačů jsou v
-[plánu zapojení](../plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md). Tyto kolekce
-nejsou tímto zápisem živě vytvořené a klienti je nesmějí přímo číst či zapisovat.
+[plánu zapojení](../plans/feed/FEED_INSTALLATION_AND_ROLLOUT.md), skutečné
+nasazení v [PROJECT_STATUS](../PROJECT_STATUS.md). Soukromé řízení a metadata
+nečte/nepřepisuje klient; veřejné projekce mají vlastní konkrétní Rules.
 
 Při rozporu použijte v tomto pořadí:
 

@@ -11,6 +11,9 @@ export const lifecycleHistoryMillis = 7 * lifecycleDay;
 export const lifecycleArchiveMillis = 60 * lifecycleDay;
 export const lifecycleBinding = Symbol('content-lifecycle');
 const id = v => typeof v === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v);
+const digest = v => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v);
+const timeOrder = (a, b) => a instanceof Timestamp && b instanceof Timestamp &&
+  (a.seconds < b.seconds || a.seconds === b.seconds && a.nanoseconds <= b.nanoseconds);
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const fail = (message, code = 'failed-precondition') => { throw new HttpsError(code, message); };
 const clone = value => Array.isArray(value) ? value.map(clone) : value && Object.getPrototypeOf(value) === Object.prototype
@@ -60,7 +63,8 @@ export function validateLifecycleThread(data, expectedId = null) {
       data.publicUntil.toMillis() < data.sourceCreatedAt.toMillis() ||
       !(data.historyUntil instanceof Timestamp) || !(data.retainUntil instanceof Timestamp) ||
       data.historyUntil.toMillis() !== data.publicUntil.toMillis() + lifecycleHistoryMillis ||
-      data.retainUntil.toMillis() !== data.historyUntil.toMillis() + lifecycleArchiveMillis) fail('Invalid content lifecycle header.');
+      data.retainUntil.toMillis() !== data.historyUntil.toMillis() + lifecycleArchiveMillis ||
+      !validLifecycleCapture(data)) fail('Invalid content lifecycle header.');
   return data;
 }
 function subjects(source, kind) {
@@ -69,13 +73,38 @@ function subjects(source, kind) {
       !Array.isArray(source.participants) || source.participants.length !== 2 || source.participants.some((v, i) => v !== uids[i]))) fail('Invalid archived content owner.');
   return uids;
 }
+// A transition copy is a later server observation, never a claim that the
+// publication was archived originally. SDK times bind the actual incarnation.
+function validLifecycleCapture(data) {
+  if (data.captureMode === undefined || data.captureMode === 'atomic-write') {
+    return data.migrationDigest === undefined && data.sourceUpdateTime === undefined;
+  }
+  return data.captureMode === 'transition' && digest(data.migrationDigest) &&
+    timeOrder(data.sourceCreateTime, data.sourceUpdateTime) && timeOrder(data.sourceUpdateTime, data.archivedAt);
+}
+export function lifecycleArchiveRecord(path, source, thread, { sourceCreateTime, sourceUpdateTime, migrationDigest } = {}) {
+  const kind = lifecycleSource(path);
+  if (!kind || !(source.createdAt instanceof Timestamp) || !(thread.sourceCreatedAt instanceof Timestamp) ||
+      thread.shoutId !== kind.shoutId || kind.kind === 'shout' && !thread.sourceCreatedAt.isEqual(source.createdAt) ||
+      sourceCreateTime !== undefined && !(sourceCreateTime instanceof Timestamp)) {
+    throw new Error('invalid-lifecycle-archive-source');
+  }
+  if (migrationDigest !== undefined && (!digest(migrationDigest) || !timeOrder(sourceCreateTime, sourceUpdateTime))) {
+    throw new Error('invalid-lifecycle-migration-capture');
+  }
+  return { schemaVersion: 1, kind: kind.kind, sourcePath: path, threadId: kind.shoutId,
+    threadCreatedAt: thread.sourceCreatedAt, sourceCreatedAt: source.createdAt,
+    archivedAt: FieldValue.serverTimestamp(), ...(sourceCreateTime ? { sourceCreateTime } : {}),
+    ...(migrationDigest ? { captureMode: 'transition', migrationDigest, sourceUpdateTime } : { captureMode: 'atomic-write' }),
+    contentHash: lifecycleBodyHash(source), subjectUserIds: subjects(source, kind.kind), content: lifecycleBody(source), state: sourceState(source) };
+}
 export function validateLifecycleArchive(db, key, data) {
   const source = lifecycleSource(data?.sourcePath);
   const redacted = data?.redactedFromHash !== undefined;
   if (!source || data.schemaVersion !== 1 || data.kind !== source.kind || data.threadId !== source.shoutId ||
       !(data.sourceCreatedAt instanceof Timestamp) || !(data.archivedAt instanceof Timestamp) ||
       data.sourceCreateTime !== undefined && !(data.sourceCreateTime instanceof Timestamp) ||
-      !(data.threadCreatedAt instanceof Timestamp) || !data.content ||
+      !(data.threadCreatedAt instanceof Timestamp) || !data.content || !validLifecycleCapture(data) ||
       (redacted ? archiveIdentityKey(db.projectId, data.sourcePath, data.sourceCreatedAt, data.redactedFromHash) :
         lifecycleArchiveKey(db.projectId, data.sourcePath, data.content)) !== key ||
       redacted && (source.kind !== 'comment' || !/^[a-f0-9]{64}$/.test(data.redactedFromHash) ||
@@ -266,10 +295,8 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
         if (old.exists) validateLifecycleArchive(db, key, old.data());
         if (!c.before && old.exists) fail('An archived content ID cannot be reused.');
         if (deadline.retainUntil.toMillis() > now.toMillis()) {
-          if (!old.exists) extra.push({ method: 'create', args: [ref, { schemaVersion: 1, kind: c.source.kind, sourcePath: c.path,
-            threadId: c.source.shoutId, threadCreatedAt: header.sourceCreatedAt, sourceCreatedAt: source.createdAt,
-            archivedAt: FieldValue.serverTimestamp(), ...(c.snapshot.exists ? { sourceCreateTime: c.snapshot.createTime } : {}),
-            contentHash: lifecycleBodyHash(source), subjectUserIds: owners, content: lifecycleBody(source), state: sourceState(source) }] });
+          if (!old.exists) extra.push({ method: 'create', args: [ref, lifecycleArchiveRecord(c.path, source, header,
+            c.snapshot.exists ? { sourceCreateTime: c.snapshot.createTime } : {})] });
           else if (!c.after || c.after.status !== c.before?.status) extra.push({ method: 'update', args: [ref, { state: sourceState(source) }] });
         } else if (!c.before || c.after && lifecycleBodyHash(c.after) !== lifecycleBodyHash(c.before) &&
             !lifecycleReferenceRedaction(c.before, c.after)) fail('Content retention already ended.');

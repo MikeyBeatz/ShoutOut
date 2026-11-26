@@ -948,6 +948,7 @@ class _ReportTargetDetails {
     this.archived = false,
     this.parentData,
     this.privacyRedacted = false,
+    this.capture,
   });
 
   final Shout? shout;
@@ -957,6 +958,7 @@ class _ReportTargetDetails {
   final bool archived;
   final Map<String, dynamic>? parentData;
   final bool privacyRedacted;
+  final ArchiveCaptureInfo? capture;
 }
 
 class _ReportDetailDialog extends StatefulWidget {
@@ -1012,6 +1014,7 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
         shout: null,
         targetData: decodeArchivedCommentTarget(response.data),
         archived: true,
+        capture: ArchiveCaptureInfo.decode(response.data),
         privacyRedacted:
             response.data is Map &&
             (response.data as Map)['privacyRedacted'] == true,
@@ -1114,9 +1117,23 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
                       if (details.archived)
                         _ReportDetailRow(
                           label: 'Podklad',
-                          value: details.privacyRedacted
-                              ? 'Archivní kopie s anonymizovaným odkazem'
-                              : 'Archivní kopie při zveřejnění',
+                          value: (details.capture ?? const ArchiveCaptureInfo())
+                              .label(
+                                Localizations.localeOf(context).languageCode,
+                                privacyRedacted: details.privacyRedacted,
+                              ),
+                        ),
+                      if (details.capture?.capturedAtMillis != null)
+                        _ReportDetailRow(
+                          label: details.capture!.dateLabel(
+                            Localizations.localeOf(context).languageCode,
+                          ),
+                          value: MaterialLocalizations.of(context)
+                              .formatMediumDate(
+                                DateTime.fromMillisecondsSinceEpoch(
+                                  details.capture!.capturedAtMillis!,
+                                ),
+                              ),
                         ),
                       if (details.parentData != null) ...[
                         _ReportDetailRow(

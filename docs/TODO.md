@@ -53,6 +53,11 @@ je připravený za false; 53 společných emulátorových případů a
 [úplné CI 45815002033](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033)
 zdroje 134cb96 prošly. Následuje přechod existujících dat/klientů a integrační revize.
 
+[Místní převzetí zdrojů](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption)
+má místní zdrojové jádro: přesný plán dávky, skutečný původ zachování a původní
+lhůty; 14 migračních případů prošlo, nové úplné CI čeká. Navazují stará hlášení/účtové kopie, úplný
+operátor a audit pokrytí i klientská kompatibilita. Celá migrační váha zůstává otevřená.
+
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést
 [kontrolu hotových kroků a jejich návazností](LAUNCH_READINESS.md#completed-work-review).

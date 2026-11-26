@@ -70,7 +70,7 @@ export async function readLifecycleReportEvidence(tx, db, report, targetType, no
   }
   return Object.freeze({ kind: targetType, sourcePath, archiveRef: archive.ref, archiveKey: archive.id,
     content: data.content, finalState: data.state, geography: g, retainUntil: deadline.retainUntil,
-    contentHash: data.contentHash, privacyRedacted: data.redactedFromHash !== undefined,
+    contentHash: data.contentHash, privacyRedacted: data.redactedFromHash !== undefined, captureMode: data.captureMode ?? 'atomic-write',
     parentContent, parentKey: r.shoutArchiveKey, archivedAt: data.archivedAt, sourceCreatedAt: data.sourceCreatedAt });
 }
 
@@ -153,7 +153,8 @@ export async function getLifecycleReportEvidenceOperation(request, db, clock = (
       actorId: uid, roleLevel: level, reportId: report.id, reportCollection: collections[input.targetType],
       action: 'read-reported-content', readAt: now, retainUntil: evidence.retainUntil,
     });
-    return { archived: true, privacyRedacted: evidence.privacyRedacted, targetData: publicTarget(evidence),
+    return { archived: true, privacyRedacted: evidence.privacyRedacted, captureMode: evidence.captureMode,
+      capturedAtMillis: Math.floor(evidence.archivedAt.toMillis()), targetData: publicTarget(evidence),
       ...(evidence.parentContent ? { parentData: publicTarget({ kind: 'shout', content: evidence.parentContent }) } : {}),
       retainUntilMillis: evidence.retainUntil.toMillis() };
   });

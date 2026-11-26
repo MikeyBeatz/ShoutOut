@@ -65,6 +65,7 @@ import 'private_reply_delete_button.dart';
 import 'shout_deletion_gateway.dart';
 import 'timed_operation_gateway.dart';
 import 'archived_comment_target.dart';
+import 'archive_capture.dart';
 import 'live_shout_state.dart';
 import 'interaction_feedback.dart';
 import 'interaction_feedback_widgets.dart';

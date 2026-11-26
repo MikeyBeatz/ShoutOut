@@ -2900,6 +2900,56 @@ dopočítat delší termín z migrace či expirace. Později převzaté tělo v�
 označit jako zachované při přechodu, ne jako originál uložený při publikování.
 Tato inventura neurčuje náhradní retenční pravidlo a neopravňuje živý backfill.
 
+<a id="content-lifecycle-source-adoption"></a>
+
+##### Místní převzetí existujících zdrojů – 26. listopadu
+
+Pokračování schváleného místního přechodu. Soukromé jádro
+functions/content_lifecycle_adoption.js připravuje přesný plán nejvýše 50
+vybraných Shoutů/komentářů/soukromých odpovědí. Plán neobsahuje texty ani
+účastníky; svazuje projekt, SDK createTime/updateTime, obsahový hash, původní
+termíny, řídicí dokumenty a inkarnace/formát zapisovaných generací.
+Zápis vyžaduje shodný schválený digest a kompatibilní společný writer;
+změna zdroje, účtového stavu, řízení či generace dávku zastaví bez částečného
+převzetí. Hlavičky, kopie a vazby zdrojů vznikají společně. Opakování již
+hotového převzetí nic znovu nekopíruje ani nepřepisuje datum zachování.
+
+Nové captureMode=transition výslovně označuje pozdější zachování, spolu
+s původními SDK časy a migrationDigest. Nejde o tvrzení o kopii při publikaci.
+Běžné atomické kopie mají captureMode=atomic-write; starší připravený formát
+bez tohoto pole zůstává čitelný. Moderace dostává jen typ zachování a celé
+milisekundy jeho data, nikoli SDK časy nebo interní plán; nový web zobrazuje
+pravdivý štítek v sedmi jazycích, anonymizace jej nemění na tvrzení o původu.
+Starší odpověď bez této informace se označí obecně jako archivní kopie.
+
+Automatický zdrojový převod nevymýšlí čas ručního smazání: staré deleted bez
+prokazatelné hlavičky je blokované. Blokují se také chybějící/nahrazený rodič,
+částečné vazby, nesoulad kopie nebo probíhající smazání některého dotčeného
+účtu. Při již uplynulém původním termínu nevzniká nová kopie těla; doplní se
+jen vazba původních termínů pro stávající purge. Přechod přes hranici retence
+mezi plánem a zápisem vyžaduje nový plán, nikoli prodloužení lhůty.
+
+Tato část **není celá migrace ani její aktivace**. Starých hlášení a účtových
+kopií se zdrojová dávka nedotýká. Zbývá jejich prokázané přiřazení, chybějící
+zdroje/rodiče, celková inventura a audit pokrytí, přechodový operátor včetně
+release/CI brány, staré/nativní klienty, indexový plán, právní verze a integrační
+revize. Samotné jádro nekontroluje Git/CI a nemá živé CLI, callable ani Scheduler.
+Žádný přepínač se nezapíná a žádná živá data se v této práci nečtou či nemění.
+Váha úplné migrace se nepovažuje za dokončenou jen kvůli tomuto jádru.
+
+**Místní výsledky, nové úplné CI ještě čeká:** 52 případů společné archivní,
+čtecí, runtime a Rules sady prošlo; po zpřísnění SDK vazby rodiče a poslední
+kontroly času také celá samostatná migrační sada **14 případů**. Tyto běhy
+se překrývají a nesčítají se. Prošlo 18 klientských testů, celá analýza bez
+nálezů, 33 unit/nástrojových kontrol, lint Functions a serverový unit běh
+209 pass (integrační větve bez emulátoru nejsou ověřené tímto unit během).
+Ověřený souběh, ztracená odpověď po potvrzeném zápisu, 50 zdrojů, v1/v2
+generace, rodič se stejným deklarovaným narozením, původní lhůta i její přechod
+během indexového plánování. Dávka 50 kořenů má 150 deklarovaných zápisů
+(50 zdrojů +50 kopií +50 hlaviček), veřejné projekce/indexové záznamy v obou
+generacích mají shodné hodnoty i updateTime. Není to měření SDK čtení,
+RPC, ceny ani cloudové propustnosti. Skutečný UI průchod není provedený.
+
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 
 Browser host byl nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
