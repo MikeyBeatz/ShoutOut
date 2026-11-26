@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,64 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,68 %** — vážené dokončení podúseků
 
-Hotové úseky: **226/282**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **227/282**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -42,15 +42,16 @@ Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účto
 má přednost. Navazující [webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
 jsou připravené místně a mají
 [úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416)
-zdroje 8e059e3. Dokončit provozní integraci a
-přechod dat, indexy i kompatibilitu nativních/starých klientů; nové volby
+zdroje 8e059e3. Dokončit přechod existujících dat, provozní profil,
+indexy i kompatibilitu nativních/starých klientů; nové volby
 i Rules brána jsou false. Původní jádro má úspěšné úplné CI 45703037163;
 bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
 platí požadavek na další přepracování cyklu.
 
 [Provozní adaptér stávajícího workeru](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
-je připravený za false; 53 společných emulátorových případů prošlo, nové úplné
-CI čeká. Následuje přechod existujících dat/klientů a integrační revize.
+je připravený za false; 53 společných emulátorových případů a
+[úplné CI 45815002033](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033)
+zdroje 134cb96 prošly. Následuje přechod existujících dat/klientů a integrační revize.
 
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést

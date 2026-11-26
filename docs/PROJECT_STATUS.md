@@ -29,18 +29,21 @@ kurzory, role/region, scroll, opakování a odmítnutí staré odpovědi. Zdroj
 [úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416),
 včetně všech serverových regresí a webového buildu. Vše je off; živá UI akceptace
 ani nativní kompatibilita se tím netvrdí.
-**Další krok ve schváleném rozsahu:** úplné provozní napojení a přechod dat;
-před aktivací také nativní/staré klienty, indexy a ověřitelný návrat.
+**Další krok ve schváleném rozsahu:** řízený přechod existujících dat a
+kompatibilita starých klientů; před aktivací také indexy, provozní profil a návrat.
 Přísnější Rules jsou stále místní prototyp a nezapínají se.
 Podrobný přechod starých dat a nová právní verze patří před jakoukoli aktivaci.
 Po MVP je zapsaná další revize cyklu. Starý živý pilot zůstává zachovaný.
 
-**Nynější místní pokračování:** [provozní adaptér](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
+**Místní provozní adaptér připravený a ověřený:** [výsledky](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
 ve stejném minutovém workeru za samostatnou false volbou. Připravené sdílení
 zdrojového rozpočtu, aby účtová fronta běžný úklid trvale neblokovala; ověřování
 souběhu, restartu a operací prošlo v 53 emulátorových případech. Dvě generace,
 ztracená odpověď a rozpočet 450 bez částečného zápisu; 207 unit pass / 756 skip,
-25 nástrojových kontrol a lint prošly. Nové úplné CI ještě není doložené.
+25 nástrojových kontrol a lint prošly. Zdroj
+**134cb960480de410841a069dacf91a45f42ae6ff** má
+[úspěšné úplné CI 45815002033](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033),
+včetně celé dosavadní regrese a webového buildu.
 Žádný rollout ani živá data. V plánu je
 [integrační revize před DEV archivem](MVP_SERVER_PLAN.md#content-lifecycle-integration-review)
 a [souhrnná revize hotových MVP kroků](LAUNCH_READINESS.md#completed-work-review)

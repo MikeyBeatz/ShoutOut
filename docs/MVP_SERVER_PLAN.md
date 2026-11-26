@@ -2703,9 +2703,10 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
    jejich úplné CI 45766451416 prošlo. Zbývá provozní kompatibilita starých
    a nativních klientů. Globální collectionGroup nesmí obejít rodičovskou
    lhůtu; prototyp brány je vypnutý a nesmí předběhnout kompatibilní klienty.
-2. Úplné provozní napojení, reálný společný rozpočet současných generací a náklady/dohánění
-   dluhu. Místní runner ani příklad 32/10 neurčují produkční kapacitu.
-   Pauza a transakční souběh jsou doložené místně, nikoli živým provozem.
+2. [Místní provozní adaptér je ověřený](#content-lifecycle-runtime-local),
+   včetně společného rozpočtu a dvou generací. Před aktivací zbývá celý
+   časový/provozní profil a dohánění dluhu při cílové zátěži; místní runner
+   ani příklad 32/10 neurčují produkční kapacitu. Živý provoz se tím netvrdí.
 3. Přesný přechod existujících zdrojů/hlášení, návaznosti všech starších kopií
    a indexové výjimky bez TTL. Pozdější převzetí živého starého těla nesmí být
    označené jako původní zachování při publikování. Odstraněný obsah se
@@ -2786,13 +2787,13 @@ je započítané; archivační těla se nečtou. Běžné SDK point odběry UI j
 profil sdílí malý B4 stav, ostatní seznamy potřebují i dostupnost rodiče/komentáře.
 Provozní zátěžový profil a nativní routing tímto nejsou uzavřené.
 
-**Další již schválený místní krok:** volitelné propojení
+**Navazující místní propojení je připravené a ověřené níže:**
 runContentLifecycleMaintenance se stávající cestou runAccountMaintenanceTick
 v functions/shout_expiration.js a jejím DEV wrapperem v
-functions/account_deletion_dev.js. Nejprve ověřit společný rozpočet, přednost
-splatných účtových povinností, dohánění dluhu běžného úklidu a souběžné
-inkarnace/generace. Samotný nový Scheduler ani živá četnost se nezavádí;
-konkrétní aktivaci musí předcházet výsledky měření a řízený přechod dat.
+functions/account_deletion_dev.js. [Výsledky adaptéru](#content-lifecycle-runtime-local).
+Další práce je přechod existujících dat/klientů a integrační revize;
+konkrétní aktivaci musí předcházet i ověření celého provozního profilu.
+Samotný nový Scheduler ani živá četnost se nezavádí.
 
 **Před aktivací připravit a cloudově ověřit indexový plán:** nový COLLECTION_GROUP
 comments(authorId ASC, createdAt DESC) a COLLECTION
@@ -2836,7 +2837,7 @@ měkká hranice 32 kroků / 10 s nejsou potvrzená produkční kapacita.
 Před živým zapojením je nutné vyhodnotit celý 60s worker včetně indexové údržby.
 Bez nového Scheduleru, změny živé četnosti, nasazení nebo migrace.
 
-**Připravené místně, úplné CI nového zdroje ještě čeká:** samostatná
+**Připravené a ověřené místně:** samostatná
 contentLifecycleMaintenanceConfiguration.enabled=false a runtime vazba
 contentMaintenance do existujícího resumeAccountDeletionJobsDev. Při false
 se původní cesta nemění a nepřibývá IO. V laboratorním zapnutí dostane
@@ -2862,6 +2863,13 @@ Interně vytvořený listing klient se vždy zavře; dodaný pager vlastní vola
 První rozšířený měřicí běh měl chybu testovacího proxy pro snapshoty, nikoli
 chybu aplikace; po opravě měřiče prošla výše uvedená celá sada.
 
+Zdroj **134cb960480de410841a069dacf91a45f42ae6ff** má
+[úspěšné úplné CI 45815002033](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033).
+Prošly klientské/browserové testy, nástroje, Functions lint/unit, Rules a
+transakce, všechny B4/moderační/Business/lifecycle/B2 a purge sady, Storage
+i webový build. Nová údržba i globální lifecycle zůstávají false; žádné nové
+nasazení, živá data ani migrační/produkční kapacita se tím nepotvrzují.
+
 [Reprodukovatelné místní měření](benchmarks/CONTENT_LIFECYCLE_RUNTIME_2026-11-26.json)
 je v functions/content_lifecycle_runtime.integration.test.js. Jeden Shout,
 jeden komentář, 65 hlášení a dvě generace, fronta účtu obsazená vadným
@@ -2880,7 +2888,21 @@ verze a před aktivací celý časový/kapacitní profil. Váha dosud nedokonče
 provozního napojení/přechodu a ověření byla rozdělena napůl mezi nynější runtime
 a zbývající migraci; hotové váhy i součet rodiče zůstávají zachované.
 
-Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
+**Podklady další místní migrace, průzkum kódu bez živých čtení:** staré cesty
+functions/delete_shout.js, remove_reported_public_content.js a
+account_shout_hiding.js zapisují status=deleted, samostatné removedAt neukládají.
+Sedmidenní serverOperations mohou už být po retenci; navíc nový požadavek
+může potvrdit již smazaný stav, takže jeho createdAt samo nedokazuje první
+odstranění. Ani pozdější updateTime zdroje nelze automaticky prohlásit za
+počátek historie. Přechod musí doložit vazbu na přesnou inkarnaci a první
+změnu dostupnosti; neprokázané položky zastavit k vyřešení, nikoli jim
+dopočítat delší termín z migrace či expirace. Později převzaté tělo výslovně
+označit jako zachované při přechodu, ne jako originál uložený při publikování.
+Tato inventura neurčuje náhradní retenční pravidlo a neopravňuje živý backfill.
+
+##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
+
+Browser host byl nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za
 akceptaci aplikace. Potřebná ruční součinnost zůstala na konec samostatné práce.
