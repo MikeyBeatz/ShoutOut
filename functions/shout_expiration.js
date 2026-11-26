@@ -36,15 +36,33 @@ export async function expireDueShouts(db, { maxCandidates, clock = () => new Dat
   return result;
 }
 
-// Reuse the existing minute tick and its source-work budget: never two full pages.
+// Reuse the existing minute tick. The optional lifecycle path divides the
+// existing page allowance; it never adds two full source pages. Its work units
+// include journal steps, unlike actual SDK reads/writes measured separately.
 export async function runAccountMaintenanceTick(db, auth, options) {
   if (options.indexMaintenance != null && typeof options.indexMaintenance !== 'function') throw new Error('invalid-index-maintenance');
+  if (options.contentMaintenance != null && (typeof options.contentMaintenance !== 'function' ||
+      !Number.isInteger(options.pageSize) || options.pageSize < 2 || options.pageSize > 50 || options.maxJobs !== 1)) {
+    throw new Error('invalid-content-maintenance');
+  }
+  const contentBudget = options.contentMaintenance ? Math.floor(options.pageSize / 2) : 0;
+  const sourceOptions = contentBudget ? { ...options, pageSize: options.pageSize - contentBudget } : options;
   const index = options.indexMaintenance ? await options.indexMaintenance() : {};
-  const purge = options.retentionPurgeEnabled ? await scanDueAccountPurges(db, auth, options) : { purgeScanned: 0, purged: 0, purgeFailed: 0, purgeNeedsReview: 0 };
-  if (purge.purgeScanned) return { ...index, ...purge, scanned: 0, failed: 0, expirationScanned: 0, expirationChanged: 0 };
-  const account = await scanDueAccountDeletionJobs(db, auth, options);
-  if (!options.shoutExpirationEnabled || account.scanned > 0) return { ...index, ...purge, ...account, expirationScanned: 0, expirationChanged: 0 };
-  const expiration = await expireDueShouts(db, { clock: options.clock, maxCandidates: options.pageSize,
-    indexWriter: options.indexWriter });
-  return { ...index, ...purge, ...account, expirationScanned: expiration.scanned, expirationChanged: expiration.expired, expirationInvalid: expiration.invalid };
+  const runSources = async () => {
+    const purge = sourceOptions.retentionPurgeEnabled ? await scanDueAccountPurges(db, auth, sourceOptions) : { purgeScanned: 0, purged: 0, purgeFailed: 0, purgeNeedsReview: 0 };
+    if (purge.purgeScanned) return { ...purge, scanned: 0, failed: 0, expirationScanned: 0, expirationChanged: 0 };
+    const account = await scanDueAccountDeletionJobs(db, auth, sourceOptions);
+    if (!sourceOptions.shoutExpirationEnabled || account.scanned > 0) return { ...purge, ...account, expirationScanned: 0, expirationChanged: 0 };
+    const expiration = await expireDueShouts(db, { clock: sourceOptions.clock, maxCandidates: sourceOptions.pageSize,
+      indexWriter: sourceOptions.indexWriter });
+    return { ...purge, ...account, expirationScanned: expiration.scanned, expirationChanged: expiration.expired, expirationInvalid: expiration.invalid };
+  };
+  // Retain the exact legacy path when disabled. With both queues enabled a
+  // failing source RPC cannot indefinitely suppress ordinary retention work.
+  if (!contentBudget) return { ...index, ...await runSources() };
+  let source, error;
+  try { source = await runSources(); } catch (failure) { error = failure; }
+  const content = await options.contentMaintenance({ maxWork: contentBudget });
+  if (error) throw error;
+  return { ...index, ...source, ...content, sourcePageBudget: sourceOptions.pageSize, lifecycleWorkBudget: contentBudget };
 }

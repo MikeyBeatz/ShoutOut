@@ -35,6 +35,17 @@ Přísnější Rules jsou stále místní prototyp a nezapínají se.
 Podrobný přechod starých dat a nová právní verze patří před jakoukoli aktivaci.
 Po MVP je zapsaná další revize cyklu. Starý živý pilot zůstává zachovaný.
 
+**Nynější místní pokračování:** [provozní adaptér](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
+ve stejném minutovém workeru za samostatnou false volbou. Připravené sdílení
+zdrojového rozpočtu, aby účtová fronta běžný úklid trvale neblokovala; ověřování
+souběhu, restartu a operací prošlo v 53 emulátorových případech. Dvě generace,
+ztracená odpověď a rozpočet 450 bez částečného zápisu; 207 unit pass / 756 skip,
+25 nástrojových kontrol a lint prošly. Nové úplné CI ještě není doložené.
+Žádný rollout ani živá data. V plánu je
+[integrační revize před DEV archivem](MVP_SERVER_PLAN.md#content-lifecycle-integration-review)
+a [souhrnná revize hotových MVP kroků](LAUNCH_READINESS.md#completed-work-review)
+po tomto cyklu před společnou regresí; obě zatím otevřené.
+
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
 Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev

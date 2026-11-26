@@ -133,8 +133,8 @@ export async function stepContentLifecycleTree(db, { threadId, kind, archiveKey 
   });
 }
 
-export async function finishContentLifecycleThread(db, { threadId, clock = () => new Date() } = {}) {
-  if (!lifecycleEnabled(db) || !identifier(threadId)) throw new Error('invalid-lifecycle-finish-options');
+export async function finishContentLifecycleThread(db, { threadId, clock = () => new Date(), pageSize = 50 } = {}) {
+  if (!lifecycleEnabled(db) || !identifier(threadId) || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new Error('invalid-lifecycle-finish-options');
   const ref = db.doc(`contentLifecycleThreads/${threadId}`);
   return db.runTransaction(async tx => {
     const [control, header, source] = await tx.getAll(db.doc('contentLifecycleControl/current'), ref, db.doc(`shouts/${threadId}`));
@@ -151,9 +151,9 @@ export async function finishContentLifecycleThread(db, { threadId, clock = () =>
       tx.update(ref, { geography: null });
       return { state: 'waiting-for-account-journal', deleted: 0 };
     }
-    const jobs = await tx.get(db.collection('contentLifecycleJobs').where('threadId', '==', threadId).limit(50));
+    const jobs = await tx.get(db.collection('contentLifecycleJobs').where('threadId', '==', threadId).limit(pageSize));
     for (const job of jobs.docs) tx.delete(job.ref, { lastUpdateTime: job.updateTime });
-    if (jobs.size < 50) tx.delete(ref);
-    return { state: jobs.size < 50 ? 'complete' : 'continuation', deleted: jobs.size + Number(jobs.size < 50) };
+    if (jobs.size < pageSize) tx.delete(ref);
+    return { state: jobs.size < pageSize ? 'complete' : 'continuation', deleted: jobs.size + Number(jobs.size < pageSize) };
   });
 }

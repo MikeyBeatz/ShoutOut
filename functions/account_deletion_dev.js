@@ -40,7 +40,7 @@ function database() {
 
 function workerOptions(db, runtime) {
   return { ...accountDeletionDevProposal, indexWriter: runtime.indexWriter, indexErasureCoordinator: runtime.indexErasureCoordinator,
-    indexMaintenance: runtime.indexMaintenance,
+    indexMaintenance: runtime.indexMaintenance, contentMaintenance: runtime.contentMaintenance,
     logoBucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`),
     bucket: getStorage().bucket(`${db.projectId}.firebasestorage.app`) };
 }
@@ -70,7 +70,7 @@ export const resumeAccountDeletionJobsDev = onSchedule({
     const result = await runAccountMaintenanceTick(db, getAuth(), {
       ...workerOptions(db, runtime), clock: () => new Date(),
     });
-    const log = result.indexFailed || result.indexNeedsReview || result.purgeFailed || result.purgeNeedsReview || result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
+    const log = result.lifecycleFailed || result.lifecycleNeedsReview || result.indexFailed || result.indexNeedsReview || result.purgeFailed || result.purgeNeedsReview || result.failed || result.needsReview || result.privateDisabled || result.contentDisabled || result.identityDisabled || result.reactionRemovalDisabled || result.checkpointConflict ? logger.warn : logger.info;
     log('account-deletion-job-recovery', result);
   } catch {
     logger.error('account-deletion-job-recovery', { code: 'scan-failed' });

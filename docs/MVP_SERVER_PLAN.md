@@ -2806,6 +2806,80 @@ Nedokončená váha
 hotové části ani pevná váha MVP milníku se nemění. Žádná nová volba se nezapíná,
 nic se nenasazuje, neprobíhá živá migrace a starý pilot zůstává zachovaný.
 
+<a id="content-lifecycle-integration-review"></a>
+
+##### Integrační revize před aktivací společného archivu
+
+Otevřený kontrolní bod: po místním dokončení provozního adaptéru a přípravy
+přechodu, před první živou migrací/aktivací v DEV, znovu projít celý nový cyklus.
+Ověřit všechny writery a čtenáře, atomické indexové/archivní vazby, původní
+účtové termíny, soukromé odpovědi, staré/nativní klienty, Rules, indexový plán,
+právní verzi, pokračování úklidu a návrat. Výstup musí uvést přesný commit,
+nálezy a jejich řešení; jednotlivá úspěšná CI tento společný bod sama neuzavírají.
+Jde o podmínku stávajícího integračního ověření, ne další váhu milníku.
+Širší [revize všech dosavadních MVP kroků](LAUNCH_READINESS.md#completed-work-review)
+následuje před společnou regresí aplikace.
+
+<a id="content-lifecycle-runtime-local"></a>
+
+##### Místní provozní napojení – pokračování schváleného rozsahu
+
+Připravit volitelnou cestu stávajícího minutového workeru za samostatnou false
+volbou. Zachovat původní běh při vypnuté volbě bez dalších databázových operací.
+V zapnuté laboratorní variantě rozdělit dosavadní zdrojový rozpočet nejvýše 50
+mezi účtovou/expirační stránku a běžný lifecycle, aby trvalá účtová fronta
+neblokovala běžný úklid. Účtový krok jde první; běžný úklid pokračuje i při
+obsazené účtové frontě. Ověřit omezené jednotlivé transakce do 450 zápisů,
+časové/počtové ukončení, studený restart, souběh, vadný záznam a zachování cizích dat.
+Měřit skutečné databázové operace a dohánění dluhu; laboratorní rozdělení ani
+měkká hranice 32 kroků / 10 s nejsou potvrzená produkční kapacita.
+Před živým zapojením je nutné vyhodnotit celý 60s worker včetně indexové údržby.
+Bez nového Scheduleru, změny živé četnosti, nasazení nebo migrace.
+
+**Připravené místně, úplné CI nového zdroje ještě čeká:** samostatná
+contentLifecycleMaintenanceConfiguration.enabled=false a runtime vazba
+contentMaintenance do existujícího resumeAccountDeletionJobsDev. Při false
+se původní cesta nemění a nepřibývá IO. V laboratorním zapnutí dostane
+účtová/expirační stránka ceil(pageSize/2), běžný úklid floor(pageSize/2);
+jejich přidělený součet zůstane nejvýše původních 50. Jednotka běžného úklidu
+je nejméně jeden krok, u dávkového mazání počet odstraněných řádků; nejde o
+počet všech čtení/zápisů. Každá transakce dál sdílí samostatnou mez 450.
+Neobsazená rezerva se zatím nepřelévá do účtové stránky; tento kompromis
+musí projít provozním měřením před zapnutím, není určený produkční profil.
+Účtová fronta má přednost, po ní proběhne běžný úsek i při chybě zdrojového
+čtení. Pauza ingressu zachovává splatný úklid, off jej blokuje. Nový úsek
+má měkkých 32 kroků / 10 s mezi kroky; indexová údržba má svůj dosavadní
+úsek, takže samotných 10 s není horní mez celého workeru.
+
+**Místní ověření:** 53 emulátorových případů společně zahrnulo nové napojení,
+původní archiv, expiraci a skutečný feed runtime. Prošlo rovněž všech
+207 serverových unit testů bez emulátoru (756 integračních skip není důkazem
+jejich ověření), 25 cílených nástrojových testů a lint celé Functions oblasti.
+Dva souběžné workery, studený restart, ztracená odpověď po potvrzeném mazání,
+vadný účtový záznam, jednostupňové stránky včetně technického dokončení,
+oba generační writery a rollback rozpočtu proběhly bez částečného zápisu.
+Interně vytvořený listing klient se vždy zavře; dodaný pager vlastní volající.
+První rozšířený měřicí běh měl chybu testovacího proxy pro snapshoty, nikoli
+chybu aplikace; po opravě měřiče prošla výše uvedená celá sada.
+
+[Reprodukovatelné místní měření](benchmarks/CONTENT_LIFECYCLE_RUNTIME_2026-11-26.json)
+je v functions/content_lifecycle_runtime.integration.test.js. Jeden Shout,
+jeden komentář, 65 hlášení a dvě generace, fronta účtu obsazená vadným
+záznamem, restart při každém běhu: pageSize 6 potřeboval 30 volání /
+408 dokumentových výsledků / 133 zápisů, pageSize 50 potřeboval 5 volání /
+276 výsledků / 108 zápisů. V obou případech navíc čtyři listCollections
+a dva metadata list požadavky; maximum úspěšné transakce 10, respektive
+25 zápisů. Nejde o úplný počet RPC, cenu nebo kapacitu pro 5 000 relací.
+Průchody jsou rozdělené mezi konec historie a archivu, nikoli důkaz doby
+dohánění skutečného provozního dluhu. Výpadek po potvrzeném zápisu může mít
+neúplné souhrnné počty; pokračování vždy vychází z trvalého journalu.
+
+Zbývá přechod dat/starých klientů a jeho integrační revize, cloudové ověření
+indexů (také maintenanceState/nextMaintenanceAt pro thread údržbu), právní
+verze a před aktivací celý časový/kapacitní profil. Váha dosud nedokončeného
+provozního napojení/přechodu a ověření byla rozdělena napůl mezi nynější runtime
+a zbývající migraci; hotové váhy i součet rodiče zůstávají zachované.
+
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě
 určit aktuální URL. Žádné další UI vstupy neprovedené, nelze to označit za

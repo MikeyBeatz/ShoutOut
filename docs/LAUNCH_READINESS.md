@@ -23,6 +23,33 @@ monetizace** ani produktové metriky v části 7 neblokují webové vydání.
 Pořadí práce: produkční webový základ → bezpečnost a právní kontrola → ruční
 testy běžných a Business toků → provozní připravenost → startovní brána.
 
+<a id="completed-work-review"></a>
+
+## Souhrnná revize dosavadních kroků před společnou regresí
+
+Naplánováno vlastníkem 26. listopadu 2026. Po dokončení nynějšího cyklu
+archivace a moderace, před závěrečnou regresí mvp-20 a rozhodnutím mvp-24,
+provést jednu společnou revizi už dokončených kroků. Průběžné testy jednotlivých
+úseků tím pokračují; tento bod zatím není provedený audit ani nový MVP kredit.
+
+- [ ] Porovnat aktuální kód, konfiguraci, skutečné DEV revize a doložené CI
+  se stavem TODO/BACKLOG/PROJECT_STATUS/progress.json; odlišit místní přípravu,
+  nasazení, přijatý ruční průchod a stále otevřené podmínky.
+- [ ] Projít společné návaznosti feedu/přečtení/cache, reakcí a komentářů,
+  mazání účtu, moderace/Business a všech archivních kopií; hledat zbylé přímé
+  zápisy, obcházení oprávnění, ztrátu auditu a rozpory retenčních termínů.
+- [ ] Přezkoumat staré i otevřené klienty, migrace/indexy, návratové verze,
+  pokračování úklidu, provozní dluh a dosud neověřené kapacitní/nákladové předpoklady.
+- [ ] Ověřit návaznosti dokumentů a právních verzí; sepsat konkrétní nálezy,
+  závažnost, důkazy a cílené opakované testy. Opravy mimo schválený rozsah
+  předložit zvlášť, neoznačovat pouhý zápis nálezu za vyřešení.
+
+Výstup je revizní záznam s přesným zdrojem a rozhodnutím o každém nálezu,
+na něj navazuje matice společné regrese. Revize patří do existujících
+ověřovacích/startovních úseků; pevné váhy milníků se nezvyšují.
+Samotná aktivace nového archivu v DEV má navíc užší
+[integrační revizi před přechodem](MVP_SERVER_PLAN.md#content-lifecycle-integration-review).
+
 <a id="capacity-target"></a>
 
 ## Kapacitní cíl MVP

@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,60 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,64 %** — vážené dokončení podúseků
 
-Hotové úseky: **225/280**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **226/282**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -47,6 +47,16 @@ přechod dat, indexy i kompatibilitu nativních/starých klientů; nové volby
 i Rules brána jsou false. Původní jádro má úspěšné úplné CI 45703037163;
 bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
 platí požadavek na další přepracování cyklu.
+
+[Provozní adaptér stávajícího workeru](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
+je připravený za false; 53 společných emulátorových případů prošlo, nové úplné
+CI čeká. Následuje přechod existujících dat/klientů a integrační revize.
+
+**Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
+archivního/moderačního cyklu a před společnou regresí mvp-20 provést
+[kontrolu hotových kroků a jejich návazností](LAUNCH_READINESS.md#completed-work-review).
+Před DEV aktivací archivu také jeho samostatná integrační revize; nyní se
+žádný z těchto auditů neoznačuje za dokončený.
 
 **Drobná oprava IDE dokončená lokálně:** [vyloučení cizích Dart šablon npm](operations/TESTING.md#dart-dependency-templates).
 Celá flutter analyze nyní bez nálezů; žádný nový MVP kredit, build či rollout.

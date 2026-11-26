@@ -268,6 +268,10 @@ požadavky v MVP_SERVER_PLAN.md. Samotné zapsání bodu neznamená implementaci
   a 5 000 současně aktivních uživatelů;
   [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target)
   se musí určit zvlášť. Kapacita zatím není prokázaná.
+  Před společnou regresí projít
+  [souhrnnou revizi dosavadních kroků](LAUNCH_READINESS.md#completed-work-review),
+  po dokončení nynějšího archivního/moderačního cyklu. Zápis do plánu není
+  provedený audit a nevytváří další váhu této položky.
 - [ ] <a id="bl-039"></a> **Po MVP** — Marketingový pilot zahájit až po splnění startovní brány a dále jej řídit
   samostatným plánem `docs/local/ShoutOut_marketingovy_plan_spusteni.docx`.
 

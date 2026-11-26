@@ -67,3 +67,33 @@ test('one optional index slice precedes the existing source page without adding 
  assert.equal(calls,1);assert.equal(result.indexSteps,32);assert.equal(result.expirationScanned,2);assert.equal(result.expirationChanged,2);
  assert.equal((await f.base.collection('shouts').where('status','==','active').get()).size,1);
 });
+
+test('optional lifecycle work shares the old page allowance and runs after an occupied account queue', {skip:!enabled}, async()=>{
+ const f=await fixture(),uid=randomUUID(),request=f.scoped.doc(`accountDeletionRequests/${uid}`);await request.set({userId:uid,status:'pending'});
+ const identity={projectId:db.projectId,userId:uid,requestCreateTime:(await request.get()).createTime};
+ const options={clock:f.clock,pageSize:4,maxJobs:1,leaseMillis:60000,retryDelayMillis:1000,authWaitMillis:86400000,shoutExpirationEnabled:true};
+ await accountRun(identity,f.scoped,{getUser:async()=>({uid})},options);f.advance(1000);
+ let calls=0;const result=await tick(f.scoped,{getUser:async()=>({uid})},{...options,contentMaintenance:async allocation=>{
+   assert.equal(allocation.maxWork,2);calls++;return {lifecycleWorkUnits:2};
+ }});
+ assert.equal(calls,1);assert.equal(result.scanned,1);assert.equal(result.expirationScanned,0);
+ assert.equal(result.sourcePageBudget+result.lifecycleWorkBudget,4);
+});
+
+test('an idle combined tick expires only its allocated half and does not consume the lifecycle reserve', {skip:!enabled},async()=>{
+ const f=await fixture();for(let i=0;i<6;i++)await f.add('s'+i);
+ const result=await tick(f.scoped,{getUser(){assert.fail('no account');}},{clock:f.clock,pageSize:6,maxJobs:1,leaseMillis:60000,retryDelayMillis:1000,authWaitMillis:86400000,shoutExpirationEnabled:true,
+ contentMaintenance:async({maxWork})=>{assert.equal(maxWork,3);return {lifecycleWorkUnits:3};}});
+ assert.equal(result.expirationScanned,3);assert.equal(result.expirationChanged,3);
+ assert.equal(result.sourcePageBudget+result.lifecycleWorkBudget,6);
+});
+
+test('a malformed purge candidate or failed account read cannot starve the optional lifecycle slice', {skip:!enabled},async()=>{
+ const f=await fixture(),bad=f.scoped.doc('accountPurgeJobs/bad');await bad.set({nextAttemptAt:f.past()});let calls=0;
+ const options={clock:f.clock,pageSize:4,maxJobs:1,leaseMillis:60000,retryDelayMillis:1000,authWaitMillis:86400000,shoutExpirationEnabled:true,retentionPurgeEnabled:true,
+ contentMaintenance:async()=>{calls++;return {lifecycleState:'idle'};}};
+ const result=await tick(f.scoped,null,options);assert.equal(result.purgeScanned,1);assert.equal(result.purgeFailed,1);assert.equal(calls,1);
+ const failing={...f.scoped,collection(name){if(name==='accountDeletionJobs')throw new Error('source-read-failed');return f.scoped.collection(name);}};
+ await assert.rejects(tick(failing,null,{...options,retentionPurgeEnabled:false}),/source-read-failed/);assert.equal(calls,2);
+ assert((await bad.get()).exists);
+});

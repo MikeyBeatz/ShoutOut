@@ -92,7 +92,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-11: Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.](TODO.md#mvp-11) | 20,00 % | 1/5 |
 | [mvp-12: Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči mimo Litoměřice.](TODO.md#mvp-12) | 50,00 % | 2/4 |
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
-| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 78,44 % | 16/21 |
+| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 79,42 % | 17/23 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 71,70 % | 38/44 |
@@ -109,7 +109,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | Položka | Dokončení | Úseky |
 |---|---:|---:|
 | [bl-019: Přepracovat onboarding na interaktivní tutorial. Po MVP *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*](BACKLOG.md#bl-019) | 25,00 % | 1/4 |
-| [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
+| [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná. Před společnou regresí projít [souhrnnou revizi dosavadních kroků](LAUNCH_READINESS.md#completed-work-review), po dokončení nynějšího archivního/moderačního cyklu. Zápis do plánu není provedený audit a nevytváří další váhu této položky.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
 | [bl-048: MVP — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby jsou starší záznamy bezpečně nečitelné.](BACKLOG.md#bl-048) | 33,34 % | 1/3 |
 | [bl-059: MVP — Po připojení `go.shoutout-app.eu` k produkčnímu projektu `shoutout-production-a1b34` přepnout jeho globální Firebase Authentication Action URL na připravený `/auth/action`. Handler už bezpečně obsluhuje ověření e-mailu, reset hesla i obnovení změněné adresy; výchozí domény projektu Firebase při ukládání vlastní Action URL odmítá. Prezentační projekt není cílem této změny.](BACKLOG.md#bl-059) | 33,34 % | 1/3 |
 | [bl-072: Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web. MVP](BACKLOG.md#bl-072) | 50,00 % | 2/4 |
@@ -320,6 +320,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-lifecycle-foundation-check: Místní archivní jádro – transakce, účtový souběh, historie a společné CI | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../functions/content_lifecycle.integration.test.js), [3](../functions/account_purge.integration.test.js), [4](../functions/get_own_shouts.integration.test.js), [5](../tools/rules/content_lifecycle.integration.test.mjs), [6](../test/content_lifecycle_test.dart) |
 | content-lifecycle-read-code: Společný archiv – serverové seznamy a webový klient za vypnutou volbou | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.js), [3](../lib/lifecycle_source_gateway.dart), [4](../lib/src/lifecycle_sources.dart) |
 | content-lifecycle-read-check: Společný archiv – oprávnění seznamů, řídké stránky, webový živý stav a souběhy | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.integration.test.js), [3](../tools/rules/content_lifecycle.integration.test.mjs), [4](../test/lifecycle_source_gateway_test.dart), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416) |
+| content-lifecycle-runtime-code: Spole?n? archiv ? voliteln? napojen? st?vaj?c?ho workeru a spole?n? d?vkov?n? | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-runtime-local), [2](../functions/content_lifecycle_runtime.js), [3](../functions/shout_expiration.js), [4](../functions/feed_runtime.js) |
+| content-lifecycle-runtime-check: Spole?n? archiv ? restart, soub?h, dluh a rozpo?et workeru | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-runtime-local), [2](../functions/content_lifecycle_runtime.integration.test.js), [3](../functions/content_lifecycle_runtime.test.js), [4](../functions/shout_expiration.integration.test.js), [5](../docs/benchmarks/CONTENT_LIFECYCLE_RUNTIME_2026-11-26.json) |
 | expired-cleanup-code: Společný životní cyklus – provozní napojení a přechod dat | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation) |
 | expired-cleanup-check: Úplná integrace životního cyklu – souběh, dluh, limity a kompatibilita | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation) |
 | expired-cleanup-dev: Společný cyklus historie, neveřejného archivu a purge – nasazení DEV | deployment | ⬜ | — |
@@ -442,10 +444,10 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | accessibility-audit: Audit přístupnosti webu | verification | ⬜ | — |
 | web-layout-accept: Mobilní/desktopové rozložení a vizuální regrese | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md#category-font-dev-rollout), [2](../tools/diagnostics/font_warning_probe.dart) |
 | translation-accept: Finální kontrola přetečení, diakritiky a plurálů | acceptance | ⬜ | — |
-| regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md) |
-| regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | — |
-| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | — |
-| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | — |
+| regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md), [2](../docs/LAUNCH_READINESS.md#completed-work-review) |
+| regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
+| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
+| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
 | legal-operator: Skutečný provozovatel a kontakty podpory | implementation | ⬜ | — |
 | legal-review: Právní kontrola veřejných textů | verification | ⬜ | — |
 | legal-subject-rights: Postup práv subjektů údajů a provozní odpovědnost | acceptance | ⬜ | — |

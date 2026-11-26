@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-26",
+  "scope": "local Firestore Standard emulator only",
+  "scenario": "One Shout and one public comment, 65 pre-existing bound reports, two real feed/card generations; cold restart on each tick; one deliberately malformed due account record kept busy. Two separate due-time boundaries: history end and archive end.",
+  "measurement": "Observed SDK document results (empty query = 1), SDK get/list calls, separate real metadata listing calls/paths and attempted/committed writes. Includes account scan/checkpoints and both generation writers. Excludes fixture creation/verification/cleanup, SDK internal retries/RPCs, index-entry reads, bytes, billing, Auth/App Check and cloud/network/cold-start capacity.",
+  "runtimeProfile": "Inactive candidate only: account/expiration first, source page divided ceil/floor; ordinary slice max 32 steps and soft 10 seconds between steps; max work <=25 at page 50. Existing index slice remains separately bounded, full 60-second worker/capacity must be validated before activation.",
+  "results": [
+    {
+      "pageSize": 6,
+      "ticks": 30,
+      "steps": 41,
+      "sources": 2,
+      "reports": 65,
+      "generations": 2,
+      "reads": 408,
+      "getCalls": 280,
+      "listingCalls": 4,
+      "metadataListCalls": 2,
+      "listedMetadataPaths": 1,
+      "attempts": 57,
+      "commits": 57,
+      "attemptedWrites": 133,
+      "committedWrites": 133,
+      "directWrites": 30,
+      "maxTransactionWrites": 10,
+      "scope": "emulator-sdk-operations-not-cloud-capacity"
+    },
+    {
+      "pageSize": 50,
+      "ticks": 5,
+      "steps": 21,
+      "sources": 2,
+      "reports": 65,
+      "generations": 2,
+      "reads": 276,
+      "getCalls": 150,
+      "listingCalls": 4,
+      "metadataListCalls": 2,
+      "listedMetadataPaths": 1,
+      "attempts": 37,
+      "commits": 37,
+      "attemptedWrites": 108,
+      "committedWrites": 108,
+      "directWrites": 5,
+      "maxTransactionWrites": 25,
+      "scope": "emulator-sdk-operations-not-cloud-capacity"
+    }
+  ]
+}
