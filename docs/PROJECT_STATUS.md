@@ -1,16 +1,20 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 24. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 26. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
 
-**DEV release hudby Shout Flight, 26. listopadu:** připravený nad nyní nasazeným
-webovým zdrojem aa43ae1. Přidává pouze klientskou smyčku, ztlumení a řízení
-životního cyklu. [Chování a ověření](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
-Před nasazením Hosting projektu/site shoutout-dev-46c81 ověřit úplné CI přesného
-commitu a čistý release. Funkce, Rules a data se tímto releasem nemění.
+**Hudba Shout Flight je nasazená v DEV:** [chování a důkazy](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Release **1da51c1a2556035e8193dd4de787bf9330cc0e96**, větev feature/shout-flight-music-dev,
+[úplné CI 45893689471 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45893689471),
+Hosting **eefd806b17cb9ee5**. Ověřeno 68 app souborů, čtyři zrcadlené soubory
+a dvě audio Range odpovědi na obou DEV doménách. Devět cílených testů, analýza,
+webové buildy i celé CI prošly. Nasazen jen Hosting, bez serverových/datových změn.
+Release je založen na předchozím DEV aa43ae1, bez rozpracovaného archivu;
+pracovní větev feature/shout-flight-music obsahuje také místní MVP přípravu a není tímto releasem.
+Návratový Hosting **f8f0b0338d6eb03d**.
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
@@ -21,7 +25,7 @@ původní web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da5
 API/web → vyřazení starých revizí → uzavření přímých Rules zápisů → účtová
 retenční údržba. Nové DEV volby jsou true; produkční konfigurace nezměněná.
 
-**Aktuální DEV web:** [oprava pozastaveného Profilu](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results),
+**Předchozí DEV web:** [oprava pozastaveného Profilu](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results),
 zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, fix/business-suspension-profile,
 [úplné CI 45424330633 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633),
 Hosting **2edf6b744dcbe95e**. Bezpečný avatar parser, čitelná neutrální lišta

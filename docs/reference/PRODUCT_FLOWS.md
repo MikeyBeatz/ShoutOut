@@ -263,7 +263,7 @@ není. Account purge tyto dva různé životní cykly nenahrazuje.
 
 ## Shout Flight – hudba ve hře
 
-Místní klientská úprava z 26. listopadu 2026, zatím bez nasazení. Stránka
+Klientská úprava z 26. listopadu 2026, nasazená pouze v DEV. Stránka
 ShoutFlightPage používá samostatný přehrávač přes lib/flight_music.dart
 a audioplayers 6.8.1. Smyčka běží jen při otevřené hře v popředí; skrytí,
 neaktivita aplikace nebo překrytí jinou trasou ji pozastaví. Návrat pokračuje,
@@ -290,5 +290,16 @@ délka, přechod konce skladby na začátek smyčky a pauza. Opakování:
 Konfigurace povoluje autoplay pouze tomuto izolovanému testu; nejde o změnu
 pravidel aplikace ani o poslechový test. Ovládání a chyba autoplay mají vlastní
 widgetové/unit testy s testovacím přehrávačem. Poslech na fyzickém Androidu/iOS ani
-živý DEV průchod zatím nebyly ověřené. Nový MVP kredit se za tuto vedlejší
+poslechový DEV průchod zatím nebyly ověřené. Nový MVP kredit se za tuto vedlejší
 úpravu nepřidává; původní herní pravidla a skóre zůstávají zachované.
+
+DEV release **1da51c1a2556035e8193dd4de787bf9330cc0e96** má
+[úspěšné úplné CI 45893689471](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45893689471).
+Vznikl v čisté pracovní kopii nad předchozím DEV aa43ae1; nepřebírá místní
+archivní přípravu. Nasazen pouze Hosting shoutout-dev-46c81, verze
+**eefd806b17cb9ee5**. Všech 68 veřejných souborů souhlasí s release manifestem,
+čtyři klíčové soubory také na firebaseapp.com; MP3 na obou doménách vrací
+audio/mpeg a 206 pro Range 0–15/2670765. SHA-256 zvuku:
+852fe027ebc49b53bccfd4e3d8b45e47de0b8ff120f887d24a70d5038d1d3b75.
+Návratový Hosting f8f0b0338d6eb03d. Server, Rules, Auth, plánovače ani data
+se v tomto úseku nenasazovaly ani neměnily.

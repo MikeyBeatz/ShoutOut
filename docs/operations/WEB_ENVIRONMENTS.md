@@ -1,6 +1,16 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – oprava pozastaveného Profilu, 24. listopadu:**
+**Aktuální DEV web – hudba Shout Flight, 26. listopadu:**
+[Chování a ověření](../reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Zdroj **1da51c1a2556035e8193dd4de787bf9330cc0e96**, větev feature/shout-flight-music-dev,
+[úplné CI 45893689471 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45893689471),
+Hosting **eefd806b17cb9ee5**. Čistý release nad aa43ae1 přidává jen hudbu hry,
+ztlumení a řízení jejího životního cyklu; nepřebírá rozpracovaný archiv.
+Ověřeno 68 app souborů, čtyři zrcadlené soubory a audio/mpeg / 206 Range
+na obou doménách. Nasazen jen Hosting; Functions, Rules, Auth, plánovače a data
+se v tomto úseku neměnily. Návratový Hosting **f8f0b0338d6eb03d**.
+
+**Předchozí DEV web – oprava pozastaveného Profilu, 24. listopadu:**
 [Nasazení a kontrola opravy](../MVP_SERVER_PLAN.md#business-suspension-ui-repair-results).
 Zdroj **3ffe71ade738f3c80cc66c70a0970bb485382052**, úplné CI **45424330633 success**,
 Hosting **2edf6b744dcbe95e**; 67 app souborů a osm HTTP kontrol obou domén shodných.

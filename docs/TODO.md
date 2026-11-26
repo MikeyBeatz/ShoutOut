@@ -169,9 +169,10 @@ místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
 
 ## Hranice MVP
 
-**Vedlejší úkol – hudba Shout Flight:** [lokální ověření a chování](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
-Vlastník schválil nasazení pouze do DEV shoutout-dev-46c81 po úplném CI
-přesného zdroje; nejde o nový MVP kredit ani změnu serveru.
+**Vedlejší úkol vlastníka – hudba Shout Flight:** nasazená DEV smyčka,
+ztlumení a řízení životního cyklu; [chování a ověření](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Devět cílených testů, analýza, buildy a úplné CI 45893689471 prošly;
+release 1da51c1 / Hosting eefd806b17cb9ee5 je živě ověřený. Bez nového MVP kreditu.
 
 Kapacitní cíl je 100 000 registrovaných účtů a 5 000 současně aktivních
 uživatelů; měřitelné výkonové podmínky ještě určí [startovní brána](LAUNCH_READINESS.md#capacity-target).
