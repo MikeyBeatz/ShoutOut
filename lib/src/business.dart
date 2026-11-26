@@ -63,7 +63,10 @@ class BusinessPromotionsPage extends StatelessWidget {
     body: _useLifecycleSources
         ? _LifecycleSources(
             view: 'business',
-            emptyText: 'Zatím zde nejsou žádné propagované Shouty.',
+            emptyText: businessTr(
+              context,
+              'Zatím zde nejsou žádné propagované Shouty.',
+            ),
             itemBuilder: (context, row) => _BusinessPromotionHistoryCard(
               shout: decodeSpatialFeedItem(row),
             ),

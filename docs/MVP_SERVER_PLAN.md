@@ -2771,6 +2771,9 @@ včetně vlastní historie a nemožnosti převzít komentář předcházející 
 rodiče. Základní serverový běh má 205 pass / 746 skip bez emulátoru;
 skip není ověření příslušné integrační větve. Žádný skutečný UI průchod se netvrdí.
 Nové úplné CI dosud čeká. Skript test:content-lifecycle nově zahrnuje i reader.
+První běh 45764931433 ze zdroje dd06a5b byl řízeně zastavený po dokončené B4
+regresi kvůli opravě překladače prázdného Business seznamu a zachování původního
+stylu nadpisu komentářů. Nedokončený běh není důkaz úspěšného úplného CI.
 
 Měření pro 50 zdrojů dvou autorů: **108 dokumentových reads / 4 dávková SDK
 volání / 0 zápisů**. Nejde o počet HTTP požadavků uživatele ani cloudovou cenu.

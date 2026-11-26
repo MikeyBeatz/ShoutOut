@@ -260,7 +260,9 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: Text(
                 tr(context, 'Komentáře'),
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           Expanded(
