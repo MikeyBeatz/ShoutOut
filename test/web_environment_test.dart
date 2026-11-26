@@ -28,6 +28,14 @@ void main() {
     expect(
       () => WebEnvironment.fromJson({
         ...config,
+        'serverContentLifecycle': true,
+        'serverSpatialFeed': false,
+      }),
+      throwsStateError,
+    );
+    expect(
+      () => WebEnvironment.fromJson({
+        ...config,
         'serverContentLifecycle': 'true',
       }),
       throwsStateError,

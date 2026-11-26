@@ -48,9 +48,12 @@ class WebEnvironment {
     }
     serverContentLifecycle = lifecycle == true;
     if (serverContentLifecycle &&
-        (name != 'dev' || key == null || reportsGateway != true)) {
+        (name != 'dev' ||
+            key == null ||
+            reportsGateway != true ||
+            json['serverSpatialFeed'] != true)) {
       throw StateError(
-        'Content lifecycle requires DEV managed reports and App Check.',
+        'Content lifecycle requires DEV managed reports, spatial pages and App Check.',
       );
     }
     if (serverArchivedReportLookup && key == null) {

@@ -33,7 +33,11 @@ test('inactive lifecycle preserves reads; the candidate gate denies every expire
       await assertSucceeds(getDocs(query(collection(client, `${root}/privateReplies`), where('recipientId', '==', uid), limit(50))));
       if (active) {
         await assertFails(getDocs(query(collection(client, 'shouts'), where('authorId', '==', uid), limit(50))));
-        await assertSucceeds(getDocs(query(collection(client, 'shouts'), where('authorId', '==', uid), where('historyUntil', '>', Timestamp.fromMillis(Date.now() + 60000)), limit(50))));
+        await assertFails(getDocs(query(collection(client, 'shouts'), where('authorId', '==', uid), where('historyUntil', '>', Timestamp.fromMillis(Date.now() + 60000)), limit(50))));
+        await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), root), { authorId: 'foreign', status: 'deleted', historyUntil: Timestamp.fromMillis(Date.now() + 3600000) }));
+        await assertFails(getDocFromServer(doc(client, root)));
+        await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), root), { authorId: 'foreign', status: 'active', historyUntil: Timestamp.fromMillis(Date.now() + 3600000) }));
+        await assertSucceeds(getDocFromServer(doc(client, root)));
       }
       await env.withSecurityRulesDisabled(c => setDoc(doc(c.firestore(), root), { authorId: uid, historyUntil: Timestamp.fromMillis(1) }));
       for (const path of reads) {

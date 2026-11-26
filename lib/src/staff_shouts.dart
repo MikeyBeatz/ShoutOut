@@ -298,6 +298,59 @@ class _RegionalShoutList extends StatelessWidget {
       }
     }
 
+    if (_useLifecycleSources) {
+      return _LifecycleSources(
+        view: 'staff',
+        countryCode: effectiveSubdivision == null ? effectiveCountry : null,
+        subdivisionCode: effectiveSubdivision,
+        point: previewLocation == null
+            ? null
+            : {
+                'latitude': previewLocation!.latitude,
+                'longitude': previewLocation!.longitude,
+              },
+        retain: (row) {
+          final geography = (row['data'] as Map)['geography'];
+          return (effectiveSubdivision == null ||
+                  geography is Map &&
+                      geography['subdivisionCode'] == effectiveSubdivision) &&
+              (effectiveSubdivision != null ||
+                  effectiveCountry == null ||
+                  geography is Map &&
+                      geography['countryCode'] == effectiveCountry) &&
+              (previewLocation == null ||
+                  (row['distanceKm'] as num) <= previewRadiusKm);
+        },
+        emptyText: 'V tomto regionu nejsou aktivní shouty.',
+        itemBuilder: (context, row) {
+          final shout = decodeSpatialFeedItem(row);
+          return Card(
+            child: ListTile(
+              leading: const Icon(Icons.campaign_outlined),
+              title: Text(shout.title),
+              subtitle: Text(
+                '${shout.author} · ${shout.geography.regionLabel}\n${shout.text}',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              isThreeLine: true,
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => ShoutDetailPage(
+                    shout: shout,
+                    onSave: () {},
+                    onReaction: (_) async {},
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection('shouts')
         .where('status', isEqualTo: 'active');

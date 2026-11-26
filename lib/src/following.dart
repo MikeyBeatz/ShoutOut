@@ -175,43 +175,64 @@ class _PublicProfileSheetState extends State<_PublicProfileSheet> {
                   ),
                 ),
                 Expanded(
-                  child: StreamBuilder<List<Shout>>(
-                    stream: _shoutsStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return EmptyState(
-                          icon: Icons.cloud_off_outlined,
-                          title: tr(context, 'Shouty se nepodařilo načíst.'),
-                        );
-                      }
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final shouts = snapshot.data!;
-                      if (shouts.isEmpty) {
-                        return EmptyState(
-                          icon: Icons.campaign_outlined,
-                          title: tr(
-                            context,
-                            'Tento účet nyní nemá žádné aktivní Shouty.',
+                  child: _useLifecycleSources
+                      ? _LifecycleSources(
+                          view: 'profile',
+                          authorId: widget.userId,
+                          emptyText:
+                              'Tento účet nyní nemá žádné aktivní Shouty.',
+                          itemBuilder: (context, row) => _LifecycleProfileCard(
+                            row: row,
+                            onSave: widget.onSave,
+                            onReaction: widget.onReaction,
                           ),
-                        );
-                      }
-                      return ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                        itemCount: shouts.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) => ShoutCard(
-                          shout: shouts[index],
-                          onSave: () => widget.onSave(shouts[index]),
-                          onReaction: (like) async {
-                            await widget.onReaction(shouts[index], like: like);
-                            if (mounted) setState(() {});
+                        )
+                      : StreamBuilder<List<Shout>>(
+                          stream: _shoutsStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return EmptyState(
+                                icon: Icons.cloud_off_outlined,
+                                title: tr(
+                                  context,
+                                  'Shouty se nepodařilo načíst.',
+                                ),
+                              );
+                            }
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            final shouts = snapshot.data!;
+                            if (shouts.isEmpty) {
+                              return EmptyState(
+                                icon: Icons.campaign_outlined,
+                                title: tr(
+                                  context,
+                                  'Tento účet nyní nemá žádné aktivní Shouty.',
+                                ),
+                              );
+                            }
+                            return ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                              itemCount: shouts.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) => ShoutCard(
+                                shout: shouts[index],
+                                onSave: () => widget.onSave(shouts[index]),
+                                onReaction: (like) async {
+                                  await widget.onReaction(
+                                    shouts[index],
+                                    like: like,
+                                  );
+                                  if (mounted) setState(() {});
+                                },
+                              ),
+                            );
                           },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ],
             ),

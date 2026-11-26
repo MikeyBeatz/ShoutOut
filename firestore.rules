@@ -2131,9 +2131,10 @@ service cloud.firestore {
     }
 
     match /shouts/{shoutId} {
-      allow get: if eligibleUser() && (!managedContentLifecycle() || lifecycleHistoryReadable(resource.data));
-      allow list: if eligibleUser() && limited(50) &&
-        (!managedContentLifecycle() || resource.data.historyUntil > request.time);
+      allow get: if eligibleUser() && (!managedContentLifecycle() ||
+        (lifecycleHistoryReadable(resource.data) &&
+          (resource.data.get('status', '') != 'deleted' || resource.data.get('authorId', '') == request.auth.uid)));
+      allow list: if eligibleUser() && limited(50) && !managedContentLifecycle();
       allow create: if canCreateContent() &&
         !managedFeedProjection() &&
         consumedRate('shout', shoutId) &&

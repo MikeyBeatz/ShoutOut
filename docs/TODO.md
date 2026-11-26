@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 25. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 26. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,44 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,52 %** — vážené dokončení podúseků
 
-Hotové úseky: **223/278**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **224/280**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -39,8 +39,10 @@ průběžné lokální kontroly, seskupený push/CI před nasazením a následn�
 **Nyní: schválený místní společný archiv Shoutů, komentářů a soukromých odpovědí.**
 [Připravený základ, měření a zbývající návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
 Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
-má přednost. Dokončit kompatibilitu SDK seznamů a provozní integraci; nové volby
-i Rules brána jsou false. Místní jádro má úspěšné úplné CI 45703037163;
+má přednost. Navazující [webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
+jsou připravené místně, jejich úplné CI čeká. Dokončit provozní integraci a
+přechod dat, indexy i kompatibilitu nativních/starých klientů; nové volby
+i Rules brána jsou false. Původní jádro má úspěšné úplné CI 45703037163;
 bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
 platí požadavek na další přepracování cyklu.
 

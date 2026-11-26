@@ -63,6 +63,11 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   String? _promoGeneration, _promoSignature;
   int _promoRequest = 0;
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _promoDocuments = [];
+  bool _lifecyclePromoFallback = false;
+  final _lifecyclePromoRows = <String, Map<String, dynamic>>{};
+  final _lifecyclePromoLocations = <String, GeoPoint>{};
+  final _lifecyclePromoWatches =
+      <String, StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>>{};
   bool _spatialLoading = false;
   bool _spatialLoadingMore = false;
   bool _spatialFailed = false;
@@ -228,6 +233,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         (_) => unawaited(_startDeltaPromotions()),
       );
       unawaited(_startDeltaPromotions());
+    } else if (_useLifecycleSources) {
+      _lifecyclePromoFallback = true;
+      _promoGeneration = 'source-only:$uid';
+      unawaited(_loadLifecyclePromotions(_promoGeneration!));
     } else {
       _shoutSubscription = firestore
           .collection('shouts')
@@ -294,6 +303,16 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
       await _shoutSubscription?.cancel();
       if (!mounted || _promoGeneration != stamp) return;
       final legacy = context['mode'] == 'source-v1';
+      _lifecyclePromoFallback = legacy && _useLifecycleSources;
+      await _stopLifecyclePromotionWatches();
+      if (!mounted || _promoGeneration != stamp) return;
+      if (_lifecyclePromoFallback) {
+        runtime.publicStates.publish(null, {});
+        _promoDocuments = [];
+        _feedDocuments = null;
+        await _loadLifecyclePromotions(stamp);
+        return;
+      }
       final candidates = legacy
           ? FirebaseFirestore.instance.collection('shouts')
           : FirebaseFirestore.instance
@@ -349,6 +368,10 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
   }
 
   Future<void> _updateDeltaPromotions() async {
+    if (_lifecyclePromoFallback && _promoGeneration != null) {
+      _presentLifecyclePromotions();
+      return;
+    }
     final position = _currentPosition;
     if (feedDeltaRuntime?.live.isLegacy == true) return;
     if (!mounted || position == null || feedDeltaRuntime == null) return;
@@ -416,6 +439,163 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     }
   }
 
+  Future<void> _stopLifecyclePromotionWatches() async {
+    final subscriptions = _lifecyclePromoWatches.values.toList();
+    _lifecyclePromoWatches.clear();
+    _lifecyclePromoRows.clear();
+    _lifecyclePromoLocations.clear();
+    await Future.wait(
+      subscriptions.map((subscription) => subscription.cancel()),
+    );
+  }
+
+  void _presentLifecyclePromotions() {
+    if (!mounted) return;
+    final old = {for (final shout in _shouts) shout.id: shout};
+    final shouts = _lifecyclePromoRows.values
+        .map(decodeSpatialFeedItem)
+        .toList();
+    for (final shout in shouts) {
+      final point = _lifecyclePromoLocations[shout.id],
+          position = _currentPosition;
+      if (point != null && position != null) {
+        shout.distanceKm =
+            Geolocator.distanceBetween(
+              position.latitude,
+              position.longitude,
+              point.latitude,
+              point.longitude,
+            ) /
+            1000;
+      }
+      final previous = old[shout.id];
+      if (previous != null) {
+        shout
+          ..isLiked = previous.isLiked
+          ..isDisliked = previous.isDisliked
+          ..isSaved = previous.isSaved;
+      }
+    }
+    _interactions?.update(shouts);
+    setState(() {
+      _shouts
+        ..clear()
+        ..addAll(shouts);
+      _isLoadingShouts = false;
+    });
+  }
+
+  Future<void> _loadLifecyclePromotions(String stamp) async {
+    final attempt = ++_promoRequest,
+        uid = FirebaseAuth.instance.currentUser?.uid;
+    final gateway = _lifecycleGateway('home');
+    bool current() =>
+        mounted &&
+        _lifecyclePromoFallback &&
+        _promoGeneration == stamp &&
+        attempt == _promoRequest &&
+        FirebaseAuth.instance.currentUser?.uid == uid;
+    try {
+      final position = _currentPosition;
+      final batch = await gateway.load(
+        point: position == null
+            ? null
+            : {'latitude': position.latitude, 'longitude': position.longitude},
+      );
+      if (!current()) return;
+      final ids = batch.items.map((row) => row['id'] as String).toSet();
+      // Rebind point listeners after a successful refresh so an event received
+      // during the request cannot be overwritten by an older page response.
+      await _stopLifecyclePromotionWatches();
+      if (!current()) return;
+      _lifecyclePromoRows
+        ..clear()
+        ..addEntries(
+          batch.items.map((row) => MapEntry(row['id'] as String, row)),
+        );
+      for (final id in ids) {
+        if (_lifecyclePromoWatches.containsKey(id)) continue;
+        _lifecyclePromoWatches[id] = FirebaseFirestore.instance
+            .doc('shouts/$id')
+            .liveSnapshots(includeMetadataChanges: true)
+            .where(
+              (doc) =>
+                  !doc.metadata.isFromCache && !doc.metadata.hasPendingWrites,
+            )
+            .listen(
+              (doc) {
+                if (!mounted ||
+                    !_lifecyclePromoFallback ||
+                    _promoGeneration != stamp ||
+                    FirebaseAuth.instance.currentUser?.uid != uid) {
+                  return;
+                }
+                final row = _lifecyclePromoRows[id];
+                if (row == null) return;
+                final data = doc.data();
+                if (data?['location'] case final GeoPoint point) {
+                  _lifecyclePromoLocations[id] = point;
+                }
+                final signal = data == null
+                    ? null
+                    : <String, dynamic>{
+                        ...data,
+                        for (final key in [
+                          'createdAt',
+                          'expiresAt',
+                          'publicUntil',
+                          'historyUntil',
+                        ])
+                          if (data[key] is Timestamp)
+                            key:
+                                (data[key] as Timestamp).millisecondsSinceEpoch,
+                      };
+                final next = mergeLifecycleSourceSignal(
+                  row,
+                  signal,
+                  view: 'home',
+                  viewer: uid!,
+                  nowMillis: DateTime.now().millisecondsSinceEpoch,
+                );
+                if (next == null) {
+                  _lifecyclePromoRows.remove(id);
+                } else {
+                  _lifecyclePromoRows[id] = next;
+                }
+                _presentLifecyclePromotions();
+              },
+              onError: (Object error) {
+                if (!mounted ||
+                    !_lifecyclePromoFallback ||
+                    _promoGeneration != stamp ||
+                    FirebaseAuth.instance.currentUser?.uid != uid) {
+                  return;
+                }
+                if ([
+                  'permission-denied',
+                  'not-found',
+                  'unauthenticated',
+                ].contains(liveDataFailureCode(error))) {
+                  _lifecyclePromoRows.remove(id);
+                  _presentLifecyclePromotions();
+                }
+                debugPrint(
+                  'Promo source subscription failed: code=${liveDataFailureCode(error)}',
+                );
+              },
+            );
+      }
+      _presentLifecyclePromotions();
+    } catch (error) {
+      if (current()) setState(() => _isLoadingShouts = false);
+      debugPrint(
+        'Promo source page failed: code=${liveDataFailureCode(error)}',
+      );
+    } finally {
+      gateway.dispose();
+    }
+  }
+
   Future<_LocationRefreshResult> _refreshLocation({
     Duration timeout = const Duration(seconds: 8),
     LocationAccuracy accuracy = LocationAccuracy.medium,
@@ -474,6 +654,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
     _spatialScroll.dispose();
     _expiryTimer.cancel();
     _promoRequest++;
+    unawaited(_stopLifecyclePromotionWatches());
     feedDeltaRuntime?.publicStates.publish(null, {});
     _deltaContexts?.cancel();
     _shoutSubscription?.cancel();
@@ -545,6 +726,9 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
         return;
       }
       if (_feedDocuments != null) _applyShoutDocuments(_feedDocuments!);
+      if (_lifecyclePromoFallback && _promoGeneration != null) {
+        unawaited(_loadLifecyclePromotions(_promoGeneration!));
+      }
       if (feedDeltaRuntime != null) unawaited(_updateDeltaPromotions());
       final context = SpatialFeedContext(
         latitude: position.latitude,

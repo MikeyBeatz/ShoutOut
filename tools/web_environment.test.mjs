@@ -11,6 +11,7 @@ const actualDev = loadConfig('dev');
 
 test('content lifecycle stays inactive and requires DEV managed reports and App Check', () => {
   assert.notEqual(actualDev.serverContentLifecycle, true);
+  assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: true, serverSpatialFeed: false }, 'dev'), /Content lifecycle requires/);
   assert.notEqual(loadConfig('prod').serverContentLifecycle, true);
   validateConfig({ ...actualDev, serverContentLifecycle: true }, 'dev');
   for (const value of [null, 'true', 1, {}, []]) assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: value }, 'dev'));

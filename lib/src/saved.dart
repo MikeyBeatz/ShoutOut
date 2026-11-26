@@ -251,6 +251,54 @@ class _MyCommentsPageState extends State<MyCommentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_useLifecycleSources) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.showTitle)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Text(
+                tr(context, 'Komentáře'),
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          Expanded(
+            child: _LifecycleSources(
+              view: 'comments',
+              emptyText: 'Zatím jsi nenapsal/a žádný komentář.',
+              itemBuilder: (context, row) {
+                final shout = decodeSpatialFeedItem(row),
+                    comment = row['comment'] as Map;
+                return Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.comment_outlined),
+                    title: Text(
+                      shout.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(comment['text'] as String),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ShoutDetailPage(
+                          shout: shout,
+                          onSave: () => widget.onSave(shout),
+                          onReaction: (like) =>
+                              widget.onReaction(shout, like: like),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    }
     final uid = FirebaseAuth.instance.currentUser!.uid;
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance

@@ -1,6 +1,6 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 25. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 26. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
@@ -19,8 +19,15 @@ není nasazené ani migrované. Místní testy zahrnuly oba zapnuté účtové p
 [úspěšné úplné CI 45703037163](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45703037163),
 včetně aplikačních/browserových a serverových sad i webového buildu.
 Pauza nových těl zachovává splatný úklid; prošel také souběh dvou workerů.
-**Další krok ve schváleném rozsahu:** kompatibilita zbývajících SDK seznamů
-a úplné provozní napojení. Přísnější Rules se zatím nezapínají.
+**Navazující místní čtení připravené, nové úplné CI zatím čeká:**
+[serverové seznamy a web](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
+pro Mé komentáře, profil, Business historii, staff a Home source-v1. Dávka
+50 zdrojů má při dvou autorech 108 dokumentových reads / 4 dávková volání /
+0 zápisů; nepočítá živé SDK odběry ani cloudový provoz. Ověřená řídká stránka,
+kurzory, role/region, scroll, opakování a odmítnutí staré odpovědi. Vše je off.
+**Další krok ve schváleném rozsahu:** úplné provozní napojení a přechod dat;
+před aktivací také nativní/staré klienty, indexy a ověřitelný návrat.
+Přísnější Rules jsou stále místní prototyp a nezapínají se.
 Podrobný přechod starých dat a nová právní verze patří před jakoukoli aktivaci.
 Po MVP je zapsaná další revize cyklu. Starý živý pilot zůstává zachovaný.
 

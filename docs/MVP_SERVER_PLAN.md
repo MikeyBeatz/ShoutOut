@@ -2699,10 +2699,10 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
 
 **Stále otevřené v již schváleném místním rozsahu, bez dalšího nasazování:**
 
-1. Kompatibilita všech zbývajících SDK seznamů (zejména Mé komentáře,
-   veřejný profil, Business historie a aktivní staff přehled). Globální
-   collectionGroup povolení nesmí obejít rodičovskou lhůtu; prototyp brány
-   je proto nyní vypnutý. Nesmí se zapnout s nekompatibilním klientem.
+1. [Webové seznamy jsou připravené místně](#content-lifecycle-read-integration),
+   jejich nové úplné CI ještě čeká. Zbývá provozní kompatibilita starých
+   a nativních klientů. Globální collectionGroup nesmí obejít rodičovskou
+   lhůtu; prototyp brány je vypnutý a nesmí předběhnout kompatibilní klienty.
 2. Úplné provozní napojení, reálný společný rozpočet současných generací a náklady/dohánění
    dluhu. Místní runner ani příklad 32/10 neurčují produkční kapacitu.
    Pauza a transakční souběh jsou doložené místně, nikoli živým provozem.
@@ -2716,9 +2716,9 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
 4. Před aktivací určit novou právní verzi a kompatibilní přijetí podmínek;
    samotný připravený překlad a staré acceptance_2026_07_25 to neřeší.
 
-**Dohledané vstupy pro navazující kompatibilitu, dosud nepřepsané:**
+**Dohledané vstupy, nová webová varianta je připravená za false:**
 
-| Cesta aplikace | Současný skutečný dotaz | Co musí následující místní integrace ověřit |
+| Cesta aplikace | Dosavadní aktivní dotaz | Kritérium nové místní varianty |
 |---|---|---|
 | Mé komentáře (`lib/src/saved.dart`) | collectionGroup comments podle authorId, potom jednotlivé rodiče | Serverově ověřený konec každého rodiče bez globálního collectionGroup obejití; jeden nepřístupný rodič nesmí shodit celý seznam. Soukromé odpovědi sem nyní nepřidávat. |
 | Veřejný profil (`lib/src/following.dart`) | Shouty autora, active se filtruje až v klientu | Zachovat pouze dostupné veřejné položky a dosavadní živé interakce; nevracet cizí smazané tělo jako vlastní historii. |
@@ -2726,14 +2726,70 @@ Měření a emulátorové případy jsou syntetické, nejde o nové živé uživ
 | Aktivní staff přehled (`lib/src/staff_shouts.dart`) | status active, přidělený region, createdAt | Zachovat serverově ověřený rozsah a expiraci; dostupnost moderovaného archivu řešit konkrétním hlášením, ne obecným SDK procházením. |
 | Home/promo (`lib/src/home.dart`) | B4 publicStates, při source-v1 návratu přímo shouts | Ověřit oba kontrakty i návrat již otevřeného klienta; přísná brána nesmí předběhnout kompatibilní seznamy. |
 
-Tato inventura není hotovým novým API ani důkazem kompatibility. Před aktivací
-zbývá také revize vlastnického čtení ručně smazaného těla v kandidátních Rules,
-přímých detailů a vazeb cizích konverzací. Výchozí false proto zůstává povinné.
+Inventura nenahrazuje živou kompatibilitu. Vlastnické čtení smazaného těla
+má novou místní Rules variantu níže; přímé detaily, cizí konverzace a nativní
+klienti potřebují další přechodové ověření. Výchozí false zůstává povinné.
 
 Žádná nová Function nebyla nasazená, nevznikla živá kolekce ani Scheduler,
 nevytvořil se Auth účet a nepoužil se starý pilotní úklid. Nový archiv ani
 celý moderační/životní milník nejsou touto přípravou uzavřené. Po MVP platí
 výslovný požadavek vlastníka na další revizi tohoto cyklu.
+
+<a id="content-lifecycle-read-integration"></a>
+
+##### Navazující místní kompatibilita čtení – 26. listopadu 2026
+
+Pokračování již schváleného místního rozsahu. Připravované
+getLifecycleSourcePage rozlišuje pouze vlastní veřejné komentáře, veřejný
+profil, vlastní Business historii, aktivní regionální staff přehled a nejvýše
+dosavadních 50 kandidátů pro Home při source-v1 návratu. Soukromé zprávy ani
+archiv touto cestou nelze vybírat. Autor Business historie je vždy přihlášený
+účet; moderátorský region a aktuální roli ověřuje server i při prázdném výsledku.
+
+Jedna transakce prohlédne nejvýše 50 zdrojů, sdílí rodiče/hlavičky a ověření
+autorů a vrací pouze veřejnou projekci. Konec historie hlídá serverový čas,
+kontroluje se inkarnace a vazba na archiv. Chybějící rodič se přeskočí;
+poškozená vazba skončí chybou. Kurzory váže účet, typ seznamu a jeho výběr.
+Prázdná nefinální stránka stále nabídne pokračování, nevyvolá neomezené dohledávání.
+
+Klientský seznam při chybě zachová karty i scroll, zopakuje stejnou stránku,
+po úspěšné obnově vrátí začátek. Zahodí odpověď pro starý účet/zrušenou obrazovku.
+Dosud načtené položky dostanou živé point odběry pro změny/odstranění;
+profil sdílí již existující malý B4 stav s kartou. Výběr nových položek obnoví
+otevření seznamu či jeho tlačítko obnovy, nevzniká nový polling.
+Home source-v1 zachová původní okno 50 kandidátů a promo hranici 20 km;
+pohyb přepočítá vzdálenosti místně, ruční obnova znovu vybere kandidáty.
+
+Rules prototyp zůstane false; po jeho budoucím zapnutí mají seznamy používat
+server, přímé point čtení ručně smazaného těla náleží jeho autorovi po dobu
+historie. Stávající účastnické čtení cizích konverzací se nerozšiřuje a
+moderační archiv zůstává dostupný jen přes konkrétní hlášení.
+
+**Místní výsledky:** 56 cílených klientských testů, analýza bez nálezů,
+46 kontrol nástrojů a všech **42** případů společné emulátorové sady prošly,
+včetně vlastní historie a nemožnosti převzít komentář předcházející inkarnaci
+rodiče. Základní serverový běh má 205 pass / 746 skip bez emulátoru;
+skip není ověření příslušné integrační větve. Žádný skutečný UI průchod se netvrdí.
+Nové úplné CI dosud čeká. Skript test:content-lifecycle nově zahrnuje i reader.
+
+Měření pro 50 zdrojů dvou autorů: **108 dokumentových reads / 4 dávková SDK
+volání / 0 zápisů**. Nejde o počet HTTP požadavků uživatele ani cloudovou cenu.
+Čtení soukromého účtu, 50 zdrojů, tří sdílených záznamů autorů a 50 hlaviček
+je započítané; archivační těla se nečtou. Běžné SDK point odběry UI jsou navíc;
+profil sdílí malý B4 stav, ostatní seznamy potřebují i dostupnost rodiče/komentáře.
+Provozní zátěžový profil a nativní routing tímto nejsou uzavřené.
+
+**Před aktivací připravit a cloudově ověřit indexový plán:** nový COLLECTION_GROUP
+comments(authorId ASC, createdAt DESC) a COLLECTION
+shouts(authorId ASC, status ASC, createdAt DESC), včetně implicitního __name__ DESC.
+Home status/createdAt a oba staff regionální dotazy už mají deklarované vzory
+ve firestore.indexes.json. Bez změny TTL; soubor indexů se nyní nenasazuje ani
+nepřepisuje. Emulátor správnost cloudových složených indexů nedokládá.
+
+Nedokončená váha
+čtení/provozního napojení je před jeho uzavřením rozdělena na dvě poloviny;
+hotové části ani pevná váha MVP milníku se nemění. Žádná nová volba se nezapíná,
+nic se nenasazuje, neprobíhá živá migrace a starý pilot zůstává zachovaný.
 
 Browser host je nedostupný; pokus o náhradní čtení otevřeného ShoutOut okna
 24. listopadu zastavila automatická kontrola, protože nedokázala spolehlivě

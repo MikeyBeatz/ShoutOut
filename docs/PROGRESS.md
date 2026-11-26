@@ -92,7 +92,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-11: Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.](TODO.md#mvp-11) | 20,00 % | 1/5 |
 | [mvp-12: Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči mimo Litoměřice.](TODO.md#mvp-12) | 50,00 % | 2/4 |
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
-| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 74,52 % | 14/19 |
+| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 76,48 % | 15/21 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 71,70 % | 38/44 |
@@ -318,7 +318,9 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | shout-expiration-accept: Serverová materializace exspirace s writerem – živá akceptace DEV | acceptance | ✅ | [1](../docs/PROJECT_STATUS.md#serverova-brana) |
 | content-lifecycle-foundation-code: Společný archiv a obnovitelný úklid – místní jádro za vypnutou volbou | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../functions/content_lifecycle.js), [3](../functions/content_lifecycle_evidence.js), [4](../functions/content_lifecycle_purge.js), [5](../functions/content_lifecycle_maintenance.js) |
 | content-lifecycle-foundation-check: Místní archivní jádro – transakce, účtový souběh, historie a společné CI | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../functions/content_lifecycle.integration.test.js), [3](../functions/account_purge.integration.test.js), [4](../functions/get_own_shouts.integration.test.js), [5](../tools/rules/content_lifecycle.integration.test.mjs), [6](../test/content_lifecycle_test.dart) |
-| expired-cleanup-code: Společný cyklus zdrojů a archivu – úplné čtení, kompatibilita a provozní napojení | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation) |
+| content-lifecycle-read-code: Společný archiv – serverové seznamy a webový klient za vypnutou volbou | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.js), [3](../lib/lifecycle_source_gateway.dart), [4](../lib/src/lifecycle_sources.dart) |
+| content-lifecycle-read-check: Společný archiv – oprávnění seznamů, řídké stránky, webový živý stav a souběhy | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.integration.test.js), [3](../tools/rules/content_lifecycle.integration.test.mjs), [4](../test/lifecycle_source_gateway_test.dart) |
+| expired-cleanup-code: Společný životní cyklus – provozní napojení a přechod dat | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation) |
 | expired-cleanup-check: Úplná integrace životního cyklu – souběh, dluh, limity a kompatibilita | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation) |
 | expired-cleanup-dev: Společný cyklus historie, neveřejného archivu a purge – nasazení DEV | deployment | ⬜ | — |
 | expired-cleanup-accept: Společný cyklus historie, neveřejného archivu a purge – živá akceptace DEV | acceptance | ⬜ | — |

@@ -60,50 +60,58 @@ class BusinessPromotionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text(businessTr(context, 'Propagace'))),
-    body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('shouts')
-          .where('authorId', isEqualTo: userId)
-          .limit(50)
-          .liveSnapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final shouts =
-            (snapshot.data?.docs ?? const [])
-                .map(Shout.fromDocument)
-                .where(
-                  (shout) =>
-                      shout.businessHighlighted ||
-                      shout.businessSpotlight ||
-                      shout.businessExtendedDuration,
-                )
-                .toList()
-              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        if (shouts.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                businessTr(
-                  context,
-                  'Zatím zde nejsou žádné propagované Shouty.',
-                ),
-                textAlign: TextAlign.center,
-              ),
+    body: _useLifecycleSources
+        ? _LifecycleSources(
+            view: 'business',
+            emptyText: 'Zatím zde nejsou žádné propagované Shouty.',
+            itemBuilder: (context, row) => _BusinessPromotionHistoryCard(
+              shout: decodeSpatialFeedItem(row),
             ),
-          );
-        }
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: shouts.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
-          itemBuilder: (context, index) =>
-              _BusinessPromotionHistoryCard(shout: shouts[index]),
-        );
-      },
-    ),
+          )
+        : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
+                .collection('shouts')
+                .where('authorId', isEqualTo: userId)
+                .limit(50)
+                .liveSnapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final shouts =
+                  (snapshot.data?.docs ?? const [])
+                      .map(Shout.fromDocument)
+                      .where(
+                        (shout) =>
+                            shout.businessHighlighted ||
+                            shout.businessSpotlight ||
+                            shout.businessExtendedDuration,
+                      )
+                      .toList()
+                    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              if (shouts.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      businessTr(
+                        context,
+                        'Zatím zde nejsou žádné propagované Shouty.',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: shouts.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (context, index) =>
+                    _BusinessPromotionHistoryCard(shout: shouts[index]),
+              );
+            },
+          ),
   );
 }
 

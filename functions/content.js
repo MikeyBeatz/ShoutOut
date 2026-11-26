@@ -33,6 +33,7 @@ import { prepareAccountDeletionOperation } from './prepare_account_deletion.js';
 import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js';
 import { contentLifecycleConfiguration } from './content_lifecycle.js';
 import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
+import { getLifecycleSourcePageOperation } from './content_lifecycle_sources.js';
 
 if (getApps().length === 0) initializeApp();
 
@@ -52,6 +53,11 @@ function lifecycleDatabase() {
   return contentLifecycleConfiguration.enabled
     ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }).database : db;
 }
+
+export const getLifecycleSourcePage = onCall({
+  ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
+  memory: '256MiB', timeoutSeconds: 15,
+}, request => getLifecycleSourcePageOperation(request, getFirestore()));
 
 export const getLifecycleReportEvidence = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
