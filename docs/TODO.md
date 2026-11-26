@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,68 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,72 %** — vážené dokončení podúseků
 
-Hotové úseky: **227/282**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **234/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -37,44 +37,31 @@ Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#developme
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
 
 **Nyní: schválený místní společný archiv Shoutů, komentářů a soukromých odpovědí.**
-[Připravený základ, měření a zbývající návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation).
-Konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
-má přednost. Navazující [webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration)
-jsou připravené místně a mají
-[úspěšné úplné CI 45766451416](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416)
-zdroje 8e059e3. Dokončit přechod existujících dat, provozní profil,
-indexy i kompatibilitu nativních/starých klientů; nové volby
-i Rules brána jsou false. Původní jádro má úspěšné úplné CI 45703037163;
-bez nasazení a živé migrace. Celý milník ani pilotní úklid se tím neuzavírá. Po MVP
-platí požadavek na další přepracování cyklu.
+[Základ a pravidla cyklu](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation):
+konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
+má přednost. Připravené a úplným CI ověřené jsou jádro,
+[webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration),
+[worker](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local),
+[převzetí zdrojů](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption),
+[vazby hlášení](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption) a
+[termíny účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
+Přesné zdroje a důkazy jsou v plánu a [PROJECT_STATUS](PROJECT_STATUS.md).
 
-[Provozní adaptér stávajícího workeru](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local)
-je připravený za false; 53 společných emulátorových případů a
-[úplné CI 45815002033](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033)
-zdroje 134cb96 prošly. Následuje přechod existujících dat/klientů a integrační revize.
+**Právě dokončované ověření:** [původní verze těl a společné čtení účtových
+kopií pro moderaci](MVP_SERVER_PLAN.md#content-lifecycle-account-evidence).
+Původní SDK čas/hash se zachová před zápisem metadat; nejasná verze se neodhaduje.
 
-[Místní převzetí zdrojů](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption)
-má místní zdrojové jádro: přesný plán dávky, skutečný původ zachování a původní
-lhůty; 14 migračních případů a
-[úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401)
-zdroje 8d5b890 prošly. Navazující přiřazení hlášení je shrnuté níže.
-Celá migrační váha zůstává otevřená;
-žádné nasazení ani živá migrace neproběhly.
+**Následuje ve schváleném místním rozsahu:** řízený operátor/inventura a
+indexový plán, kompatibilita starých účtových běhů a nativních klientů,
+závěrečná integrace a provozní/návratový plán. Před DEV aktivací také archivní
+integrační revize. Nové přepínače a Rules brána jsou false; nic z tohoto cyklu
+není nasazené ani živě migrované. Celý milník ani původní pilotní úklid se
+tím neuzavírá; po MVP zůstává další revize cyklu.
 
-[Přiřazení starých hlášení](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption)
-je připravené místně: zachovaná prokazatelná verze, metadata bez duplikace
-těl a nezměněná původní retence; 22 cílených případů a
-[úplné CI 45838228232](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232)
-zdroje 0d6602f prošly. Následují staré účtové kopie, celkový operátor/audit
-přechodu a kompatibilita klientů včetně nativního čtení soukromých hlášení.
-
-[Termíny starých účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption)
-jsou připravené místně bez nových těl a prodlužování lhůt; 96 společných případů
-včetně 19 účtových a
-[úplné CI 45861268034](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034)
-zdroje 1278558 prošly. Nejprve zachovat původní důkaz verze těla před převodem
-a dokončit společné moderační čtení účtových kopií; dále operátor/audit a kompatibilita
-starých účtových běhů a klientů a indexový plán. Celá migrační váha zůstává otevřená.
+Stupnice má od 26. listopadu schválené jemnější členění stejné zbývající váhy:
+zdroje, hlášení, účtové termíny, verze/čtení, operátor/indexy, kompatibilita,
+závěrečná integrace. Doložené místní celky se započítávají samostatně;
+nasazení a živá akceptace zůstávají oddělené a otevřené.
 
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést

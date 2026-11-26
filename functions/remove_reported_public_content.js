@@ -10,7 +10,7 @@ import { nextDeleteRate } from './delete_comment.js';
 import { prepareCardMutation } from './feed_card_state.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { lifecycleEnabled } from './content_lifecycle.js';
-import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
+import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPublicContent';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -46,7 +46,7 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
-      if (managed) assertPrivateReportScope(role.data(), level, stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
+      if (managed) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
           stored.targetId !== input.targetId || JSON.stringify(stored.reportIds) !== JSON.stringify(input.reportIds) ||
@@ -101,7 +101,7 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     tx.create(receiptRef, { ...retention, action, userId: uid, fingerprint, targetType: input.targetType,
       shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
       reportIds: input.reportIds, authorId: evidence?.content.authorId ?? source.get('authorId'),
-      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), requiredRoleLevel, result, createdAt: now });
+      ...lifecycleEvidenceReference(evidence), requiredRoleLevel, result, createdAt: now });
     return result;
   });
 }

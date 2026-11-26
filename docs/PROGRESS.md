@@ -29,6 +29,14 @@ Hotové části a váhy zachovej. Skutečné přidání rozsahu může změnit c
 jmenovatel a musí být výslovně popsané; neodstraňuj nesplněné podmínky, aby
 stupnice rostla. Nový rozpad nepovoluje implementaci nebo nasazení daného úkolu.
 
+Vlastník 26. listopadu schválil zpřesnění otevřeného přechodu archivu v mvp-14:
+původních 98 implementačních a 98 ověřovacích bodů je rozděleno po 14 mezi
+sedm celků (zdroje, hlášení, účtové termíny, verze/čtení, operátor/indexy,
+kompatibilita a závěrečná integrace). První tři celky jsou zpětně doložené
+existujícím kódem a úspěšným úplným CI. Již hotové váhy, počet milníků,
+nasazení i živá akceptace se nemění. Tyto migrační části nejsou přiřazené
+k samostatné backlogové položce, proto samy nezvednou druhou stupnici.
+
 ## Co znamená hotovo
 
 Úsek má stabilní ID, věcný název, fázi, stav, podklady a případné závislosti.
@@ -92,7 +100,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | [mvp-11: Ověřit doručitelnost e-mailů, produkční Auth domény, Action URL a šablony.](TODO.md#mvp-11) | 20,00 % | 1/5 |
 | [mvp-12: Ověřit polohu, feed a publikování v mobilním i desktopovém prohlížeči mimo Litoměřice.](TODO.md#mvp-12) | 50,00 % | 2/4 |
 | [mvp-13: Nasadit geografické obohacení, provést backfill a ověřit regionální data potřebná pro stávající moderaci.](TODO.md#mvp-13) | 50,00 % | 4/8 |
-| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 80,40 % | 18/23 |
+| [mvp-14: Automatizovat expiraci Shoutů, mazání podkolekcí a dokončení 60denní retence účtu.](TODO.md#mvp-14) | 81,38 % | 25/35 |
 | [mvp-15: Dokončit webový App Check a ochranu registrace; vynucení zapnout až po ověření metrik.](TODO.md#mvp-15) | 57,16 % | 4/7 |
 | [mvp-16: Zavést důvěryhodnou serverovou bránu pro zápisy obsahu, čítače, polohu, idempotenci a limity proti spamu.](TODO.md#mvp-16) | 98,90 % | 142/144 |
 | [mvp-17: Dopracovat bezpečné moderátorské operace a jejich audit pro veřejný web, včetně zamítnutí a pozastavení Business účtů.](TODO.md#mvp-17) | 71,70 % | 38/44 |
@@ -320,10 +328,22 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-lifecycle-foundation-check: Místní archivní jádro – transakce, účtový souběh, historie a společné CI | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../functions/content_lifecycle.integration.test.js), [3](../functions/account_purge.integration.test.js), [4](../functions/get_own_shouts.integration.test.js), [5](../tools/rules/content_lifecycle.integration.test.mjs), [6](../test/content_lifecycle_test.dart) |
 | content-lifecycle-read-code: Společný archiv – serverové seznamy a webový klient za vypnutou volbou | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.js), [3](../lib/lifecycle_source_gateway.dart), [4](../lib/src/lifecycle_sources.dart) |
 | content-lifecycle-read-check: Společný archiv – oprávnění seznamů, řídké stránky, webový živý stav a souběhy | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-read-integration), [2](../functions/content_lifecycle_sources.integration.test.js), [3](../tools/rules/content_lifecycle.integration.test.mjs), [4](../test/lifecycle_source_gateway_test.dart), [5](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45766451416) |
+| lifecycle-adopt-sources-code: Přechod archivu – převzetí existujících zdrojů | implementation | ✅ | [1](../functions/content_lifecycle_adoption.js), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-source-adoption) |
+| lifecycle-adopt-sources-check: Přechod archivu – ověření převzetí zdrojů | verification | ✅ | [1](../functions/content_lifecycle_adoption.integration.test.js), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401) |
+| lifecycle-adopt-reports-code: Přechod archivu – vazby starých hlášení | implementation | ✅ | [1](../functions/content_lifecycle_report_adoption.js), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-report-adoption) |
+| lifecycle-adopt-reports-check: Přechod archivu – ověření vazeb hlášení | verification | ✅ | [1](../functions/content_lifecycle_report_adoption.integration.test.js), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232) |
+| lifecycle-adopt-accounts-code: Přechod archivu – termíny účtových kopií | implementation | ✅ | [1](../functions/content_lifecycle_account_adoption.js), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption) |
+| lifecycle-adopt-accounts-check: Přechod archivu – ověření účtových termínů | verification | ✅ | [1](../functions/content_lifecycle_account_adoption.integration.test.js), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034) |
+| lifecycle-account-evidence-code: Přechod archivu – původní verze těl a společné čtení | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-evidence), [2](../functions/account_archive_lifecycle_binding.js), [3](../functions/content_lifecycle_account_evidence.js), [4](../functions/content_lifecycle_evidence.js), [5](../lib/archive_capture.dart) |
+| lifecycle-account-evidence-check: Přechod archivu – ověření verzí a moderačního čtení | verification | ⬜ | — |
+| lifecycle-operator-code: Přechod archivu – řízený operátor, inventura a indexový plán | implementation | ⬜ | — |
+| lifecycle-operator-check: Přechod archivu – ověření operátoru a indexů | verification | ⬜ | — |
+| lifecycle-compatibility-code: Přechod archivu – kompatibilita klientů a starých účtových běhů | implementation | ⬜ | — |
+| lifecycle-compatibility-check: Přechod archivu – ověření klientské a účtové kompatibility | verification | ⬜ | — |
 | content-lifecycle-runtime-code: Společný archiv – volitelné napojení stávajícího workeru a společné dávkování | implementation | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-runtime-local), [2](../functions/content_lifecycle_runtime.js), [3](../functions/shout_expiration.js), [4](../functions/feed_runtime.js) |
 | content-lifecycle-runtime-check: Společný archiv – restart, souběh, dluh a rozpočet workeru | verification | ✅ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-runtime-local), [2](../functions/content_lifecycle_runtime.integration.test.js), [3](../functions/content_lifecycle_runtime.test.js), [4](../functions/shout_expiration.integration.test.js), [5](../docs/benchmarks/CONTENT_LIFECYCLE_RUNTIME_2026-11-26.json), [6](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45815002033) |
-| expired-cleanup-code: Společný životní cyklus – přechod dat a kompatibilita klientů | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-source-adoption), [3](../functions/content_lifecycle_adoption.js), [4](../docs/MVP_SERVER_PLAN.md#content-lifecycle-report-adoption), [5](../functions/content_lifecycle_report_adoption.js), [6](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption), [7](../functions/content_lifecycle_account_adoption.js) |
-| expired-cleanup-check: Úplná integrace životního cyklu – souběh, dluh, limity a kompatibilita | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-source-adoption), [3](../functions/content_lifecycle_adoption.integration.test.js), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401), [5](../docs/MVP_SERVER_PLAN.md#content-lifecycle-report-adoption), [6](../functions/content_lifecycle_report_adoption.integration.test.js), [7](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232), [8](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption), [9](../functions/content_lifecycle_account_adoption.integration.test.js), [10](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034) |
+| expired-cleanup-code: Společný archiv – závěrečná integrace přechodu | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-source-adoption), [3](../functions/content_lifecycle_adoption.js), [4](../docs/MVP_SERVER_PLAN.md#content-lifecycle-report-adoption), [5](../functions/content_lifecycle_report_adoption.js), [6](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption), [7](../functions/content_lifecycle_account_adoption.js) |
+| expired-cleanup-check: Společný archiv – ověření úplné integrace přechodu | verification | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#content-lifecycle-local-foundation), [2](../docs/MVP_SERVER_PLAN.md#content-lifecycle-source-adoption), [3](../functions/content_lifecycle_adoption.integration.test.js), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401), [5](../docs/MVP_SERVER_PLAN.md#content-lifecycle-report-adoption), [6](../functions/content_lifecycle_report_adoption.integration.test.js), [7](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232), [8](../docs/MVP_SERVER_PLAN.md#content-lifecycle-account-adoption), [9](../functions/content_lifecycle_account_adoption.integration.test.js), [10](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034) |
 | expired-cleanup-dev: Společný cyklus historie, neveřejného archivu a purge – nasazení DEV | deployment | ⬜ | — |
 | expired-cleanup-accept: Společný cyklus historie, neveřejného archivu a purge – živá akceptace DEV | acceptance | ⬜ | — |
 | lifecycle-production: Produkční aktivace a akceptace životního cyklu | acceptance | ⬜ | — |

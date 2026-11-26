@@ -3082,19 +3082,73 @@ Vše je místní a off, bez nasazení, živých dat, Auth účtů, Rules, Schedu
 změny prostředků. Před živým spuštěním doplnit indexový plán (nové technické pole
 lifecycleAccountBinding se nedotazuje), úplnou inventuru/operátor a kompatibilitu
 starých účtových běhů. Běžný purge nesmí odstranit rodičovské důkazy dříve, než
-je přechod pokrytý. Společný moderační reader zatím tyto tělové kopie nepřebírá;
-dosavadní konkrétní lookup komentáře má ověřený dřívější termín. Celá migrace
+je přechod pokrytý. Zdroj 1278558 ještě společnému readeru tyto kopie nepředával;
+navazující [místní čtení](#content-lifecycle-account-evidence) je popsané níže.
+Dosavadní konkrétní lookup komentáře má ověřený dřívější termín. Celá migrace
 ani váha expired-cleanup se tím neuzavírá.
 Kompatibilní serverové čtení/worker musí předcházet zápisu nového markeru:
 starší validátor vyžadoval vedle ordinaryRetainUntil také contentArchiveKey.
 Po převodu tedy není návratová varianta server bez podpory lifecycleAccountBinding,
 i kdyby měl globální archivní přepínač vypnutý.
-Před jakýmkoli živým převodem ještě uzavřít původ těla pro společné moderační
-čtení: zápis metadat změní SDK updateTime kopie. Současný čtecí plán obsahuje
-jeho původní hodnotu, šestipolový marker ji však neuchovává jako důkaz verze.
-Navazující řešení musí před prvním zápisem zachovat potřebný původní SDK čas
-a hash těla, nebo výslovně ponechat verzi jako neprokázanou; metadata se nesmějí
+Před jakýmkoli živým převodem je nutný také důkaz původu těla pro společné
+moderační čtení: zápis metadat změní SDK updateTime kopie. Šestipolový marker
+v1 ze zdroje 1278558 původní hodnotu neuchovává jako důkaz verze. Navazující
+marker v2 níže zachovává původní SDK čas a hash před prvním zápisem, nebo
+výslovně ponechává verzi jako neprokázanou; metadata se nesmějí
 zpětně vydávat za původní neměnný obsah. Žádná živá kopie tím zatím změněná není.
+
+<a id="content-lifecycle-account-evidence"></a>
+
+##### Původní verze účtové kopie a společné moderační čtení
+
+Navazující místní implementace ukládá při prvním převodu marker v2: původní
+SDK updateTime a createTime kořenové kopie, hash těla a klíč/SDK inkarnaci
+rodičovské kopie, vedle dosavadní retenční identity. Celá podoba markeru je
+součástí digestu schvalované dávky; starý plán pro v1 nemůže tiše zapsat v2.
+V1 zůstává pouze důkazem termínu a opakováním nezíská tvrzení o verzi těla.
+Žádná živá metadata nebyla převedena.
+
+Společný reader pro konkrétní veřejné/soukromé hlášení může použít existující
+accountContentArchive bez nové kopie a bez předstírání contentLifecycleArchive.
+Omezený dotaz vrátí nejvýše dvě SDK inkarnace před vznikem hlášení. Zdrojový
+updateTime musí předcházet SDK vzniku hlášení, ten vzniku účtové kopie; původní
+updateTime kopie musí být roven jejímu createTime a hash stále odpovídat.
+Pozdější doložený technický drain neporuší zachovaný důkaz, ale již dříve
+měněná kopie je neprokázaná. Novější verze, náhradní zdroj/kopie/hlavička,
+neúplná metadata a nejasný původ se odmítají, nikoli rekonstruují.
+
+Původní rodič musí mít prokazatelný transition záznam pro stejnou dobu a SDK
+inkarnaci. Region se nepřebírá z dnešního rodiče. Chybějící či neprokázaný
+kontext se nyní odmítá; automatický převod takových případů zůstává úkolem
+inventury/operátoru. Soukromé čtení vyžaduje konkrétní hlášení příjemce a shodu
+původního textu, bez procházení konverzace. Retence všech dotčených subjektů,
+uzavření ingress a původní dřívější termíny se ověřují ve stejné transakci.
+
+Společné vyřízení a odstranění obsahu používají tento reader; potvrzení nese
+accountArchiveId, nikdy ne neexistující společný contentArchiveKey. Opakování
+kontroluje dnešní roli a původní doložený region. Přístupový audit vzniká pod
+skutečnou účtovou kopií; veřejná odpověď obsahuje jen povolené položky cíle.
+Klient odlišuje „Zachováno při úklidu účtu“ od původního zápisu či převodu
+systému v sedmi jazycích a ukazuje původní SDK datum kopie.
+
+**Místní výsledky:** prošlo 114 společných archivních případů; poté 19 cílených
+čtecích případů včetně doplněné sankce žijícího autora nad kopií smazaného
+příjemce. Prošlo 215 serverových unit testů (integrační skip není jejich
+ověření), lint, 4 klientské testy původu, analýza bez nálezů, 11 testů metrik
+a 3 kontroly balíčku Functions. Úplné CI přesného zdroje ještě není doložené.
+Čisté vnitřní čtení jednoho soukromého podkladu má 11 SDK dokumentových reads /
+5 volání, z toho 1 omezený dotaz; opakování ve stejné transakci 0 dalších reads,
+0 zápisů. Měření nezahrnuje čtení aktéra/hlášení, případný audit ani cloudové
+účtování a není kapacitní zárukou. Přepínače zůstávají false; bez nasazení,
+živé migrace, Auth účtů nebo změny Rules a prostředků.
+
+**Zbývá před aktivací:** celý operátor/inventura a indexový plán, kompatibilita
+starých účtových běhů a nativních klientů a závěrečná integrační revize.
+Tento reader nenahrazuje pokrytí všech starých hlášení ani jejich běžný purge:
+nepřevedená hlášení nadále blokují závěrečný report drain. Starý samostatný
+lookup archivního komentáře zachovává dosavadní kontrakt; nepředstavuje důkaz
+nové přísnější společné cesty. Před živým převodem musí kompatibilní server
+předcházet markeru v2 a návrat nesmí použít server bez jeho podpory.
 
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 

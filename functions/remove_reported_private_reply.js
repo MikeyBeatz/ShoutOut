@@ -5,7 +5,7 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { receiptRetentionFields } from './operation_retention.js';
 import { lifecycleEnabled } from './content_lifecycle.js';
-import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
+import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPrivateReply';
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -100,7 +100,7 @@ export async function removeReportedPrivateReplyOperation(request, db, clock = (
       if (level < stored.requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
       // Check current authority, never the role supplied in an old request.
       const shout = await tx.get(db.doc(`shouts/${stored.shoutId}`));
-      assertPrivateReportScope(role.data(), level, lifecycleEnabled(db) && stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
+      assertPrivateReportScope(role.data(), level, lifecycleEnabled(db) && (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       return { removed: true };
     }
     const managed = lifecycleEnabled(db), report = await tx.get(reportRef), data = reportTarget(report, managed);
@@ -118,7 +118,7 @@ export async function removeReportedPrivateReplyOperation(request, db, clock = (
       resolvedBy: uid, decisionOperationId: receiptRef.id, ...(input.note ? { moderatorNote: input.note } : {}) });
     tx.create(receiptRef, { ...retention, action, userId: uid, reportId: report.id,
       shoutId: data.shoutId, privateReplyId: data.privateReplyId, requiredRoleLevel,
-      fingerprint, ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), result: { removed: true }, createdAt: now });
+      fingerprint, ...lifecycleEvidenceReference(evidence), result: { removed: true }, createdAt: now });
     // Report body/reason, archive, related messages, rate counters and feed stay intact.
     return { removed: true };
   });

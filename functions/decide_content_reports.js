@@ -8,7 +8,7 @@ import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
 import { lifecycleEnabled } from './content_lifecycle.js';
-import { resolveLifecycleReportGroup } from './content_lifecycle_evidence.js';
+import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'decideContentReports';
 const unavailableAction = 'resolveUnavailableContentReports';
@@ -105,7 +105,7 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     if (receipt.exists) {
       const stored = receipt.data();
       if (lifecycleEnabled(db)) assertPrivateReportScope(role.data(), level,
-        stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
+        (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       const unavailable = unavailableReceipt?.exists === true;
       if (stored.action !== (unavailable ? unavailableAction : action) || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
@@ -150,7 +150,7 @@ export async function decideContentReportsOperation(request, db, clock = () => n
     tx.create(operationRef, { ...retention, action: unavailable ? unavailableAction : action, userId: uid, fingerprint, targetType: input.targetType,
       shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
       reportIds: input.reportIds, ...(unavailable ? { targetUnavailable: true } : { authorId: evidence?.content.authorId ?? source.get('authorId') }),
-      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), requiredRoleLevel, result, createdAt: now });
+      ...lifecycleEvidenceReference(evidence), requiredRoleLevel, result, createdAt: now });
     return result;
   });
 }

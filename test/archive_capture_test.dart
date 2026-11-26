@@ -2,6 +2,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shoutout/archive_capture.dart';
 
 void main() {
+  test('account capture remains distinct from publication and transition', () {
+    final info = ArchiveCaptureInfo.decode({
+      'archived': true,
+      'captureMode': 'account-archive',
+      'capturedAtMillis': 1795700000000,
+    });
+    expect(info.label('cs'), 'Zachováno při úklidu účtu');
+    for (final language in ['cs', 'en', 'de', 'pl', 'sk', 'uk', 'vi']) {
+      expect(
+        info.label(language),
+        isNot(const ArchiveCaptureInfo(mode: 'atomic-write').label(language)),
+      );
+      expect(
+        info.label(language),
+        isNot(const ArchiveCaptureInfo(mode: 'transition').label(language)),
+      );
+      expect(
+        info.label(language),
+        isNot(const ArchiveCaptureInfo().label(language)),
+      );
+    }
+  });
   test(
     'legacy response stays generic instead of claiming publication capture',
     () {

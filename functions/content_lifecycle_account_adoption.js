@@ -119,8 +119,13 @@ async function inspect(tx, db, ids, now) {
       entry.ordinaryUntil = stamp(header.retainUntil); entry.retainUntil = stamp(result.retainUntil); entry.redact = now.toMillis() >= result.retainUntil.toMillis();
       item.patch = { ordinaryRetainUntil: header.retainUntil, retainUntil, contentExpired: false };
       if (entry.redact) item.patch.content = {};
-      entry.patchHash = hash(item.patch); entry.action = 'bind';
-      item.binding = { schemaVersion: 1, archiveCreateTime: copy.createTime, parentCreateTime: parent.createTime, parentCreatedAt: header.sourceCreatedAt, threadCreateTime: thread.createTime };
+      let bodyHash; try { bodyHash = lifecycleBodyHash(body); } catch { blocked('invalid-account-body'); }
+      item.binding = { schemaVersion: 2, archiveCreateTime: copy.createTime, originalArchiveUpdateTime: copy.updateTime,
+        bodyHash, parentArchiveKey: parentArchive.id, parentArchiveCreateTime: parentArchive.createTime,
+        parentCreateTime: parent.createTime, parentCreatedAt: header.sourceCreatedAt, threadCreateTime: thread.createTime };
+      // Include provenance in the approved plan. An old deadline-only digest
+      // must not silently authorize a different marker format.
+      entry.patchHash = hash({ ...item.patch, lifecycleAccountBinding: item.binding }); entry.action = 'bind';
     } catch (error) {
       if (!error.adoptionBlocked) throw error;
       entry.action = 'blocked'; entry.reason = error.message; item.patch = null;

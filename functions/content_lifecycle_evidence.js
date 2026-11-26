@@ -6,6 +6,7 @@ import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_
 import { isPurgedShoutContext } from './shout_context.js';
 import { validateLifecycleArchive, validateLifecycleThread, lifecycleSubjectDeadline, lifecycleArchiveKey, lifecycleBodyHash, lifecycleGeography } from './content_lifecycle.js';
 import { validLegacyReportBinding, reportArchiveVersionProven, reportArchivePairProven } from './content_lifecycle_report_provenance.js';
+import { readLifecycleAccountReportEvidence } from './content_lifecycle_account_evidence.js';
 
 const collections = { shout: 'reports', comment: 'commentReports', privateReply: 'privateReplyReports' };
 const identifier = v => typeof v === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v);
@@ -17,6 +18,9 @@ const absent = () => fail('not-found', 'The reported archive is unavailable.');
 // and subsequent moderation mutations must share the caller's transaction.
 export async function readLifecycleReportEvidence(tx, db, report, targetType, now, cache = { documents: new Map(), subjects: new Map() }) {
   const r = report?.data();
+  if (r && r.contentArchiveKey === undefined && ['comment', 'privateReply'].includes(targetType)) {
+    return readLifecycleAccountReportEvidence(tx, db, report, targetType, now, cache);
+  }
   if (!r || !Object.hasOwn(collections, targetType) || report.ref.parent.id !== collections[targetType] ||
       !identifier(r.reporterId) || !identifier(r.shoutId) || !identifier(r.authorId) ||
       !['open', 'escalated', 'resolved'].includes(r.status) || typeof r.reason !== 'string' || !r.reason ||
@@ -95,16 +99,24 @@ export async function resolveLifecycleReportGroup(tx, db, reports, input, source
         input.targetType === 'privateReply' && r.privateReplyId !== input.targetId ||
         input.decision === 'escalate' && r.status !== 'open') fail('failed-precondition', 'Invalid report group.');
     const evidence = await readLifecycleReportEvidence(tx, db, report, input.targetType, now, cache);
-    if (selected && (selected.archiveKey !== evidence.archiveKey || selected.parentKey !== evidence.parentKey ||
+    if (selected && (selected.archiveRef.path !== evidence.archiveRef.path || selected.archiveKey !== evidence.archiveKey || selected.parentKey !== evidence.parentKey ||
         JSON.stringify(selected.geography) !== JSON.stringify(evidence.geography))) fail('failed-precondition', 'Ambiguous reported versions.');
     selected = evidence;
   }
+  if (source.exists && selected.archiveStorage === 'account') fail('failed-precondition', 'The archived report source was recreated.');
   if (source.exists && !isPurgedShoutContext(source.data()) && (source.ref.path !== selected.sourcePath || !source.get('createdAt')?.isEqual(selected.sourceCreatedAt) ||
       (selected.privacyRedacted ? lifecycleBodyHash(source.data()) !== selected.contentHash :
         source.get('contentArchiveKey') !== selected.archiveKey || lifecycleArchiveKey(db.projectId, source.ref.path, source.data()) !== selected.archiveKey))) {
     fail('failed-precondition', 'The live report target changed.');
   }
   return selected;
+}
+
+// Preserve the storage namespace in receipts/audits. An account copy ID must
+// never masquerade as a contentLifecycleArchive document that does not exist.
+export function lifecycleEvidenceReference(evidence) {
+  return evidence ? { [evidence.archiveStorage === 'account' ? 'accountArchiveId' : 'contentArchiveKey']: evidence.archiveKey,
+    moderationGeography: evidence.geography } : {};
 }
 
 export async function readLifecycleSourceBinding(tx, db, source, now) {

@@ -9,7 +9,7 @@ import { validateContentReportDecision, pendingContentReports, assertContentRepo
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
 import { lifecycleEnabled } from './content_lifecycle.js';
-import { resolveLifecycleReportGroup, readLifecycleSourceBinding } from './content_lifecycle_evidence.js';
+import { resolveLifecycleReportGroup, readLifecycleSourceBinding, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 // Activate with the checked client/Rules cutover, never by deploying this preparation.
 export const managedModerationAuthorityEnabled = true;
@@ -93,7 +93,7 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
-      if (managed) assertPrivateReportScope(role.data(), level, stored.contentArchiveKey ? { geography: stored.moderationGeography } : shout.data());
+      if (managed) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.authorId !== input.expectedTargetUserId || stored.sanctionId !== sanctionRef.id ||
           stored.targetType !== input.targetType || stored.shoutId !== input.shoutId || stored.targetId !== input.targetId ||
@@ -132,8 +132,9 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
       moderatorId: uid, status: 'active', sourceReportId: input.sourceReportId ?? '', previousSanctionsCount: previous.size, purgeAt,
       sourceType: input.mode === 'report' ? 'report' : 'moderatorObservation', sourceContentType: input.targetType,
       sourceContentId: input.targetId ?? input.shoutId,
-      contentSnapshot: evidence ? { authorId: body.authorId, shoutId: input.shoutId, contentArchiveKey: evidence.archiveKey } : { ...body, shoutId: input.shoutId },
-      ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}) });
+      contentSnapshot: evidence ? { authorId: body.authorId, shoutId: input.shoutId,
+        [evidence.archiveStorage === 'account' ? 'accountArchiveId' : 'contentArchiveKey']: evidence.archiveKey } : { ...body, shoutId: input.shoutId },
+      ...lifecycleEvidenceReference(evidence) });
     if (pointerRef) { if (next !== current) tx.set(pointerRef, next); }
     else tx.create(warningRef, { userId: body.authorId, reason: input.note, createdAt: now, moderatorId: uid, sanctionId: sanctionRef.id });
     for (const report of reports?.docs ?? []) tx.update(report.ref, { status: 'resolved', resolution: 'sanctioned', resolvedAt: now,
@@ -141,7 +142,7 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     const result = { sanctionId: sanctionRef.id, decision: input.decision, count: input.reportIds.length };
     tx.create(receiptRef, { ...retention, action, userId: uid, authorId: body.authorId, fingerprint, requiredRoleLevel, sanctionId: sanctionRef.id,
       targetType: input.targetType, shoutId: input.shoutId, ...(input.targetId === undefined ? {} : { targetId: input.targetId }),
-      reportIds: input.reportIds, ...(evidence ? { contentArchiveKey: evidence.archiveKey, moderationGeography: evidence.geography } : {}), result, createdAt: now });
+      reportIds: input.reportIds, ...lifecycleEvidenceReference(evidence), result, createdAt: now });
     return result;
   });
 }

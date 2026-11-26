@@ -8,7 +8,10 @@ class ArchiveCaptureInfo {
     }
     final mode = response['captureMode'];
     final time = response['capturedAtMillis'];
-    if ((mode != null && mode != 'atomic-write' && mode != 'transition') ||
+    if ((mode != null &&
+            mode != 'atomic-write' &&
+            mode != 'transition' &&
+            mode != 'account-archive') ||
         (time != null &&
             (time is! num ||
                 !time.isFinite ||
@@ -85,6 +88,15 @@ class ArchiveCaptureInfo {
     final origin = switch (mode) {
       'atomic-write' => labels.$2,
       'transition' => labels.$3,
+      'account-archive' => switch (language) {
+        'en' => 'Preserved during account cleanup',
+        'de' => 'Bei der Kontobereinigung gesichert',
+        'pl' => 'Zachowano podczas usuwania konta',
+        'sk' => 'Uchované pri čistení účtu',
+        'uk' => 'Збережено під час очищення облікового запису',
+        'vi' => 'Được lưu khi dọn dẹp tài khoản',
+        _ => 'Zachováno při úklidu účtu',
+      },
       _ => labels.$1,
     };
     return privacyRedacted ? '$origin · ${labels.$4}' : origin;

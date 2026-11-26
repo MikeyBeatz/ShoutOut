@@ -84,10 +84,28 @@ jednoho rodiče; nejde o cloudovou kapacitu. Zdroj
 **12785580e87241dd7a393bc96e111fc95ee7bb27** má
 [úspěšné úplné CI 45861268034](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45861268034),
 včetně 96 archivních případů a webového buildu.
-Další krok: před prvním zápisem zachovat důkaz původní verze těla pro společné
-moderační čtení. Následují celý operátor/audit, staré účtové běhy, klienti a
-indexový plán; vše zůstává otevřené. Nové volby false, žádná živá data
+Navazující zachování důkazu těla a společný reader jsou shrnuté níže.
+Následují celý operátor/audit, staré účtové běhy, klienti a
+indexový plán; tyto části zůstávají otevřené. Nové volby false, žádná živá data
 ani nasazení; původní pilot zůstává zachovaný.
+
+**Místní zachování verzí a společné čtení účtových kopií připravené:**
+[kontrakt a otevřené brány](MVP_SERVER_PLAN.md#content-lifecycle-account-evidence).
+Marker v2 zachovává původní SDK updateTime/hash před změnou metadat; v1
+nepředstírá důkaz těla. Reader používá konkrétní hlášení, původní region a
+pevné termíny; audit/receipt rozlišují skutečné účtové úložiště. Neznámá
+verze či náhradní zdroj/kopie se odmítá. Klient má samostatné označení původu.
+Prošlo 114 společných případů a následných 19 cílených včetně sankce; 215
+serverových unit testů, lint, 4 klientské testy, analýza bez nálezů, 11 testů
+metrik a 3 kontroly balíčku. Vnitřní čtení 11 SDK dokumentových reads / 5 volání,
+opakování v téže transakci bez dalších reads; nejde o cloudové účtování.
+Úplné CI ještě není doložené. Nic se nenasazuje; nové volby jsou false.
+
+**Stupnice zpřesněná podle schválení vlastníka:** původních 98 +98 migračních
+bodů je rozděleno do sedmi implementačních/ověřovacích celků. První tři jsou
+doložené dosavadními úplnými CI; nasazení a akceptace zůstávají otevřené.
+Metriky generuje nástroj z progress.json; dnešní implementace má místní
+důkazy, společné ověření se započítá až po úplném CI. Podrobnosti v [metodice](PROGRESS.md).
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
