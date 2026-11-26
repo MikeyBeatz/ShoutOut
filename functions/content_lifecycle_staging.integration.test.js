@@ -50,6 +50,16 @@ test('a post-fence unbound source cannot use legacy compatibility or bypass arch
   assert.equal((await ref.get()).get('status'), 'active'); assert.equal((await f.control.get()).get('legacyRevision'), 0);
 });
 
+test('a new child of an unconverted parent stops atomically instead of creating an unarchived body', { skip: !enabled }, async t => {
+  const f = await fixture(t), child = f.root.collection('comments').doc('new');
+  await assert.rejects(f.db.runTransaction(async tx => { const parent = await tx.get(f.root);
+    tx.update(f.root, { commentsCount: parent.get('commentsCount') + 1 });
+    tx.create(child, { authorId: 'other-author', text: 'New comment', createdAt: Timestamp.fromDate(f.clock()) });
+  }), /migration is required/);
+  assert(!(await child.get()).exists); assert.equal((await f.root.get()).get('commentsCount'), 1);
+  assert.equal((await f.control.get()).get('legacyRevision'), 0);
+});
+
 test('a legacy anonymous context cannot bypass the original account deadline or preserve extra private fields', { skip: !enabled }, async t => {
   const f = await fixture(t), request = f.track(f.raw.doc(`accountDeletionRequests/${f.owner}`));
   await request.create({ userId: f.owner, status: 'pending' });

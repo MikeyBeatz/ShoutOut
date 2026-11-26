@@ -10,8 +10,8 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 [rozsah a přechodové fáze](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation).
 Připravené capture-only oddělení, staré účtové běhy a nativní čtení,
 metadata vazeb hlášení bez kopií těl, indexový plán a obnovitelný operátor.
-Analýza bez nálezů, 22 klientských a 126 nástrojových testů prošlo.
-Závěrečná cílená regrese: 42 emulátorových případů, lint Functions a
+Analýza bez nálezů, 22 klientských a 127 nástrojových testů prošlo.
+Závěrečné cílené regrese: 42 a následně 34 emulátorových případů, lint Functions a
 216 serverových unit případů prošlo (852 integračních skip nejsou ověření).
 Společné úplné CI naváže po jednom seskupeném pushi; nasazení není součástí úseku.
 Nové volby zůstávají false. Níže jsou důkazy předchozích dokončených úseků;

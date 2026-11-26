@@ -2867,9 +2867,17 @@ Zápisové příkazy start/apply vyžadují --confirm-project,
 včetně archivních a moderačních sad. Bez volby captureEnabled/enabled v ověřeném
 zdroji skončí před otevřením databáze. Výstupní soubory jsou pouze v pracovním
 adresáři a nepřepisují se; chyba uložení po zápisu se řeší opakováním stejného
-digestu. Žádný příkaz nezapíná nové čtení ani údržbu. Doklad skutečně nasazených
+digestu a novým výstupním názvem. Žádný příkaz nezapíná nové čtení ani údržbu. Doklad skutečně nasazených
 writerů/Rules, doběhnutí starých volání, právní verze a fyzické nativní kompatibility
 se musí doložit zvlášť před živým postupem; lokální CI toto samo neprokazuje.
+
+Ověřená podmínka pořadí: nový komentář či soukromá odpověď vyžaduje již převedeného
+rodiče. Před převodem starého rodiče se nový komentář atomicky odmítne i s úpravou
+počtu; nevznikne nezachovaný obsah. Živý plán proto musí vyřešit pořadí převzetí
+rodičů a otevírání zápisů. Po scrub textů hlášení také nelze za bezpečný návrat
+považovat libovolný starý web; kompatibilní návratový artefakt se ověří samostatně.
+Účtové kopie reakcí používají svůj původní kontrakt, nejsou kopiemi komentářů;
+regrese ověřuje jejich odstranění/čítač/60denní kopii v capture-only i plném režimu.
 
 **Indexový plán:** tools/content_lifecycle_index_plan.mjs čistě z dodané úplné
 REST inventury navrhuje 3 dotazové indexy a 12 výjimek mapových polí.
@@ -2878,8 +2886,9 @@ neznámý explicitní override nebo stav k opravě předá k posouzení. Nástro
 neprovádí síťovou inventuru ani živé založení indexů.
 
 **Kontroly tohoto úseku:** cílené klientské testy (22), analýza bez nálezů,
-126 testů nástrojů a lint Functions prošly místně. Závěrečná cílená regrese
-má 42 úspěšných emulátorových případů (operátor, staging a celý účtový purge);
+127 testů nástrojů a lint Functions prošly místně. Závěrečná cílená regrese
+má 42 úspěšných emulátorových případů (operátor, staging a celý účtový purge)
+a následně 34 cílených případů s doplněnou regresí účtových reakcí a nepřevedeného rodiče;
 216 serverových unit případů prošlo, 852 integračních skip není důkazem jejich ověření.
 Úplná archivní/moderační regrese přesného výsledného commitu naváže v CI. Celkový timeout CI
 je 30 místo 25 minut a archivní krok má 6 místo 4 minut: předchozí úplný běh

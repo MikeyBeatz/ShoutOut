@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
 import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { removeDeletedAccountReactions as remove } from './account_reaction_removal.js';
+import { createContentLifecycleDatabase, lifecycleDay } from './content_lifecycle.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'reaction-removal-tests') : null;
@@ -39,6 +40,29 @@ async function fixture() {
     archives: () => db.collection('accountContentArchive').where('retentionOwnerId', '==', uid).get() };
   fixtures.push(f); return f;
 }
+
+for (const readsEnabled of [false, true]) test(`account reaction copies preserve their own contract with lifecycle reads=${readsEnabled}`, { skip: !enabled }, async () => {
+  const f = await fixture(), control = db.doc('contentLifecycleControl/current');
+  const body = { ...(await f.root.get()).data(), createdAt: Timestamp.fromDate(f.options.clock()),
+    expiresAt: Timestamp.fromMillis(f.options.clock().getTime() + lifecycleDay), text: 'Keep foreign source', commentsCount: 0,
+    geography: { schemaVersion: 1, countryCode: 'CZ' } };
+  if (readsEnabled) await f.root.delete(); else await f.root.set(body);
+  await control.create({ schemaVersion: 1, mode: 'active', revision: 1, legacyRevision: 0, captureFenceAt: FieldValue.serverTimestamp() });
+  const wrapped = createContentLifecycleDatabase(db, { enabled: true, readsEnabled, clock: f.options.clock });
+  try {
+    if (readsEnabled) await wrapped.runTransaction(tx => tx.create(f.root, body));
+    const reaction = await f.reaction();
+    const result = await remove(f.identity, wrapped, absent, { ...f.options, reactionPaths: [reaction.path] });
+    assert.equal(result.removed, 1); assert.equal((await f.root.get()).get('likesCount'), 0);
+    assert.equal((await f.root.get()).get('text'), body.text); assert(!(await reaction.get()).exists);
+    const archive = (await f.archives()).docs[0]; assert.equal(archive.get('kind'), 'shoutReaction');
+    assert.equal(archive.get('retainUntil').toMillis(), f.identity.requestCreateTime.toMillis() + 60 * lifecycleDay);
+    assert.equal(archive.get('contentArchiveKey'), undefined);
+  } finally {
+    const current = await f.root.get(); if (current.get('contentArchiveKey')) await db.recursiveDelete(db.doc(`contentLifecycleArchive/${current.get('contentArchiveKey')}`));
+    await db.recursiveDelete(db.doc(`contentLifecycleThreads/${f.root.id}`)); await control.delete();
+  }
+});
 
 test('a foreign Shout like is removed, counted and archived atomically with the original deadline', { skip: !enabled }, async () => {
   const f = await fixture(), reaction = await f.reaction(), source = await reaction.get(), request = await f.request.get(), before = (await f.root.get()).data();

@@ -225,7 +225,8 @@ export function createContentLifecycleDatabase(db, { enabled = false, readsEnabl
           ? applyPatch(change.after ?? {}, data) : clone(data);
       }
       const reports = writes.filter(w => w.method === 'create' && w.args[0]?.path.split('/').length === 2 && reportCollections.has(w.args[0].parent.id));
-      const allCopies = writes.filter(w => w.method === 'create' && w.args[0]?.parent.id === 'accountContentArchive');
+      const allCopies = writes.filter(w => w.method === 'create' && w.args[0]?.parent.id === 'accountContentArchive' &&
+        ['comment', 'privateReply'].includes(w.args[1]?.kind));
       const copies = allCopies.filter(w => w.args[1]?.content?.contentArchiveKey);
       if (changes.size > 50) fail('The content lifecycle source batch exceeds 50.');
       for (const [path, c] of changes) {
