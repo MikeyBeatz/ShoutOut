@@ -57,14 +57,16 @@ zdroje 134cb96 prošly. Následuje přechod existujících dat/klientů a integr
 má místní zdrojové jádro: přesný plán dávky, skutečný původ zachování a původní
 lhůty; 14 migračních případů a
 [úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401)
-zdroje 8d5b890 prošly. Navazují stará hlášení/účtové kopie, úplný operátor,
-audit pokrytí a klientská kompatibilita. Celá migrační váha zůstává otevřená;
+zdroje 8d5b890 prošly. Navazující přiřazení hlášení je shrnuté níže.
+Celá migrační váha zůstává otevřená;
 žádné nasazení ani živá migrace neproběhly.
 
 [Přiřazení starých hlášení](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption)
 je připravené místně: zachovaná prokazatelná verze, metadata bez duplikace
-těl a nezměněná původní retence; 22 cílených případů prošlo. Následují staré účtové kopie, celkový audit
-přechodu a klientská kompatibilita. Nové úplné CI zatím není dokončené.
+těl a nezměněná původní retence; 22 cílených případů a
+[úplné CI 45838228232](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232)
+zdroje 0d6602f prošly. Následují staré účtové kopie, celkový operátor/audit
+přechodu a kompatibilita klientů včetně nativního čtení soukromých hlášení.
 
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést

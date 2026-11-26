@@ -59,15 +59,19 @@ migračních případů, společná archivní sada 52 případů a 18 klientský
 analýza bez nálezů. Zdroj **8d5b8906dac5141a23ddc3d9b07f2e6a3bc0a054** má
 [úspěšné úplné CI 45826502401](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45826502401),
 včetně společné regrese a webového buildu. Nové volby jsou false, bez nasazení
-a živé migrace. Další krok: prokázané přiřazení starých hlášení a účtových kopií,
-pak celkový operátor/audit a klientská kompatibilita; celý přechod není uzavřený.
+a živé migrace. Navazující přiřazení hlášení je shrnuté níže;
+celý přechod dat a klientů není uzavřený.
 
-**Navazující místní vazby starých hlášení připravené:** [rozsah a otevřené části](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption).
+**Místní vazby starých hlášení připravené a ověřené:** [rozsah a otevřené části](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption).
 Připravený převod metadat do 50 hlášení bez dalších kopií textů. Verze cíle
 i rodiče se prokazuje přesnými SDK časy; geografie se neodvozuje z dnešního
 rodiče. Prošlo 22 cílených případů, společný archivní běh 73 případů, 212
-serverových unit testů a lint; nové úplné CI zatím čeká. Staré účtové kopie,
-celkový migrační operátor/audit a klientská kompatibilita zůstávají otevřené.
+serverových unit testů a lint. Zdroj **0d6602f2d0fdd902522fd3ebe85d048fe0f4a418** má
+[úspěšné úplné CI 45838228232](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232),
+včetně konečné společné archivní sady 77 případů a webového buildu.
+Další krok: staré účtové kopie, celkový migrační operátor/audit a klientská
+kompatibilita. Nativní detail stále čte původní textové pole hlášení;
+bez jeho přechodu nelze nový datový cyklus aktivovat pro tyto klienty.
 Žádné nasazení, Rules změny nebo živá data; nové volby zůstávají false.
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**

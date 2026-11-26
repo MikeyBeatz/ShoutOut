@@ -3001,12 +3001,37 @@ Prošly také tři přesné nanosekundové regrese původu (součást 212 server
 unit pass) a lint Functions; větve bez emulátoru nejsou tímto unit během
 ověřené. Dávka 50 hlášení má 50 deklarovaných zápisů metadat / 0 nových těl;
 zdrojové a archivní updateTime se nepřepisují. Není to měření ceny či cloudové
-kapacity. Nové úplné CI zatím čeká.
+kapacity.
+
+Zdroj **0d6602f2d0fdd902522fd3ebe85d048fe0f4a418** má
+[úspěšné úplné CI 45838228232](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45838228232),
+včetně konečné společné archivní sady se 77 případy, moderačních i dosavadních
+aplikačních/browserových regresí, Rules, účtového/Storage úklidu a webového buildu.
+Ověřuje místní kód; žádné nasazení ani živý přechod neproběhly.
 Vše zůstává vypnuté; bez Rules změn, nasazení a živých dat. Celá migrace se tím
 neuzavírá. Staré accountContentArchive se zatím nepřevádějí: jejich původní SDK
 časy a účtový termín je nutné zachovat, pozdější scrub/reactionsComplete nesmí
 sloužit jako falešný důkaz původního těla. Chybějící rodiče, neznámá ruční
 smazání, celkový operátor/audit a kompatibilita starých klientů zůstávají otevřené.
+
+**Další místní přechod účtových kopií:** svázat SDK identitu samotné kopie i
+její původní sourceCreateTime/sourceUpdateTime, retentionOwnerId a přesnou
+inkarnaci žádosti. Zachovat reactionsComplete i případný pendingArchiveId;
+nepřepisovat rozpracovaný záznam průběhu mazání účtu. Původní ordinaryRetainUntil lze doplnit
+jen z prokázané hlavičky stejné inkarnace rodiče, nikoli z data komentáře nebo
+dnešního náhradního Shoutu. Pevný účtový termín se nesmí prodloužit. Přechod musí
+zohlednit contentExpired a existující dávkový purge, včetně záznamu bez těla do
+dokončení původního journalu. Toto je další otevřená implementace, nikoli
+provedená migrace či nový retenční souhlas.
+
+Před živým přiřazením hlášení musí operátor doložit také kompatibilní čtenáře
+a klienty, nejen writery. Převod odstraňuje duplicitní soukromý text z hlášení;
+starý nespravovaný serverový režim ani klient závislý pouze na tomto poli není
+návratová varianta po převodu. Dnešní interní kompatibilitní volba je tvrzení
+volajícího, nikoli automatické ověření vydání. Živý přechod zatím není připravený.
+Konkrétní otevřená cesta: lib/src/moderation.dart volí nový archiv jen při
+kIsWeb a serverContentLifecycle; nativní detail soukromého hlášení stále
+čte přímý text. Tento klientský přechod zde nebyl provedený.
 
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 
