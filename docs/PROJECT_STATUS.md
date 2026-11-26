@@ -6,6 +6,12 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**DEV release hudby Shout Flight, 26. listopadu:** připravený nad nyní nasazeným
+webovým zdrojem aa43ae1. Přidává pouze klientskou smyčku, ztlumení a řízení
+životního cyklu. [Chování a ověření](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
+Před nasazením Hosting projektu/site shoutout-dev-46c81 ověřit úplné CI přesného
+commitu a čistý release. Funkce, Rules a data se tímto releasem nemění.
+
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
 Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev

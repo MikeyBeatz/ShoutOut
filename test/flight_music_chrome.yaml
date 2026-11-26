@@ -1,0 +1,5 @@
+# Only for the isolated codec/loop smoke test. App autoplay rules are unchanged.
+override_platforms:
+  chrome:
+    settings:
+      arguments: --autoplay-policy=no-user-gesture-required
