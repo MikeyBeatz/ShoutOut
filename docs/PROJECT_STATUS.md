@@ -74,6 +74,17 @@ kompatibilita. Nativní detail stále čte původní textové pole hlášení;
 bez jeho přechodu nelze nový datový cyklus aktivovat pro tyto klienty.
 Žádné nasazení, Rules změny nebo živá data; nové volby zůstávají false.
 
+**Místní termíny starých účtových kopií připravené:** [rozsah, důkazy a návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
+Převod metadat do 50 kopií zachová původní žádost, SDK identity a pendingArchiveId;
+těla se neduplikují. Dřívější běžný termín omezí původních účtových 60 dní,
+mezistav dávkového purge neodstaví úklid účtu. Prošlo 96 společných případů
+včetně 19 nových, 214 serverových unit pass / 811 integračních skip a lint.
+Naměřeno 112 dokumentových SDK reads / 6 čtecích volání / 50 zápisů u 50 kopií
+jednoho rodiče; nejde o cloudovou kapacitu. Nové úplné CI zatím čeká.
+Společné moderační čtení těchto těl, celý operátor/audit, staré účtové běhy,
+klienti a indexový plán zůstávají otevřené. Nové volby false, žádná živá data
+ani nasazení; původní pilot zůstává zachovaný.
+
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
 Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev

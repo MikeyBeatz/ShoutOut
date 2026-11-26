@@ -42,7 +42,7 @@ export async function getArchivedCommentReportTargetOperation(request, db, clock
         !identifier(archive.content?.authorId) || archive.content.authorId !== archive.retentionOwnerId ||
         archive.content.authorId === data.reporterId || typeof archive.content.text !== 'string' ||
         !(archive.content.createdAt instanceof Timestamp)) fail('failed-precondition', 'Invalid stored archived target.');
-    const effectiveEnd = await accountArchiveEffectiveDeadline(transaction, db, archive);
+    const effectiveEnd = await accountArchiveEffectiveDeadline(transaction, db, archive, snapshot);
     if (now.toMillis() >= effectiveEnd.toMillis()) fail('not-found', 'The report target is unavailable.');
     const targetData = { authorId: archive.content.authorId, text: archive.content.text,
       createdAtMillis: Math.floor(archive.content.createdAt.toMillis()) };

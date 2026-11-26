@@ -68,6 +68,12 @@ těl a nezměněná původní retence; 22 cílených případů a
 zdroje 0d6602f prošly. Následují staré účtové kopie, celkový operátor/audit
 přechodu a kompatibilita klientů včetně nativního čtení soukromých hlášení.
 
+[Termíny starých účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption)
+jsou připravené místně bez nových těl a prodlužování lhůt; 96 společných případů
+včetně 19 účtových prošlo. Nové úplné CI zatím čeká. Další návaznosti jsou
+společné moderační čtení účtových kopií, operátor/audit přechodu, kompatibilita
+starých účtových běhů a klientů a indexový plán. Celá migrační váha zůstává otevřená.
+
 **Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
 archivního/moderačního cyklu a před společnou regresí mvp-20 provést
 [kontrolu hotových kroků a jejich návazností](LAUNCH_READINESS.md#completed-work-review).

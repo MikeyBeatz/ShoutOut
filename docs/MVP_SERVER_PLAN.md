@@ -3014,15 +3014,16 @@ neuzavírá. Staré accountContentArchive se zatím nepřevádějí: jejich pův
 sloužit jako falešný důkaz původního těla. Chybějící rodiče, neznámá ruční
 smazání, celkový operátor/audit a kompatibilita starých klientů zůstávají otevřené.
 
-**Další místní přechod účtových kopií:** svázat SDK identitu samotné kopie i
+**Návaznost účtových kopií:** [místní termíny a pokračování úklidu](#content-lifecycle-account-adoption)
+již připravují vazbu na SDK identitu samotné kopie i
 její původní sourceCreateTime/sourceUpdateTime, retentionOwnerId a přesnou
 inkarnaci žádosti. Zachovat reactionsComplete i případný pendingArchiveId;
 nepřepisovat rozpracovaný záznam průběhu mazání účtu. Původní ordinaryRetainUntil lze doplnit
 jen z prokázané hlavičky stejné inkarnace rodiče, nikoli z data komentáře nebo
 dnešního náhradního Shoutu. Pevný účtový termín se nesmí prodloužit. Přechod musí
 zohlednit contentExpired a existující dávkový purge, včetně záznamu bez těla do
-dokončení původního journalu. Toto je další otevřená implementace, nikoli
-provedená migrace či nový retenční souhlas.
+dokončení původního journalu. Celý přechod a společné moderační čtení těchto
+kopií zůstávají otevřené; nejde o provedenou živou migraci ani nový retenční souhlas.
 
 Před živým přiřazením hlášení musí operátor doložit také kompatibilní čtenáře
 a klienty, nejen writery. Převod odstraňuje duplicitní soukromý text z hlášení;
@@ -3032,6 +3033,59 @@ volajícího, nikoli automatické ověření vydání. Živý přechod zatím ne
 Konkrétní otevřená cesta: lib/src/moderation.dart volí nový archiv jen při
 kIsWeb a serverContentLifecycle; nativní detail soukromého hlášení stále
 čte přímý text. Tento klientský přechod zde nebyl provedený.
+
+<a id="content-lifecycle-account-adoption"></a>
+
+##### Místní přechod termínů starých účtových kopií
+
+Připravené soukromé jádro functions/content_lifecycle_account_adoption.js.
+Dávka nejvýše 50 přesně určených accountContentArchive ID má čtecí plán a
+digest; svazuje SDK inkarnace/updateTime kopie, žádosti, účtového jobu, purge
+jobu, původního rodiče, jeho kopie a hlavičky. Zápis vyžaduje výslovný digest
+a kompatibilní writery; interní volba sama neověřuje Git/CI ani klienty.
+
+Staré tělo se **nekopíruje do nového archivu** a nezíská contentArchiveKey,
+který by předstíral existující společnou kopii. Doplní se lifecycleAccountBinding
+s digestem a původní SDK identitou kopie/rodiče/hlavičky, ordinaryRetainUntil
+z prokázané stejné inkarnace rodiče a contentExpired. Pevný retainUntil je menší
+z původního request.createTime +60 dní a původního běžného termínu. SDK časy
+zdroje, archivedAt, vlastníci, reactionsComplete a záznam průběhu účtu se nemění.
+Binding je důkazem retenční vazby, nikoli původní verze nahlášeného textu.
+
+Pro první převzetí je nutný stále přítomný původní rodič: SDK createTime musí
+odpovídat hlavičce/kopii a předcházet SDK vzniku dítěte. Chybějící či náhradní
+rodič, souběžně obnovený zdroj, neúplné vazby, nepotvrzené odstranění Auth,
+nahrazená žádost, uzavřený purge ingress a neprokázaný pendingArchiveId se
+blokují bez odhadu data. Po již uplynulém běžném termínu zápis odstraní tělo,
+ale ponechá původní hlavičku pro dokončení reakcí. Nově ověřovaný termín odmítá
+nahrazenou kopii/hlavičku a respektuje i dřívější úklid dalšího účastníka.
+
+V účtovém purge je opravená akceptace mezistavu content={} / contentExpired=false
+při rozpracovaném dávkovém mazání potomků, také pro dosavadní společný
+formát s contentArchiveKey. Čtení, reakční drain a běžný purge předávají skutečný
+SDK snapshot. Opakování neobnovuje tělo ani datum; změna podkladů vyžaduje nový
+plán. Sdílené čtení se cachuje pouze uvnitř jedné transakce, nikoli mezi běhy.
+
+**Místní výsledky:** 96 společných archivních/čtecích/migračních/runtime/Rules
+případů prošlo, z toho 19 nových účtových případů. Prošel skutečný v3 worker
+s rozpracovaným pendingArchiveId, report-only čtení do termínu, souběh,
+ztracená odpověď, mezistav purge a SDK nahrazení. Prošlo 214 serverových unit
+testů (811 integračních skip není jejich ověření) a lint. U 50 soukromých kopií
+se stejným rodičem/účtem má zápis 112 SDK dokumentových reads / 6 čtecích volání /
+50 zápisů metadat / 0 nových těl. Nejde o cloudovou cenu či kapacitní záruku.
+Nové úplné CI zatím čeká.
+
+Vše je místní a off, bez nasazení, živých dat, Auth účtů, Rules, Scheduleru či
+změny prostředků. Před živým spuštěním doplnit indexový plán (nové technické pole
+lifecycleAccountBinding se nedotazuje), úplnou inventuru/operátor a kompatibilitu
+starých účtových běhů. Běžný purge nesmí odstranit rodičovské důkazy dříve, než
+je přechod pokrytý. Společný moderační reader zatím tyto tělové kopie nepřebírá;
+dosavadní konkrétní lookup komentáře má ověřený dřívější termín. Celá migrace
+ani váha expired-cleanup se tím neuzavírá.
+Kompatibilní serverové čtení/worker musí předcházet zápisu nového markeru:
+starší validátor vyžadoval vedle ordinaryRetainUntil také contentArchiveKey.
+Po převodu tedy není návratová varianta server bez podpory lifecycleAccountBinding,
+i kdyby měl globální archivní přepínač vypnutý.
 
 ##### Historická poznámka ke společnému moderačnímu DEV přechodu – 24. listopadu
 

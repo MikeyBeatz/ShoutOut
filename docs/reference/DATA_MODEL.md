@@ -445,6 +445,15 @@ verze se dále ověřují přesnými SDK časy, soukromá zpráva i příjemcem 
 převodu shodou původního hlášeného textu. Žádné procházení archivu ani nová
 retence. [Přechod hlášení a omezení důkazů](../MVP_SERVER_PLAN.md#content-lifecycle-report-adoption).
 
+Připravené převzetí starých accountContentArchive kopií přidává pouze
+lifecycleAccountBinding (schemaVersion, migrationDigest, archiveCreateTime,
+threadCreateTime, parentCreateTime a parentCreatedAt), ordinaryRetainUntil a
+contentExpired. Zde nevzniká společná kopie těla ani contentArchiveKey. Původní
+sourceCreateTime/sourceUpdateTime, archivedAt, účastníci a účtový job zůstávají.
+Termín je minimum původního účtového a prokázaného běžného konce; SDK identita
+se kontroluje při čtení i úklidu. Nejde o důkaz původního hlášeného těla.
+[Stav a omezení přechodu](../MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
+
 ## Co je zdroj pravdy
 
 Prostorová vrstva používá soukromé `feedIndexControl/current`,

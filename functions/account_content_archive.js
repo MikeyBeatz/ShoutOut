@@ -3,7 +3,8 @@ import { prepareCardMutation } from './feed_card_state.js';
 import { createHash } from 'node:crypto';
 import { Timestamp, FieldPath } from 'firebase-admin/firestore';
 import { AccountDeletionRequestUnavailable } from './account_shout_hiding.js';
-import { validateLifecycleThread } from './content_lifecycle.js';
+import { validateLifecycleThread, lifecycleSubjectDeadline } from './content_lifecycle.js';
+import { validAccountLifecycleBinding } from './account_archive_lifecycle_binding.js';
 
 const retentionMillis = 60 * 86400000;
 const identifier = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
@@ -11,22 +12,39 @@ const same = (a, b) => a instanceof Timestamp && a.isEqual(b);
 export class AccountArchiveNeedsReview extends Error {}
 
 // A newly bound ordinary archive may expire sooner than the account's fixed
-// deadline. Legacy records retain their exact original account-only contract.
+// deadline. Unbound legacy records retain their original account-only contract.
 export function validAccountArchiveDeadline(data) {
   if (!(data?.requestCreateTime instanceof Timestamp) || !(data.retainUntil instanceof Timestamp)) return false;
+  if (data.lifecycleAccountBinding !== undefined && (!(data.ordinaryRetainUntil instanceof Timestamp) || !validAccountLifecycleBinding(data))) return false;
   const accountEnd = data.requestCreateTime.toMillis() + retentionMillis;
   if (data.ordinaryRetainUntil === undefined) return data.retainUntil.toMillis() === accountEnd;
   return data.ordinaryRetainUntil instanceof Timestamp &&
-    typeof data.contentArchiveKey === 'string' && /^[a-f0-9]{64}$/.test(data.contentArchiveKey) &&
+    (typeof data.contentArchiveKey === 'string' && /^[a-f0-9]{64}$/.test(data.contentArchiveKey) || validAccountLifecycleBinding(data)) &&
     data.retainUntil.toMillis() === Math.min(accountEnd, data.ordinaryRetainUntil.toMillis());
 }
 
-export async function accountArchiveEffectiveDeadline(tx, db, data) {
+export async function accountArchiveEffectiveDeadline(tx, db, data, snapshot = null, cache = null) {
   if (!validAccountArchiveDeadline(data)) throw new AccountArchiveNeedsReview('invalid-account-archive-deadline');
   if (data.ordinaryRetainUntil === undefined) return data.retainUntil;
-  const thread = await tx.get(db.doc(`contentLifecycleThreads/${data.sourceShoutId}`));
+  cache ??= { threads: new Map(), subjects: new Map() };
+  const thread = cache.threads.get(data.sourceShoutId) ?? await tx.get(db.doc(`contentLifecycleThreads/${data.sourceShoutId}`));
   if (!thread.exists) throw new AccountArchiveNeedsReview('missing-account-archive-thread');
+  cache.threads.set(data.sourceShoutId, thread);
   const header = validateLifecycleThread(thread.data(), data.sourceShoutId);
+  if (data.lifecycleAccountBinding !== undefined) {
+    const proof = data.lifecycleAccountBinding;
+    if (!validAccountLifecycleBinding(data) || !snapshot?.exists ||
+        snapshot.ref.path !== `accountContentArchive/${accountContentArchiveId(db.projectId, data.sourcePath, data.sourceCreateTime)}` ||
+        !same(snapshot.createTime, proof.archiveCreateTime) || !same(thread.createTime, proof.threadCreateTime) ||
+        !same(header.sourceCreateTime ?? thread.createTime, proof.parentCreateTime) || !same(header.sourceCreatedAt, proof.parentCreatedAt)) {
+      throw new AccountArchiveNeedsReview('account-archive-binding-changed');
+    }
+    const end = Timestamp.fromMillis(Math.min(data.retainUntil.toMillis(), header.retainUntil.toMillis()));
+    const result = await lifecycleSubjectDeadline(tx, db, data.subjectUserIds, end, cache.subjects);
+    const owner = cache.subjects.get(data.retentionOwnerId)?.[0];
+    if (!owner?.exists || !same(owner.createTime, data.requestCreateTime)) throw new AccountArchiveNeedsReview('account-archive-request-changed');
+    return result.retainUntil;
+  }
   return Timestamp.fromMillis(Math.min(data.retainUntil.toMillis(), header.retainUntil.toMillis()));
 }
 
@@ -181,7 +199,7 @@ export async function drainArchivedCommentReactionsPage(identity, db, auth, opti
       c.check(request); const data = checkArchive(archive), time = c.now();
       if (parent.exists) throw new AccountArchiveNeedsReview('comment-recreated-during-drain');
       if (data.reactionsComplete) throw new AccountArchiveNeedsReview('reaction-created-after-drain');
-      const retain = time.toMillis() < (await accountArchiveEffectiveDeadline(transaction, db, data)).toMillis();
+      const retain = time.toMillis() < (await accountArchiveEffectiveDeadline(transaction, db, data, archive)).toMillis();
       const apply = await c.record(transaction, { kind: 'archive-reaction', archiveId, copied: source.exists && retain ? 1 : 0 });
       if (!source.exists) return false;
       if (!same(source.createTime, candidate.createTime) || existing.exists && retain) throw new AccountArchiveNeedsReview('reaction-archive-conflict');

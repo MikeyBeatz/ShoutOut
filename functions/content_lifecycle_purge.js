@@ -36,7 +36,7 @@ export async function expireLifecycleAccountCopy(db, { threadId, clock = () => n
     if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-copy-paused');
     if (!source.exists) return { state: 'continuation', deleted: 0 };
     if (!same(source.createTime, candidate.createTime) || source.get('sourceShoutId') !== threadId) fail('lifecycle-copy-replaced');
-    const deadline = await accountArchiveEffectiveDeadline(tx, db, source.data());
+    const deadline = await accountArchiveEffectiveDeadline(tx, db, source.data(), source);
     if (now.toMillis() < deadline.toMillis()) fail('lifecycle-copy-not-due');
     const reactions = await tx.get(source.ref.collection('reactions').limit(pageSize));
     const audits = reactions.size === pageSize ? null : await tx.get(source.ref.collection('accessAudits').limit(pageSize - reactions.size));

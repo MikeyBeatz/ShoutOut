@@ -1,6 +1,8 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { AccountPurgeNeedsReview } from './account_purge_guard.js';
 import { validateLifecycleArchive, lifecycleBodyHash } from './content_lifecycle.js';
+import { validAccountArchiveDeadline } from './account_content_archive.js';
+import { validAccountLifecycleBinding } from './account_archive_lifecycle_binding.js';
 
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
@@ -62,8 +64,9 @@ export function validatePurgeSelection(snapshot, stage, uid) {
     if (parts.length !== 2 || parts[0] !== stage.collection) return false;
     if (stage.collection === 'accountContentArchive') {
       const data = snapshot.data();
-      if (data.contentExpired === true && data.content && Object.keys(data.content).length === 0 &&
-          /^[a-f0-9]{64}$/.test(data.contentArchiveKey ?? '') && id(data.retentionOwnerId) &&
+      if ((data.contentExpired === true || data.contentExpired === false && validAccountArchiveDeadline(data) && data.ordinaryRetainUntil) &&
+          data.content && Object.keys(data.content).length === 0 &&
+          (/^[a-f0-9]{64}$/.test(data.contentArchiveKey ?? '') || validAccountLifecycleBinding(data) && snapshot.createTime.isEqual(data.lifecycleAccountBinding.archiveCreateTime)) && id(data.retentionOwnerId) &&
           ['comment', 'privateReply'].includes(data.kind)) return true;
       if (data.kind === 'comment') return data.content?.authorId === uid;
       if (data.kind === 'privateReply') return data.content?.authorId === uid || data.content?.recipientId === uid;
