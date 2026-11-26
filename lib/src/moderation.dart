@@ -990,7 +990,7 @@ class _ReportDetailDialogState extends State<_ReportDetailDialog> {
 
   Future<_ReportTargetDetails> _load() async {
     final data = widget.report.data();
-    if (kIsWeb && WebEnvironment.current.serverContentLifecycle) {
+    if (_useLifecycleSources) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid == null) throw StateError('Sign-in required');
       final type = switch (widget.collection) {

@@ -8,7 +8,7 @@ import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_
 import { validateContentReportDecision, pendingContentReports, assertContentReportGroup } from './decide_content_reports.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
-import { lifecycleEnabled } from './content_lifecycle.js';
+import { lifecycleEnabled, lifecycleReportReadsEnabled } from './content_lifecycle.js';
 import { resolveLifecycleReportGroup, readLifecycleSourceBinding, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 // Activate with the checked client/Rules cutover, never by deploying this preparation.
@@ -85,15 +85,15 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
     const now = nowAt(clock), policy = sanctionActions[input.decision];
     await requireEligibleActor({ request, db, reader: tx, now: now.toDate() });
     const [role, legacy, receipt, shout] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef);
-    const managed = lifecycleEnabled(db);
+    const capturing = lifecycleEnabled(db);
     const level = privateReportModeratorLevel(role.data(), legacy.data());
-    if (!managed) assertPrivateReportScope(role.data(), level, shout.data());
+    if (!capturing) assertPrivateReportScope(role.data(), level, shout.data());
     if (level < policy.role) fail('permission-denied', 'Senior moderator permission is required.');
     await targetAccount(tx, db, input.expectedTargetUserId, uid, level);
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
-      if (managed) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
+      if (capturing) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.authorId !== input.expectedTargetUserId || stored.sanctionId !== sanctionRef.id ||
           stored.targetType !== input.targetType || stored.shoutId !== input.shoutId || stored.targetId !== input.targetId ||
@@ -104,12 +104,14 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
       return { sanctionId: sanctionRef.id, decision: input.decision, count: input.reportIds.length };
     }
     const source = input.targetType === 'shout' ? shout : await tx.get(sourceRef);
+    const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
+    const managed = lifecycleReportReadsEnabled(db, reports ?? source);
     if (!managed && (!source.exists || !shout.exists || isPurgedShoutContext(shout.data()))) fail('not-found', 'The sanction source is unavailable.');
     if (managed && input.targetType === 'privateReply' && input.mode !== 'report') fail('permission-denied', 'A private reply report is required.');
-    const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
     const evidence = managed ? reports ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) :
       await readLifecycleSourceBinding(tx, db, source, now) : null;
     if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
+    else assertPrivateReportScope(role.data(), level, shout.data());
     const body = evidence?.content ?? source.data();
     if (body.authorId !== input.expectedTargetUserId || !(body.createdAt instanceof Timestamp) ||
         input.mode === 'observation' && body.createdAt.toMillis() !== input.expectedCreatedAt) fail('failed-precondition', 'The sanction source changed.');

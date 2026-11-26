@@ -31,3 +31,12 @@ export function accountReportBodyProven(archive, report) {
       !atOrBefore(d.sourceUpdateTime, report.createTime) || !atOrBefore(report.createTime, archive.createTime)) return false;
   try { return lifecycleBodyHash(d.content) === b.bodyHash; } catch { return false; }
 }
+
+export function validAccountReportBinding(report) {
+  const b = report?.get('accountEvidenceBinding');
+  return Boolean(report?.exists && b && Object.getPrototypeOf(b) === Object.prototype &&
+    Object.keys(b).sort().join(',') === 'archiveCreateTime,migrationDigest,reportCreateTime,schemaVersion' &&
+    b.schemaVersion === 1 && /^[a-f0-9]{64}$/.test(b.migrationDigest ?? '') &&
+    b.reportCreateTime instanceof Timestamp && b.reportCreateTime.isEqual(report.createTime) &&
+    atOrBefore(report.createTime, b.archiveCreateTime) && /^[a-f0-9]{64}$/.test(report.get('accountArchiveId') ?? ''));
+}

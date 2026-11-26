@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,73 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,74 %** — vážené dokončení podúseků
 
-Hotové úseky: **235/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **237/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -53,9 +53,10 @@ Původní SDK čas/hash se zachová před zápisem metadat; nejasná verze se ne
 Zdroj 98323a2 má [úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751)
 se 115 archivními případy včetně 19 nových a webovým buildem.
 
-**Následuje ve schváleném místním rozsahu:** řízený operátor/inventura a
-indexový plán, kompatibilita starých účtových běhů a nativních klientů,
-závěrečná integrace a provozní/návratový plán. Před DEV aktivací také archivní
+**Probíhá schválený společný místní úsek:** [řízený operátor/inventura,
+indexový plán a kompatibilita](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation)
+starých účtových běhů a nativních klientů. Naváže závěrečná integrace
+a provozní/návratový plán. Před DEV aktivací také archivní
 integrační revize. Nové přepínače a Rules brána jsou false; nic z tohoto cyklu
 není nasazené ani živě migrované. Celý milník ani původní pilotní úklid se
 tím neuzavírá; po MVP zůstává další revize cyklu.

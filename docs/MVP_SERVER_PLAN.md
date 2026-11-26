@@ -2807,6 +2807,85 @@ Nedokončená váha
 hotové části ani pevná váha MVP milníku se nemění. Žádná nová volba se nezapíná,
 nic se nenasazuje, neprobíhá živá migrace a starý pilot zůstává zachovaný.
 
+<a id="content-lifecycle-transition-preparation"></a>
+
+##### Schválené společné dokončení místní přípravy přechodu
+
+Vlastník 26. listopadu schválil jeden společný místní úsek: obnovitelný
+operátor/inventuru bez textů, digesty a přesný čistý commit/úplné CI,
+indexový plán bez TTL, oddělení zachování nových zápisů od nového čtení/údržby,
+nativní čtení hlášení a pokračování starých účtových běhů. Dávka zůstává
+nejvýše 50 zdrojů / 450 zápisů; role, oprávnění a původní lhůty se nemění.
+Ověřit souběh zápisů, restart, ztracenou odpověď a návrat, dokumentaci/metriky;
+push a úplné CI spojit na konec tohoto úseku. Zatím bez nasazení, živé inventury
+či migrace, Auth účtů, Scheduleru nebo změny prostředků. Nové volby zůstanou false.
+
+Připravený přechod má tři samostatné brány: capture-only zachovává
+nový obsah, následné čtení/historie přepíná klienty a až poslední brána pouští
+údržbu. Stará kohorta se určuje serverovým SDK časem captureFenceAt; její
+změna zároveň posouvá legacyRevision, takže audit nemůže považovat souběžně
+měněnou inventuru za úplnou. Neznámé historické smazání/verze se nepřevádějí
+odhadem. První živý záchyt musí mít vyřešenou právní verzi a kompatibilní
+writery/Rules; toto schválení žádnou živou bránu nezapíná.
+
+Nativní routing je za výchozí vypnutou DEV volbou
+SHOUTOUT_CONTENT_LIFECYCLE. Připravený routing není podepsaný Android/iOS
+build ani fyzická akceptace; tyto release podmínky se nesmějí vydávat za
+splněné pouhým emulátorovým či widgetovým testem.
+
+**Operátor a soubory:** tools/content_lifecycle_transition.mjs používá pouze
+výslovný projekt shoutout-dev-46c81. plan-start připraví digest budoucího
+záchytu; start jej transakčně založí pouze s potvrzeným kompatibilním writerem.
+plan / inventory vytvoří obnovitelný průchod devíti kolekcemi/skupinami po
+nejvýše 50 dokumentech. Každá stránka kontroluje SDK inkarnace, formát generací,
+řídicí revize a předchozí hash; assemble odmítne chybějící či opakovanou stránku.
+Inventura obsahuje cesty, časy a hashe, nikoli nadpisy, texty, účastníky či polohu.
+Vadné SDK hodnoty se označí bez vypsání obsahu. Souběžná změna starého zdroje
+nebo vznik staré účtové kopie atomicky změní legacyRevision; průchod je pak
+nutné naplánovat znovu. Nový obsah po SDK hranici musí zachytávat kompatibilní writer.
+
+prepare / apply obalují stávající jádra sources, reports, accounts a nový
+metadata-only compatibility. Všechny jejich transakce znovu kontrolují tutéž
+inventurní hranici; používá se skutečný společný indexový writer a rozpočet 450.
+resolve vybírá kandidáty hlášení pouze z úplné rodiny archivních stránek;
+obsah, verzi a termín následně znovu prokáže převodní jádro. Nejasné datum
+smazání, neprokazatelná původní verze, chybějící kontext či nejednoznačná kopie
+zůstanou blocked, nikdy se nevytvoří odhadovaný originál nebo nová lhůta.
+audit ověřuje skutečné řádky dané stránky; finish-audit kontroluje úplný
+řetězec a všechny dílčí audity. Výsledek výslovně activationAuthorized=false:
+lokální digest chrání proti poškození souboru, není nezávislou atestací živých dat.
+
+Výchozí prepare zachová text soukromého hlášení pro staré klienty
+(--text-policy preserve); teprve samostatný --text-policy scrub vyžaduje
+potvrzení kompatibilních čtenářů i zapnuté serverové čtení. Capture-only server
+umí rozhodovat již navázaná hlášení i po ztrátě zdroje, nenavázaná dál používají
+dosavadní cestu. Stará účtová archivace zachová původní inkarnaci žádosti a 60 dní;
+anonymizace starého Shoutu při purge vyžaduje tento původní splatný termín.
+
+Zápisové příkazy start/apply vyžadují --confirm-project,
+--confirm-compatible-writers, schválený digest, čistý přesný commit a úplné CI
+včetně archivních a moderačních sad. Bez volby captureEnabled/enabled v ověřeném
+zdroji skončí před otevřením databáze. Výstupní soubory jsou pouze v pracovním
+adresáři a nepřepisují se; chyba uložení po zápisu se řeší opakováním stejného
+digestu. Žádný příkaz nezapíná nové čtení ani údržbu. Doklad skutečně nasazených
+writerů/Rules, doběhnutí starých volání, právní verze a fyzické nativní kompatibility
+se musí doložit zvlášť před živým postupem; lokální CI toto samo neprokazuje.
+
+**Indexový plán:** tools/content_lifecycle_index_plan.mjs čistě z dodané úplné
+REST inventury navrhuje 3 dotazové indexy a 12 výjimek mapových polí.
+Nemění TTL, ponechá nesouvisející indexy, rozpracovaný index neduplikuje;
+neznámý explicitní override nebo stav k opravě předá k posouzení. Nástroj
+neprovádí síťovou inventuru ani živé založení indexů.
+
+**Kontroly tohoto úseku:** cílené klientské testy (22), analýza bez nálezů,
+126 testů nástrojů a lint Functions prošly místně. Závěrečná cílená regrese
+má 42 úspěšných emulátorových případů (operátor, staging a celý účtový purge);
+216 serverových unit případů prošlo, 852 integračních skip není důkazem jejich ověření.
+Úplná archivní/moderační regrese přesného výsledného commitu naváže v CI. Celkový timeout CI
+je 30 místo 25 minut a archivní krok má 6 místo 4 minut: předchozí úplný běh
+téměř vyčerpal 25 minut a rozšířená místní archivní sada trvala 258 sekund.
+Počet jobů ani prováděné kontroly se tím nemění.
+
 <a id="content-lifecycle-integration-review"></a>
 
 ##### Integrační revize před aktivací společného archivu

@@ -24,6 +24,7 @@ export async function readLifecycleReportEvidence(tx, db, report, targetType, no
   if (!r || !Object.hasOwn(collections, targetType) || report.ref.parent.id !== collections[targetType] ||
       !identifier(r.reporterId) || !identifier(r.shoutId) || !identifier(r.authorId) ||
       !['open', 'escalated', 'resolved'].includes(r.status) || typeof r.reason !== 'string' || !r.reason ||
+      r.accountArchiveId !== undefined || r.accountEvidenceBinding !== undefined ||
       !(r.createdAt instanceof Timestamp) || !archiveKey(r.contentArchiveKey) ||
       !(archiveKey(r.shoutArchiveKey) || targetType !== 'shout' && r.parentContextPurged === true &&
         r.shoutArchiveKey === undefined && r.moderationGeography === null)) {

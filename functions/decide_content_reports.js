@@ -7,7 +7,7 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { privateReportModeratorLevel, assertPrivateReportScope } from './remove_reported_private_reply.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
-import { lifecycleEnabled } from './content_lifecycle.js';
+import { lifecycleEnabled, lifecycleReportReadsEnabled } from './content_lifecycle.js';
 import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'decideContentReports';
@@ -39,7 +39,7 @@ export function pendingContentReports(db, input) {
   let query = db.collection(collections[input.targetType]).where('shoutId', '==', input.shoutId);
   if (input.targetType !== 'shout') query = query.where(input.targetType === 'comment' ? 'commentId' : 'privateReplyId', '==', input.targetId);
   return query.where('status', 'in', ['open', 'escalated']).limit(51).select(
-    'reporterId', 'shoutId', 'status', 'createdAt', 'reason', 'authorId', 'contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged', 'legacyEvidenceBinding',
+    'reporterId', 'shoutId', 'status', 'createdAt', 'reason', 'authorId', 'contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged', 'legacyEvidenceBinding', 'accountArchiveId', 'accountEvidenceBinding',
     ...(input.targetType === 'comment' ? ['commentId'] : input.targetType === 'privateReply' ? ['privateReplyId', 'authorId', 'text'] : []),
   );
 }
@@ -116,17 +116,20 @@ export async function decideContentReportsOperation(request, db, clock = () => n
       return { decision: input.decision, count: input.reportIds.length };
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
-    const managed = lifecycleEnabled(db);
+    const reports = await tx.get(pendingContentReports(db, input));
+    const managed = lifecycleReportReadsEnabled(db, reports);
     const unavailable = !managed && unavailableRef !== null && (!source.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
     const contextChild = unavailableRef !== null && input.targetType !== 'shout' && source.exists && (!shout.exists || isPurgedShoutContext(shout.data()));
     if (!managed && !unavailable && !contextChild) validateTarget(source, shout);
     if (contextChild && (!id(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
     if (!unavailable && clearance.exists) fail('failed-precondition', 'The content was already approved.');
-    const reports = await tx.get(pendingContentReports(db, input));
     const evidence = managed ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) : null;
     if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
-    else if (unavailable) assertUnavailableReportGroup(reports, input);
-    else assertContentReportGroup(reports, input, source);
+    else {
+      assertPrivateReportScope(role.data(), level, shout.data());
+      if (unavailable) assertUnavailableReportGroup(reports, input);
+      else assertContentReportGroup(reports, input, source);
+    }
     if (guardEvidenceRetention && input.decision === 'approve') await assertReportEvidenceRetention(tx, db, reports, now);
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');

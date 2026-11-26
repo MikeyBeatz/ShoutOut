@@ -4,7 +4,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { receiptRetentionFields } from './operation_retention.js';
-import { lifecycleEnabled } from './content_lifecycle.js';
+import { lifecycleEnabled, lifecycleReportReadsEnabled } from './content_lifecycle.js';
 import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPrivateReply';
@@ -103,7 +103,7 @@ export async function removeReportedPrivateReplyOperation(request, db, clock = (
       assertPrivateReportScope(role.data(), level, lifecycleEnabled(db) && (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       return { removed: true };
     }
-    const managed = lifecycleEnabled(db), report = await tx.get(reportRef), data = reportTarget(report, managed);
+    const report = await tx.get(reportRef), managed = lifecycleReportReadsEnabled(db, { docs: [report] }), data = reportTarget(report, managed);
     const requiredRoleLevel = data.status === 'escalated' ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     const sourceRef = db.doc(`shouts/${data.shoutId}/privateReplies/${data.privateReplyId}`);

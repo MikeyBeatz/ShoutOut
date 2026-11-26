@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Check out repository
@@ -200,7 +200,7 @@ jobs:
 
       - name: Test inactive content lifecycle
         if: steps.scope.outputs.full != 'false'
-        timeout-minutes: 4
+        timeout-minutes: 6
         working-directory: tools
         run: npm run test:content-lifecycle
 

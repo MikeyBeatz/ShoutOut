@@ -5,7 +5,8 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { accountPurgeJobRef } from './account_purge_guard.js';
 
-export const contentLifecycleConfiguration = Object.freeze({ enabled: false });
+// Capture can precede reader/history activation. Maintenance has its own gate.
+export const contentLifecycleConfiguration = Object.freeze({ enabled: false, captureEnabled: false });
 export const lifecycleDay = 86400000;
 export const lifecycleHistoryMillis = 7 * lifecycleDay;
 export const lifecycleArchiveMillis = 60 * lifecycleDay;
@@ -167,6 +168,12 @@ export function lifecycleGeography(value) {
   return { schemaVersion: 1, countryCode: g.countryCode, ...(g.subdivisionCode ? { subdivisionCode: g.subdivisionCode } : {}) };
 }
 export function lifecycleEnabled(db) { return db?.[lifecycleBinding]?.enabled === true; }
+export function lifecycleReadsEnabled(db) { return db?.[lifecycleBinding]?.readsEnabled === true; }
+export function lifecycleReportReadsEnabled(db, reportsOrSource) {
+  if (lifecycleReadsEnabled(db)) return true;
+  return lifecycleEnabled(db) && (reportsOrSource?.docs ?? [reportsOrSource]).some(d =>
+    d?.get('contentArchiveKey') !== undefined || d?.get('accountArchiveId') !== undefined);
+}
 // Pausing ingress must not extend any already established retention deadline.
 // Unknown/off control still fails closed; it is not an alternate activation.
 export function lifecycleControlUsable(control, { allowPaused = false } = {}) {
@@ -177,11 +184,12 @@ export function lifecycleControlUsable(control, { allowPaused = false } = {}) {
 // Buffer SDK writes so the shared archive can complete all its reads first.
 // The original operation, archive, receipts and projections still commit once.
 // Disabled mode returns the identical database without extra reads or writes.
-export function createContentLifecycleDatabase(db, { enabled = false, clock = () => new Date(), writeBudget = 450 } = {}) {
-  if (typeof enabled !== 'boolean' || typeof clock !== 'function' || !Number.isInteger(writeBudget) || writeBudget < 1 || writeBudget > 450) throw new Error('invalid-content-lifecycle-options');
+export function createContentLifecycleDatabase(db, { enabled = false, readsEnabled = enabled, clock = () => new Date(), writeBudget = 450 } = {}) {
+  if (typeof enabled !== 'boolean' || typeof readsEnabled !== 'boolean' || readsEnabled && !enabled ||
+      typeof clock !== 'function' || !Number.isInteger(writeBudget) || writeBudget < 1 || writeBudget > 450) throw new Error('invalid-content-lifecycle-options');
   if (!enabled) return db;
   assertFeedRuntimeTarget(db);
-  const binding = Object.freeze({ enabled: true, clock });
+  const binding = Object.freeze({ enabled: true, readsEnabled, clock });
   return new Proxy(db, { get(target, key) {
     if (key === lifecycleBinding) return binding;
     if (key !== 'runTransaction') return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
@@ -217,7 +225,8 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
           ? applyPatch(change.after ?? {}, data) : clone(data);
       }
       const reports = writes.filter(w => w.method === 'create' && w.args[0]?.path.split('/').length === 2 && reportCollections.has(w.args[0].parent.id));
-      const copies = writes.filter(w => w.method === 'create' && w.args[0]?.parent.id === 'accountContentArchive' && w.args[1]?.content?.contentArchiveKey);
+      const allCopies = writes.filter(w => w.method === 'create' && w.args[0]?.parent.id === 'accountContentArchive');
+      const copies = allCopies.filter(w => w.args[1]?.content?.contentArchiveKey);
       if (changes.size > 50) fail('The content lifecycle source batch exceeds 50.');
       for (const [path, c] of changes) {
         if (c.before && c.after && !c.before.contentPurged && !c.after.contentPurged &&
@@ -229,13 +238,50 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
           changes.delete(path);
         }
       }
-      if (!changes.size && !reports.length && !copies.length) { for (const w of writes) raw[w.method](...w.args); return result; }
+      if (!changes.size && !reports.length && !allCopies.length) { for (const w of writes) raw[w.method](...w.args); return result; }
       const control = await raw.get(db.doc('contentLifecycleControl/current'));
       const createsBody = [...changes.values()].some(c => !c.before || c.after && !c.after.contentPurged &&
         lifecycleBodyHash(c.before) !== lifecycleBodyHash(c.after) && !lifecycleReferenceRedaction(c.before, c.after));
       if (!lifecycleControlUsable(control, { allowPaused: !createsBody })) fail('Content archive is not active.');
       const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-content-clock');
       const now = Timestamp.fromDate(date), extra = [], threads = new Map(), subjectCache = new Map();
+      const legacy = new Map(); let legacyDirty = false;
+      const legacySource = snapshot => !readsEnabled && snapshot?.exists && snapshot.get('contentArchiveKey') === undefined &&
+        snapshot.get('contentHash') === undefined &&
+        timeOrder(control.get('captureFenceAt'), control.updateTime) && timeOrder(snapshot.createTime, control.get('captureFenceAt')) &&
+        !snapshot.createTime.isEqual(control.get('captureFenceAt'));
+      // Pre-cutover mutations change the inventory fence in the same commit.
+      // They are never accepted as new content or as migration coverage.
+      for (const [path, c] of changes) if (legacySource(c.snapshot)) {
+        const frozen = c.source.kind === 'shout' && c.after?.schemaVersion === 1 && c.after.status === 'deleted' &&
+          c.after.contentPurged === true && Object.keys(c.after).every(k => ['schemaVersion', 'status', 'contentPurged', 'authorId'].includes(k)) &&
+          (c.after.authorId === undefined || c.after.authorId === c.before.authorId);
+        if (frozen) {
+          if (!id(c.before.authorId)) fail('The legacy purge author is unavailable.');
+          const request = await raw.get(db.doc(`accountDeletionRequests/${c.before.authorId}`));
+          if (!request.exists || request.get('status') !== 'pending' || request.get('userId') !== c.before.authorId ||
+              now.toMillis() < request.createTime.toMillis() + lifecycleArchiveMillis) fail('The legacy account retention deadline has not passed.');
+        } else if (c.after && (c.after.contentArchiveKey !== undefined || c.after.contentHash !== undefined ||
+            !c.after.createdAt?.isEqual(c.before.createdAt) || c.after.authorId !== c.before.authorId || c.last.method === 'create')) {
+          fail('The legacy source incarnation changed.');
+        }
+        legacy.set(path, c); changes.delete(path); legacyDirty = true;
+      }
+      for (const write of allCopies.filter(w => !copies.includes(w))) {
+        const d = write.args[1], c = legacy.get(d?.sourcePath);
+        if (!c || c.after !== null || !['comment', 'privateReply'].includes(c.source.kind) || d.kind !== c.source.kind ||
+            d.schemaVersion !== 1 || d.sourceShoutId !== c.source.shoutId ||
+            write.args[0].id !== hash([db.projectId, d.sourcePath, c.snapshot.createTime.seconds, c.snapshot.createTime.nanoseconds]) ||
+            !d.sourceCreateTime?.isEqual(c.snapshot.createTime) || !d.sourceUpdateTime?.isEqual(c.snapshot.updateTime) ||
+            hash(normalized(d.content)) !== hash(normalized(c.before)) || !subjects(c.before, c.source.kind).includes(d.retentionOwnerId) ||
+            JSON.stringify(d.subjectUserIds) !== JSON.stringify(subjects(c.before, c.source.kind)) ||
+            !timeOrder(d.requestCreateTime, now) || !d.retainUntil?.isEqual(Timestamp.fromMillis(d.requestCreateTime.toMillis() + lifecycleArchiveMillis))) {
+          fail('Unbound account content requires a proven legacy source.');
+        }
+        const request = await raw.get(db.doc(`accountDeletionRequests/${d.retentionOwnerId}`));
+        if (!request.exists || request.get('userId') !== d.retentionOwnerId || request.get('status') !== 'pending' ||
+            !request.createTime.isEqual(d.requestCreateTime)) fail('The legacy account request changed.');
+      }
       const readThread = async shoutId => {
         if (!threads.has(shoutId)) {
           const doc = await raw.get(db.doc(`contentLifecycleThreads/${shoutId}`));
@@ -310,7 +356,14 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
       for (const write of reports) {
         const data = write.args[1], kind = reportCollections.get(write.args[0].parent.id);
         const path = `shouts/${data.shoutId}` + (kind === 'shout' ? '' : `/${kind === 'comment' ? 'comments' : 'privateReplies'}/${data.commentId ?? data.privateReplyId}`);
-        const source = changes.get(path)?.after ?? observed.get(path)?.data() ?? (await raw.get(db.doc(path))).data();
+        const snapshot = observed.get(path) ?? await raw.get(db.doc(path));
+        const source = changes.get(path)?.after ?? snapshot.data();
+        if (!changes.has(path) && legacySource(snapshot)) {
+          if (!id(data.reporterId) || data.reporterId === source.authorId || data.contentArchiveKey !== undefined ||
+              data.shoutArchiveKey !== undefined || kind === 'privateReply' &&
+              (data.reporterId !== source.recipientId || data.text !== source.text)) fail('Invalid legacy report evidence.');
+          legacyDirty = true; continue;
+        }
         if (!source?.contentArchiveKey) fail('Content archive migration is required.');
         const archive = await raw.get(db.doc(`contentLifecycleArchive/${source.contentArchiveKey}`));
         if (!archive.exists) fail('Reported archive is unavailable.');
@@ -331,7 +384,7 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
             parentArchive.id !== lifecycleArchiveKey(db.projectId, `shouts/${data.shoutId}`, parent)) fail('Invalid report parent binding.');
         Object.assign(data, { contentArchiveKey: archive.id, shoutArchiveKey: parentArchive.id,
           moderationGeography: lifecycleGeography(parent), parentContextPurged: false, authorId: source.authorId });
-        delete data.text;
+        if (readsEnabled) delete data.text;
       }
       // Existing account jobs keep their journal/identity. Their body copies may
       // never outlive the shared content deadline; expired bodies are omitted.
@@ -342,6 +395,11 @@ export function createContentLifecycleDatabase(db, { enabled = false, clock = ()
         Object.assign(data, { retainUntil: end, ordinaryRetainUntil: header.retainUntil,
           contentArchiveKey: data.content.contentArchiveKey, contentExpired: false });
         if (now.toMillis() >= end.toMillis()) { data.content = {}; data.contentExpired = true; }
+      }
+      if (legacyDirty) {
+        const revision = control.get('legacyRevision');
+        if (!Number.isSafeInteger(revision) || revision < 0 || revision >= Number.MAX_SAFE_INTEGER) fail('A legacy inventory fence is required.');
+        extra.push({ method: 'update', args: [control.ref, { legacyRevision: revision + 1 }] });
       }
       if (writes.length + extra.length > writeBudget) throw new Error('feed-transaction-write-budget-exceeded');
       for (const w of [...extra, ...writes]) raw[w.method](...w.args);

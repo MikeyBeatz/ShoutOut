@@ -20,7 +20,7 @@ const validStamp = v => Array.isArray(v) && v.length === 2 && v.every(Number.isS
 const validIdentity = v => keys(v, 'createTime,updateTime') && validStamp(v.createTime) && validStamp(v.updateTime);
 const fail = code => { throw new Error(code); };
 const blocked = code => { throw Object.assign(new Error(code), { adoptionBlocked: true }); };
-const boundFields = ['contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged', 'legacyEvidenceBinding'];
+const boundFields = ['contentArchiveKey', 'shoutArchiveKey', 'moderationGeography', 'parentContextPurged', 'legacyEvidenceBinding', 'accountArchiveId', 'accountEvidenceBinding'];
 function reportKind(path) {
   const p = typeof path === 'string' ? path.split('/') : [];
   return p.length === 2 && Object.hasOwn(collections, p[0]) && /^[A-Za-z0-9_-]{1,386}$/.test(p[1]) ? collections[p[0]] : null;
@@ -39,7 +39,7 @@ function timeAt(clock) {
   if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime()) || date.getTime() < 0) fail('invalid-lifecycle-report-clock');
   return Timestamp.fromDate(date);
 }
-async function inspect(tx, db, candidates, now) {
+async function inspect(tx, db, candidates, now, preserveLegacyText = false) {
   const control = await tx.get(db.doc('contentLifecycleControl/current'));
   if (!lifecycleControlUsable(control, { allowPaused: true })) fail('lifecycle-report-control-required');
   const docs = new Map(), subjects = new Map();
@@ -84,7 +84,8 @@ async function inspect(tx, db, candidates, now) {
         parentContextPurged: false, authorId: body.authorId };
       item.patch = patch; entry.patchHash = hash(patch);
       if (boundFields.some(k => r[k] !== undefined)) {
-        if (!validLegacyReportBinding(report) || Object.entries(patch).some(([k, v]) => !same(r[k], v)) || r.text !== undefined) blocked('partial-report-binding');
+        if (!validLegacyReportBinding(report) || Object.entries(patch).some(([k, v]) => !same(r[k], v)) ||
+            r.text !== undefined && (!preserveLegacyText || kind !== 'privateReply' || r.text !== body.text)) blocked('partial-report-binding');
         entry.action = 'bound';
       } else {
         if (archive.get('redactedFromHash') !== undefined || parent.get('redactedFromHash') !== undefined) blocked('report-version-unproven');
@@ -97,11 +98,12 @@ async function inspect(tx, db, candidates, now) {
   }
   return { control: identity(control), selected, entries: selected.map(v => v.entry) };
 }
-export async function planLifecycleReportAdoption(db, candidates, { clock = () => new Date() } = {}) {
+export async function planLifecycleReportAdoption(db, candidates, { clock = () => new Date(), preserveLegacyText = false } = {}) {
   assertFeedRuntimeTarget(db); candidates = candidatesFor(candidates);
+  if (typeof preserveLegacyText !== 'boolean') fail('invalid-lifecycle-report-text-policy');
   return db.runTransaction(async tx => {
-    const now = timeAt(clock), current = await inspect(tx, db, candidates, now);
-    const value = { v: 1, kind: 'content-lifecycle-report-adoption', projectId: db.projectId, plannedAt: stamp(now), control: current.control, entries: current.entries };
+    const now = timeAt(clock), current = await inspect(tx, db, candidates, now, preserveLegacyText);
+    const value = { v: 2, kind: 'content-lifecycle-report-adoption', projectId: db.projectId, preserveLegacyText, plannedAt: stamp(now), control: current.control, entries: current.entries };
     return { ...value, digest: hash(value) };
   }, { readOnly: true });
 }
@@ -113,7 +115,8 @@ export function validateLifecycleReportAdoptionPlan(plan, projectId, approvedDig
     (e.action === 'blocked' ? typeof e.reason === 'string' && /^[a-z-]{1,64}$/.test(e.reason) : e.reason === null &&
       [e.report, e.archive, e.parent, e.thread].every(validIdentity) && digest(e.reportHash) && digest(e.patchHash) && validStamp(e.retainUntil));
   if (!digest(saved) || saved !== approvedDigest || hash(value) !== saved ||
-      !keys(value, 'control,entries,kind,plannedAt,projectId,v') || value.v !== 1 || value.kind !== 'content-lifecycle-report-adoption' ||
+      !(value.v === 1 && keys(value, 'control,entries,kind,plannedAt,projectId,v') ||
+        value.v === 2 && keys(value, 'control,entries,kind,plannedAt,preserveLegacyText,projectId,v') && typeof value.preserveLegacyText === 'boolean') || value.kind !== 'content-lifecycle-report-adoption' ||
       value.projectId !== projectId || !validStamp(value.plannedAt) || !validIdentity(value.control) ||
       !Array.isArray(value.entries) || !value.entries.every(validEntry)) fail('invalid-lifecycle-report-plan');
   const candidates = value.entries.map(e => ({ reportPath: e.reportPath, contentArchiveKey: e.contentArchiveKey, shoutArchiveKey: e.shoutArchiveKey }));
@@ -129,7 +132,7 @@ export async function applyLifecycleReportAdoption(db, plan, { approvedDigest, c
   return db.runTransaction(async tx => {
     const now = timeAt(clock);
     if (now.toMillis() < new Timestamp(...value.plannedAt).toMillis()) fail('lifecycle-report-clock-regressed');
-    const current = await inspect(tx, db, value.entries.map(e => ({ reportPath: e.reportPath, contentArchiveKey: e.contentArchiveKey, shoutArchiveKey: e.shoutArchiveKey })), now);
+    const current = await inspect(tx, db, value.entries.map(e => ({ reportPath: e.reportPath, contentArchiveKey: e.contentArchiveKey, shoutArchiveKey: e.shoutArchiveKey })), now, value.preserveLegacyText === true);
     if (!same(current.control, value.control)) fail('lifecycle-report-control-drift');
     const pending = [];
     for (let n = 0; n < value.entries.length; n++) {
@@ -143,7 +146,7 @@ export async function applyLifecycleReportAdoption(db, plan, { approvedDigest, c
     const finalNow = timeAt(clock);
     if (finalNow.toMillis() < now.toMillis()) fail('lifecycle-report-clock-regressed');
     if (current.entries.some(e => finalNow.toMillis() >= new Timestamp(...e.retainUntil).toMillis())) fail('lifecycle-report-source-drift');
-    for (const item of pending) tx.update(item.report.ref, { ...item.patch, text: FieldValue.delete(), legacyEvidenceBinding: {
+    for (const item of pending) tx.update(item.report.ref, { ...item.patch, ...(value.preserveLegacyText ? {} : { text: FieldValue.delete() }), legacyEvidenceBinding: {
       schemaVersion: 1, migrationDigest: plan.digest, reportCreateTime: item.report.createTime } });
     return { state: pending.length ? 'applied' : 'already-applied', reports: pending.length, writes: pending.length, bodyCopies: 0 };
   });

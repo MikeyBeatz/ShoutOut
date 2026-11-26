@@ -1,7 +1,6 @@
 part of '../main.dart';
 
-bool get _useLifecycleSources =>
-    kIsWeb && WebEnvironment.current.serverContentLifecycle;
+bool get _useLifecycleSources => LifecycleClientPolicy.current.enabled;
 
 // The surrounding row is keyed by its server payload. Preserve the mutable
 // interaction model during parent/list rebuilds; a real refresh replaces it.

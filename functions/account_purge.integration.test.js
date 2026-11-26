@@ -2,7 +2,7 @@ import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { initializeApp, deleteApp } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { accountPurgeJobRef, initialAccountPurgeJob, accountRetentionMillis } from './account_purge_guard.js';
 import { runAccountPurgeJob, purgedShoutContext } from './account_purge_job.js';
 import { createPurgeDocumentPager } from './account_purge_pager.js';
@@ -53,6 +53,22 @@ async function fixture() {
     assert.fail('purge did not finish'); };
   return f;
 }
+
+test('capture-only preserves a legacy purge journal and its original deadline while anonymizing only the owned parent', { skip: !enabled }, async () => {
+  const f = await fixture(), root = await f.add(`shouts/${randomUUID()}`, { authorId: f.uid, status: 'deleted',
+    createdAt: Timestamp.fromMillis(f.identity.requestCreateTime.toMillis() - 1000), title: 'Old account content', text: 'Old body', commentsCount: 1 });
+  const foreign = await f.add(`${root.path}/comments/foreign`, { authorId: 'foreign-author', text: 'Keep foreign conversation', createdAt: Timestamp.now() });
+  const control = await f.add('contentLifecycleControl/current', { schemaVersion: 1, mode: 'active', revision: 1, legacyRevision: 0, captureFenceAt: FieldValue.serverTimestamp() });
+  const capture = createContentLifecycleDatabase(db, { enabled: true, readsEnabled: false, clock: f.options.clock });
+  let result;
+  for (let n = 0; n < 100; n++) {
+    result = await f.run(missing, f.options, capture); if (result.state === 'purged') break;
+    assert.equal(result.state, 'purging', JSON.stringify(result)); f.advance(1000);
+  }
+  assert.equal(result.state, 'purged'); assert.deepEqual((await root.get()).data(), purgedShoutContext);
+  assert.equal((await foreign.get()).get('text'), 'Keep foreign conversation'); assert((await control.get()).get('legacyRevision') >= 1);
+  await db.recursiveDelete(control);
+});
 
 test('opted-in lifecycle stages append to existing positions and purge only owned canonical bodies and their audits', { skip: !enabled }, async () => {
   const f = await fixture(); f.options.contentLifecycleEnabled = true; f.options.moderationCopiesEnabled = true;

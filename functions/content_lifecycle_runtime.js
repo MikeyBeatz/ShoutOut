@@ -1,6 +1,6 @@
 // Prepared adapter for the existing worker. Enabling archive ingress alone
 // does not schedule maintenance. No new host, timer, or live activation.
-import { lifecycleEnabled } from './content_lifecycle.js';
+import { lifecycleReadsEnabled as lifecycleEnabled } from './content_lifecycle.js';
 import { runContentLifecycleMaintenance } from './content_lifecycle_maintenance.js';
 
 export const contentLifecycleMaintenanceConfiguration = Object.freeze({ enabled: false });

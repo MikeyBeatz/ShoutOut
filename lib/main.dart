@@ -32,6 +32,7 @@ import 'app_theme.dart';
 import 'avatar_style.dart';
 import 'firebase_options.dart';
 import 'web_environment.dart';
+import 'lifecycle_client_policy.dart';
 import 'read_sync_gateway.dart';
 import 'read_sync_controller.dart';
 import 'easter_egg_game.dart';

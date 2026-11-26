@@ -9,7 +9,7 @@ import { receiptRetentionFields } from './operation_retention.js';
 import { nextDeleteRate } from './delete_comment.js';
 import { prepareCardMutation } from './feed_card_state.js';
 import { isPurgedShoutContext } from './shout_context.js';
-import { lifecycleEnabled } from './content_lifecycle.js';
+import { lifecycleEnabled, lifecycleReportReadsEnabled } from './content_lifecycle.js';
 import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
 
 const action = 'removeReportedPublicContent';
@@ -41,12 +41,12 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     await requireEligibleActor({ request, db, reader: tx, now: date });
     const [role, legacy, receipt, shout] = await tx.getAll(db.doc(`accountRoles/${uid}`), db.doc(`moderators/${uid}`), receiptRef, shoutRef);
     const level = privateReportModeratorLevel(role.data(), legacy.data());
-    const managed = lifecycleEnabled(db);
-    if (!managed) assertPrivateReportScope(role.data(), level, shout.data());
+    const capturing = lifecycleEnabled(db);
+    if (!capturing) assertPrivateReportScope(role.data(), level, shout.data());
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {
       const stored = receipt.data();
-      if (managed) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
+      if (capturing) assertPrivateReportScope(role.data(), level, (stored.contentArchiveKey || stored.accountArchiveId) ? { geography: stored.moderationGeography } : shout.data());
       if (stored.action !== action || stored.fingerprint !== fingerprint) fail('already-exists', 'Idempotency key was already used for another payload.');
       if (stored.userId !== uid || stored.shoutId !== input.shoutId || stored.targetType !== input.targetType ||
           stored.targetId !== input.targetId || JSON.stringify(stored.reportIds) !== JSON.stringify(input.reportIds) ||
@@ -57,13 +57,13 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
     const hasLiveBody = source.exists && !(input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
+    const reports = await tx.get(pendingContentReports(db, input)), managed = lifecycleReportReadsEnabled(db, reports);
     if (!managed && (!source.exists || !shout.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()))) fail('not-found', 'The report target is unavailable.');
     if (!managed && (!identifier(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');
-    const reports = await tx.get(pendingContentReports(db, input));
     const evidence = managed ? await resolveLifecycleReportGroup(tx, db, reports, input, source, now) : null;
     if (evidence) assertPrivateReportScope(role.data(), level, { geography: evidence.geography });
-    else assertContentReportGroup(reports, input, source);
+    else { assertPrivateReportScope(role.data(), level, shout.data()); assertContentReportGroup(reports, input, source); }
     const requiredRoleLevel = reports.docs.some(d => d.get('status') === 'escalated') ? 4 : 3;
     if (level < requiredRoleLevel) fail('permission-denied', 'Senior moderator permission is required.');
     const body = shout.data();

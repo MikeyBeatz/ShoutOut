@@ -6,6 +6,18 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Probíhá schválené společné dokončení místní přípravy migrace:**
+[rozsah a přechodové fáze](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation).
+Připravené capture-only oddělení, staré účtové běhy a nativní čtení,
+metadata vazeb hlášení bez kopií těl, indexový plán a obnovitelný operátor.
+Analýza bez nálezů, 22 klientských a 126 nástrojových testů prošlo.
+Závěrečná cílená regrese: 42 emulátorových případů, lint Functions a
+216 serverových unit případů prošlo (852 integračních skip nejsou ověření).
+Společné úplné CI naváže po jednom seskupeném pushi; nasazení není součástí úseku.
+Nové volby zůstávají false. Níže jsou důkazy předchozích dokončených úseků;
+Operátor/kompatibilita mají doloženou implementaci; jejich ověřovací podúseky
+zůstávají otevřené do dokončení společných kontrol a úplného CI.
+
 **Aktuální místní práce – společný archiv obsahu:**
 [základ a otevřené návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation),
 větev feature/moderation-report-evidence. Připravené atomické kopie všech

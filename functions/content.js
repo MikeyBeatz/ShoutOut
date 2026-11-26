@@ -45,12 +45,12 @@ function indexedOperation(operation, request, options = {}) {
 }
 
 function projectedOperation(operation, request, options = {}) {
-  return feedRuntimeConfiguration.cardStateEnabled || contentLifecycleConfiguration.enabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
+  return feedRuntimeConfiguration.cardStateEnabled || contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
 }
 
 function lifecycleDatabase() {
   const db = getFirestore();
-  return contentLifecycleConfiguration.enabled
+  return contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled
     ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }).database : db;
 }
 
@@ -63,7 +63,7 @@ export const getLifecycleReportEvidence = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => {
-  if (!contentLifecycleConfiguration.enabled) throw new HttpsError('failed-precondition', 'Content lifecycle is not enabled.');
+  if (!contentLifecycleConfiguration.enabled && !contentLifecycleConfiguration.captureEnabled) throw new HttpsError('failed-precondition', 'Content lifecycle is not enabled.');
   return getLifecycleReportEvidenceOperation(request, lifecycleDatabase());
 });
 

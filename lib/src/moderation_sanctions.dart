@@ -1,6 +1,7 @@
 part of '../main.dart';
 
 bool get _useServerContentSanctions =>
+    _useLifecycleSources ||
     kIsWeb && WebEnvironment.current.serverContentSanctions;
 
 class _ModerationDecisionCancelled implements Exception {}

@@ -1589,7 +1589,7 @@ class _ShoutOutHomeState extends State<ShoutOutHome>
             followedUserIds: _followedUserIds,
           ),
           2 => MyShoutsPage(
-            serverPages: _useSpatialFeed,
+            serverPages: _useSpatialFeed || _useLifecycleSources,
             position: _currentPosition,
             shouts: _shouts
                 .where(

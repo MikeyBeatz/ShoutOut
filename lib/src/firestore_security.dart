@@ -248,12 +248,15 @@ final _commentDeletionGateway = CommentDeletionGateway(
 );
 
 bool get _useServerPrivateReportRemoval =>
+    _useLifecycleSources ||
     kIsWeb && WebEnvironment.current.serverPrivateReportRemoval;
 
 bool get _useServerContentReportDecisions =>
+    _useLifecycleSources ||
     kIsWeb && WebEnvironment.current.serverContentReportDecisions;
 
 bool get _useServerPublicReportRemoval =>
+    _useLifecycleSources ||
     kIsWeb && WebEnvironment.current.serverPublicReportRemoval;
 
 ContentReportTarget _contentReportTarget(

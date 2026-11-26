@@ -1,8 +1,9 @@
 // Inactive bounded adapter. No exported Scheduler host or live cadence.
 import { Timestamp, FieldPath } from 'firebase-admin/firestore';
-import { lifecycleEnabled, validateLifecycleThread, lifecycleControlUsable } from './content_lifecycle.js';
+import { lifecycleReadsEnabled as lifecycleEnabled, validateLifecycleThread, lifecycleControlUsable } from './content_lifecycle.js';
 import { createPurgeDocumentPager } from './account_purge_pager.js';
 import { stepContentLifecycleTree, expireLifecycleAccountCopy, finishContentLifecycleThread } from './content_lifecycle_purge.js';
+import { validAccountReportBinding } from './account_archive_lifecycle_binding.js';
 
 const phases = ['source', 'copies', 'reports', 'commentReports', 'privateReplyReports', 'clearances', 'archives', 'finish'];
 const fail = message => { throw new Error(message); };
@@ -44,7 +45,7 @@ export async function runContentLifecycleMaintenance(db, { maxSteps, maxElapsedM
     const rows = await tx.get(db.collection(collection === 'clearances' ? 'moderationClearances' : collection)
       .where('shoutId', '==', candidate.id).limit(pageSize));
     for (const row of rows.docs) {
-      if (collection !== 'clearances' && !/^[a-f0-9]{64}$/.test(row.get('contentArchiveKey') ?? '')) fail('lifecycle-report-drain-unbound');
+      if (collection !== 'clearances' && !/^[a-f0-9]{64}$/.test(row.get('contentArchiveKey') ?? '') && !validAccountReportBinding(row)) fail('lifecycle-report-drain-unbound');
       tx.delete(row.ref, { lastUpdateTime: row.updateTime });
     }
     return { complete: rows.size < pageSize, deleted: rows.size };

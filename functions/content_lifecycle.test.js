@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Timestamp } from 'firebase-admin/firestore';
 import { lifecycleTimes, lifecycleDay, lifecycleArchiveKey, lifecycleReferenceRedaction,
-  createContentLifecycleDatabase, lifecycleBinding, lifecycleGeography, lifecycleControlUsable } from './content_lifecycle.js';
+  createContentLifecycleDatabase, lifecycleBinding, lifecycleReadsEnabled, lifecycleGeography, lifecycleControlUsable } from './content_lifecycle.js';
 import { runContentLifecycleMaintenance } from './content_lifecycle_maintenance.js';
 
 test('ordinary and Business deadlines are public end plus seven plus sixty days, without report extensions', () => {
@@ -25,6 +25,15 @@ test('disabled lifecycle preserves the exact database and performs no maintenanc
   } });
   assert.equal(createContentLifecycleDatabase(raw), raw);
   assert.deepEqual(await runContentLifecycleMaintenance(raw), { state: 'disabled', steps: 0, deleted: 0 });
+});
+
+test('capture, reader and maintenance gates are independent and default off', async () => {
+  const raw = { projectId: 'shoutout-dev-46c81' };
+  const capture = createContentLifecycleDatabase(raw, { enabled: true, readsEnabled: false });
+  assert.equal(capture[lifecycleBinding].enabled, true); assert.equal(lifecycleReadsEnabled(capture), false);
+  assert.deepEqual(await runContentLifecycleMaintenance(capture), { state: 'disabled', steps: 0, deleted: 0 });
+  assert(lifecycleReadsEnabled(createContentLifecycleDatabase(raw, { enabled: true })));
+  assert.throws(() => createContentLifecycleDatabase(raw, { readsEnabled: true }), /invalid-content-lifecycle/);
 });
 
 test('immutable identity ignores counters while preserving text, birth and project boundaries', () => {

@@ -15,6 +15,7 @@ import { purgeScrubPatch } from './account_purge_policy.js';
 import { operationTestKey } from './test_helpers.js';
 import { encodeGeohash } from './geohash.js';
 import { canonical } from './feed_block_index.js';
+import { planLifecycleReportCompatibility, applyLifecycleReportCompatibility } from './content_lifecycle_report_compatibility.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const types = ['shout', 'comment', 'privateReply'];
@@ -115,6 +116,29 @@ for (const kind of types) test(`migrated ${kind} is readable and decidable after
   await f.role.update({ moderationScope: { countries: ['DE'] } });
   await assert.rejects(readEvidence(f.request(kind), f.rt.database, f.clock), e => e.code === 'permission-denied');
   await assert.rejects(decideContentReportsOperation(req, db, f.clock), e => e.code === 'permission-denied');
+});
+
+test('capture-only migrated reports remain decidable after source loss while private legacy text waits for compatible readers', { skip: !enabled }, async t => {
+  const f = await fixture(t); await f.adopt();
+  const plan = await planPage(f.rt.database, await f.candidates(), { clock: f.clock, preserveLegacyText: true });
+  await f.apply(plan); assert.equal((await f.reports.privateReply.get()).get('text'), 'Existing original private body');
+  assert.equal((await f.apply(plan)).writes, 0);
+  for (const ref of Object.values(f.sources).reverse()) await ref.delete();
+  const db = createContentLifecycleDatabase(f.raw, { enabled: true, readsEnabled: false, clock: f.clock });
+  for (const kind of types) {
+    const req = f.request(kind); req.data = { expectedUserId: f.moderatorId, targetType: kind, shoutId: f.root.id,
+      ...(kind === 'shout' ? {} : { targetId: f.sources[kind].id }), reportIds: [f.reports[kind].id], decision: 'resolve',
+      idempotencyKey: operationTestKey(`staged_${kind}`, f.clock()) };
+    assert.equal((await decideContentReportsOperation(req, db, f.clock)).count, 1);
+    await decideContentReportsOperation(req, db, f.clock);
+  }
+  for (const doc of (await f.raw.collection('serverOperations').where('userId', '==', f.moderatorId).get()).docs) f.extra.push(doc.ref);
+  const scrub = await planLifecycleReportCompatibility(f.raw, [f.reports.privateReply.path], { clock: f.clock });
+  await assert.rejects(applyLifecycleReportCompatibility(f.raw, scrub, { approvedDigest: scrub.digest, compatibleWriters: true, clock: f.clock }), /compatible-readers/);
+  assert.equal((await applyLifecycleReportCompatibility(f.raw, scrub, { approvedDigest: scrub.digest, compatibleWriters: true, compatibleReaders: true, clock: f.clock })).writes, 1);
+  assert.equal((await f.reports.privateReply.get()).get('text'), undefined);
+  await f.role.update({ moderationScope: { countries: ['DE'] } });
+  await assert.rejects(readEvidence(f.request('privateReply'), f.raw, f.clock), e => e.code === 'permission-denied');
 });
 
 test('later target edits cannot be presented as the old reported version', { skip: !enabled }, async t => {

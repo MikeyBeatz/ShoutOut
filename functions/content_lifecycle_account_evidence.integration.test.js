@@ -12,6 +12,7 @@ import { decideContentReportsOperation } from './decide_content_reports.js';
 import { removeReportedPrivateReplyOperation } from './remove_reported_private_reply.js';
 import { removeReportedPublicContentOperation } from './remove_reported_public_content.js';
 import { sanctionContentOperation } from './moderation_sanctions.js';
+import { planLifecycleReportCompatibility, applyLifecycleReportCompatibility } from './content_lifecycle_report_compatibility.js';
 import { operationTestKey } from './test_helpers.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
@@ -232,4 +233,49 @@ test('repeated reads within a report-group transaction reuse the bounded account
   }, { readOnly: true });
   assert.deepEqual(trace, { documentReads: 11, readCalls: 5, queryReads: 1 });
   t.diagnostic(`ACCOUNT_EVIDENCE_READ_TRACE ${JSON.stringify(trace)}; repeatReads=0; writes=0; excludes actor/report reads and cloud billing`);
+});
+
+test('account report metadata binds once without a body copy and remains readable after text cleanup', { skip: !enabled }, async t => {
+  const f = await fixture(t), original = await f.report.get(), archive = await f.copy.get();
+  const plan = await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock });
+  assert.equal(plan.entries[0].action, 'bind-account'); assert(!JSON.stringify(plan).includes('Existing original child'));
+  const options = { approvedDigest: plan.digest, compatibleReaders: true, compatibleWriters: true, clock: f.clock };
+  await assert.rejects(applyLifecycleReportCompatibility(f.raw, plan, { ...options, compatibleReaders: false }), /readers-and-writers/);
+  assert((await f.report.get()).updateTime.isEqual(original.updateTime));
+  assert.deepEqual(await applyLifecycleReportCompatibility(f.raw, plan, options), { state: 'applied', reports: 1, writes: 1, bodyCopies: 0 });
+  const bound = await f.report.get(); assert.equal(bound.get('accountArchiveId'), f.copy.id); assert.equal(bound.get('contentArchiveKey'), undefined);
+  assert.equal(bound.get('text'), undefined); assert(bound.createTime.isEqual(original.createTime));
+  assert((await f.copy.get()).updateTime.isEqual(archive.updateTime)); assert.equal((await f.read()).targetData.text, 'Existing original child');
+  assert.equal((await applyLifecycleReportCompatibility(f.raw, plan, options)).writes, 0);
+  await f.report.update({ status: 'resolved' }); assert.equal((await applyLifecycleReportCompatibility(f.raw, plan, options)).writes, 0);
+  assert.equal((await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock })).entries[0].action, 'covered');
+});
+
+test('bound account report context purge retains only global authority and never opens the parent conversation', { skip: !enabled }, async t => {
+  const f = await fixture(t), plan = await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock });
+  await applyLifecycleReportCompatibility(f.raw, plan, { approvedDigest: plan.digest, compatibleReaders: true, compatibleWriters: true, clock: f.clock });
+  await f.report.update({ shoutArchiveKey: FieldValue.delete(), moderationGeography: null, parentContextPurged: true });
+  await f.parent.delete(); await assert.rejects(f.read(), e => e.code === 'permission-denied');
+  await f.role.update({ level: 5 }); const result = await f.read();
+  assert.equal(result.parentData, undefined); assert.equal(result.targetData.text, 'Existing original child');
+});
+
+test('metadata compatibility never binds an unproven original copy or re-created report', { skip: !enabled }, async t => {
+  const f = await fixture(t, 'privateReply', { mutateCopy: true });
+  const plan = await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock });
+  assert.equal(plan.entries[0].action, 'blocked');
+  await assert.rejects(applyLifecycleReportCompatibility(f.raw, plan, { approvedDigest: plan.digest, compatibleReaders: true, compatibleWriters: true, clock: f.clock }), /plan-blocked/);
+  assert.equal((await f.report.get()).get('accountArchiveId'), undefined);
+});
+
+test('account binding preserves old-client text first and scrubs it only after a separate reader acknowledgement', { skip: !enabled }, async t => {
+  const f = await fixture(t), plan = await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock, preserveLegacyText: true });
+  await applyLifecycleReportCompatibility(f.raw, plan, { approvedDigest: plan.digest, compatibleWriters: true, clock: f.clock });
+  assert.equal((await f.report.get()).get('text'), 'Existing original child'); assert((await f.report.get()).get('accountArchiveId'));
+  assert.equal((await f.read()).targetData.text, 'Existing original child');
+  const cleanup = await planLifecycleReportCompatibility(f.raw, [f.report.path], { clock: f.clock });
+  assert.equal(cleanup.entries[0].action, 'scrub');
+  await assert.rejects(applyLifecycleReportCompatibility(f.raw, cleanup, { approvedDigest: cleanup.digest, compatibleWriters: true, clock: f.clock }), /compatible-readers/);
+  await applyLifecycleReportCompatibility(f.raw, cleanup, { approvedDigest: cleanup.digest, compatibleWriters: true, compatibleReaders: true, clock: f.clock });
+  assert.equal((await f.report.get()).get('text'), undefined); assert.equal((await f.read()).targetData.text, 'Existing original child');
 });
