@@ -6,6 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Shout Flight: pripravena oprava ovladani a plynulosti**, fix/shout-flight-rendering.
+[Diagnoza, zmeny a overeni](reference/PRODUCT_FLOWS.md#shout-flight-ovladani-a-plynulost-26-listopadu).
+Puvodni paleta ma spravny kontrast; pricina konkretni relace neni prokazana.
+Kresleny zvukovy prepinac s vlastnim pozadim, Ticker/repaint bez celeho buildu,
+zachovany 16ms simulacni krok a volitelne mistni FPS/p95. Nasleduje uplne CI
+a pouze DEV Hosting; zlepseni na fyzickem telefonu zatim nepotvrzene.
+
+
 **Hudba Shout Flight je nasazená v DEV:** [chování a důkazy](reference/PRODUCT_FLOWS.md#shout-flight--hudba-ve-hře).
 Release **1da51c1a2556035e8193dd4de787bf9330cc0e96**, větev feature/shout-flight-music-dev,
 [úplné CI 45893689471 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45893689471),

@@ -138,10 +138,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(backend.starts, 1);
-      expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('flight-music-toggle')))
+            .isSelected,
+        isTrue,
+      );
       await tester.tap(find.byKey(const Key('flight-music-toggle')));
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('flight-music-toggle')))
+            .isSelected,
+        isFalse,
+      );
       await tester.tap(find.byKey(const Key('flight-music-toggle')));
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);

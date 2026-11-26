@@ -303,3 +303,42 @@ audio/mpeg a 206 pro Range 0–15/2670765. SHA-256 zvuku:
 852fe027ebc49b53bccfd4e3d8b45e47de0b8ff120f887d24a70d5038d1d3b75.
 Návratový Hosting f8f0b0338d6eb03d. Server, Rules, Auth, plánovače ani data
 se v tomto úseku nenasazovaly ani neměnily.
+
+<a id="shout-flight-ovladani-a-plynulost-26-listopadu"></a>
+### Shout Flight: ovládání a plynulost (26. listopadu)
+
+Vlastník potvrdil poslech na telefonu, ale na desktopu neviděl stisknutelnou
+ikonu; na telefonu v tmavém vzhledu byla viditelná. Diagnostika původního
+kódu nad skutečnými ThemeData aplikace ověřila pro oba stavy kontrast
+14,43 : 1 ve světlém a 14,74 : 1 v tmavém vzhledu. Obě původní ikony jsou
+ve vydaném fontu. Hypotéza chybné bílé barvy ani stará fontová cache proto
+nejsou prokázané příčiny konkrétní relace; HTTP font měl max-age=3600.
+Oprava nepovažuje domněnku za potvrzenou diagnózu: místně kreslený reproduktor
+s vlastním tónovaným pozadím odstraňuje závislost na MaterialIcons a výslovně
+používá dvojici secondaryContainer/onSecondaryContainer. Ověřeno zapnuto/vypnuto,
+kontrast 9,02 : 1 / 7,62 : 1 a viditelný stisknutelný obdélník na šířce 390 px.
+
+Doložené slabiny původní animace: Timer.periodic(16 ms) bez vazby na snímky
+obrazovky, 30 přestaveb celé stránky za 30 snímků a nový TextPainter/layout
+hráče při každém překreslení. Nový Ticker aktualizuje pouze CustomPainter
+přes repaint Listenable, skóre má samostatný ValueListenableBuilder a kresba
+hráče používá znovu stejný TextPainter do změny velikosti/motivu. Simulace
+zachovává původní 16ms krok; interpolace vyhlazuje vykreslení při 30/60/120 Hz.
+Zdržení se dohání omezeným počtem kroků (nejvýše 50 ms přijatého času),
+pozadí nebo překrytá trasa simulaci pozastaví bez následného přehrání mezery.
+Porovnávací widgetový test: 30 → 0 přestaveb celé stránky za 30 snímků;
+nejde o měření FPS fyzického telefonu ani důkaz konkrétního zrychlení GPU.
+
+Tlačítko FPS zapíná místní průběžné měření intervalů Ticker callbacků při hře:
+průměrné FPS a p95 intervalů v ms, nová hodnota přibližně jednou za sekundu.
+Měřicí okno je omezené na 240 vzorků, při pauze se resetuje, bez odesílání dat.
+Jde o kadenci animace, nikoli počet skutečně zobrazených GPU snímků. Pro
+hlubší diagnózu webu použít [Chrome Performance podle Flutteru](https://docs.flutter.dev/perf/web-performance);
+[repaint bez build/layout](https://api.flutter.dev/flutter/rendering/CustomPainter-class.html).
+
+Důkazy: test/flight_rendering_test.dart (skutečné motivy, oba stavy, šířka,
+přestavby, FPS, pozadí i překrytí), test/flight_frame_clock_test.dart
+(30/60/120 Hz, dlouhý výpadek, reset a naměřená kadence), původní zvukové,
+fyzikální a čtyři herní widgetové regrese. Fyzický telefon po této změně
+zatím neověřen; nasazení až po úplném CI přesného zdroje, pouze DEV Hosting.
+MVP ani backlogové váhy se vedlejší herní úpravou nenavyšují.
