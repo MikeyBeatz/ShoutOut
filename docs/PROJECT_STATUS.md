@@ -6,29 +6,27 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončovací DEV archiv je schválený a probíhá.** [Podrobné důkazy a pořadí](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
-Zdroj **ebae0e321e6aa536b68a90e8610f1eb37bb824bf** má [úspěšné úplné CI 46000078269](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46000078269).
-Čistá nasazovací kopie je build/releases/archive-capture-ebae0e3.
-V DEV bylo odstraněno přesných 11 schválených MVP kořenů; ostatních
-28 Shoutů /99 komentářů /1 soukromá odpověď zachováno. Původní pending
-žádost má stejné SDK verze. Její Auth už před zásahem neexistoval,
-tato práce jej nesmazala. Nový samostatný klíč je založený; 18 indexových
-operací bez TTL je dokončených/READY. 31 Functions, Rules a web jsou nasazené
-v profilu capture; všechny staré revize RETIRED, prostředky a dva joby stejné.
-Hosting 806c5134994f9acd, Rules 7834bb01-d63c-4639-af6a-03d53f3600d9.
-Právní verze 2026-11-27, capture fence spuštěný. Nové čtení/údržba vypnuté.
-Inventura 131 záznamů /10 stránek; první apply se zastavil před zápisem na
-zděděné inline volbě při explicitně vypnutém capture. Lokální oprava/regrese
-prošly (229 serverových unit, 903 integračních skip); nyní nové úplné CI před
-pokračováním adopce. Původní zdroje zatím nejsou převedené.
+**Dokončovací DEV archiv pokračuje po úspěšném druhém CI.** [Důkazy a pořadí](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
+Nasazený capture zdroj ebae0e3 /CI 46000078269: 31 Functions, web 806c5134994f9acd,
+Rules 7834bb01-d63c-4639-af6a-03d53f3600d9; právní verze 2026-11-27.
+Přesných 11 MVP kořenů uklizeno, samostatný klíč založený a 18 selektivních
+indexových operací bez TTL READY. Prostředky/plánovače zachované.
 
-**Nový nález před konečným auditem:** tři resolved testovací hlášení
-MVP modbiz 926a31d2 nemají plně doložitelný původní podklad. Je předložen
-přesný úklid jen těchto tří hlášení; odpověď zatím chybí. Bez ní
-se hlášení nemažou, podklad nevymýšlí a audit neobchází. Druhá etapa
-active a oddělený kompatibilní návrat jsou připravené místně, cílené
-testy i release build prošly, dosud bez nového úplného CI nebo aktivace.
-Ruční testy a jejich nová data až na konec; právní souhlasy se nevytvářejí.
+**Převod původních zdrojů provedený.** Čistý zdroj a221749f5c01c8603309e0128b7f1098f30fb80c má
+[úspěšné úplné CI 46009552516](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46009552516).
+Tři dávky 28/50/50 svázaly 128 zdrojů a vytvořily 28 vláken a 9 retenčně
+platných těl; 119 prošlých zdrojů jen metadata. Ověřeny původní obsahy,
+inkarnace, termíny i beze změny pending žádost a absence původních jobů.
+Auth chyběl už před zásahem; žádný původní Auth účet se nesmazal.
+
+**Konečný audit: 128 ověřených, právě 3 stará pilotní hlášení blokují aktivaci.**
+Vlastník jejich přesný úklid schválil. Nový pevný operátor má šest místních
+zelených testů; před živým použitím potřebuje vlastní přesné úplné CI.
+Po úklidu se provede čerstvá inventura/audit, teprve potom active rollout.
+Nové čtení a obsahová údržba zůstávají vypnuté. Aktivní a kompatibilní návratový
+balíček jsou připravené a ověřené, zatím nenasazené. Ruční pilot i jeho nová
+data na konec; žádné automatické právní souhlasy. DEV/akceptace zatím otevřené,
+pevné metriky nedostávají druhý kredit za již započtenou místní přípravu.
 
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.

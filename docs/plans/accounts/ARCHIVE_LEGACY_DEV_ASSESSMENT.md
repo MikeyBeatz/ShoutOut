@@ -185,17 +185,47 @@ textovou kopii. Rodič všech tří byl změněný až po jejich vytvoření; so
 SDK updateTime proto nesplňuje důkaz původní verze, aniž by se něco odhadlo.
 Původní text se nedoplňuje a audit se nesmí obejít.
 
-Předložený, **zatím neschválený**, nejmenší návrh: uklidit právě tato tři
+Vlastník následně **výslovně schválil** nejmenší postup: uklidit právě tato tři
 resolved testovací hlášení, včetně jejich vložených rozhodnutí, s přesnými
 SDK/hash pojistkami a novým přesným CI. Parent Shout, zbylý komentář,
 soukromá odpověď, postihy a technická potvrzení se zachovají. Nejde o nové
-obecné pravidlo pro skutečná hlášení. Bez odpovědi se tento úklid neprovede.
+obecné pravidlo pro skutečná hlášení. Živý úklid vyžaduje přesné CI operátoru.
 První nezávislé kroky výše zůstávají schválené; konečný migrační audit a
 zapnutí čtení/údržby závisejí na vyřešení tohoto nálezu.
 
-Druhá etapa active a oddělené návratové balíčky se připravují místně. Jejich
-cílené testy i release build prošly; nové úplné CI a živá aktivace této etapy
-dosud neproběhly. Pilotní data ani právní potvrzení se nezakládají.
+Druhá etapa active a oddělené návratové balíčky jsou připravené z čistého
+zdroje a221749f5c01c8603309e0128b7f1098f30fb80c. Jeho
+[úplné CI 46009552516](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46009552516)
+je úspěšné. Release web prošel místní kontrolou v active i rollback profilu;
+Rules i klientský kontrakt jsou shodné, pouze návratová údržba je vypnutá.
+Tato etapa dosud není nasazená. Pilotní data ani právní potvrzení se nezakládají.
+
+### Provedené převzetí zdrojů a schválená výjimka hlášení
+
+Ze samostatné čisté kopie build/releases/archive-active-a221749 byl po přesném
+CI proveden původní plán kořenů cc010734f12f4ccb7565d990965b13d84ae4f5aece76e77bcfa25199185914a1
+a dvě nové dávky potomků po 50. Celkem 128 zdrojů: 28 kořenů /99 komentářů /
+1 soukromá odpověď. Výsledky 62 +53 +50 zápisů; vzniklo 28 thread hlaviček a
+9 dosud retenčně platných archivních těl (6 Shoutů, 2 komentáře, 1 soukromá
+odpověď). Zbylých 119 zdrojů má pouze prošlou vazbu, bez obnovení textu.
+Texty zdrojů se v této etapě zachovávají; čtení a obsahový purge se neaktivují.
+Následuje úplný audit a samostatné ověření původních termínů/pending žádosti.
+
+[Pevný operátor tří hlášení](../../../tools/archive_report_cleanup.mjs) odmítá
+jiné cesty, nevyřízený stav, jiné testovací označení, potomky hlášení a drift
+SDK verzí/hashů celé omezené baseline. V jedné transakci odstraní právě tři
+reporty včetně vložených rozhodnutí, zvýší legacyRevision a uloží sedmidenní
+technické potvrzení ve stávajícím kontraktu cleanupLegacyArchiveFixtures.
+Původní inventura i audit se tím zneplatní; před aktivací je nutná nová úplná
+inventura. Opakování vyžaduje potvrzení a nepřítomnost všech tří původních
+reportů, novou inkarnaci nikdy nemaže. Žádné nové obecné retenční pravidlo.
+
+Místní emulátorové ověření: 5 transakčních případů (souběh, rollback, změna
+zdroje/reportu/controlu, neznámí potomci, ztracená odpověď, znovuvytvořený
+report, zachování obsahu/postihů/pending žádosti/receipts, zneplatnění inventury)
+a 1 CLI kontrakt, celkem 6 pass /0 skip. Nové přesné úplné CI této výjimky
+musí předcházet jejímu živému použití. Ostatní právní, pilotní a retenční
+podmínky schváleného balíku zůstávají platné.
 
 Celý výše uvedený rozsah byl následně výslovně schválen. Připravené zdroje:
 

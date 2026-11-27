@@ -33,21 +33,27 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Schválený dokončovací DEV archiv probíhá:** [stav, důkazy a nový nález](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
-První zdroj ebae0e3 má úspěšné úplné CI 46000078269; přesných 11 MVP
-kořenů uklizeno, klíč založen, 18 selektivních indexových operací bez TTL READY.
-31 Functions, Rules a web nasazené v capture profilu; původní prostředky/joby
-stejné a staré revize RETIRED. Capture fence a inventura 131 záznamů hotové.
-První adopce bezpečně zastavená před zápisem na konfigurační regresi operátoru;
-oprava + aktivní/návratový profil nyní potřebují nové přesné úplné CI. Původní
-pending žádost beze změny, Auth chyběl už před zásahem. Čtení/údržba vypnuté.
+**Dokončovací DEV archiv pokračuje po úspěšném druhém CI.** [Důkazy a pořadí](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
+Nasazený capture zdroj ebae0e3 /CI 46000078269: 31 Functions, web 806c5134994f9acd,
+Rules 7834bb01-d63c-4639-af6a-03d53f3600d9; právní verze 2026-11-27.
+Přesných 11 MVP kořenů uklizeno, samostatný klíč založený a 18 selektivních
+indexových operací bez TTL READY. Prostředky/plánovače zachované.
 
-**Konečný audit/čtení/údržba je podmíněné vyřešením tří starých pilotních hlášení.**
-Přesný návrh jejich úklidu čeká na odpověď; bez ní se nemažou ani
-nevymýšlí původní obsah. Druhá etapa/návrat připraveny místně, nové
-úplné CI a aktivace zatím neproběhly. Ruční testy a pilotní data na konec.
-Metriky neudělují druhý kredit již ověřenému místnímu jádru; DEV/akceptace
-nejsou uzavřené před skutečným dokončením všech bran.
+**Převod původních zdrojů provedený.** Čistý zdroj a221749f5c01c8603309e0128b7f1098f30fb80c má
+[úspěšné úplné CI 46009552516](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46009552516).
+Tři dávky 28/50/50 svázaly 128 zdrojů a vytvořily 28 vláken a 9 retenčně
+platných těl; 119 prošlých zdrojů jen metadata. Ověřeny původní obsahy,
+inkarnace, termíny i beze změny pending žádost a absence původních jobů.
+Auth chyběl už před zásahem; žádný původní Auth účet se nesmazal.
+
+**Konečný audit: 128 ověřených, právě 3 stará pilotní hlášení blokují aktivaci.**
+Vlastník jejich přesný úklid schválil. Nový pevný operátor má šest místních
+zelených testů; před živým použitím potřebuje vlastní přesné úplné CI.
+Po úklidu se provede čerstvá inventura/audit, teprve potom active rollout.
+Nové čtení a obsahová údržba zůstávají vypnuté. Aktivní a kompatibilní návratový
+balíček jsou připravené a ověřené, zatím nenasazené. Ruční pilot i jeho nová
+data na konec; žádné automatické právní souhlasy. DEV/akceptace zatím otevřené,
+pevné metriky nedostávají druhý kredit za již započtenou místní přípravu.
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
