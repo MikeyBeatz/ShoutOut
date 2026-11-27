@@ -6,6 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
+jen administrátor/owner; současné konečné termíny smazání zachovat.
+[Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
+Nový kontaktní index a administrátorský náhled jsou zatím návrh; neprovádět
+implementaci před jeho schválením. Původní tříbodový úsek vlastník požádal
+nejprve vysvětlit, poté doplnil dohledatelnost; obecný souhlas s kódem se netvrdí.
+
+
 **MVP: zahájená integrační revize archivu; první tři přechodové otázky prověřené.**
 [Nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
 Nový potomek nepřevedeného rodiče se bezpečně odmítne; plynulé převzetí

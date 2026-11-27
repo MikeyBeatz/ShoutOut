@@ -12,3 +12,4 @@ Serverové fáze jsou dokončené v DEV; otevřený je klientský přechod a spo
 - [Odebrání reakcí mazaného účtu](ACCOUNT_REACTION_REMOVAL_PLAN.md)
 - [Konečný 60denní úklid účtu](ACCOUNT_RETENTION_PURGE_PLAN.md)
 - [Integrační revize společného archivu před aktivací](CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md)
+- [Archiv obsahu a dohledání účtů podle kontaktu](ARCHIVE_IDENTITY_LOOKUP.md)

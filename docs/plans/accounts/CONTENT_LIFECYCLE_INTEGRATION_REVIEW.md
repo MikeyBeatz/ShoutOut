@@ -9,6 +9,11 @@ větvi s vedlejší úpravou hry. Nejde o inventuru živých dat ani o souhlas s
 zůstává otevřená. Tato část řeší tři předem označené přechodové otázky;
 nenahrazuje úplnou revizi všech writerů, čtenářů a účtového purge.
 
+**Zpřesnění vlastníka 27. listopadu:** okamžitý archiv a dohledatelnost účtů
+přes kontakt mají [samostatný návrh](ARCHIVE_IDENTITY_LOOKUP.md). Schválený je
+přístup administrátora/ownera a zachování současných retenčních termínů;
+implementace nového kontaktního indexu a rozšířeného náhledu zatím schválená není.
+
 ## 1. Starý rodič a nový komentář
 
 **Potvrzeno:** capture-only writer odmítne nové potomky nepřevedeného Shoutu.
