@@ -6,7 +6,13 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
+**Schválená oprava přímého čtení veřejných zdrojů; společný ruční pilot archivu odložený.**
+[Dva doložené nálezy a regrese Rules](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
+Lokálně opravený veřejný parent/author guard, 7 emulátorových testů Rules a
+19 klientských testů odběrů prošlo. Následuje společný push a úplné CI přesného
+zdroje; potom pouze DEV Rules. Zatím žádné nové nasazení této opravy.
+
+**Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
 Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
 [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).

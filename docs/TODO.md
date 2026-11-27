@@ -33,7 +33,13 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
+**Nyní: schválená oprava přímého čtení veřejných zdrojů.**
+[Nálezy, rozsah a regrese](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
+sjednotit veřejný parent/author guard, zachovat vlastní historii a účastnické
+soukromé čtení. Místní Rules/klientské testy prošly; před DEV Rules ještě
+společný push a úplné CI. Bez nové fixture/Auth a bez ručního testu nyní.
+
+**Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
 Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
 [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).

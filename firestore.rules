@@ -57,6 +57,22 @@ service cloud.firestore {
           lifecycleHistoryReadable(get(/databases/$(database)/documents/shouts/$(shoutId)).data));
     }
 
+    // Public source copies share the server source reader's Shout-parent
+    // fence. A deleted Shout remains in its owner's history only.
+    // Private replies deliberately keep the separate participant/history gate.
+    function lifecyclePublicSourceReadable(data) {
+      return !managedContentLifecycle() ||
+        (lifecycleHistoryReadable(data) &&
+          availableAccountTarget(data.get('authorId', '')) &&
+          (data.get('status', '') != 'deleted' || data.get('authorId', '') == request.auth.uid));
+    }
+
+    function lifecyclePublicThreadReadable(shoutId) {
+      return !managedContentLifecycle() ||
+        (exists(/databases/$(database)/documents/shouts/$(shoutId)) &&
+          lifecyclePublicSourceReadable(get(/databases/$(database)/documents/shouts/$(shoutId)).data));
+    }
+
     function managedCardProjection() {
       let control = /databases/$(database)/documents/feedIndexControl/current;
       return exists(control) && get(control).data.get('schemaVersion', 1) == 2 &&
@@ -2131,9 +2147,7 @@ service cloud.firestore {
     }
 
     match /shouts/{shoutId} {
-      allow get: if eligibleUser() && (!managedContentLifecycle() ||
-        (lifecycleHistoryReadable(resource.data) &&
-          (resource.data.get('status', '') != 'deleted' || resource.data.get('authorId', '') == request.auth.uid)));
+      allow get: if eligibleUser() && lifecyclePublicSourceReadable(resource.data);
       allow list: if eligibleUser() && limited(50) && !managedContentLifecycle();
       allow create: if canCreateContent() &&
         !managedFeedProjection() &&
@@ -2172,8 +2186,8 @@ service cloud.firestore {
               (oldType == 'dislike' ? 1 : 0);
         }
 
-        allow get: if eligibleUser() && lifecycleThreadReadable(shoutId);
-        allow list: if eligibleUser() && limited(50) && lifecycleThreadReadable(shoutId);
+        allow get: if eligibleUser() && lifecyclePublicThreadReadable(shoutId);
+        allow list: if eligibleUser() && limited(50) && lifecyclePublicThreadReadable(shoutId);
         allow create: if canCreateContent() &&
           !managedCardProjection() &&
           activeShout(shoutId) &&

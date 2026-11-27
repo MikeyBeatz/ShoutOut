@@ -403,6 +403,72 @@ Nové pilotní fixture ani Auth účet zatím nevznikly. Po dostupnosti klienta
 jeden společný průchod v již schválených mezích, vymezený úklid a plánovaná
 souhrnná revize před společnou MVP regresí. Produkce/main se neměnily.
 
+<a id="public-source-read-fix"></a>
+
+## Oprava veřejné čtecí brány po předběžné revizi
+
+Vlastník 27. listopadu schválil jeden společný opravný úsek včetně commit/push,
+úplného CI a následně pouze Rules pro DEV shoutout-dev-46c81. Bez živých
+fixture, Auth účtů, změny Functions/webu, rolí, retence nebo produkce.
+Společný ruční pilot a celková revize před MVP regresí zůstávají otevřené.
+
+Před opravou bylo 12 syntetickými emulátorovými sondami potvrzeno:
+
+- AR-READ-01: cizí oprávněný klient se znalostí ID nesměl číst deleted Shout,
+  ale mohl přímo číst a vypsat jeho veřejné komentáře do historyUntil.
+- AR-READ-02: pending žádost autora Shoutu ještě nebránila přímému čtení
+  jeho dosud active Shoutu a veřejných komentářů tohoto rodiče. Během
+  dávkového účtového úklidu je takový přechodný stav možný.
+
+Hash reprodukovaných Rules odpovídal tehdy nasazenému rulesetu
+1b29a656-f990-42f5-b335-ef35c44c0997. Serverový content_lifecycle_sources.js
+už ověřoval dostupnost autora a vlastnictví deleted rodiče; přímé Rules
+zaostávaly. Jde o přístup ke zdrojovým kopiím, nikoli o otevření soukromého archivu.
+
+### Implementace a místní ověření
+
+V [firestore.rules](../../../firestore.rules) sdílí get Shoutu a get/list
+jeho veřejných komentářů nový lifecyclePublicSourceReadable /
+lifecyclePublicThreadReadable. Při zapnutém readeru vyžadují platné
+historyUntil, dostupného autora rodiče (bez pending žádosti/deleted profilu)
+a u deleted rodiče totožnost vlastníka. Existující availableAccountTarget
+zachovává kompatibilitu chybějícího starého publicProfiles dokumentu.
+Soukromé odpovědi používají původní oddělenou účastnickou/history bránu.
+Autor jednotlivého komentáře nepřidává do dotazu další SDK lookup; tento
+úsek opravuje dvě doložené mezery v dostupnosti rodičovského Shoutu.
+
+[content_lifecycle.integration.test.mjs](../../../tools/rules/content_lifecycle.integration.test.mjs)
+má **7 prošlých testů bez skip**, včetně tří nových matic active/rollback/capture
+a jednoho přechodu otevřeného odběru. Matice pokrývají get/list cizího i vlastního
+obsahu, admin bez přímého bypassu, pending/deleted profil autora rodiče,
+chybějícího rodiče, neplatný/prošlý historyUntil, 50 různých komentujících,
+skutečné první/poslední dotazy detailu, odmítnutí limitu 51, anonymního čtení
+a klientského přepsání vlastnictví. Přímý archiv a cizí soukromá zpráva zůstávají
+nepřístupné. Nový event otevřeného komentářového odběru po pending žádosti
+skončí permission-denied; emulátor sám spolehlivě nepřehodnocuje závislé
+dokumenty bez dalšího zdrojového eventu, proto test tento event vyvolá.
+Tím se netvrdí zpětné odstranění již staženého obsahu z klientské paměti.
+
+**19 klientských testů** live_data_test.dart a live_data_lifecycle_test.dart
+prošlo, včetně permission-denied, změny účtu a zániku obrazovky bez uncaught
+error. Existující StreamBuilder/liveSnapshots API a serverové archivní
+moderování se nemění. Kontroly útoků v rozsahu: anonymní list/get, cizí
+get/list smazaného rodiče, parent pending/deleted, osiřelé podkolekce,
+podvržení authorId, přímé archivní čtení/zápis a staff bypass jsou odmítnuté;
+platné běžné dotazy i vlastní historie jsou kladné kontrolní případy.
+
+Před nasazením: úplné CI přesného čistého zdroje, materializace active
+pravidel s právní verzí 2026-11-27, kontrola úzkého diffu proti aktuálnímu
+rulesetu a nasazení pouze firestore:rules do shoutout-dev-46c81. Potom
+čtecí ověření skutečného rulesetu/hashů a serverové simulace s výhradně
+syntetickým kontextem. Pro simulace se použije
+[Firebase Rules test API](https://firebase.google.com/docs/reference/rules/rest/v1/projects/test)
+s explicitními mocks; žádná živá fixture ani právní potvrzení nevznikne.
+Návratový ruleset je výše uvedená předchozí verze; návrat by znovu otevřel
+tyto nálezy, proto jej použít jen při prokázané kompatibilitní regresi.
+Tento úzký opravený prototyp Rules nenahrazuje celkovou předstartovní revizi.
+V evidenci se doplňují důkazy stávajících částí, nikoli nový kredit či živá akceptace.
+
 ## Důkazy původního čtecího došetření
 
 Pouze technické ignorované výstupy v build/archive-readiness:
