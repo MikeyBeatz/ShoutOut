@@ -2,7 +2,7 @@
 
 [Hlavní rozcestník](../../README.md) · [Aktuální stav](../../PROJECT_STATUS.md)
 
-Serverové fáze jsou dokončené v DEV; otevřený je klientský přechod a společný závěrečný test. Piloty zachovávají datované důkazy, nikoli alternativní současné nasazení.
+Dosavadní účtové serverové fáze jsou dokončené v DEV. Nový společný archiv a dohledání podle kontaktu mají hotovou místní přípravu; jejich živý přechod a závěrečný test zůstávají otevřené. Piloty zachovávají datované důkazy, nikoli alternativní současné nasazení.
 
 - [Odebrání oprávnění a materializace exspirace](ACCOUNT_AUTHORITY_AND_EXPIRATION.md)
 - [Archiv zpráv a komentářů smazaného účtu](ACCOUNT_CONTENT_ARCHIVE_PLAN.md)

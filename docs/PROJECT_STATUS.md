@@ -6,13 +6,20 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválený přípravný balík:** [výsledek a meze](plans/accounts/ARCHIVE_DEV_READINESS.md#místní-výsledek-přípravného-balíku).
-Místně doplněné wrappery, vlastní smazání bez nového přijetí,
-operátor doložených starých vazeb a pouze čtecí preflight; vydaná hra zachovaná.
-Cílené kontroly prošly; probíhá závěrečná revize před společným pushem/CI.
-Potom pouze čtecí inventura shoutout-dev-46c81. Žádný klíč, živé zápisy
-ani rollout; nové volby false a právní verze 2026-07-25. Ruční testy na konec,
-dosud neověřené. Nedává se další kredit za již započtenou implementaci.
+**Přípravný balík archivu dokončený:** [výsledky a další pořadí](plans/accounts/ARCHIVE_DEV_READINESS.md#úplné-ci-a-čtecí-dev-inventura--27-listopadu).
+Zdroj **6e68e03d719aa66e45277204abce9a8bd3a2aa4e** má
+[úspěšné úplné CI 45984217529](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45984217529):
+600 aplikačních, 178 archivních, 483 Rules/transakčních a 151 retenčních
+případů, browsery, ostatní sady, analýza, lint i build. Unit 225 pass /896 skip
+nenahrazují emulátor. Vydaná hra zachovaná; vlastní smazání bez nového
+přijetí a operátor doložených starých vazeb jsou připravené místně.
+Čtecí DEV inventura potvrzuje 27 ACTIVE Functions, stejný web/Rules,
+39 Shoutů /99 komentářů /1 soukromou odpověď a 18 indexových akcí v návrhu.
+**Další brána:** 11 deleted Shoutů nemá přímo doložený původní čas
+odstranění. Doložit původní důkaz nebo předložit konkrétní výjimky; datum
+neodhadovat a migraci neobcházet. Pak konkrétní živý balík ke schválení.
+Bez nasazení, nového klíče nebo živých zápisů. Nové volby false a skutečná
+právní verze 2026-07-25; ruční testy na konec, dosud neověřené.
 
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.

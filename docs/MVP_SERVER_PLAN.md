@@ -3483,3 +3483,16 @@ Pokud bude srovnání potřebné, nejdřív provést read-only inventuru součas
 DEV pojistku a oprávnění. Konkrétní plán změn existujících dat předložit
 vlastníkovi; teprve po souhlasu provést a ověřit. Přihlašovací údaje nikdy
 necommitovat a produkční cíl nepoužít.
+
+
+<a id="archive-dev-readiness-results"></a>
+
+### Archiv: hotová příprava a čtecí DEV inventura 27. listopadu
+
+[Konkrétní výsledky a další pořadí](plans/accounts/ARCHIVE_DEV_READINESS.md#úplné-ci-a-čtecí-dev-inventura--27-listopadu).
+Zdroj 6e68e03 má úspěšné úplné CI 45984217529; wrappery, staré autorské
+vazby a vlastní smazání bez nového přijetí připravené, vydaná hra zachovaná.
+Pouze čtecí inventura našla 39 Shoutů a 11 starých deleted bez přímo doloženého
+času odstranění. Tyto výjimky vyřešit před živou migrací; neodhadovat lhůty.
+18 selektivních indexových akcí je jen návrh. Bez nasazení, klíče, živých
+zápisů nebo Auth účtů; aktivace a společná ruční akceptace zůstávají otevřené.

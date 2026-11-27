@@ -76,7 +76,7 @@ nepřijetí nové verze je výslovně schválené; rutinní kroky se znovu nesch
   rozpracovaný experiment kořenové větve. Nastavení archivu zůstává vypnuté.
 - Čtyři připravené callable exporty mají dosavadní DEV profil a Auth/App Check.
   Identity secret je pouze deklarovaný; off artefakt jej nemountuje. Zapnutá
-  deklarace jej připojí ke všem 17 dosavadním writerům/čtenářům, které runtime
+  deklarace jej připojí ke všem 17 navazujícím writerům/čtenářům, které runtime
   vytvářejí, a k oběma identity endpointům; workerový UID purge klíč nepotřebuje.
 - Připravená právní verze je 2026-11-27, skutečná konfigurace dál 2026-07-25.
   Výjimka pro prepare/finalize přeskočí pouze přijetí podmínek; běžná operace
@@ -105,7 +105,80 @@ záruku počtu účtovaných čtení při transakčních retry. 131 nástrojový
 27 cílených Flutter testů, lint a analýza prošly. Serverové unit: 224 pass,
 895 integračních skip; skip nenahrazují skutečný běh emulátoru. Po doplnění
 připravené konkrétní právní verze následuje závěrečná kontrola a úplné CI
-přesného zdroje. Živá inventura i ruční akceptace jsou dosud neprovedené.
+přesného zdroje. Výsledek CI a provedené čtecí inventury je níže; ruční akceptace
+zůstává neprovedená.
+
+## Úplné CI a čtecí DEV inventura – 27. listopadu
+
+Zdroj **6e68e03d719aa66e45277204abce9a8bd3a2aa4e** má
+[úspěšné úplné CI 45984217529](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45984217529).
+Prošlo 600 aplikačních testů, browsery 17 +2, 131 nástrojových, 483
+Rules/transakčních, 178 archivních a 151 retenčních případů. Prošly také B4,
+moderace, Business, B2, Storage, analýza, lint a webový build. Serverové unit:
+225 pass /896 integračních skip; skip nenahrazují skutečně spuštěné emulátorové
+sady. Herních 13 souborů se shoduje s vydaným d119d63. Žádný rollout neproběhl.
+
+Čtení projektu shoutout-dev-46c81 po tomto CI potvrdilo:
+
+- Databáze (default), Standard /FIRESTORE_NATIVE, europe-west3.
+- 27 Functions ACTIVE; dosavadní profily 256 MiB, max 1 /concurrency 1,
+  15 s pro callables a 60 s pro workery zůstávají. Všechny čtyři nové exporty
+  jsou nadále pouze v připraveném zdroji.
+- Hosting **2075374549f5b49b**, vydaný 26.11.2026 21:57:15 UTC;
+  Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**, beze změny proti doloženému DEV.
+- Deset stránek devíti kolekcí/skupin: 39 Shoutů, 99 veřejných komentářů,
+  1 soukromá odpověď a po jednom reports/commentReports/privateReplyReports.
+  accountContentArchive, contentLifecycleArchive a contentLifecycleThreads
+  mají v této inventuře 0 záznamů. Nejde o inventuru uživatelských kontaktů/Auth.
+- **11 deleted Shoutů nemá přímo doložený původní okamžik odstranění.**
+  Jde o konkrétní nález preflightu, nikoli důkaz, že už nelze dohledat jiný
+  původní serverový doklad. Datum se nedoplnilo z updateTime/expirace/aktuálního
+  času a nevytvořil se náhradní archiv. Před převodem musí existovat ověřitelný
+  doklad, nebo výslovně schválený postup pro tyto staré výjimky. Běžné apply
+  nesmí nejasné řádky obejít či vydávat za dokončenou migraci.
+- Čerstvý indexový návrh: 5 nových složených indexů, 12 vypnutí zbytečné
+  indexace map a 1 skupinový array index auditů, celkem 18 akcí. Pending 0;
+  TTL a nesouvisející definice se nemění. Nic z návrhu se neaplikovalo.
+
+Inventurní soubory jsou místní ignorované technické artefakty v
+build/archive-readiness, bez textů/kontaktů/tokenů. Poradní plán má digest
+f5f86dd2f3135cc706a5cf7c197f50348b21a3f725e30c6c2a783d8a0ba1a233.
+SHA-256 souhrnu: 0e892ef56cae5f4abe66a5f28d2a75a166fb5693e77ca912038eee23258371e3.
+Indexové plány mají digesty
+f1e0f0401ead01cc2fb203adf743089e47a9fef3c0d72b336a6520a00a4a8b8b a
+e19d85fd32a5903200068d0665010eff1d4fb1dc19ccf5b0a0cf72223473e484.
+Úplný technický snapshot má SHA-256
+2248c168d8f93885eb422e40170431b951b2d0bf8ba8c886c1aff9ae9fae25dc.
+API při čtení indexů přijalo pouze výchozí page size a vracelo širší seznam;
+plánovací pohled byl zúžen až po ověření projektových jmen. Původní úplný
+seznam je zachovaný v technickém snapshotu. Neproběhl žádný datový zápis,
+založení control/fence, klíče, Auth účtu ani změna Scheduleru či prostředků.
+
+### Konkrétní další pořadí před živým přechodem
+
+1. Vyřešit důkazy nebo konkrétní postup pro uvedených 11 starých výjimek;
+   nynější souhlas je neupravuje. Počáteční kontaktní pokrytí zůstává jen pro
+   skutečně přihlášené účty po novém přijetí; žádná rekonstrukce historie Auth.
+2. Předložit jeden společný živý balík: přesný DEV cíl, samostatný projektový
+   HMAC klíč, 18 selektivních indexových akcí s čerstvými digesty/READY,
+   kompatibilní web/server/Rules a navržená právní verze. Při všech nových
+   aktivačních zdrojích opět úplné CI přesného commitu; main/produkce se nemění.
+3. Nasadit kompatibilní základ, pak odděleně informování a capture-only fázi
+   s vlastním schváleným fence. Nová verze přijetí se nevytvoří za uživatele.
+   Nové čtyři callables by rozšířily dnešních 27 Functions na 31. Přepnutí
+   právní politiky musí zahrnout i oba read-sync endpointy, ne jen content
+   codebase; účtové workery musí zachovat pokračování a sticky purge.
+4. Teprve po úplném důkazním auditu zapnout nové čtení/údržbu. První pilot
+   ponechá staré textové kopie; návrat zachová čtení nových archivů a úklid.
+   Starý otevřený klient musí mít předem určenou kompatibilní/návratovou cestu.
+5. Konkrétní živý pilot schválit s vymezeným obsahem a jedním novým dočasným
+   účtem pro test odmítnutí nové verze a vlastního smazání. Fixture vytvořit až
+   při dostupném člověku; celý ruční blok níže udělat společně na konci a uklidit.
+
+Tyto kroky jsou připravený další návrh, **ne souhlas s jejich živým provedením**.
+Přípravný balík je dokončený; aktivace, řešení starých výjimek a živá akceptace
+zůstávají otevřené. Nové služby, další produkční limity nebo placený zátěžový
+test se tímto návrhem nepřidávají.
 
 ### Navržená pouze čtecí DEV inventura po přípravě
 
