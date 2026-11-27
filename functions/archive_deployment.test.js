@@ -21,7 +21,7 @@ test('release phases are DEV-only; rollback keeps disclosure, reader and identit
   assert.throws(() => archiveDeploymentProfile(env, 'unknown'), /invalid/);
 });
 
-test('real DEV module graph selects one consistent capture profile without reading a secret or database', () => {
+test('real DEV module graph selects the active reader and maintenance without reading a secret or database', () => {
   const script = `import {contentLifecycleConfiguration as lifecycle} from './content_lifecycle.js';
     import {archiveIdentityConfiguration as identity} from './archive_identity.js';
     import {contentLifecycleMaintenanceConfiguration as maintenance} from './content_lifecycle_runtime.js';
@@ -31,7 +31,23 @@ test('real DEV module graph selects one consistent capture profile without readi
     cwd: import.meta.dirname, encoding: 'utf8', windowsHide: true,
     env: { ...process.env, GCLOUD_PROJECT: 'shoutout-dev-46c81', GOOGLE_CLOUD_PROJECT: 'shoutout-dev-46c81', FIRESTORE_EMULATOR_HOST: '', SHOUTOUT_ARCHIVE_RELEASE_PHASE: '' },
   }));
-  assert.deepEqual(value.lifecycle, { enabled: false, captureEnabled: true, inlineParentAdoption: true });
-  assert.deepEqual(value.identity, { enabled: true, purgeEnabled: true }); assert.equal(value.maintenance.enabled, false);
+  assert.deepEqual(value.lifecycle, { enabled: true, captureEnabled: true, inlineParentAdoption: true });
+  assert.deepEqual(value.identity, { enabled: true, purgeEnabled: true }); assert.equal(value.maintenance.enabled, true);
   assert.equal(value.legal.version, '2026-11-27'); assert.equal(value.legal.archiveDisclosureEnabled, true);
+});
+
+test('the actual fallback module graph preserves reader/capture/legal/identity purge and only pauses content maintenance', () => {
+  const script = `import {contentLifecycleConfiguration as lifecycle} from './content_lifecycle.js';
+    import {archiveIdentityConfiguration as identity} from './archive_identity.js';
+    import {contentLifecycleMaintenanceConfiguration as maintenance} from './content_lifecycle_runtime.js';
+    import {currentLegalPolicy} from './legal_policy.js';
+    console.log(JSON.stringify({lifecycle,identity,maintenance,legal:currentLegalPolicy()}));`;
+  const value = JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: import.meta.dirname, encoding: 'utf8', windowsHide: true,
+    env: { ...process.env, GCLOUD_PROJECT: 'shoutout-dev-46c81', GOOGLE_CLOUD_PROJECT: 'shoutout-dev-46c81',
+      FIRESTORE_EMULATOR_HOST: '', SHOUTOUT_ARCHIVE_RELEASE_PHASE: 'rollback' },
+  }));
+  assert.deepEqual(value.lifecycle, { enabled: true, captureEnabled: true, inlineParentAdoption: true });
+  assert.deepEqual(value.identity, { enabled: true, purgeEnabled: true }); assert.equal(value.maintenance.enabled, false);
+  assert.equal(value.legal.version, '2026-11-27');
 });

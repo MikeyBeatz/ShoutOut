@@ -10,9 +10,10 @@ import { archiveWebConfig, assertDevelopmentProject, buildHostingConfig, devProj
 const actualDev = loadConfig('dev');
 
 test('archive web builds bind the committed DEV phase through deploy precheck; prod and old artifacts fail closed', () => {
-  const capture = archiveWebConfig(actualDev);
+  const capture = archiveWebConfig(actualDev, 'capture');
   assert.equal(capture.legalVersion, '2026-11-27'); assert.equal(capture.serverContentLifecycle, false);
   assert.equal(archiveWebConfig(actualDev, 'active').serverContentLifecycle, true);
+  assert.equal(archiveWebConfig(actualDev).serverContentLifecycle, true);
   assert.equal(archiveWebConfig(actualDev, 'rollback').legalVersion, capture.legalVersion);
   assert.throws(() => archiveWebConfig(loadConfig('prod')), /explicit-dev/);
   const deploy = buildHostingConfig(capture, {}, { archive: true });

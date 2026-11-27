@@ -33,35 +33,18 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Další ucelený návrh:** [dokončení archivu v DEV po došetření](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
-Průzkum hotový; potvrzený rozsah 11 starých MVP bez potomků, přesný dopad
-běžné retence a jeden již prošlý komentář pending autora. Nové úpravy,
-úklid, klíč a aktivace jsou výslovně schválené. Nejprve implementace, testy
-a přesné úplné CI potřebných etap; ruční testy až na konec.
+**Schválený dokončovací DEV archiv probíhá:** [stav, důkazy a nový nález](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
+První zdroj ebae0e3 má úspěšné úplné CI 46000078269; přesných 11 MVP
+kořenů uklizeno, klíč založen, 18 selektivních indexových operací bez TTL
+odesláno. Po READY následuje první capture nasazení a migrace. Původní pending
+žádost beze změny; Auth chyběl už před zásahem.
 
-
-**Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
-jen administrátor/owner; současné konečné termíny smazání zachovat.
-[Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
-Celý společný místní implementační úsek i testy jsou výslovně schválené.
-Místní implementace a ověření jsou uzavřené ve větvi feature/archive-identity-integration;
-zdroj b1ed417 má [úspěšné úplné CI](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486).
-Převzetí starého rodiče, oddělená právní informace, soukromý index a klient
-zůstávají vypnuté; žádný rollout, živá migrace ani nový secret se neprovádí.
-
-
-**MVP: místní integrační úsek uzavřený úplným CI.**
-[Společný výsledek](MVP_SERVER_PLAN.md#archive-identity-local-integration): rodič a
-první odpověď, samostatné informování, kompatibilní návrat, index kontaktů a
-admin/owner náhled. Nyní připravit konkrétní DEV
-plán včetně právní verze a počátečního pokrytí starých účtů/archivů. Nové volby
-jsou false; žádné nasazení ani živá migrace tím nejsou dokončené.
-
-[Přípravný balík a odložené ruční testy](plans/accounts/ARCHIVE_DEV_READINESS.md)
-jsou dokončené místně a úplným CI 45984217529. Čtecí DEV inventura hotová;
-nejprve vyřešit doklady/postup 11 starých deleted Shoutů bez času odstranění,
-pak konkrétní živý přechod. Celý dokončovací DEV úsek je nyní výslovně schválený;
-ruční testy zůstávají na konec a nejsou započtené jako hotové.
+**Konečný audit/čtení/údržba je podmíněné vyřešením tří starých pilotních hlášení.**
+Přesný návrh jejich úklidu čeká na odpověď; bez ní se nemažou ani
+nevymýšlí původní obsah. Druhá etapa/návrat připraveny místně, nové
+úplné CI a aktivace zatím neproběhly. Ruční testy a pilotní data na konec.
+Metriky neudělují druhý kredit již ověřenému místnímu jádru; DEV/akceptace
+nejsou uzavřené před skutečným dokončením všech bran.
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.

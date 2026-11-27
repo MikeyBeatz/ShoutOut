@@ -1,6 +1,6 @@
 // Committed release phase, not a client/Remote Config toggle. Only the exact
 // DEV Cloud Functions project can activate it. Each phase needs exact full CI.
-export const archiveDevDeploymentPhase = 'capture';
+export const archiveDevDeploymentPhase = 'active';
 export function archiveDeploymentProfile(env = process.env, phase = archiveDevDeploymentPhase) {
   if (!['off', 'capture', 'active', 'rollback'].includes(phase)) throw new Error('invalid-archive-deployment-phase');
   const override = env.SHOUTOUT_ARCHIVE_RELEASE_PHASE;

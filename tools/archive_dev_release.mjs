@@ -32,12 +32,12 @@ export function prepareArchiveDevRelease(root,phase=archiveDevDeploymentPhase){
   if(phase!==archiveDevDeploymentPhase&&!(archiveDevDeploymentPhase==='active'&&phase==='rollback'))throw Error('archive-release-committed-phase-required');
   const prepared=archiveReleaseConfiguration(JSON.parse(readFileSync(resolve(root,'config/dev.json'),'utf8')),
     readFileSync(resolve(root,'firestore.rules'),'utf8'),phase);
-  const target=resolve(root,'build/archive-release');mkdirSync(target,{recursive:true});
+  const target=resolve(root,`build/archive-release-${phase}`);mkdirSync(target,{recursive:true});
   const rules=resolve(target,'firestore.rules');writeFileSync(rules,prepared.rules);
   const config=resolve(target,'app-config.json');writeFileSync(config,JSON.stringify(prepared.web,null,2)+'\n');
   const functions={};
   for(const [group,definition]of Object.entries(archiveFunctionGroups)){
-    const artifact=prepareFunctionArtifact(root,`functions-archive-${group}`,definition.entry);
+    const artifact=prepareFunctionArtifact(root,`functions-archive-${phase}-${group}`,definition.entry);
     const envName=`.env.${archiveDevProject}`;writeFileSync(resolve(artifact.target,envName),`SHOUTOUT_ARCHIVE_RELEASE_PHASE=${phase}\n`);
     const hashes=Object.fromEntries([...artifact.files,'package.json','package-lock.json',envName].map(name=>[name,
       createHash('sha256').update(readFileSync(resolve(artifact.target,name))).digest('hex')]));

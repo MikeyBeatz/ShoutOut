@@ -26,5 +26,13 @@ test('materialized modules include the real phase and identity policy without la
     const pkg=JSON.parse(readFileSync(resolve(artifact.source,'package.json'),'utf8'));assert.equal(pkg.engines.node,'22');
     assert(!pkg.scripts);
   }
-  assert.throws(()=>prepareArchiveDevRelease(root,'active'),/committed-phase/);
+  const fallback=prepareArchiveDevRelease(root,'rollback');
+  assert.notEqual(fallback.target,result.target);assert(fallback.manifest.profile.reader&&fallback.manifest.profile.identityPurge);
+  assert.equal(fallback.manifest.profile.maintenance,false);
+  for(const group of Object.keys(result.manifest.functions)){
+    const active=result.manifest.functions[group],paused=fallback.manifest.functions[group];assert.notEqual(active.source,paused.source);
+    for(const file of Object.keys(active.hashes).filter(name=>!name.startsWith('.env.')))assert.equal(active.hashes[file],paused.hashes[file]);
+    assert.equal(readFileSync(resolve(paused.source,'.env.shoutout-dev-46c81'),'utf8'),'SHOUTOUT_ARCHIVE_RELEASE_PHASE=rollback\n');
+  }
+  assert.throws(()=>prepareArchiveDevRelease(root,'capture'),/committed-phase/);
 });

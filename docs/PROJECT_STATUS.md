@@ -6,32 +6,23 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Došetření starých DEV dat dokončené:** [nálezy a návrh společného dokončení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
-11 deleted kořenů má MVP označení, nulové potomky a žádné dohledané související
-receipts/sanctions/reports. Čas odstranění není doplněný; návrh je vymezený
-úklid těchto fixture. Z dalších dat je 22 Shoutů /97 komentářů po termínu,
-6 Shoutů /2 komentáře /1 soukromá odpověď v otevřené retenci. Jeden již prošlý
-komentář patří autorovi původní pending žádosti a adopce jej nyní správně
-zastaví; před přechodem je potřebná ověřená cesta pouze metadat bez nového těla.
-Dnešní průzkum je pouze čtecí, bez změn aplikace/dat nebo nového úplného CI.
-Celý společný dokončovací DEV úsek je výslovně schválený. Probíhá
-implementace operátoru a úzké adopce prošlých metadat. Nové úplné CI ani
-živé zápisy dosud neproběhly; ruční kontrola zůstává na konec.
+**Dokončovací DEV archiv je schválený a probíhá.** [Podrobné důkazy a pořadí](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
+Zdroj **ebae0e321e6aa536b68a90e8610f1eb37bb824bf** má [úspěšné úplné CI 46000078269](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46000078269).
+Čistá nasazovací kopie je build/releases/archive-capture-ebae0e3.
+V DEV bylo odstraněno přesných 11 schválených MVP kořenů; ostatních
+28 Shoutů /99 komentářů /1 soukromá odpověď zachováno. Původní pending
+žádost má stejné SDK verze. Její Auth už před zásahem neexistoval,
+tato práce jej nesmazala. Nový samostatný klíč je založený; 18 indexových
+operací bez TTL je odeslaných, zatím se ověřuje READY. Functions/Rules/web
+ještě nejsou tímto přechodem aktualizované.
 
-**Přípravný balík archivu dokončený:** [výsledky a další pořadí](plans/accounts/ARCHIVE_DEV_READINESS.md#úplné-ci-a-čtecí-dev-inventura--27-listopadu).
-Zdroj **6e68e03d719aa66e45277204abce9a8bd3a2aa4e** má
-[úspěšné úplné CI 45984217529](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45984217529):
-600 aplikačních, 178 archivních, 483 Rules/transakčních a 151 retenčních
-případů, browsery, ostatní sady, analýza, lint i build. Unit 225 pass /896 skip
-nenahrazují emulátor. Vydaná hra zachovaná; vlastní smazání bez nového
-přijetí a operátor doložených starých vazeb jsou připravené místně.
-Čtecí DEV inventura potvrzuje 27 ACTIVE Functions, stejný web/Rules,
-39 Shoutů /99 komentářů /1 soukromou odpověď a 18 indexových akcí v návrhu.
-**Další brána:** 11 deleted Shoutů nemá přímo doložený původní čas
-odstranění. Doložit původní důkaz nebo předložit konkrétní výjimky; datum
-neodhadovat a migraci neobcházet. Pak konkrétní živý balík ke schválení.
-Bez nasazení, nového klíče nebo živých zápisů. Nové volby false a skutečná
-právní verze 2026-07-25; ruční testy na konec, dosud neověřené.
+**Nový nález před konečným auditem:** tři resolved testovací hlášení
+MVP modbiz 926a31d2 nemají plně doložitelný původní podklad. Je předložen
+přesný úklid jen těchto tří hlášení; odpověď zatím chybí. Bez ní
+se hlášení nemažou, podklad nevymýšlí a audit neobchází. Druhá etapa
+active a oddělený kompatibilní návrat jsou připravené místně, cílené
+testy i release build prošly, dosud bez nového úplného CI nebo aktivace.
+Ruční testy a jejich nová data až na konec; právní souhlasy se nevytvářejí.
 
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.

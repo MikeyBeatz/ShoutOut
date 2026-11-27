@@ -125,6 +125,49 @@ Nespouští se placený zátěžový test ani Phone Auth/R2.
 
 ## Dokončovací implementace a pořadí vydání
 
+### Ověřený první zdroj a provedené živé kroky
+
+Zdroj **ebae0e321e6aa536b68a90e8610f1eb37bb824bf** má
+[úspěšné úplné CI 46000078269](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46000078269).
+První b9f193a běh skončil na chybějící vygenerované tabulce důkazů; následný
+commit ji doplnil a ručně spuštěné úplné CI ověřilo celý přesný ebae zdroj.
+Čistá nasazovací kopie: build/releases/archive-capture-ebae0e3.
+
+V DEV již provedené (27.11.2026 kolem 13:00 UTC):
+
+- Přesných 11 MVP kořenů odstraněno v jedné transakci; 129 ostatních zdrojů
+  včetně pending žádosti chráněno. Kontrola: 28 Shoutů /99 komentářů /1 soukromá
+  odpověď, archivních těl zatím 0. Původní žádost má stejné SDK verze.
+- Nový samostatný SHOUTOUT_ARCHIVE_IDENTITY_KEY, verze 1, 32 náhodných bytů
+  zapsaných jako hex64. Hodnota nebyla vypsaná ani zapsaná do místního souboru.
+- Přesných 18 selektivních indexových operací odesláno; TTL beze změny.
+  Následuje kontrola READY, teprve potom Functions/Rules/web. Samotné přijetí
+  operace se nepovažuje za dokončený index.
+
+Původní pending požadavek nemá odpovídající Auth účet již **před** těmito
+změnami (čtecí kontrola 12:41 UTC), ani primární job. Žádný původní Auth účet
+se touto prací neodstranil a požadavek se nemaže, nepřepisuje ani nespouští.
+
+### Dodatečný nález – tři vyřízená stará pilotní hlášení
+
+Všechna tři stávající hlášení byla ověřena proti původnímu manifestu pilotu
+MVP modbiz 926a31d2. U hlášení komentáře již zdroj neexistuje a report nemá
+textovou kopii. Rodič všech tří byl změněný až po jejich vytvoření; současný
+SDK updateTime proto nesplňuje důkaz původní verze, aniž by se něco odhadlo.
+Původní text se nedoplňuje a audit se nesmí obejít.
+
+Předložený, **zatím neschválený**, nejmenší návrh: uklidit právě tato tři
+resolved testovací hlášení, včetně jejich vložených rozhodnutí, s přesnými
+SDK/hash pojistkami a novým přesným CI. Parent Shout, zbylý komentář,
+soukromá odpověď, postihy a technická potvrzení se zachovají. Nejde o nové
+obecné pravidlo pro skutečná hlášení. Bez odpovědi se tento úklid neprovede.
+První nezávislé kroky výše zůstávají schválené; konečný migrační audit a
+zapnutí čtení/údržby závisejí na vyřešení tohoto nálezu.
+
+Druhá etapa active a oddělené návratové balíčky se připravují místně. Jejich
+cílené testy i release build prošly; nové úplné CI a živá aktivace této etapy
+dosud neproběhly. Pilotní data ani právní potvrzení se nezakládají.
+
 Celý výše uvedený rozsah byl následně výslovně schválen. Připravené zdroje:
 
 - [Pevný operátor 11 fixture](../../../tools/archive_legacy_cleanup.mjs):
