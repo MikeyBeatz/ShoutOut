@@ -13,8 +13,14 @@ V DEV bylo odstraněno přesných 11 schválených MVP kořenů; ostatních
 28 Shoutů /99 komentářů /1 soukromá odpověď zachováno. Původní pending
 žádost má stejné SDK verze. Její Auth už před zásahem neexistoval,
 tato práce jej nesmazala. Nový samostatný klíč je založený; 18 indexových
-operací bez TTL je odeslaných, zatím se ověřuje READY. Functions/Rules/web
-ještě nejsou tímto přechodem aktualizované.
+operací bez TTL je dokončených/READY. 31 Functions, Rules a web jsou nasazené
+v profilu capture; všechny staré revize RETIRED, prostředky a dva joby stejné.
+Hosting 806c5134994f9acd, Rules 7834bb01-d63c-4639-af6a-03d53f3600d9.
+Právní verze 2026-11-27, capture fence spuštěný. Nové čtení/údržba vypnuté.
+Inventura 131 záznamů /10 stránek; první apply se zastavil před zápisem na
+zděděné inline volbě při explicitně vypnutém capture. Lokální oprava/regrese
+prošly (229 serverových unit, 903 integračních skip); nyní nové úplné CI před
+pokračováním adopce. Původní zdroje zatím nejsou převedené.
 
 **Nový nález před konečným auditem:** tři resolved testovací hlášení
 MVP modbiz 926a31d2 nemají plně doložitelný původní podklad. Je předložen
@@ -175,7 +181,7 @@ a úplné ověření čtvrtého celku (verze těl/čtení). Podrobnosti v [metod
 
 **Společný DEV přechod moderace a Business je nasazený a technicky ověřený.**
 [Důkazy, pořadí a návrat](MVP_SERVER_PLAN.md#moderation-business-dev-results).
-Serverový zdroj **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
+Předchozí moderační zdroj před archivním přechodem: **05fc1eddf51a2594524774b3ea4857d0e6ae2d1b**, větev
 feature/moderation-business-dev, [úplné CI 45375019177 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177).
 Pouze shoutout-dev-46c81: tři nové callables, šest aktualizovaných Functions,
 původní web **507c7a0b950b74b2** a Rules **82d8db43-d9e9-4bd1-ba3f-f530fa78da57**.
@@ -1527,23 +1533,20 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 | Vrstva | Poslední ověřený DEV stav |
 |---|---|
-| Projekt / Hosting site | `shoutout-dev-46c81` |
-| Aplikace | https://shoutout-dev-46c81.web.app |
-| Webový zdroj / Hosting verze | `78d6a3f3d5bbf80df7c31bebc92ea4fe45a6df88` / `2d6ae9af70840b03`; úplné CI 45077814590 success. B2/B3/B4 a pohyb aktivní pouze DEV; 67 app souborů / 8 HTTP kontrol. Ruční dosahy 1–50 km, výchozí 50. |
-| Finalizace žádosti | Zdroj `a9ff425bb6b01e2d7420f45915b6ea977895fa43`, ACTIVE, revize `finalizeaccountdeletion-00001-wav`, hash `21288ad667885c01f4bbf46dbdfee7a5a7c3025b`; min0/max1, concurrency1, 256 MiB/15 s |
-| Příprava mazání | Zdroj `8b1de68`, ACTIVE `prepareaccountdeletion-00004-jeh`; společný B4 writer |
-| Receipt/read cleanup | `bc4a6e1`, ACTIVE `cleanupoperationreceipts-00004-zel`; původní job každou minutu, nový continuing runner, controls/24h klid a prošlé fixture ověřené. ZIP shodný se 49 soubory balíčku. |
-| Účtové Functions | `8b1de68`, obě ACTIVE; request `00014-sux`, recovery `00014-pof`; 43 zdrojových modulů ověřeno, prostředky/read úklid zachované. |
-| B2 čtecí Functions | `bc4a6e1`, ACTIVE `syncreadbatch-00001-fox` / `getreadstatepage-00001-xub`, klíč v1, min0/max1/concurrency1/256 MiB/15 s, oba HTTP 401 bez identity/attestace; ZIP shodné s 10 soubory balíčku. |
-| Čtecí Functions | `78d6a3f`: ACTIVE `getfeedpage-00007-moc`, delta/V1, newsRecovery a podepsaný rebase/retained metadata; stávající klíč/limity, 100 % provozu, staré revize retired. getSavedShouts `00001-tav` a getOwnShouts `00001-fik` zachované. |
-| Obsahové writery | ACTIVE `createshout-00007-viz` z 20206c4, `deleteshout-00004-wos`, `toggleshoutreaction-00010-toz`; společný B4 writer. Recovery rollout je neměnil. |
-| Další B4 writery | `8b1de68`: ACTIVE `createcomment-00005-ziz`, `deletecomment-00005-xec`, `toggleshoutsave-00007-kiz`; obsahový artefakt má 57 zdrojových modulů. toggleCommentReaction, createContentReport a createPrivateReply se tímto rolloutem neaktualizovaly. |
-| Firestore Rules | `476d216c-9208-4e5c-9143-f583cb82a3e9`, zdroj 17317e9; uzavření přímých obsahových zápisů, B4 publicStates a ochrany čítačů/ukládání. Recovery rollout je neměnil. |
-| Prostorový index / news | Feed control 12 / active, reader/card reader `feed-v3`, writery `[feed-v1, feed-v2, feed-v3]`, card writer feed-v3. News control **6/active** po řízeném průchodu 5/paused. Generace i indexová konfigurace zachované, bez změny TTL. |
-| Vlastní stránky | Index `CICAgLiT_JAK` READY: authorId/status ASC, createdAt/expiresAt/__name__ DESC; bez TTL nebo field změn |
-| Storage | DEV soft delete 0 z dřívějšího schváleného kroku; tento rollout Storage neměnil |
+| Projekt / Hosting site | `shoutout-dev-46c81`, https://shoutout-dev-46c81.web.app |
+| Nasazený zdroj | `ebae0e321e6aa536b68a90e8610f1eb37bb824bf`, úplné CI 46000078269 success; čistá kopie build/releases/archive-capture-ebae0e3 |
+| Web | Hosting `806c5134994f9acd`, 68 souborů; veřejný JS hash shodný s release artefaktem; vydaná hra zachovaná |
+| Functions | 31 ACTIVE, Node.js 22; min0/max1, concurrency1, 256 MiB. 28 callables 15 s, tři worker endpointy 60 s. 4 nové callables bez identity/attestace HTTP 401 |
+| Předchozí revize | 100 % provozu nové revize a všechny starší revize 27 původních Functions doloženě RETIRED; prostředky zachované |
+| Plánovače | Stejné 2 ENABLED joby, cron `* * * * *`, Etc/UTC; bez nového jobu |
+| Firestore Rules | `7834bb01-d63c-4639-af6a-03d53f3600d9`, SHA-256 `116a5ebdc44c268908bcc34e0e798de636cc8156d613f3aa565706c02128211b`; právní verze 2026-11-27, archivní historie/read brána zatím vypnutá |
+| Indexy / klíč | 18 operací dokončeno a indexy READY: 5 složených, 12 mapových výjimek, 1 array CG. TTL beze změny. Nový samostatný SHOUTOUT_ARCHIVE_IDENTITY_KEY v1, 32 náhodných bytů, hodnota neveřejná |
+| Archivní etapa | Capture běží, čtení a obsahová údržba vypnuté. Inventura 131 záznamů /10 stránek. První source apply bezpečně odmítnut před zápisem; oprava operátoru před dalším CI |
+| Vymezený úklid | 11 přesných MVP kořenů odstraněno, 129 ostatních zdrojů chráněno. Původní pending žádost beze změny; její Auth chyběl už před prací |
+| B2/B3/B4 / Storage / produkce | Dosavadní feed a pohyb zachované; nová právní verze vyžaduje skutečné přijetí. Storage, produkce a main beze změny |
 
-Aktuální recovery důkazy jsou v [živém protokolu](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results);
+
+Starší B4 recovery důkazy jsou v [živém protokolu](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results);
 původní desetifunkční přechod B4 v [dřívějším protokolu](plans/feed/B4_DEV_ROLLOUT.md#dev-rollout-results).
 Poslední úsek aktualizoval pouze getFeedPage a web; ostatní nespojovat
 do jednoho nového artefaktu. Návrat webu tohoto úseku: 6762922852bede94.

@@ -35,9 +35,12 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 **Schválený dokončovací DEV archiv probíhá:** [stav, důkazy a nový nález](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
 První zdroj ebae0e3 má úspěšné úplné CI 46000078269; přesných 11 MVP
-kořenů uklizeno, klíč založen, 18 selektivních indexových operací bez TTL
-odesláno. Po READY následuje první capture nasazení a migrace. Původní pending
-žádost beze změny; Auth chyběl už před zásahem.
+kořenů uklizeno, klíč založen, 18 selektivních indexových operací bez TTL READY.
+31 Functions, Rules a web nasazené v capture profilu; původní prostředky/joby
+stejné a staré revize RETIRED. Capture fence a inventura 131 záznamů hotové.
+První adopce bezpečně zastavená před zápisem na konfigurační regresi operátoru;
+oprava + aktivní/návratový profil nyní potřebují nové přesné úplné CI. Původní
+pending žádost beze změny, Auth chyběl už před zásahem. Čtení/údržba vypnuté.
 
 **Konečný audit/čtení/údržba je podmíněné vyřešením tří starých pilotních hlášení.**
 Přesný návrh jejich úklidu čeká na odpověď; bez ní se nemažou ani

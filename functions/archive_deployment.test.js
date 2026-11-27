@@ -51,3 +51,23 @@ test('the actual fallback module graph preserves reader/capture/legal/identity p
   assert.deepEqual(value.identity, { enabled: true, purgeEnabled: true }); assert.equal(value.maintenance.enabled, false);
   assert.equal(value.legal.version, '2026-11-27');
 });
+
+test('metadata operator explicitly disabling capture does not inherit inline parent adoption from an installed profile', () => {
+  const script = `import assert from 'node:assert/strict';
+    import {Firestore} from 'firebase-admin/firestore';
+    import {createFeedRuntime} from './feed_runtime.js';
+    const db=new Firestore({projectId:'shoutout-dev-46c81'});
+    db.runTransaction=()=>assert.fail('metadata operator constructor attempted IO');
+    const options={enabled:true,contentLifecycleEnabled:false,contentCaptureEnabled:false,contentMaintenanceEnabled:false};
+    const runtime=createFeedRuntime(db,{getUser(){assert.fail('unexpected Auth lookup');}},options);
+    assert.equal(runtime.enabled,true);assert.equal(runtime.contentMaintenance,null);
+    assert.throws(()=>createFeedRuntime(db,null,{...options,inlineParentAdoption:true}),/invalid-feed-runtime-enabled/);
+    await db.terminate();console.log('metadata-operator-no-io');`;
+  for (const phase of ['active', 'rollback']) {
+    assert.equal(execFileSync(process.execPath, ['--input-type=module', '-e', script], {
+      cwd: import.meta.dirname, encoding: 'utf8', windowsHide: true,
+      env: { ...process.env, GCLOUD_PROJECT: 'shoutout-dev-46c81', GOOGLE_CLOUD_PROJECT: 'shoutout-dev-46c81',
+        FIRESTORE_EMULATOR_HOST: '', SHOUTOUT_ARCHIVE_RELEASE_PHASE: phase },
+    }).trim(), 'metadata-operator-no-io');
+  }
+});

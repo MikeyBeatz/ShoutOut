@@ -140,9 +140,38 @@ V DEV již provedené (27.11.2026 kolem 13:00 UTC):
   odpověď, archivních těl zatím 0. Původní žádost má stejné SDK verze.
 - Nový samostatný SHOUTOUT_ARCHIVE_IDENTITY_KEY, verze 1, 32 náhodných bytů
   zapsaných jako hex64. Hodnota nebyla vypsaná ani zapsaná do místního souboru.
-- Přesných 18 selektivních indexových operací odesláno; TTL beze změny.
-  Následuje kontrola READY, teprve potom Functions/Rules/web. Samotné přijetí
-  operace se nepovažuje za dokončený index.
+- Přesných 18 selektivních indexových operací dokončeno; všechny požadované
+  indexy READY, TTL beze změny. Ověřeno i dokončení všech 18 long-running operací.
+- 31 Functions ACTIVE v profilu capture, stejné min0/max1/concurrency1/256 MiB,
+  callables 15 s, tři worker endpointy 60 s. Stejné dva minutové Scheduler joby.
+  100 % provozu nové revize; všech 27 předchozích služeb má všechny starší
+  revize ve stavu Active=CONDITION_FAILED / revisionReason=RETIRED. Závěr není
+  odvozený jen z času nebo chybějících metrik.
+- Hosting **806c5134994f9acd**, veřejný main.dart.js SHA-256
+  9d2af5eb747679da367ad1b3a0e9ad10789b5fb63245512b2bb9272bc6c5708e
+  shodný s release artefaktem. Rules **7834bb01-d63c-4639-af6a-03d53f3600d9**,
+  hash 116a5ebdc44c268908bcc34e0e798de636cc8156d613f3aa565706c02128211b.
+  Právní verze 2026-11-27; nové čtení a obsahová údržba vypnuté.
+  Všechny čtyři nové callables vracejí bez identity/attestace HTTP 401.
+- Capture fence spuštěný až po všech výše uvedených důkazech; digest startu
+  ef378488275a6c7d4e49cbea14be9858f5289f324555d41ed891bb88a908cf52.
+  Inventura dokončená: 131 původních záznamů /10 stránek, digest
+  427b1119bcc72a5983852e4c8a9eece5d6e4d3f99b284fb8ad77074e988d72b9.
+
+### Regrese provozního operátoru před první adopcí
+
+První zdrojová dávka má 28 kořenů: 6 otevřených termínů pro kopii a 22 pouze
+prošlých vazeb. Její apply se zastavil **před prvním zápisem** na
+invalid-feed-runtime-enabled: operátor vypnul capture, ale zdědil zapnutou
+inlineParentAdoption z instalovaného profilu. Oprava odvozuje výchozí inline
+volbu od již vyřešeného capture parametru; výslovně rozporné volby dál odmítá.
+Regrese spouští skutečný modulový graf v active i rollback profilu a ověřuje
+metadata-only konstruktor bez IO. Prošly 4 profilové testy, lint a serverové
+unit 229 pass /903 integračních skip. Nejde o důkaz provedené migrace.
+
+Oprava se spojí s již připravenou druhou etapou do nového přesného úplného CI.
+Potom může schválená adopce pokračovat při zachování textových zdrojů;
+nasazení active zůstává podmíněné úplným auditem a vyřešením tří hlášení níže.
 
 Původní pending požadavek nemá odpovídající Auth účet již **před** těmito
 změnami (čtecí kontrola 12:41 UTC), ani primární job. Žádný původní Auth účet
@@ -226,8 +255,9 @@ Pouze technické ignorované výstupy v build/archive-readiness:
   80a327b955aea5446db07974a67e9430fd3a5ac375cbb846a68efd9c65a5deae;
   není apply oprávněním. Před provedením musí existovat čerstvý plán.
 
-Runtime zůstává 6e68e03 s úplným CI 45984217529; průzkum nic nenasazuje,
-nemění živá data a netvrdí nové úplné CI. Nemá nový kredit za již započtenou
-přípravu. Nový souhlas pro navržený společný úsek vyžaduje AGENTS.md:
+V době původního čtecího průzkumu byl runtime 6e68e03 s CI 45984217529;
+průzkum sám nic nenasazoval. Následující schválené a provedené kroky jsou
+uvedené výše. Příprava nedostává druhý kredit. Původní souhlas pro společný
+úsek byl následně udělen podle AGENTS.md:
 „při podstatném rozšíření si vyžádej nový souhlas“ – nový migrační případ,
 zrušení ochrany konkrétních testovacích dat a první živý archiv/klíč.
