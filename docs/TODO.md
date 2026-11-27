@@ -33,12 +33,14 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Nyní: schválená oprava indexu Mé shouty, nalezená při zahájeném pilotu.**
+**Hotovo: indexová oprava Mé shouty v DEV; pokračuje stejný archivní pilot.**
 [Příčina a kontrolní bod](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
 Jeden pilotní Shout A pod TestBusiness je archivovaný a autorsky navázaný;
 jeho skutečné přijetí podmínek je ověřené. Aktivní/Expirované blokuje chybějící
-publicUntil index. Místní kontrola skutečných dotazů/plánu/konfigurace prošla;
-následuje úplné CI a pouze jeden DEV index, potom pokračování téhož pilotu.
+publicUntil index. Zdroj 7c6a122 má úspěšné úplné CI 46065640727; jediný nový
+DEV index CICAgNjpr5sK je READY a oba živé dotazy i kurzory prošly.
+Další krok je opakovat původní Mé shouty/detail pod TestBusiness, potom
+zbývající archivní testy. Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
 Bez další fixture/Auth a bez změn webu/Functions/Rules/TTL nebo retence.
 
 **Hotovo: oprava přímého čtení veřejných zdrojů v DEV.**
@@ -46,7 +48,7 @@ Bez další fixture/Auth a bez změn webu/Functions/Rules/TTL nebo retence.
 zdroj c361526 /[úplné CI 46043558742 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742),
 Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89 a 22 serverových simulací vydané verze.
 Vlastní historie a účastnické soukromé čtení zachované; web/Functions/job beze
-změny. Žádná nová fixture/Auth. Další krok: odložený společný ruční pilot archivu.
+změny. Tento Rules úsek nevytvořil fixture/Auth; navazující pilot už běží výše.
 
 **Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).

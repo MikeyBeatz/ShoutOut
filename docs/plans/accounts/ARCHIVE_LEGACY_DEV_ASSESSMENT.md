@@ -457,6 +457,44 @@ navazující stránku výslovně odlišit od akceptace více než 50 živých ka
 Stupnice dostává další důkazy stávajících částí, nikoli nový kredit nebo
 uzavření stále rozpracovaného ručního pilotu.
 
+### DEV průběh indexové opravy a nezávislá část pilotu
+
+Zdroj **7c6a1229ced05803498a7f6f9bba7acb1045ea93** prošel
+[úplným CI 46065640727](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727),
+včetně deseti indexových regresí, celé aplikační/serverové sady a buildu.
+Čerstvý selektivní plán měl digest
+`c05b9873bd6b4b411f3d18e4ed90b4c076cc83d5797b727dc3c5a863efeb29e4` a právě
+jeden POST. Git blob konfigurace odpovídal přesné definici. Stávající řízený
+archive_dev_indexes apply zkontroloval čistý commit a všechny povinné kroky
+úplného CI; odeslal právě jednu operaci bez TTL. Nový index **CICAgNjpr5sK**
+dosáhl READY a 27. listopadu 21:16:53 UTC prošlo živé ověření skutečných
+SDK dotazů: Aktivní vrací Shout A (1), Expirované správně 0, oba dotazy se
+startAfter také fungují a nevracejí kotvící dokument. U Aktivních je kurzor
+ze skutečně načteného dokumentu, u prázdných Expirovaných je ověřená pouze
+platná konstrukce startAfter nad existujícím A. Živá stránka nad 50 ani
+neprázdné navazující Expirované se tím netvrdí; jejich dotazový kontrakt je
+pokrytý místní regresí. Oprava chybějícího indexu je uzavřená.
+
+Před/po bylo porovnáno všech 18 ostatních indexů, Hosting 14a0f588585839e2,
+Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89, 31 Functions včetně revizí/
+updateTime a dva plánovače; vše beze změny. Původní jeden Shout i původní
+pending žádost mají stejný updateTime. Ověřování nezapsalo žádný obsah;
+během opravy nevznikla nová fixture ani Auth. Technické důkazy:
+build/archive-readiness/manual-pilot/own-history-index-plan.json,
+own-index-apply.log a own-index-verified.json. Návrat aplikace není potřeba;
+starý expiresAt index zůstává zachovaný a nový nic nepřepisuje ani neuděluje
+další oprávnění. Případné odebrání nového indexu by znovu zablokovalo nové
+vlastní seznamy, proto není součástí této opravy.
+
+Během čekání vlastník skutečně přihlásil všechny čtyři stávající testovací
+účty; přijetí 2026-11-27 i kontaktní pozorování jsou potvrzené na serveru.
+Pod TestAdmin vyzkoušel přesný kontakt TestBusiness, otevřel účet, seznam
+Shoutů a archivní detail A; potvrdil označení „Archivní podklad“, nadpis i text.
+Server má přesně tři související audity lookup/shouts/detail s aktérem
+it_admin /roleLevel 5 a případem „MVP archiv 6c00e1d7e8“. Tato dílčí živá
+kontrola je hotová; nenahrazuje podklad hlášení po odstranění zdroje nebo
+vlastní smazání bez nového přijetí. Žádný další obsah nebo Auth nevznikl.
+
 <a id="public-source-read-fix"></a>
 
 ## Oprava veřejné čtecí brány po předběžné revizi

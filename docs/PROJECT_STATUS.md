@@ -6,14 +6,20 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Ruční archivní pilot zahájený; opravu blokujícího indexu už vlastník schválil.**
+**Index Mé shouty opravený a ověřený v DEV; ruční archivní pilot pokračuje.**
 [Diagnóza a oprava Mé shouty](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
 TestBusiness skutečně přijal verzi 2026-11-27 a server zaznamenal jeho identitu.
 Vznikl jediný „MVP archiv 27.11. A 6c00e1d7e8“, atomická archivní kopie,
 autorská vazba a původní 68denní termín ověřené. Další obsah/Auth nevznikl.
-Aktivní i Expirované nyní vracejí chybějící index pro publicUntil. Opravený
-plán/konfigurace a 10 cílených testů prošlo lokálně; před jediným DEV přidáním
-je nutné úplné CI přesného zdroje. Pilot zůstává rozehraný; A znovu nevytvářet.
+Aktivní i Expirované blokoval chybějící index pro publicUntil. Zdroj
+7c6a1229ced05803498a7f6f9bba7acb1045ea93 má
+[úspěšné úplné CI 46065640727](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727).
+Jediný doplněný index CICAgNjpr5sK je READY, živé Aktivní/Expirované i
+navázání kurzorem fungují (1 → 0 a 0 → 0, nikoli živá dávka nad 50).
+Ostatních 18 indexů, web/Rules/31 Functions/dva joby a původní data zachované.
+Pilot zůstává rozehraný; A znovu nevytvářet.
+Všechna čtyři existující testovací přijetí/identity potvrzená; TestAdmin
+potvrdil dohledání účtu a archivní detail, tři skutečné role-5 audity ověřené.
 
 **Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
 [Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
@@ -22,7 +28,8 @@ Zdroj c361526adeeec77328a7c1d640b43dd693e970bd /
 Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89: přímé veřejné čtení respektuje
 deleted rodiče a dostupnost jeho autora. 7 Rules /19 klientských testů a 22
 serverových simulací vydané verze prošlo. Web, 31 Functions a dva joby beze
-změny; žádná nová živá data/Auth. Společný ruční pilot archivu je stále odložený.
+změny; tento Rules úsek nevytvořil živá data/Auth. Navazující pilot už běží,
+jeho aktuální stav určuje přehled výše.
 
 **Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
