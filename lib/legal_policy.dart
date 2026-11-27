@@ -16,6 +16,7 @@ class LegalPolicy {
   }
 
   static const legacyVersion = '2026-07-25';
+  static const preparedArchiveVersion = '2026-11-27';
   final bool archiveDisclosureEnabled;
   final String version;
   String get acceptanceDocument => 'acceptance_${version.replaceAll('-', '_')}';

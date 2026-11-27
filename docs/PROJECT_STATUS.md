@@ -6,6 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Schválený přípravný balík:** [výsledek a meze](plans/accounts/ARCHIVE_DEV_READINESS.md#místní-výsledek-přípravného-balíku).
+Místně doplněné wrappery, vlastní smazání bez nového přijetí,
+operátor doložených starých vazeb a pouze čtecí preflight; vydaná hra zachovaná.
+Cílené kontroly prošly; probíhá závěrečná revize před společným pushem/CI.
+Potom pouze čtecí inventura shoutout-dev-46c81. Žádný klíč, živé zápisy
+ani rollout; nové volby false a právní verze 2026-07-25. Ruční testy na konec,
+dosud neověřené. Nedává se další kredit za již započtenou implementaci.
+
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).

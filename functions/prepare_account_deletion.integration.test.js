@@ -57,7 +57,7 @@ test('duplicate/replayed page acknowledges its original result and never consume
 });
 
 test('Auth, App Check, current actor eligibility and strict owner-only input precede every mutation and replay', { skip: !enabled }, async () => {
-  for (const mode of ['auth', 'app', 'email', 'expected', 'foreign-input', 'profile', 'legal', 'ban', 'intent']) {
+  for (const mode of ['auth', 'app', 'email', 'expected', 'foreign-input', 'profile', 'ban', 'intent']) {
     const f = await fixture(1), request = globalThis.structuredClone(f.request);
     if (mode === 'auth') delete request.auth;
     if (mode === 'app') delete request.app;
@@ -65,7 +65,6 @@ test('Auth, App Check, current actor eligibility and strict owner-only input pre
     if (mode === 'expected') request.data.expectedUserId = 'other';
     if (mode === 'foreign-input') request.data.shoutIds = ['other'];
     if (mode === 'profile') await db.doc(`users/${f.uid}`).delete();
-    if (mode === 'legal') await db.doc(`users/${f.uid}/legal/acceptance_2026_07_25`).delete();
     if (mode === 'ban') await add(`bans/${f.uid}`, {});
     if (mode === 'intent') await add(`accountDeletionRequests/${f.uid}`, { userId: f.uid, status: 'pending' });
     await assert.rejects(prepare(request, db, clock));
@@ -81,4 +80,21 @@ test('failure before commit rolls back every staged source change and the receip
   await assert.rejects(prepare(f.request, db, clock, { beforeCommit: () => { throw new Error('injected transaction failure'); } }), /injected transaction failure/);
   for (const ref of f.shouts) assert.equal((await ref.get()).get('status'), 'active');
   assert.equal((await f.receipt.get()).exists, false);
+});
+
+test('own deletion skips only legal acceptance and leaves ordinary actions gated', { skip: !enabled }, async () => {
+  const f = await fixture(1);
+  await db.doc(`users/${f.uid}/legal/acceptance_2026_07_25`).delete();
+  const { requireEligibleActor } = await import('./callable_security.js');
+  const { finalizeAccountDeletionOperation } = await import('./finalize_account_deletion.js');
+  await assert.rejects(requireEligibleActor({ request: f.request, db }), /legal terms/);
+  await assert.rejects(requireEligibleActor({ request: f.request, db, requireLegalAcceptance: false }), /legal terms/);
+  assert.deepEqual(await prepare(f.request, db, clock), { hidden: 1, hasMore: false });
+  const request = { ...f.request, data: { expectedUserId: f.uid } };
+  const ref = db.doc(`accountDeletionRequests/${f.uid}`); roots.push(ref);
+  assert.equal((await finalizeAccountDeletionOperation(request, db, clock)).ready, true);
+  const first = await ref.get();
+  await finalizeAccountDeletionOperation(request, db, clock);
+  assert((await ref.get()).updateTime.isEqual(first.updateTime));
+  assert.equal((await db.doc(`users/${f.uid}/legal/acceptance_2026_07_25`).get()).exists, false);
 });

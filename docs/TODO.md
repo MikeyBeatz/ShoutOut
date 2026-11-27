@@ -50,6 +50,11 @@ admin/owner náhled. Nyní připravit konkrétní DEV
 plán včetně právní verze a počátečního pokrytí starých účtů/archivů. Nové volby
 jsou false; žádné nasazení ani živá migrace tím nejsou dokončené.
 
+[Konkrétní přípravný balík a odložené ruční testy](plans/accounts/ARCHIVE_DEV_READINESS.md)
+jsou schválené a místně připravené: zachovat vydanou hru, dokončit wrappery, přechod
+právní verze včetně vlastního smazání a operátor doložených starých vazeb.
+Živé zápisy, klíč a rollout tím nejsou schválené; ruční kontroly se sdruží na konec.
+
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.

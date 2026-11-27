@@ -34,10 +34,22 @@ import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js
 import { contentLifecycleConfiguration } from './content_lifecycle.js';
 import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
 import { getLifecycleSourcePageOperation } from './content_lifecycle_sources.js';
-import { preparedArchiveIdentityRuntime } from './archive_identity_runtime.js';
-import { observeArchiveIdentity } from './archive_identity.js';
+import { preparedArchiveIdentityRuntime, createArchiveIdentityHandlers } from './archive_identity_runtime.js';
+import { observeArchiveIdentity as observeArchiveIdentityOperation, archiveIdentityConfiguration } from './archive_identity.js';
 
 if (getApps().length === 0) initializeApp();
+
+// Declaration only. Disabled artifacts do not mount or require this secret.
+const archiveIdentityKey = defineSecret('SHOUTOUT_ARCHIVE_IDENTITY_KEY');
+const identitySecretOptions = archiveIdentityConfiguration.enabled ? { secrets: [archiveIdentityKey] } : {};
+const identityHostOptions = { ...secureCallableOptions, minInstances: 0, maxInstances: 1,
+  concurrency: 1, memory: '256MiB', timeoutSeconds: 15, ...identitySecretOptions };
+function identityHandlers() {
+  return createArchiveIdentityHandlers(preparedArchiveIdentityRuntime(getFirestore()),
+    { getUser: uid => getAuth().getUser(uid) });
+}
+export const observeArchiveIdentity = onCall(identityHostOptions, request => identityHandlers().sync(request));
+export const getArchiveIdentityPage = onCall(identityHostOptions, request => identityHandlers().page(request));
 
 // One switch selects writer + early queue + purge coordinator together. The
 // queue is not scheduled here; activation requires the migration/runtime gate.
@@ -45,7 +57,7 @@ async function indexedOperation(operation, request, { observeIdentity = false, .
   const db = getFirestore(), auth = { getUser: uid => getAuth().getUser(uid) };
   let identityRuntime = preparedArchiveIdentityRuntime(db);
   if (identityRuntime.enabled && observeIdentity) {
-    const proof = await observeArchiveIdentity(request, identityRuntime, auth);
+    const proof = await observeArchiveIdentityOperation(request, identityRuntime, auth);
     identityRuntime = { ...identityRuntime, expectedAuthor: { userId: request.auth.uid, accountKey: proof.accountKey } };
   }
   const runtime = createFeedRuntime(db, auth, { identityRuntime });
@@ -68,6 +80,7 @@ export const getLifecycleSourcePage = onCall({
 }, request => getLifecycleSourcePageOperation(request, getFirestore()));
 
 export const getLifecycleReportEvidence = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => {
@@ -107,6 +120,7 @@ export const getFeedPage = onCall({
 
 // Local preparation only: the client switch remains disabled.
 export const finalizeAccountDeletion = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => {
@@ -116,11 +130,13 @@ export const finalizeAccountDeletion = onCall({
 
 // Prepared locally; deploying this export is a separate rollout step.
 export const prepareAccountDeletion = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => indexedOperation(prepareAccountDeletionOperation, request));
 
 export const deleteShout = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -130,6 +146,7 @@ export const deleteShout = onCall({
 }, request => indexedOperation(deleteShoutOperation, request, { authorOnly: managedModerationAuthorityEnabled }));
 
 export const deleteComment = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -139,21 +156,25 @@ export const deleteComment = onCall({
 }, (request) => projectedOperation(deleteCommentOperation, request, { authorOnly: managedModerationAuthorityEnabled }));
 
 export const removeReportedPrivateReply = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => removeReportedPrivateReplyOperation(request, lifecycleDatabase()));
 
 export const decideContentReports = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => decideContentReportsOperation(request, lifecycleDatabase(), () => new Date(), { resolveUnavailableTargets: orphanReportResolutionEnabled, guardEvidenceRetention: moderationEvidenceRetentionEnabled }));
 
 export const removeReportedPublicContent = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => indexedOperation(removeReportedPublicContentOperation, request));
 
 export const sanctionContent = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
 }, request => sanctionContentOperation(request, lifecycleDatabase()));
@@ -172,6 +193,7 @@ export const revokeSanction = onCall({
 }, request => revokeSanctionOperation(request, getFirestore()));
 
 export const deletePrivateReply = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -181,6 +203,7 @@ export const deletePrivateReply = onCall({
 }, request => deletePrivateReplyOperation(request, lifecycleDatabase()));
 
 export const createShout = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -190,6 +213,7 @@ export const createShout = onCall({
 }, (request) => indexedOperation(createShoutOperation, request, { observeIdentity: true }));
 
 export const createComment = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -199,6 +223,7 @@ export const createComment = onCall({
 }, (request) => projectedOperation(createCommentOperation, request, { observeIdentity: true }));
 
 export const createPrivateReply = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -207,11 +232,12 @@ export const createPrivateReply = onCall({
   timeoutSeconds: 15,
 }, async request => {
   const identity = preparedArchiveIdentityRuntime(getFirestore());
-  const proof = identity.enabled ? await observeArchiveIdentity(request, identity, { getUser: uid => getAuth().getUser(uid) }) : null;
+  const proof = identity.enabled ? await observeArchiveIdentityOperation(request, identity, { getUser: uid => getAuth().getUser(uid) }) : null;
   return createPrivateReplyOperation(request, lifecycleDatabase(proof ? { userId: request.auth.uid, accountKey: proof.accountKey } : null));
 });
 
 export const toggleShoutReaction = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -221,6 +247,7 @@ export const toggleShoutReaction = onCall({
 }, (request) => indexedOperation(toggleShoutReactionOperation, request));
 
 export const toggleCommentReaction = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -230,6 +257,7 @@ export const toggleCommentReaction = onCall({
 }, (request) => toggleCommentReactionOperation(request, lifecycleDatabase()));
 
 export const toggleShoutSave = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,
@@ -239,6 +267,7 @@ export const toggleShoutSave = onCall({
 }, (request) => projectedOperation(toggleShoutSaveOperation, request));
 
 export const createContentReport = onCall({
+  ...identitySecretOptions,
   ...secureCallableOptions,
   minInstances: 0,
   maxInstances: 1,

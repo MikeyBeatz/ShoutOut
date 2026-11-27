@@ -2,9 +2,13 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'flight_score_store.dart';
+import 'flight_music.dart';
+import 'flight_frame_clock.dart';
+import 'flight_sound_icon.dart';
 
 double flightVelocityAfterTap(double velocity) => -.66;
 
@@ -91,28 +95,89 @@ class FlightGameState {
 }
 
 class ShoutFlightPage extends StatefulWidget {
-  const ShoutFlightPage({super.key});
+  const ShoutFlightPage({super.key, this.music});
+
+  /// The page owns and disposes this controller, including injected players.
+  final FlightMusicController? music;
 
   @override
   State<ShoutFlightPage> createState() => _ShoutFlightPageState();
 }
 
-class _ShoutFlightPageState extends State<ShoutFlightPage> {
-  static const _frame = Duration(milliseconds: 16);
+class _ShoutFlightPageState extends State<ShoutFlightPage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   static const _playerX = .25;
   final _random = math.Random();
   final _focusNode = FocusNode();
-  Timer? _timer;
+  late final Ticker _ticker;
+  final _clock = FlightFrameClock();
+  final _frameStats = FlightFrameStats();
+  final _visual = ValueNotifier(const FlightGameState());
+  final _score = ValueNotifier(0);
+  final _fps = ValueNotifier<FlightFrameSample?>(null);
+  _FlightPainter? _painter;
+  bool _showFps = false;
   FlightGameState _game = const FlightGameState();
+  FlightGameState _previousGame = const FlightGameState();
   int _bestScore = 0;
   bool _newRecord = false;
   double _spawnCountdown = .6;
-  int _lastTimerTick = 0;
+  late final FlightMusicController _music;
+  bool _appActive = true;
+  bool _routeCurrent = true;
 
   @override
   void initState() {
     super.initState();
+    _ticker = createTicker(_onFrame);
+    _music = widget.music ?? FlightMusicController();
+    _music.addListener(_musicChanged);
+    WidgetsBinding.instance.addObserver(this);
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _appActive = lifecycle == null || lifecycle == AppLifecycleState.resumed;
+    unawaited(_music.setForeground(_appActive));
     _loadBestScore();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final colors = Theme.of(context).colorScheme;
+    if (_painter?.colors != colors) {
+      _painter?.disposeText();
+      _painter = _FlightPainter(
+        frames: _visual,
+        playerX: _playerX,
+        colors: colors,
+      );
+    }
+    _routeCurrent = ModalRoute.isCurrentOf(context) ?? true;
+    unawaited(_music.setForeground(_appActive && _routeCurrent));
+    _syncTicker();
+  }
+
+  void _musicChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appActive = state == AppLifecycleState.resumed;
+    unawaited(_music.setForeground(_appActive && _routeCurrent));
+    _syncTicker();
+  }
+
+  void _syncTicker() {
+    final active = _game.running && _appActive && _routeCurrent;
+    if (active == _ticker.isActive) return;
+    _clock.reset();
+    _frameStats.reset();
+    _previousGame = _game;
+    if (active) {
+      _ticker.start();
+    } else {
+      _ticker.stop();
+    }
   }
 
   Future<void> _loadBestScore() async {
@@ -125,53 +190,94 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _music.removeListener(_musicChanged);
+    _music.dispose();
+    _ticker.dispose();
+    _painter?.disposeText();
+    _visual.dispose();
+    _score.dispose();
+    _fps.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _tap() {
+    unawaited(_music.retry());
     _focusNode.requestFocus();
     if (_game.gameOver) {
       _prepareGame();
       return;
     }
     if (!_game.running) _startGame();
-    setState(
-      () => _game = _game.copyWith(
-        velocity: flightVelocityAfterTap(_game.velocity),
-        angularVelocity: (_game.angularVelocity + 5.4).clamp(0, 13),
-      ),
+    _game = _game.copyWith(
+      velocity: flightVelocityAfterTap(_game.velocity),
+      angularVelocity: (_game.angularVelocity + 5.4).clamp(0, 13),
     );
   }
 
   void _prepareGame() {
-    _timer?.cancel();
+    _ticker.stop();
+    _clock.reset();
+    _frameStats.reset();
+    _fps.value = null;
     setState(() {
       _game = const FlightGameState();
       _newRecord = false;
       _spawnCountdown = .45;
     });
+    _previousGame = _game;
+    _visual.value = _game;
+    _score.value = _game.score;
   }
 
   void _startGame() {
-    _timer?.cancel();
-    _lastTimerTick = 0;
+    _ticker.stop();
+    _clock.reset();
+    _frameStats.reset();
+    _fps.value = null;
     setState(() {
       _game = const FlightGameState(running: true);
       _newRecord = false;
       _spawnCountdown = .45;
     });
-    _timer = Timer.periodic(_frame, _onFrame);
+    _previousGame = _game;
+    _score.value = 0;
+    _visual.value = _game;
+    _syncTicker();
   }
 
-  void _onFrame(Timer timer) {
-    final elapsedTicks = timer.tick - _lastTimerTick;
-    _lastTimerTick = timer.tick;
-    final delta =
-        (elapsedTicks * _frame.inMicroseconds / Duration.microsecondsPerSecond)
-            .clamp(0.001, 0.05);
-    _tick(delta);
+  void _onFrame(Duration elapsed) {
+    if (!_appActive || !_routeCurrent || !_game.running) return;
+    if (_showFps) {
+      final sample = _frameStats.add(elapsed);
+      if (sample != null) _fps.value = sample;
+    }
+    final steps = _clock.advance(elapsed);
+    for (var step = 0; step < steps && _game.running; step++) {
+      _previousGame = _game;
+      _tick(FlightFrameClock.stepSeconds);
+    }
+    _score.value = _game.score;
+    if (!_game.running) {
+      _visual.value = _game;
+      return;
+    }
+    final alpha = _clock.interpolation;
+    final behind = (1 - alpha) * FlightFrameClock.stepSeconds;
+    _visual.value = _game.copyWith(
+      playerY:
+          _previousGame.playerY +
+          (_game.playerY - _previousGame.playerY) * alpha,
+      rotation:
+          _previousGame.rotation +
+          (_game.rotation - _previousGame.rotation) * alpha,
+      elapsed: math.max(0, _game.elapsed - behind),
+      obstacles: [
+        for (final obstacle in _game.obstacles)
+          obstacle.copyWith(x: obstacle.x + .42 * behind),
+      ],
+    );
   }
 
   void _tick(double delta) {
@@ -210,7 +316,7 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
           (playerY - .032 < gapTop || playerY + .032 > gapBottom);
     });
     if (hitBoundary || hitObstacle) {
-      _timer?.cancel();
+      _ticker.stop();
       _newRecord = score > _bestScore;
       if (_newRecord) {
         _bestScore = score;
@@ -232,17 +338,15 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
       );
       return;
     }
-    setState(
-      () => _game = _game.copyWith(
-        playerY: playerY,
-        velocity: velocity,
-        rotation: rotation,
-        angularVelocity: angularVelocity,
-        elapsed: elapsed,
-        obstacleScore: obstacleScore,
-        score: score,
-        obstacles: obstacles,
-      ),
+    _game = _game.copyWith(
+      playerY: playerY,
+      velocity: velocity,
+      rotation: rotation,
+      angularVelocity: angularVelocity,
+      elapsed: elapsed,
+      obstacleScore: obstacleScore,
+      score: score,
+      obstacles: obstacles,
     );
   }
 
@@ -277,18 +381,64 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(_flightText(context, _FlightText.title))),
+    appBar: AppBar(
+      title: Text(_flightText(context, _FlightText.title)),
+      actions: [
+        TextButton(
+          key: const Key('flight-fps-toggle'),
+          onPressed: () => setState(() {
+            _showFps = !_showFps;
+            _frameStats.reset();
+            _fps.value = null;
+          }),
+          child: Text(
+            'FPS',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              decoration: _showFps ? TextDecoration.underline : null,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: IconButton.filledTonal(
+            key: const Key('flight-music-toggle'),
+            style: IconButton.styleFrom(
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onSecondaryContainer,
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            ),
+            tooltip: _flightText(
+              context,
+              _music.muted || _music.unavailable
+                  ? _FlightText.musicOn
+                  : _FlightText.musicOff,
+            ),
+            onPressed: () => unawaited(_music.toggle()),
+            isSelected: !_music.muted && !_music.unavailable,
+            icon: FlightSoundIcon(
+              muted: _music.muted || _music.unavailable,
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ),
+      ],
+    ),
     body: SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              '${_game.score}',
-              key: const Key('flight-score'),
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: Theme.of(context).colorScheme.primary,
+            ValueListenableBuilder<int>(
+              valueListenable: _score,
+              builder: (context, score, _) => Text(
+                '$score',
+                key: const Key('flight-score'),
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             Text(
@@ -296,6 +446,17 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 8),
+            if (_showFps)
+              ValueListenableBuilder<FlightFrameSample?>(
+                valueListenable: _fps,
+                builder: (context, sample, _) => Text(
+                  sample == null
+                      ? 'FPS: \u2014'
+                      : '${sample.fps.toStringAsFixed(0)} FPS \u00b7 p95 ${sample.p95Milliseconds.toStringAsFixed(1)} ms',
+                  key: const Key('flight-fps-reading'),
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
             Expanded(
               child: Semantics(
                 label: _flightText(context, _FlightText.semantics),
@@ -317,11 +478,7 @@ class _ShoutFlightPageState extends State<ShoutFlightPage> {
                       borderRadius: BorderRadius.circular(22),
                       child: RepaintBoundary(
                         child: CustomPaint(
-                          painter: _FlightPainter(
-                            game: _game,
-                            playerX: _playerX,
-                            colors: Theme.of(context).colorScheme,
-                          ),
+                          painter: _painter,
                           child: Center(
                             child: AnimatedOpacity(
                               opacity: _game.running ? 0 : 1,
@@ -389,6 +546,8 @@ enum _FlightText {
   start,
   instructions,
   newRecord,
+  musicOn,
+  musicOff,
 }
 
 String _flightText(BuildContext context, _FlightText key) {
@@ -405,6 +564,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Klepni do hry nebo stiskni mezerník. Proleť mezerami a nedotkni se okrajů.',
       _FlightText.newRecord: 'Nový rekord',
+      _FlightText.musicOn: 'Zapnout hudbu',
+      _FlightText.musicOff: 'Vypnout hudbu',
     },
     'en': {
       _FlightText.title: 'Shout Flight',
@@ -417,6 +578,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Tap the game or press Space. Fly through the gaps without touching the edges.',
       _FlightText.newRecord: 'New record',
+      _FlightText.musicOn: 'Turn music on',
+      _FlightText.musicOff: 'Turn music off',
     },
     'de': {
       _FlightText.title: 'Shout Flight',
@@ -430,6 +593,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Tippe ins Spiel oder drücke die Leertaste. Fliege durch die Lücken, ohne die Ränder zu berühren.',
       _FlightText.newRecord: 'Neuer Rekord',
+      _FlightText.musicOn: 'Musik einschalten',
+      _FlightText.musicOff: 'Musik ausschalten',
     },
     'pl': {
       _FlightText.title: 'Shout Flight',
@@ -443,6 +608,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Dotknij gry lub naciśnij spację. Przelatuj przez luki bez dotykania krawędzi.',
       _FlightText.newRecord: 'Nowy rekord',
+      _FlightText.musicOn: 'Włącz muzykę',
+      _FlightText.musicOff: 'Wyłącz muzykę',
     },
     'sk': {
       _FlightText.title: 'Shout Flight',
@@ -456,6 +623,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Ťukni do hry alebo stlač medzerník. Preleť medzerami a nedotkni sa okrajov.',
       _FlightText.newRecord: 'Nový rekord',
+      _FlightText.musicOn: 'Zapnúť hudbu',
+      _FlightText.musicOff: 'Vypnúť hudbu',
     },
     'uk': {
       _FlightText.title: 'Shout Flight',
@@ -469,6 +638,8 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Торкніться гри або натисніть пробіл. Пролітайте крізь отвори, не торкаючись країв.',
       _FlightText.newRecord: 'Новий рекорд',
+      _FlightText.musicOn: 'Увімкнути музику',
+      _FlightText.musicOff: 'Вимкнути музику',
     },
     'vi': {
       _FlightText.title: 'Shout Flight',
@@ -481,21 +652,32 @@ String _flightText(BuildContext context, _FlightText key) {
       _FlightText.instructions:
           'Chạm vào trò chơi hoặc nhấn phím cách. Bay qua các khoảng trống và tránh chạm mép.',
       _FlightText.newRecord: 'Kỷ lục mới',
+      _FlightText.musicOn: 'Bật nhạc',
+      _FlightText.musicOff: 'Tắt nhạc',
     },
   };
   return (values[language] ?? values['en']!)[key]!;
 }
 
 class _FlightPainter extends CustomPainter {
-  const _FlightPainter({
-    required this.game,
+  _FlightPainter({
+    required this.frames,
     required this.playerX,
     required this.colors,
-  });
+  }) : super(repaint: frames);
 
-  final FlightGameState game;
+  final ValueNotifier<FlightGameState> frames;
+  FlightGameState get game => frames.value;
   final double playerX;
   final ColorScheme colors;
+  TextPainter? _iconPainter;
+  double? _iconSize;
+
+  void disposeText() {
+    _iconPainter?.dispose();
+    _iconPainter = null;
+    _iconSize = null;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -539,25 +721,30 @@ class _FlightPainter extends CustomPainter {
       34.0,
       54.0,
     );
-    final iconPainter = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(Icons.campaign_rounded.codePoint),
-        style: TextStyle(
-          fontSize: iconSize,
-          fontFamily: Icons.campaign_rounded.fontFamily,
-          package: Icons.campaign_rounded.fontPackage,
-          color: colors.primary,
-          shadows: [
-            Shadow(
-              color: colors.onSurface.withValues(alpha: .25),
-              blurRadius: 3,
-              offset: const Offset(1, 2),
-            ),
-          ],
+    if (_iconSize != iconSize) {
+      disposeText();
+      _iconSize = iconSize;
+      _iconPainter = TextPainter(
+        text: TextSpan(
+          text: String.fromCharCode(Icons.campaign_rounded.codePoint),
+          style: TextStyle(
+            fontSize: iconSize,
+            fontFamily: Icons.campaign_rounded.fontFamily,
+            package: Icons.campaign_rounded.fontPackage,
+            color: colors.primary,
+            shadows: [
+              Shadow(
+                color: colors.onSurface.withValues(alpha: .25),
+                blurRadius: 3,
+                offset: const Offset(1, 2),
+              ),
+            ],
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+        textDirection: TextDirection.ltr,
+      )..layout();
+    }
+    final iconPainter = _iconPainter!;
     iconPainter.paint(
       canvas,
       Offset(-iconPainter.width / 2, -iconPainter.height / 2),
@@ -736,5 +923,5 @@ class _FlightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_FlightPainter oldDelegate) =>
-      oldDelegate.game != game || oldDelegate.colors != colors;
+      oldDelegate.frames != frames || oldDelegate.colors != colors;
 }

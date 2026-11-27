@@ -45,6 +45,14 @@ void main() {
       }
     },
   );
+  test('approved archive version is prepared without activation', () {
+    final prepared = LegalPolicy(
+      archiveDisclosureEnabled: true,
+      version: LegalPolicy.preparedArchiveVersion,
+    );
+    expect(prepared.acceptanceDocument, 'acceptance_2026_11_27');
+    expect(LegalPolicy().version, LegalPolicy.legacyVersion);
+  });
   test('inactive policy preserves the current version and acceptance', () {
     final policy = LegalPolicy();
     expect(policy.version, '2026-07-25');

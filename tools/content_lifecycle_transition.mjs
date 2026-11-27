@@ -8,7 +8,7 @@ import { contentLifecycleConfiguration } from '../functions/content_lifecycle.js
 import { planLifecycleCaptureStart, startLifecycleCapture, validateLifecycleCaptureStartPlan, planLifecycleInventory, validateLifecycleInventoryPlan,
   readLifecycleInventoryPage, validateLifecycleInventoryPage, planLifecycleTransitionBatch, validateLifecycleTransitionBatch,
   applyLifecycleTransitionBatch, auditLifecycleInventoryPage, resolveLifecycleReportCandidates,
-  assembleLifecycleInventory, finishLifecycleInventoryAudit } from '../functions/content_lifecycle_transition.js';
+  assembleLifecycleInventory, finishLifecycleInventoryAudit, planLifecyclePreflight, validateLifecyclePreflight, readLifecyclePreflightPage } from '../functions/content_lifecycle_transition.js';
 
 const root = resolve(import.meta.dirname, '..'), project = 'shoutout-dev-46c81';
 export const requiredLifecycleTransitionChecks = Object.freeze(['Test inactive content lifecycle',
@@ -34,7 +34,7 @@ export function parseLifecycleTransitionArguments(argv) {
   const [action, ...rest] = argv, options = {}, mutating = ['start', 'apply'].includes(action);
   const shared = ['--project', '--output'];
   const allowed = {
-    'plan-start': ['--writer-commit'], start: ['--plan', '--approved-digest', '--confirm-project', '--ci-run', '--confirm-compatible-writers'],
+    'preflight-plan': [], preflight: ['--plan', '--checkpoint'], 'plan-start': ['--writer-commit'], start: ['--plan', '--approved-digest', '--confirm-project', '--ci-run', '--confirm-compatible-writers'],
     plan: [], inventory: ['--plan', '--checkpoint'], prepare: ['--plan', '--phase', '--candidates', '--text-policy'],
     apply: ['--plan', '--approved-digest', '--confirm-project', '--ci-run', '--confirm-compatible-writers', '--confirm-compatible-readers'],
     audit: ['--plan', '--page', '--text-policy'], resolve: ['--plan', '--page', '--archives'],
@@ -47,10 +47,10 @@ export function parseLifecycleTransitionArguments(argv) {
     options[rest[n]] = rest[n + 1];
   }
   if (options['--project'] !== project) throw new Error('lifecycle-transition-explicit-dev-project-required');
-  if (['plan-start', 'plan', 'inventory', 'prepare'].includes(action) && !options['--output']) throw new Error('lifecycle-transition-output-required');
+  if (['preflight-plan', 'preflight', 'plan-start', 'plan', 'inventory', 'prepare'].includes(action) && !options['--output']) throw new Error('lifecycle-transition-output-required');
   if (options['--output']) localPath(options['--output']);
   if (action === 'plan-start' && !/^[a-f0-9]{40}$/.test(options['--writer-commit'] ?? '') ||
-      !['plan-start', 'plan'].includes(action) && !options['--plan'] ||
+      !['preflight-plan', 'plan-start', 'plan'].includes(action) && !options['--plan'] ||
       action === 'prepare' && (!['sources', 'reports', 'accounts', 'compatibility'].includes(options['--phase']) || !options['--candidates']) ||
       ['audit', 'resolve'].includes(action) && !options['--page'] || action === 'resolve' && !options['--archives'] ||
       ['assemble', 'finish-audit'].includes(action) && !options['--pages'] || action === 'finish-audit' && !options['--audits'] ||
@@ -68,7 +68,8 @@ export async function main(argv, { openDatabase = feedAdminDatabase, inspectRele
   const plan = options['--plan'] ? read(options['--plan']) : null;
   if (action === 'start') validateLifecycleCaptureStartPlan(plan, projectId, options['--approved-digest']);
   if (plan && action !== 'start') {
-    if (action === 'apply') validateLifecycleTransitionBatch(plan, projectId, options['--approved-digest']);
+    if (action === 'preflight') validateLifecyclePreflight(plan, projectId);
+    else if (action === 'apply') validateLifecycleTransitionBatch(plan, projectId, options['--approved-digest']);
     else validateLifecycleInventoryPlan(plan, projectId);
   }
   const page = options['--page'] ? validateLifecycleInventoryPage(plan, read(options['--page'])) : null;
@@ -94,7 +95,9 @@ export async function main(argv, { openDatabase = feedAdminDatabase, inspectRele
   try {
     if (db.projectId !== projectId) throw new Error('lifecycle-transition-database-project-mismatch');
     let value;
-    if (action === 'plan-start') value = await planLifecycleCaptureStart(db, options['--writer-commit']);
+    if (action === 'preflight-plan') value = await planLifecyclePreflight(db);
+    else if (action === 'preflight') value = await readLifecyclePreflightPage(db, plan, options['--checkpoint'] ? read(options['--checkpoint']) : null);
+    else if (action === 'plan-start') value = await planLifecycleCaptureStart(db, options['--writer-commit']);
     else if (action === 'start') value = await startLifecycleCapture(db, plan, { approvedDigest: options['--approved-digest'], compatibleWriters: true });
     else if (action === 'plan') value = await planLifecycleInventory(db);
     else if (action === 'inventory') value = await readLifecycleInventoryPage(db, plan, options['--checkpoint'] ? read(options['--checkpoint']) : null);
@@ -114,7 +117,7 @@ export async function main(argv, { openDatabase = feedAdminDatabase, inspectRele
     // No default overwrite or unbounded output. Inventory/batch plans stay in
     // immutable workspace files; stdout contains technical results only.
     const file = options['--output'] ? save(options['--output'], value) : null;
-    if (['plan-start', 'plan', 'inventory', 'prepare'].includes(action) && !file) throw new Error('lifecycle-transition-output-required');
+    if (['preflight-plan', 'preflight', 'plan-start', 'plan', 'inventory', 'prepare'].includes(action) && !file) throw new Error('lifecycle-transition-output-required');
     return file ? { projectId, action, file, digest: value.digest ?? value.pageDigest ?? null, writes: value.writes ?? 0,
       ...(release ? { sourceCommit: release.commit, ciRun: options['--ci-run'] } : {}) } : value;
   } finally { await db.terminate(); }

@@ -600,7 +600,9 @@ void main() {
     await tester.pumpWidget(game);
     await tester.pump();
     await tester.tap(find.text('Klepni pro vzlet'));
-    await tester.pump(const Duration(seconds: 3));
+    for (var frame = 0; frame < 188; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
 
@@ -634,7 +636,9 @@ void main() {
     );
     await tester.pump();
     await tester.tap(find.text('Klepni pro vzlet'));
-    await tester.pump(const Duration(seconds: 3));
+    for (var frame = 0; frame < 188; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
 
     expect(find.textContaining('Konec letu'), findsOneWidget);
     await tester.tap(find.textContaining('Konec letu'));

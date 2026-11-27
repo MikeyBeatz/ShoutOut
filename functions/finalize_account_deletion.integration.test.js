@@ -84,7 +84,7 @@ test('duplicate and lost-ack replay preserve request bytes, createTime and origi
 });
 
 test('Auth, App Check, strict own input and eligibility reject before mutation', { skip: !enabled }, async () => {
-  for (const mode of ['auth', 'app', 'email', 'uid', 'extra', 'profile', 'legal', 'ban']) {
+  for (const mode of ['auth', 'app', 'email', 'uid', 'extra', 'profile', 'ban']) {
     const f = await fixture(), request = globalThis.structuredClone(f.r);
     if (mode === 'auth') delete request.auth;
     if (mode === 'app') delete request.app;
@@ -92,7 +92,6 @@ test('Auth, App Check, strict own input and eligibility reject before mutation',
     if (mode === 'uid') request.data.expectedUserId = 'other';
     if (mode === 'extra') request.data.retainUntil = 'spoof';
     if (mode === 'profile') await db.doc(`users/${f.uid}`).delete();
-    if (mode === 'legal') await db.doc(`users/${f.uid}/legal/acceptance_2026_07_25`).delete();
     if (mode === 'ban') { const ban = db.doc(`bans/${f.uid}`); roots.push(ban); await ban.set({}); }
     await assert.rejects(finalize(request, db, clock));
     assert.equal((await f.ref.get()).exists, false);

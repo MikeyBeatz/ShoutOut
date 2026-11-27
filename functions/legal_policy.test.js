@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { legalPolicy, currentLegalPolicy, assertCaptureDisclosure } from './legal_policy.js';
+import { legalPolicy, currentLegalPolicy, assertCaptureDisclosure, preparedArchiveLegalVersion } from './legal_policy.js';
 import { accountDocumentRefs } from './callable_security.js';
 import { createFeedRuntime } from './feed_runtime.js';
 
@@ -19,4 +19,10 @@ test('prepared disclosure can precede readers and has a matching server acceptan
   assert.throws(() => assertCaptureDisclosure(currentLegalPolicy(), true), /disclosure/);
   assert.doesNotThrow(() => assertCaptureDisclosure(currentLegalPolicy(), false));
   assert.throws(() => createFeedRuntime({}, {}, { contentCaptureEnabled: true, enforceArchiveDisclosure: true }), /disclosure/);
+});
+
+test('approved archive version is prepared without activating the deployed policy', () => {
+  const p = legalPolicy({ archiveDisclosureEnabled: true, version: preparedArchiveLegalVersion });
+  assert.equal(p.acceptanceDocument, 'acceptance_2026_11_27');
+  assert.equal(currentLegalPolicy().acceptanceDocument, 'acceptance_2026_07_25');
 });

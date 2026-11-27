@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'archive_identity_disclosure.dart';
+import 'account_deletion.dart';
 
 import 'l10n/legal_translations.dart';
 import 'l10n/text.dart';
@@ -216,9 +217,11 @@ class _LegalAcceptancePageState extends State<LegalAcceptancePage> {
                       : _accept,
                   child: Text(tr(context, 'Pokračovat')),
                 ),
-                TextButton(
-                  onPressed: _saving ? null : FirebaseAuth.instance.signOut,
-                  child: Text(tr(context, 'Odhlásit se')),
+                LegalAccountExitActions(
+                  busy: _saving,
+                  allowDeletion: _legalPolicy.archiveDisclosureEnabled,
+                  onSignOut: FirebaseAuth.instance.signOut,
+                  onDelete: _deleteOwnAccount,
                 ),
               ],
             ),
@@ -232,6 +235,17 @@ class _LegalAcceptancePageState extends State<LegalAcceptancePage> {
     context,
     MaterialPageRoute(builder: (_) => LegalDocumentPage(type: type)),
   );
+
+  Future<void> _deleteOwnAccount() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (_saving || user == null || user.uid != widget.userId) return;
+    setState(() => _saving = true);
+    try {
+      await requestAccountDeletion(context, user);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   Future<void> _accept() async {
     setState(() => _saving = true);
@@ -258,6 +272,36 @@ class _LegalAcceptancePageState extends State<LegalAcceptancePage> {
       if (mounted) setState(() => _saving = false);
     }
   }
+}
+
+/// Account exit does not depend on checking either consent checkbox.
+class LegalAccountExitActions extends StatelessWidget {
+  const LegalAccountExitActions({
+    super.key,
+    required this.busy,
+    required this.allowDeletion,
+    required this.onSignOut,
+    required this.onDelete,
+  });
+  final bool busy;
+  final bool allowDeletion;
+  final VoidCallback onSignOut;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      TextButton(
+        onPressed: busy ? null : onSignOut,
+        child: Text(tr(context, 'Odhlásit se')),
+      ),
+      if (allowDeletion)
+        TextButton(
+          onPressed: busy ? null : onDelete,
+          child: Text(tr(context, 'Smazat účet')),
+        ),
+    ],
+  );
 }
 
 class LegalHubPage extends StatelessWidget {

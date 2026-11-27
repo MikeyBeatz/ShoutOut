@@ -99,6 +99,51 @@ export async function planLifecycleInventory(db) {
     return { ...value, digest: hash(value) };
   }, { readOnly: true });
 }
+
+// Advisory inventory before capture installation. No control creation, Auth
+// scan or mutation. It is deliberately not accepted by transition apply/audit.
+export async function planLifecyclePreflight(db) {
+  assertFeedRuntimeTarget(db);
+  return db.runTransaction(async tx => {
+    const controls = await tx.getAll(db.doc('contentLifecycleControl/current'), db.doc('feedIndexControl/current'));
+    const value = { v: 1, kind: 'content-lifecycle-preflight', projectId: db.projectId,
+      batchSize: 50, controls: controls.map(identity), activationAuthorized: false };
+    return { ...value, digest: hash(value) };
+  }, { readOnly: true });
+}
+export function validateLifecyclePreflight(plan, project) {
+  const p = checked(plan, 'content-lifecycle-preflight', project, 'activationAuthorized,batchSize,controls,kind,projectId,v');
+  if (p.batchSize !== 50 || p.activationAuthorized !== false || !Array.isArray(p.controls) || p.controls.length !== 2 ||
+      p.controls.some(value => value !== null && !validIdentity(value))) fail('invalid-lifecycle-preflight');
+  return p;
+}
+export async function readLifecyclePreflightPage(db, plan, checkpoint = null) {
+  assertFeedRuntimeTarget(db); const p = validateLifecyclePreflight(plan, db.projectId), c = validateCheckpoint(plan, checkpoint);
+  if (c.phase === lifecycleInventoryCollections.length) fail('lifecycle-preflight-already-complete');
+  return db.runTransaction(async tx => {
+    const controls = await tx.getAll(db.doc('contentLifecycleControl/current'), db.doc('feedIndexControl/current'));
+    if (!same(controls.map(identity), p.controls)) fail('lifecycle-preflight-control-drift');
+    const collection = lifecycleInventoryCollections[c.phase];
+    let query = ['comments', 'privateReplies'].includes(collection) ? db.collectionGroup(collection) : db.collection(collection);
+    query = query.orderBy(FieldPath.documentId()).limit(50);
+    if (c.after) query = query.startAfter(db.doc(c.after));
+    const rows = await tx.get(query), records = rows.docs.map(d => recordFor(d, collection));
+    const issues = [];
+    for (const d of rows.docs) {
+      if (records.find(r => r.path === d.ref.path).malformed) issues.push({ path: d.ref.path, reason: 'malformed-sdk-data' });
+      if (collection === 'shouts' && d.get('status') === 'deleted' &&
+          !(d.get('removedAt') instanceof Timestamp) && !(d.get('deletedAt') instanceof Timestamp) && !digest(d.get('contentArchiveKey'))) {
+        issues.push({ path: d.ref.path, reason: 'original-removal-time-unproven' });
+      }
+    }
+    const pageDigest = hash({ planDigest: plan.digest, before: c, records, issues });
+    const next = { planDigest: plan.digest, phase: c.phase + Number(rows.size < 50), after: rows.size < 50 ? null : rows.docs.at(-1).ref.path,
+      seen: c.seen + rows.size, chain: pageDigest };
+    return { collection, planDigest: plan.digest, before: checkpoint, records, issues, pageDigest,
+      checkpoint: { ...next, digest: hash(next) }, complete: next.phase === lifecycleInventoryCollections.length,
+      writes: 0, activationAuthorized: false };
+  }, { readOnly: true });
+}
 export function validateLifecycleInventoryPlan(plan, project) {
   const p = checked(plan, 'content-lifecycle-inventory', project, 'batchSize,fence,kind,projectId,v');
   if (p.batchSize !== 50 || !keys(p.fence, 'control,feed') || !keys(p.fence.control, 'captureFenceAt,createTime,legacyRevision,mode,revision,writerCommit') || !validStamp(p.fence.control?.createTime) ||

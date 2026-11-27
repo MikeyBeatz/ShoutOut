@@ -1,6 +1,8 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 
 export const legacyLegalVersion = '2026-07-25';
+// Approved preparation only; configuration stays on the legacy policy.
+export const preparedArchiveLegalVersion = '2026-11-27';
 // Activation chooses the public version separately. This preparation changes
 // neither the live document text nor the acceptance document used by clients.
 export const legalPolicyConfiguration = Object.freeze({ archiveDisclosureEnabled: false, version: legacyLegalVersion });

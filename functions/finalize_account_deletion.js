@@ -1,6 +1,6 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
-import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
+import { requireCallableIdentity, requireAccountDeletionActor } from './callable_security.js';
 import { prepareArchiveIdentityDeletion } from './archive_identity.js';
 
 const retentionMillis = 60 * 86400000;
@@ -28,7 +28,7 @@ export async function finalizeAccountDeletionOperation(request, db, clock = () =
       return { userId: uid, ready: true, confirmed: data.authDeletionConfirmedAt instanceof Timestamp };
     }
     const now = clock();
-    await requireEligibleActor({ request, db, reader: transaction, now });
+    await requireAccountDeletionActor({ request, db, reader: transaction, now });
     // createShout reads the same request document inside its transaction. If it
     // commits first this query observes its Shout (or this transaction retries);
     // if finalization commits first publication retries and rejects pending Auth.

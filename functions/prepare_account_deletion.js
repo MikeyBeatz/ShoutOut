@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
-import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
+import { requireCallableIdentity, requireAccountDeletionActor } from './callable_security.js';
 import { receiptRetentionFields } from './operation_retention.js';
 
 const action = 'prepareAccountDeletion';
@@ -23,7 +23,7 @@ export async function prepareAccountDeletionOperation(request, db, clock = () =>
   const now = Timestamp.fromDate(clock());
   let batchSize = 50;
   const attempt = () => db.runTransaction(async transaction => {
-    await requireEligibleActor({ request, db, reader: transaction, now: now.toDate() });
+    await requireAccountDeletionActor({ request, db, reader: transaction, now: now.toDate() });
     const receipt = await transaction.get(receiptRef);
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
     if (receipt.exists) {

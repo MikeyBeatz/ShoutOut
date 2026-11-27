@@ -78,13 +78,14 @@ async function readAccountDocuments(reader, refs) {
   throw new TypeError('The Firestore reader must provide getAll() or get().');
 }
 
-export async function requireEligibleActor({
+async function requireActor({
   request,
   db,
   reader = db,
   requireContentPermission = false,
   includeProfileSnapshot = false,
   now = new Date(),
+  requireLegalAcceptance = true,
 }) {
   const identity = requireCallableIdentity(request);
   const refs = accountDocumentRefs(db, identity.uid);
@@ -95,7 +96,7 @@ export async function requireEligibleActor({
   if (!profile.exists) {
     reject('failed-precondition', 'The account profile is incomplete.');
   }
-  if (!legal.exists) {
+  if (requireLegalAcceptance && !legal.exists) {
     reject('failed-precondition', 'Current legal terms must be accepted.');
   }
   if (hasActiveBan(ban, nowMillis)) {
@@ -119,5 +120,9 @@ export async function requireEligibleActor({
     refs,
   });
 }
+
+// These are trusted server entry points, never selected by request data.
+export const requireEligibleActor = options => requireActor({ ...options, requireLegalAcceptance: true });
+export const requireAccountDeletionActor = options => requireActor({ ...options, requireLegalAcceptance: false });
 
 export { legalAcceptanceId };
