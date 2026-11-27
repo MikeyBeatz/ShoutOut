@@ -6,43 +6,30 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Index Mé shouty opravený a ověřený v DEV; ruční archivní pilot pokračuje.**
-[Diagnóza a oprava Mé shouty](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
-TestBusiness skutečně přijal verzi 2026-11-27 a server zaznamenal jeho identitu.
-Vznikl jediný „MVP archiv 27.11. A 6c00e1d7e8“, atomická archivní kopie,
-autorská vazba a původní 68denní termín ověřené. Následně připravený jeden
-veřejný komentář a jedna soukromá odpověď pod Bright_Otter_182, obojí atomicky
-archivované s jeho doloženou identitou. Jediný schválený dočasný ověřený Auth
-je bez obsahu; uživatel na něm skutečně přijal podmínky, přijetí i záchyt identity
-ověřené. Čeká jeho běžné smazání. Smazání/odhlášení bez souhlasu tím ověřené není;
-požádáno o právě jeden dodatečný dočasný účet, zatím bez schválení/vytvoření.
-Aktivní i Expirované blokoval chybějící index pro publicUntil. Zdroj
-7c6a1229ced05803498a7f6f9bba7acb1045ea93 má
-[úspěšné úplné CI 46065640727](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727).
-Jediný doplněný index CICAgNjpr5sK je READY, živé Aktivní/Expirované i
-navázání kurzorem fungují (1 → 0 a 0 → 0, nikoli živá dávka nad 50).
-Ostatních 18 indexů, web/Rules/31 Functions/dva joby a původní data zachované.
-Uživatel po opravě potvrdil Mé shouty i detail pod TestBusiness bez chyby.
-Pilot zůstává rozehraný; A ani jeho potomky znovu nevytvářet.
-Všechna čtyři existující testovací přijetí/identity potvrzená; TestAdmin
-potvrdil dohledání účtu a archivní detail, tři skutečné role-5 audity ověřené.
-TestBusiness skutečně nahlásil jediný testovací veřejný komentář; server ověřil
-autora, oba archivní klíče a důvod s běžným kategoriálním prefixem. Následné
-vlastní odstranění pod Bright_Otter_182 je potvrzené: zdroj pryč, archivní
-text/autor/vazby platné, hlášení open, počet 0; Shout, soukromá odpověď,
-termín i původní data beze změny. TestAdmin potvrdil detail archivního komentáře
-i rodiče po odstranění zdroje; skutečný read-reported-content audit role 5 ověřený.
-Vlastní odstranění Shoutu a historie potvrzené: status deleted, 7 dní historie
-a 60 dní archivu, konečný termín 02.02.2027. TestAdmin potvrdil čitelný archiv,
-ověřené tři nové auditní akce po smazání. Ovládání hudby ve hře viditelné;
-aktuální přehrávání hudby uživatel výslovně nepotvrdil. Zbývá právní negativní
-test, smazání dočasného účtu a vymezený úklid; celková akceptace zůstává otevřená.
-[Nálezy a pokračování pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings).
-Hlavní feed v jednom prohlížeči hlásí code=unknown, v jiném funguje; poslední
-serverová volání jsou HTTP 200, příčina nepotvrzená. Uživatel další diagnózu
-odložil. Pevné světlé barvy a odlišné akce soukromé odpovědi jsou potvrzené
-UI nálezy, implementace zatím neschválená. Manifest/handoff jsou v
-build/archive-readiness/manual-pilot a current-handoff.json.
+**DEV archivní pilot uzavřený včetně úklidu.**
+[Výsledky, důkazy a meze](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
+Potvrzené skutečné přijetí verze 2026-11-27, kontaktní dohledání a audit pod
+TestAdmin, čitelný nahlášený komentář po odstranění originálu i archiv Shoutu
+po vlastním smazání. Vlastní historie zůstala 7 dní, archiv navazuje 60 dny.
+U dodatečně schváleného druhého dočasného účtu uživatel ověřil odhlášení
+a smazání bez souhlasu; server potvrdil oba Auth nepřítomné a druhý bez přijetí.
+Obě primární úklidové úlohy jsou content-archived, privátní purge scheduled
+na 26.01.2027 podle původních žádostí. První neúplný testovací profil byl
+doplněn o běžnou rezervaci přezdívky; nešlo o změnu běžné registrace ani lhůt.
+
+Vymezených 16 pilotních dokumentů odstraněno přes společný indexový writer
+a hlídaný úklid, 3 testovací cloudové značky přečtení pryč, všech 6 technických
+potvrzení zůstává do původních termínů. Původní obsah/pending žádost, skutečné
+kontaktní vazby a účtová retence zachované. Tento dokončovací krok nic nového
+nenasazoval; index Mé shouty a všechny dříve vydané revize zůstaly beze změny.
+
+**Další krok:** naplánovaná souhrnná revize dosavadní práce před MVP regresí
+podle [LAUNCH_READINESS](LAUNCH_READINESS.md#completed-work-review), nejprve čtecí
+kontrola souladu kódu, skutečného DEV a dokumentovaných důkazů. Ovládání hudby
+je viditelné, aktuální přehrávání uživatel výslovně nepotvrdil. Feedová chyba
+code=unknown jen v jednom prohlížeči zůstává na přání uživatele odložená;
+tmavý vzhled a odlišné akce soukromých odpovědí jsou otevřené UI nálezy.
+Jejich implementace dosud není schválená. Produkce/main se nemění.
 
 **Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
 [Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).

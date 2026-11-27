@@ -1,5 +1,9 @@
 # Serverový a produkční plán webového MVP
 
+Aktuálně 27. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
+Následuje souhrnná revize podle LAUNCH_READINESS; níže jsou také datované výsledky předchozích příprav.
+Produkční aktivace a celková MVP regrese zůstávají otevřené.
+
 <a id="archive-identity-local-integration"></a>
 ## Společná místní integrace archivu a kontaktního indexu
 
@@ -51,7 +55,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
 | Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
-| Životnost Shoutů | Exspirace mění status v DEV se společným indexovým writerem; od 11. listopadu je nasazený a ověřený zámek běžných interakcí podle expiresAt. | Sedmidenní fyzický úklid Shoutů a potomků včetně odpovídající indexové konzistence. |
+| Životnost Shoutů | Společný cyklus platnost → 7 dní vlastní historie → 60 dní archivu, sdílené kopie, moderace po odstranění zdroje a omezený purge mají uzavřenou DEV akceptaci i úklid. | Produkční aktivace a společná předstartovní regrese. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
 | Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
 | Bezpečnostní kontrola | Dílčí testy jsou doložené v TESTING. | Závěrečná předprodukční revize a odstranění/přijetí rizik. |

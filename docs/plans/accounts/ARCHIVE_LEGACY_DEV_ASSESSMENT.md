@@ -694,7 +694,7 @@ ve hře; aktuální přehrávání hudby výslovně nepotvrdil.
 ### Odchylka právního pilotu – skutečné přijetí uživatelem
 
 Uživatel na dočasném mvp_archive_legal_6c00e1d7e8 skutečně přijal podmínky.
-Server ověřil všechny tři verze 2026-11-27 a záchyt identity; účet je dosud
+Server ověřil všechny tři verze 2026-11-27 a záchyt identity; v době této kontroly byl účet
 živý a bez pending žádosti. Přijetí ani audit se kvůli testu zpětně nemažou
 nebo nepřepisují. Jeho běžné smazání zůstává v původním souhlasu; negativní
 odhlášení a smazání bez přijetí nejsou tímto průchodem doložené.
@@ -704,3 +704,85 @@ protože původní limit nejvýše jednoho nového účtu je vyčerpaný. Dodate
 účet dosud není schválený ani vytvořený. Soukromá odpověď zatím zůstává. Nenavyšovat
 fixture ani Auth, neobnovovat již vytvořené zdroje. Celková živá akceptace
 a následný vymezený úklid jsou nadále otevřené; stupnice nedostává nový kredit.
+
+<a id="archive-dev-pilot-results"></a>
+
+## Dokončená DEV akceptace a úklid 27. listopadu 2026
+
+Živý archivní/právní pilot je uzavřený; produkční aktivace a společná MVP
+regrese tím nejsou splněné. Nový aplikační kód ani deployment v dokončovacím
+kroku nevznikl. Vydaný archivní základ 5435855 / úplné CI 46013597685,
+GC bd81e98 / 46020290663, Rules c361526 / 46043558742 a vlastní index
+7c6a122 / 46065640727 zůstávají skutečným DEV základem. Před úklidem byla
+znovu ověřena přesná shoda dotčených indexových/archivních jader s úplným CI.
+Čerstvá čtecí metadata navíc potvrdila 31 ACTIVE Node.js 22 Functions se stejnými
+prostředky, Hosting 14a0f588585839e2, Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89
+a dva původní minutové plánovače. Důkaz: current-dev-release-metadata.json;
+tento snapshot sám není celá souhrnná předstartovní revize.
+
+### Ruční průchody a serverové důkazy
+
+- Existující testovací účty skutečně přijaly verzi 2026-11-27. TestAdmin
+  dohledal kontakt a otevřel archivní detail; role 5 a přístupové audity doložené.
+- TestBusiness nahlásil komentář, Bright_Otter_182 jej odstranil. Server
+  ověřil zmizelý zdroj, neměnný text/autora a vazby hlášení; TestAdmin pak
+  skutečně otevřel archivní podklad, audit read-reported-content potvrzený.
+- TestBusiness odstranil Shout A a viděl jej v Expirovaných. Server ověřil
+  7 dní vlastní historie a dalších 60 dní archivu od dřívějšího odstranění,
+  tedy konec 02.02.2027 21:47:42 UTC. TestAdmin potvrdil čitelný archiv.
+  Pilotní geografie není doložená; tyto role-5 průchody nenahrazují živé
+  regionální ověření TestModerator, jehož pravidla jsou doložená emulátorem.
+- U prvního nového účtu uživatel skutečně přijal podmínky a potom jej smazal.
+  Přijetí ani audit se zpětně nemažou. Vlastník výslovně schválil právě jeden
+  další dočasný Auth/profile; celkem vznikly dva, žádný třetí.
+- Na druhém účtu uživatel nechal souhlasy prázdné, odhlásil se a po novém
+  přihlášení účet smazal. Server ověřil oba Auth nepřítomné, u druhého žádný
+  právní souhlas ani kontaktní záchyt. Obě primární úlohy dosáhly
+  content-archived a oba purge joby zůstávají scheduled na 26.01.2027,
+  podle původních přesných requestCreateTime. Nečeká se na 60denní termín;
+  hranice purge je ověřená samostatnými emulátorovými testy a dřívějším živým GC.
+- Ve hře uživatel potvrdil viditelné ovládání zvuku; aktuální přehrávání hudby
+  výslovně nepotvrdil. Tím se nepřipisuje nová herní akceptace.
+
+### Oprava přípravy syntetického profilu
+
+První testovací profil v ručním přípravném helperu postrádal nicknameLower
+a odpovídající rezervaci v nicknames. Auth byl správně odstraněný, ale
+navazující úloha bezpečně skončila needs-review ve fázi identity. Potvrzená
+příčina je v testovacích datech: běžná registrace v auth_gate.dart oba záznamy
+již atomicky vytváří. Doplněný byl pouze tento přesný syntetický profil
+a jeho dosud neexistující rezervace; stejná úloha byla znovu zařazena ze stejné
+fáze se stejnou inkarnací, bez změny retence, rolí, auditu nebo původních účtů.
+Transakce hlídala SDK verze profilu/žádosti/jobu a chráněných původních dokumentů.
+Druhý helper již vytvořil běžné registrační vazby a jeho úklid proběhl bez opravy.
+Průběžné technické důkazy: first-fixture-completion-plan.json,
+first-fixture-completed.json, legal-final-verified.json, worker-completion-progress.json.
+
+### Vymezený úklid
+
+Plán 8c0ba6b4e3f7706f57d80c772f5e141cd219f8eb048dfd36b12c49eaaaf63978
+vybral právě 16 dokumentů tohoto pilotu. Společný writer ověřil tři udržované
+generace a odstranil 2 zbývající zdroje (smazaný Shout a soukromou odpověď)
+a jednu živou stavovou projekci; indexové uzly měnit nemusel. Následný hlídaný
+úklid odstranil 14 souvisejících dokumentů: tři archivní těla, hlavičku, jediné
+testovací hlášení a jeho testovací audit, dvě oznámení a šest případových auditů.
+Všechny vybrané cesty jsou nepřítomné, SDK/řídicí snapshoty byly transakčně hlídané.
+
+Odebrané byly pouze 3 cloudové read klíče přesného testovacího Shoutu; ostatní
+záznamy a směrovací větve zůstaly zachované. Všech šest serverOperations
+potvrzení zůstává do původního 7denního konce, kvóty se neresetovaly.
+Skutečné kontaktní vazby existujících účtů, původní obsah/pending žádost
+a privátní retence obou dočasných účtů byly zachované. Hesla obou již smazaných
+Auth byla odstraněná pouze z jejich místních vygenerovaných souborů;
+identifikační metadata a technické důkazy zůstávají. Důkazy jsou v ignorovaném
+build/archive-readiness/manual-pilot (manifest.json, content-cleanup-complete.json).
+
+### Další práce a meze akceptace
+
+Pokračuje naplánovaná [souhrnná revize](../../LAUNCH_READINESS.md#completed-work-review)
+před společnou MVP regresí. Chyba feedu code=unknown jen v jednom prohlížeči
+je odložená na výslovné přání vlastníka; příčina nepotvrzená, poslední serverové
+odpovědi HTTP 200. Pevné světlé barvy a odlišné ovládání soukromých odpovědí
+jsou potvrzené otevřené UI nálezy, nikoli hotové opravy. Případné implementace
+mimo dosavadní rozsah vyžadují konkrétní schválení. Celkové MVP a produkce
+se neuzavírají; započítá se pouze existující DEV akceptační podúsek bez změny vah.

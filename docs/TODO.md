@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **62,01 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **62,26 %** — vážené dokončení podúseků
 
-Hotové úseky: **242/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **243/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -33,27 +33,21 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Hotovo: indexová oprava Mé shouty v DEV; pokračuje stejný archivní pilot.**
-[Příčina a kontrolní bod](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
-Jeden pilotní Shout A pod TestBusiness je archivovaný a autorsky navázaný;
-jeho skutečné přijetí podmínek je ověřené. Aktivní/Expirované blokuje chybějící
-publicUntil index. Zdroj 7c6a122 má úspěšné úplné CI 46065640727; jediný nový
-DEV index CICAgNjpr5sK je READY a oba živé dotazy i kurzory prošly.
-Uživatel potvrdil opravené Mé shouty/detail pod TestBusiness a nahlásil jediný
-testovací komentář; server ověřil jeho archivní vazby. Bright_Otter_182 jej
-odstranil; zdroj chybí, archivní podklad i hlášení open zůstaly, počet je 0.
-TestAdmin potvrdil archivní detail po odstranění zdroje včetně serverového
-auditu role 5. Potvrzené také smazání Shoutu/vlastní historie, čitelný archiv
-a viditelné ovládání hudby. Dočasný účet uživatel skutečně právně přijal;
-čeká běžné smazání, negativní test bez souhlasu zůstává neověřený. Pro právě
-jeden dodatečný účet je položen konkrétní dotaz, zatím se nevytváří.
-[Nálezy pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings):
-chyba hlavního feedu jen v jednom prohlížeči je na přání uživatele odložená,
-příčina nepotvrzená; tmavý vzhled a odlišné akce soukromých odpovědí čekají
-konkrétní schválení implementace. Právní přijetí se zpětně nemaže ani nepřepisuje;
-žádný další obsahový seed.
-Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
-Samotná indexová oprava nevytvořila fixture/Auth a nezměnila web/Functions/Rules/TTL ani retenci.
+**Hotovo: živá DEV akceptace archivu a vymezený úklid.**
+[Výsledky a otevřené nálezy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
+Potvrzené kontaktní dohledání/audit, podklad hlášení po odstranění komentáře,
+vlastní smazání Shoutu/historie a čitelný archiv. Dodatečný druhý účet ověřil
+odhlášení i smazání bez právního přijetí; oba nové Auth jsou pryč, obě primární
+úlohy dokončené. Jejich privátní purge zůstává na původních 60denních termínech.
+Uklizeno 16 testovacích dokumentů a 3 cloudové značky přečtení; všech 6 potvrzení
+operací zachovaných 7 dní. Původní obsah/pending, kontaktní vazby a prostředky
+se neměnily; tento dokončovací krok nic nového nenasadil.
+
+**Následuje souhrnná revize před společnou MVP regresí** podle
+[LAUNCH_READINESS](LAUNCH_READINESS.md#completed-work-review). Nejprve čtecí
+soulad kódu, skutečného DEV, CI a dokumentace. Opravy mimo schválený rozsah
+předložit konkrétně. Feedová chyba jen v jednom prohlížeči je odložená na přání
+uživatele; tmavý motiv/ovládání soukromých odpovědí zůstávají otevřené UI nálezy.
 
 **Hotovo: oprava přímého čtení veřejných zdrojů v DEV.**
 [Nálezy, regrese a nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
