@@ -320,14 +320,14 @@ z toho 22 Shoutů /97 komentářů má prošlý i konečný archivní termín, d
 Původní pending žádost má stejné SDK verze, oba původní joby stále absent;
 její Auth chyběl už před prací. Její termín, stav ani běh se nepřepisoval.
 
-### Otevřený nález staré indexové údržby
+### Nález staré indexové údržby (následně uzavřený)
 
-Souhrn workeru je WARNING kvůli **indexFailed 1**, nikoli kvůli obsahovému
+Při první kontrole byl souhrn workeru WARNING kvůli **indexFailed 1**, nikoli kvůli obsahovému
 archivu. Čtecí reprodukce bez zápisu potvrdila invalid-normal-gc-generation.
-[Spouštěč GC](../../../functions/feed_normal_gc.js) v guardu stále uznává jen
+[Spouštěč GC](../../../functions/feed_normal_gc.js) v tehdy nasazeném guardu uznával jen
 marker.v === 1, zatímco feed-v3 má již podporované v2/cardProjection1.
 [Vlastní GC jádro](../../../functions/feed_index_gc_store.js) formáty 1/2
-podporuje. Není doloženo úplné bezchybné provozní ověření celého workeru.
+podporuje. V tomto kontrolním bodě ještě nebylo doložené bezchybné provozní ověření celého workeru; následné úspěšné ověření je uvedené níže.
 
 Předložený další konkrétní úsek: ověřovat podporované kombinace přes existující
 generationCardProjection, doplnit v1/v2 regrese zachování živých a hodinově
@@ -359,10 +359,49 @@ workeři, aktuální i hodinově chráněné stromy, odmítnuté vadné kombinac
 průchod přes skutečný zapnutý archivní createFeedRuntime/indexMaintenance
 s indexFailed 0 a bez obsahové mutace. Lint také prošel.
 
-Po společném pushi ještě potřebuje tento přesný zdroj úplné CI. Teprve potom
+Předem stanovený kontrolní bod: po společném pushi úplné CI přesného zdroje, potom
 pouze accountDeletionRequestCreatedDev a resumeAccountDeletionJobsDev v DEV;
 ostatních 29 Functions, web, Rules a provozní prostředky zůstávají na právě
-ověřené verzi. Živý úspěch GC zatím není doložen touto místní regresí.
+ověřené verzi. Tato místní regrese sama nebyla důkazem živého úspěchu; následuje skutečný výsledek.
+
+<a id="gc-dev-verification"></a>
+
+### GC oprava nasazená a skutečně ověřená v DEV
+
+Zdroj **bd81e98ddab2b5e0e6f62410e302e9824e547f18** má
+[úspěšné úplné CI 46020290663](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663),
+včetně finální retenční sady s devíti GC případy. Po něm byly aktualizované
+pouze accountDeletionRequestCreatedDev **00019-gap** a resumeAccountDeletionJobsDev
+**00019-vel**. Skutečné oba zdrojové ZIP archivy odpovídají novému balíčku;
+jediný změněný runtime soubor je feed_normal_gc.js. Ostatních 29 Functions má
+stejné revize a jejich předchozí zdrojová verifikace zůstává platná.
+Všech 31 endpointů ACTIVE, starší revize RETIRED, stejné prostředky i dva joby.
+
+Nová revize workeru 15:23:08 a 15:24:05 UTC vykázala **INFO /gc:complete**,
+indexSteps 32 a 2, indexFailed/indexNeedsReview 0. Také všechny ostatní
+chybové příznaky v obou bězích jsou 0 a obsahový lifecycle je idle.
+Web 14a0f588585839e2 a Rules 1b29a656-f990-42f5-b335-ef35c44c0997 byly znovu
+ověřeny jako beze změny. Provozní nález v1/v2 je tím uzavřený; předchozí
+WARNING zůstává historickým důkazem, ne aktuální závadou.
+
+Před opravou GC již doběhl první obsahový dluh: odstraněno přesně 125
+zdrojových kopií (27 Shoutů /98 komentářů) po konci historie a 22 definitivně
+prošlých thread hlaviček. Všech 119 definitivně prošlých těl zůstalo bez nové
+kopie. Zůstávají 3 zdroje (1 Shout /1 komentář /1 soukromá odpověď), 9 platných
+archivních těl a 6 hlaviček. Čtecí kontrola všech původních plánů potvrdila
+hash/SDK identity zachovaných těl a původní publicUntil/historyUntil/retainUntil;
+po opravě GC jsou stejné počty, pending žádost beze změny a původní joby absent.
+
+DEV implementace, převod, nasazení a samostatné provozní kontroly jsou hotové.
+**Společná ruční akceptace stále není hotová:** nové skutečné přijetí podmínek,
+kontakt/archiv pod adminem, nahlášený obsah po odstranění zdroje a vlastní
+smazání bez nového souhlasu. Nové kontaktní vazby vznikají jen z doloženého
+Auth pozorování po skutečném novém přijetí; chybějící staré kontakty se
+nedoplňovaly odhadem. Případné staré autorské vazby vyžadují příslušné
+doložené pozorování a teprve potom původní adopční operátor.
+Nové pilotní fixture ani Auth účet zatím nevznikly. Po dostupnosti klienta
+jeden společný průchod v již schválených mezích, vymezený úklid a plánovaná
+souhrnná revize před společnou MVP regresí. Produkce/main se neměnily.
 
 ## Důkazy původního čtecího došetření
 

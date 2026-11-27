@@ -33,30 +33,33 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Archiv je nasazený v DEV; provozní a ruční akceptace zůstává otevřená.**
-[Skutečné nasazení a zbývající nález](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#dev-finishing-deployment).
-Zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b má úspěšné úplné
-[CI 46013597685](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
-Převedeno 128 původních zdrojů; po schváleném úklidu 11 MVP kořenů a tří
-starých hlášení je čerstvý audit všech 165 záznamů ready, bez blokujících
-položek a starých textových kopií hlášení. Nový samostatný klíč a 18 cílených
-indexových operací bez TTL hotové. Původní pending žádost beze změny.
+**Automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
+[Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
+Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
+[úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
+Dva účtové workery: opravený GC zdroj bd81e98ddab2b5e0e6f62410e302e9824e547f18 /
+[úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663).
+Aktivní vývoj: feature/archive-identity-integration, build/reviews/content-lifecycle-0421.
 
-**Ověřená živá verze:** Hosting 14a0f588585839e2, Rules
-1b29a656-f990-42f5-b335-ef35c44c0997. Všech 31 Functions ACTIVE, skutečné
-zdrojové ZIP archivy shodné s balíčky, starší revize 31 endpointů RETIRED.
-Čtení/identita/obsahová údržba a právní verze 2026-11-27 zapnuté; žádná
-právní potvrzení nevytvořena za uživatele. Stejné prostředky a dva plánovače,
-Storage/produkce/main beze změny. 68 app cest, 8 HTTP kontrol a 4×401 ověřené.
+**Živý stav:** Hosting 14a0f588585839e2, Rules 1b29a656-f990-42f5-b335-ef35c44c0997.
+31 ACTIVE Functions, ověřené skutečné zdrojové archivy, starší revize RETIRED,
+stejné prostředky a dva plánovače. Čtení/identita/capture/údržba a právní verze
+2026-11-27 zapnuté. Úklid 11 MVP kořenů a tří hlášení, převod 128 zdrojů,
+čerstvý audit 165 položek ready a 18 selektivních indexových operací bez TTL hotové.
 
-**Údržba archivu pokračuje po dávkách:** lifecycleFailed 0 /needsReview 0,
-9 platných archivních těl zachovaných. Původní pending žádost se nemění;
-její Auth už před zásahem neexistoval, oba původní joby stále absent.
-Celý worker ale hlásí indexFailed 1: starý spouštěč GC odmítá v2 formát
-feed-v3. Čtecí reprodukce bez zápisu potvrzená, vlastní GC jádro v2 podporuje.
-Konkrétní následná oprava a DEV ověření jsou schválené; nyní místní regrese a přesné CI před nasazením dvou workerů. Živá akceptace
-se proto neuzavírá. Nové pilotní fixture/Auth nejsou založené; ruční testy
-zůstanou společně na konec, potom úklid a naplánovaná souhrnná revize.
+První obsahový dluh doběhl podle původních termínů: 125 zdrojových kopií pryč,
+9 platných archivních těl zachovaných; zůstávají 1 Shout /1 komentář /1 soukromá
+odpověď a 6 platných hlaviček. Původní pending žádost nezměněná, její Auth
+chyběl už před prací, původní joby absent. GC nález uzavřený: dva skutečné běhy
+nové revize INFO /gc:complete, všechny chybové příznaky 0, lifecycle idle.
+
+**Další krok:** společný ruční pilot archivu/identity, podkladu hlášení po
+smazání zdroje a vlastního smazání bez přijetí nové verze; potom vymezený úklid
+a naplánovaná souhrnná revize před MVP regresí. Nové pilotní fixture/Auth dosud
+nevytvořené; právní souhlasy se nikdy nevyplnily za uživatele. Kontaktní pokrytí
+vzniká z doloženého Auth pozorování po skutečném přijetí. Živá akceptace
+stále otevřená; nasazení je ve stupnici započtené samostatně. Produkce/main
+beze změny. Návratový profil zachovává nové čtení/capture/právo/identitu.
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
