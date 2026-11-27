@@ -6,6 +6,17 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Došetření starých DEV dat dokončené:** [nálezy a návrh společného dokončení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
+11 deleted kořenů má MVP označení, nulové potomky a žádné dohledané související
+receipts/sanctions/reports. Čas odstranění není doplněný; návrh je vymezený
+úklid těchto fixture. Z dalších dat je 22 Shoutů /97 komentářů po termínu,
+6 Shoutů /2 komentáře /1 soukromá odpověď v otevřené retenci. Jeden již prošlý
+komentář patří autorovi původní pending žádosti a adopce jej nyní správně
+zastaví; před přechodem je potřebná ověřená cesta pouze metadat bez nového těla.
+Dnešní průzkum je pouze čtecí, bez změn aplikace/dat nebo nového úplného CI.
+Další společný implementační/DEV balík je připravený ke schválení, zatím
+se neprovádí. Ruční kontrola zůstává na konec.
+
 **Přípravný balík archivu dokončený:** [výsledky a další pořadí](plans/accounts/ARCHIVE_DEV_READINESS.md#úplné-ci-a-čtecí-dev-inventura--27-listopadu).
 Zdroj **6e68e03d719aa66e45277204abce9a8bd3a2aa4e** má
 [úspěšné úplné CI 45984217529](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45984217529):

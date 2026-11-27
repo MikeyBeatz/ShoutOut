@@ -3496,3 +3496,15 @@ Pouze čtecí inventura našla 39 Shoutů a 11 starých deleted bez přímo dolo
 času odstranění. Tyto výjimky vyřešit před živou migrací; neodhadovat lhůty.
 18 selektivních indexových akcí je jen návrh. Bez nasazení, klíče, živých
 zápisů nebo Auth účtů; aktivace a společná ruční akceptace zůstávají otevřené.
+
+
+### Došetření před dokončením DEV archivu
+
+[Nálezy, přesná data a společný návrh](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
+Čtení potvrdilo 11 starých MVP bez potomků, bez přesného serverového času
+odstranění. Běžná aktivovaná retence by navíc uklidila 22 Shoutů a 97
+komentářů, jejichž obsahový termín již skončil. Jeden je od pending autora;
+nová úzká adopce pouze prošlých metadat vyžaduje implementaci a ověření.
+Návrh má jeden společný implementační/DEV rozsah a poslední ruční blok.
+Dnešní došetření nic nezměnilo ani nenasadilo; navržené kroky nejsou
+schválené samotným zapsáním dokumentu.

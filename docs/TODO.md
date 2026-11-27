@@ -33,6 +33,12 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
+**Další ucelený návrh:** [dokončení archivu v DEV po došetření](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
+Průzkum hotový; potvrzený rozsah 11 starých MVP bez potomků, přesný dopad
+běžné retence a jeden již prošlý komentář pending autora. Nové úpravy,
+úklid, klíč a aktivace jsou dosud neschválený návrh, ruční testy až na konec.
+
+
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).

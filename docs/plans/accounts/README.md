@@ -14,3 +14,4 @@ Dosavadní účtové serverové fáze jsou dokončené v DEV. Nový společný a
 - [Integrační revize společného archivu před aktivací](CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md)
 - [Archiv obsahu a dohledání účtů podle kontaktu](ARCHIVE_IDENTITY_LOOKUP.md)
 - [Příprava DEV přechodu a společná odložená akceptace](ARCHIVE_DEV_READINESS.md)
+- [Došetření starých DEV dat a návrh společného dokončení](ARCHIVE_LEGACY_DEV_ASSESSMENT.md)
