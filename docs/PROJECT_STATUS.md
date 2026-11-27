@@ -1,10 +1,18 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 26. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
+Souhrn k 27. listopadu 2026. Dokládá poslední ověřené výsledky; před dalším
 nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologie je v
 [archivním indexu](archive/README.md), priority v [TODO](TODO.md).
 
 ## Další konkrétní krok
+
+**MVP: zahájená integrační revize archivu; první tři přechodové otázky prověřené.**
+[Nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
+Nový potomek nepřevedeného rodiče se bezpečně odmítne; plynulé převzetí
+je nový rozsah ke schválení. Před capture také oddělit informování od readeru
+a doložit kompatibilní návrat po scrub. Prošlo 23 cílených kontrol, brána
+i metrika zůstávají otevřené. Vše vypnuté; bez aplikace/Firebase změn.
+
 
 **Hotová společná místní příprava migrace:**
 [rozsah a přechodové fáze](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation).

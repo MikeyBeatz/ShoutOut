@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 26. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 27. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -32,6 +32,14 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 [evidenci](progress.json); výpočet zahrnuje i práci po MVP.
 
 ## Nejbližší práce
+
+**MVP: zahájená integrační revize archivu; první tři přechodové otázky prověřené.**
+[Nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
+Nový potomek nepřevedeného rodiče se bezpečně odmítne; plynulé převzetí
+je nový rozsah ke schválení. Před capture také oddělit informování od readeru
+a doložit kompatibilní návrat po scrub. Prošlo 23 cílených kontrol, brána
+i metrika zůstávají otevřené. Vše vypnuté; bez aplikace/Firebase změn.
+
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
 průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.

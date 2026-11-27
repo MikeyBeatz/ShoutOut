@@ -2904,6 +2904,13 @@ Počet jobů ani prováděné kontroly se tím nemění.
 
 ##### Integrační revize před aktivací společného archivu
 
+**27. listopadu – první část revize dokončená:**
+[konkrétní nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
+Ověřené bezpečné odmítnutí nepřevedeného rodiče není plynulá migrace;
+informování uživatelů je stále vázané na reader a návrat po scrub musí zachovat
+nové čtení. Prošlo 23 cílených kontrol, bez živých dat či aktivace.
+Celá integrační brána a její dokončovací kredit zůstávají otevřené.
+
 Otevřený kontrolní bod: po místním dokončení provozního adaptéru a přípravy
 přechodu, před první živou migrací/aktivací v DEV, znovu projít celý nový cyklus.
 Ověřit všechny writery a čtenáře, atomické indexové/archivní vazby, původní
