@@ -10,16 +10,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 [Diagnóza a oprava Mé shouty](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
 TestBusiness skutečně přijal verzi 2026-11-27 a server zaznamenal jeho identitu.
 Vznikl jediný „MVP archiv 27.11. A 6c00e1d7e8“, atomická archivní kopie,
-autorská vazba a původní 68denní termín ověřené. Další obsah/Auth nevznikl.
+autorská vazba a původní 68denní termín ověřené. Následně připravený jeden
+veřejný komentář a jedna soukromá odpověď pod Bright_Otter_182, obojí atomicky
+archivované s jeho doloženou identitou. Nový Auth zatím nevznikl.
 Aktivní i Expirované blokoval chybějící index pro publicUntil. Zdroj
 7c6a1229ced05803498a7f6f9bba7acb1045ea93 má
 [úspěšné úplné CI 46065640727](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727).
 Jediný doplněný index CICAgNjpr5sK je READY, živé Aktivní/Expirované i
 navázání kurzorem fungují (1 → 0 a 0 → 0, nikoli živá dávka nad 50).
 Ostatních 18 indexů, web/Rules/31 Functions/dva joby a původní data zachované.
-Pilot zůstává rozehraný; A znovu nevytvářet.
+Uživatel po opravě potvrdil Mé shouty i detail pod TestBusiness bez chyby.
+Pilot zůstává rozehraný; A ani jeho potomky znovu nevytvářet.
 Všechna čtyři existující testovací přijetí/identity potvrzená; TestAdmin
 potvrdil dohledání účtu a archivní detail, tři skutečné role-5 audity ověřené.
+Nyní čeká skutečné nahlášení jediného testovacího veřejného komentáře pod
+TestBusiness; zatím neodstraňovat Shout ani zprávy. Manifest a aktuální handoff
+jsou v build/archive-readiness/manual-pilot a current-handoff.json.
 
 **Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
 [Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).

@@ -493,7 +493,18 @@ Shoutů a archivní detail A; potvrdil označení „Archivní podklad“, nadpi
 Server má přesně tři související audity lookup/shouts/detail s aktérem
 it_admin /roleLevel 5 a případem „MVP archiv 6c00e1d7e8“. Tato dílčí živá
 kontrola je hotová; nenahrazuje podklad hlášení po odstranění zdroje nebo
-vlastní smazání bez nového přijetí. Žádný další obsah nebo Auth nevznikl.
+vlastní smazání bez nového přijetí.
+
+Po dokončení indexu vlastník potvrdil také Mé shouty → Aktivní a detail A
+pod TestBusiness bez chyby. Navazující již schválený pilot pokračuje jedním
+veřejným komentářem a jednou soukromou odpovědí pod Bright_Otter_182. Oba
+vznikly přes existující serverové operace/společný writer, mají validní
+archivní kopie a authorAccountKey z aktuální doložené identity. Manifest
+phase children-seeded; žádný druhý Shout ani nový Auth nevznikl. Vlastník
+má nyní pod TestBusiness ověřit oba texty a nahlásit právě veřejný komentář
+s důvodem „MVP archiv 6c00e1d7e8 komentar. Remove after verification.“.
+Do serverového potvrzení hlášení nic neodstraňovat; zatím není doložený
+archivní podklad po odstranění zdroje ani nové vlastní smazání bez přijetí.
 
 <a id="public-source-read-fix"></a>
 

@@ -39,9 +39,11 @@ Jeden pilotní Shout A pod TestBusiness je archivovaný a autorsky navázaný;
 jeho skutečné přijetí podmínek je ověřené. Aktivní/Expirované blokuje chybějící
 publicUntil index. Zdroj 7c6a122 má úspěšné úplné CI 46065640727; jediný nový
 DEV index CICAgNjpr5sK je READY a oba živé dotazy i kurzory prošly.
-Další krok je opakovat původní Mé shouty/detail pod TestBusiness, potom
-zbývající archivní testy. Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
-Bez další fixture/Auth a bez změn webu/Functions/Rules/TTL nebo retence.
+Uživatel potvrdil opravené Mé shouty/detail pod TestBusiness. Nyní ověřuje
+jediný veřejný komentář a soukromou odpověď, obojí připravené/archivované pod
+Bright_Otter_182; žádný nový Auth. Čeká nahlášení testovacího komentáře.
+Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
+Samotná indexová oprava nevytvořila fixture/Auth a nezměnila web/Functions/Rules/TTL ani retenci.
 
 **Hotovo: oprava přímého čtení veřejných zdrojů v DEV.**
 [Nálezy, regrese a nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
