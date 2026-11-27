@@ -271,6 +271,99 @@ má verzi 2; starý plán bez účtových SDK pojistek se nepřijme.
 Již započtené místní podúseky nedostávají druhý kredit; DEV/akceptace zůstávají
 otevřené. Všechny pilotní fixture a skutečné právní souhlasy až na konec.
 
+<a id="dev-finishing-deployment"></a>
+
+## Dokončené DEV nasazení, otevřená provozní a ruční akceptace
+
+Zdroj **5435855847bc81c76a05f1e6f18d5b68b636367b** má
+[úspěšné úplné CI 46013597685](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
+Po něm operátor s digestem
+39abd11208683c6b8ac57d16deccc9c80a7c845ace7be680104d9c4123bb66b2
+odstranil přesná tři vyřízená pilotní hlášení, zachoval 217 chráněných záznamů
+a atomicky nastavil legacyRevision 1. Pět zápisů zahrnuje tři reporty, control
+a vlastní sedmidenní potvrzení; původní rozhodnutí/postihy mimo tyto reporty
+se nepřepisovaly. Žádná Auth mutace.
+
+Čerstvý audit s digestem inventury
+47173f8a04788df149ea6b39d71fce95f360f9e26772f66ad9ff334b100faa24
+ověřil všech **165 záznamů**, blocked [], legacyText 0, ready true. Nejde o
+automatické aktivační oprávnění; navazující rollout je proveden v rozsahu
+výslovného souhlasu vlastníka a přesného úspěšného CI.
+
+Nasazení proběhlo ve třech krocích: 27 obsahových Functions +2 read-sync,
+potom Rules/web s živým ověřením, nakonec 2 účtové Functions s údržbou.
+Hosting **14a0f588585839e2**, Rules **1b29a656-f990-42f5-b335-ef35c44c0997**
+(SHA-256 0175189e016f072c9d9229caeca0899ee622b952a0d5d7ed2cbb69fac2a5b8e8).
+Ověřeno 68 aplikačních cest a dvě standardní rezervované Firebase init cesty,
+8 HTTP hash kontrol obou DEV domén a 4×401 bez Auth/App Check.
+Všech 31 Functions ACTIVE/Node22/active profil, 100 % nové revize; všechny
+starší revize 31 endpointů RETIRED. Skutečných 31 zdrojových ZIP archivů
+souhlasí se všemi hashi připravených modulů, balíčků a env souborů.
+Min0/max1, concurrency1, 256 MiB, callables 15 s /workery 60 s i dva minutové
+plánovače zůstaly stejné. Podpisové klíče, Storage a produkce beze změny.
+
+Release web z a221749 byl použit po doložené shodě všech webových zdrojů,
+konfigurace, Rules a serverových balíčků mezi a221749 a 5435855; poslední
+commit přidal jen úklidový nástroj, jeho testy a dokumentaci. Nejde o tvrzení
+nového sestavení změněné aplikace. Active i rollback balíčky jsou připravené;
+rollback zachová čtení/capture/identitu/právní verzi a zastaví obsahovou údržbu.
+Živý návrat otevřeného klienta zatím není novou ruční akceptací doložený.
+
+Obsahová údržba je skutečně aktivní: 14:44–14:48 UTC pět ticků continuation,
+každý 25 kroků /25 jednotek ze sdílených 50 (druhá polovina pro účtové zdroje),
+max32 kroků /měkkých10 s zachované. lifecycleFailed 0 /lifecycleNeedsReview 0.
+Průběžný stav 14:48:46 UTC: 22 zdrojových Shoutů /64 komentářů /1 soukromá
+odpověď, všech **9 platných archivních těl zachovaných**. To není konečný počet:
+na původní časové ose skončila historie u 27 zdrojů Shoutů /98 komentářů;
+z toho 22 Shoutů /97 komentářů má prošlý i konečný archivní termín, dalších
+5 Shoutů /1 komentář pouze přechází ze zdroje do zachovaného archivu.
+Původní pending žádost má stejné SDK verze, oba původní joby stále absent;
+její Auth chyběl už před prací. Její termín, stav ani běh se nepřepisoval.
+
+### Otevřený nález staré indexové údržby
+
+Souhrn workeru je WARNING kvůli **indexFailed 1**, nikoli kvůli obsahovému
+archivu. Čtecí reprodukce bez zápisu potvrdila invalid-normal-gc-generation.
+[Spouštěč GC](../../../functions/feed_normal_gc.js) v guardu stále uznává jen
+marker.v === 1, zatímco feed-v3 má již podporované v2/cardProjection1.
+[Vlastní GC jádro](../../../functions/feed_index_gc_store.js) formáty 1/2
+podporuje. Není doloženo úplné bezchybné provozní ověření celého workeru.
+
+Předložený další konkrétní úsek: ověřovat podporované kombinace přes existující
+generationCardProjection, doplnit v1/v2 regrese zachování živých a hodinově
+chráněných stromů, restartu/souběhu a vadného formátu; po přesném úplném CI
+pouze dvě existující účtové Functions v DEV. Bez nových dat, Rules, webu,
+prostředků, limitů či retence. Vlastník tuto další opravu **výslovně schválil**.
+Nález je podmínkou další
+provozní akceptace, nikoli důvodem skrýt varovné logy nebo navýšit stupnici
+živé akceptace.
+
+Ruční pilot zůstává odložený. Nové fixture, Auth účet ani právní potvrzení
+se nevytvořily. Další pořadí: vyřešit GC, jeden společný archivní/identity/
+právní průchod dle schválených mezí, úklid nových fixture a plánovaná souhrnná
+revize před společnou MVP regresí. DEV nasazení je samostatně doložené;
+živá akceptace a produkce zůstávají otevřené.
+
+### Schválená lokální oprava GC formátu a další vydání
+
+V guardu spouštěče se nyní používají stávající generationContentIdentity a
+generationCardProjection; tím přijme platný v1 i v2 a odmítne nepodporovanou
+verzi či rozporné příznaky. Žádná změna GC algoritmu, hodinové ochrany,
+lease/retry/batch mezí, rolí nebo retencí. Historie Git dokládá původní v1
+podmínku již v cc262af z 6. listopadu; nejde o nově přidané archivační pravidlo.
+
+Všech **9 emulátorových případů** v
+[feed_normal_gc.integration.test.js](../../../functions/feed_normal_gc.integration.test.js)
+prošlo bez skip: původní v1, skutečné v2 uzly, studené pokračování, současní
+workeři, aktuální i hodinově chráněné stromy, odmítnuté vadné kombinace a
+průchod přes skutečný zapnutý archivní createFeedRuntime/indexMaintenance
+s indexFailed 0 a bez obsahové mutace. Lint také prošel.
+
+Po společném pushi ještě potřebuje tento přesný zdroj úplné CI. Teprve potom
+pouze accountDeletionRequestCreatedDev a resumeAccountDeletionJobsDev v DEV;
+ostatních 29 Functions, web, Rules a provozní prostředky zůstávají na právě
+ověřené verzi. Živý úspěch GC zatím není doložen touto místní regresí.
+
 ## Důkazy původního čtecího došetření
 
 Pouze technické ignorované výstupy v build/archive-readiness:

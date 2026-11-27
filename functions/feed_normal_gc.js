@@ -5,6 +5,7 @@ import { beginIndexGc } from './feed_index_gc_store.js';
 import { assertFeedRuntimeTarget, runtimeIndexBinding } from './feed_index_paths.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { feedSessionLifetimeMillis } from './feed_session_policy.js';
+import { generationContentIdentity, generationCardProjection } from './feed_generation_format.js';
 
 const jobPath = /^feedIndexGenerations\/([a-z][a-z0-9-]{0,39})\/gcJobs\/([0123456789bcdefghjkmnpqrstuvwxyz]{4})$/;
 const historyPath = /^feedIndexGenerations\/([a-z][a-z0-9-]{0,39})\/retiredRoots\/[^/]+$/;
@@ -72,8 +73,10 @@ export async function runNormalIndexGc(db, { clock = () => new Date(), elapsedCl
   const [, generation, cell] = match, binding = runtimeIndexBinding(db, generation), token = randomUUID();
   const claimed = await db.runTransaction(async tx => {
     const [job, marker, control] = await tx.getAll(ref, binding.base, controlRef);
-    if (!control.exists || validateFeedIndexControl(control.data()).mode === 'off' || marker.get('v') !== 1 ||
+    if (!control.exists || validateFeedIndexControl(control.data()).mode === 'off' ||
         marker.get('schemaVersion') !== 1 || marker.get('accountRetention') !== true) throw new Error('invalid-normal-gc-generation');
+    generationContentIdentity(marker.data());
+    generationCardProjection(marker.data());
     if (job.exists) {
       const data = validateJob(job.data());
       if (!same(data.generationCreateTime, marker.createTime)) throw new Error('index-gc-generation-changed');

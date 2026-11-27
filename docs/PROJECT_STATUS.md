@@ -6,27 +6,30 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Dokončovací DEV archiv pokračuje po úspěšném druhém CI.** [Důkazy a pořadí](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#finishing-implementation).
-Nasazený capture zdroj ebae0e3 /CI 46000078269: 31 Functions, web 806c5134994f9acd,
-Rules 7834bb01-d63c-4639-af6a-03d53f3600d9; právní verze 2026-11-27.
-Přesných 11 MVP kořenů uklizeno, samostatný klíč založený a 18 selektivních
-indexových operací bez TTL READY. Prostředky/plánovače zachované.
+**Archiv je nasazený v DEV; provozní a ruční akceptace zůstává otevřená.**
+[Skutečné nasazení a zbývající nález](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#dev-finishing-deployment).
+Zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b má úspěšné úplné
+[CI 46013597685](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
+Převedeno 128 původních zdrojů; po schváleném úklidu 11 MVP kořenů a tří
+starých hlášení je čerstvý audit všech 165 záznamů ready, bez blokujících
+položek a starých textových kopií hlášení. Nový samostatný klíč a 18 cílených
+indexových operací bez TTL hotové. Původní pending žádost beze změny.
 
-**Převod původních zdrojů provedený.** Čistý zdroj a221749f5c01c8603309e0128b7f1098f30fb80c má
-[úspěšné úplné CI 46009552516](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46009552516).
-Tři dávky 28/50/50 svázaly 128 zdrojů a vytvořily 28 vláken a 9 retenčně
-platných těl; 119 prošlých zdrojů jen metadata. Ověřeny původní obsahy,
-inkarnace, termíny i beze změny pending žádost a absence původních jobů.
-Auth chyběl už před zásahem; žádný původní Auth účet se nesmazal.
+**Ověřená živá verze:** Hosting 14a0f588585839e2, Rules
+1b29a656-f990-42f5-b335-ef35c44c0997. Všech 31 Functions ACTIVE, skutečné
+zdrojové ZIP archivy shodné s balíčky, starší revize 31 endpointů RETIRED.
+Čtení/identita/obsahová údržba a právní verze 2026-11-27 zapnuté; žádná
+právní potvrzení nevytvořena za uživatele. Stejné prostředky a dva plánovače,
+Storage/produkce/main beze změny. 68 app cest, 8 HTTP kontrol a 4×401 ověřené.
 
-**Konečný audit: 128 ověřených, právě 3 stará pilotní hlášení blokují aktivaci.**
-Vlastník jejich přesný úklid schválil. Nový pevný operátor má šest místních
-zelených testů; před živým použitím potřebuje vlastní přesné úplné CI.
-Po úklidu se provede čerstvá inventura/audit, teprve potom active rollout.
-Nové čtení a obsahová údržba zůstávají vypnuté. Aktivní a kompatibilní návratový
-balíček jsou připravené a ověřené, zatím nenasazené. Ruční pilot i jeho nová
-data na konec; žádné automatické právní souhlasy. DEV/akceptace zatím otevřené,
-pevné metriky nedostávají druhý kredit za již započtenou místní přípravu.
+**Údržba archivu pokračuje po dávkách:** lifecycleFailed 0 /needsReview 0,
+9 platných archivních těl zachovaných. Původní pending žádost se nemění;
+její Auth už před zásahem neexistoval, oba původní joby stále absent.
+Celý worker ale hlásí indexFailed 1: starý spouštěč GC odmítá v2 formát
+feed-v3. Čtecí reprodukce bez zápisu potvrzená, vlastní GC jádro v2 podporuje.
+Konkrétní následná oprava a DEV ověření jsou schválené; nyní místní regrese a přesné CI před nasazením dvou workerů. Živá akceptace
+se proto neuzavírá. Nové pilotní fixture/Auth nejsou založené; ruční testy
+zůstanou společně na konec, potom úklid a naplánovaná souhrnná revize.
 
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.
@@ -1531,17 +1534,17 @@ Neměnila aplikaci, nasazení ani data a není novým otevřeným MVP úkolem.
 
 | Vrstva | Poslední ověřený DEV stav |
 |---|---|
-| Projekt / Hosting site | `shoutout-dev-46c81`, https://shoutout-dev-46c81.web.app |
-| Nasazený zdroj | `ebae0e321e6aa536b68a90e8610f1eb37bb824bf`, úplné CI 46000078269 success; čistá kopie build/releases/archive-capture-ebae0e3 |
-| Web | Hosting `806c5134994f9acd`, 68 souborů; veřejný JS hash shodný s release artefaktem; vydaná hra zachovaná |
-| Functions | 31 ACTIVE, Node.js 22; min0/max1, concurrency1, 256 MiB. 28 callables 15 s, tři worker endpointy 60 s. 4 nové callables bez identity/attestace HTTP 401 |
-| Předchozí revize | 100 % provozu nové revize a všechny starší revize 27 původních Functions doloženě RETIRED; prostředky zachované |
-| Plánovače | Stejné 2 ENABLED joby, cron `* * * * *`, Etc/UTC; bez nového jobu |
-| Firestore Rules | `7834bb01-d63c-4639-af6a-03d53f3600d9`, SHA-256 `116a5ebdc44c268908bcc34e0e798de636cc8156d613f3aa565706c02128211b`; právní verze 2026-11-27, archivní historie/read brána zatím vypnutá |
-| Indexy / klíč | 18 operací dokončeno a indexy READY: 5 složených, 12 mapových výjimek, 1 array CG. TTL beze změny. Nový samostatný SHOUTOUT_ARCHIVE_IDENTITY_KEY v1, 32 náhodných bytů, hodnota neveřejná |
-| Archivní etapa | Capture běží, čtení a obsahová údržba vypnuté. Inventura 131 záznamů /10 stránek. První source apply bezpečně odmítnut před zápisem; oprava operátoru před dalším CI |
-| Vymezený úklid | 11 přesných MVP kořenů odstraněno, 129 ostatních zdrojů chráněno. Původní pending žádost beze změny; její Auth chyběl už před prací |
-| B2/B3/B4 / Storage / produkce | Dosavadní feed a pohyb zachované; nová právní verze vyžaduje skutečné přijetí. Storage, produkce a main beze změny |
+| Projekt / site | shoutout-dev-46c81; https://shoutout-dev-46c81.web.app |
+| Zdroj / CI | 5435855847bc81c76a05f1e6f18d5b68b636367b / úplné CI 46013597685 success |
+| Web | Hosting 14a0f588585839e2; 68 aplikačních a 2 rezervované Firebase init cesty, 8 HTTP hash kontrol obou domén; vydaná hra zachovaná |
+| Functions | 31 ACTIVE /Node22 /active; skutečné zdrojové archivy shodné s připravenými balíčky. Min0/max1 /concurrency1 /256 MiB; 28 callables 15 s, 3 workery 60 s |
+| Revize / plánovače | 100 % provozu nové revize; všechny starší revize 31 endpointů RETIRED. Stejné 2 ENABLED minutové joby Etc/UTC |
+| Rules | 1b29a656-f990-42f5-b335-ef35c44c0997; SHA-256 0175189e016f072c9d9229caeca0899ee622b952a0d5d7ed2cbb69fac2a5b8e8 |
+| Archiv / právo | Capture, čtení, identita a obsahová údržba zapnuté; právní verze 2026-11-27 bez automatických potvrzení. Audit 165 záznamů ready; 9 platných archivních těl zachovaných |
+| Indexy / klíč | 18 cílených operací READY bez TTL, samostatný SHOUTOUT_ARCHIVE_IDENTITY_KEY v1; jeho hodnota neveřejná |
+| Úklid / pending | Přesných 11 MVP kořenů a 3 schválená testovací hlášení uklizeno. Běžný obsahový úklid pokračuje po dávkách; pending žádost beze změny, původní Auth chyběl již před prací, původní joby absent |
+| Otevřená kontrola | Obsahový lifecycle bez chyb; starý GC spouštěč odmítá v2/feed-v3. Navazující oprava schválená, před svým přesným CI/DEV ověřením. Ruční pilot odložený, nová data/Auth nezaložené |
+| Jiné prostředí | Storage, produkce a main beze změny |
 
 
 Starší B4 recovery důkazy jsou v [živém protokolu](plans/feed/B4_DEV_ROLLOUT.md#news-pause-recovery-results);
