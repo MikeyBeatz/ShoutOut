@@ -94,7 +94,7 @@ test('opted-in lifecycle stages append to existing positions and purge only owne
   assert.equal((await foreign.get()).get('content.text'), 'Preserve foreign archive');
 });
 
-test('identity cleanup resumes through existing account purge and removes actor/subject audits without touching foreign accounts', { skip: !enabled }, async () => {
+test('identity cleanup continues with ingress off through existing account purge without touching foreign accounts', { skip: !enabled }, async () => {
   const f = await fixture(); f.options.archiveIdentityEnabled = true;
   const own = await f.add(`archiveIdentityAccounts/${randomUUID()}`, { userId: f.uid });
   const binding = await f.add(`archiveIdentityBindings/${randomUUID()}`, { userId: f.uid });

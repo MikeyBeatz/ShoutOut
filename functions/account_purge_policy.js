@@ -8,8 +8,9 @@ const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
   ({ collection, field, action, group, operator });
 
-export function accountPurgeStages(uid, { moderationCopiesEnabled = false, contentLifecycleEnabled = false, archiveIdentityEnabled = false } = {}) {
-  if (typeof archiveIdentityEnabled !== 'boolean' || typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
+export function accountPurgeStages(uid, { moderationCopiesEnabled = false, archiveIdentityEnabled = false, contentLifecycleEnabled = archiveIdentityEnabled } = {}) {
+  if (typeof archiveIdentityEnabled !== 'boolean' || typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean' ||
+      archiveIdentityEnabled && !contentLifecycleEnabled) throw new Error('invalid-moderation-copy-option');
   return [
     queryStage('shouts', 'authorId', 'freeze'),
     queryStage('reactions', 'actorId', 'delete', true), // Archived copies, not live counter-bearing votes.

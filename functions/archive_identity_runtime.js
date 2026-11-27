@@ -12,6 +12,7 @@ export function preparedArchiveIdentityRuntime(db, options = {}) {
   if (!enabled) return createArchiveIdentityRuntime(db, { enabled: false });
   const encoded = options.encodedKey ?? process.env.SHOUTOUT_ARCHIVE_IDENTITY_KEY;
   if (typeof encoded !== 'string' || !/^[a-f0-9]{64}$/.test(encoded)) throw new Error('archive-identity-key-required');
+  if ((options.purgeEnabled ?? archiveIdentityConfiguration.purgeEnabled) !== true) throw new Error('archive-identity-purge-required');
   if (!(options.captureEnabled ?? (contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled))) throw new Error('archive-identity-capture-required');
   assertCaptureDisclosure(options.disclosurePolicy ?? currentLegalPolicy(), true);
   return createArchiveIdentityRuntime(db, { ...options, enabled, key: Buffer.from(encoded, 'hex') });

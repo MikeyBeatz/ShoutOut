@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { identityContact, createArchiveIdentityCodec, createArchiveIdentityRuntime, observeArchiveIdentity } from './archive_identity.js';
+import { identityContact, createArchiveIdentityCodec, createArchiveIdentityRuntime, observeArchiveIdentity, archiveIdentityConfiguration } from './archive_identity.js';
 import { getArchiveIdentityPageOperation } from './archive_identity_reader.js';
 import { accountPurgeStages } from './account_purge_policy.js';
 import { Buffer } from 'node:buffer';
@@ -34,9 +34,14 @@ test('disabled operations do not inspect the database or Auth and purge addition
 });
 test('prepared integration requires a key, capture and independent disclosure before any database access', () => {
   const db = { projectId: 'shoutout-dev-46c81' };
+  assert.deepEqual(archiveIdentityConfiguration, { enabled: false, purgeEnabled: false });
   assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true }), /key-required/);
-  assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true, encodedKey: '0'.repeat(64), captureEnabled: false }), /capture-required/);
-  assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true, encodedKey: '0'.repeat(64), captureEnabled: true }), /disclosure/);
-  assert(preparedArchiveIdentityRuntime(db, { enabled: true, encodedKey: '0'.repeat(64), captureEnabled: true,
+  assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true, encodedKey: '0'.repeat(64), captureEnabled: true }), /purge-required/);
+  assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true, purgeEnabled: true, encodedKey: '0'.repeat(64), captureEnabled: false }), /capture-required/);
+  assert.throws(() => preparedArchiveIdentityRuntime(db, { enabled: true, purgeEnabled: true, encodedKey: '0'.repeat(64), captureEnabled: true }), /disclosure/);
+  assert(preparedArchiveIdentityRuntime(db, { enabled: true, purgeEnabled: true, encodedKey: '0'.repeat(64), captureEnabled: true,
     disclosurePolicy: legalPolicy({ archiveDisclosureEnabled: true, version: '2099-01-01' }) }).enabled);
+  const cleanup = accountPurgeStages('uid', { archiveIdentityEnabled: true });
+  assert(cleanup.some(stage => stage.collection === 'contentLifecycleArchive'));
+  assert.throws(() => accountPurgeStages('uid', { archiveIdentityEnabled: true, contentLifecycleEnabled: false }));
 });

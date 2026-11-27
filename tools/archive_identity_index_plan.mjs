@@ -23,8 +23,10 @@ export function planArchiveIdentityIndexes(projectId, snapshots) {
   });
   const desired = { queryScope: 'COLLECTION_GROUP', fields: [{ fieldPath: 'subjectUserIds', arrayConfig: 'CONTAINS' }] };
   const present = indexes.some(index => canonical(index) === canonical(desired));
+  const pending = [...core.pending];
+  if (present && row.data.indexConfig.indexes[indexes.findIndex(index => canonical(index) === canonical(desired))].state !== 'READY') pending.push(name);
   const actions = [...core.actions, ...(present ? [] : [{ method: 'PATCH', resource: name, updateMask: 'indexConfig', before: row.data.indexConfig,
     body: { name, indexConfig: { indexes: [...indexes, desired] } } }])];
-  const result = { projectId, actions, pending: core.pending, observations: [core, row.data.indexConfig] };
+  const result = { projectId, readOnlyPlan: true, changesTTL: false, actions, pending, observations: [core, row.data.indexConfig] };
   return { ...result, digest: createHash('sha256').update(canonical(result)).digest('hex') };
 }

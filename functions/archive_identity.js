@@ -6,7 +6,8 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 
-export const archiveIdentityConfiguration = Object.freeze({ enabled: false });
+// Once installed, cleanup stays enabled through an ingress/reader rollback.
+export const archiveIdentityConfiguration = Object.freeze({ enabled: false, purgeEnabled: false });
 export const identityCollections = Object.freeze({ accounts: 'archiveIdentityAccounts', bindings: 'archiveIdentityBindings' });
 const fail = (code, text) => { throw new HttpsError(code, text); };
 export const identityId = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
@@ -61,6 +62,7 @@ export function requireIdentityRuntime(runtime) {
 // by Admin Auth; email_verified, phone and account birth are never request data.
 export async function observeArchiveIdentity(request, runtime, auth) {
   const { db, codec, clock } = requireIdentityRuntime(runtime), { uid, email } = requireCallableIdentity(request);
+  if (!identityUid(uid)) fail('failed-precondition', 'Invalid retained account identifier.');
   const proofStartedAt = identityNow(clock);
   const record = await auth.getUser(uid);
   const observedAt = identityNow(clock);

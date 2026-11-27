@@ -21,7 +21,7 @@ const keyValid = key => typeof key === 'string' && key.length >= 3 && key.length
 export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
-  indexErasureCoordinator = null, moderationCopiesEnabled = false, contentLifecycleEnabled = lifecycleEnabled(db), archiveIdentityEnabled = false,
+  indexErasureCoordinator = null, moderationCopiesEnabled = false, archiveIdentityEnabled = false, contentLifecycleEnabled = archiveIdentityEnabled || lifecycleEnabled(db),
 } = {}) {
   if (typeof moderationCopiesEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||

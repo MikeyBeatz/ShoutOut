@@ -14,4 +14,9 @@ test('identity proposal preserves unrelated single indexes and never writes TTL'
   assert.equal(patch.updateMask, 'indexConfig'); assert(!JSON.stringify(result.actions).includes('ttl'));
   assert.throws(() => planArchiveIdentityIndexes('shoutout-production-a1b34', snapshots));
   assert.throws(() => planArchiveIdentityIndexes(project, {}));
+  snapshots['accessAudits/fields/subjectUserIds'].data.indexConfig.indexes.push({ queryScope: 'COLLECTION_GROUP',
+    fields: [{ fieldPath: 'subjectUserIds', arrayConfig: 'CONTAINS' }], state: 'CREATING' });
+  assert(planArchiveIdentityIndexes(project, snapshots).pending.includes(`${base}/accessAudits/fields/subjectUserIds`));
+  snapshots['accessAudits/fields/subjectUserIds'].data.indexConfig.indexes.at(-1).state = 'READY';
+  assert.equal(planArchiveIdentityIndexes(project, snapshots).pending.length, 0);
 });

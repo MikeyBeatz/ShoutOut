@@ -146,6 +146,10 @@ Aktivace, veřejná právní verze a konkrétní DEV plán tím schválené nejs
   neduplikuje a neukládá kopii odpovědi. Audit obsahuje identifikátor případu,
   aktéra a cílové reference, nikoli kontakt nebo tělo. Při purge aktéra či
   některého cílového účtu se celý příslušný audit odstraní; cizí účty se nemění.
+- Příjem/čtení a účtový purge mají oddělené vypnuté volby. Po první instalaci
+  musí purgeEnabled zůstat zapnuté i při vypnutí příjmu/hledání; nepotřebuje HMAC
+  klíč. Zachová i lifecycle fáze před identity fázemi, aby návrat neposunul čísla
+  rozpracovaného jobu. Aktivní adaptér vyžaduje připravený úklid.
 - [Finalizace účtu](../../../functions/finalize_account_deletion.js) atomicky
   uzavře identitu a označí původní žádost. Druhá omezená transakce doplní přesný
   SDK createTime této žádosti. Při přerušení čtení přijme jen původní označenou
@@ -203,3 +207,16 @@ zánik controlleru a lokální odstranění prošlého obsahu. [Rules regrese](.
 odmítají přímé čtení/listování/zápisy indexu pro úrovně 1–6; kandidát právní
 verze zachovává vlastnictví, validaci a neměnnost přijetí. Kandidát je pouze
 místní prototyp, nikoli doklad nasazení či úplné bezpečnostní certifikace.
+
+### Příští kontrolní bod před DEV
+
+Nejdřív vybrat novou veřejnou právní verzi a způsob přechodu existujících účtů;
+testovací datum 2099-01-01 není návrhem veřejné verze. Potom doložit počáteční
+kontaktní pokrytí a případné vazby starých archivů s konkrétními důkazy. Teprve
+nad tím připravit přesný živý plán klíče/wrapperů, indexů, kompatibilních klientů,
+retence a návratu, včetně skutečné připravenosti všech indexových stavů.
+
+Tato větev je izolovaná od vedlejší práce na hře. Před budoucím webovým rolloutem
+porovnat celý vybraný zdroj s aktuálním DEV vydáním včetně již schválené hudby
+a ovládání hry; testovaný místní archivní zdroj sám není automaticky vybranou
+náhradou dnešního webu. Nezahrnovat rozpracované herní experimenty ani R2 plán.

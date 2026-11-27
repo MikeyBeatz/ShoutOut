@@ -155,6 +155,26 @@ test('finalization binds the exact first server commit; removed/replaced request
   assert.equal((await f.page({ action: 'lookup', type: 'email', value: `${f.uid}@example.cz` })).items.length, 0);
 });
 
+test('interruption between identity closure and SDK birth binding resumes only the original tagged request', { skip: !enabled }, async t => {
+  const f = await fixture(t), account = await f.observe(), request = { ...f.request(f.uid), data: { expectedUserId: f.uid } };
+  let calls = 0;
+  const interrupted = new Proxy(f.db, { get(target, key) {
+    if (key === 'runTransaction') return (...args) => {
+      if (++calls === 2) throw new Error('lost-second-phase');
+      return target.runTransaction(...args);
+    };
+    return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
+  } });
+  await assert.rejects(finalizeAccountDeletionOperation(request, interrupted, f.clock, { identityRuntime: f.runtime }), /lost-second-phase/);
+  const ref = f.db.doc(`archiveIdentityAccounts/${account.accountKey}`), pending = f.db.doc(`accountDeletionRequests/${f.uid}`);
+  assert((await ref.get()).get('deletionClosedAt') instanceof Timestamp);
+  assert.equal((await ref.get()).get('deletionRequestCreateTime'), undefined);
+  const query = { action: 'lookup', type: 'email', value: `${f.uid}@example.cz` };
+  assert.equal((await f.page(query)).items.length, 1);
+  await finalizeAccountDeletionOperation(request, f.db, f.clock, { identityRuntime: f.runtime });
+  assert((await ref.get()).get('deletionRequestCreateTime').isEqual((await pending.get()).createTime));
+});
+
 test('measured cold/warm observation and exact lookup avoid repeated writes and full scans', { skip: !enabled }, async t => {
   const f = await fixture(t), counts = { reads: 0, writes: 0, auth: 0 };
   const db = new Proxy(f.db, { get(target, key) {
