@@ -117,7 +117,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | Položka | Dokončení | Úseky |
 |---|---:|---:|
 | [bl-019: Přepracovat onboarding na interaktivní tutorial. Po MVP *(Rozpracováno, automatické spuštění je dočasně deaktivované.)*](BACKLOG.md#bl-019) | 25,00 % | 1/4 |
-| [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná. Před společnou regresí projít [souhrnnou revizi dosavadních kroků](LAUNCH_READINESS.md#completed-work-review), po dokončení nynějšího archivního/moderačního cyklu. Zápis do plánu není provedený audit a nevytváří další váhu této položky.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
+| [bl-038: MVP — Splnit webovou předstartovní bránu v `docs/LAUNCH_READINESS.md`. Tento dokument sdružuje produkční, bezpečnostní, právní, testovací a provozní předpoklady veřejné aplikace. Mobilní distribuce a placená monetizace jsou samostatné navazující etapy; jednotlivé úkoly zůstávají v tomto backlogu. Provozní akceptace zahrnuje schválený cíl 100 000 registrovaných účtů a 5 000 současně aktivních uživatelů; [profil akcí a ověření této zátěže](LAUNCH_READINESS.md#capacity-target) se musí určit zvlášť. Kapacita zatím není prokázaná. [Souhrnná revize dosavadních kroků](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) je dokončená 27. listopadu 2026. Před společnou regresí vyřešit její nálezy; samotná revize nevytváří další váhu ani nezavírá tuto startovní bránu.](BACKLOG.md#bl-038) | 50,00 % | 2/4 |
 | [bl-048: MVP — Blaze je aktivní; před nasazením připravené Firestore TTL konfigurace pro fyzické odstranění `clientErrorLogs` a `technicalLogAccessAudits` změřit objem a schválit účtovaná TTL mazání podle `docs/operations/COST_SAFETY.md`. Do té doby jsou starší záznamy bezpečně nečitelné.](BACKLOG.md#bl-048) | 33,34 % | 1/3 |
 | [bl-059: MVP — Po připojení `go.shoutout-app.eu` k produkčnímu projektu `shoutout-production-a1b34` přepnout jeho globální Firebase Authentication Action URL na připravený `/auth/action`. Handler už bezpečně obsluhuje ověření e-mailu, reset hesla i obnovení změněné adresy; výchozí domény projektu Firebase při ukládání vlastní Action URL odmítá. Prezentační projekt není cílem této změny.](BACKLOG.md#bl-059) | 33,34 % | 1/3 |
 | [bl-072: Dokončit Business účet, provozovny a ruční aktivaci pro veřejný web. MVP](BACKLOG.md#bl-072) | 50,00 % | 2/4 |
@@ -407,7 +407,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-private-delete-web-dev: Vlastní soukromé mazání – kompatibilní DEV web | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45096691292) |
 | content-private-delete-dev: Vlastní soukromé mazání – ověřený DEV Rules cutover | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591) |
 | content-private-delete-accept: Vlastní soukromé mazání – živá akceptace DEV | acceptance | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete) |
-| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation) |
+| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
 | moderation-archive-target-check: Auditovaný detail nahlášeného archivovaného komentáře – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
@@ -451,7 +451,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-business-dev: Business rozhodování – DEV aktivace | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-business-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633), [4](../docs/MVP_SERVER_PLAN.md#business-suspension-ui-repair-results) |
 | moderation-business-accept: Business rozhodování – živá akceptace | acceptance | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md), [2](../docs/MVP_SERVER_PLAN.md#moderation-business-final-client-results) |
 | moderation-business: Business – pravidla ruční kontroly a společná regrese | verification | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
-| moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | — |
+| moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | [1](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | moderation-production: Produkční aktivace moderace | acceptance | ⬜ | — |
 | business-deletion-fence-code: Ochrana Business aktivace proti návratu smazaného účtu – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
 | business-deletion-fence-check: Ochrana Business aktivace proti návratu smazaného účtu – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
@@ -464,16 +464,16 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | accessibility-audit: Audit přístupnosti webu | verification | ⬜ | — |
 | web-layout-accept: Mobilní/desktopové rozložení a vizuální regrese | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md#category-font-dev-rollout), [2](../tools/diagnostics/font_warning_probe.dart) |
 | translation-accept: Finální kontrola přetečení, diakritiky a plurálů | acceptance | ⬜ | — |
-| regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md), [2](../docs/LAUNCH_READINESS.md#completed-work-review) |
-| regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
-| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
-| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review) |
+| regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md), [2](../docs/LAUNCH_READINESS.md#completed-work-review), [3](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | legal-operator: Skutečný provozovatel a kontakty podpory | implementation | ⬜ | — |
 | legal-review: Právní kontrola veřejných textů | verification | ⬜ | — |
 | legal-subject-rights: Postup práv subjektů údajů a provozní odpovědnost | acceptance | ⬜ | — |
 | capacity-local-code: Reprodukovatelný model kapacity a cílené emulátorové ověření – implementace | implementation | ✅ | [1](../docs/operations/CAPACITY_AND_SCALING.md) |
 | capacity-local-check: Reprodukovatelný model kapacity a cílené emulátorové ověření – automatické ověření | verification | ✅ | [1](../docs/operations/CAPACITY_AND_SCALING.md) |
-| capacity-cloud: Schválený cloudový test 100 000 účtů / 5 000 aktivních relací | acceptance | ⬜ | — |
+| capacity-cloud: Schválený cloudový test 100 000 účtů / 5 000 aktivních relací | acceptance | ⬜ | [1](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | capacity-autoscaling: Měřená konfigurace automatického škálování | implementation | ⬜ | — |
 | maintenance-capacity: Kapacita a pokračování retenční údržby | verification | ⬜ | — |
 | ops-monitoring: Produkční monitoring a minimální metriky | deployment | ⬜ | — |
@@ -483,7 +483,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | release-ci: CI přesného produkčního release kandidáta | verification | ⬜ | — |
 | release-build: Čistý produkční webový build | verification | ⬜ | — |
 | release-defects: Odstranění blokujících vad release kandidáta | acceptance | ⬜ | — |
-| launch-gate: Kompletní předstartovní checklist a rozhodnutí o rizicích | acceptance | ⬜ | — |
+| launch-gate: Kompletní předstartovní checklist a rozhodnutí o rizicích | acceptance | ⬜ | [1](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | launch-release: Schválený main/tag a produkční nasazení | deployment | ⬜ | — |
 | launch-smoke: Živá povydávací kontrola veřejného webu | acceptance | ⬜ | — |
 | technical-ttl-config: Připravená TTL konfigurace technických logů | implementation | ✅ | [1](../firestore.indexes.json) |

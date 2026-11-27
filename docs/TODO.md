@@ -33,239 +33,31 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Hotovo: živá DEV akceptace archivu a vymezený úklid.**
-[Výsledky a otevřené nálezy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
-Potvrzené kontaktní dohledání/audit, podklad hlášení po odstranění komentáře,
-vlastní smazání Shoutu/historie a čitelný archiv. Dodatečný druhý účet ověřil
-odhlášení i smazání bez právního přijetí; oba nové Auth jsou pryč, obě primární
-úlohy dokončené. Jejich privátní purge zůstává na původních 60denních termínech.
-Uklizeno 16 testovacích dokumentů a 3 cloudové značky přečtení; všech 6 potvrzení
-operací zachovaných 7 dní. Původní obsah/pending, kontaktní vazby a prostředky
-se neměnily; tento dokončovací krok nic nového nenasadil.
+**Souhrnná revize je dokončená.** [Nálezy, důkazy a navazující matice](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md).
+DEV feed a archivní pilot jsou uzavřené; celé MVP, produkce a společná ruční
+regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi neměnily.
 
-**Následuje souhrnná revize před společnou MVP regresí** podle
-[LAUNCH_READINESS](LAUNCH_READINESS.md#completed-work-review). Nejprve čtecí
-soulad kódu, skutečného DEV, CI a dokumentace. Opravy mimo schválený rozsah
-předložit konkrétně. Feedová chyba jen v jednom prohlížeči je odložená na přání
-uživatele; tmavý motiv/ovládání soukromých odpovědí zůstávají otevřené UI nálezy.
+1. Předložit společný bezpečnostní úsek F-01/F-02/F-06: způsobilost staff
+   čtení při banu, serverová autorita oznámení a pending autor ve starých
+   čtecích stavech. Nejprve emulátor/klientská kompatibilita, potom přesné CI
+   a DEV. Regionální viditelnost metadat Q-01 před změnou pravidel upřesnit.
+2. Dokončit již otevřenou moderaci a Business: fronta nad 50 hlášení F-04,
+   důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
+   Konkrétní poskytovatele, upload a provozní meze schválit před implementací.
+3. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;
+   poté společný ruční blok mvp-20 a startovní brána mvp-24. Pro 5 000 aktivních
+   uživatelů zatím nejsou cloudové důkazy. Ruční testy seskupit až po opravách.
 
-**Hotovo: oprava přímého čtení veřejných zdrojů v DEV.**
-[Nálezy, regrese a nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
-zdroj c361526 /[úplné CI 46043558742 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742),
-Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89 a 22 serverových simulací vydané verze.
-Vlastní historie a účastnické soukromé čtení zachované; web/Functions/job beze
-změny. Tento Rules úsek nevytvořil fixture/Auth; navazující pilot už běží výše.
+Známé menší otevřené body: tmavý motiv a akce soukromých odpovědí,
+diagnostika code=unknown; chybu jednoho prohlížeče vlastník odložil. Tyto
+nálezy nejsou automaticky schválenou implementací. Žádné nové Auth/fixture
+se pro revizi nevytvářely, produkce/main zůstaly beze změny.
 
-**Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
-[Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
-Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
-[úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
-Dva účtové workery: opravený GC zdroj bd81e98ddab2b5e0e6f62410e302e9824e547f18 /
-[úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663).
-Aktivní vývoj: fix/archive-own-history-index, build/reviews/content-lifecycle-0421.
-
-**Živý stav:** Hosting 14a0f588585839e2, Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89.
-31 ACTIVE Functions, ověřené skutečné zdrojové archivy, starší revize RETIRED,
-stejné prostředky a dva plánovače. Čtení/identita/capture/údržba a právní verze
-2026-11-27 zapnuté. Úklid 11 MVP kořenů a tří hlášení, převod 128 zdrojů,
-čerstvý audit 165 položek ready a 18 selektivních indexových operací bez TTL hotové.
-
-První obsahový dluh doběhl podle původních termínů: 125 zdrojových kopií pryč,
-9 platných archivních těl zachovaných; zůstávají 1 Shout /1 komentář /1 soukromá
-odpověď a 6 platných hlaviček. Původní pending žádost nezměněná, její Auth
-chyběl už před prací, původní joby absent. GC nález uzavřený: dva skutečné běhy
-nové revize INFO /gc:complete, všechny chybové příznaky 0, lifecycle idle.
-
-**Další krok:** společný ruční pilot archivu/identity, podkladu hlášení po
-smazání zdroje a vlastního smazání bez přijetí nové verze; potom vymezený úklid
-a naplánovaná souhrnná revize před MVP regresí. Nové pilotní fixture/Auth dosud
-nevytvořené; právní souhlasy se nikdy nevyplnily za uživatele. Kontaktní pokrytí
-vzniká z doloženého Auth pozorování po skutečném přijetí. Živá akceptace
-stále otevřená; nasazení je ve stupnici započtené samostatně. Produkce/main
-beze změny. Návratový profil zachovává nové čtení/capture/právo/identitu.
-
-Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
-průběžné lokální kontroly, seskupený push/CI před nasazením a následný DEV průchod.
-
-**Nyní: schválený místní společný archiv Shoutů, komentářů a soukromých odpovědí.**
-[Základ a pravidla cyklu](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation):
-konec platnosti +7 dní vlastní historie +60 dní archivu, dřívější účtový termín
-má přednost. Připravené a úplným CI ověřené jsou jádro,
-[webové seznamy](MVP_SERVER_PLAN.md#content-lifecycle-read-integration),
-[worker](MVP_SERVER_PLAN.md#content-lifecycle-runtime-local),
-[převzetí zdrojů](MVP_SERVER_PLAN.md#content-lifecycle-source-adoption),
-[vazby hlášení](MVP_SERVER_PLAN.md#content-lifecycle-report-adoption) a
-[termíny účtových kopií](MVP_SERVER_PLAN.md#content-lifecycle-account-adoption).
-Přesné zdroje a důkazy jsou v plánu a [PROJECT_STATUS](PROJECT_STATUS.md).
-
-**Doložené předchozí jádro:** [původní verze těl a společné čtení účtových
-kopií pro moderaci](MVP_SERVER_PLAN.md#content-lifecycle-account-evidence).
-Původní SDK čas/hash se zachová před zápisem metadat; nejasná verze se neodhaduje.
-Zdroj 98323a2 má [úspěšné úplné CI 45868647751](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45868647751)
-se 115 archivními případy včetně 19 nových a webovým buildem.
-
-**Dokončený společný místní úsek:** [řízený operátor/inventura,
-indexový plán a kompatibilita](MVP_SERVER_PLAN.md#content-lifecycle-transition-preparation)
-starých účtových běhů a nativního čtení. Zdroj 4544366 má
-[úspěšné úplné CI 45883719658](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45883719658),
-včetně 140 archivních případů a webového buildu. Nyní naváže závěrečná integrace
-a provozní/návratový plán. Před DEV aktivací také archivní
-integrační revize. Nové přepínače a Rules brána jsou false; nic z tohoto cyklu
-není nasazené ani živě migrované. Celý milník ani původní pilotní úklid se
-tím neuzavírá; po MVP zůstává další revize cyklu.
-
-Stupnice má od 26. listopadu schválené jemnější členění stejné zbývající váhy:
-zdroje, hlášení, účtové termíny, verze/čtení, operátor/indexy, kompatibilita,
-závěrečná integrace. Doložené místní celky se započítávají samostatně;
-nasazení a živá akceptace zůstávají oddělené a otevřené.
-
-**Naplánovaná souhrnná revize dosavadní práce:** po dokončení nynějšího
-archivního/moderačního cyklu a před společnou regresí mvp-20 provést
-[kontrolu hotových kroků a jejich návazností](LAUNCH_READINESS.md#completed-work-review).
-Před DEV aktivací archivu také jeho samostatná integrační revize; nyní se
-žádný z těchto auditů neoznačuje za dokončený.
-
-**Drobná oprava IDE dokončená lokálně:** [vyloučení cizích Dart šablon npm](operations/TESTING.md#dart-dependency-templates).
-Celá flutter analyze nyní bez nálezů; žádný nový MVP kredit, build či rollout.
-
-**Odbočka ke konzoli – fontová oprava dokončená v DEV:**
-[Důkazy](operations/CONSOLE_WARNINGS.md#category-font-dev-rollout): 9e3828d má
-success úplné CI 44178308912, verze 74d0c3756884ac19 je nasazená a ověřená
-na obou doménách. Sedm místních fontových scénářů, 26 Shout testů a celý CI
-průchod prošly. Odstraněné jsou jen dva selektory pevných symbolů; CSP/QUIC
-zůstávají samostatnou evidencí a jejich oprava se netvrdí. Celý vizuální audit
-není tím hotový; B2 má samostatnou uzavřenou akceptaci níže. Metriky a jejich pevné váhy jsou zachované.
-Vlastník potvrdil odstranění fontové hlášky; zbývající
-[Intl.v8BreakIterator deprecation](operations/CONSOLE_WARNINGS.md#intl-break-iterator)
-je ve Flutter engine. Konkrétní lokální porovnání auto/full rendereru zatím
-čeká na schválení; neměnit SDK/bootstrap ani potlačovat hlášky bez ověření.
-
-**Předchozí uzavřený živý úsek:** [B4 metadata/cache – DEV akceptace a úklid](plans/feed/B4_DEV_ROLLOUT.md#delta-acceptance-complete).
-Vlastník potvrdil oba účty a požadované UI/interakční průchody. Uklizeno
-120 nových fixture a 138 jejich cloudových značek; původních 38 zdrojů a
-pending žádost beze změny. Předchozí [B3 je také uzavřené](plans/feed/B3_DEV_ROLLOUT.md#b3-acceptance-complete).
-
-**Uzavřený feed:** [B4 a finální DEV regrese](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete).
-Vlastník přijal řazení při pohybu i stabilní čtenou kartu. Po úplném CI
-45218543240 success ze zdroje a8d13eb uklizeno 53 testovacích Shoutů a 54
-cloudových read klíčů. Původních 38 zdrojů/pending žádost, 21 receipts,
-ostatní data a provozní konfigurace zachované. Manifesty cleaned; znovu
-neseedovat. Nové rollouty ani Auth účty nevznikly. A0–A3/B1–B4 mají hotovou
-společnou DEV akceptaci; kapacitní a produkční brány tím uzavřené nejsou.
-Diagnóza původního běžného okna zůstává samostatně odložená, bez mazání
-místní fronty; příčina počáteční přechodné chyby nebyla potvrzená.
-
-1. **Uzavřít zbývající serverové a předstartovní milníky.** Příští konkrétní
-   úsek vždy vybrat podle závislostí v [serverovém plánu](MVP_SERVER_PLAN.md)
-   a [startovní bráně](LAUNCH_READINESS.md), ne podle pořadí historických poznámek.
-   **Probíhá společný sankční a Business úsek** na feature/moderation-business-dev:
-   [Společný DEV přechod moderace a Business je nasazený](MVP_SERVER_PLAN.md#moderation-business-dev-results):
-   **05fc1ed / úplné CI 45375019177 success**, tři nové a šest aktualizovaných
-   Functions, web 507c7a0b950b74b2 a obě aktivní Rules brány. Údržba až po
-   uzavření přímých zápisů; skutečné zdroje, revize, prostředky a plánovače
-   ověřené. Původních 38 Shoutů/pending žádost zachované.
-   **Probíhá jediný již schválený živý pilot, pak úklid.** TestAdmin ověřil
-   zamítnutí; dočasný účet provedl resubmit, server checking/revize 2 se správným
-   auditem. Vlastník mohl dodatek názvu zapomenout; změna pole živě neověřená,
-   chyba nepotvrzená. Schválení TestAdmin ověřené: active/revize 3, profil/role 2
-   a první pobočka. Manifest content-ready: 1 Shout / 2 komentáře / 1 zpráva /
-   3 hlášení. Pozastavení TestAdmin ověřené: suspended/revize 4,
-   zachovaná role 2/pobočka/starší Shout. [Oprava UI a fixture nasazená v DEV](MVP_SERVER_PLAN.md#business-suspension-ui-repair-results):
-   **3ffe71a / úplné CI 45424330633 success**, web **2edf6b744dcbe95e**.
-   Atomicky opraveny jen 3 avatarová pole ve dvou dokumentech dočasného UID;
-   parser chrání Profil, lišta/odhlášení čitelné, důvod přes Detail a krátký stav
-   při publikování. Server/Rules, 19 kontrolovaných dokumentů a původní data zachované.
-   Vlastník potvrdil celou ruční kontrolu opravy (lišta/Detail, krátká zpráva při
-   publikování, Profil/odhlášení). **Reaktivace TestAdmin ověřená** active/revize 5,
-   všech pět Business auditů/receipts správně. Tři postihy uložené, kratší ban
-   nezkrátil sedmidenní; jeho následná revokace TestAdmin také ověřená.
-   **Odchylka:** všechny TestAdmin nad Shoutem,
-   nikoli plánovaný TestModerator/komentář. [Vlastník přijal přesné admin důkazy](MVP_SERVER_PLAN.md#moderation-business-observed-admin-proposal);
-   úzká volitelná výjimka nástroje prošla 24 emulátorovými / 115 nástrojovými
-   kontrolami a lintem; **3ec9664 / úplné CI 45486072998 success**. Žádné změny auditu/rolí,
-   regionální sankční průchod se netvrdí. Ban UI do 1. prosince i odhlášení
-   potvrzené. Osiřelý komentář připraven, druhý zachovaný, počet/projekce 2 → 1.
-   [UI stavů a historie je nasazené v DEV](MVP_SERVER_PLAN.md#moderation-user-history-ui):
-   **aa43ae1 / úplné CI 45491348488 success**, web **f8f0b0338d6eb03d**.
-   Otisky/8 HTTP kontrol ověřené, server/Rules/prostředky zachované.
-   Vlastník potvrdil celý závěrečný ruční blok, oba resolve receipts/aktéři a
-   2×HTTP 200 / Auth/App Check VALID ověřené; všechna hlášení resolved.
-   **Nový nález před úklidem:** [neveřejné zachování nahlášeného obsahu po samostatném smazání](MVP_SERVER_PLAN.md#reported-content-evidence-proposal).
-   Veřejná hlášení mají nyní jen reference, samostatné mazání není účtový archiv.
-   Místní podklady hlášení schválené; místo lhůty od hlášení vlastník navrhl
-   archiv všech Shoutů po sedmidenní historii. [Ověřená dokumentace a nový společný návrh](MVP_SERVER_PLAN.md#content-lifecycle-retention-review):
-   60 dní po konci historie, nikoli pevně +68 dní pro libovolnou platnost;
-   Business až +74 dní, ruční smazání nově 7 dní v historii. Rozšíření na
-   všechny Shouty/komentáře/soukromé odpovědi schválené 25. listopadu včetně
-   místní implementace/testů. Probíhá práce za vypnutou volbou; bez migrace
-   či rolloutu. Po MVP proběhne revize cyklu. Úklid jediné fixture je odložený.
-   Nové sankce ani obsah nezakládat.
-   Předepsaný klientský průchod dokončený; úklid a nová retenční návaznost otevřené.
-   Browser host nedostupný, náhradní ovládání zastavila kontrola URL.
-   Ruční průchody jsou nyní na konci samostatné práce; nový souhlas není potřeba.
-   Započítané pouze DEV aktivace, živá akceptace a celý milník stále otevřené.
-   Sankce zachovají silnější aktivní postih; Business zamítnutí dovolí opravu
-   a opětovné podání, pozastavení blokuje nové publikování bez odebrání role.
-   Místní výsledky a historické úplné CI jsou v příslušných částech plánu.
-   **Veřejné moderační odstranění má hotový [místní úsek](MVP_SERVER_PLAN.md#moderation-public-local-results):**
-   jádro, neaktivní obě klientské obrazovky, 16/16 nových případů, 519 Flutter,
-   110 tools a 179 unit, analyze/lint. Zdroj **ea1fde9** má
-   [úspěšné úplné CI 45230513178](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45230513178).
-   [DEV nasazení je ověřené](MVP_SERVER_PLAN.md#moderation-public-dev-results):
-   zdroj 87d6687 / úplné CI 45238613178 success, nová veřejná callable,
-   aktualizovaný cleanup a web 1974e34d52e2945b. Ostatní provoz a původní data
-   zachované. [Živá akceptace i úklid jsou uzavřené](MVP_SERVER_PLAN.md#moderation-public-dev-complete):
-   TestModerator, komentář 2 → 1 / kontrolní zachovaný, potom odstranění Shoutu;
-   oba audity a 2×HTTP 200 s Auth/App Check VALID ověřené. Manifest **ada057d3**
-   cleaned; všech 28 receipts a 26 rate dokumentů při úklidu zachováno, žádná
-   fixture/read klíč nezůstaly. Pro tento pilot další ruční test není potřeba.
-   Další otevřené části
-   jsou živá akceptace sankcí/Business/osiřelých hlášení a celková předstartovní regrese.
-   Níže jsou důkazy dříve uzavřených částí.
-   **Místní úsek dokončený:** [společné schválení/eskalace/uzavření](MVP_SERVER_PLAN.md#moderation-basic-local)
-   všech tří typů hlášení, místní server a neaktivní klient, testy a společné CI.
-   Jde o historický místní checkpoint; navazující DEV přechod je uzavřený níže.
-   [Místní výsledek](MVP_SERVER_PLAN.md#moderation-basic-local-results): jádro,
-   neaktivní klient a testy hotové; 18 nových emulátorových, 15 purge, 509 Flutter,
-   108 nástrojových a 177 unit prošlo. Zdroj 7746bbd má
-   [úspěšné úplné CI 45177013854](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45177013854),
-   včetně 142 retenčních testů a webového buildu.
-   **Navazující DEV je uzavřený:** [akceptace a úklid](MVP_SERVER_PLAN.md#moderation-basic-dev-complete).
-   Server 44e07a5 / úplné CI 45196844737 success; opravený web 33853a9 /
-   úplné CI 45202922410 success, Hosting 565880d4664da7b2. Všechny 4 živé
-   akce správných TestModerator/TestAdmin mají audit, HTTP 200 a platný
-   Auth/App Check. Jediný pilot je cleaned; 10 receipts a 23 rate dokumentů,
-   91 původních zdrojů/pending žádost zachované. Další konkrétní rozsah:
-   veřejné odstranění, následně sankce a společný Rules cutover. Celý
-   moderační milník zůstává otevřený; cleaned fixture znovu nevytvářet.
-   **Poslední uzavřený DEV úsek:** [vlastní mazání soukromých odpovědí](MVP_SERVER_PLAN.md#private-deletion-dev-complete).
-   App 9c2e121 / úplné CI 45096691292 success, Rules 9fee32e / úplné CI
-   45098775591 success. Oba účty prošly skutečným UI/callable mazáním s Auth
-   a App Check VALID. DEV Rules **e16b7a3d-f363-499c-ad40-262471059271** mají
-   přesnou shodu zdroje a 8/8 scénářů serverové simulace; přímý autentizovaný
-   HTTP DELETE z prohlížeče tato kontrola neměřila. Hosting 813f34b7555e272a,
-   Functions/prostředky/plánovače zachované. Nový pilot je uklizený včetně
-   notifikací a cloudové read značky, 5 potvrzení ponechaných +7 dní;
-   všech 91 původních zdrojů/pending žádost zachované. Manifest cleaned,
-   znovu neseedovat. Implementace, ověření, DEV i akceptace této části uzavřené.
-   **Nově uzavřený DEV úsek:** [soukromé odstranění bez postihu](MVP_SERVER_PLAN.md#moderation-private-dev-complete).
-   App/server 0fa2774 / úplné CI 45147594322 success; samostatný Rules zdroj
-   40e127f / úplné CI 45164557897 success. Místních 49/49 emulátorových testů
-   a 16/16 serverových simulací vydaného Rules zdroje prošlo.
-   Rules **3de8f7d8…de297** mají ověřenou shodu zdroje a uzavřené managed
-   private delete/contentRemoved. Vlastník přijal skutečný průchod TestAdmin;
-   regionální živé ověření tím netvrdit. Vymezená fixture je uklizená,
-   5 potvrzení ponechaných +7 dní, kvóty beze resetu. Původních 91 zdrojů,
-   pending žádost, 22 Functions, oba plánovače a web b5703cec19978454 zachované.
-   Přijatý manifest je cleaned, původní je jen historický; znovu neseedovat.
-   Kompletní DEV/akceptace této operace se započítávají; celý moderační
-   milník a ostatní rozhodnutí zůstávají otevřené.
-   Další atomická rozhodnutí/regionální autoritu připravit
-   podle [auditu](MVP_SERVER_PLAN.md#private-deletion-preparation).
-   Nezaměňovat dokončení vlastního mazání za celý obsahový milník.
-   Pohybový test i staré feed fixture jsou nyní uzavřené výše. Regionální
-   živá regrese soukromého odstranění zůstává otevřená; přijatý TestAdmin
-   průchod a novější approve/resolve/escalate ji nenahrazují.
+Pracovat po [ucelených schválených úsecích](operations/RELEASING.md#development-checkpoints):
+cílené místní kontroly průběžně, společný push/CI na konci celku před
+nasazením. Nezaměňovat dokumentaci, test, nasazení a živou akceptaci.
+Souhrnná revize nezvyšuje pevné váhy ani nezavírá zbývající implementaci.
+Úplné starší checkpointy zůstávají v [archivu](archive/README.md).
 
 ## Hranice MVP
 

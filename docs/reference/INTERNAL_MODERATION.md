@@ -18,27 +18,25 @@ ale mají vlastní text a schvalovací proces.
 
 ## Stav dokumentu
 
-[Společné approve/escalate/resolve](../MVP_SERVER_PLAN.md#moderation-basic-local-results)
-všech tří typů hlášení mají ověřené místní jádro. Role, region, skupina a audit
-se ověřují v transakci. [Schválený DEV přechod](../MVP_SERVER_PLAN.md#moderation-basic-dev-proposal)
-je [nasazený pouze v DEV](../MVP_SERVER_PLAN.md#moderation-basic-dev-results),
-včetně callable a klientského příznaku. [Klientský pilot i úklid jsou uzavřené](../MVP_SERVER_PLAN.md#moderation-basic-dev-complete):
-správný TestModerator provedl approve/resolve/escalate, správný TestAdmin
-dokončil předaný případ. Celková moderační autorita ještě není uzavřená.
+V DEV jsou aktivní společná approve/escalate/resolve rozhodnutí, veřejné
+i soukromé odstranění bez postihu, sankce/revokace a Business posuzování.
+Server atomicky ověřuje aktéra, roli, rozsah, skupinu, audit a potvrzení.
+Klientské piloty i jejich schválené úklidy jsou doložené v
+[serverovém plánu](../MVP_SERVER_PLAN.md#moderation-business-dev-results).
+Archivní podklad zůstává pro oprávněnou moderaci čitelný i po smazání originálu;
+kontaktní dohledání je omezené na admin/owner.
 
-Místní serverové jádro pro jedno rozhodnutí **Skrýt soukromou odpověď bez
-postihu** je oddělené od dosavadního klienta: [rozsah, testy a hranice](../MVP_SERVER_PLAN.md#moderation-private-local).
-Navazující [DEV přechod včetně Rules, akceptace a úklidu je uzavřený](../MVP_SERVER_PLAN.md#moderation-private-dev-complete).
-Vlastník přijal skutečný průchod TestAdmin; regionální živé oprávnění je
-nadále součástí otevřené ruční regrese. Seskupená hlášení a ostatní rozhodnutí zůstávají
-navazující prací; níže uvedené klientské chování není důkazem nové serverové autority.
+Celý milník dosud není uzavřený. [Revize 27.11.2026](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md)
+potvrdila rozdíl některých privilegovaných přímých čtení při banu F-01,
+neúplnost fronty nad 50 hlášení F-04 a otevřenou volbu Q-01 o regionální
+viditelnosti metadat. Serverová rozhodnutí a přístup k archivnímu tělu mají
+samostatné regionální ochrany. Živé sankční průchody přijaté jako TestAdmin
+nejsou důkazem regionálního moderátora; tam trvají automatické testy a otevřená
+společná ruční regrese.
 
-- **Implementováno** znamená, že chování existuje v klientovi nebo Firestore
-  Rules a je pokryté automatickými testy.
-- **Navrženo** znamená schválený směr, který ještě nemusí mít hotové rozhraní,
-  serverovou automatizaci nebo celý proces.
-- Produkční nasazení změny pravidel vyžaduje kontrolu pravidel, testů, migrace
-  existujících dat a odpovídajících právních textů.
+Implementováno/testováno, nasazeno v DEV a produkčně přijato jsou oddělené
+stavy. Produkční aktivace vyžaduje startovní bránu a kontrolu rolí, dat,
+právních textů a kompatibilního návratu.
 
 ## Úrovně účtů
 
@@ -46,7 +44,7 @@ navazující prací; níže uvedené klientské chování není důkazem nové s
 |---:|---|---|---|
 | 0 | návštěvník | Pouze přihlášení nebo registrace, bez veřejného náhledu | Implementováno |
 | 1 | `user` | Běžný komunitní účet | Implementováno |
-| 2 | `business` | Firemní profil, provozovny a publikování za pobočku | Ruční schválení a bezplatná propagace fungují; zamítnutí a pozastavení chybí, předplatné a statistiky jsou pozdější plán |
+| 2 | `business` | Firemní profil, provozovny a publikování za pobočku | Schválení/zamítnutí/oprava/pozastavení/reaktivace mají serverový DEV průchod; předplatné a statistiky jsou pozdější plán |
 | 3 | `moderator` | Každodenní moderace a dočasné postihy | Implementováno částečně |
 | 4 | `seniorModerator` | Vedení moderace, dlouhé a trvalé bany, odvolání | Implementováno částečně |
 | 5 | `administrator` | Správa systému, rolí, business účtů a dohled | Role a technický dohled implementovány; část správy navržena |

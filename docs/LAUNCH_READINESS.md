@@ -27,20 +27,22 @@ testy běžných a Business toků → provozní připravenost → startovní br�
 
 ## Souhrnná revize dosavadních kroků před společnou regresí
 
-Naplánováno vlastníkem 26. listopadu 2026. Po dokončení nynějšího cyklu
-archivace a moderace, před závěrečnou regresí mvp-20 a rozhodnutím mvp-24,
-provést jednu společnou revizi už dokončených kroků. Průběžné testy jednotlivých
-úseků tím pokračují; tento bod zatím není provedený audit ani nový MVP kredit.
+Naplánováno vlastníkem 26. listopadu a výslovně schváleno/provedeno
+27. listopadu 2026 po dokončení archivního pilotu.
+[Výsledný revizní protokol](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) obsahuje přesný zdroj, skutečný DEV,
+testy, šest nálezů a navazující regresní matici. Zaškrtnutí níže dokládá
+provedení revize, nikoli opravu jejích nálezů nebo dokončení mvp-20/mvp-24.
+Pevné váhy ani procenta se samotným auditem nezvyšují.
 
-- [ ] Porovnat aktuální kód, konfiguraci, skutečné DEV revize a doložené CI
+- [x] Porovnat aktuální kód, konfiguraci, skutečné DEV revize a doložené CI
   se stavem TODO/BACKLOG/PROJECT_STATUS/progress.json; odlišit místní přípravu,
   nasazení, přijatý ruční průchod a stále otevřené podmínky.
-- [ ] Projít společné návaznosti feedu/přečtení/cache, reakcí a komentářů,
+- [x] Projít společné návaznosti feedu/přečtení/cache, reakcí a komentářů,
   mazání účtu, moderace/Business a všech archivních kopií; hledat zbylé přímé
   zápisy, obcházení oprávnění, ztrátu auditu a rozpory retenčních termínů.
-- [ ] Přezkoumat staré i otevřené klienty, migrace/indexy, návratové verze,
+- [x] Přezkoumat staré i otevřené klienty, migrace/indexy, návratové verze,
   pokračování úklidu, provozní dluh a dosud neověřené kapacitní/nákladové předpoklady.
-- [ ] Ověřit návaznosti dokumentů a právních verzí; sepsat konkrétní nálezy,
+- [x] Ověřit návaznosti dokumentů a právních verzí; sepsat konkrétní nálezy,
   závažnost, důkazy a cílené opakované testy. Opravy mimo schválený rozsah
   předložit zvlášť, neoznačovat pouhý zápis nálezu za vyřešení.
 

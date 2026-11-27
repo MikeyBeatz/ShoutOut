@@ -41,6 +41,20 @@
       "sourceCommit": "e8c835e496d0ae5c5ce8917f2cdb122690180c3a",
       "bytes": 50569,
       "sha256": "a505871ed59dcdfc25ba3d991154ce7206ba67cf440560f1511c1bc8aa694430"
+    },
+    {
+      "path": "docs/archive/PROJECT_STATUS_2026-11-27.txt",
+      "source": "docs/PROJECT_STATUS.md",
+      "sourceCommit": "0c81043eecf7139a839b07c93d48f1693c51ff16",
+      "bytes": 131730,
+      "sha256": "b288244819ddf3d39cc1b09a407d30110671ed22c2c18db8410b01ef0cf2806f"
+    },
+    {
+      "path": "docs/archive/TODO_2026-11-27.txt",
+      "source": "docs/TODO.md",
+      "sourceCommit": "0c81043eecf7139a839b07c93d48f1693c51ff16",
+      "bytes": 27816,
+      "sha256": "325dca48edc63ed3a8ef03217bfa26f22e9f6813cfe68eb2d1c997cd74f2d8b6"
     }
   ]
 }

@@ -1,7 +1,9 @@
 # Serverový a produkční plán webového MVP
 
 Aktuálně 27. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
-Následuje souhrnná revize podle LAUNCH_READINESS; níže jsou také datované výsledky předchozích příprav.
+[Souhrnná revize](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) je dokončená;
+šest nálezů a otevřené brány jsou v protokolu. Následují jejich konkrétní
+opravy po schválení, potom společná regrese. Níže jsou i historické výsledky příprav.
 Produkční aktivace a celková MVP regrese zůstávají otevřené.
 
 <a id="archive-identity-local-integration"></a>
@@ -40,7 +42,8 @@ prostředky nebyly změněny. Nasazení/akceptace ve stupnici zůstávají otev�
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).
 Navazující [DEV přechod, živá akceptace i úklid jsou uzavřené](#moderation-public-dev-complete);
 původní obsah a ostatní konfigurace jsou zachované. Celý moderační milník ještě není uzavřený.
-Probíhá [místní sankční pokračování](#moderation-sanctions-local), bez aktivace.
+Sankce a Business byly následně [vydané v DEV](#moderation-business-dev-results).
+Datované místní výsledky níže nejsou důkazem aktuálně vypnutých přepínačů.
 
 Souhrn původně k 11. listopadu 2026; stav feedu aktualizovaný 23. listopadu.
 Níže jsou kritéria dokončení, nikoli seznam
@@ -51,14 +54,14 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 |---|---|---|
 | Prostředí | DEV/produkční konfigurace a oddělený app Hosting připravené. | Produkční runtime, přístupy a startovní brána. |
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
-| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A0–A3/B1–B4 včetně číslovky, pohybu a finální regrese mají [uzavřenou DEV akceptaci a úklid](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete). | Audit zbývající autority, veřejné moderační odstranění/sankce, produkční kapacita a ostatní níže uvedená kritéria. |
+| Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A0–A3/B1–B4 včetně číslovky, pohybu a finální regrese mají [uzavřenou DEV akceptaci a úklid](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete). | F-02/F-05/F-06 ze souhrnné revize, produkční kapacita a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
-| Moderace | UI/Rules a některé obsahové operace existují. | Úplné důvěryhodné operace/atomický audit a Business postihy. |
+| Moderace | Serverová rozhodnutí, odstranění, sankce/revokace a Business posuzování mají vydaný DEV průchod a audit. | F-01/F-04, Q-01, celková regrese a produkční brána. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
 | Životnost Shoutů | Společný cyklus platnost → 7 dní vlastní historie → 60 dní archivu, sdílené kopie, moderace po odstranění zdroje a omezený purge mají uzavřenou DEV akceptaci i úklid. | Produkční aktivace a společná předstartovní regrese. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |
 | Provoz | Dosavadní pojistky neprokazují úplnou produkční připravenost. | Monitoring, zálohy/obnova a závislosti podle kritérií níže. |
-| Bezpečnostní kontrola | Dílčí testy jsou doložené v TESTING. | Závěrečná předprodukční revize a odstranění/přijetí rizik. |
+| Bezpečnostní kontrola | Souhrnná DEV revize 27.11.2026 je dokončená s potvrzenými nálezy. | Odstranění nálezů nebo výslovné přijetí příslušných rizik; produkční brána není uzavřená. |
 
 Tento dokument zachovává podrobné požadavky a výstupní kritéria původního plánu.
 Aktuální splnění ověřujte v [PROJECT_STATUS](PROJECT_STATUS.md), priority v [TODO](TODO.md).

@@ -1,6 +1,24 @@
 # Vývojový a produkční web
 
-**Aktuální DEV web – stav a historie postihů, 24. listopadu:**
+## Současný ověřený DEV stav – 27. listopadu 2026
+
+Aktuální tabulku vrstev určuje [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
+Čtecí [souhrnná revize](MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#potvrzený-stav-dev)
+znovu potvrdila Hosting **14a0f588585839e2**, 31 ACTIVE Functions, dva
+minutové joby a Firestore Rules **88a94380-2b88-4f37-8ed9-47dc9ab88a89**.
+Web/29 Functions jsou ze zdroje 5435855, dva účtové workery bd81e98;
+Rules c361526 a vlastní publicUntil index 7c6a122 mají vlastní úspěšné CI.
+Archiv a právní verze 2026-11-27 jsou aktivní, pilot i vymezený úklid uzavřené.
+Při revizi nic nenasazeno; produkce/main se neměnily.
+
+## Historické checkpointy DEV
+
+Následující datované texty dokládají tehdejší stav. Jejich označení
+„aktuální“, původní návratové verze a čekající kroky nejsou novým pokynem
+k nasazení ani popisem současné archivní konfigurace. Před návratem použít
+aktuální kompatibilní archivní profil, který zachová nové čtení a retenční fáze.
+
+**Historický DEV web – stav a historie postihů, 24. listopadu:**
 [Přehled a ověření](../MVP_SERVER_PLAN.md#moderation-user-history-ui).
 Zdroj **aa43ae18e3ebd0b5ed9a0be77d2c8f00010c6a74**, úplné CI **45491348488 success**,
 Hosting **f8f0b0338d6eb03d**. 67 app souborů/8 HTTP kontrol obou domén souhlasí.

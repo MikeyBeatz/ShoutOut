@@ -8,28 +8,28 @@ administrátor nebo owner. Schválení atomicky vytvoří Business roli, profil,
 první pobočku a audit; vývojový projekt má také chráněný Admin SDK nástroj.
 Skutečný tok je v `PRODUCT_FLOWS.md` a technický model v `DATA_MODEL.md`.
 
-Nasazené administrátorské rozhraní umí žádost schválit a aktivovat. Místně je
-za vypnutou volbou připravený nový serverový a klientský tok schválení,
-zamítnutí, opravy žádosti, pozastavení a opětovné aktivace;
-[výsledky a přesné meze](../MVP_SERVER_PLAN.md#business-review-local).
-Callable wrapper a živé Business Rules uzavření zatím nejsou aktivované.
-Pro veřejné webové MVP musí být ruční kontrola, aktivace,
-zamítnutí a případné pozastavení účtu provozně dokončené. Přesná kritéria
-kontroly a řešení sporů jsou stále otevřená; před vydáním se musí schválit a
-otestovat. Automatické ověřování firem přes ARES, VIES ani jiné registry není v
-plánu.
+Serverový a klientský tok schválení, zamítnutí, opravy žádosti, pozastavení
+a opětovné aktivace je nasazený pouze v DEV a má uzavřený klientský pilot.
+[Nasazení a audit](../MVP_SERVER_PLAN.md#moderation-business-dev-results),
+[aktuální revize](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md).
+serverBusinessReview i Business Rules brána jsou v DEV aktivní; starou přímou
+aktivační cestu nelze považovat za současnou autoritu. Produkční aktivace,
+kritéria kontroly firem a řešení sporů zůstávají otevřené. Automatické ověření
+přes ARES/VIES ani jiné registry se neplánuje.
 
-### Schválené chování k doplnění
+### Schválené a v DEV ověřené chování
 
-Vlastník 23. listopadu potvrdil: zamítnutá žádost zobrazí důvod, zachová údaje
-a umožní jejich opravu a nové odeslání na stejném účtu. Business oprávnění
-vzniknou až po schválení. Pozastavení již aktivního Business účtu zastaví nové
-publikování a propagaci, ponechá přístup k údajům a důvodu a nechá starší běžné
-Shouty doběhnout. Opětovnou aktivaci smí provést admin/owner. Role se při
-pozastavení neodebere, aby se zákaz nedal obejít osobním publikováním.
-Místní implementaci a testy vlastník schválil 24. listopadu; tok je připravený,
-dosud nenasazený. serverBusinessReview zůstává false a původní přímá cesta platí;
-kritéria kontroly firem a řešení sporů tím nejsou rozhodnutá.
+Zamítnutá žádost zobrazí důvod, zachová údaje a umožní opravu/nové odeslání
+na stejném účtu. Business oprávnění vzniknou až schválením. Pozastavení
+zastaví nové publikování a propagaci, ponechá firemní údaje i detail důvodu
+a nechá starší běžné Shouty doběhnout. Role se neodebere; reaktivuje admin/owner.
+Oprava kontrastu a Profilu i reaktivace jsou potvrzené uživatelem. Živý pilot
+potvrdil nové odeslání; konkrétní změnu názvu uživatel při tomto průchodu
+neprovedl, proto ji nevydáváme za samostatně živě ověřenou editaci.
+
+Souhrnná revize ponechává otevřené důvěryhodné ověření souřadnic poboček
+a bezpečné ukládání nynějších log (F-05/F-03). Schválení firmy samo o sobě
+neprokazuje autoritu libovolného klientského providerPlaceId.
 
 ## Zásady kontroly
 

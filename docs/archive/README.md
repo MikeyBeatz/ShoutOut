@@ -29,6 +29,18 @@ Jde o plaintext, aby původní relativní odkazy v přesné kopii nevytvářely
 falešnou aktuální navigaci. Význam tehdejších cest je relativní k původnímu
 souboru v docs/. Snímky chrání `.gitattributes`; jejich obsah nepřepisovat.
 
+## Snímky před souhrnnou revizí 27. listopadu 2026
+
+Zdroj 0c81043eecf7139a839b07c93d48f1693c51ff16. Úplné původní souhrny včetně nahromaděných
+checkpointů a jejich rozporů zůstávají zachované:
+
+- [PROJECT_STATUS_2026-11-27.txt](PROJECT_STATUS_2026-11-27.txt).
+- [TODO_2026-11-27.txt](TODO_2026-11-27.txt).
+
+Nové souhrny mají jeden současný stav a odkazují na
+[výsledek revize](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md). Snímky chrání registr a .gitattributes;
+nejsou aktuálními pokyny pro nasazení.
+
 ## Aktuální umístění informací z původního TODO
 
 Před změnou metodiky stupnic 12. listopadu 2026 byly uloženy přesné snímky
