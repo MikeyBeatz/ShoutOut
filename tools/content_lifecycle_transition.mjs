@@ -59,7 +59,10 @@ export function parseLifecycleTransitionArguments(argv) {
       !/^[0-9]+$/.test(options['--ci-run'] ?? '') || !/^[a-f0-9]{64}$/.test(options['--approved-digest'] ?? ''))) throw new Error('lifecycle-transition-explicit-approval-and-ci-required');
   return { action, projectId: project, options, mutating };
 }
+import { currentLegalPolicy, assertCaptureDisclosure } from '../functions/legal_policy.js';
+
 export async function main(argv, { openDatabase = feedAdminDatabase, inspectRelease = inspectTransitionRelease,
+  disclosurePolicy = currentLegalPolicy(),
   configuration = contentLifecycleConfiguration, feedConfiguration = feedRuntimeConfiguration, runtime = createFeedRuntime } = {}) {
   const { action, projectId, options, mutating } = parseLifecycleTransitionArguments(argv);
   const plan = options['--plan'] ? read(options['--plan']) : null;
@@ -85,6 +88,7 @@ export async function main(argv, { openDatabase = feedAdminDatabase, inspectRele
     if (action === 'start' && (plan?.digest !== options['--approved-digest'] || plan.writerCommit !== release.commit)) throw new Error('lifecycle-transition-start-source-mismatch');
     if (action === 'apply' && ['reports', 'compatibility'].includes(plan.phase) && !plan.core.preserveLegacyText &&
         (options['--confirm-compatible-readers'] !== projectId || configuration.enabled !== true)) throw new Error('lifecycle-transition-reader-release-required');
+    assertCaptureDisclosure(disclosurePolicy, true);
   }
   const db = await openDatabase(projectId);
   try {

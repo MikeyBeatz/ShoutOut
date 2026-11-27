@@ -22,6 +22,7 @@ import 'business_registration.dart';
 import 'email_verification.dart';
 import 'interactive_tutorial.dart';
 import 'legal.dart';
+import 'archive_identity_observation.dart';
 import 'l10n/business_text.dart';
 import 'l10n/text.dart';
 import 'nickname_validation.dart';
@@ -714,7 +715,10 @@ class ProfileGate extends StatelessWidget {
                         snapshot.data!.data()?['showOnboardingHelp'] == true,
                     initialStep:
                         snapshot.data!.data()?['onboardingStep'] as int? ?? 0,
-                    child: child,
+                    child: ArchiveIdentityObservation(
+                      key: ValueKey(user.uid),
+                      child: child,
+                    ),
                   ),
                 ),
               ),

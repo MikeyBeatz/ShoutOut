@@ -11,10 +11,12 @@ import * as logger from 'firebase-functions/logger';
 import { runAccountDeletionCreatedEvent } from './account_deletion_job.js';
 import { runAccountMaintenanceTick } from './shout_expiration.js';
 import { moderationEvidenceRetentionEnabled } from './moderation_retention.js';
+import { archiveIdentityConfiguration } from './archive_identity.js';
 
 if (getApps().length === 0) initializeApp();
 
 export const accountDeletionDevProposal = Object.freeze({
+  archiveIdentityEnabled: archiveIdentityConfiguration.enabled,
   moderationCopiesEnabled: moderationEvidenceRetentionEnabled, // Paired with the prepared report-copy ingress guard; default off.
   retentionPurgeEnabled: true, // DEV activation requires exact CI plus verified indexes and Storage policy.
   retireRolePrivilegesEnabled: true, // Retire both role stores atomically with Auth confirmation.

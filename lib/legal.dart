@@ -2,14 +2,31 @@ import 'live_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'archive_identity_disclosure.dart';
 
 import 'l10n/legal_translations.dart';
 import 'l10n/text.dart';
 import 'content_lifecycle_policy.dart';
-import 'lifecycle_client_policy.dart';
+import 'legal_policy.dart';
+import 'web_environment.dart';
 
-const legalVersion = '2026-07-25';
-const _acceptanceDocument = 'acceptance_2026_07_25';
+LegalPolicy get _legalPolicy {
+  if (kIsWeb) return WebEnvironment.current.legalPolicy;
+  const enabled = bool.fromEnvironment('SHOUTOUT_ARCHIVE_DISCLOSURE');
+  const version = String.fromEnvironment(
+    'SHOUTOUT_LEGAL_VERSION',
+    defaultValue: LegalPolicy.legacyVersion,
+  );
+  if (enabled && Firebase.app().options.projectId != 'shoutout-dev-46c81') {
+    throw StateError('Archive disclosure requires a checked DEV release.');
+  }
+  return LegalPolicy(archiveDisclosureEnabled: enabled, version: version);
+}
+
+String get legalVersion => _legalPolicy.version;
+String get _acceptanceDocument => _legalPolicy.acceptanceDocument;
 
 enum LegalDocumentType { terms, privacy }
 
@@ -328,7 +345,7 @@ String _title(BuildContext context, LegalDocumentType type) => tr(
 );
 
 List<LegalSection> _document(String language, LegalDocumentType type) {
-  if (LifecycleClientPolicy.current.enabled &&
+  if (_legalPolicy.archiveDisclosureEnabled &&
       type == LegalDocumentType.privacy) {
     final original = _legacyDocument(language, type);
     return [
@@ -336,7 +353,7 @@ List<LegalSection> _document(String language, LegalDocumentType type) {
         index == 2
             ? LegalSection(
                 original[index].title,
-                contentLifecyclePrivacyBody(language),
+                '${contentLifecyclePrivacyBody(language)}\n\n${archiveIdentityDisclosure(language)}',
               )
             : original[index],
     ];

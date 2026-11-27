@@ -1,5 +1,32 @@
 # Serverový a produkční plán webového MVP
 
+<a id="archive-identity-local-integration"></a>
+## Společná místní integrace archivu a kontaktního indexu
+
+27. listopadu vlastník schválil [celý místní úsek](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
+Ve větvi feature/archive-identity-integration je připraven serverový HMAC index
+doložených kontaktů a inkarnací, role 5/6, stránky max. 50, audit přístupů,
+klientský náhled a původní účtový úklid. [Matice a přechodové regrese](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md#local-integration-results)
+zahrnují starého rodiče/první odpověď, oddělené informování před capture a
+kompatibilní reader po scrub i při pauze příjmu/vypnuté údržbě.
+
+Hlavní zdroje: [index](../functions/archive_identity.js),
+[čtení](../functions/archive_identity_reader.js),
+[připravený adaptér](../functions/archive_identity_runtime.js),
+[transakční archiv](../functions/content_lifecycle.js),
+[finalizace](../functions/finalize_account_deletion.js),
+[purge](../functions/account_purge_policy.js),
+[klient](../lib/archive_identity_client.dart),
+[Rules kandidát](../tools/rules/archive_legal_candidate.mjs).
+Testy a skutečné počty operací jsou uvedené v propojených plánech; lokálně
+prošla archivní/emulátorová, aplikační, unit a nástrojová kontrola. Úplné CI
+přesného společného zdroje se teprve doplňuje.
+
+Volby a transport zůstávají vypnuté; nová veřejná právní verze, skutečný secret,
+callable wrappery, počáteční pokrytí starých účtů/archivních vazeb a konkrétní DEV
+plán jsou podmínkami příští aktivace. Žádná živá data, role, termíny, Rules ani
+prostředky nebyly změněny. Nasazení/akceptace ve stupnici zůstávají otevřené.
+
 ## Aktuální stav a použití plánu
 
 **Místní úsek uzavřený s úplným CI:** [atomické veřejné odstranění bez postihu](#moderation-public-local-results).

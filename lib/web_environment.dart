@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'legal_policy.dart';
 
 /// Public web configuration, supplied by the checked build workflow.
 class WebEnvironment {
@@ -13,6 +14,20 @@ class WebEnvironment {
       throw StateError('Choose a configured dev or prod web environment.');
     }
     final key = json['appCheckSiteKey'];
+    if (json.containsKey('archiveDisclosureEnabled') &&
+        json['archiveDisclosureEnabled'] is! bool) {
+      throw StateError('archiveDisclosureEnabled must be a boolean.');
+    }
+    if (json.containsKey('legalVersion') && json['legalVersion'] is! String) {
+      throw StateError('legalVersion must be a string.');
+    }
+    legalPolicy = LegalPolicy(
+      archiveDisclosureEnabled: json['archiveDisclosureEnabled'] == true,
+      version: json['legalVersion'] as String? ?? LegalPolicy.legacyVersion,
+    );
+    if (legalPolicy.archiveDisclosureEnabled && name != 'dev') {
+      throw StateError('Archive disclosure requires a checked DEV release.');
+    }
     if (json.containsKey('localReadTracking') &&
         json['localReadTracking'] is! bool) {
       throw StateError('localReadTracking must be a boolean.');
@@ -47,6 +62,19 @@ class WebEnvironment {
       throw StateError('serverContentLifecycle must be a boolean.');
     }
     serverContentLifecycle = lifecycle == true;
+    final identity = json['serverArchiveIdentity'];
+    if (json.containsKey('serverArchiveIdentity') && identity is! bool) {
+      throw StateError('serverArchiveIdentity must be a boolean.');
+    }
+    serverArchiveIdentity = identity == true;
+    if (serverArchiveIdentity &&
+        (name != 'dev' ||
+            !serverContentLifecycle ||
+            !legalPolicy.archiveDisclosureEnabled)) {
+      throw StateError(
+        'Archive identity requires DEV lifecycle and archive disclosure.',
+      );
+    }
     if (serverContentLifecycle &&
         (name != 'dev' ||
             key == null ||
@@ -357,6 +385,8 @@ class WebEnvironment {
   late final bool serverContentReports;
   late final bool serverArchivedReportLookup;
   late final bool serverContentLifecycle;
+  late final bool serverArchiveIdentity;
+  late final LegalPolicy legalPolicy;
   late final bool serverCommentDeletion;
   late final bool serverPrivateReplyDeletion;
   late final bool serverPrivateReportRemoval;

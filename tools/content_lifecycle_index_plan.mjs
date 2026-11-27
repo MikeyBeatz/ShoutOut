@@ -16,10 +16,10 @@ export const lifecycleCompositeIndexes = Object.freeze([
 ]);
 const same = (a, b) => canonical(a) === canonical(b);
 const hash = v => createHash('sha256').update(canonical(v)).digest('hex');
-export function planLifecycleIndexes(projectId, snapshots) {
+export function planLifecycleIndexes(projectId, snapshots, { maps = lifecycleIndexMaps, composites = lifecycleCompositeIndexes } = {}) {
   if (projectId !== 'shoutout-dev-46c81') throw new Error('lifecycle-indexes-explicit-dev-required');
   const base = `projects/${projectId}/databases/(default)/collectionGroups`, actions = [], pending = [], observations = [];
-  for (const [collection, field] of lifecycleIndexMaps) {
+  for (const [collection, field] of maps) {
     const path = `${collection}/fields/${field}`, row = snapshots?.[path], name = `${base}/${path}`, data = row?.data;
     if (row?.status !== 200 || data?.name !== name || !data.indexConfig ||
         data.indexConfig.indexes !== undefined && !Array.isArray(data.indexConfig.indexes) ||
@@ -31,7 +31,7 @@ export function planLifecycleIndexes(projectId, snapshots) {
         body: { name, indexConfig: { indexes: [] } } });
     }
   }
-  for (const desired of lifecycleCompositeIndexes) {
+  for (const desired of composites) {
     const { collection, ...spec } = desired, path = `${collection}/indexes`, row = snapshots?.[path];
     if (row?.status !== 200 || !row.data || typeof row.data !== 'object' || row.data?.nextPageToken || !Array.isArray(row.data?.indexes ?? [])) throw new Error('lifecycle-composite-inventory-required');
     if ((row.data.indexes ?? []).some(v => !v.name?.startsWith(`${base}/${collection}/indexes/`))) throw new Error('lifecycle-composite-project-mismatch');

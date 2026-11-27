@@ -13,7 +13,15 @@ export function assertDevelopmentProject(project) {
 }
 
 export function validateConfig(config, environment) {
+  const archiveDisclosure = config.archiveDisclosureEnabled === undefined ? false : config.archiveDisclosureEnabled,
+    policyVersion = config.legalVersion === undefined ? '2026-07-25' : config.legalVersion;
+  const policyDate = typeof policyVersion === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(policyVersion) ? new Date(policyVersion + 'T00:00:00.000Z') : null;
+  if (typeof archiveDisclosure !== 'boolean' || !policyDate || !Number.isFinite(policyDate.getTime()) ||
+      policyDate.toISOString().slice(0, 10) !== policyVersion ||
+      (archiveDisclosure ? environment !== 'dev' || policyVersion === '2026-07-25' : policyVersion !== '2026-07-25')) throw new Error('invalid-legal-policy');
   if (config.serverContentLifecycle !== undefined && typeof config.serverContentLifecycle !== 'boolean') throw new Error('serverContentLifecycle must be a boolean.');
+    if (config.serverArchiveIdentity !== undefined && typeof config.serverArchiveIdentity !== 'boolean') throw new Error('serverArchiveIdentity must be a boolean.');
+    if (config.serverArchiveIdentity === true && (environment !== 'dev' || config.serverContentLifecycle !== true || !archiveDisclosure)) throw new Error('Archive identity requires DEV lifecycle and archive disclosure.');
   if (config.serverContentLifecycle === true && (environment !== 'dev' || !config.appCheckSiteKey || config.serverContentReports !== true || config.serverSpatialFeed !== true)) throw new Error('Content lifecycle requires DEV managed reports, spatial pages and App Check.');
   if (config.serverFeedMovement !== undefined && typeof config.serverFeedMovement !== 'boolean') throw new Error('serverFeedMovement must be a boolean.');
   if (config.serverFeedMovement === true && (environment !== 'dev' || config.serverDeltaFeed !== true || config.serverFeedNews !== true)) throw new Error('Feed movement requires DEV delta feed and news.');

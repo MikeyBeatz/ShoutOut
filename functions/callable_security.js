@@ -1,6 +1,8 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 
-const legalAcceptanceId = 'acceptance_2026_07_25';
+import { currentLegalPolicy } from './legal_policy.js';
+
+const legalAcceptanceId = currentLegalPolicy().acceptanceDocument;
 
 export const secureCallableOptions = Object.freeze({
   region: 'europe-west3',
@@ -49,10 +51,10 @@ export function requireCallableIdentity(request) {
   return Object.freeze({ uid, email: token.email });
 }
 
-export function accountDocumentRefs(db, uid) {
+export function accountDocumentRefs(db, uid, policy = currentLegalPolicy()) {
   return Object.freeze({
     profile: db.doc(`users/${uid}`),
-    legal: db.doc(`users/${uid}/legal/${legalAcceptanceId}`),
+    legal: db.doc(`users/${uid}/legal/${policy.acceptanceDocument}`),
     ban: db.doc(`bans/${uid}`),
     deletion: db.doc(`accountDeletionRequests/${uid}`),
     restriction: db.doc(`contentRestrictions/${uid}`),
@@ -81,6 +83,7 @@ export async function requireEligibleActor({
   db,
   reader = db,
   requireContentPermission = false,
+  includeProfileSnapshot = false,
   now = new Date(),
 }) {
   const identity = requireCallableIdentity(request);
@@ -112,6 +115,7 @@ export async function requireEligibleActor({
     uid: identity.uid,
     email: identity.email,
     profile: profile.data(),
+    ...(includeProfileSnapshot ? { profileSnapshot: profile } : {}),
     refs,
   });
 }

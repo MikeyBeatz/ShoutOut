@@ -21,7 +21,7 @@ const keyValid = key => typeof key === 'string' && key.length >= 3 && key.length
 export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
-  indexErasureCoordinator = null, moderationCopiesEnabled = false, contentLifecycleEnabled = lifecycleEnabled(db),
+  indexErasureCoordinator = null, moderationCopiesEnabled = false, contentLifecycleEnabled = lifecycleEnabled(db), archiveIdentityEnabled = false,
 } = {}) {
   if (typeof moderationCopiesEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||
@@ -30,7 +30,7 @@ export async function runAccountPurgeJob(identity, db, auth, {
   }
   const jobRef = accountPurgeJobRef(db, identity), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`),
     mainRef = db.doc(`accountDeletionJobs/${jobRef.id}`), profileRef = db.doc(`publicProfiles/${identity.userId}`),
-    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled, contentLifecycleEnabled }), token = randomUUID();
+    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled, contentLifecycleEnabled, archiveIdentityEnabled }), token = randomUUID();
   const now = () => { const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-purge-clock'); return Timestamp.fromDate(date); };
   const header = await jobRef.get();
   if (!header.exists) return { state: 'purged', examined: 0 };

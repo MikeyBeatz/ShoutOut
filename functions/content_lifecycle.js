@@ -4,9 +4,11 @@ import { Timestamp, FieldValue, GeoPoint } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { accountPurgeJobRef } from './account_purge_guard.js';
+import { publicFeedBody } from './feed_public_body.js';
+import { archiveAuthorIdentity } from './archive_identity.js';
 
 // Capture can precede reader/history activation. Maintenance has its own gate.
-export const contentLifecycleConfiguration = Object.freeze({ enabled: false, captureEnabled: false });
+export const contentLifecycleConfiguration = Object.freeze({ enabled: false, captureEnabled: false, inlineParentAdoption: false });
 export const lifecycleDay = 86400000;
 export const lifecycleHistoryMillis = 7 * lifecycleDay;
 export const lifecycleArchiveMillis = 60 * lifecycleDay;
@@ -184,8 +186,11 @@ export function lifecycleControlUsable(control, { allowPaused = false } = {}) {
 // Buffer SDK writes so the shared archive can complete all its reads first.
 // The original operation, archive, receipts and projections still commit once.
 // Disabled mode returns the identical database without extra reads or writes.
-export function createContentLifecycleDatabase(db, { enabled = false, readsEnabled = enabled, clock = () => new Date(), writeBudget = 450 } = {}) {
+export function createContentLifecycleDatabase(db, { enabled = false, readsEnabled = enabled, identityRuntime = null,
+  inlineParentAdoption = contentLifecycleConfiguration.inlineParentAdoption, clock = () => new Date(), writeBudget = 450 } = {}) {
   if (typeof enabled !== 'boolean' || typeof readsEnabled !== 'boolean' || readsEnabled && !enabled ||
+      identityRuntime !== null && (typeof identityRuntime.enabled !== 'boolean' || identityRuntime.enabled && (!enabled || identityRuntime.db.projectId !== db.projectId)) ||
+      typeof inlineParentAdoption !== 'boolean' || inlineParentAdoption && !enabled ||
       typeof clock !== 'function' || !Number.isInteger(writeBudget) || writeBudget < 1 || writeBudget > 450) throw new Error('invalid-content-lifecycle-options');
   if (!enabled) return db;
   assertFeedRuntimeTarget(db);
@@ -194,7 +199,7 @@ export function createContentLifecycleDatabase(db, { enabled = false, readsEnabl
     if (key === lifecycleBinding) return binding;
     if (key !== 'runTransaction') return typeof target[key] === 'function' ? target[key].bind(target) : target[key];
     return (operation, ...options) => target.runTransaction(async raw => {
-      const writes = [], observed = new Map();
+      const writes = [], observed = new Map(), identityCache = new Map();
       const remember = result => {
         for (const doc of Array.isArray(result) ? result : result.docs ?? [result]) if (doc?.ref && lifecycleSource(doc.ref.path)) observed.set(doc.ref.path, doc);
         return result;
@@ -251,6 +256,53 @@ export function createContentLifecycleDatabase(db, { enabled = false, readsEnabl
         snapshot.get('contentHash') === undefined &&
         timeOrder(control.get('captureFenceAt'), control.updateTime) && timeOrder(snapshot.createTime, control.get('captureFenceAt')) &&
         !snapshot.createTime.isEqual(control.get('captureFenceAt'));
+      // Only the trusted, pre-fence parent of an actual new child is adopted.
+      // All plans remain buffered until every source/archive/index read succeeds.
+      // Existing receipts (no new child write) never repeat adoption.
+      const sourcePaths = new Set(changes.keys());
+      if (inlineParentAdoption && !readsEnabled) {
+        const roots = new Set([...changes.values()].filter(c => !c.before && c.after &&
+          ['comment', 'privateReply'].includes(c.source.kind)).map(c => `shouts/${c.source.shoutId}`));
+        for (const path of roots) {
+          const change = changes.get(path), snapshot = change?.snapshot ?? observed.get(path) ?? await raw.get(db.doc(path));
+          if (!legacySource(snapshot)) continue;
+          sourcePaths.add(path);
+          if (sourcePaths.size > 50) fail('The content lifecycle source batch exceeds 50.');
+          const before = snapshot.data(), after = change?.after ?? before;
+          publicFeedBody(before);
+          if (!after || before.status !== 'active' || after.status !== before.status ||
+              before.contentPurged || before.publicUntil !== undefined || before.historyUntil !== undefined ||
+              !(before.expiresAt instanceof Timestamp) || before.expiresAt.toMillis() <= now.toMillis() ||
+              before.createdAt.toMillis() < 0 || before.createdAt.toMillis() > now.toMillis() ||
+              !timeOrder(snapshot.createTime, snapshot.updateTime) || !timeOrder(snapshot.updateTime, now) ||
+              before.expiresAt.toMillis() < before.createdAt.toMillis() ||
+              lifecycleBodyHash(before) !== lifecycleBodyHash(after)) fail('The inline parent requires proven active content.');
+          const shoutId = snapshot.id, headerRef = db.doc(`contentLifecycleThreads/${shoutId}`);
+          const archiveKey = lifecycleArchiveKey(db.projectId, path, before), archiveRef = db.doc(`contentLifecycleArchive/${archiveKey}`);
+          const [savedHeader, savedArchive] = await raw.getAll(headerRef, archiveRef);
+          if (savedHeader.exists || savedArchive.exists) fail('The inline parent has a partial archive binding.');
+          const times = lifecycleTimes(before.expiresAt);
+          const deadline = await lifecycleSubjectDeadline(raw, db, [before.authorId], times.retainUntil, subjectCache);
+          if (deadline.deleting || deadline.retainUntil.toMillis() <= now.toMillis()) fail('The inline parent account is unavailable.');
+          const migrationDigest = hash(['inline-parent-v1', db.projectId, path,
+            normalized(snapshot.createTime), normalized(snapshot.updateTime), normalized(control.get('captureFenceAt'))]);
+          const header = { schemaVersion: 1, shoutId, sourceCreatedAt: before.createdAt, plannedExpiresAt: before.expiresAt,
+            archivedAt: FieldValue.serverTimestamp(), ...times, geography: lifecycleGeography(before), sourceDrainedAt: null,
+            maintenanceState: 'pending', maintenancePhase: 'source', nextMaintenanceAt: times.historyUntil,
+            captureMode: 'transition', sourceCreateTime: snapshot.createTime, sourceUpdateTime: snapshot.updateTime, migrationDigest };
+          const patch = { contentArchiveKey: archiveKey, contentHash: lifecycleBodyHash(before),
+            publicUntil: times.publicUntil, historyUntil: times.historyUntil };
+          threads.set(shoutId, header);
+          extra.push({ method: 'create', args: [headerRef, header] }, { method: 'create', args: [archiveRef,
+            lifecycleArchiveRecord(path, after, header, { sourceCreateTime: snapshot.createTime,
+              sourceUpdateTime: snapshot.updateTime, migrationDigest })] });
+          if (change) {
+            Object.assign(change.last.args[1], patch);
+            changes.delete(path);
+          } else extra.push({ method: 'update', args: [snapshot.ref, patch] });
+          legacyDirty = true;
+        }
+      }
       // Pre-cutover mutations change the inventory fence in the same commit.
       // They are never accepted as new content or as migration coverage.
       for (const [path, c] of changes) if (legacySource(c.snapshot)) {
@@ -342,8 +394,20 @@ export function createContentLifecycleDatabase(db, { enabled = false, readsEnabl
         if (old.exists) validateLifecycleArchive(db, key, old.data());
         if (!c.before && old.exists) fail('An archived content ID cannot be reused.');
         if (deadline.retainUntil.toMillis() > now.toMillis()) {
-          if (!old.exists) extra.push({ method: 'create', args: [ref, lifecycleArchiveRecord(c.path, source, header,
-            c.snapshot.exists ? { sourceCreateTime: c.snapshot.createTime } : {})] });
+          if (!old.exists) {
+            let identity = {};
+            if (identityRuntime?.enabled && !c.before) identity = await archiveAuthorIdentity(raw, db, source, identityRuntime, identityCache);
+            else if (c.before?.contentArchiveKey) {
+              const previous = await raw.get(db.doc(`contentLifecycleArchive/${c.before.contentArchiveKey}`));
+              if (previous.exists) {
+                validateLifecycleArchive(db, previous.id, previous.data());
+                if (previous.get('content.authorId') !== source.authorId) fail('Archive author changed.');
+                if (previous.get('authorAccountKey')) identity = { authorAccountKey: previous.get('authorAccountKey') };
+              }
+            }
+            extra.push({ method: 'create', args: [ref, { ...lifecycleArchiveRecord(c.path, source, header,
+              c.snapshot.exists ? { sourceCreateTime: c.snapshot.createTime } : {}), ...identity }] });
+          }
           else if (!c.after || c.after.status !== c.before?.status) extra.push({ method: 'update', args: [ref, { state: sourceState(source) }] });
         } else if (!c.before || c.after && lifecycleBodyHash(c.after) !== lifecycleBodyHash(c.before) &&
             !lifecycleReferenceRedaction(c.before, c.after)) fail('Content retention already ended.');

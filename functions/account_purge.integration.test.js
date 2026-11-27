@@ -94,6 +94,20 @@ test('opted-in lifecycle stages append to existing positions and purge only owne
   assert.equal((await foreign.get()).get('content.text'), 'Preserve foreign archive');
 });
 
+test('identity cleanup resumes through existing account purge and removes actor/subject audits without touching foreign accounts', { skip: !enabled }, async () => {
+  const f = await fixture(); f.options.archiveIdentityEnabled = true;
+  const own = await f.add(`archiveIdentityAccounts/${randomUUID()}`, { userId: f.uid });
+  const binding = await f.add(`archiveIdentityBindings/${randomUUID()}`, { userId: f.uid });
+  const current = await f.add(`archiveIdentityCurrent/${f.uid}`, { accountKey: own.id });
+  const subject = await f.add(`archiveIdentityAccess/foreign/accessAudits/${randomUUID()}`, { actorId: 'foreign', subjectUserIds: [f.uid] });
+  const actor = await f.add(`archiveIdentityAccess/${f.uid}/accessAudits/${randomUUID()}`, { actorId: f.uid, subjectUserIds: ['foreign'] });
+  const keep = await f.add(`archiveIdentityAccounts/${randomUUID()}`, { userId: 'foreign' });
+  const keepAudit = await f.add(`archiveIdentityAccess/foreign/accessAudits/${randomUUID()}`, { actorId: 'foreign', subjectUserIds: ['foreign'] });
+  await f.run(); f.advance(1000); await f.finish();
+  for (const ref of [own, binding, current, subject, actor]) assert(!(await ref.get()).exists, ref.path);
+  assert((await keep.get()).exists); assert((await keepAudit.get()).exists);
+});
+
 test('lifecycle account purge during paused ingress anonymizes foreign reply versions and parent context without losing the foreign body', { skip: !enabled }, async () => {
   const f = await fixture(); f.options.contentLifecycleEnabled = true;
   await f.add('contentLifecycleControl/current', { schemaVersion: 1, mode: 'paused', revision: 2 });

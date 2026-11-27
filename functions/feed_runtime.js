@@ -9,6 +9,7 @@ import { indexMaintenance } from './feed_index_maintenance.js';
 import { preparePublicationSignal } from './feed_news_signals.js';
 import { createContentLifecycleDatabase, contentLifecycleConfiguration } from './content_lifecycle.js';
 import { createContentLifecycleMaintenance, contentLifecycleMaintenanceConfiguration } from './content_lifecycle_runtime.js';
+import { currentLegalPolicy, assertCaptureDisclosure } from './legal_policy.js';
 
 export const feedRuntimeConfiguration = Object.freeze({ enabled: true, compatibleGenerations: true,
   cardStateEnabled: true, deltaResponsesEnabled: true, newsEnabled: true, newsRuntimeEnabled: true, recenterEnabled: true, unreadFirst: true, maxReadBlockReads: 256 }); // Approved DEV pilot, not production capacity.
@@ -64,9 +65,15 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   newsRuntimeEnabled = feedRuntimeConfiguration.newsRuntimeEnabled,
   contentLifecycleEnabled = contentLifecycleConfiguration.enabled,
   contentCaptureEnabled = contentLifecycleEnabled || contentLifecycleConfiguration.captureEnabled,
+  inlineParentAdoption = contentLifecycleConfiguration.inlineParentAdoption,
+  enforceArchiveDisclosure = contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled,
+  disclosurePolicy = currentLegalPolicy(),
+  identityRuntime = null,
   contentMaintenanceEnabled = contentLifecycleMaintenanceConfiguration.enabled } = {}) {
   if (typeof enabled !== 'boolean' || typeof contentIdentity !== 'boolean' || typeof compatibleGenerations !== 'boolean' || typeof cardStateEnabled !== 'boolean' ||
       typeof contentLifecycleEnabled !== 'boolean' || typeof contentCaptureEnabled !== 'boolean' ||
+      typeof inlineParentAdoption !== 'boolean' || inlineParentAdoption && !contentCaptureEnabled ||
+      typeof enforceArchiveDisclosure !== 'boolean' ||
       contentCaptureEnabled && !enabled || contentLifecycleEnabled && !contentCaptureEnabled ||
       typeof contentMaintenanceEnabled !== 'boolean' || contentMaintenanceEnabled && !contentLifecycleEnabled) throw new Error('invalid-feed-runtime-enabled');
   if (typeof newsRuntimeEnabled !== 'boolean' || newsRuntimeEnabled && !cardStateEnabled) throw new Error('invalid-news-runtime-enabled');
@@ -74,9 +81,10 @@ export function createFeedRuntime(db, auth, { enabled = feedRuntimeConfiguration
   // Disabled wrappers keep the exact legacy database and do not even inspect
   // control/registry/queue documents or require a new Auth capability.
   if (!enabled) return Object.freeze({ enabled: false, database: db, indexWriter: null, earlyErasureQueue: null, indexErasureCoordinator: null, indexMaintenance: null, contentMaintenance: null });
+  if (enforceArchiveDisclosure) assertCaptureDisclosure(disclosurePolicy, contentCaptureEnabled);
   assertFeedRuntimeTarget(db);
   if (typeof clock !== 'function' || typeof auth?.getUser !== 'function') throw new Error('invalid-feed-runtime-options');
-  const database = budgetDatabase(createContentLifecycleDatabase(db, { enabled: contentCaptureEnabled, readsEnabled: contentLifecycleEnabled, clock,
+  const database = budgetDatabase(createContentLifecycleDatabase(db, { enabled: contentCaptureEnabled, readsEnabled: contentLifecycleEnabled, inlineParentAdoption, identityRuntime, clock,
     writeBudget: feedTransactionWriteBudget }), cardStateEnabled);
   const binding = {
     base: database.doc('feedIndexMaintenance/erasureQueue'),

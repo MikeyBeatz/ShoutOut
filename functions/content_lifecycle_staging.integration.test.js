@@ -8,13 +8,16 @@ import { accountDeletionJobRef, runAccountShoutHidingJob } from './account_delet
 import { operationTestKey } from './test_helpers.js';
 import { decideContentReportsOperation } from './decide_content_reports.js';
 import { planLifecycleReportCompatibility, applyLifecycleReportCompatibility } from './content_lifecycle_report_compatibility.js';
+import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
+import { createFeedRuntime } from './feed_runtime.js';
+import { legalPolicy } from './legal_policy.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const absent = { async getUser() { throw Object.assign(new Error('missing'), { code: 'auth/user-not-found' }); } };
 async function fixture(t) {
   const raw = new Firestore({ projectId: 'shoutout-rules-test' }), nonce = randomUUID().replaceAll('-', '');
   const root = raw.doc(`shouts/staging_${nonce}`), child = root.collection('comments').doc('legacy'), owner = `author_${nonce}`;
-  const body = { authorId: owner, title: 'Synthetic legacy', text: 'Original legacy body', createdAt: Timestamp.fromMillis(Date.now() - 5000),
+  const body = { authorId: owner, authorNickname: 'Synthetic author', title: 'Synthetic legacy', text: 'Original legacy body', createdAt: Timestamp.fromMillis(Date.now() - 5000),
     expiresAt: Timestamp.fromMillis(Date.now() + lifecycleDay), status: 'active', commentsCount: 1, likesCount: 0, dislikesCount: 0, savesCount: 0,
     geography: { schemaVersion: 1, countryCode: 'CZ' } };
   const control = raw.doc('contentLifecycleControl/current'), extra = [];
@@ -59,6 +62,55 @@ test('a new child of an unconverted parent stops atomically instead of creating 
   assert(!(await child.get()).exists); assert.equal((await f.root.get()).get('commentsCount'), 1);
   assert.equal((await f.control.get()).get('legacyRevision'), 0);
 });
+
+test('inline adoption captures one original parent and both child kinds atomically', { skip: !enabled }, async t => {
+  const f = await fixture(t), db = createContentLifecycleDatabase(f.raw, { enabled: true, readsEnabled: false, inlineParentAdoption: true, clock: f.clock });
+  const first = f.root.collection('comments').doc('new'), second = f.root.collection('privateReplies').doc('new');
+  await db.runTransaction(async tx => {
+    const root = await tx.get(f.root);
+    tx.update(f.root, { commentsCount: root.get('commentsCount') + 1 });
+    tx.create(first, { authorId: 'other-author', text: 'New public', createdAt: Timestamp.fromDate(f.clock()) });
+    tx.create(second, { authorId: 'other-author', recipientId: f.owner, participants: ['other-author', f.owner], text: 'New private', createdAt: Timestamp.fromDate(f.clock()) });
+  });
+  const root = await f.root.get(), header = f.track(f.raw.doc(`contentLifecycleThreads/${root.id}`));
+  const copies = [];
+  for (const ref of [f.root, first, second]) {
+    const doc = await ref.get(), archive = f.track(f.raw.doc(`contentLifecycleArchive/${doc.get('contentArchiveKey')}`));
+    copies.push((await archive.get()).data());
+  }
+  assert.equal(root.get('commentsCount'), 2);
+  assert.equal(copies[0].captureMode, 'transition'); assert.equal(copies[0].content.text, f.body.text);
+  assert.equal(copies[1].captureMode, 'atomic-write'); assert.equal(copies[2].captureMode, 'atomic-write');
+  assert.equal((await header.get()).get('retainUntil').toMillis(), f.body.expiresAt.toMillis() + 67 * lifecycleDay);
+  assert.equal((await f.control.get()).get('legacyRevision'), 1);
+  // A second child uses the already bound root and does not recreate its body.
+  const third = f.root.collection('comments').doc('next');
+  const born = (await f.raw.doc(`contentLifecycleArchive/${root.get('contentArchiveKey')}`).get()).createTime;
+  await db.runTransaction(tx => tx.create(third, { authorId: 'other-author', text: 'Next', createdAt: Timestamp.fromDate(f.clock()) }));
+  f.track(f.raw.doc(`contentLifecycleArchive/${(await third.get()).get('contentArchiveKey')}`));
+  assert((await f.raw.doc(`contentLifecycleArchive/${root.get('contentArchiveKey')}`).get()).createTime.isEqual(born));
+  assert.equal((await f.control.get()).get('legacyRevision'), 1);
+});
+
+for (const scenario of ['deleted', 'expired', 'deleting', 'partial', 'budget']) {
+  test(`inline parent ${scenario} stops the entire transaction`, { skip: !enabled }, async t => {
+    const f = await fixture(t);
+    if (scenario === 'deleted') await f.root.update({ status: 'deleted' });
+    if (scenario === 'expired') f.setNow(new Date(f.body.expiresAt.toMillis() + 1));
+    if (scenario === 'deleting') await f.track(f.raw.doc(`accountDeletionRequests/${f.owner}`)).create({ userId: f.owner, status: 'pending' });
+    if (scenario === 'partial') await f.track(f.raw.doc(`contentLifecycleThreads/${f.root.id}`)).create({ invalid: true });
+    const db = createContentLifecycleDatabase(f.raw, { enabled: true, readsEnabled: false, inlineParentAdoption: true, clock: f.clock,
+      ...(scenario === 'budget' ? { writeBudget: 3 } : {}) });
+    const child = f.root.collection('comments').doc('new');
+    await assert.rejects(db.runTransaction(async tx => {
+      await tx.get(f.root); tx.update(f.root, { commentsCount: 2 });
+      tx.create(child, { authorId: 'other-author', text: 'New', createdAt: Timestamp.fromDate(f.clock()) });
+    }));
+    assert(!(await child.get()).exists); assert.equal((await f.root.get()).get('commentsCount'), 1);
+    assert.equal((await f.root.get()).get('contentArchiveKey'), undefined);
+    assert.equal((await f.control.get()).get('legacyRevision'), 0);
+  });
+}
 
 test('a legacy anonymous context cannot bypass the original account deadline or preserve extra private fields', { skip: !enabled }, async t => {
   const f = await fixture(t), request = f.track(f.raw.doc(`accountDeletionRequests/${f.owner}`));
@@ -153,5 +205,22 @@ test('staged shared private reports keep old-client text until an approved compa
   const options = { approvedDigest: plan.digest, compatibleReaders: true, compatibleWriters: true, clock: f.clock };
   assert.equal((await applyLifecycleReportCompatibility(f.raw, plan, options)).writes, 1);
   assert.equal((await report.get()).get('text'), undefined); assert.equal((await applyLifecycleReportCompatibility(f.raw, plan, options)).writes, 0);
+  const uid = `admin_${f.root.id}`, user = f.track(f.raw.doc(`users/${uid}`)), role = f.track(f.raw.doc(`accountRoles/${uid}`));
+  await user.create({ nickname: 'Synthetic admin' }); await user.collection('legal').doc('acceptance_2026_07_25').create({});
+  await role.create({ level: 5 });
+  const request = { auth: { uid, token: { email_verified: true, email: 'fixture@example.test' } }, app: { appId: 'synthetic' },
+    data: { expectedUserId: uid, targetType: 'privateReply', reportId: report.id } };
+  const before = await getLifecycleReportEvidenceOperation(request, f.db, f.clock);
+  // A compatible rollback pauses capture and disables maintenance, retaining
+  // the archive reader contract rather than falling back to missing sources.
+  await f.control.update({ mode: 'paused', revision: 2 });
+  const rollback = createFeedRuntime(f.raw, absent, { clock: f.clock, contentLifecycleEnabled: true, contentMaintenanceEnabled: false,
+    enforceArchiveDisclosure: true, disclosurePolicy: legalPolicy({ archiveDisclosureEnabled: true, version: '2099-01-01' }) });
+  assert.equal(rollback.contentMaintenance, null);
+  await root.delete(); await child.delete();
+  const after = await getLifecycleReportEvidenceOperation(request, rollback.database, f.clock);
+  assert.deepEqual(after.targetData, before.targetData); assert.equal(after.targetData.text, 'Private original');
+  await assert.rejects(f.db.runTransaction(tx => tx.create(root, { ...f.body, commentsCount: 0 })), /not active/);
+  assert.equal((await report.get()).get('text'), undefined);
   for (const d of (await f.raw.collection('contentLifecycleArchive').where('threadId', '==', root.id).get()).docs) f.track(d.ref);
 });

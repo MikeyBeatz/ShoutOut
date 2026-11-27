@@ -34,13 +34,21 @@ import { finalizeAccountDeletionOperation } from './finalize_account_deletion.js
 import { contentLifecycleConfiguration } from './content_lifecycle.js';
 import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
 import { getLifecycleSourcePageOperation } from './content_lifecycle_sources.js';
+import { preparedArchiveIdentityRuntime } from './archive_identity_runtime.js';
+import { observeArchiveIdentity } from './archive_identity.js';
 
 if (getApps().length === 0) initializeApp();
 
 // One switch selects writer + early queue + purge coordinator together. The
 // queue is not scheduled here; activation requires the migration/runtime gate.
-function indexedOperation(operation, request, options = {}) {
-  const runtime = createFeedRuntime(getFirestore(), { getUser: uid => getAuth().getUser(uid) });
+async function indexedOperation(operation, request, { observeIdentity = false, ...options } = {}) {
+  const db = getFirestore(), auth = { getUser: uid => getAuth().getUser(uid) };
+  let identityRuntime = preparedArchiveIdentityRuntime(db);
+  if (identityRuntime.enabled && observeIdentity) {
+    const proof = await observeArchiveIdentity(request, identityRuntime, auth);
+    identityRuntime = { ...identityRuntime, expectedAuthor: { userId: request.auth.uid, accountKey: proof.accountKey } };
+  }
+  const runtime = createFeedRuntime(db, auth, { identityRuntime });
   return operation(request, runtime.database, () => new Date(), { ...options, indexWriter: runtime.indexWriter });
 }
 
@@ -48,10 +56,10 @@ function projectedOperation(operation, request, options = {}) {
   return feedRuntimeConfiguration.cardStateEnabled || contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled ? indexedOperation(operation, request, options) : operation(request, getFirestore(), () => new Date(), options);
 }
 
-function lifecycleDatabase() {
+function lifecycleDatabase(expectedAuthor = null) {
   const db = getFirestore();
   return contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled
-    ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }).database : db;
+    ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }, { identityRuntime: { ...preparedArchiveIdentityRuntime(db), ...(expectedAuthor ? { expectedAuthor } : {}) } }).database : db;
 }
 
 export const getLifecycleSourcePage = onCall({
@@ -101,7 +109,10 @@ export const getFeedPage = onCall({
 export const finalizeAccountDeletion = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,
   memory: '256MiB', timeoutSeconds: 15,
-}, request => finalizeAccountDeletionOperation(request, getFirestore()));
+}, request => {
+  const db = getFirestore();
+  return finalizeAccountDeletionOperation(request, db, () => new Date(), { identityRuntime: preparedArchiveIdentityRuntime(db) });
+});
 
 // Prepared locally; deploying this export is a separate rollout step.
 export const prepareAccountDeletion = onCall({
@@ -176,7 +187,7 @@ export const createShout = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => indexedOperation(createShoutOperation, request));
+}, (request) => indexedOperation(createShoutOperation, request, { observeIdentity: true }));
 
 export const createComment = onCall({
   ...secureCallableOptions,
@@ -185,7 +196,7 @@ export const createComment = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => projectedOperation(createCommentOperation, request));
+}, (request) => projectedOperation(createCommentOperation, request, { observeIdentity: true }));
 
 export const createPrivateReply = onCall({
   ...secureCallableOptions,
@@ -194,7 +205,11 @@ export const createPrivateReply = onCall({
   concurrency: 1,
   memory: '256MiB',
   timeoutSeconds: 15,
-}, (request) => createPrivateReplyOperation(request, lifecycleDatabase()));
+}, async request => {
+  const identity = preparedArchiveIdentityRuntime(getFirestore());
+  const proof = identity.enabled ? await observeArchiveIdentity(request, identity, { getUser: uid => getAuth().getUser(uid) }) : null;
+  return createPrivateReplyOperation(request, lifecycleDatabase(proof ? { userId: request.auth.uid, accountKey: proof.accountKey } : null));
+});
 
 export const toggleShoutReaction = onCall({
   ...secureCallableOptions,

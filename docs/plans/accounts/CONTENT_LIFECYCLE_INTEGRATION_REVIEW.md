@@ -12,7 +12,9 @@ nenahrazuje úplnou revizi všech writerů, čtenářů a účtového purge.
 **Zpřesnění vlastníka 27. listopadu:** okamžitý archiv a dohledatelnost účtů
 přes kontakt mají [samostatný návrh](ARCHIVE_IDENTITY_LOOKUP.md). Schválený je
 přístup administrátora/ownera a zachování současných retenčních termínů;
-implementace nového kontaktního indexu a rozšířeného náhledu zatím schválená není.
+celý navazující místní implementační úsek a testy jsou nyní výslovně schválené.
+Následující tři nálezy popisují původní zdroj 0421b83; jejich aktuální řešení
+je v [místním dokončení](#local-integration-results).
 
 ## 1. Starý rodič a nový komentář
 
@@ -81,3 +83,52 @@ zbývající matici writerů/čtenářů, účtových termínů, Rules/indexů a
 Až po uzavření těchto nálezů připravit konkrétní DEV plán včetně právní verze,
 kompatibilního návratu a samostatného živého souhlasu. Integrační metrika zůstává
 otevřená; tento dílčí výstup nepřidává dokončovací kredit.
+
+<a id="local-integration-results"></a>
+## Společné místní dokončení integrace
+
+**27. listopadu, feature/archive-identity-integration:** původní tři nálezy mají
+implementované místní řešení. Všechny nové provozní volby zůstávají false;
+právní verze je nadále 2026-07-25. Úplné CI nového společného zdroje se teprve
+dokládá; živá akceptace a startovní brána nejsou místním testem nahrazené.
+
+1. **První nový potomek:** ověřitelný aktivní pre-fence rodič se převezme v téže
+   transakci jako veřejný komentář či soukromá odpověď, s původním tělem,
+   SDK důkazy, termíny a zneplatněním legacy inventury. Smazaný, prošlý, částečně
+   navázaný nebo účtově uzavřený rodič způsobí rollback. Platí max. 50 zdrojů /
+   450 zápisů včetně archivní práce; výchozí dosavadní odmítnutí zůstává beze změny.
+2. **Informování:** samostatná legal policy v klientu i serveru dovolí zveřejnit
+   informaci před novým readerem. Capture/operátor vyžaduje připravenou samostatnou
+   novou verzi. Současná verze ani přijetí se nemění; text kontaktového indexu
+   je připraven v sedmi jazycích. Emulator-only kandidát Rules testuje stejný
+   dokument přijetí a verze polí. Konkrétní veřejnou verzi/aktivaci schválit zvlášť.
+3. **Kompatibilní návrat:** po odstranění textové kopie hlášení i živého rodiče
+   a odpovědi čte tentýž klientský kontrakt původní podklad z archivu. Návrat
+   ponechává reader, pauzuje capture a zvlášť vypíná údržbu; obyčejný starý web
+   s vypnutým archivním readerem není přípustným návratem. Původní v3 účtový běh
+   pokračuje s týmž původním termínem. Podepsaný Android/iOS release se netvrdí.
+
+[Rozšířený soukromý index a jeho meze](ARCHIVE_IDENTITY_LOOKUP.md#místní-implementace-a-ověřené-meze)
+mají vlastní serverové/klientské testy. Chybějící stará autorova inkarnace se
+nevymýšlí; před aktivací vyžaduje konkrétní plán počátečního pokrytí.
+
+### Matice writerů a čtenářů
+
+| Cesta | Vazba při zapnutí | Kontrolní důkaz |
+| --- | --- | --- |
+| Nový Shout / veřejný komentář | společný runtime, čerstvý Auth důkaz, atomický archiv i index | archive_identity / lifecycle / runtime integrační sady |
+| Nová soukromá odpověď | stejný lifecycle runtime a důkaz, privátní archive body | archive_identity a staging sady |
+| První potomek starého rodiče | inline převzetí nebo úplné odmítnutí, posun legacyRevision | content_lifecycle_staging.integration.test.js |
+| Palce, záložky, počty | žádné nové tělo při pouhé změně počtu; zachované veřejné projekce | lifecycle a runtime sady |
+| Vlastní odstranění / veřejná a soukromá moderace / postih | stejný transakční runtime, archivní stav a původní termín | lifecycle + moderační sady v úplném CI |
+| Hlášení / převod textových kopií | přesná verze a vlákno, default preserve; scrub pouze kompatibilním readerům | report adoption / compatibility / staging |
+| Expirace / běžný purge | společný runtime a oddělená maintenance volba | content_lifecycle_runtime.integration.test.js |
+| Účtová archivace / staré v3 joby / konečný purge | původní inkarnace žádosti; nové identity fáze pouze na konci | staging + account_purge.integration.test.js |
+| Opravné a historické seed nástroje | stávající transakční managed-feed ochrany; žádný nový obtok | původní R6b testy v úplném CI |
+| Vlastní/Mé/Business/Home/regionální moderace | dosavadní lifecycle source reader a read-only historie | sources + klientské sady |
+| Konkrétní nahlášený obsah po smazání zdroje | archive reader se zachovanou rolí/geografií i při pauze | staging / evidence sady |
+| Obecné kontaktní hledání a veřejný archiv | pouze 5/6, nejvýše 50, audit, žádný privateReply browse | archive_identity / Rules / klientské sady |
+
+Příslušné zdroje jsou v [hlavním implementačním přehledu](../../MVP_SERVER_PLAN.md#archive-identity-local-integration).
+Matice rozlišuje přímý nový test od následné úplné regrese; sama není důkazem
+skutečného nasazení nebo fyzického mobilního testu.

@@ -152,6 +152,13 @@ class _StaffShellState extends State<_StaffShell> {
         icon: Icons.storefront_outlined,
         page: const _BusinessApplicationList(),
       ),
+    if (widget.role.isAtLeast(AccountRole.administrator) &&
+        ArchiveIdentityPolicy.enabled)
+      const _StaffDestination(
+        label: 'Neveřejný archiv',
+        icon: Icons.inventory_2_outlined,
+        page: _StaffArchive(),
+      ),
   ];
 
   @override

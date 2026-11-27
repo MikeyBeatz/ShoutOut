@@ -9,17 +9,22 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
-Nový kontaktní index a administrátorský náhled jsou zatím návrh; neprovádět
-implementaci před jeho schválením. Původní tříbodový úsek vlastník požádal
-nejprve vysvětlit, poté doplnil dohledatelnost; obecný souhlas s kódem se netvrdí.
+Celý společný místní implementační úsek i testy jsou výslovně schválené.
+Implementace je připravená ve větvi feature/archive-identity-integration;
+probíhá společný kontrolní bod a dokládání úplného CI.
+Převzetí starého rodiče, oddělená právní informace, soukromý index a klient
+zůstávají vypnuté; žádný rollout, živá migrace ani nový secret se neprovádí.
 
 
-**MVP: zahájená integrační revize archivu; první tři přechodové otázky prověřené.**
-[Nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
-Nový potomek nepřevedeného rodiče se bezpečně odmítne; plynulé převzetí
-je nový rozsah ke schválení. Před capture také oddělit informování od readeru
-a doložit kompatibilní návrat po scrub. Prošlo 23 cílených kontrol, brána
-i metrika zůstávají otevřené. Vše vypnuté; bez aplikace/Firebase změn.
+**MVP: připravená společná místní integrace a dohledání účtů.**
+[Výsledek a přesné meze](MVP_SERVER_PLAN.md#archive-identity-local-integration).
+Převzetí prvního rodiče, samostatná právní informace, návrat čtení po scrub,
+kontaktní index a admin/owner náhled jsou místně otestované. Prošlo 163 archivních
+případů, 582 aplikačních, 129 nástrojových a následné cílené kontroly; analýza a
+lint jsou čisté. Serverové unit mají 221 pass /881 integračních skip; skip
+nenahrazují emulátorové důkazy. Poslední drobné změny pokryje přesné úplné CI.
+Aktivní pracovní kopie je build/reviews/content-lifecycle-0421, izolovaná od hry
+a nesouvisejících změn v kořenové větvi. Nic se nenasazuje; nové volby jsou false.
 
 
 **Hotová společná místní příprava migrace:**
@@ -35,11 +40,12 @@ jejich ověření; výše uvedené emulátorové sady skutečně běžely bez se
 Operátor i kompatibilita mají uzavřenou implementaci a ověření ve stupnici.
 Nové volby zůstávají false; nic z tohoto cyklu není nasazené ani živě inventarizované.
 
-**Následuje závěrečná integrace a archivní revize před aktivací:**
+**Před jakoukoli aktivací zůstává samostatná provozní brána:**
 [kontrolní bod](MVP_SERVER_PLAN.md#content-lifecycle-integration-review), poté konkrétní
-provozní/návratový plán. Zvlášť vyřešit převod rodičů před novými komentáři,
-návrat po odstranění textových kopií, právní verzi, skutečné writery/Rules a
-fyzické nativní release podmínky. Tato celková brána ani živé nasazení se samotným CI neuzavírají.
+provozní/návratový plán. Místní rodič/rollback regrese jsou připravené výše;
+zvlášť určit veřejnou právní verzi, počáteční kontaktní/archivní pokrytí, živé
+wrappery/klíč/indexy a fyzické nativní release podmínky. Tato provozní brána
+ani živé nasazení se samotným CI neuzavírají.
 
 **Aktuální místní práce – společný archiv obsahu:**
 [základ a otevřené návaznosti](MVP_SERVER_PLAN.md#content-lifecycle-local-foundation),

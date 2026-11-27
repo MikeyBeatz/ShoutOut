@@ -9,6 +9,15 @@ import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, 
 
 const actualDev = loadConfig('dev');
 
+test('archive identity and disclosure stay inactive and require paired DEV legal policy', () => {
+  assert.notEqual(actualDev.serverArchiveIdentity, true);
+  for (const value of [null, 1, 'true']) assert.throws(() => validateConfig({ ...actualDev, serverArchiveIdentity: value }, 'dev'));
+  assert.throws(() => validateConfig({ ...actualDev, serverArchiveIdentity: true }, 'dev'));
+  assert.throws(() => validateConfig({ ...actualDev, archiveDisclosureEnabled: null }, 'dev'));
+  assert.throws(() => validateConfig({ ...actualDev, legalVersion: null }, 'dev'));
+  validateConfig({ ...actualDev, serverContentLifecycle: true, serverArchiveIdentity: true, archiveDisclosureEnabled: true, legalVersion: '2099-01-01' }, 'dev');
+});
+
 test('content lifecycle stays inactive and requires DEV managed reports and App Check', () => {
   assert.notEqual(actualDev.serverContentLifecycle, true);
   assert.throws(() => validateConfig({ ...actualDev, serverContentLifecycle: true, serverSpatialFeed: false }, 'dev'), /Content lifecycle requires/);

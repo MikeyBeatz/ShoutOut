@@ -2,8 +2,9 @@
 
 Zadání a produktová rozhodnutí vlastníka z 27. listopadu 2026.
 Navazuje na [integrační revizi](CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
-Tento dokument je návrh dalšího úseku; nový index ani jeho prohlížení nejsou
-implementované nebo nasazené. Stávající archivní volby zůstávají vypnuté.
+Vlastník 27. listopadu výslovně schválil celý společný místní úsek a testy.
+Implementace probíhá ve větvi feature/archive-identity-integration; všechny nové
+volby zůstávají vypnuté. Bez nasazení, živých dat, Auth účtů nebo secrets.
 
 ## Schválené zadání a hranice
 
@@ -115,7 +116,90 @@ commit/push a společné úplné CI. Bez nasazení, živých dat, migrace, Auth 
 nových služeb/secrets, změny retenčních lhůt, rolí či provozních prostředků.
 Potřebné indexy a oprávnění pouze navrhnout a ověřit místně; žádný DEV cutover.
 
-Tyto produktové odpovědi samy nejsou souhlasem s implementací nového indexu.
-Do něj ještě nevstupovat; před změnou kódu předložit tento konkrétní rozsah
-podle AGENTS.md. Původní tříbodový úsek vlastník nejprve požádal vysvětlit,
-poté zpřesnil požadavek na dohledatelnost účtů.
+Po vysvětlení a zpřesnění rolí/retence vlastník výslovně schválil výše uvedený
+společný místní implementační úsek včetně testů, commitu/pushe a úplného CI.
+Aktivace, veřejná právní verze a konkrétní DEV plán tím schválené nejsou.
+
+## Místní implementace a ověřené meze
+
+- [Serverový index](../../../functions/archive_identity.js): HMAC oddělený podle
+  projektu, druhu kontaktu a verze klíče. Inkarnace obsahuje UID, doložený vznik
+  Auth a přesný SDK createTime profilu; nezávisí jen na sekundové přesnosti Auth.
+  Hodnota kontaktu ani klíč se nezapisují do indexu, ID dokumentů nebo diagnostiky.
+- Záchyt používá Admin Auth a transakčně kontroluje profil, přijetí podmínek,
+  zákaz i mazání. Telefon se bere pouze z doloženého Auth phoneNumber. Záchyt
+  před vznikem nového profilu nemůže být připojen k jeho náhradě.
+- [Připravené adaptéry](../../../functions/archive_identity_runtime.js) jsou off.
+  Serverové publikování Shoutu, komentáře a soukromé odpovědi před novým tělem
+  znovu ověří identitu. Publikace váže transakční důkaz na tentýž účet; přepnutí
+  inkarnace mezi ověřením a zápisem odmítne celý obsahový zápis.
+- Klient má vypnuté pozorování při přihlášení/změně Auth a návratu do popředí.
+  Samostatný [administrátorský náhled](../../../lib/src/staff_archive.dart) není
+  v běžné moderaci. Po změně účtu/role odstraní RAM stav; vypršení serverové
+  platnosti rovněž odstraní obsah bez dalšího síťového požadavku.
+- [Čtení](../../../functions/archive_identity_reader.js): nejvýše 50 prohlédnutých
+  záznamů, podepsané pokračování pro konkrétního aktéra/případ/výběr, metadata
+  bez textů v seznamu, tělo až v detailu. Veřejné komentáře mají vazbu na přesnou
+  inkarnaci vlákna; soukromé odpovědi nejsou součástí obecného procházení.
+  Každý požadavek znovu ověřuje současnou roli 5/6 a původní termíny, včetně retry.
+- Úspěšné čtení zapisuje jeden audit na požadavek; opakování stejného ID jej
+  neduplikuje a neukládá kopii odpovědi. Audit obsahuje identifikátor případu,
+  aktéra a cílové reference, nikoli kontakt nebo tělo. Při purge aktéra či
+  některého cílového účtu se celý příslušný audit odstraní; cizí účty se nemění.
+- [Finalizace účtu](../../../functions/finalize_account_deletion.js) atomicky
+  uzavře identitu a označí původní žádost. Druhá omezená transakce doplní přesný
+  SDK createTime této žádosti. Při přerušení čtení přijme jen původní označenou
+  žádost; při její ztrátě odmítne přístup. Opakování ji může dokončit, nikdy
+  nahradit novějším termínem. Účtový purge má nové fáze až za původními pozicemi.
+- [Indexový návrh](../../../tools/archive_identity_index_plan.mjs) obsahuje dvě
+  složená indexová schémata a skupinový array index auditních subjektů. Zachovává
+  ostatní indexy a neprovádí změnu TTL; nemá živý aplikační vstup.
+  Nové soukromé kolekce nadále pokrývá výchozí deny ve stávajících Rules.
+
+### Co index dokládá a co nedokládá
+
+Zachytí ověřený kontakt, který backend skutečně viděl u dokončeného účtu.
+Při nezměněných kontaktech se nový záznam nezapisuje. Nedokládá všechny minulé
+změny Auth mezi dvěma pozorováními, nedokončené/neověřené registrace, vlastnictví
+telefonu mimo Auth ani občanskou totožnost osoby. Přihlašovací/foreground
+pozorování není nová Auth služba či trigger; jeho chyba neblokuje odhlášení.
+
+Nové tělo dostává authorAccountKey ve stejné transakci jako archiv. Staršímu
+archivu bez doložené vazby se UID nepřeklopí automaticky na dnešní inkarnaci.
+Rozhraní i odpověď přiznávají pouze doložené pokrytí; prázdná stránka není důkazem,
+že účet nikdy nepublikoval. Před DEV aktivací je třeba konkrétně schválit způsob
+počátečního záchytu stávajících účtů a řešení starých archivních vazeb; v této
+místní přípravě se živá data neinventarizovala ani nedoplňovala.
+
+Není zaveden veřejný callable wrapper ani skutečný secret. Názvy připraveného
+transportu jsou observeArchiveIdentity/getArchiveIdentityPage, jejich lokální
+obsluhy jsou testované přímo. První aktivace musí doplnit wrapper s vynuceným
+Auth/App Check, konkrétní prostředky, právní verzi, ověřený indexový stav a klíč.
+Změna verze HMAC klíče vyžaduje samostatný přechod; samotné přepnutí klíče není
+kompatibilní migrací. Phone Auth a fyzické mobilní release kontroly zůstávají
+v původním pořadí plánu.
+
+### Měření a kontrolní důkazy
+
+[Emulátorová sada](../../../functions/archive_identity.integration.test.js)
+počítá dokumentové výsledky, prázdný dotaz jako jedno čtení, pokusy zápisů a
+volání Auth. Jedna emailová vazba bez konfliktu:
+
+| Operace | Firestore čtení | Zápisy | Auth getUser |
+| --- | ---: | ---: | ---: |
+| První ověřené pozorování | 8 | 3 | 1 |
+| Stejná již zachycená vazba | 7 | 0 | 1 |
+| Přesné dohledání jedné vazby s auditem | 12 | 1 | 0 |
+
+Nejde o účtenku nebo cloudový kapacitní benchmark; nezahrnuje index entries,
+přenosy, infra App Check ani opakování transakcí. Ověřeny jsou i stránky 50 +3,
+změna role mezi požadavky, cizí kontakt, chybějící ověření, souběžné pozorování,
+zánik/reinkarnace profilu, archiv po odstranění zdroje, zákaz soukromého browse,
+původní 60denní hranice a účtový úklid se zachováním cizích dat.
+
+Samostatné [klientské regrese](../../../test/archive_identity_client_test.dart)
+ověřují retry stejné žádosti, řídkou stránku, opožděnou odpověď, změnu účtu,
+zánik controlleru a lokální odstranění prošlého obsahu. [Rules regrese](../../../tools/rules/content_lifecycle.integration.test.mjs)
+odmítají přímé čtení/listování/zápisy indexu pro úrovně 1–6; kandidát právní
+verze zachovává vlastnictví, validaci a neměnnost přijetí. Kandidát je pouze
+místní prototyp, nikoli doklad nasazení či úplné bezpečnostní certifikace.

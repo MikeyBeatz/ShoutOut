@@ -8,8 +8,8 @@ const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
   ({ collection, field, action, group, operator });
 
-export function accountPurgeStages(uid, { moderationCopiesEnabled = false, contentLifecycleEnabled = false } = {}) {
-  if (typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
+export function accountPurgeStages(uid, { moderationCopiesEnabled = false, contentLifecycleEnabled = false, archiveIdentityEnabled = false } = {}) {
+  if (typeof archiveIdentityEnabled !== 'boolean' || typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean') throw new Error('invalid-moderation-copy-option');
   return [
     queryStage('shouts', 'authorId', 'freeze'),
     queryStage('reactions', 'actorId', 'delete', true), // Archived copies, not live counter-bearing votes.
@@ -47,6 +47,12 @@ export function accountPurgeStages(uid, { moderationCopiesEnabled = false, conte
     ...(contentLifecycleEnabled ? [
       queryStage('contentLifecycleArchive', 'subjectUserIds', 'archive', false, 'array-contains'),
       queryStage('reports', 'authorId', 'report'), queryStage('commentReports', 'authorId', 'report'),
+    ] : []),
+    ...(archiveIdentityEnabled ? [
+      queryStage('archiveIdentityBindings', 'userId'),
+      queryStage('archiveIdentityAccounts', 'userId'),
+      queryStage('accessAudits', 'subjectUserIds', 'delete', true, 'array-contains'),
+      { action: 'delete', direct: `archiveIdentityCurrent/${uid}` },
     ] : []),
   ];
 }
@@ -89,8 +95,11 @@ export function validatePurgeSelection(snapshot, stage, uid) {
   }
   if (stage.field === 'actorId') {
     return parts.length === 4 && (parts[0] === 'accountContentArchive' ||
-      parts[0] === 'contentLifecycleArchive' && stage.collection === 'accessAudits') && parts[2] === stage.collection &&
+      ['contentLifecycleArchive', 'archiveIdentityAccess'].includes(parts[0]) && stage.collection === 'accessAudits') && parts[2] === stage.collection &&
       (stage.collection !== 'reactions' || parts[3] === uid);
+  }
+  if (stage.field === 'subjectUserIds' && stage.collection === 'accessAudits') {
+    return parts.length === 4 && parts[0] === 'archiveIdentityAccess' && parts[2] === 'accessAudits';
   }
   return parts[0] === 'shouts' && parts.at(-1) === uid &&
     (parts.length === 4 && parts[2] === stage.collection ||

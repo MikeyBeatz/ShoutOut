@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,75 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,76 %** — vážené dokončení podúseků
 
-Hotové úseky: **239/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **240/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -36,17 +36,19 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
-Nový kontaktní index a administrátorský náhled jsou zatím návrh; neprovádět
-implementaci před jeho schválením. Původní tříbodový úsek vlastník požádal
-nejprve vysvětlit, poté doplnil dohledatelnost; obecný souhlas s kódem se netvrdí.
+Celý společný místní implementační úsek i testy jsou výslovně schválené.
+Implementace je připravená ve větvi feature/archive-identity-integration;
+probíhá společný kontrolní bod a dokládání úplného CI.
+Převzetí starého rodiče, oddělená právní informace, soukromý index a klient
+zůstávají vypnuté; žádný rollout, živá migrace ani nový secret se neprovádí.
 
 
-**MVP: zahájená integrační revize archivu; první tři přechodové otázky prověřené.**
-[Nálezy a další postup](plans/accounts/CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
-Nový potomek nepřevedeného rodiče se bezpečně odmítne; plynulé převzetí
-je nový rozsah ke schválení. Před capture také oddělit informování od readeru
-a doložit kompatibilní návrat po scrub. Prošlo 23 cílených kontrol, brána
-i metrika zůstávají otevřené. Vše vypnuté; bez aplikace/Firebase změn.
+**MVP: místní integrační úsek připravený a otestovaný.**
+[Společný výsledek](MVP_SERVER_PLAN.md#archive-identity-local-integration): rodič a
+první odpověď, samostatné informování, kompatibilní návrat, index kontaktů a
+admin/owner náhled. Nyní doložit přesné úplné CI, poté připravit konkrétní DEV
+plán včetně právní verze a počátečního pokrytí starých účtů/archivů. Nové volby
+jsou false; žádné nasazení ani živá migrace tím nejsou dokončené.
 
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):
