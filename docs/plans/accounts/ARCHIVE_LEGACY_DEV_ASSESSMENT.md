@@ -654,8 +654,53 @@ ovládání jsou otevřené nálezy k samostatnému konkrétnímu schválení, n
 součást již nasazené indexové opravy. Žádná změna aplikace se v této kontrole
 neprovedla ani nenasadila.
 
-Další krok stejného schváleného pilotu: Bright_Otter_182 odstraní pouze svůj
-nahlášený veřejný komentář; poté ověřit přežití archivního podkladu a přístup
-přes konkrétní hlášení. Shout A a soukromá odpověď zatím zůstávají. Nenavyšovat
+Bright_Otter_182 následně odstranil právě nahlášený veřejný komentář; uživatel
+potvrdil zmizení po několika sekundách. Čtecí ověření 21:40 UTC potvrdilo
+neexistující zdroj, platnou archivní identitu/hash, původní text a autora,
+otevřené hlášení s oběma původními archivními klíči a počet komentářů 0.
+Rodič zůstává active, soukromá odpověď nezměněná, termín hlavičky i chráněné
+původní dokumenty beze změny. Důkaz: comment-removal-verified.json. Kontrola
+neměla cloudové zápisy; samotné mazání provedl uživatel přes klienta.
+
+TestAdmin následně potvrdil čitelný obsah komentáře/rodiče a informaci
+„Zachováno při zápisu obsahu“. Čtecí ověření potvrdilo jeden skutečný audit
+read-reported-content pro commentReports pod it_admin, úroveň 5; zdroj stále
+chybí a hlášení zůstává open. Důkaz: report-archive-access-verified.json.
+Pilotní rodič nemá doloženou geografii; tento průchod se proto nevydává
+za živé regionální ověření TestModerator.
+
+Pro zbývající právní test vznikl právě jeden schválený dočasný ověřený Auth
+mvp_archive_legal_6c00e1d7e8, běžný profil a publicProfiles s platným avatarem.
+Nevzniklo žádné právní přijetí, kontaktový záchyt, role ani obsah. Přihlašovací
+údaje zůstávají jen v ignorovaném docs/local/archive-legal-pilot-2026-11-27.json.
+Před přípravou znovu ověřené úplné CI vydaného základu 5435855 /
+46013597685 success a shoda dotčeného runtime. První Auth vytvoření uspělo,
+ale místní časová kontrola skončila před zápisem profilu kvůli rozdílu
+1098 ms vůči sekundové Auth značce; přesná nová inkarnace byla ověřena čtením
+a pokračovalo se stejným účtem. Druhý Auth nevznikl. Ochrana nových vytvoření
+už používá serverový readTime; existující inkarnace je vázaná přesným časem.
+Soukromý pomocný soubor byl před předáním přesunut do správného docs/local
+kořene projektu; heslo se nevypisovalo ani necommitovalo.
+
+TestBusiness následně smazal Shout A a potvrdil jeho vlastní historii.
+Čtecí kontrola potvrdila status deleted, historyUntil = publicUntil +7 dní
+a retainUntil = publicUntil +67 dní: 02.02.2027 21:47:42 UTC. Původní obsah
+Shoutu a komentáře má stále platnou archivní identitu/hash, soukromá odpověď
+je zachovaná a chráněné původní dokumenty nezměněné. TestAdmin potvrdil čitelný
+archiv Shoutu; doložené tři auditní akce po smazání. Důkaz:
+shout-removal-verified.json. Uživatel také potvrdil viditelné ovládání zvuku
+ve hře; aktuální přehrávání hudby výslovně nepotvrdil.
+
+### Odchylka právního pilotu – skutečné přijetí uživatelem
+
+Uživatel na dočasném mvp_archive_legal_6c00e1d7e8 skutečně přijal podmínky.
+Server ověřil všechny tři verze 2026-11-27 a záchyt identity; účet je dosud
+živý a bez pending žádosti. Přijetí ani audit se kvůli testu zpětně nemažou
+nebo nepřepisují. Jeho běžné smazání zůstává v původním souhlasu; negativní
+odhlášení a smazání bez přijetí nejsou tímto průchodem doložené.
+Důkaz: temporary-account-accepted.json. Vlastník dostal konkrétní dotaz na
+právě jeden dodatečný dočasný ověřený Auth/profile bez obsahu a souhlasu,
+protože původní limit nejvýše jednoho nového účtu je vyčerpaný. Dodatečný
+účet dosud není schválený ani vytvořený. Soukromá odpověď zatím zůstává. Nenavyšovat
 fixture ani Auth, neobnovovat již vytvořené zdroje. Celková živá akceptace
 a následný vymezený úklid jsou nadále otevřené; stupnice nedostává nový kredit.

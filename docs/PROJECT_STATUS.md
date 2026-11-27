@@ -12,7 +12,10 @@ TestBusiness skutečně přijal verzi 2026-11-27 a server zaznamenal jeho identi
 Vznikl jediný „MVP archiv 27.11. A 6c00e1d7e8“, atomická archivní kopie,
 autorská vazba a původní 68denní termín ověřené. Následně připravený jeden
 veřejný komentář a jedna soukromá odpověď pod Bright_Otter_182, obojí atomicky
-archivované s jeho doloženou identitou. Nový Auth zatím nevznikl.
+archivované s jeho doloženou identitou. Jediný schválený dočasný ověřený Auth
+je bez obsahu; uživatel na něm skutečně přijal podmínky, přijetí i záchyt identity
+ověřené. Čeká jeho běžné smazání. Smazání/odhlášení bez souhlasu tím ověřené není;
+požádáno o právě jeden dodatečný dočasný účet, zatím bez schválení/vytvoření.
 Aktivní i Expirované blokoval chybějící index pro publicUntil. Zdroj
 7c6a1229ced05803498a7f6f9bba7acb1045ea93 má
 [úspěšné úplné CI 46065640727](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727).
@@ -24,9 +27,16 @@ Pilot zůstává rozehraný; A ani jeho potomky znovu nevytvářet.
 Všechna čtyři existující testovací přijetí/identity potvrzená; TestAdmin
 potvrdil dohledání účtu a archivní detail, tři skutečné role-5 audity ověřené.
 TestBusiness skutečně nahlásil jediný testovací veřejný komentář; server ověřil
-autora, oba archivní klíče a důvod s běžným kategoriálním prefixem. Následuje
-vlastní odstranění pouze tohoto komentáře pod Bright_Otter_182 a kontrola
-archivního podkladu; Shout a soukromá odpověď zatím zůstávají.
+autora, oba archivní klíče a důvod s běžným kategoriálním prefixem. Následné
+vlastní odstranění pod Bright_Otter_182 je potvrzené: zdroj pryč, archivní
+text/autor/vazby platné, hlášení open, počet 0; Shout, soukromá odpověď,
+termín i původní data beze změny. TestAdmin potvrdil detail archivního komentáře
+i rodiče po odstranění zdroje; skutečný read-reported-content audit role 5 ověřený.
+Vlastní odstranění Shoutu a historie potvrzené: status deleted, 7 dní historie
+a 60 dní archivu, konečný termín 02.02.2027. TestAdmin potvrdil čitelný archiv,
+ověřené tři nové auditní akce po smazání. Ovládání hudby ve hře viditelné;
+aktuální přehrávání hudby uživatel výslovně nepotvrdil. Zbývá právní negativní
+test, smazání dočasného účtu a vymezený úklid; celková akceptace zůstává otevřená.
 [Nálezy a pokračování pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings).
 Hlavní feed v jednom prohlížeči hlásí code=unknown, v jiném funguje; poslední
 serverová volání jsou HTTP 200, příčina nepotvrzená. Uživatel další diagnózu

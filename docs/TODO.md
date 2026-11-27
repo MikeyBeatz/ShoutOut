@@ -40,12 +40,18 @@ jeho skutečné přijetí podmínek je ověřené. Aktivní/Expirované blokuje 
 publicUntil index. Zdroj 7c6a122 má úspěšné úplné CI 46065640727; jediný nový
 DEV index CICAgNjpr5sK je READY a oba živé dotazy i kurzory prošly.
 Uživatel potvrdil opravené Mé shouty/detail pod TestBusiness a nahlásil jediný
-testovací komentář; server ověřil jeho archivní vazby. Následuje odstranění
-pouze tohoto komentáře jeho autorem Bright_Otter_182 a kontrola podkladu.
+testovací komentář; server ověřil jeho archivní vazby. Bright_Otter_182 jej
+odstranil; zdroj chybí, archivní podklad i hlášení open zůstaly, počet je 0.
+TestAdmin potvrdil archivní detail po odstranění zdroje včetně serverového
+auditu role 5. Potvrzené také smazání Shoutu/vlastní historie, čitelný archiv
+a viditelné ovládání hudby. Dočasný účet uživatel skutečně právně přijal;
+čeká běžné smazání, negativní test bez souhlasu zůstává neověřený. Pro právě
+jeden dodatečný účet je položen konkrétní dotaz, zatím se nevytváří.
 [Nálezy pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings):
 chyba hlavního feedu jen v jednom prohlížeči je na přání uživatele odložená,
 příčina nepotvrzená; tmavý vzhled a odlišné akce soukromých odpovědí čekají
-konkrétní schválení implementace. Žádný nový Auth ani další seed.
+konkrétní schválení implementace. Právní přijetí se zpětně nemaže ani nepřepisuje;
+žádný další obsahový seed.
 Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
 Samotná indexová oprava nevytvořila fixture/Auth a nezměnila web/Functions/Rules/TTL ani retenci.
 
