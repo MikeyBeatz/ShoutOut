@@ -39,9 +39,13 @@ Jeden pilotní Shout A pod TestBusiness je archivovaný a autorsky navázaný;
 jeho skutečné přijetí podmínek je ověřené. Aktivní/Expirované blokuje chybějící
 publicUntil index. Zdroj 7c6a122 má úspěšné úplné CI 46065640727; jediný nový
 DEV index CICAgNjpr5sK je READY a oba živé dotazy i kurzory prošly.
-Uživatel potvrdil opravené Mé shouty/detail pod TestBusiness. Nyní ověřuje
-jediný veřejný komentář a soukromou odpověď, obojí připravené/archivované pod
-Bright_Otter_182; žádný nový Auth. Čeká nahlášení testovacího komentáře.
+Uživatel potvrdil opravené Mé shouty/detail pod TestBusiness a nahlásil jediný
+testovací komentář; server ověřil jeho archivní vazby. Následuje odstranění
+pouze tohoto komentáře jeho autorem Bright_Otter_182 a kontrola podkladu.
+[Nálezy pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings):
+chyba hlavního feedu jen v jednom prohlížeči je na přání uživatele odložená,
+příčina nepotvrzená; tmavý vzhled a odlišné akce soukromých odpovědí čekají
+konkrétní schválení implementace. Žádný nový Auth ani další seed.
 Dohledání/detail pod TestAdmin už potvrzené včetně auditů.
 Samotná indexová oprava nevytvořila fixture/Auth a nezměnila web/Functions/Rules/TTL ani retenci.
 

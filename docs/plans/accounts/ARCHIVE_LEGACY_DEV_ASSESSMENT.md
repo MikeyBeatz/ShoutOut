@@ -626,3 +626,36 @@ uvedené výše. Příprava nedostává druhý kredit. Původní souhlas pro spo
 úsek byl následně udělen podle AGENTS.md:
 „při podstatném rozšíření si vyžádej nový souhlas“ – nový migrační případ,
 zrušení ochrany konkrétních testovacích dat a první živý archiv/klíč.
+
+<a id="pilot-followup-findings"></a>
+
+## Průběžné nálezy ručního pilotu 27. listopadu
+
+TestBusiness odeslal jedno hlášení veřejného komentáře v Shoutu A
+„MVP archiv 27.11. A 6c00e1d7e8“. Čtecí kontrola potvrdila stav open,
+správného oznamovatele/autora, contentArchiveKey komentáře a shoutArchiveKey
+rodiče. Důvod obsahuje standardní prefix zvolené kategorie a přesně zadaný
+testovací detail; nejde o odchylku nebo důvod k opakování hlášení.
+Zdroj i rodič stále existují. Důkaz je v ignorovaném pilotním manifestu
+a report-binding-verified.json; samotná kontrola neměla žádné cloudové zápisy.
+
+Uživatel oznámil tři nálezy. Hlavní feed v jednom prohlížeči vrací obecnou
+chybu s code=unknown, v jiném prohlížeči funguje. Poslední zaznamenaná volání
+getFeedPage/getReadStatePage mají HTTP 200; to nedokazuje úspěšné zpracování
+v klientovi. Kód pod tento záznam slučuje mimo jiné místní chyby synchronizace
+a sestavení feedu, konkrétní příčina není potvrzená. Po krátké čtecí kontrole
+uživatel výslovně odložil další diagnózu. Místní data prohlížeče se nemažou,
+chyba se neoznačuje za opravenou a pilot pokračuje ve fungujícím prohlížeči.
+
+V private_replies.dart je potvrzená pevná světlá barva pozadí a textu;
+akce soukromé odpovědi používají TextButton.icon/Wrap, zatímco veřejný
+komentář má kompaktní ikony zarovnané vpravo. Oprava vzhledu a sjednocení
+ovládání jsou otevřené nálezy k samostatnému konkrétnímu schválení, nikoli
+součást již nasazené indexové opravy. Žádná změna aplikace se v této kontrole
+neprovedla ani nenasadila.
+
+Další krok stejného schváleného pilotu: Bright_Otter_182 odstraní pouze svůj
+nahlášený veřejný komentář; poté ověřit přežití archivního podkladu a přístup
+přes konkrétní hlášení. Shout A a soukromá odpověď zatím zůstávají. Nenavyšovat
+fixture ani Auth, neobnovovat již vytvořené zdroje. Celková živá akceptace
+a následný vymezený úklid jsou nadále otevřené; stupnice nedostává nový kredit.

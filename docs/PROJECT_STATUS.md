@@ -23,9 +23,16 @@ Uživatel po opravě potvrdil Mé shouty i detail pod TestBusiness bez chyby.
 Pilot zůstává rozehraný; A ani jeho potomky znovu nevytvářet.
 Všechna čtyři existující testovací přijetí/identity potvrzená; TestAdmin
 potvrdil dohledání účtu a archivní detail, tři skutečné role-5 audity ověřené.
-Nyní čeká skutečné nahlášení jediného testovacího veřejného komentáře pod
-TestBusiness; zatím neodstraňovat Shout ani zprávy. Manifest a aktuální handoff
-jsou v build/archive-readiness/manual-pilot a current-handoff.json.
+TestBusiness skutečně nahlásil jediný testovací veřejný komentář; server ověřil
+autora, oba archivní klíče a důvod s běžným kategoriálním prefixem. Následuje
+vlastní odstranění pouze tohoto komentáře pod Bright_Otter_182 a kontrola
+archivního podkladu; Shout a soukromá odpověď zatím zůstávají.
+[Nálezy a pokračování pilotu](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#pilot-followup-findings).
+Hlavní feed v jednom prohlížeči hlásí code=unknown, v jiném funguje; poslední
+serverová volání jsou HTTP 200, příčina nepotvrzená. Uživatel další diagnózu
+odložil. Pevné světlé barvy a odlišné akce soukromé odpovědi jsou potvrzené
+UI nálezy, implementace zatím neschválená. Manifest/handoff jsou v
+build/archive-readiness/manual-pilot a current-handoff.json.
 
 **Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
 [Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
