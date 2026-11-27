@@ -14,8 +14,9 @@ receipts/sanctions/reports. Čas odstranění není doplněný; návrh je vymeze
 komentář patří autorovi původní pending žádosti a adopce jej nyní správně
 zastaví; před přechodem je potřebná ověřená cesta pouze metadat bez nového těla.
 Dnešní průzkum je pouze čtecí, bez změn aplikace/dat nebo nového úplného CI.
-Další společný implementační/DEV balík je připravený ke schválení, zatím
-se neprovádí. Ruční kontrola zůstává na konec.
+Celý společný dokončovací DEV úsek je výslovně schválený. Probíhá
+implementace operátoru a úzké adopce prošlých metadat. Nové úplné CI ani
+živé zápisy dosud neproběhly; ruční kontrola zůstává na konec.
 
 **Přípravný balík archivu dokončený:** [výsledky a další pořadí](plans/accounts/ARCHIVE_DEV_READINESS.md#úplné-ci-a-čtecí-dev-inventura--27-listopadu).
 Zdroj **6e68e03d719aa66e45277204abce9a8bd3a2aa4e** má

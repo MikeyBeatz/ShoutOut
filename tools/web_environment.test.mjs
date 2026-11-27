@@ -5,9 +5,19 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
-import { assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
+import { archiveWebConfig, assertDevelopmentProject, buildHostingConfig, devProject, prodProject, presentationSite, fingerprint, loadConfig, root, validateConfig, verifyBuild } from './web_environment.mjs';
 
 const actualDev = loadConfig('dev');
+
+test('archive web builds bind the committed DEV phase through deploy precheck; prod and old artifacts fail closed', () => {
+  const capture = archiveWebConfig(actualDev);
+  assert.equal(capture.legalVersion, '2026-11-27'); assert.equal(capture.serverContentLifecycle, false);
+  assert.equal(archiveWebConfig(actualDev, 'active').serverContentLifecycle, true);
+  assert.equal(archiveWebConfig(actualDev, 'rollback').legalVersion, capture.legalVersion);
+  assert.throws(() => archiveWebConfig(loadConfig('prod')), /explicit-dev/);
+  const deploy = buildHostingConfig(capture, {}, { archive: true });
+  assert.deepEqual(deploy.hosting.predeploy, ['node tools/web_environment.mjs check dev --archive']);
+});
 
 test('archive identity and disclosure stay inactive and require paired DEV legal policy', () => {
   assert.notEqual(actualDev.serverArchiveIdentity, true);

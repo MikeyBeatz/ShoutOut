@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync,
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { archiveDeploymentProfile, archiveDevDeploymentPhase } from '../functions/archive_deployment.js';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const devProject = 'shoutout-dev-46c81';
@@ -10,6 +11,14 @@ export const prodProject = 'shoutout-production-a1b34';
 export const presentationSite = prodProject;
 export function assertDevelopmentProject(project) {
   if (project !== devProject) throw new Error('Development tools only support shoutout-dev-46c81.');
+}
+export function archiveWebConfig(config, phase = archiveDevDeploymentPhase) {
+  if (config.environment !== 'dev' || config.firebase.projectId !== devProject || config.hostingSite !== devProject ||
+      !['capture', 'active', 'rollback'].includes(phase)) throw new Error('archive-web-explicit-dev-profile-required');
+  const profile = archiveDeploymentProfile({ GCLOUD_PROJECT: devProject }, phase);
+  const result = { ...config, archiveDisclosureEnabled: true, legalVersion: '2026-11-27',
+    serverContentLifecycle: profile.reader, serverArchiveIdentity: profile.reader };
+  validateConfig(result, 'dev'); return result;
 }
 
 export function validateConfig(config, environment) {
@@ -230,14 +239,14 @@ export function verifyBuild(config, manifest, project, directory) {
   }
 }
 
-export function buildHostingConfig(config, hosting) {
+export function buildHostingConfig(config, hosting, { archive = false } = {}) {
   validateConfig(config, config.environment);
   // Never inherit a presentation or development target from another config.
   const { target, ...settings } = hosting;
   return { hosting: {
     ...settings, public: `build/web-${config.environment}`,
     site: config.hostingSite,
-    predeploy: [`node tools/web_environment.mjs check ${config.environment}`],
+    predeploy: [`node tools/web_environment.mjs check ${config.environment}${archive ? ' --archive' : ''}`],
   } };
 }
 
@@ -264,13 +273,13 @@ function run(program, args) {
 export function main(args) {
   const [command, environment, ...flags] = args;
   if (!['prepare', 'build', 'check', 'deploy'].includes(command) ||
-      flags.some(flag => !['--debug', '--apply', '--app-check-probe'].includes(flag) && !/^--project=[a-z0-9-]+$/.test(flag)) ||
+      flags.some(flag => !['--debug', '--apply', '--app-check-probe', '--archive'].includes(flag) && !/^--project=[a-z0-9-]+$/.test(flag)) ||
       (flags.includes('--app-check-probe') && (command !== 'build' || environment !== 'dev')) ||
       (command !== 'build' && flags.includes('--debug')) ||
       (command !== 'deploy' && flags.includes('--apply'))) {
-    throw new Error('Usage: node tools/web_environment.mjs prepare|build|check|deploy dev|prod [--debug] [--project=ID] [--apply] [--app-check-probe (build dev only)]');
+    throw new Error('Usage: node tools/web_environment.mjs prepare|build|check|deploy dev|prod [--debug] [--project=ID] [--apply] [--archive (DEV only)] [--app-check-probe (build dev only)]');
   }
-  const config = loadConfig(environment);
+  const config = flags.includes('--archive') ? archiveWebConfig(loadConfig(environment)) : loadConfig(environment);
   const directory = join(root, 'build', `web-${environment}`);
   const manifestPath = join(root, 'build', 'environments', `${environment}.manifest.json`);
   const definesPath = join(root, 'build', 'environments', `${environment}.defines.json`);
@@ -323,7 +332,7 @@ export function main(args) {
   }
   const hosting = readJson(join(root, 'firebase.json')).hosting;
   const deploymentConfig = join(root, `.firebase-hosting-${environment}.json`);
-  writeJson(deploymentConfig, buildHostingConfig(config, hosting));
+  writeJson(deploymentConfig, buildHostingConfig(config, hosting, { archive: flags.includes('--archive') }));
   run('firebase', ['deploy', '--only', 'hosting', '--project', project, '--config', deploymentConfig]);
 }
 

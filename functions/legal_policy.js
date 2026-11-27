@@ -1,11 +1,12 @@
 import { HttpsError } from 'firebase-functions/v2/https';
+import { archiveDeploymentProfile } from './archive_deployment.js';
 
 export const legacyLegalVersion = '2026-07-25';
-// Approved preparation only; configuration stays on the legacy policy.
+// Approved DEV disclosure; production keeps the legacy policy until its own release.
 export const preparedArchiveLegalVersion = '2026-11-27';
-// Activation chooses the public version separately. This preparation changes
-// neither the live document text nor the acceptance document used by clients.
-export const legalPolicyConfiguration = Object.freeze({ archiveDisclosureEnabled: false, version: legacyLegalVersion });
+// Capture, client disclosure and Rules are paired by the checked release package.
+export const legalPolicyConfiguration = Object.freeze({ archiveDisclosureEnabled: archiveDeploymentProfile().disclosure,
+  version: archiveDeploymentProfile().disclosure ? preparedArchiveLegalVersion : legacyLegalVersion });
 
 export function legalPolicy({ archiveDisclosureEnabled = false, version = legacyLegalVersion } = {}) {
   const date = typeof version === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(version) ? new Date(version + 'T00:00:00.000Z') : null;

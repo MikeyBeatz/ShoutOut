@@ -1,13 +1,15 @@
-// Inactive, server-only identity observations. No raw contact or secret is persisted.
+// Server-only identity observations. No raw contact or secret is persisted.
 import { createHmac, randomUUID } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
+import { archiveDeploymentProfile } from './archive_deployment.js';
 
 // Once installed, cleanup stays enabled through an ingress/reader rollback.
-export const archiveIdentityConfiguration = Object.freeze({ enabled: false, purgeEnabled: false });
+export const archiveIdentityConfiguration = Object.freeze({ enabled: archiveDeploymentProfile().identity,
+  purgeEnabled: archiveDeploymentProfile().identityPurge });
 export const identityCollections = Object.freeze({ accounts: 'archiveIdentityAccounts', bindings: 'archiveIdentityBindings' });
 const fail = (code, text) => { throw new HttpsError(code, text); };
 export const identityId = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);

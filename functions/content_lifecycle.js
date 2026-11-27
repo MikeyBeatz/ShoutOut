@@ -1,4 +1,4 @@
-// Shared, inactive content lifecycle. No host or scheduler is activated here.
+// Shared content lifecycle. Activation follows the committed DEV release phase.
 import { createHash } from 'node:crypto';
 import { Timestamp, FieldValue, GeoPoint } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
@@ -6,9 +6,11 @@ import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { accountPurgeJobRef } from './account_purge_guard.js';
 import { publicFeedBody } from './feed_public_body.js';
 import { archiveAuthorIdentity } from './archive_identity.js';
+import { archiveDeploymentProfile } from './archive_deployment.js';
 
 // Capture can precede reader/history activation. Maintenance has its own gate.
-export const contentLifecycleConfiguration = Object.freeze({ enabled: false, captureEnabled: false, inlineParentAdoption: false });
+export const contentLifecycleConfiguration = Object.freeze({ enabled: archiveDeploymentProfile().reader,
+  captureEnabled: archiveDeploymentProfile().capture, inlineParentAdoption: archiveDeploymentProfile().capture });
 export const lifecycleDay = 86400000;
 export const lifecycleHistoryMillis = 7 * lifecycleDay;
 export const lifecycleArchiveMillis = 60 * lifecycleDay;

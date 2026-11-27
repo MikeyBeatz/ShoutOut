@@ -10,6 +10,7 @@ import { bodyProjection } from './feed_body_contract.js';
 import { canonical } from './feed_block_index.js';
 import { createHash } from 'node:crypto';
 import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
+import { accountPurgeJobRef, initialAccountPurgeJob } from './account_purge_guard.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const absent = { async getUser() { throw Object.assign(new Error('absent'), { code: 'auth/user-not-found' }); } };
@@ -175,6 +176,64 @@ test('expired retention binds only the old deadlines, copies no body and is cons
   const rt = f.runtime({ contentLifecycleEnabled: true, contentMaintenanceEnabled: true });
   const done = await rt.contentMaintenance({ maxWork: 25 }); assert.equal(done.lifecycleFailed, 0); assert(!(await root.get()).exists);
   assert.equal((await f.raw.collection('contentLifecycleArchive').get()).size, 0);
+});
+
+async function expiredPendingComment(t) {
+  const f = await fixture(t), root = f.roots[0], uid = `pending_${root.id}`;
+  const profile = f.raw.doc(`publicProfiles/${uid}`), request = f.raw.doc(`accountDeletionRequests/${uid}`);
+  f.extra.push(profile, request); await profile.create({ accountStatus: 'pending' });
+  const comment = await f.child('comment', 'expired-pending'); await comment.update({ authorId: uid });
+  await request.create({ userId: uid, status: 'pending' });
+  const originalRequest = await request.get(), job = accountPurgeJobRef(f.raw, {
+    projectId: f.raw.projectId, userId: uid, requestCreateTime: originalRequest.createTime,
+  }); f.extra.push(job);
+  const source = await root.get(); f.setNow(new Date(source.get('expiresAt').toMillis() + 67 * lifecycleDay));
+  await f.apply(await f.plan([root.path]));
+  return { ...f, root, uid, profile, request, originalRequest, job, comment };
+}
+
+test('pending legacy author permits only expired comment metadata; retry and ordinary purge preserve request incarnation', { skip: !enabled }, async t => {
+  const f = await expiredPendingComment(t), source = await f.comment.get(), plan = await f.plan([f.comment.path]);
+  assert.equal(plan.entries[0].action, 'bind-expired'); assert.equal(plan.entries[0].deletionFences.length, 1);
+  assert.equal((await f.apply(plan)).archives, 0); assert.equal((await f.apply(plan)).state, 'already-applied');
+  assert.equal((await f.raw.collection('contentLifecycleArchive').get()).size, 0);
+  assert.equal((await f.comment.get()).get('text'), source.get('text'));
+  const rt = f.runtime({ contentLifecycleEnabled: true, contentMaintenanceEnabled: true });
+  const done = await rt.contentMaintenance({ maxWork: 25 }); assert.equal(done.lifecycleFailed, 0);
+  assert(!(await f.comment.get()).exists); assert(!(await f.job.get()).exists);
+  const request = await f.request.get(); assert(request.createTime.isEqual(f.originalRequest.createTime));
+  assert(request.updateTime.isEqual(f.originalRequest.updateTime)); assert.deepEqual(request.data(), f.originalRequest.data());
+});
+
+test('expired pending comment rejects recreated request/profile and a changed account purge fence without partial binding', { skip: !enabled }, async t => {
+  const f = await expiredPendingComment(t), plan = await f.plan([f.comment.path]);
+  await f.request.delete(); await f.request.create(f.originalRequest.data());
+  await assert.rejects(f.apply(plan), /source-drift/);
+  const fresh = await f.plan([f.comment.path]); assert.equal(fresh.entries[0].action, 'bind-expired');
+  const request = await f.request.get();
+  const job = accountPurgeJobRef(f.raw, { projectId: f.raw.projectId, userId: f.uid, requestCreateTime: request.createTime }); f.extra.push(job);
+  await job.create(initialAccountPurgeJob({ projectId: f.raw.projectId, userId: f.uid, requestCreateTime: request.createTime }, Timestamp.now()));
+  await assert.rejects(f.apply(fresh), /source-drift/);
+  assert.equal((await f.plan([f.comment.path])).entries[0].action, 'bind-expired');
+  await job.update({ ingressClosedAt: Timestamp.now() });
+  assert.equal((await f.plan([f.comment.path])).entries[0].reason, 'account-deletion-in-progress');
+  await job.delete(); await f.profile.delete(); await f.profile.create({ accountStatus: 'pending' });
+  assert.equal((await f.plan([f.comment.path])).entries[0].reason, 'account-deletion-in-progress');
+  assert.equal((await f.comment.get()).get('contentArchiveKey'), undefined);
+});
+
+test('pending exception rejects deleted/missing profile, malformed purge identity, private replies and unexpired bodies', { skip: !enabled }, async t => {
+  const f = await expiredPendingComment(t);
+  await f.profile.update({ accountStatus: 'deleted' });
+  assert.equal((await f.plan([f.comment.path])).entries[0].reason, 'account-deletion-in-progress');
+  await f.profile.update({ accountStatus: 'pending' });
+  await f.job.create({ schemaVersion: 1, userId: f.uid, requestCreateTime: Timestamp.fromMillis(1), phase: 'scheduled', stage: 0, ingressClosedAt: null });
+  assert.equal((await f.plan([f.comment.path])).entries[0].reason, 'account-deletion-in-progress');
+  await f.job.delete(); await f.profile.delete();
+  assert.equal((await f.plan([f.comment.path])).entries[0].reason, 'account-deletion-in-progress');
+  const reply = await f.child('privateReply', 'pending-private');
+  await reply.update({ authorId: f.uid, participants: [f.uid, (await reply.get()).get('recipientId')] });
+  assert.equal((await f.plan([reply.path])).entries[0].reason, 'account-deletion-in-progress');
 });
 
 test('crossing the fixed deadline between plan and commit requests a new plan instead of creating expired copies', { skip: !enabled }, async t => {

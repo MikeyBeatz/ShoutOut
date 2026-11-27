@@ -1,5 +1,5 @@
-// Emulator-only materialization of an explicitly chosen policy. Does not edit
-// firestore.rules or expose an apply/deploy entry point.
+// Pure materialization of an explicitly chosen policy for tests/release artifacts.
+// Does not edit firestore.rules or expose an apply/deploy entry point.
 import { legalPolicy, legacyLegalVersion } from '../../functions/legal_policy.js';
 export function archiveLegalRulesCandidate(source, input) {
   const policy = legalPolicy(input);

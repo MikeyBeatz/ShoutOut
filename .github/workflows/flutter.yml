@@ -234,7 +234,7 @@ jobs:
       - name: Build web
         if: steps.scope.outputs.full != 'false'
         timeout-minutes: 5
-        run: node tools/web_environment.mjs build dev --debug
+        run: node tools/web_environment.mjs build dev --debug --archive
 
       - name: Upload emulator failure logs
         if: ${{ steps.scope.outputs.full != 'false' && (failure() || cancelled()) }}

@@ -6,6 +6,7 @@ import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { canonical } from './feed_block_index.js';
 import { publicFeedBody } from './feed_public_body.js';
+import { validateAccountPurgeJob } from './account_purge_guard.js';
 import { lifecycleBinding, lifecycleSource, lifecycleTimes, lifecycleGeography, lifecycleBodyHash,
   lifecycleArchiveKey, lifecycleArchiveRecord, lifecycleSubjectDeadline, validateLifecycleArchive,
   validateLifecycleThread, lifecycleControlUsable } from './content_lifecycle.js';
@@ -19,11 +20,14 @@ const validStamp = value => Array.isArray(value) && value.length === 2 && value.
 const validIdentity = value => keys(value, 'createTime,updateTime') && validStamp(value.createTime) && validStamp(value.updateTime);
 const validDigest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 function validEntry(entry) {
-  if (!keys(entry, 'action,archiveKey,contentHash,parent,parentHash,path,reason,source,times') ||
+  if (!keys(entry, 'action,archiveKey,contentHash,deletionFences,parent,parentHash,path,reason,source,times') ||
       !['adopt', 'bind-expired', 'bound', 'blocked'].includes(entry.action) || typeof entry.path !== 'string' || !lifecycleSource(entry.path) ||
       entry.source !== null && !validIdentity(entry.source) || entry.parent !== null && !validIdentity(entry.parent) ||
       [entry.contentHash, entry.archiveKey, entry.parentHash].some(value => value !== null && !validDigest(value)) ||
-      entry.times !== null && (!keys(entry.times, 'historyUntil,publicUntil,retainUntil') || !Object.values(entry.times).every(validStamp))) return false;
+      entry.times !== null && (!keys(entry.times, 'historyUntil,publicUntil,retainUntil') || !Object.values(entry.times).every(validStamp)) ||
+      !Array.isArray(entry.deletionFences) || entry.deletionFences.length > 3 || entry.deletionFences.some(fence =>
+        !keys(fence, 'job,profile,request,subjectHash') || !validDigest(fence.subjectHash) || !validIdentity(fence.request) ||
+        !validIdentity(fence.profile) || fence.job !== null && !validIdentity(fence.job))) return false;
   return entry.action === 'blocked' ? typeof entry.reason === 'string' && /^[a-z-]{1,64}$/.test(entry.reason) :
     entry.reason === null && entry.source !== null && entry.parent !== null && entry.times !== null &&
       [entry.contentHash, entry.archiveKey, entry.parentHash].every(validDigest);
@@ -41,6 +45,27 @@ const archiveIncarnation = (archive, source) => archive.get('sourceCreateTime') 
   ? equalTime(archive.get('sourceCreateTime'), source.createTime) : equalTime(archive.createTime, source.createTime);
 const sorted = paths => [...paths].sort((a, b) => a.split('/').length - b.split('/').length || (a < b ? -1 : a > b ? 1 : 0));
 const blocked = code => { throw Object.assign(new Error(code), { adoptionBlocked: true }); };
+// Only an already finally expired public comment may acquire metadata while its
+// old author is pending deletion. No body/identity ingress and no account-job
+// mutation. SDK incarnations fence planning, retry and concurrent account purge.
+function expiredDeletionFences(kind, doc, header, owners, cache, now) {
+  if (kind.kind !== 'comment' || header.retainUntil.toMillis() > now.toMillis()) blocked('account-deletion-in-progress');
+  return owners.flatMap(uid => {
+    const [request, profile, job] = cache.get(uid);
+    if (!request.exists) {
+      if (profile.get('accountStatus') === 'deleted') blocked('account-deletion-in-progress');
+      return [];
+    }
+    if (!profile.exists || profile.get('accountStatus') === 'deleted' || earlier(doc.createTime, profile.createTime) ||
+        earlier(request.createTime, doc.createTime)) blocked('account-deletion-in-progress');
+    if (job?.exists) {
+      try { validateAccountPurgeJob(job.data(), { projectId: doc.ref.firestore.projectId, userId: uid, requestCreateTime: request.createTime }, 0); }
+      catch { blocked('account-deletion-in-progress'); }
+      if (job.get('phase') !== 'scheduled' || job.get('stage') !== 0 || job.get('ingressClosedAt') !== null) blocked('account-deletion-in-progress');
+    }
+    return [{ subjectHash: digest(uid), request: identity(request), profile: identity(profile), job: job ? identity(job) : null }];
+  });
+}
 function pathsFor(paths) {
   if (!Array.isArray(paths) || paths.length < 1 || paths.length > 50 || new Set(paths).size !== paths.length ||
       paths.some(path => typeof path !== 'string' || !lifecycleSource(path))) fail('invalid-lifecycle-adoption-paths');
@@ -97,7 +122,7 @@ async function inspect(tx, db, paths, now) {
   for (const path of paths) {
     const doc = sources.get(path), kind = lifecycleSource(path), parentPath = `shouts/${kind.shoutId}`, root = sources.get(parentPath);
     const entry = { path, source: identity(doc), contentHash: null, archiveKey: archiveKeys.get(path) ?? null,
-      parent: identity(root), parentHash: archiveKeys.get(parentPath) ?? null, times: null, action: 'blocked', reason: null };
+      parent: identity(root), parentHash: archiveKeys.get(parentPath) ?? null, times: null, action: 'blocked', reason: null, deletionFences: [] };
     const item = { entry, doc, root, kind, header: null, newHeader: false, capture: false };
     selected.set(path, item);
     try {
@@ -134,9 +159,10 @@ async function inspect(tx, db, paths, now) {
       try { record = lifecycleArchiveRecord(path, data, header, { sourceCreateTime: doc.createTime }); } catch { blocked('invalid-source'); }
       const owners = [...new Set([...record.subjectUserIds, root.get('authorId')])];
       const deadline = await lifecycleSubjectDeadline(tx, db, owners, header.retainUntil, subjectCache);
-      if (deadline.deleting) blocked('account-deletion-in-progress');
+      if (deadline.deleting) entry.deletionFences = expiredDeletionFences(kind, doc, header, owners, subjectCache, now);
       entry.times = { publicUntil: stamp(header.publicUntil), historyUntil: stamp(header.historyUntil), retainUntil: stamp(deadline.retainUntil) };
       const archive = archives.get(entry.archiveKey);
+      if (entry.deletionFences.length && archive?.exists) blocked('account-deletion-in-progress');
       if (data.contentArchiveKey !== undefined || data.contentHash !== undefined) {
         if (data.contentArchiveKey !== entry.archiveKey || data.contentHash !== entry.contentHash || item.newHeader) blocked('partial-source-binding');
         if (archive?.exists) {
@@ -165,14 +191,14 @@ export async function planLifecycleSourceAdoption(db, paths, { clock = () => new
   assertFeedRuntimeTarget(db); paths = pathsFor(paths);
   return db.runTransaction(async tx => {
     const now = timeAt(clock), current = await inspect(tx, db, paths, now);
-    const value = { v: 1, kind: 'content-lifecycle-source-adoption', projectId: db.projectId, plannedAt: stamp(now),
+    const value = { v: 2, kind: 'content-lifecycle-source-adoption', projectId: db.projectId, plannedAt: stamp(now),
       binding: current.binding, entries: current.entries };
     return { ...value, digest: digest(value) };
   }, { readOnly: true });
 }
 export function validateLifecycleAdoptionPlan(plan, projectId, approvedDigest = plan?.digest) {
   const { digest: saved, ...value } = plan ?? {};
-  if (!/^[a-f0-9]{64}$/.test(saved ?? '') || saved !== approvedDigest || digest(value) !== saved || value.v !== 1 ||
+  if (!/^[a-f0-9]{64}$/.test(saved ?? '') || saved !== approvedDigest || digest(value) !== saved || value.v !== 2 ||
       value.kind !== 'content-lifecycle-source-adoption' || value.projectId !== projectId ||
       Object.keys(value).sort().join(',') !== 'binding,entries,kind,plannedAt,projectId,v' ||
       !validStamp(value.plannedAt) || !validBinding(value.binding) ||
@@ -201,7 +227,8 @@ export async function applyLifecycleSourceAdoption(db, plan, { approvedDigest, c
       const item = current.selected.get(before.path), after = item.entry;
       if (after.action === 'blocked' || !same(before.source?.createTime, after.source?.createTime) || before.contentHash !== after.contentHash ||
           before.archiveKey !== after.archiveKey || !same(before.parent?.createTime, after.parent?.createTime) ||
-          before.parentHash !== after.parentHash || !same(before.times, after.times)) fail('lifecycle-adoption-source-drift');
+          before.parentHash !== after.parentHash || !same(before.times, after.times) ||
+          !same(before.deletionFences, after.deletionFences)) fail('lifecycle-adoption-source-drift');
       if (after.action === 'bound') continue;
       if (!same(before, after)) fail('lifecycle-adoption-source-drift');
       pending.push(item);

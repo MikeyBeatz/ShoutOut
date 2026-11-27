@@ -2,7 +2,8 @@
 
 27. listopadu 2026. Navazuje na [hotovou přípravu](ARCHIVE_DEV_READINESS.md).
 Průzkum je dokončený, pouze čtecí. Následující implementace a živý rozsah jsou
-**návrh ke schválení**, nikoli provedená změna nebo automatický souhlas.
+**výslovně schválený společný dokončovací DEV úsek**. Souhlas s provedením
+není důkaz nasazení; etapy níže ještě vyžadují testy a přesné CI.
 
 ## Ověřené nálezy
 
@@ -120,7 +121,55 @@ Nové role, sankce, limity, služby, četnost jobů, globální App Check, main,
 a produkce nejsou součástí. DEV profil nedokládá kapacitu 5 000 relací.
 Nespouští se placený zátěžový test ani Phone Auth/R2.
 
-## Důkazy a hranice dnešního výsledku
+<a id="finishing-implementation"></a>
+
+## Dokončovací implementace a pořadí vydání
+
+Celý výše uvedený rozsah byl následně výslovně schválen. Připravené zdroje:
+
+- [Pevný operátor 11 fixture](../../../tools/archive_legacy_cleanup.mjs):
+  SDK verze/hash, nuloví potomci, související důkazy a úplná omezená baseline
+  ostatních zdrojů i pending žádosti. Jedna transakce přes společný writer;
+  vlastní technické potvrzení stejného úklidu zůstává 7 dní. Není vydáváno za
+  uživatelskou operaci ani datum původního odstranění. Bez potvrzení se pouhá
+  nepřítomnost zdroje nepovažuje za úspěch; nová inkarnace se nikdy nesmaže.
+- [Adopce](../../../functions/content_lifecycle_adoption.js): pouze veřejný
+  komentář po definitivním původním obsahovém termínu. Existující pending
+  žádost, starší inkarnace profilu a případný platný dosud neotevřený purge job
+  jsou znovu ověřené a svázané SDK verzemi s plánem. Smazaný/chybějící profil,
+  později vytvořený zdroj, uzavřený vstup a nejasný job zůstávají odmítnuté.
+  Žádné nové tělo, kontakt ani zápis do účtové žádosti/jobu.
+- [Selektivní indexový nástroj](../../../tools/archive_dev_indexes.mjs):
+  čerstvý plán, přesné CI a digest; jen známých nejvýše 18 indexových akcí.
+  Restart pokračuje zbývajícími shodnými akcemi, jiný nový návrh zastaví běh.
+  PATCH používá výhradně updateMask=indexConfig, bez změny TTL.
+- [Nasazovací profil](../../../functions/archive_deployment.js) je omezený
+  na přesný DEV projekt; lokální emulátor a produkce zůstávají neaktivní.
+  První commit vybírá capture: archivace/identita/úklid identity a právní verze,
+  avšak bez nového čtení a obsahové údržby. Druhý po úspěšném auditu vybere
+  active. Každý nasazovaný zdroj potřebuje vlastní přesné úplné CI.
+- [Materializace balíčku](../../../tools/archive_dev_release.mjs) spojuje
+  tři skutečné modulové grafy /31 Functions, jejich hashe, Git SHA/čistotu,
+  Rules a konfiguraci webu. Web se připravuje/buildí/kontroluje/nasazuje s
+  `--archive`; přednasazovací kontrola musí zvolit stejný profil. CI sestavuje
+  právě tuto variantu. Vydaná hra zůstává zachovaná.
+- Kompatibilní návrat z active dovoluje pouze rollback profil: zachová čtení,
+  zachytávání, identitu, její purge a právní verzi; zastaví obsahovou údržbu.
+  Nemůže přepnout capture na active ani vypnout zavedenou retenci identity.
+  Po odstranění zdrojů se nepoužije původní d119 web. Návratový balíček se
+  připraví a ověří před aktivací údržby.
+
+Lokální důkazy: dvě cílené sady s překryvem – 31 emulátorových případů
+úklidu/adopce/operátoru a 33 případů adopce, přípravy/finalizace účtu a kombinací Rules
+(stará/nová právní verze × vypnuté/zapnuté archivní čtení). Prošly také
+cílené testy indexů, balíčků, profilů a webové konfigurace i serverové unit/lint
+(227 pass /903 integračních skip; skip nenahrazují emulátor). Nový adopční plán
+má verzi 2; starý plán bez účtových SDK pojistek se nepřijme.
+Úplné CI tohoto nového zdroje a živé etapy ještě nejsou tímto výsledkem doložené.
+Již započtené místní podúseky nedostávají druhý kredit; DEV/akceptace zůstávají
+otevřené. Všechny pilotní fixture a skutečné právní souhlasy až na konec.
+
+## Důkazy původního čtecího došetření
 
 Pouze technické ignorované výstupy v build/archive-readiness:
 

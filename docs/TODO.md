@@ -36,7 +36,8 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 **Další ucelený návrh:** [dokončení archivu v DEV po došetření](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md).
 Průzkum hotový; potvrzený rozsah 11 starých MVP bez potomků, přesný dopad
 běžné retence a jeden již prošlý komentář pending autora. Nové úpravy,
-úklid, klíč a aktivace jsou dosud neschválený návrh, ruční testy až na konec.
+úklid, klíč a aktivace jsou výslovně schválené. Nejprve implementace, testy
+a přesné úplné CI potřebných etap; ruční testy až na konec.
 
 
 **Upřesnění archivu schválené 27. listopadu:** dohledání podle kontaktu
@@ -59,7 +60,7 @@ jsou false; žádné nasazení ani živá migrace tím nejsou dokončené.
 [Přípravný balík a odložené ruční testy](plans/accounts/ARCHIVE_DEV_READINESS.md)
 jsou dokončené místně a úplným CI 45984217529. Čtecí DEV inventura hotová;
 nejprve vyřešit doklady/postup 11 starých deleted Shoutů bez času odstranění,
-pak konkrétní živý přechod. Klíč, migrace a rollout dosud nejsou schválené;
+pak konkrétní živý přechod. Celý dokončovací DEV úsek je nyní výslovně schválený;
 ruční testy zůstávají na konec a nejsou započtené jako hotové.
 
 Pracovat po [ucelených funkčních úsecích](operations/RELEASING.md#development-checkpoints):

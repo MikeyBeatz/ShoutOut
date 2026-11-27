@@ -5,15 +5,19 @@ import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import { doc, setDoc, getDocFromServer, deleteDoc, collection, query, where, limit, getDocs, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { archiveLegalRulesCandidate } from './archive_legal_candidate.mjs';
+import { archiveReleaseConfiguration } from '../archive_dev_release.mjs';
 
 test('inactive lifecycle preserves reads; the candidate gate denies every expired source and all direct archive access', async () => {
   assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8080');
   const source = readFileSync(new URL('../../firestore.rules', import.meta.url), 'utf8');
   const needle = 'return false; // content-lifecycle-gate: local preparation only';
   assert(source.includes(needle));
-  for (const active of [false, true]) {
+  for (const [active, disclosed] of [[false, false], [true, false], [false, true], [true, true]]) {
+    const config = JSON.parse(readFileSync(new URL('../../config/dev.json', import.meta.url), 'utf8'));
+    const candidate = disclosed ? archiveReleaseConfiguration(config, source, active ? 'active' : 'capture').rules :
+      active ? source.replace(needle, 'return true; // local candidate') : source;
     const env = await initializeTestEnvironment({ projectId: 'shoutout-rules-test', firestore: {
-      host: '127.0.0.1', port: 8080, rules: active ? source.replace(needle, 'return true; // local candidate') : source,
+      host: '127.0.0.1', port: 8080, rules: candidate,
     } });
     const nonce = randomUUID(), uid = `life-${nonce}`, root = `shouts/${nonce}`, paths = [];
     const add = async (path, data) => {
@@ -21,7 +25,7 @@ test('inactive lifecycle preserves reads; the candidate gate denies every expire
     };
     try {
       await add(`users/${uid}`, { nickname: 'Synthetic rules actor' });
-      await add(`users/${uid}/legal/acceptance_2026_07_25`, {});
+      await add(`users/${uid}/legal/${disclosed ? 'acceptance_2026_11_27' : 'acceptance_2026_07_25'}`, {});
       await add(`accountRoles/${uid}`, { level: 6, role: 'owner' });
       await add(root, { authorId: uid, status: 'deleted', text: 'Synthetic retained source', historyUntil: Timestamp.fromMillis(Date.now() + 3600000) });
       await add(`${root}/comments/comment`, { authorId: uid, text: 'Synthetic comment' });

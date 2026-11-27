@@ -2,8 +2,9 @@
 // does not schedule maintenance. No new host, timer, or live activation.
 import { lifecycleReadsEnabled as lifecycleEnabled } from './content_lifecycle.js';
 import { runContentLifecycleMaintenance } from './content_lifecycle_maintenance.js';
+import { archiveDeploymentProfile } from './archive_deployment.js';
 
-export const contentLifecycleMaintenanceConfiguration = Object.freeze({ enabled: false });
+export const contentLifecycleMaintenanceConfiguration = Object.freeze({ enabled: archiveDeploymentProfile().maintenance });
 
 export function createContentLifecycleMaintenance(db, indexWriter, {
   enabled = contentLifecycleMaintenanceConfiguration.enabled,
