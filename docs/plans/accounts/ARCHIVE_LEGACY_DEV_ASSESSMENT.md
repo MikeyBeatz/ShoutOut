@@ -403,6 +403,60 @@ Nové pilotní fixture ani Auth účet zatím nevznikly. Po dostupnosti klienta
 jeden společný průchod v již schválených mezích, vymezený úklid a plánovaná
 souhrnná revize před společnou MVP regresí. Produkce/main se neměnily.
 
+<a id="own-history-index-fix"></a>
+
+## Index Mé shouty nalezený v zahájeném archivním pilotu
+
+27. listopadu se vlastník přihlásil pod TestBusiness. Skutečné přijetí verze
+2026-11-27 i kontaktní pozorování jsou serverově potvrzené; žádné přijetí
+nebylo vytvořené za člověka. Vznikl jeden schválený 24h Shout
+„MVP archiv 27.11. A 6c00e1d7e8“ přes existující createShoutOperation a společný
+indexový/archivní writer. Archiv vznikl atomicky, autorská inkarnace se shoduje
+s doloženým kontaktem; retainUntil je vytvoření +68 dní. Původní jeden zdroj
+a pending žádost mají zachovaný updateTime. Žádný nový Auth, komentář,
+soukromá odpověď ani hlášení zatím nevznikly. Manifest je pouze místně v
+build/archive-readiness/manual-pilot/manifest.json; **Shout A znovu neseedovat**.
+
+První ruční kontrola Mé shouty → Aktivní selhala. Log getOwnShouts doložil
+Auth/App Check VALID a HTTP 500 /FAILED_PRECONDITION „The query requires an
+index“. Čtecí běh skutečného ownShoutsQuery proti DEV potvrdil stejnou chybu
+pro Aktivní i Expirované. Archivní kopie a časové vazby jsou validní; chyběl
+nasazený index pro novou hranici publicUntil. Původní expiresAt index nový
+dotaz nepokrývá. Tuto kombinaci původní plán opomenul.
+
+Vlastník schválil opravu jednoho složeného indexu, regresní kontrolu,
+commit/push a úplné CI, potom pouze selektivní přidání v shoutout-dev-46c81:
+shouts /COLLECTION, authorId ASC, status ASC, createdAt DESC, publicUntil DESC,
+implicitní __name__ DESC. Starý expiresAt index zůstává pro kompatibilitu.
+Bez změny webu, Functions, Rules, TTL, retenčních lhůt či dalších fixture/Auth.
+
+### Místní implementace a kontrola
+
+[Plán](../../../tools/content_lifecycle_index_plan.mjs) i
+[deklarativní konfigurace](../../../firestore.indexes.json) nyní zahrnují
+nový index. Operátor odvozuje maximální velikost povoleného plánu z přesného
+katalogu definic (pro prázdnou instalaci 19 místo původních 18 operací);
+v již instalovaném DEV musí být konkrétní aktuální plán **právě jeden POST**.
+Nejde o souhlas s opakováním celé instalace nebo s jinými změnami indexace.
+
+**10 cílených testů prošlo:** skutečný SDK ownShoutsQuery se serializuje pro
+Aktivní/Expirované a první/navazující stránku, ověří se rovnost/rozsahy,
+řazení, tie-break a limit 50 proti plánovači i konfiguraci. Chybějící
+publicUntil, starý expiresAt nebo opačné řazení ID neprojdou. Sada také
+ověřuje právě jeden chybějící POST po staré instalaci, zachování všech
+ostatních indexů/TTL, pokračování po ztracené odpovědi, pending a digest.
+Testy jsou v content_lifecycle_index_plan.test.mjs a archive_dev_indexes.test.mjs.
+
+Emulátor složené indexy nevynucuje, proto samotné integrační testy tuto
+provozní mezeru neodhalily; viz [oficiální omezení emulátoru](https://firebase.google.com/docs/emulator-suite/connect_firestore#indexes).
+Nová statická vazba skutečného SDK dotazu je doplněk, nikoli náhrada živého
+ověření. Před přidáním: čistý přesný commit s úspěšným úplným CI, čerstvý
+digest selektivního plánu a ověření jediného povoleného POST. Po něm READY,
+oba živé dotazy a skutečný serverový kurzor bez nového seedu; prázdnou
+navazující stránku výslovně odlišit od akceptace více než 50 živých karet.
+Stupnice dostává další důkazy stávajících částí, nikoli nový kredit nebo
+uzavření stále rozpracovaného ručního pilotu.
+
 <a id="public-source-read-fix"></a>
 
 ## Oprava veřejné čtecí brány po předběžné revizi

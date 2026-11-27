@@ -22,14 +22,14 @@ function fake(){
   return {fields,indexes,writes,call};
 }
 function resign(plan){delete plan.digest;plan.digest=createHash('sha256').update(canonical(plan)).digest('hex');return plan;}
-test('exact eighteen operations preserve TTL and unrelated definitions; completion and lost response resume safely',async()=>{
-  const f=fake(),p=await collectArchiveIndexPlan(f.call);assert.equal(validateArchiveIndexPlan(p,p.digest).length,18);
+test('exact nineteen catalog operations preserve TTL and unrelated definitions; completion and lost response resume safely',async()=>{
+  const f=fake(),p=await collectArchiveIndexPlan(f.call);assert.equal(validateArchiveIndexPlan(p,p.digest).length,19);
   let fail=true;
   const call=async(...args)=>{const result=await f.call(...args);if(args[0]==='PATCH'&&fail){fail=false;throw Error('lost-response');}return result;};
   await assert.rejects(applyArchiveIndexPlan(p,{approvedDigest:p.digest,call}),/lost-response/);
-  assert.equal((await applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call})).submitted,17);
+  assert.equal((await applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call})).submitted,18);
   assert.equal((await applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call})).submitted,0);
-  assert.equal(f.writes.length,18);
+  assert.equal(f.writes.length,19);
   for(const field of f.fields.values())assert.deepEqual(field.ttlConfig,{state:'DISABLED'});
   const audit=f.fields.get(`${base}/accessAudits/fields/subjectUserIds`);assert.equal(audit.indexConfig.indexes.length,2);
 });
@@ -42,4 +42,19 @@ test('unapproved changes, foreign inventory, digest and project mismatch cannot 
   await assert.rejects(applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call}),/foreign-index/);
   await assert.rejects(main(['apply','--project','production'],{connect(){assert.fail('network');}}),/explicit-dev/);
   assert.equal(f.writes.length,0);
+});
+
+test('an installed archive missing only own-history ordering submits exactly one index and preserves all other indexes',async()=>{
+  const f=fake(),initial=await collectArchiveIndexPlan(f.call);
+  await applyArchiveIndexPlan(initial,{approvedDigest:initial.digest,call:f.call});
+  const position=f.indexes.findIndex(i=>i.fields.some(field=>field.fieldPath==='publicUntil'));
+  assert(position>=0);const [missing]=f.indexes.splice(position,1),before=structuredClone(f.indexes);
+  f.writes.length=0;
+  const p=await collectArchiveIndexPlan(f.call),actions=validateArchiveIndexPlan(p,p.digest);
+  assert.equal(actions.length,1);assert.equal(actions[0].method,'POST');
+  assert.equal(actions[0].resource,base+'/shouts/indexes');
+  assert.deepEqual(actions[0].body.fields,missing.fields.filter(field=>field.fieldPath!=='__name__'));
+  assert.equal((await applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call})).submitted,1);
+  assert.deepEqual(f.indexes.slice(0,-1),before);assert.equal(f.writes.length,1);
+  assert.equal((await applyArchiveIndexPlan(p,{approvedDigest:p.digest,call:f.call})).submitted,0);
 });

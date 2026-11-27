@@ -12,6 +12,7 @@ export const lifecycleIndexMaps = Object.freeze([
 export const lifecycleCompositeIndexes = Object.freeze([
   { collection: 'comments', queryScope: 'COLLECTION_GROUP', fields: [{ fieldPath: 'authorId', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }] },
   { collection: 'shouts', queryScope: 'COLLECTION', fields: [{ fieldPath: 'authorId', order: 'ASCENDING' }, { fieldPath: 'status', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }] },
+  { collection: 'shouts', queryScope: 'COLLECTION', fields: [{ fieldPath: 'authorId', order: 'ASCENDING' }, { fieldPath: 'status', order: 'ASCENDING' }, { fieldPath: 'createdAt', order: 'DESCENDING' }, { fieldPath: 'publicUntil', order: 'DESCENDING' }] },
   { collection: 'contentLifecycleThreads', queryScope: 'COLLECTION', fields: [{ fieldPath: 'maintenanceState', order: 'ASCENDING' }, { fieldPath: 'nextMaintenanceAt', order: 'ASCENDING' }] },
 ]);
 const same = (a, b) => canonical(a) === canonical(b);

@@ -39,7 +39,8 @@ export function validateArchiveIndexPlan(plan,digest){
       value.v!==1||value.projectId!==project||value.changesTTL!==false||
       value.lifecycle?.changesTTL!==false||value.identity?.changesTTL!==false)fail('invalid-plan');
   const actions=[...(value.lifecycle.actions??[]),...(value.identity.actions??[])];
-  if(actions.length>18||new Set(actions.map(a=>a.method+':'+a.resource+(a.method==='POST'?':'+hash(a.body):''))).size!==actions.length||actions.some(action=>
+  const catalogSize=lifecycleIndexMaps.length+lifecycleCompositeIndexes.length+archiveIdentityCompositeIndexes.length+1;
+  if(actions.length>catalogSize||new Set(actions.map(a=>a.method+':'+a.resource+(a.method==='POST'?':'+hash(a.body):''))).size!==actions.length||actions.some(action=>
     !['POST','PATCH'].includes(action.method)||!action.resource?.startsWith(base+'/')||
     action.method==='PATCH'&&(action.updateMask!=='indexConfig'||Object.keys(action.body??{}).sort().join(',')!=='indexConfig,name')||
     action.method==='POST'&&(Object.keys(action.body??{}).sort().join(',')!=='fields,queryScope')))fail('invalid-actions');

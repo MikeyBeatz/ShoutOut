@@ -3,6 +3,11 @@
     {
       "collectionGroup": "shouts", "queryScope": "COLLECTION",
       "fields": [{ "fieldPath": "authorId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }, { "fieldPath": "publicUntil", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "shouts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "authorId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" }]
     },
     {

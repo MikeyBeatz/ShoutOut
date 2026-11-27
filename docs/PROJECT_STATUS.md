@@ -6,6 +6,15 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
+**Ruční archivní pilot zahájený; opravu blokujícího indexu už vlastník schválil.**
+[Diagnóza a oprava Mé shouty](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#own-history-index-fix).
+TestBusiness skutečně přijal verzi 2026-11-27 a server zaznamenal jeho identitu.
+Vznikl jediný „MVP archiv 27.11. A 6c00e1d7e8“, atomická archivní kopie,
+autorská vazba a původní 68denní termín ověřené. Další obsah/Auth nevznikl.
+Aktivní i Expirované nyní vracejí chybějící index pro publicUntil. Opravený
+plán/konfigurace a 10 cílených testů prošlo lokálně; před jediným DEV přidáním
+je nutné úplné CI přesného zdroje. Pilot zůstává rozehraný; A znovu nevytvářet.
+
 **Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
 [Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
 Zdroj c361526adeeec77328a7c1d640b43dd693e970bd /
@@ -21,7 +30,7 @@ Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
 [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
 Dva účtové workery: opravený GC zdroj bd81e98ddab2b5e0e6f62410e302e9824e547f18 /
 [úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663).
-Aktivní vývoj: fix/archive-public-read-visibility, build/reviews/content-lifecycle-0421.
+Aktivní vývoj: fix/archive-own-history-index, build/reviews/content-lifecycle-0421.
 
 **Živý stav:** Hosting 14a0f588585839e2, Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89.
 31 ACTIVE Functions, ověřené skutečné zdrojové archivy, starší revize RETIRED,
