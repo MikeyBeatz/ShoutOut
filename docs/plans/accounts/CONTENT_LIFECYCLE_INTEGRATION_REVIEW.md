@@ -89,8 +89,9 @@ otevřená; tento dílčí výstup nepřidává dokončovací kredit.
 
 **27. listopadu, feature/archive-identity-integration:** původní tři nálezy mají
 implementované místní řešení. Všechny nové provozní volby zůstávají false;
-právní verze je nadále 2026-07-25. Úplné CI nového společného zdroje se teprve
-dokládá; živá akceptace a startovní brána nejsou místním testem nahrazené.
+právní verze je nadále 2026-07-25. Zdroj b1ed417 má
+[úspěšné úplné CI 45970322486](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486);
+živá akceptace a startovní brána nejsou místním testem nahrazené.
 
 1. **První nový potomek:** ověřitelný aktivní pre-fence rodič se převezme v téže
    transakci jako veřejný komentář či soukromá odpověď, s původním tělem,

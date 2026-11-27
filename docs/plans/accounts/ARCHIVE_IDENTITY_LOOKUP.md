@@ -3,8 +3,14 @@
 Zadání a produktová rozhodnutí vlastníka z 27. listopadu 2026.
 Navazuje na [integrační revizi](CONTENT_LIFECYCLE_INTEGRATION_REVIEW.md).
 Vlastník 27. listopadu výslovně schválil celý společný místní úsek a testy.
-Implementace probíhá ve větvi feature/archive-identity-integration; všechny nové
+Implementace je připravená ve větvi feature/archive-identity-integration; všechny nové
 volby zůstávají vypnuté. Bez nasazení, živých dat, Auth účtů nebo secrets.
+
+**Místní úsek uzavřený:** zdroj b1ed417c689884b496627eb907788d1b871d5a0d má
+[úspěšné úplné CI 45970322486](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486).
+165 archivních případů, 151 retenčních, 482 Rules/transakčních, 583 aplikačních
+a 129 nástrojových testů; prošly i browserové/B4/B2/moderační/Storage sady,
+analýza, lint a webový build. Unit 222 pass /882 skip neznamená spuštění skipů.
 
 ## Schválené zadání a hranice
 

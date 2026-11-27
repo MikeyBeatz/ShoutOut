@@ -19,8 +19,12 @@ Hlavní zdroje: [index](../functions/archive_identity.js),
 [klient](../lib/archive_identity_client.dart),
 [Rules kandidát](../tools/rules/archive_legal_candidate.mjs).
 Testy a skutečné počty operací jsou uvedené v propojených plánech; lokálně
-prošla archivní/emulátorová, aplikační, unit a nástrojová kontrola. Úplné CI
-přesného společného zdroje se teprve doplňuje.
+prošla archivní/emulátorová, aplikační, unit a nástrojová kontrola. Přesný zdroj
+**b1ed417c689884b496627eb907788d1b871d5a0d** má
+[úspěšné úplné CI 45970322486](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486):
+165 archivních, 583 aplikačních, 129 nástrojových, 482 Rules/transakčních a 151
+retenčních případů. Prošly také browsery, B4, moderace, B2, Storage, lint, analýza
+a webový build. Unit 222 pass /882 integračních skip není doklad spuštění skipů.
 
 Volby a transport zůstávají vypnuté; nová veřejná právní verze, skutečný secret,
 callable wrappery, počáteční pokrytí starých účtů/archivních vazeb a konkrétní DEV

@@ -10,9 +10,9 @@ podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 ### Postup do MVP
 
 <!-- progress:mvp:start -->
-`████████████████████████░░░░░░░░░░░░░░░░` **61,76 %** — vážené dokončení podúseků
+`████████████████████████░░░░░░░░░░░░░░░░` **61,77 %** — vážené dokončení podúseků
 
-Hotové úseky: **240/294**. Celé milníky: **9/24**; rozpracované: 11.
+Hotové úseky: **241/294**. Celé milníky: **9/24**; rozpracované: 11.
 <!-- progress:mvp:end -->
 
 Stupnice započítává i doložené podúseky otevřených milníků. Celé milníky a
@@ -37,16 +37,16 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
 Celý společný místní implementační úsek i testy jsou výslovně schválené.
-Implementace je připravená ve větvi feature/archive-identity-integration;
-probíhá společný kontrolní bod a dokládání úplného CI.
+Místní implementace a ověření jsou uzavřené ve větvi feature/archive-identity-integration;
+zdroj b1ed417 má [úspěšné úplné CI](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486).
 Převzetí starého rodiče, oddělená právní informace, soukromý index a klient
 zůstávají vypnuté; žádný rollout, živá migrace ani nový secret se neprovádí.
 
 
-**MVP: místní integrační úsek připravený a otestovaný.**
+**MVP: místní integrační úsek uzavřený úplným CI.**
 [Společný výsledek](MVP_SERVER_PLAN.md#archive-identity-local-integration): rodič a
 první odpověď, samostatné informování, kompatibilní návrat, index kontaktů a
-admin/owner náhled. Nyní doložit přesné úplné CI, poté připravit konkrétní DEV
+admin/owner náhled. Nyní připravit konkrétní DEV
 plán včetně právní verze a počátečního pokrytí starých účtů/archivů. Nové volby
 jsou false; žádné nasazení ani živá migrace tím nejsou dokončené.
 

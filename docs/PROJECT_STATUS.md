@@ -10,19 +10,21 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 jen administrátor/owner; současné konečné termíny smazání zachovat.
 [Konkrétní návrh dalšího místního úseku](plans/accounts/ARCHIVE_IDENTITY_LOOKUP.md).
 Celý společný místní implementační úsek i testy jsou výslovně schválené.
-Implementace je připravená ve větvi feature/archive-identity-integration;
-probíhá společný kontrolní bod a dokládání úplného CI.
+Místní implementace a ověření jsou uzavřené ve větvi feature/archive-identity-integration;
+zdroj **b1ed417c689884b496627eb907788d1b871d5a0d** má
+[úspěšné úplné CI 45970322486](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45970322486).
 Převzetí starého rodiče, oddělená právní informace, soukromý index a klient
 zůstávají vypnuté; žádný rollout, živá migrace ani nový secret se neprovádí.
 
 
-**MVP: připravená společná místní integrace a dohledání účtů.**
+**MVP: společná místní integrace a dohledání účtů ověřené úplným CI.**
 [Výsledek a přesné meze](MVP_SERVER_PLAN.md#archive-identity-local-integration).
 Převzetí prvního rodiče, samostatná právní informace, návrat čtení po scrub,
-kontaktní index a admin/owner náhled jsou místně otestované. Prošlo 163 archivních
-případů, 582 aplikačních, 129 nástrojových a následné cílené kontroly; analýza a
-lint jsou čisté. Serverové unit mají 221 pass /881 integračních skip; skip
-nenahrazují emulátorové důkazy. Poslední drobné změny pokryje přesné úplné CI.
+kontaktní index a admin/owner náhled jsou otestované. Přesné CI doložilo 165
+archivních případů, 583 aplikačních, 129 nástrojových, 482 Rules/transakčních a
+151 retenčních; prošly také B4, moderace, B2, Storage, browsery, analýza, lint
+a webový build. Serverové unit mají 222 pass /882 integračních skip; skip
+nenahrazují výše uvedené skutečně spuštěné emulátorové sady.
 Aktivní pracovní kopie je build/reviews/content-lifecycle-0421, izolovaná od hry
 a nesouvisejících změn v kořenové větvi. Nic se nenasazuje; nové volby jsou false.
 
