@@ -6,11 +6,14 @@ nasazením znovu ověřit Git, CI a skutečný cíl. Úplná starší chronologi
 
 ## Další konkrétní krok
 
-**Schválená oprava přímého čtení veřejných zdrojů; společný ruční pilot archivu odložený.**
-[Dva doložené nálezy a regrese Rules](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
-Lokálně opravený veřejný parent/author guard, 7 emulátorových testů Rules a
-19 klientských testů odběrů prošlo. Následuje společný push a úplné CI přesného
-zdroje; potom pouze DEV Rules. Zatím žádné nové nasazení této opravy.
+**Oprava přímého čtení veřejných zdrojů nasazená a ověřená v DEV.**
+[Dva nálezy, regrese a skutečné nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix).
+Zdroj c361526adeeec77328a7c1d640b43dd693e970bd /
+[úplné CI 46043558742 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742).
+Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89: přímé veřejné čtení respektuje
+deleted rodiče a dostupnost jeho autora. 7 Rules /19 klientských testů a 22
+serverových simulací vydané verze prošlo. Web, 31 Functions a dva joby beze
+změny; žádná nová živá data/Auth. Společný ruční pilot archivu je stále odložený.
 
 **Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
@@ -18,9 +21,9 @@ Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
 [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
 Dva účtové workery: opravený GC zdroj bd81e98ddab2b5e0e6f62410e302e9824e547f18 /
 [úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663).
-Aktivní vývoj: feature/archive-identity-integration, build/reviews/content-lifecycle-0421.
+Aktivní vývoj: fix/archive-public-read-visibility, build/reviews/content-lifecycle-0421.
 
-**Živý stav:** Hosting 14a0f588585839e2, Rules 1b29a656-f990-42f5-b335-ef35c44c0997.
+**Živý stav:** Hosting 14a0f588585839e2, Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89.
 31 ACTIVE Functions, ověřené skutečné zdrojové archivy, starší revize RETIRED,
 stejné prostředky a dva plánovače. Čtení/identita/capture/údržba a právní verze
 2026-11-27 zapnuté. Úklid 11 MVP kořenů a tří hlášení, převod 128 zdrojů,

@@ -33,11 +33,12 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 
 ## Nejbližší práce
 
-**Nyní: schválená oprava přímého čtení veřejných zdrojů.**
-[Nálezy, rozsah a regrese](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
-sjednotit veřejný parent/author guard, zachovat vlastní historii a účastnické
-soukromé čtení. Místní Rules/klientské testy prošly; před DEV Rules ještě
-společný push a úplné CI. Bez nové fixture/Auth a bez ručního testu nyní.
+**Hotovo: oprava přímého čtení veřejných zdrojů v DEV.**
+[Nálezy, regrese a nasazení](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#public-source-read-fix):
+zdroj c361526 /[úplné CI 46043558742 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742),
+Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89 a 22 serverových simulací vydané verze.
+Vlastní historie a účastnické soukromé čtení zachované; web/Functions/job beze
+změny. Žádná nová fixture/Auth. Další krok: odložený společný ruční pilot archivu.
 
 **Dosavadní automatická DEV část archivu je hotová; zbývá společný ruční pilot.**
 [Nasazení, převod a provozní důkazy](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#gc-dev-verification).
@@ -45,9 +46,9 @@ Archivní web a 29 Functions: zdroj 5435855847bc81c76a05f1e6f18d5b68b636367b /
 [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685).
 Dva účtové workery: opravený GC zdroj bd81e98ddab2b5e0e6f62410e302e9824e547f18 /
 [úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663).
-Aktivní vývoj: feature/archive-identity-integration, build/reviews/content-lifecycle-0421.
+Aktivní vývoj: fix/archive-public-read-visibility, build/reviews/content-lifecycle-0421.
 
-**Živý stav:** Hosting 14a0f588585839e2, Rules 1b29a656-f990-42f5-b335-ef35c44c0997.
+**Živý stav:** Hosting 14a0f588585839e2, Rules 88a94380-2b88-4f37-8ed9-47dc9ab88a89.
 31 ACTIVE Functions, ověřené skutečné zdrojové archivy, starší revize RETIRED,
 stejné prostředky a dva plánovače. Čtení/identita/capture/údržba a právní verze
 2026-11-27 zapnuté. Úklid 11 MVP kořenů a tří hlášení, převod 128 zdrojů,

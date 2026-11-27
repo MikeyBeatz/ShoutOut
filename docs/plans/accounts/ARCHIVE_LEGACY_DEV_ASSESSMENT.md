@@ -469,6 +469,40 @@ tyto nálezy, proto jej použít jen při prokázané kompatibilitní regresi.
 Tento úzký opravený prototyp Rules nenahrazuje celkovou předstartovní revizi.
 V evidenci se doplňují důkazy stávajících částí, nikoli nový kredit či živá akceptace.
 
+### Dokončené DEV vydání opravy čtení
+
+Zdroj **c361526adeeec77328a7c1d640b43dd693e970bd** prošel
+[úplným CI 46043558742](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742):
+aplikační/browserové testy, Rules/transakce, archiv, B4, moderace, B2, retence,
+Storage, analýza/lint a webový build. Nasazeny pouze Firestore Rules v
+shoutout-dev-46c81, ruleset **88a94380-2b88-4f37-8ed9-47dc9ab88a89**.
+Přednasazovací guard ověřil čistý přesný commit, konečný úspěch celého CI,
+obsah artefaktu přímo z Git blobu a nezměněný předchozí ruleset. Artefakt
+používá kanonické LF podle Gitu; pracovní Windows CRLF byly před simulací
+a nasazením odstraněny pouze z odvozeného artefaktu, nikoli ze zdrojového commitu.
+
+Skutečně publikovaný text má shodný SHA-256
+`a262952b15fdf1f8e5172182d787213a362f1b108849158bacf6e582ca59f9d2`.
+Všech **22 serverových simulací skutečně vydaného textu** prošlo, včetně
+kladných běžných čtení, obou nálezů, vlastní historie, admin bez bypassu,
+pending/deleted autora rodiče a zachovaných soukromých účastníků. Všechny
+service get/exists mají explicitní syntetické mocks; žádný živý obsah ani
+Auth účet se při ověřování nevytvořil. Skutečné SDK query/list a přechody
+odběru jsou doložené výše emulátorem, nikoli vydávány za živý UI průchod.
+
+Hosting **14a0f588585839e2**, všech **31 Functions** včetně jejich revizí/
+updateTime a **oba plánovače** byly před/po porovnány a zůstaly stejné.
+Functions dál používají předchozí doložené zdroje 5435855 /bd81e98; tato
+oprava je neaktualizovala. Na původní pending žádost ani obsah tento úsek nezapisoval.
+Technické důkazy jsou v build/archive-review-20261127 (rules-manifest,
+predeploy-proof, deploy-rules.log, rules-before/after.json).
+
+AR-READ-01 a AR-READ-02 v doloženém rozsahu rodičovské čtecí brány jsou uzavřené.
+Přibyly důkazy existujících implementačních/ověřovacích/DEV částí, nikoli
+další váhy: MVP stále **62,01 % /242 z 294**. Společný archivní/identity/
+právní pilot a souhrnná předstartovní revize nadále čekají. Produkce a main
+zůstaly beze změny; dočasný nový účet nebo pilotní obsah se dosud nezakládal.
+
 ## Důkazy původního čtecího došetření
 
 Pouze technické ignorované výstupy v build/archive-readiness:
