@@ -12,6 +12,7 @@ import { stepAccountPurgeStorage } from './account_purge_storage.js';
 import { purgedShoutContext, isPurgedShoutContext } from './shout_context.js';
 import { prepareSanctionCopyScrub } from './moderation_retention.js';
 import { lifecycleEnabled, validateLifecycleArchive } from './content_lifecycle.js';
+import { moderationQueueBinding } from './moderation_queue.js';
 export { purgedShoutContext } from './shout_context.js';
 
 const marker = { schemaVersion: 1, accountStatus: 'deleted' };
@@ -22,15 +23,16 @@ export async function runAccountPurgeJob(identity, db, auth, {
   pageSize, leaseMillis, retryDelayMillis, clock = () => new Date(),
   pager = null, bucket = null, beforeCommit = null, storageStep = stepAccountPurgeStorage, indexWriter = null,
   indexErasureCoordinator = null, moderationCopiesEnabled = false, archiveIdentityEnabled = false, contentLifecycleEnabled = archiveIdentityEnabled || lifecycleEnabled(db),
+  moderationQueueEnabled = db[moderationQueueBinding]?.enabled === true,
 } = {}) {
-  if (typeof moderationCopiesEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
+  if (typeof moderationCopiesEnabled !== 'boolean' || typeof moderationQueueEnabled !== 'boolean' || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
       ![leaseMillis, retryDelayMillis].every(n => Number.isSafeInteger(n) && n > 0) || typeof clock !== 'function' ||
       indexErasureCoordinator !== null && (typeof indexErasureCoordinator.step !== 'function' || typeof indexErasureCoordinator.prepareFinish !== 'function')) {
     throw new Error('invalid-account-purge-options');
   }
   const jobRef = accountPurgeJobRef(db, identity), requestRef = db.doc(`accountDeletionRequests/${identity.userId}`),
     mainRef = db.doc(`accountDeletionJobs/${jobRef.id}`), profileRef = db.doc(`publicProfiles/${identity.userId}`),
-    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled, contentLifecycleEnabled, archiveIdentityEnabled }), token = randomUUID();
+    userRef = db.doc(`users/${identity.userId}`), stages = accountPurgeStages(identity.userId, { moderationCopiesEnabled, contentLifecycleEnabled, archiveIdentityEnabled, moderationQueueEnabled }), token = randomUUID();
   const now = () => { const date = clock(); if (!(date instanceof Date) || !Number.isSafeInteger(date.getTime())) throw new Error('invalid-purge-clock'); return Timestamp.fromDate(date); };
   const header = await jobRef.get();
   if (!header.exists) return { state: 'purged', examined: 0 };

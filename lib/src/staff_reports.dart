@@ -60,6 +60,7 @@ class _StaffReportsState extends State<_StaffReports> {
   @override
   void initState() {
     super.initState();
+    if (_useServerModerationQueue) return;
     for (final collection in _collections) {
       Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection(
         collection,
@@ -142,6 +143,9 @@ class _StaffReportsState extends State<_StaffReports> {
 
   @override
   Widget build(BuildContext context) {
+    if (_useServerModerationQueue) {
+      return _ServerStaffReports(role: widget.role);
+    }
     final groups = _groups;
     final loading = _loadedCollections.length < _collections.length;
     return Column(

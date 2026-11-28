@@ -42,8 +42,10 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
 změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
 
-1. Připravit konkrétní úsek úplné moderační fronty F-04. Regionální metadata
-   Q-01 se nemění; před změnou jejich oprávnění je produktově upřesnit.
+1. Dokončit společné úplné CI schválené [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md)
+   (místní kontroly prošly) a předložit připravený DEV přechod. Q-01 rozhodnuté: globální metadata
+   s filtrem města/oblasti/státu/geohashe; oprávnění k tělům a zásahům zachovaná.
+   Nové cesty zůstávají vypnuté, dosavadní DEV se nemění.
 2. Dokončit zbývající již otevřenou moderaci a Business:
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.

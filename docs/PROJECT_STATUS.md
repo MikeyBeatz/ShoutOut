@@ -17,9 +17,15 @@ Firestore/Storage Rules v shoutout-dev-46c81. Skutečné zdroje a hashe Rules
 ověřené, staré revize vybraných Functions odstavené. Web, ostatních 29 Functions,
 prostředky, indexy, joby, klíče ani živé fixture se neměnily.
 
-Další navržený úsek je úplnost moderační fronty F-04. Q-01 o regionální
-viditelnosti metadat před změnou oprávnění produktově upřesnit. F-03/F-05
-ani nové produktové volby nejsou součástí dokončené opravy.
+**Navazuje schválený místní F-04:** [úplná moderační fronta](plans/MODERATION_QUEUE_COMPLETENESS.md).
+Q-01 vlastník rozhodl: globální metadata a důvody, volitelný filtr místa/geohashe;
+archivní tělo a rozhodnutí mají dál dnešní geografická oprávnění. Připravené
+stránky nejvýše 50 případů, atomická projekce a obnovitelné velké rozhodnutí,
+oba klientské vstupy i historie postihů jsou výchozí vypnuté. Místní sada
+32/32 bez skipů, skutečný účtový purge, klientské testy a analýza prošly;
+zbývá společné úplné CI. Žádné nové nasazení, živá migrace/data ani Auth účty.
+Po CI následuje připravený návrh DEV přechodu; F-03/F-05 nejsou
+součástí tohoto úseku.
 
 Další stávající MVP práce: úplnost moderační fronty, důvěryhodné Business
 pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.
@@ -60,7 +66,7 @@ ve starém checkpointu nemá přednost před touto tabulkou.
 |---|---|---|
 | Feed | B1–B4 mají [uzavřenou DEV akceptaci](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete); čtecí ochrana starých pending autorů F-06 nasazená. | Společná produkční regrese a kapacita; nejasné staré indexové stavy zůstávají bezpečně odmítnuté. |
 | Obsahová brána | DEV serverová tvorba, reakce, uložení, hlášení a mazání včetně idempotence; klientský writer event oznámení F-02 uzavřený. | Souřadnice poboček F-05 a zbylá autorita; celý mvp-16 není uzavřený. |
-| Moderace / Business | Serverová rozhodnutí, sankce/revokace a Business stav mají audit/piloty; F-01 čtení při banu opravené v DEV. | Úplná fronta F-04, Q-01, bezpečná loga F-03 a provozní kritéria; Storage má popsanou hranici dvou autorizačních dokumentů. |
+| Moderace / Business | Serverová rozhodnutí, sankce/revokace a Business stav mají audit/piloty; F-01 čtení při banu opravené v DEV. Q-01 rozhodnuté: globální metadata s filtry. | F-04 zatím místně a vypnuté; bezpečná loga F-03 a provozní kritéria; Storage má popsanou hranici dvou autorizačních dokumentů. |
 | Archiv / životnost | Platnost → 7 dní vlastní historie → 60 dní archivu, dohledání admin/ownerem, podklad hlášení po smazání a omezený purge v DEV přijaty. | Produkční aktivace a společná regrese; původní termíny a otevřený povinný úklid respektovat. |
 | Mazání účtu | Příprava/finalizace, Auth, archivace, původní purge a smazání bez přijetí nových podmínek ověřené v DEV. | Produkční brána a dohled nad potřebou ručního řešení; neplést naplánovaný purge s již provedeným. |
 | Geografie | Serverový kód a místní ochrany existují. | enrichShoutGeography není mezi 31 Functions; bezpečný backfill a regionální akceptace mvp-13 otevřené. |

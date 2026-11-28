@@ -23,6 +23,15 @@ test('scheduled DEV retention without control does not invoke a legacy cleanup',
   } });
   assert.equal(result.state, 'off'); assert.equal(reads, 1);
 });
+test('disabled retention never starts prepared queue maintenance, even if explicitly selected', async () => {
+  let reads = 0;
+  const result = await runScheduledRetention({ projectId: 'shoutout-dev-46c81', doc(path) {
+    assert.equal(path, 'maintenanceState/retentionControl');
+    return { async get() { reads++; return { exists: false, data: () => undefined }; } };
+  } }, { moderationQueueEnabled: true });
+  assert.equal(result.state, 'off'); assert.equal(reads, 1);
+  await assert.rejects(runScheduledRetention({}, { moderationQueueEnabled: 'true' }), /invalid-moderation-queue/);
+});
 
 test('retention logs exclude source identifiers, cursors and arbitrary result fields', () => {
   const result = { state: 'checked', controlReads: 1, userId: 'secret', phases: {

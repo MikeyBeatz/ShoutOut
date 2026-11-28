@@ -1,5 +1,6 @@
 // Atomic public removal core; the callable host supplies the managed writer.
 import { createHash } from 'node:crypto';
+import { readPendingModerationReports } from './moderation_queue.js';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
@@ -57,7 +58,7 @@ export async function removeReportedPublicContentOperation(request, db, clock = 
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
     const hasLiveBody = source.exists && !(input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
-    const reports = await tx.get(pendingContentReports(db, input)), managed = lifecycleReportReadsEnabled(db, reports);
+    const reports = await readPendingModerationReports(tx, db, input, pendingContentReports(db, input)), managed = lifecycleReportReadsEnabled(db, reports);
     if (!managed && (!source.exists || !shout.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()))) fail('not-found', 'The report target is unavailable.');
     if (!managed && (!identifier(source.get('authorId')) || !(source.get('createdAt') instanceof Timestamp))) fail('failed-precondition', 'Invalid report target.');
     if (clearance.exists) fail('failed-precondition', 'The content was already approved.');

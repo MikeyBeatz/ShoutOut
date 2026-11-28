@@ -8,8 +8,8 @@ const id = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(v
 const queryStage = (collection, field, action = 'delete', group = false, operator = '==') =>
   ({ collection, field, action, group, operator });
 
-export function accountPurgeStages(uid, { moderationCopiesEnabled = false, archiveIdentityEnabled = false, contentLifecycleEnabled = archiveIdentityEnabled } = {}) {
-  if (typeof archiveIdentityEnabled !== 'boolean' || typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean' ||
+export function accountPurgeStages(uid, { moderationCopiesEnabled = false, archiveIdentityEnabled = false, contentLifecycleEnabled = archiveIdentityEnabled, moderationQueueEnabled = false } = {}) {
+  if (typeof archiveIdentityEnabled !== 'boolean' || typeof moderationCopiesEnabled !== 'boolean' || typeof contentLifecycleEnabled !== 'boolean' || typeof moderationQueueEnabled !== 'boolean' ||
       archiveIdentityEnabled && !contentLifecycleEnabled) throw new Error('invalid-moderation-copy-option');
   return [
     queryStage('shouts', 'authorId', 'freeze'),
@@ -54,6 +54,13 @@ export function accountPurgeStages(uid, { moderationCopiesEnabled = false, archi
       queryStage('archiveIdentityAccounts', 'userId'),
       queryStage('accessAudits', 'subjectUserIds', 'delete', true, 'array-contains'),
       { action: 'delete', direct: `archiveIdentityCurrent/${uid}` },
+    ] : []),
+    // Append only; old purge checkpoints keep their original numeric stages.
+    ...(moderationQueueEnabled ? [
+      queryStage('serverOperations', 'completedBy', 'scrub'),
+      ...['actorId', 'authorId'].map(field => queryStage('moderationCases', `appliedEffect.${field}`, 'scrub')),
+      ...['userId', 'authorId'].map(field => queryStage('moderationCaseDecisions', field)),
+      ...['lastRunnerId', 'effect.actorId', 'effect.authorId'].map(field => queryStage('moderationCaseDecisions', field, 'scrub')),
     ] : []),
   ];
 }

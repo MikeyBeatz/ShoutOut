@@ -235,6 +235,26 @@ final _serverContentOperations = TimedOperationGateway(
   },
 );
 
+bool get _useServerModerationQueue => kIsWeb
+    ? WebEnvironment.current.serverModerationQueue
+    : const bool.fromEnvironment('SERVER_MODERATION_QUEUE');
+
+Future<Map<String, dynamic>> _moderationQueueTransport(
+  String operation,
+  Map<String, dynamic> payload,
+) async {
+  final result = await FirebaseFunctions.instanceFor(
+    region: 'europe-west3',
+  ).httpsCallable(operation).call(payload);
+  return Map<String, dynamic>.from(result.data as Map);
+}
+
+final _moderationCaseDecisions = ModerationCaseDecisionClient(
+  send: _moderationQueueTransport,
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  issuedAt: _serverContentOperations.issuedAt,
+);
+
 final _commentDeletionGateway = CommentDeletionGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
   send: (request) async {

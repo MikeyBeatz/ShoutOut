@@ -204,6 +204,12 @@ jobs:
         working-directory: tools
         run: npm run test:content-lifecycle
 
+      - name: Test inactive moderation queue and large decisions
+        if: steps.scope.outputs.full != 'false'
+        timeout-minutes: 6
+        working-directory: tools
+        run: npm run test:moderation-queue
+
       - name: Test prepared Business review
         if: steps.scope.outputs.full != 'false'
         timeout-minutes: 4

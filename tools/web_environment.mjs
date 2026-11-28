@@ -108,6 +108,13 @@ export function validateConfig(config, environment) {
   if (Object.hasOwn(config, 'serverBusinessReview') && typeof config.serverBusinessReview !== 'boolean') {
     throw new Error('serverBusinessReview must be a boolean.');
   }
+  if (Object.hasOwn(config, 'serverModerationQueue') && typeof config.serverModerationQueue !== 'boolean') {
+    throw new Error('serverModerationQueue must be a boolean.');
+  }
+  if (config.serverModerationQueue === true && (config.environment !== 'dev' || !config.appCheckSiteKey ||
+      !config.serverContentLifecycle || !config.serverContentSanctions || !config.serverContentReportDecisions || !config.serverPublicReportRemoval)) {
+    throw new Error('Moderation queue requires the complete checked DEV server path.');
+  }
   if (config.serverBusinessReview === true && !config.appCheckSiteKey) {
     throw new Error('Server Business review requires web App Check.');
   }

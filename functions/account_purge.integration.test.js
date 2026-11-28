@@ -11,6 +11,7 @@ import { accountPurgeStages } from './account_purge_policy.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
 import { lifecycleArchiveKey, lifecycleBodyHash, lifecycleTimes, createContentLifecycleDatabase } from './content_lifecycle.js';
 import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidence.js';
+import { createModerationQueueDatabase, moderationReportTarget } from './moderation_queue.js';
 
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'account-purge-tests') : null;
@@ -53,6 +54,37 @@ async function fixture() {
     assert.fail('purge did not finish'); };
   return f;
 }
+
+test('opted-in queue purge scrubs actor copies, deletes its journal and unlocks only the retained foreign case', { skip: !enabled }, async () => {
+  const f = await fixture(), now = Timestamp.now(), foreign = 'foreign_' + f.uid;
+  await f.add('moderationQueueControl/current', { schemaVersion: 1, revision: 1, mode: 'building', incarnation: 'a'.repeat(64) });
+  const shout = await f.add('shouts/queue_' + f.uid, { authorId: foreign, title: 'Keep foreign source', text: 'Keep body', createdAt: now,
+    geography: { schemaVersion: 1, countryCode: 'CZ' }, geohash: 'u3078dx' });
+  const report = db.doc('reports/reporter_' + shout.id), q = createModerationQueueDatabase(db, { enabled: true });
+  roots.push(report);
+  await q.runTransaction(tx => tx.create(report, { reporterId: 'reporter', shoutId: shout.id, status: 'open', reason: 'Keep foreign report', createdAt: now }));
+  const caseId = moderationReportTarget(report.path, (await report.get()).data()).caseId, c = db.doc('moderationCases/' + caseId);
+  roots.push(c);
+  const jobId = 'b'.repeat(64), op = await f.add('serverOperations/' + 'c'.repeat(64), {
+    userId: foreign, authorId: foreign, completedBy: f.uid, action: 'decideModerationCase', createdAt: now,
+  });
+  await c.update({ activeDecision: jobId, appliedEffect: { actorId: f.uid, authorId: foreign, operationId: 'd'.repeat(64) } });
+  const job = await f.add('moderationCaseDecisions/' + jobId, { caseId, caseIncarnation: (await c.get()).get('incarnation'), userId: f.uid, authorId: foreign });
+  let result;
+  for (let n = 0; n < 100; n++) {
+    result = await f.run(missing, f.options, q);
+    if (result.state === 'purged') break;
+    assert.equal(result.state, 'purging', JSON.stringify(result)); f.advance(1000);
+  }
+  assert.equal(result.state, 'purged');
+  assert(!(await job.get()).exists); assert.equal((await c.get()).get('activeDecision'), undefined);
+  assert.equal((await c.get()).get('appliedEffect.actorId'), undefined);
+  assert.equal((await c.get()).get('appliedEffect.authorId'), foreign);
+  assert.equal((await c.get()).get('pendingCount'), 1);
+  assert.equal((await report.get()).get('reason'), 'Keep foreign report');
+  assert.equal((await shout.get()).get('text'), 'Keep body');
+  assert.equal((await op.get()).get('completedBy'), undefined);
+});
 
 test('capture-only preserves a legacy purge journal and its original deadline while anonymizing only the owned parent', { skip: !enabled }, async () => {
   const f = await fixture(), root = await f.add(`shouts/${randomUUID()}`, { authorId: f.uid, status: 'deleted',

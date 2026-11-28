@@ -29,8 +29,12 @@ kontaktní dohledání je omezené na admin/owner.
 Celý milník dosud není uzavřený. [Revize 27.11.2026](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md)
 potvrdila rozdíl některých privilegovaných přímých čtení při banu F-01,
 který je po úplném CI [opravený v DEV](../operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
-Neúplnost fronty nad 50 hlášení F-04 a volba Q-01 o regionální viditelnosti
-metadat zůstávají otevřené. Serverová rozhodnutí a přístup k archivnímu tělu mají
+Pro F-04 je schválená [místní oprava úplnosti fronty](../plans/MODERATION_QUEUE_COMPLETENESS.md),
+zatím vypnutá a bez DEV přechodu. Q-01 vlastník 28.11. rozhodl: způsobilá
+moderace vidí metadata a důvody globálně, s volitelným filtrem místa/geohashe.
+Výběr města využívá obalovou oblast poskytovatele a veřejný geohash; nejde
+o přesný správní polygon ani nové oprávnění. Přesný ISO filtr země/kraje
+je dostupný samostatně. Serverová rozhodnutí a přístup k archivnímu tělu mají
 samostatné regionální ochrany. Živé sankční průchody přijaté jako TestAdmin
 nejsou důkazem regionálního moderátora; tam trvají automatické testy a otevřená
 společná ruční regrese.

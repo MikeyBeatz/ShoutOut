@@ -1,5 +1,6 @@
 // Prepared server core and host declarations; no live activation.
 import { createHash } from 'node:crypto';
+import { readPendingModerationReports } from './moderation_queue.js';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { requireCallableIdentity, requireEligibleActor } from './callable_security.js';
@@ -104,7 +105,7 @@ export async function sanctionContentOperation(request, db, clock = () => new Da
       return { sanctionId: sanctionRef.id, decision: input.decision, count: input.reportIds.length };
     }
     const source = input.targetType === 'shout' ? shout : await tx.get(sourceRef);
-    const reports = input.mode === 'report' ? await tx.get(pendingContentReports(db, input)) : null;
+    const reports = input.mode === 'report' ? await readPendingModerationReports(tx, db, input, pendingContentReports(db, input)) : null;
     const managed = lifecycleReportReadsEnabled(db, reports ?? source);
     if (!managed && (!source.exists || !shout.exists || isPurgedShoutContext(shout.data()))) fail('not-found', 'The sanction source is unavailable.');
     if (managed && input.targetType === 'privateReply' && input.mode !== 'report') fail('permission-denied', 'A private reply report is required.');

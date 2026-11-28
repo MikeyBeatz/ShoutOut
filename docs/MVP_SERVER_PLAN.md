@@ -5,7 +5,9 @@ Aktuálně 28. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accoun
 šest nálezů a otevřené brány jsou v protokolu. Vlastník následně schválil
 [opravu F-01/F-02/F-06](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md), která
 je hotová po úplném CI ec371188 a ověřeném DEV přechodu dvou čtecích Functions
-a Firestore/Storage Rules. Další návrh je F-04; Q-01 před změnou oprávnění upřesnit.
+a Firestore/Storage Rules. Nyní probíhá schválený místní [F-04](plans/MODERATION_QUEUE_COMPLETENESS.md);
+Q-01 je rozhodnuté: globální metadata a důvody s geografickými filtry,
+bez rozšíření oprávnění k archivnímu obsahu či rozhodnutím.
 Společná regrese zůstává navazující prací. Níže jsou i historické výsledky příprav.
 Produkční aktivace a celková MVP regrese zůstávají otevřené.
 
@@ -59,7 +61,7 @@ Prioritní pořadí: [TODO](TODO.md). Stavy milníků se nemění přepsáním t
 | App Check/registrace | DEV web provider a ochrana obsahových callable ověřené. | Produkce, metriky/enforcement a ochrana registrace. |
 | Obsahová brána | Serverové DEV operace, timed idempotence, prostorové API/indexové writery, Home i úplné vlastní Aktivní/Expirované jsou nasazené; přímé Shout create/vote zápisy uzavřené. A0–A3/B1–B4 včetně číslovky, pohybu a finální regrese mají [uzavřenou DEV akceptaci a úklid](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete). | F-02/F-05/F-06 ze souhrnné revize, produkční kapacita a ostatní níže uvedená kritéria. |
 | Antispam | Existující serverové UID/rate limity jsou součástí obsahových operací. | Celá níže uvedená kritéria a ochrana registrace nejsou uzavřené. |
-| Moderace | Serverová rozhodnutí, odstranění, sankce/revokace a Business posuzování mají vydaný DEV průchod a audit. | F-01/F-04, Q-01, celková regrese a produkční brána. |
+| Moderace | Serverová rozhodnutí, odstranění, sankce/revokace a Business posuzování mají vydaný DEV průchod a audit; F-01 opravené a Q-01 rozhodnuté. | F-04 zatím pouze místně; celková regrese a produkční brána. |
 | Mazání účtu | DEV dokončeno: serverové fáze/purge, klient, Rules cutover, společný UI/serverový test a úklid. | Produkční aktivace pod společnou vydávací bránou. |
 | Životnost Shoutů | Společný cyklus platnost → 7 dní vlastní historie → 60 dní archivu, sdílené kopie, moderace po odstranění zdroje a omezený purge mají uzavřenou DEV akceptaci i úklid. | Produkční aktivace a společná předstartovní regrese. |
 | Push | Pozdější etapa. | Nezavádět do webového MVP bez změny rozsahu. |

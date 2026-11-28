@@ -22,6 +22,30 @@ class _ModerationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canVerifyBusiness = role.isAtLeast(AccountRole.administrator);
+    if (_useServerModerationQueue) {
+      return DefaultTabController(
+        length: canVerifyBusiness ? 3 : 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(tr(context, 'Moderace')),
+            bottom: TabBar(
+              tabs: [
+                const Tab(text: 'Hlášení'),
+                const Tab(text: 'Postihy'),
+                if (canVerifyBusiness) const Tab(text: 'Business žádosti'),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              _ServerStaffReports(role: role),
+              const _SanctionHistoryList(),
+              if (canVerifyBusiness) const _BusinessApplicationList(),
+            ],
+          ),
+        ),
+      );
+    }
     return DefaultTabController(
       length: canVerifyBusiness ? 5 : 4,
       child: Scaffold(
@@ -1507,66 +1531,68 @@ class _SanctionHistoryList extends StatelessWidget {
   const _SanctionHistoryList();
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-    stream: FirebaseFirestore.instance
-        .collection('sanctions')
-        .orderBy('createdAt', descending: true)
-        .limit(_moderationPageSize)
-        .liveSnapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return const Center(child: Text('Postihy se nepodařilo načíst.'));
-      }
-      if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      final sanctions = snapshot.data!.docs;
-      if (sanctions.isEmpty) {
-        return const Center(child: Text('Zatím nejsou zaznamenané postihy.'));
-      }
-      return ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: sanctions.length,
-        itemBuilder: (context, index) {
-          final sanction = sanctions[index];
-          final data = sanction.data();
-          final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
-          final type = switch (data['type']) {
-            'warning' => 'Varování',
-            'contentRestriction' => 'Omezení tvorby',
-            'accountBan' =>
-              data['permanent'] == true ? 'Trvalý ban' : 'Dočasný ban',
-            _ => data['type']?.toString() ?? 'Postih',
-          };
-          final validity = data['permanent'] == true
-              ? 'trvale'
-              : expiresAt == null
-              ? 'bez časového omezení'
-              : 'do ${MaterialLocalizations.of(context).formatMediumDate(expiresAt)}';
-          return Card(
-            child: ListTile(
-              leading: Icon(
-                data['type'] == 'accountBan'
-                    ? Icons.block
-                    : data['type'] == 'contentRestriction'
-                    ? Icons.edit_off_outlined
-                    : Icons.warning_amber_outlined,
-              ),
-              title: Text('$type – $validity'),
-              subtitle: Text(
-                'Uživatel: ${data['userId'] ?? ''}\n'
-                '${data['reason'] ?? ''}\n'
-                'Předchozí postihy: ${data['previousSanctionsCount'] ?? 0}',
-              ),
-              isThreeLine: true,
-            ),
-          );
-        },
-      );
-    },
-  );
+  Widget build(BuildContext context) => _useServerModerationQueue
+      ? const _PagedGlobalStaffSanctions()
+      : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('sanctions')
+              .orderBy('createdAt', descending: true)
+              .limit(_moderationPageSize)
+              .liveSnapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const Center(child: Text('Postihy se nepodařilo načíst.'));
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final sanctions = snapshot.data!.docs;
+            if (sanctions.isEmpty) {
+              return const Center(
+                child: Text('Zatím nejsou zaznamenané postihy.'),
+              );
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: sanctions.length,
+              itemBuilder: (context, index) {
+                final sanction = sanctions[index];
+                final data = sanction.data();
+                final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
+                final type = switch (data['type']) {
+                  'warning' => 'Varování',
+                  'contentRestriction' => 'Omezení tvorby',
+                  'accountBan' =>
+                    data['permanent'] == true ? 'Trvalý ban' : 'Dočasný ban',
+                  _ => data['type']?.toString() ?? 'Postih',
+                };
+                final validity = data['permanent'] == true
+                    ? 'trvale'
+                    : expiresAt == null
+                    ? 'bez časového omezení'
+                    : 'do ${MaterialLocalizations.of(context).formatMediumDate(expiresAt)}';
+                return Card(
+                  child: ListTile(
+                    leading: Icon(
+                      data['type'] == 'accountBan'
+                          ? Icons.block
+                          : data['type'] == 'contentRestriction'
+                          ? Icons.edit_off_outlined
+                          : Icons.warning_amber_outlined,
+                    ),
+                    title: Text('$type – $validity'),
+                    subtitle: Text(
+                      'Uživatel: ${data['userId'] ?? ''}\n'
+                      '${data['reason'] ?? ''}\n'
+                      'Předchozí postihy: ${data['previousSanctionsCount'] ?? 0}',
+                    ),
+                    isThreeLine: true,
+                  ),
+                );
+              },
+            );
+          },
+        );
 }
 
 class WarningHistoryPage extends StatelessWidget {

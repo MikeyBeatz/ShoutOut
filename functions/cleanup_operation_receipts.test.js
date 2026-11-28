@@ -10,6 +10,7 @@ const legacy = { userId: 'actor', action: 'createShout', createdAt: created };
 
 test('only supported, expired operation receipts qualify for cleanup', () => {
   assert.equal(receiptMayBePurged(legacy, now), true);
+  assert.equal(receiptMayBePurged({ ...legacy, action: 'decideModerationCase', keyVersion: 1, expiresAt: now }, now), true);
   assert.equal(receiptMayBePurged({ ...legacy, keyVersion: 1, expiresAt: now }, now), true);
   assert.equal(receiptMayBePurged(legacy, Timestamp.fromMillis(now.toMillis() - 1)), false);
   for (const bad of [null, {}, { ...legacy, action: 'futureUnknownOperation' },

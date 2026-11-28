@@ -297,6 +297,22 @@ class WebEnvironment {
         throw StateError('Missing Firebase configuration: $key');
       }
     }
+    if (json.containsKey('serverModerationQueue') &&
+        json['serverModerationQueue'] is! bool) {
+      throw StateError('serverModerationQueue must be a boolean.');
+    }
+    serverModerationQueue = json['serverModerationQueue'] == true;
+    if (serverModerationQueue &&
+        (name != 'dev' ||
+            key == null ||
+            !serverContentLifecycle ||
+            !serverContentSanctions ||
+            !serverContentReportDecisions ||
+            !serverPublicReportRemoval)) {
+      throw StateError(
+        'Moderation queue requires the complete checked DEV server path.',
+      );
+    }
     final project = firebase['projectId'];
     if (!RegExp(r'^[a-z][a-z0-9-]{4,28}[a-z0-9]$').hasMatch(project)) {
       throw StateError('Invalid Firebase project ID.');
@@ -394,6 +410,7 @@ class WebEnvironment {
   late final bool serverPublicReportRemoval;
   late final bool serverContentSanctions;
   late final bool serverBusinessReview;
+  late final bool serverModerationQueue;
   late final bool serverShoutDeletion;
   late final bool serverAccountDeletionPreparation;
   late final bool serverAccountDeletionFinalization;

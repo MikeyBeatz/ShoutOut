@@ -9,6 +9,7 @@ import { isPurgedShoutContext } from './shout_context.js';
 import { assertReportEvidenceRetention } from './moderation_retention.js';
 import { lifecycleEnabled, lifecycleReportReadsEnabled } from './content_lifecycle.js';
 import { resolveLifecycleReportGroup, lifecycleEvidenceReference } from './content_lifecycle_evidence.js';
+import { readPendingModerationReports } from './moderation_queue.js';
 
 const action = 'decideContentReports';
 const unavailableAction = 'resolveUnavailableContentReports';
@@ -116,7 +117,7 @@ export async function decideContentReportsOperation(request, db, clock = () => n
       return { decision: input.decision, count: input.reportIds.length };
     }
     const [source, clearance] = input.targetType === 'shout' ? [shout, await tx.get(clearanceRef)] : await tx.getAll(sourceRef, clearanceRef);
-    const reports = await tx.get(pendingContentReports(db, input));
+    const reports = await readPendingModerationReports(tx, db, input, pendingContentReports(db, input));
     const managed = lifecycleReportReadsEnabled(db, reports);
     const unavailable = !managed && unavailableRef !== null && (!source.exists || input.targetType === 'shout' && isPurgedShoutContext(shout.data()));
     const contextChild = unavailableRef !== null && input.targetType !== 'shout' && source.exists && (!shout.exists || isPurgedShoutContext(shout.data()));

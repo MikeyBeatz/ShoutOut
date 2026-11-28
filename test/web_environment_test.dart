@@ -20,6 +20,35 @@ Map<String, dynamic> gatewayFixture() => {
 };
 
 void main() {
+  test(
+    'moderation queue is off and requires the complete managed DEV stack',
+    () {
+      final config =
+          jsonDecode(File('config/dev.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(WebEnvironment.fromJson(config).serverModerationQueue, isFalse);
+      final candidate = {
+        ...config,
+        'serverModerationQueue': true,
+        'serverContentLifecycle': true,
+      };
+      expect(WebEnvironment.fromJson(candidate).serverModerationQueue, isTrue);
+      for (final patch in [
+        {'serverModerationQueue': 'true'},
+        {'serverContentLifecycle': false},
+        {'serverContentSanctions': false},
+        {'serverContentReportDecisions': false},
+        {'serverPublicReportRemoval': false},
+        {'environment': 'prod'},
+        {'appCheckSiteKey': ''},
+      ]) {
+        expect(
+          () => WebEnvironment.fromJson({...candidate, ...patch}),
+          throwsStateError,
+        );
+      }
+    },
+  );
   test('content lifecycle is off by default and rejects an invalid flag', () {
     final config =
         jsonDecode(File('config/dev.json').readAsStringSync())

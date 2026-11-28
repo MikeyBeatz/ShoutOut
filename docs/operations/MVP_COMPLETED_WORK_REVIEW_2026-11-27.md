@@ -162,6 +162,11 @@ recenter cestách bez posunu původních lhůt; ověřit i původní pending ž�
 
 ## Q-01 – produktové upřesnění před změnou oprávnění
 
+**Rozhodnuto vlastníkem 28.11.2026:** ponechat globální metadata a důvody,
+doplnit volitelný filtr města/oblasti/státu/geohashe. Oprávnění k tělu a
+rozhodnutí se nemění. [Schválený místní F-04](../plans/MODERATION_QUEUE_COMPLETENESS.md)
+je zatím vypnutý; následující odstavce zachovávají původní nález revize.
+
 Regionální moderátor dnes přímo přečte metadata hlášení z jiné země, včetně
 důvodu hlášení. Emulátor potvrdil CZ roli nad DE `privateReplyReports`.
 Archivní tělo a serverové rozhodnutí mají samostatnou geografickou kontrolu;

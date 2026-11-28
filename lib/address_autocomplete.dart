@@ -18,6 +18,9 @@ class AddressSelection {
     required this.latitude,
     required this.longitude,
     required this.placeId,
+    this.bounds,
+    this.resultType,
+    this.stateCode,
   });
 
   final String formatted;
@@ -28,6 +31,31 @@ class AddressSelection {
   final double latitude;
   final double longitude;
   final String placeId;
+  final List<double>? bounds;
+  final String? resultType, stateCode;
+
+  static List<double>? parseBounds(Object? value) {
+    final values = value is Map
+        ? [value['lon1'], value['lat1'], value['lon2'], value['lat2']]
+        : value is List
+        ? value
+        : null;
+    if (values == null ||
+        values.length != 4 ||
+        values.any((v) => v is! num || !v.isFinite)) {
+      return null;
+    }
+    final result = values.map((v) => (v as num).toDouble()).toList();
+    if (result[0].abs() > 180 ||
+        result[2].abs() > 180 ||
+        result[1] < -90 ||
+        result[3] > 90 ||
+        result[1] >= result[3] ||
+        result[0] == result[2]) {
+      return null;
+    }
+    return List.unmodifiable(result);
+  }
 
   factory AddressSelection.fromMap(Map<Object?, Object?> data) =>
       AddressSelection(
@@ -39,6 +67,9 @@ class AddressSelection {
         latitude: (data['latitude'] as num).toDouble(),
         longitude: (data['longitude'] as num).toDouble(),
         placeId: data['placeId'] as String? ?? '',
+        bounds: parseBounds(data['bounds']),
+        resultType: data['resultType'] as String?,
+        stateCode: data['stateCode'] as String?,
       );
 }
 
@@ -50,6 +81,7 @@ class AddressAutocompleteField extends StatefulWidget {
     required this.onSelected,
     this.label = 'Adresa',
     this.enabled = true,
+    this.searchType,
   });
 
   final TextEditingController controller;
@@ -57,6 +89,7 @@ class AddressAutocompleteField extends StatefulWidget {
   final ValueChanged<AddressSelection> onSelected;
   final String label;
   final bool enabled;
+  final String? searchType;
 
   @override
   State<AddressAutocompleteField> createState() =>
@@ -95,6 +128,7 @@ class _AddressAutocompleteFieldState extends State<AddressAutocompleteField> {
           'limit': '5',
           'format': 'json',
           'apiKey': _geoapifyApiKey,
+          if (widget.searchType != null) 'type': widget.searchType!,
           if (RegExp(r'^[A-Za-z]{2}$').hasMatch(widget.countryCode))
             'filter': 'countrycode:${widget.countryCode.toLowerCase()}',
         };
@@ -123,6 +157,9 @@ class _AddressAutocompleteFieldState extends State<AddressAutocompleteField> {
             latitude: (data['lat'] as num).toDouble(),
             longitude: (data['lon'] as num).toDouble(),
             placeId: data['place_id'] as String? ?? '',
+            bounds: AddressSelection.parseBounds(data['bbox']),
+            resultType: data['result_type'] as String?,
+            stateCode: data['state_code']?.toString(),
           );
         }).toList();
         if (mounted && widget.controller.text.trim() == value.trim()) {

@@ -123,9 +123,44 @@ class _StaffUserDetail extends StatefulWidget {
 
 class _StaffUserDetailState extends State<_StaffUserDetail> {
   late Future<_StaffUserData> _data = _load();
+  int _historyReload = 0;
 
   Future<_StaffUserData> _load() async {
     final firestore = FirebaseFirestore.instance;
+    if (_useServerModerationQueue) {
+      final actor = FirebaseAuth.instance.currentUser?.uid;
+      final rows = await Future.wait([
+        firestore.collection('users').doc(widget.userId).get(),
+        firestore.collection('accountRoles').doc(widget.userId).get(),
+        firestore.collection('bans').doc(widget.userId).get(),
+        firestore.collection('contentRestrictions').doc(widget.userId).get(),
+      ]);
+      final ban = rows[2].data(), restriction = rows[3].data();
+      final ids = {
+        for (final pointer in [ban, restriction])
+          if (pointer?['sanctionId'] is String)
+            pointer!['sanctionId'] as String,
+      };
+      final revocations = <String, Map<String, dynamic>>{};
+      for (final id in ids) {
+        final r = await firestore
+            .collection('sanctionRevocations')
+            .doc(id)
+            .get();
+        if (r.exists) revocations[id] = r.data()!;
+      }
+      if (actor == null || FirebaseAuth.instance.currentUser?.uid != actor) {
+        throw StateError('The signed-in account changed.');
+      }
+      return _StaffUserData(
+        profile: rows[0].data(),
+        role: AccountRole.fromData(rows[1].data()),
+        ban: ban,
+        restriction: restriction,
+        sanctions: const [],
+        revocations: revocations,
+      );
+    }
     final results = await Future.wait([
       firestore.collection('users').doc(widget.userId).get(),
       firestore.collection('accountRoles').doc(widget.userId).get(),
@@ -192,7 +227,10 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
     );
   }
 
-  void _reload() => setState(() => _data = _load());
+  void _reload() => setState(() {
+    _historyReload++;
+    _data = _load();
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -213,6 +251,39 @@ class _StaffUserDetailState extends State<_StaffUserDetail> {
           revocations: data.revocations,
           now: DateTime.now(),
         );
+        if (_useServerModerationQueue) {
+          return _PagedStaffSanctions(
+            key: ValueKey('${widget.userId}:$_historyReload'),
+            role: widget.role,
+            userId: widget.userId,
+            enforcement: enforcement,
+            onRevoked: _reload,
+            currentSanctionIds: {
+              if (data.ban?['sanctionId'] is String)
+                data.ban!['sanctionId'] as String,
+              if (data.restriction?['sanctionId'] is String)
+                data.restriction!['sanctionId'] as String,
+            },
+            header: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  data.profile?['nickname'] as String? ?? widget.userId,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                Text('UID: ${widget.userId}'),
+                Text('Role: ${_staffRoleLabel(data.role)}'),
+                const SizedBox(height: 20),
+                StaffEnforcementSummary(state: enforcement),
+                const SizedBox(height: 20),
+                Text(
+                  'Historie postihů',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+          );
+        }
         return ListView(
           padding: const EdgeInsets.all(24),
           children: [

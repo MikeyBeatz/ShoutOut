@@ -465,3 +465,13 @@ test('archived report lookup is gated by a strict boolean and App Check', () => 
   delete disabled.appCheckSiteKey;
   assert.throws(() => validateConfig({ ...disabled, serverArchivedReportLookup: true }, 'dev'));
 });
+
+test('moderation queue requires a strict boolean and the full managed DEV client', () => {
+  assert.equal(actualDev.serverModerationQueue, undefined);
+  const candidate = { ...actualDev, serverModerationQueue: true, serverContentLifecycle: true };
+  assert.doesNotThrow(() => validateConfig(candidate, 'dev'));
+  for (const patch of [
+    { serverModerationQueue: 'true' }, { serverContentLifecycle: false }, { serverContentSanctions: false },
+    { serverContentReportDecisions: false }, { serverPublicReportRemoval: false }, { environment: 'prod' }, { appCheckSiteKey: '' },
+  ]) assert.throws(() => validateConfig({ ...candidate, ...patch }, 'dev'));
+});
