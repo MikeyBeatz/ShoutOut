@@ -156,7 +156,7 @@ samostatně od Firestore. Prázdný prefix nyní znamená, že není navržen ž
 úklid starých log nebo zásah do původního obsahu.
 
 Vzorek 50 skutečných posledních HTTP běhů údržby měl 50×200, medián 0,285 s,
-p95 0,366 s a maximum 0,451 s. Padesát odpovídajících aplikačních souhrnů bylo
+p95 0,368 s (nearest-rank) a maximum 0,451 s. Padesát odpovídajících aplikačních souhrnů bylo
 checked, bez needsReview a bez aktivního retenčního dluhu. Jde o omezený vzorek
 klidného provozu, nikoli měření plného 500+500 úklidu nebo záruku 60s doběhu.
 
