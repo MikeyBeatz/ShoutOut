@@ -8,14 +8,19 @@ const spec = value => ({ queryScope: value.queryScope, fields: value.fields });
 export async function collectModerationIndexPlan(call) {
   const inventory = [];
   for (const group of new Set(moderationQueueIndexes.map(i => i.collectionGroup))) {
-    let pageToken;
+    let pageToken, pages = 0;
     do {
-      const url = new URL(`${base}/${group}/indexes?pageSize=100`);
+      if (++pages > 100) throw Error('moderation-queue-index-inventory-budget');
+      // Firestore Admin currently accepts only the default page size (0).
+      const url = new URL(`${base}/${group}/indexes`);
       if (pageToken) url.searchParams.set('pageToken', pageToken);
       const page = await call('GET', url.href);
       for (const i of page.indexes ?? []) {
-        if (!i.name.startsWith(`${base.slice(base.indexOf('/v1/') + 4)}/${group}/indexes/`)) throw Error('moderation-queue-foreign-index');
-        inventory.push({ collectionGroup: group, ...spec(i), state: i.state });
+        const prefix = base.slice(base.indexOf('/v1/') + 4);
+        if (!i.name.startsWith(prefix + '/')) throw Error('moderation-queue-foreign-index');
+        // The live Admin API can return the project's complete index list.
+        // Filter by the returned resource name, never assume the URL filtered it.
+        if (i.name.startsWith(`${prefix}/${group}/indexes/`)) inventory.push({ collectionGroup: group, ...spec(i), state: i.state });
       }
       pageToken = page.nextPageToken;
       if (inventory.length > 1000) throw Error('moderation-queue-index-inventory-budget');

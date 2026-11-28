@@ -29,8 +29,10 @@ test('selective index operator resumes exactly four approved creates, never TTL 
   const installed = [], submitted = [];
   const call = async (method, url, body) => {
     const u = new URL(url), collection = u.pathname.split('/').at(-2);
-    if (method === 'GET') return { indexes: installed.filter(i => i.collectionGroup === collection).map(({ collectionGroup, ...i }) => ({ ...i,
-      name: `projects/${project}/databases/(default)/collectionGroups/${collectionGroup}/indexes/${i.id}` })) };
+    if (method === 'GET') { assert.equal(u.searchParams.has('pageSize'), false, 'Admin index list accepts the default size only'); return { indexes: [...installed.map(({ collectionGroup, ...i }) => ({ ...i,
+      name: `projects/${project}/databases/(default)/collectionGroups/${collectionGroup}/indexes/${i.id}` })),
+      { name: `projects/${project}/databases/(default)/collectionGroups/unrelated/indexes/keep`, state: 'READY', queryScope: 'COLLECTION', fields: [] }] };
+    }
     assert.equal(method, 'POST'); submitted.push(body); installed.push({ ...body, collectionGroup: collection, state: 'CREATING', id: String(installed.length) });
     return { name: 'operation-' + installed.length };
   };

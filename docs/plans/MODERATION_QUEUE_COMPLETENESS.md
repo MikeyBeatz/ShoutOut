@@ -307,3 +307,13 @@ klient fronty **10/10**, Functions lint a Flutter analyze čisté. Vývojové
 nástroje před závěrečným doplněním dvou kontraktů prošly 146/146. Úplné CI
 aktivačního commitu a skutečné nasazení ještě nejsou doložené. Původní
 váhy metrik se nemění; živou akceptaci nepředjímáme.
+
+Čtecí předkontrola skutečného Admin API potvrdila dvě odlišnosti od původního
+mocku: seznam indexů přijímá jen výchozí velikost stránky a může vracet
+indexy celého projektu i při dotazu na jednu kolekci. Nástroj proto velikost
+neposílá a vybírá zdroje podle skutečného resource name; regrese vrací i cizí
+projektové kolekce. Opravená živá inventura navrhuje přesně 4 vytvoření,
+bez TTL či jiných indexových změn, digest indexové části
+`6dc849f7038d63ae384e2fc6b6e4922dbe153d7f3dce733d5e82c54a08fe3f10`.
+Zatím stále 0 živých zápisů. Původní CI 46137204776 bylo záměrně zrušeno,
+aby se jako release důkaz použilo pouze úplné CI opraveného zdroje.
