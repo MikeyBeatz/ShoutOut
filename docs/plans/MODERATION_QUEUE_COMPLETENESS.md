@@ -13,9 +13,9 @@ moderaci. Filtr místa může vybrat město/oblast/stát nebo geohash. Filtr nen
 oprávnění: otevření archivního těla a rozhodnutí dál kontroluje dnešní roli
 a přidělený geografický rozsah. Chybějící doložená geografie se neodhaduje.
 
-Vše výchozí vypnuté a pouze emulátor. Bez nasazení, živých dat/účtů, služeb,
-Scheduler změn, nových poskytovatelů/klíčů nebo změny retenčních lhůt.
-Konkrétní DEV převod a prostředky se připraví podle skutečných výsledků.
+Tento původní místní rozsah byl výchozí vypnutý a pouze v emulátoru, bez
+živých dat/účtů a změn retence. Následný vlastníkem schválený DEV přechod
+má [samostatný skutečný výsledek](#dev-rollout-results); klientský pilot čeká.
 
 ## Kontrakt
 
@@ -228,16 +228,16 @@ pending žádost zůstávají mimo tento úsek. Pilot je schválen na jeden 24h
 Shout, 50 komentářů, jednu soukromou odpověď a 53 hlášení (52 případů).
 Další fixture ani nové provozní meze tento souhlas nepokrývá.
 
-Místní vývoj probíhá ve větvi `feature/moderation-queue-completeness`.
-Nové zapojení není dosud vydané; [aktuální DEV](../PROJECT_STATUS.md)
-zůstává na dokončené opravě F-01/F-02/F-06.
+Původní místní vývoj proběhl ve větvi `feature/moderation-queue-completeness`.
+Po něm zapojení ještě nebylo vydané; následný skutečný DEV přechod je níže
+a v [aktuálním stavu](../PROJECT_STATUS.md).
 
 <a id="dev-implementation"></a>
 
 ## Provozní balík F-04 – příprava 28.11.2026
 
-Práce pokračuje ve větvi `feature/moderation-queue-dev`. Tento záznam
-rozlišuje připravený kód a skutečné nasazení; nové živé zápisy zatím neproběhly.
+Práce pokračuje ve větvi `feature/moderation-queue-dev`. V okamžiku této
+přípravy ještě neproběhly živé zápisy; výsledek následného přechodu je níže.
 Čtecí inventura DEV: 0 hlášení všech tří typů, 0 případů/journalů, žádný
 queue control; 1 původní Shout a 3 původní žádosti o smazání. Nejde o souhlas
 s úklidem těchto původních zdrojů. Firestore Standard, europe-west3.
@@ -317,3 +317,79 @@ bez TTL či jiných indexových změn, digest indexové části
 `6dc849f7038d63ae384e2fc6b6e4922dbe153d7f3dce733d5e82c54a08fe3f10`.
 Zatím stále 0 živých zápisů. Původní CI 46137204776 bylo záměrně zrušeno,
 aby se jako release důkaz použilo pouze úplné CI opraveného zdroje.
+
+<a id="dev-rollout-results"></a>
+
+## Ověřování DEV přechodu 28.11.2026
+
+Zdroj `9df1b1bddfb4a6766a41c61732e8366a7eceadd6` má úspěšné
+[úplné CI 46137813905](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46137813905).
+Prošly mimo jiné nové F-04 testy 34/34 bez skipů, vývojové nástroje 148/148,
+Functions jednotkové testy 239 pass/947 skip/0 fail (oddělené emulátorové
+matice jsou spuštěné zvlášť), Rules/server 500/500, archiv 194/194,
+účtový purge 156/156 a Storage 16/16. Analýza, formát, klientská sada,
+browserové regrese i DEV debug archive sestavení jsou úspěšné.
+
+Nasazování používá samostatný čistý release checkout tohoto commitu, nikoli
+pracovní strom s právě dopisovaným výsledkem. Připravený release web má
+69 souborů, aktivní archiv/právo 2026-11-27 a zachovanou hudbu hry. Web byl
+sestavený nad 0de6530; mezi tímto a 9df1b1b se změnil pouze indexový
+operátor, jeho test a dokumentace. Shoda všech aplikačních vstupů, konfigurace
+a skutečných výstupních hashů je doložená zvlášť, opakované sestavení
+nezměněného aplikačního stromu se neprovádělo.
+
+Živý instalační plán má digest
+`23b4c93909e9d16336996ea48ee06399c6a736ac302a701926a43dc3f68c8964`.
+Čerstvá inventura znovu 0 hlášení, neinstalovaný control/projekce. Čtyři
+schválené indexy jsou **READY**, bez TTL a bez ostatních indexových mutací.
+Následovalo kontrolované building, zdrojová kontrola a skutečné odstavení
+všech starých revizí osmi writerů. Převod/audit provedl čtyři kroky,
+0 prohlédnutých/0 převzatých reportů, všechny tři kolekce prošel; aktivace
+skončila s control **active /revize 2**, inkarnace
+`4cc5219a76bc3f85ba300c1e4f2c13ae03a1a114dc809e0b7126490926854c5d`.
+
+**Skutečné DEV nasazení a nezávislé ověření jsou dokončené:**
+
+- 34 ACTIVE Functions, pouze schválených 8 aktualizovaných +3 nové. Všechny
+  skutečné GCS zdrojové ZIPy vybraných 11 porovnané s čistým artefaktem.
+  Nové case callables 0/1, concurrency1, 256 MiB, 15 s; původní prostředky,
+  service accounts a IAM shodné s inventurou. Dva účtové workery revize
+  `00020-riq`/`00020-jab`, cleanup `00012-fed`. Zbylých 23 Functions
+  beze změny (21 zdroj 5435855, getFeedPage/getSavedShouts zdroj ec371188).
+- 100% provozu na nových revizích, všechny dřívější revize skutečně RETIRED:
+  createContentReport 6, decideContentReports 4, veřejné/soukromé odstranění
+  a sanctionContent po 3, oba účtové workery po 19, cleanup 11. Nejde jen
+  o počet sekund po nasazení či chybějící metriky.
+- Hosting **69b6045055062848**, oba DEV hostname. **68 zveřejněných souborů**
+  ověřených skutečným HTTP obsahem a SHA256, další čtyři kontroly hlavních
+  souborů obou domén. Místní 69. soubor `.last_build_id` je úmyslně skrytý
+  a standardním Hosting ignore vynechaný. Archiv/právo 2026-11-27, hra
+  a hudba zachované; `serverModerationQueue` zapnutý pouze v archive DEV buildu.
+- Všechny tři skutečné case indexové dotazy a historie uživatele prošly
+  živým SDK; výsledky jsou prázdné. Není to důkaz živého stránkování 50+2.
+  Tři nové callable endpointy skutečně odmítly anonymní požadavek
+  **401 /UNAUTHENTICATED**. Úspěšný klientský Auth/App Check ještě nepředjímáme.
+- Nová revize skutečného cleanup workeru doložená přirozenými minutovými
+  běhy 11:36–11:42 UTC: `checked`, queue `checked`, 0 exam/0 delete,
+  `needsReview=false`, původní fáze idle. Nový Scheduler nevznikl,
+  dva původní minutové joby jsou nezměněné. Reálná údržba tedy není pouze
+  emulátorový výsledek.
+- Firestore Rules **8cbacbed-2456-48f7-9a2f-46bb66e8481b** a Storage
+  **fb4848ff-2673-482e-84df-f1c1caa74c9f** beze změny, potvrzená shoda
+  zdrojových hashů s předchozí opravou. Původní 1 Shout a 3 účtové žádosti
+  zachované, 0 reportů/případů, 0 nových Auth účtů či pilotních dat.
+
+První souběžná závěrečná čtecí kontrola narazila na limit Logging API 429
+a jedno obnovení CLI přihlášení. Po odstupu a sekvenčním opakování prošlo
+úplné zdrojové/IAM/revizní ověření i živé dotazy a logy; nové přihlášení,
+změna oprávnění ani obcházení limitu nebyly nutné. Compute API zůstává
+vypnuté, CLI pouze použilo již existující výchozí service account.
+
+**Otevřený poslední krok:** dostupný TestModerator, potom teprve založit
+schválený manifest/fixture 1 Shout +50 komentářů +1 soukromá odpověď
++53 hlášení; ověřit 50→52, přesné počty, rozhodnutí, filtr a otevřený klient
+při pauze/návratu. Úklid přes vymezené writery a přesné SDK verze včetně
+read klíčů; účtová data, kvóty a 7denní potvrzení zachovat. Živá akceptace
+ani celý mvp-17 zatím nejsou uzavřené. Automatická kontrola ovládání Chrome
+pro tento turn zastavila vstup kvůli neověřené URL; žádné nové připojení
+se nepoužilo k jejímu obejití. Konzolový skript pro pilota není potřeba.

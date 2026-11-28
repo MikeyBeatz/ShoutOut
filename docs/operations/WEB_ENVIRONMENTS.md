@@ -3,15 +3,20 @@
 ## Současný ověřený DEV stav – 28. listopadu 2026
 
 Aktuální tabulku vrstev určuje [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
-Po [opravě F-01/F-02/F-06](MVP_AUTHORITY_READ_FIX_2026-11-28.md#dokončené-dev-nasazení-a-ověření)
-zůstává Hosting **14a0f588585839e2**, 31 ACTIVE Functions a dva minutové joby.
-Web/27 Functions jsou ze zdroje 5435855, dva účtové workery bd81e98;
-getFeedPage/getSavedShouts nově ec371188, úplné CI 46117687063 success,
-revize 00010-nay /00004-biv. Firestore Rules jsou **8cbacbed-2456-48f7-9a2f-46bb66e8481b**,
-Storage **fb4848ff-2673-482e-84df-f1c1caa74c9f**; hashe a oba cloudové zdrojové
-archivy ověřené. PublicUntil index 7c6a122, prostředky a ostatních 29 Functions beze změny.
-Archiv a právní verze 2026-11-27 jsou aktivní, pilot i vymezený úklid uzavřené.
-Oprava nasazena pouze do DEV; bez nových dat/účtů, produkce/main se neměnily.
+Po [DEV přechodu F-04](../plans/MODERATION_QUEUE_COMPLETENESS.md#dev-rollout-results)
+je Hosting **69b6045055062848**, 34 ACTIVE Functions a dva původní minutové joby.
+Web a 11 vybraných Functions mají zdroj **9df1b1bddfb4a6766a41c61732e8366a7eceadd6**,
+úplné CI **46137813905 success**. Čtyři indexy READY, převod/audit prázdné
+fronty hotový, control active revize 2. Skutečné zdroje/IAM/prostředky,
+odstavení starých revizí, všech 68 veřejných webových souborů, živé SDK
+dotazy a anonymní 401 nových endpointů ověřené. Přirozené nové běhy údržby
+jsou checked bez needsReview. Klientský pilot 50→52 a úklid čekají, fixture není.
+Ostatních 23 Functions nezměněných: 21 zdroj 5435855, getFeedPage/getSavedShouts
+zdroj ec371188, revize 00010-nay /00004-biv. Firestore Rules jsou stále
+**8cbacbed-2456-48f7-9a2f-46bb66e8481b**, Storage
+**fb4848ff-2673-482e-84df-f1c1caa74c9f**, hashe ověřené.
+Archiv/právo 2026-11-27 i vydaná hra s hudbou zachované. Původní 1 Shout
+a 3 žádosti zachované, žádné Auth změny; produkce/main se neměnily.
 
 ## Historické checkpointy DEV
 

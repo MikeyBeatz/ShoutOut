@@ -42,15 +42,15 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
 změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
 
-1. Dokončit již schválený DEV přechod
-   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-implementation).
-   Místní úsek 65c5b0b má úplné CI 46131153276 success; nové cesty jsou
-   vypnuté. Q-01 rozhodnuté: globální metadata
+1. Dokončit pouze klientský pilot a úklid
+   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-rollout-results).
+   Zdroj 9df1b1b má úplné CI 46137813905 success; čtyři indexy READY,
+   tři nové +osm aktualizovaných Functions, audit/control active 2 a DEV web
+   jsou skutečně nasazené a automaticky ověřené. Q-01: globální metadata
    s filtrem města/oblasti/státu/geohashe; oprávnění k tělům a zásahům zachovaná.
-   Připravené jsou wrappery, živý operátor/pilot a kompatibilní návrat;
-   po úplném CI přesného zdroje čtyři indexy, osm stávajících +tři nové
-   Functions, řízený převod/audit a DEV web. Živé zápisy ještě neproběhly.
-   Fixture založit až při dostupném klientu, ruční kontrolu seskupit na konec.
+   Zatím nevznikla fixture ani Auth. Teprve při dostupném TestModerator založit
+   schválených 52 případů, ověřit 50→52/počty/rozhodnutí/filtr/pauzu a návrat,
+   potom vymezený úklid. Celá společná regrese moderace zůstává otevřená.
 2. Dokončit zbývající již otevřenou moderaci a Business:
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.
