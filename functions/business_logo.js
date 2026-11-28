@@ -129,12 +129,26 @@ export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled =
     if (!(p.createdAt instanceof Timestamp) || !(p.expiresAt instanceof Timestamp) || p.expiresAt.toMillis() !== p.createdAt.toMillis() + operationRetryWindowMillis ||
         !['prepared', 'published'].includes(p.phase) || (p.path && !validLogoPath(uid, p.path)) || (p.oldPath && !validLogoPath(uid, p.oldPath))) fail('failed-precondition', 'Invalid logo cleanup state.');
     const retired = deletion.exists || !user.exists || stamp(user.createTime) !== p.incarnation || profile.get('accountStatus') === 'deleted';
+    // Already-published user files present at account deletion stay under the
+    // original account retention. The existing account purge owns that prefix.
+    if (p.phase === 'published' && deletion.exists) return { p, accountPurge: true };
     if (p.phase === 'prepared' && !retired && clock().getTime() < p.expiresAt.toMillis()) return null;
     const path = p.phase === 'published' ? p.oldPath : p.path;
     if (path && (user.get('businessLogoPath') === path || profile.get('businessLogoPath') === path)) fail('failed-precondition', 'Cleanup cannot remove the current logo.');
     return { p, path, expected: p.phase === 'published' ? p.oldGeneration : null };
   });
   const chosen = await read(); if (!chosen) return { status: 'idle' };
+  if (chosen.accountPurge) {
+    await db.runTransaction(async tx => {
+      const [state, deletion] = await tx.getAll(r.state, db.doc(`accountDeletionRequests/${uid}`));
+      if (deletion.exists && state.get('pending.operationId') === chosen.p.operationId) {
+        // Account purge owns the files; do not rediscover this idle work every
+        // minute throughout the original retention. Keep the durable pointer.
+        tx.update(r.state, { cleanupAt: FieldValue.delete() });
+      }
+    });
+    return { status: 'account-purge' };
+  }
   const existing = chosen.path ? await storage.inspect(uid, chosen.path) : null;
   if (existing && (chosen.p.phase === 'published' ? existing.generation !== chosen.expected : existing.digest !== chosen.p.digest)) fail('failed-precondition', 'The retired logo generation changed.');
   if (existing) await storage.remove(uid, chosen.path, existing.generation, async () => {

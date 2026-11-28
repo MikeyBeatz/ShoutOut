@@ -11,7 +11,7 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 Serverové dekódování PNG/řízení náhrady/úklid a klientský adaptér jsou
 připravené; všechny přepínače a Rules brány zůstávají false, bez wrapperu,
 nasazení nebo živých dat. Cíleně prošlo 5 obrazových/Storage unit testů,
-16 emulátorových testů bez skipů, 42 Flutter testů, analyze/lint/format,
+17 emulátorových testů bez skipů, 42 Flutter testů, analyze/lint/format,
 38 nástrojových testů včetně artefaktů. Úplné CI tohoto zdroje ještě čeká.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;

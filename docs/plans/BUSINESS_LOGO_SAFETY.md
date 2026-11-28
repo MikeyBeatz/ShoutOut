@@ -93,6 +93,9 @@ nutné inventarizovat a vyřešit před tvrzením, že celý bucket dodržuje dv
 Stávající purge již pokrývá celý businessProfiles podstrom, serverOperations
 podle userId a původní Storage prefix. Cesty ani původní 60denní account
 termín se nemění. Dosavadní revokace tokenů/úklid účtu se nenahrazují.
+Pokud při smazání účtu existuje publikovaná verze s nedokončeným úklidem,
+nová logo údržba ji ponechá původní účtové retenci/purge, včetně starého
+publikovaného souboru. Nezveřejněný opuštěný upload není touto výjimkou aktivován.
 
 ## Kandidátní oprávnění
 
@@ -138,7 +141,7 @@ nutné doložit před DEV. Nový scheduler ani globální scan účtů nejsou po
 
 ## Ověření a další krok
 
-Místně prošlo **5/5** unit testů obrazu/Storage adaptéru, **16/16**
+Místně prošlo **5/5** unit testů obrazu/Storage adaptéru, **17/17**
 Firestore/Storage emulátorových testů bez skipů, **42/42** Flutter testů
 včetně původního editoru a konfigurace, Flutter analyze, formát a Functions
 lint. Nástrojová sada webového prostředí/artefaktů **38/38**; doplněná

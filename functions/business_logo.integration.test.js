@@ -102,6 +102,15 @@ test('retiring an unfinished account incarnation cannot resurrect an old request
   f.storage.afterPut = null; await assert.rejects(update(f.request(), db, f.storage, f.options), e => e.code === 'already-exists');
   assert.equal(f.storage.puts, 1);
 });
+
+test('published files present at account deletion keep the original account retention and purge ownership', { skip: !enabled }, async t => {
+  const f = await fixture(t); await update(f.request(), db, f.storage, f.options); f.storage.failRemove = true;
+  await assert.rejects(update(f.request('replacement'), db, f.storage, f.options)); f.storage.failRemove = false;
+  await db.doc(`accountDeletionRequests/${f.uid}`).set({ userId: f.uid, status: 'pending' });
+  assert.deepEqual(await clean(db, f.storage, f.uid, f.options), { status: 'account-purge' }); assert.equal(f.storage.files.size, 2);
+  assert.equal((await f.state.get()).get('pending.phase'), 'published');
+  assert.equal((await f.state.get()).get('cleanupAt'), undefined);
+});
 test('current-object or changed-generation cleanup fails closed; account purge already covers private state, receipts and original logo paths', { skip: !enabled }, async t => {
   const f = await fixture(t); await update(f.request(), db, f.storage, f.options); f.storage.failRemove = true;
   await assert.rejects(update(f.request('two'), db, f.storage, f.options)); f.storage.failRemove = false;
