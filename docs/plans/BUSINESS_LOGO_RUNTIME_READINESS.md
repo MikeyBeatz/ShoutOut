@@ -177,10 +177,12 @@ znovu porovná; změněné reference, objekty, cizí override nebo control jej z
 
 <a id="dev-rollout-proposal"></a>
 
-## Navržený společný DEV přechod – čeká na schválení
+## Schválený společný DEV přechod – příprava před CI
 
-Základ e63837d má úplné CI 46164824318. Následující implementace a živý
-přechod jsou nový rozsah; nic z tohoto oddílu se inventurou neaktivovalo.
+Vlastník navázal na konkrétní návrh: „pokračuj v práci dokud nebudeš potřebovat
+mojí asistenci“. Tím schválil celý popsaný DEV úsek. Základ e63837d má úplné
+CI 46164824318; nová implementace potřebuje vlastní úplné CI před jakýmkoli
+nasazením. Živý control/index/Functions/Rules/web se zatím nezměnily.
 
 ### Společná příprava a rozpočet
 
@@ -264,4 +266,47 @@ jej i údržbový adaptér dál vylučují. Příprava nezakládá control, inde
 Důkazy doplňují otevřené business-endtoend/business-authority-final.
 Jejich celé Business a produkční podmínky splněné nejsou, proto se nepřidávají
 zpětné body ani nové váhy. Navazující čtecí inventura je doložená výše;
-připravený společný DEV přechod nyní čeká na schválení. Ruční test teď není potřebný.
+společný DEV přechod je nyní schválený a probíhá jeho příprava. Ruční test teď není potřebný.
+
+
+## Aktivační příprava před vydáním
+
+- [Společný handler](../../functions/receipt_cleanup_handler.js) zachovává
+  dosavadní retenci a moderační reaper; logo připustí až poté, při čase pod 45 s.
+  [Unit regrese](../../functions/receipt_cleanup_handler.test.js) ověřuje hranice
+  44 999/45 000/59 000 ms, pořadí, pauzu, vypnutí a bezpečné souhrny.
+- [Profil nasazení](../../functions/business_logo_deployment.js) aktivuje
+  výhradně přesný DEV projekt. V emulátoru je výchozí vypnutý; aktivní testy
+  volí zapojení explicitně. Rollback zachová serverového klienta, ale vypne
+  nové logo mutace/údržbu. Produkční profil se nemění.
+- [Release](../../tools/business_logo_dev_release.mjs) materializuje jen
+  cleanupOperationReceipts a updateBusinessLogo, kandidátní Rules a klienta
+  se zachovanou archivací/moderací. Nové Rules mají kanonické LF řádky.
+- [Operátor](../../tools/business_logo_dev.mjs) před připojením ověřuje čistý
+  přesný zdroj a úplné CI, před zápisem projekt/digest a čerstvou inventuru.
+  Instalace controlu je idempotentní; aktivace/opakování ověřují revizi.
+- [Cloudový důkaz](../../tools/business_logo_dev_cloud.mjs) kontroluje skutečné
+  zdrojové ZIPy, prostředky/IAM, nezměněné ostatní Functions/plánovače,
+  odstavení starých revizí workeru, obsah obou Rules a všechny veřejné soubory
+  webu. Samotný JSON s boolean „verified“ pro aktivaci nestačí: důkaz se znovu
+  porovná se skutečným prostředím.
+- [Pilot](../../tools/business_logo_pilot.mjs) odmítá prepare bez dostupného
+  TestBusiness klienta. Vytvoří jen místní syntetické PNG; cloudové uploady
+  proběhnou klientem. Kontroluje původní avatar, dvě přesné nové barevné PNG,
+  receipts/7 dní, scope generace a očekávané HTTP412 bez smazání při kompenzaci.
+
+Předběžné porovnání správně zastavilo záměnu místního vypnutého prototypu
+Rules za dnešní nasazený soubor: cloudové Rules ještě neobsahují jeho pomocné
+funkce. Byl zafixován a opět skutečně přečten přesný schválený předchůdce:
+Firestore SHA256 5b33f52df1832fd5d14890d0e77a76fb96866830ba8afeaf4bcf2c80a52e97f1,
+Storage SHA256 d9c230499a65d2b4efb6572ac27c08e78316d4992e46ccf11f657c46cb53102c.
+Rozdíly od dnešního živého zdroje jsou právě doplněné logo kontroly a brána;
+nejde o jinou změnu oprávnění. Předběžná kontrola po tomto upřesnění prošla
+bez cloudového zápisu.
+
+Místně prošlo 23 emulátorových logo/Rules/údržbových testů bez skipů,
+155 nástrojových testů a Functions lint. Samostatný unit běh Functions má
+248 pass, 967 skip (emulátorové testy v tomto běhu nejsou zapnuté); tyto skipy
+se nevydávají za ověření. Nové společné/pilotní testy jsou zahrnuté do úplného CI.
+Aktuálně ještě neexistuje úspěšné úplné CI nového aktivačního commitu ani
+živé nasazení F-03. Původní e63837d/46164824318 nové změny nedokládá.

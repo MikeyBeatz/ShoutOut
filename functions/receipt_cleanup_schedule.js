@@ -11,7 +11,7 @@ export const cleanupOperationReceipts = onSchedule(retentionScheduleOptions, asy
   const result = await runScheduledRetention(getFirestore());
   const summary = retentionLogSummary(result);
   // Never log receipt IDs, user IDs, content or persisted scan cursors.
-  const log = result.state === 'interrupted' || Object.values(result.phases ?? {}).some(phase => phase.needsReview)
+  const log = result.state === 'interrupted' || result.logo?.needsReview || Object.values(result.phases ?? {}).some(phase => phase.needsReview)
     ? logger.warn : logger.info;
   log('retention-maintenance', summary);
 });

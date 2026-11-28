@@ -3,9 +3,10 @@ import { performance } from 'node:perf_hooks';
 import { Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { cleanupBusinessLogoBatch, updateBusinessLogoOperation } from './business_logo.js';
+import { businessLogoDeploymentProfile } from './business_logo_deployment.js';
 
-// Prepared only. Neither this module nor the host joins an active deployment.
-export const businessLogoConfiguration = Object.freeze({ enabled: false });
+// The committed DEV profile still requires an installed, active private control.
+export const businessLogoConfiguration = businessLogoDeploymentProfile();
 export const businessLogoCallableOptions = Object.freeze({
   region: 'europe-west3', enforceAppCheck: true, minInstances: 0,
   maxInstances: 1, concurrency: 1, memory: '256MiB', timeoutSeconds: 15,

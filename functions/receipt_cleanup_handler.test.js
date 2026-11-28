@@ -44,3 +44,39 @@ test('retention logs exclude source identifiers, cursors and arbitrary result fi
   assert.equal(summary.receipts.needsContinuation, true); assert.equal(summary.reads.needsReview, true);
   assert.equal(JSON.stringify(summary).includes('secret'), false);
 });
+
+
+test('shared maintenance preserves order and defers logo at the fifteen-second deadline reserve', async () => {
+  for (const elapsed of [0, 44999, 45000, 59000]) {
+    const calls = []; let now = 0;
+    const result = await runScheduledRetention({ projectId: 'shoutout-dev-46c81' }, {
+      logoEnabled: true, moderationQueueEnabled: true, monotonic: () => now,
+      runRetention: async () => { calls.push('retention'); now = elapsed / 2; return { state: 'checked' }; },
+      runModeration: async () => { calls.push('queue'); now = elapsed; return { examined: 0 }; },
+      runLogo: async (_, options) => { assert.equal(options.enabled, true); calls.push('logo'); return { status: 'checked', examined: 1 }; },
+    });
+    assert.deepEqual(calls, elapsed < 45000 ? ['retention', 'queue', 'logo'] : ['retention', 'queue']);
+    assert.equal(result.logo.status, elapsed < 45000 ? 'checked' : 'deferred-budget');
+  }
+});
+test('failed/paused parent maintenance and disabled logo never construct a Storage client or skip the queue', async () => {
+  for (const state of ['off', 'paused', 'interrupted']) {
+    const calls = [];
+    await runScheduledRetention({ projectId: 'shoutout-dev-46c81' }, { logoEnabled: true, moderationQueueEnabled: true,
+      runRetention: async () => ({ state }), runModeration: async () => { calls.push('queue'); return {}; },
+      runLogo: async () => assert.fail('no logo after unconfirmed parent maintenance') });
+    assert.deepEqual(calls, state === 'interrupted' ? ['queue'] : []);
+  }
+  const result = await runScheduledRetention({ projectId: 'shoutout-dev-46c81' }, { logoEnabled: false, moderationQueueEnabled: false,
+    runRetention: async () => ({ state: 'checked' }), runLogo: async () => assert.fail('disabled') });
+  assert.equal(result.logo, undefined);
+});
+test('logo errors preserve earlier successful phases and log only aggregate progress', async () => {
+  const result = await runScheduledRetention({ projectId: 'shoutout-dev-46c81' }, { logoEnabled: true, moderationQueueEnabled: false,
+    runRetention: async () => ({ state: 'checked', phases: { receipts: { state: 'complete' } } }),
+    runLogo: async () => { throw Object.assign(Error('private path'), { code: 'failed-precondition' }); } });
+  assert.equal(result.state, 'interrupted'); assert.equal(result.phases.receipts.state, 'complete');
+  assert.equal(result.logo.needsReview, true);
+  const summary = retentionLogSummary({ ...result, logo: { ...result.logo, cursor: 'private', userId: 'private' } });
+  assert.equal(JSON.stringify(summary).includes('private'), false);
+});

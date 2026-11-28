@@ -16,13 +16,13 @@ export function planBusinessLogoIndex(projectId, snapshot) {
   const config = snapshot.data.indexConfig, indexes = config.indexes ?? [];
   if (!Array.isArray(indexes)) throw Error('logo-index-shape');
   const shape = indexes.map(({ queryScope, fields }) => ({ queryScope, fields }));
-  const same = canonical(shape) === canonical(expected);
+  const same = canonical(shape.map(canonical).sort()) === canonical(expected.map(canonical).sort());
   if (config.usesAncestorConfig !== true && !same) throw Error('logo-index-foreign-override');
   const plan = { schemaVersion: 1, projectId, database: '(default)', changesTTL: false,
     before: structuredClone(snapshot.data),
     actions: same && config.usesAncestorConfig !== true ? [] : [{
       method: 'PATCH', resource: name, updateMask: 'indexConfig',
-      body: { name, indexConfig: { indexes: expected } },
+      body: { name, indexConfig: { indexes: structuredClone(expected) } },
     }],
     ready: same && config.usesAncestorConfig !== true && indexes.every(i => i.state === 'READY'),
   };

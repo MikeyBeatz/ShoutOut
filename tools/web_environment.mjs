@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { archiveDeploymentProfile, archiveDevDeploymentPhase } from '../functions/archive_deployment.js';
 import { moderationQueueDeploymentProfile } from '../functions/moderation_queue_deployment.js';
+import { businessLogoDeploymentProfile } from '../functions/business_logo_deployment.js';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const devProject = 'shoutout-dev-46c81';
@@ -19,7 +20,8 @@ export function archiveWebConfig(config, phase = archiveDevDeploymentPhase) {
   const profile = archiveDeploymentProfile({ GCLOUD_PROJECT: devProject }, phase);
   const result = { ...config, archiveDisclosureEnabled: true, legalVersion: '2026-11-27',
     serverContentLifecycle: profile.reader, serverArchiveIdentity: profile.reader,
-    serverModerationQueue: profile.reader && moderationQueueDeploymentProfile({ GCLOUD_PROJECT: devProject }).enabled };
+    serverModerationQueue: profile.reader && moderationQueueDeploymentProfile({ GCLOUD_PROJECT: devProject }).enabled,
+    serverBusinessLogo: profile.reader && businessLogoDeploymentProfile({ GCLOUD_PROJECT: devProject }).clientEnabled };
   validateConfig(result, 'dev'); return result;
 }
 

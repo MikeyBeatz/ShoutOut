@@ -14,6 +14,9 @@ import { accountPurgeStages } from './account_purge_policy.js';
 import { planBusinessLogoOrphans, cleanupBusinessLogoOrphans } from './business_logo_orphans.js';
 import { createBusinessLogoRuntime } from './business_logo_runtime.js';
 import { runBusinessLogoMaintenance } from './business_logo_cleanup_adapter.js';
+import { runScheduledRetention, retentionLogSummary } from './receipt_cleanup_handler.js';
+import { installBusinessLogoControl, changeBusinessLogoMode } from '../tools/business_logo_dev.mjs';
+import { logoHash } from '../tools/business_logo_dev_release.mjs';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'business-logo-local') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (db) { await db.terminate(); await deleteApp(app); } });
@@ -257,4 +260,40 @@ test('lease loss during cleanup cannot delete an object or advance the old check
   await assert.rejects(createBusinessLogoRuntime(db, f.storage, { enabled: true, clock: late }).maintenance(), e => e.code === 'aborted');
   assert.equal(f.storage.files.size, 1); assert.equal((await ref.get()).get('after'), undefined);
   assert.equal((await ref.get()).get('owner'), 'replacement-worker');
+});
+
+
+test('shared real retention pipeline drains published logo cleanup and honors its own pause without touching current pixels', { skip: !enabled }, async t => {
+  const f = await fixture(t), control = db.doc('businessLogoMaintenance/current'), parent = db.doc('maintenanceState/retentionControl');
+  const previous = (await db.collection('maintenanceState').get()).docs;
+  t.after(async () => { await control.delete(); for (const row of (await db.collection('maintenanceState').get()).docs) if (!previous.some(d=>d.id===row.id)) await row.ref.delete(); });
+  await parent.set({ v: 1, mode: 'active', revision: 1 });
+  await control.set({ schemaVersion: 1, mode: 'active', revision: 1 });
+  await update(f.request(), db, f.storage, f.options); f.storage.failRemove = true;
+  await assert.rejects(update(f.request('replacement'), db, f.storage, f.options)); f.storage.failRemove = false;
+  const current = (await f.user.get()).get('businessLogoPath'); assert.equal(f.storage.files.size, 2);
+  const options = { logoEnabled: true, moderationQueueEnabled: false, clock: f.options.clock,
+    runLogo: (db, options) => runBusinessLogoMaintenance(db, () => f.storage, options) };
+  const result = await runScheduledRetention(db, options);
+  assert.equal(result.state, 'checked'); assert.equal(result.logo.cleaned, 1); assert.equal(f.storage.files.size, 1); assert(f.storage.files.has(current));
+  assert.equal(JSON.stringify(retentionLogSummary(result)).includes(f.uid), false);
+  await control.update({ mode: 'paused', revision: 2 });
+  assert.equal((await runScheduledRetention(db, options)).logo.status, 'idle');
+  await parent.update({ mode: 'paused', revision: 2 });
+  assert.equal((await runScheduledRetention(db, options)).logo, undefined);
+  assert(f.storage.files.has(current));
+});
+test('operator control install and revision transitions survive lost replies and reject foreign plans', { skip: !enabled }, async t => {
+  const ref = db.doc('businessLogoMaintenance/current'); t.after(() => ref.delete());
+  const body = { schemaVersion: 1, projectId: 'shoutout-dev-46c81', kind: 'business-logo-dev', sourceCommit: 'a'.repeat(40),
+    inventory: { files: [], control: null, users: [], profiles: [], actor: { id: 'fixture' } }, indexes: { actions: [], changesTTL: false } };
+  const plan = { ...body, digest: logoHash(body) };
+  assert.equal((await installBusinessLogoControl(db, plan)).installed, true);
+  assert.equal((await installBusinessLogoControl(db, plan)).installed, false);
+  assert.deepEqual(await changeBusinessLogoMode(db, plan, 'off', 1, 'active'), { mode: 'active', revision: 2 });
+  assert.deepEqual(await changeBusinessLogoMode(db, plan, 'off', 1, 'active'), { mode: 'active', revision: 2 });
+  await changeBusinessLogoMode(db, plan, 'active', 2, 'paused');
+  await assert.rejects(changeBusinessLogoMode(db, plan, 'active', 2, 'active'));
+  const other = { ...body, sourceCommit: 'b'.repeat(40) }, foreign = { ...other, digest: logoHash(other) };
+  await assert.rejects(installBusinessLogoControl(db, foreign), /foreign-control/);
 });

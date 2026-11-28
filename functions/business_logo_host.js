@@ -7,6 +7,6 @@ import { businessLogoConfiguration, businessLogoCallableOptions, createBusinessL
 if (!getApps().length) initializeApp();
 export const updateBusinessLogo = onCall(businessLogoCallableOptions, request => {
   if (!businessLogoConfiguration.enabled) return createBusinessLogoRuntime(null, null).update(request);
-  const db = getFirestore(), bucket = getStorage().bucket();
+  const db = getFirestore(), bucket = getStorage().bucket(`${db.projectId}.firebasestorage.app`);
   return createBusinessLogoRuntime(db, businessLogoStorage(bucket, db.projectId), businessLogoConfiguration).update(request);
 });

@@ -21,11 +21,14 @@ včetně celé dosavadní regrese a web buildu. Cíleně prošlo 21 emulátorov�
 34 Functions, 2 původní minutové úlohy a vydaný web/Rules beze změny.
 Vzorek 50 běhů údržby: 50×200, medián 0,285 s, maximum 0,451 s; nejde o plnou zátěž.
 TestBusiness je připravený pro pilot bez nového Auth účtu nebo Shoutu.
-[Společný DEV návrh](plans/BUSINESS_LOGO_RUNTIME_READINESS.md#dev-rollout-proposal)
-čeká na nový souhlas: nové zapojení společného rozpočtu, 1 nová +1 stávající
-Function, 1 index, control, Rules/web a nejvýše 2 syntetická loga s návratem
-původního avataru. Zatím žádné nasazení, nové role, klíče, Auth ani fixture.
-Business milník/MVP nejsou celé uzavřené; předávací stav `build/business-logo-handoff.json`.
+**Společný DEV přechod je schválený a připravuje se.**
+[Konkrétní rozsah a aktivační příprava](plans/BUSINESS_LOGO_RUNTIME_READINESS.md#dev-rollout-proposal):
+společný 45s admission limit/5s logo úsek, 1 nová +1 stávající Function,
+1 index, control, Rules/web a nejvýše 2 syntetická loga s návratem avataru.
+Místně prošlo 23 emulátorových a 155 nástrojových testů, Functions lint;
+nový aktivační zdroj ještě musí projít úplným CI. Dosavadní DEV je nezměněné,
+bez nových rolí, klíčů, Auth nebo fixture. Pilot teprve při dostupném klientu.
+Business milník/MVP nejsou celé uzavřené; stav `build/business-logo-handoff.json`.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;
 nepřipravuje se serverové dokazování adresy/přítomnosti firmy.

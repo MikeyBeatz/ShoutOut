@@ -12,7 +12,7 @@ export const moderationQueueWriterFunctions = Object.freeze(['createContentRepor
 export function verifyModerationQueueRevisionDrain(projectId, before, after, services, revisions) {
   return verifyRevisionDrain(projectId, before, after, services, revisions, moderationQueueWriterFunctions);
 }
-function verifyRevisionDrain(projectId, before, after, services, revisions, names) {
+export function verifyRevisionDrain(projectId, before, after, services, revisions, names) {
   if(projectId!=='shoutout-dev-46c81') throw new Error('b4-drain-dev-required');
   const result=[];
   for(const name of names){
