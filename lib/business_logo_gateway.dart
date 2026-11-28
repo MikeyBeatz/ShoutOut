@@ -69,6 +69,14 @@ class BusinessLogoGateway {
     Map<String, String>? avatar,
   }) async {
     if (currentUserId() != uid) return Future.error(_changed());
+    // Validate before encoding or durable storage, including non-editor callers.
+    if (png != null && (png.isEmpty || png.length > 2 * 1024 * 1024) ||
+        avatar != null && jsonEncode(avatar).length > 1024) {
+      throw FirebaseFunctionsException(
+        code: 'invalid-argument',
+        message: 'Invalid local logo payload.',
+      );
+    }
     final candidate = BusinessLogoRequest(
       userId: uid,
       key: '',

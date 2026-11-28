@@ -9,6 +9,27 @@ import 'package:shoutout/timed_operation_gateway.dart';
 
 void main() {
   test(
+    'oversized PNG is rejected before encoding, persistence or transport',
+    () async {
+      final store = MemoryBusinessLogoPendingStore();
+      var calls = 0;
+      final gateway = BusinessLogoGateway(
+        currentUserId: () => 'a',
+        store: store,
+        send: (_) async {
+          calls++;
+        },
+      );
+      await expectLater(
+        gateway.update('a', png: Uint8List(2 * 1024 * 1024 + 1)),
+        throwsA(isA<FirebaseFunctionsException>()),
+      );
+      expect(await store.read('a'), isNull);
+      expect(calls, 0);
+    },
+  );
+
+  test(
     'freezes bytes and keeps the original request after an uncertain reply',
     () async {
       final sent = <BusinessLogoRequest>[];

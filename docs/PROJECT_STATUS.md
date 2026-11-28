@@ -11,7 +11,7 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 IndexedDB zachová PNG i původní časovaný požadavek, kvóta je 10 nových
 uploadů/hodinu na účet. Samostatný wrapper, údržbový adaptér, klient i Rules
 jsou vypnuté, bez zapojení do aktivních Functions nebo nasazení.
-Cíleně prošlo 21 emulátorových testů a společná klientská sada 53 testů;
+Cíleně prošlo 21 emulátorových testů a společná klientská sada 54 testů;
 úplné CI nového zdroje se teprve provede. Původní balík 3bcea52 má
 [úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387),
 což nedokládá nové změny. Žádné živé zápisy/inventura, Auth účty, klíče,
