@@ -6,17 +6,19 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 
 ## Další konkrétní krok
 
-**Navazující místní balík F-03 je připravený**, větev
-`feature/business-logo-local`. [Recovery, provozní profil a přesný další plán](plans/BUSINESS_LOGO_RUNTIME_READINESS.md).
+**Navazující místní balík F-03 je dokončený**, větev
+`feature/business-logo-local`. [Recovery, provozní profil, ověření a další plán](plans/BUSINESS_LOGO_RUNTIME_READINESS.md).
 IndexedDB zachová PNG i původní časovaný požadavek, kvóta je 10 nových
 uploadů/hodinu na účet. Samostatný wrapper, údržbový adaptér, klient i Rules
 jsou vypnuté, bez zapojení do aktivních Functions nebo nasazení.
-Cíleně prošlo 21 emulátorových testů a společná klientská sada 54 testů;
-úplné CI nového zdroje se teprve provede. Původní balík 3bcea52 má
-[úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387),
-což nedokládá nové změny. Žádné živé zápisy/inventura, Auth účty, klíče,
-změny plánovačů či prostředků. Následuje CI a teprve konkrétní samostatně
-schválená DEV inventura/přechod; Business milník ani MVP nejsou celé uzavřené.
+Zdroj **e63837d904e16d961a8cfeaa5adb00ac477b92c4** má
+[úspěšné úplné CI 46164824318](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46164824318),
+včetně celé dosavadní regrese a web buildu. Cíleně prošlo 21 emulátorových,
+54 klientských, 2 Chrome IndexedDB a 150 nástrojových testů, analyze/lint/format.
+Žádné živé zápisy/inventura, Auth účty, klíče, změny plánovačů či prostředků.
+Následuje samostatně schválená čtecí DEV inventura a přesný přechod s rozpočtem
+společné úlohy, indexem, návratem a pilotem. Business milník ani MVP tím
+nejsou celé uzavřené. Předávací stav: `build/business-logo-handoff.json`.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;
 nepřipravuje se serverové dokazování adresy/přítomnosti firmy.

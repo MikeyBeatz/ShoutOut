@@ -50,9 +50,9 @@ obsah odstraněný, původní obsah/žádosti a 8 sedmidenních potvrzení zacho
 Celá společná regrese moderace zůstává otevřená; pevné váhy se nemění.
 
 1. Dokončit zbývající již otevřenou moderaci a Business:
-   [F-03: trvalá obnova/kvóta/provozní adaptér jsou místně připravené](plans/BUSINESS_LOGO_RUNTIME_READINESS.md).
-   Dokončit úplné CI nového zdroje; nic se nyní nenasazuje. Poté společný
-   konkrétní DEV plán s inventurou starých objektů, časovým rozpočtem úlohy,
+   [F-03: trvalá obnova/kvóta/provozní adaptér jsou místně hotové](plans/BUSINESS_LOGO_RUNTIME_READINESS.md).
+   Úplné CI 46164824318 zdroje e63837d je úspěšné; nic se nyní nenasazuje.
+   Následuje samostatně schválená čtecí inventura a společný DEV plán s rozpočtem úlohy,
    indexem, kompatibilním návratem a pilotem. Odděleně geografie mvp-13.
    F-05 je produktově upřesněné: firma si volí
    přesnou adresu nebo oblast/město sama, bez dalšího ověřování; funkční

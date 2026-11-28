@@ -8,9 +8,10 @@ zapojení a úklid, indexový/návratový plán, regrese, dokumentace a push/úp
 Původní sedmidenní okno a účtová retence se nemění. Bez nasazení, živé
 inventury/zápisů, Auth účtů nebo nových klíčů/služeb.
 
-Implementace a cílené testy jsou připravené; úplné CI přesného nového zdroje
-se teprve provede. Původní [úspěšné CI](BUSINESS_LOGO_SAFETY.md)
-nenahrazuje ověření tohoto navazujícího balíku. DEV zůstává nezměněné.
+Místní balík je dokončený. Zdroj **e63837d904e16d961a8cfeaa5adb00ac477b92c4**
+má [úspěšné úplné CI 46164824318](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46164824318)
+včetně browser/klient/server/Rules/archiv/purge/Storage regresí a web buildu.
+DEV zůstává nezměněné; tento úspěch nedokládá živý rollout ani cloudový závod.
 
 ## Klient a souběžné karty
 
@@ -121,3 +122,23 @@ ani fakturaci: čísla nezahrnují index-entry reads, GCS API/přenosy a cloudov
    nejsou povolené. Ruční průchod seskupit na konec.
 
 Celé Business MVP, jeho nasazení a produkční akceptace zůstávají otevřené.
+
+
+## Ověření dokončeného místního balíku
+
+Cíleně prošlo 21/21 Firestore/Storage emulátorových testů bez skipů,
+54/54 společných Flutter testů gateway/časování/editoru/konfigurace,
+2/2 testy ve skutečném Chrome IndexedDB a 150/150 nástrojových testů.
+Flutter analyze, Functions lint a formát jsou čisté. Úplné CI přesného
+zdroje e63837d výše navíc potvrdilo celou dosavadní společnou regresi a web build.
+
+První běh 46164591135 zdroje 6ddb068 byl záměrně zrušen pro doplnění
+kontroly velikosti PNG ještě před místním uložením. Není úspěšným důkazem;
+finální zdroj tuto kontrolu i regresní test obsahuje. Samostatný logo host
+má úplný připravený balíček, ale všechny aktivní content/account artefakty
+jej i údržbový adaptér dál vylučují. Příprava nezakládá control, index nebo endpoint.
+
+Důkazy doplňují otevřené business-endtoend/business-authority-final.
+Jejich celé Business a produkční podmínky splněné nejsou, proto se nepřidávají
+zpětné body ani nové váhy. Další krok je samostatně schválená čtecí DEV
+inventura a podle ní jeden konkrétní přechod/pilot. Ruční test teď není potřebný.
