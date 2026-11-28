@@ -27,7 +27,8 @@ přímé klientské verze nejsou početně omezené. To je F-03 z
 [revize](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#f-03--střední-priorita-business-loga-nemají-omezený-počet-platných-objektů).
 
 Nové jádro v [business_logo.js](../../functions/business_logo.js) se
-neimportuje do žádného vydávaného wrapperu a vyžaduje explicitní `enabled`.
+neimportuje do aktivního content/account balíčku a vyžaduje explicitní `enabled`.
+Samostatný připravený wrapper i údržbový adaptér jsou výchozí vypnuté.
 `serverBusinessLogo` je false v obou konfiguracích; nativní define má
 výchozí false. Ověřený DEV zdroj a Rules zůstávají podle PROJECT_STATUS.
 Místní soubory Rules mají novou statickou bránu **false**;
@@ -131,13 +132,12 @@ kódování, cloudovou latenci či souběžné transakční opakování.
 Čtení před každým citlivým krokem chrání aktuální ban/mazání/inkarnaci;
 nejde o práci vykonávanou při každém zobrazení loga ve feedu.
 
-Pro budoucí aktivaci navrhuji jako výchozí podklad **10 nových náhrad za
-hodinu na účet** a údržbu po nejvýše jedné stránce ve stávajícím workeru;
-potvrzené opakování bez nového objektu se nepočítá jako nová náhrada.
-To je návrh ke schválení, nikoli již implementovaný či živý limit.
-Provozní rozpočet/četnost, kratší opuštění, prostředky, index pro
-collection-group `logoState.cleanupAt` bez TTL a recovery klienta je
-nutné doložit před DEV. Nový scheduler ani globální scan účtů nejsou potřebné.
+Navazující schválený místní balík již implementuje **10 nových uploadů
+v klouzavé hodině na účet**, včetně obrazově neplatných pokusů. Stejný
+rezervovaný/potvrzený požadavek kvótu znovu nečerpá; odstranění loga ji
+nečerpá. Vše zůstává vypnuté. [Recovery, nové měření a DEV plán](BUSINESS_LOGO_RUNTIME_READINESS.md).
+Kratší opuštění se nezavádí: původní sedmidenní okno je zachované.
+Nový scheduler ani globální scan účtů nejsou potřebné.
 
 ## Ověření a další krok
 
@@ -178,6 +178,7 @@ generaci; preconditions dál posílá do GCS. Lokální model ověřuje závod,
 skutečný emulátor SDK roundtrip a chybnou generaci. Cloudový důkaz bude
 součástí případného samostatně schváleného DEV pilotu, nikoli tohoto balíku.
 
-Další krok: revize připraveného provozního zapojení, recovery prohlížeče,
-úplné CI a konkrétní DEV plán včetně starých objektů, limitu a návratu.
+Navazující recovery/provozní balík a jeho přesný aktuální stav jsou v
+[readiness plánu](BUSINESS_LOGO_RUNTIME_READINESS.md); starší CI výše
+dokládá pouze původní zdroj, ne následné změny.
 Nyní se nic nenasazuje; tato příprava neuzavírá celý Business milník ani MVP.

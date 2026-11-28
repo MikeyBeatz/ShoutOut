@@ -52,78 +52,108 @@ function matching(pending, operationId, fingerprint, incarnation) {
   if (!pending || pending.operationId !== operationId || pending.fingerprint !== fingerprint || pending.incarnation !== incarnation) fail('already-exists', 'Retry the existing logo operation first.');
 }
 
-export async function updateBusinessLogoOperation(request, db, storage, { enabled = false, clock = () => new Date() } = {}) {
+export async function updateBusinessLogoOperation(request, db, storage, { enabled = false, clock = () => new Date(), guardTransaction = async () => {} } = {}) {
   if (enabled !== true) fail('failed-precondition', 'Business logo processing is disabled.');
   const identity = requireCallableIdentity(request), input = validateLogoRequest(request.data), uid = identity.uid;
   if (uid !== input.expectedUserId) fail('unauthenticated', 'The signed-in account changed.');
   const r = refs(db, uid), operationId = hash(`${uid}\n${action}\n${input.idempotencyKey}`), receiptRef = db.doc(`serverOperations/${operationId}`);
-  const inspect = () => db.runTransaction(async tx => {
-    const date = clock(), { actor, incarnation } = await eligible(tx, db, request, date);
+  const eligibility = async (tx, date) => { await guardTransaction(tx); return eligible(tx, db, request, date); };
+  const inspect = ({ reserve = false } = {}) => db.runTransaction(async tx => {
+    const date = clock(), { actor, incarnation } = await eligibility(tx, date);
     const [receipt, state] = await tx.getAll(receiptRef, r.state);
     const retention = receiptRetentionFields(input.idempotencyKey, Timestamp.fromDate(date), receipt.data());
     if (receipt.exists) {
       if (receipt.get('fingerprint') !== input.fingerprint || receipt.get('incarnation') !== incarnation) fail('already-exists', 'The logo request changed.');
-      if (receipt.get('result.status') === 'cancelled') fail('failed-precondition', 'The original logo operation was cancelled.');
-      return { complete: receipt.get('result'), pending: state.get('pending') ?? null, incarnation };
+      if (receipt.get('result.status') === 'cancelled') fail('failed-precondition', 'logo-operation-cancelled');
+      if (receipt.get('result.status') === 'rejected') fail('invalid-argument', 'logo-image-rejected');
+      if (receipt.get('result.status') === 'complete') return { complete: receipt.get('result'), pending: state.get('pending') ?? null, incarnation };
+      if (receipt.get('result.status') !== 'reserved') fail('failed-precondition', 'Invalid logo receipt.');
     }
     const pending = state.get('pending');
     if (pending && pending.phase !== 'published') matching(pending, operationId, input.fingerprint, incarnation);
+    // Admission is part of the existing first eligibility transaction: no
+    // second account read roundtrip. Invalid decodes consume a new upload slot;
+    // identical reserved/confirmed retries never consume another slot.
+    if (reserve && !receipt.exists && pending?.phase !== 'published') {
+      const now = Timestamp.fromDate(date);
+      if (input.mode === 'replace') {
+        const quota = await tx.get(db.doc(`businessProfiles/${uid}/logoState/quota`));
+        const raw = quota.get('attempts') ?? [];
+        if (!Array.isArray(raw) || raw.length > 10 || raw.some(t => !(t instanceof Timestamp) || t.toMillis() > date.getTime())) fail('failed-precondition', 'Invalid logo quota.');
+        const recent = raw.filter(t => t.toMillis() > date.getTime() - 3600000);
+        if (recent.length >= 10) fail('resource-exhausted', 'logo-upload-quota');
+        tx.set(db.doc(`businessProfiles/${uid}/logoState/quota`), { attempts: [...recent, now] });
+      }
+      tx.create(receiptRef, { action, userId: uid, incarnation, fingerprint: input.fingerprint, idempotencyKey: input.idempotencyKey,
+        createdAt: now, ...retention, result: { status: 'reserved' } });
+    }
     return { pending: pending ?? null, incarnation, actor, retention };
   });
-  let first = await inspect();
+  let first = await inspect({ reserve: true });
   if (first.pending?.phase === 'published') {
-    await cleanupBusinessLogoOperation(db, storage, uid, { enabled, clock });
-    first = await inspect();
+    await cleanupBusinessLogoOperation(db, storage, uid, { enabled, clock, guardTransaction });
+    first = await inspect({ reserve: true });
   }
   if (first.complete) return first.complete;
-  const png = input.bytes ? await normalizeBusinessLogo(input.bytes) : null;
+  let png;
+  try { png = input.bytes ? await normalizeBusinessLogo(input.bytes) : null; }
+  catch (error) {
+    if (error.code === 'invalid-argument') await db.runTransaction(async tx => {
+      await guardTransaction(tx);
+      const receipt = await tx.get(receiptRef);
+      if (receipt.get('result.status') === 'reserved') tx.update(receiptRef, { result: { status: 'rejected' } });
+    });
+    throw error;
+  }
   const oldPath = first.actor.profile.businessLogoPath ?? null;
   if (oldPath && !validLogoPath(uid, oldPath)) fail('failed-precondition', 'The previous logo requires review.');
   const old = oldPath ? await storage.inspect(uid, oldPath) : null;
   const pending = await db.runTransaction(async tx => {
-    const date = clock(), { actor, incarnation } = await eligible(tx, db, request, date), now = Timestamp.fromDate(date);
+    const date = clock(), { actor, incarnation } = await eligibility(tx, date), now = Timestamp.fromDate(date);
     const [state, receipt] = await tx.getAll(r.state, receiptRef);
     receiptRetentionFields(input.idempotencyKey, now, receipt.data());
-    if (receipt.exists) return null;
+    if (receipt.exists && receipt.get('result.status') !== 'reserved') return null;
     if (state.get('pending')) { matching(state.get('pending'), operationId, input.fingerprint, incarnation); return state.get('pending'); }
     if ((actor.profile.businessLogoPath ?? null) !== oldPath) fail('aborted', 'The previous logo changed.');
     const version = Math.max(date.getTime(), (state.get('version') ?? 0) + 1, (actor.profile.businessLogoVersion ?? 0) + 1);
     if (!Number.isSafeInteger(version) || version <= 0) fail('failed-precondition', 'Invalid logo version.');
     const p = { operationId, fingerprint: input.fingerprint, incarnation, phase: 'prepared', mode: input.mode,
       version, path: png ? `businessLogos/${uid}/logo-${version}.png` : null, digest: png ? logoDigest(png) : null,
-      oldPath, oldGeneration: old?.generation ?? null, createdAt: now, expiresAt: Timestamp.fromMillis(now.toMillis() + operationRetryWindowMillis) };
+      oldPath, oldGeneration: old?.generation ?? null, createdAt: receipt.get('createdAt'), expiresAt: receipt.get('expiresAt') };
     tx.set(r.state, { version, pending: p, cleanupAt: p.expiresAt }); return p;
   });
   if (!pending) return (await inspect()).complete;
   const guard = async () => { const current = await inspect(); if (!current.complete) matching(current.pending, operationId, input.fingerprint, current.incarnation); };
   const object = pending.phase === 'prepared' && png ? await storage.put(uid, pending.path, png, guard) : null;
   const result = await db.runTransaction(async tx => {
-    const date = clock(), { actor, incarnation } = await eligible(tx, db, request, date), now = Timestamp.fromDate(date);
+    const date = clock(), { actor, incarnation } = await eligibility(tx, date), now = Timestamp.fromDate(date);
     const [receipt, state] = await tx.getAll(receiptRef, r.state);
     const retention = receiptRetentionFields(input.idempotencyKey, now, receipt.data());
-    if (receipt.exists) return receipt.get('result');
+    if (receipt.exists && receipt.get('result.status') === 'complete') return receipt.get('result');
+    if (receipt.get('result.status') !== 'reserved') fail('failed-precondition', 'logo-operation-cancelled');
     const p = state.get('pending'); matching(p, operationId, input.fingerprint, incarnation);
     if ((actor.profile.businessLogoPath ?? null) !== p.oldPath || p.phase !== 'prepared') fail('failed-precondition', 'The profile changed during logo processing.');
     const patch = p.path ? { businessLogoPath: p.path, businessLogoVersion: p.version } :
       { businessLogoPath: FieldValue.delete(), businessLogoVersion: FieldValue.delete(), ...(input.avatar ?? {}) };
     tx.update(r.user, patch); tx.update(r.public, patch);
     const done = { status: 'complete', path: p.path, version: p.path ? p.version : null };
-    tx.create(receiptRef, { action, userId: uid, incarnation, fingerprint: input.fingerprint, idempotencyKey: input.idempotencyKey, createdAt: now, ...retention, result: done });
+    tx.update(receiptRef, { ...retention, result: done });
     tx.update(r.state, { pending: { ...p, phase: 'published', generation: object?.generation ?? null }, cleanupAt: now });
     return done;
   });
   // Failure here leaves the committed logo and a durable cleanup pointer. Never
   // delete the newly published object to compensate a lost client response.
-  await cleanupBusinessLogoOperation(db, storage, uid, { enabled, clock });
+  await cleanupBusinessLogoOperation(db, storage, uid, { enabled, clock, guardTransaction });
   return result;
 }
 
 // Exact-account, bounded maintenance adapter; no global scan or live schedule.
-export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled = false, clock = () => new Date() } = {}) {
+export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled = false, clock = () => new Date(), guardTransaction = async () => {} } = {}) {
   if (!enabled) return { status: 'disabled' };
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) throw Error('invalid-logo-cleanup-user');
   const r = refs(db, uid);
   const read = () => db.runTransaction(async tx => {
+    await guardTransaction(tx);
     const [state, user, profile, deletion] = await tx.getAll(r.state, r.user, r.public, db.doc(`accountDeletionRequests/${uid}`));
     const p = state.get('pending'); if (!p) return null;
     if (!(p.createdAt instanceof Timestamp) || !(p.expiresAt instanceof Timestamp) || p.expiresAt.toMillis() !== p.createdAt.toMillis() + operationRetryWindowMillis ||
@@ -140,6 +170,7 @@ export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled =
   const chosen = await read(); if (!chosen) return { status: 'idle' };
   if (chosen.accountPurge) {
     await db.runTransaction(async tx => {
+      await guardTransaction(tx);
       const [state, deletion] = await tx.getAll(r.state, db.doc(`accountDeletionRequests/${uid}`));
       if (deletion.exists && state.get('pending.operationId') === chosen.p.operationId) {
         // Account purge owns the files; do not rediscover this idle work every
@@ -156,15 +187,17 @@ export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled =
     if (!current || current.p.operationId !== chosen.p.operationId || current.path !== chosen.path) fail('aborted', 'The logo cleanup changed.');
   });
   await db.runTransaction(async tx => {
+    await guardTransaction(tx);
     const receiptRef = db.doc(`serverOperations/${chosen.p.operationId}`);
     const [state, receipt] = await tx.getAll(r.state, receiptRef);
     if (state.get('pending.operationId') === chosen.p.operationId) {
       // Remember a retired in-flight operation within its original window. A
       // recreated account/profile must not reuse its key after orphan cleanup.
       // Never recreate a receipt after the original retry deadline.
-      if (chosen.p.phase === 'prepared' && !receipt.exists && clock().getTime() < chosen.p.expiresAt.toMillis()) {
-        tx.create(receiptRef, { action, userId: uid, incarnation: chosen.p.incarnation, fingerprint: chosen.p.fingerprint,
+      if (chosen.p.phase === 'prepared' && clock().getTime() < chosen.p.expiresAt.toMillis()) {
+        if (!receipt.exists) tx.create(receiptRef, { action, userId: uid, incarnation: chosen.p.incarnation, fingerprint: chosen.p.fingerprint,
           keyVersion: 1, createdAt: chosen.p.createdAt, expiresAt: chosen.p.expiresAt, result: { status: 'cancelled' } });
+        else if (receipt.get('result.status') === 'reserved') tx.update(receiptRef, { result: { status: 'cancelled' } });
       }
       tx.update(r.state, { pending: null, cleanupAt: FieldValue.delete() });
     }
@@ -175,7 +208,7 @@ export async function cleanupBusinessLogoOperation(db, storage, uid, { enabled =
 // Optional bounded discovery for a future existing worker. It is not installed
 // into any live wrapper. The caller persists the returned checkpoint; invalid
 // rows are reported rather than creating an unbounded first-page loop.
-export async function cleanupBusinessLogoBatch(db, storage, { enabled = false, clock = () => new Date(), limit = 50, after = null } = {}) {
+export async function cleanupBusinessLogoBatch(db, storage, { enabled = false, clock = () => new Date(), limit = 50, after = null, guardTransaction = async () => {} } = {}) {
   if (!enabled) return { status: 'disabled' };
   const parts = typeof after?.path === 'string' ? after.path.split('/') : [];
   if (!Number.isInteger(limit) || limit < 1 || limit > 50 || after !== null &&
@@ -188,7 +221,7 @@ export async function cleanupBusinessLogoBatch(db, storage, { enabled = false, c
   for (const row of page.docs) {
     const match = /^businessProfiles\/([A-Za-z0-9_-]{1,128})\/logoState\/current$/.exec(row.ref.path);
     if (!match) { needsReview.push(row.ref.path); continue; }
-    try { if ((await cleanupBusinessLogoOperation(db, storage, match[1], { enabled, clock })).status === 'cleaned') cleaned++; }
+    try { if ((await cleanupBusinessLogoOperation(db, storage, match[1], { enabled, clock, guardTransaction })).status === 'cleaned') cleaned++; }
     catch (error) { if (error.code === 'failed-precondition') needsReview.push(row.ref.path); else throw error; }
   }
   const last = page.docs.at(-1);

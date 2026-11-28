@@ -12,6 +12,7 @@ import 'deletion_write_policy.dart';
 import 'l10n/text.dart';
 import 'timed_operation_gateway.dart';
 import 'read_tracking_controller.dart';
+import 'business_logo_session.dart';
 
 final _deletionRuns = <String, Future<AccountDeletionOutcome?>>{};
 void _logAccountDeletionFailure(String stage, Object error) => debugPrint(
@@ -173,6 +174,7 @@ Future<AccountDeletionOutcome?> _requestAccountDeletion(
         onIntentConfirmed: () async {
           feedDeltaRuntime?.eraseAccount(user.uid);
           await readSessions.eraseAccount(user.uid);
+          await erasePendingBusinessLogo(user.uid);
         },
         finalizeIntent: policy.finalization
             ? () async =>

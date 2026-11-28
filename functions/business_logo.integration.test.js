@@ -12,6 +12,8 @@ import { operationTestKey } from './test_helpers.js';
 import { receiptMayBePurged } from './cleanup_operation_receipts.js';
 import { accountPurgeStages } from './account_purge_policy.js';
 import { planBusinessLogoOrphans, cleanupBusinessLogoOrphans } from './business_logo_orphans.js';
+import { createBusinessLogoRuntime } from './business_logo_runtime.js';
+import { runBusinessLogoMaintenance } from './business_logo_cleanup_adapter.js';
 const enabled = process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080';
 const app = enabled ? initializeApp({ projectId: 'shoutout-rules-test' }, 'business-logo-local') : null, db = app ? getFirestore(app) : null;
 after(async () => { if (db) { await db.terminate(); await deleteApp(app); } });
@@ -61,7 +63,7 @@ test('lost acknowledgement after the Firestore commit replays the receipt withou
     if (key === 'runTransaction') return async fn => {
       let published = false;
       const result = await target.runTransaction(tx => fn(new Proxy(tx, { get(real, method) {
-        if (method === 'create') return (ref, data) => { if (ref.parent.id === 'serverOperations') published = true; return real.create(ref, data); };
+        if (method === 'update') return (ref, data) => { if (ref.parent.id === 'serverOperations' && data.result?.status === 'complete') published = true; return real.update(ref, data); };
         return typeof real[method] === 'function' ? real[method].bind(real) : real[method];
       } })));
       if (published && lose) { lose = false; throw Error('lost-commit-reply'); } return result;
@@ -183,4 +185,76 @@ test('measure actual SDK document operations for first publish, retry, replaceme
   assert.equal(f.storage.peak, 2);
   log('BUSINESS_LOGO_MEASURE ' + JSON.stringify({ ...result, pngBytes: bytes.length, requestJsonBytes: Buffer.byteLength(JSON.stringify(f.request().data)), peakObjects: f.storage.peak,
     scope: 'SDK document attempts and injected Storage writes; excludes GCS operations, index billing, wire encoding and cloud latency' }));
+});
+
+
+test('ten new uploads per rolling hour across devices; invalid image retries are terminal and removals remain available', { skip: !enabled }, async t => {
+  const f = await fixture(t), bad = n => ({ ...f.request(`bad-${n}`), data: { ...f.request(`bad-${n}`).data, pngBase64: 'AQID' } });
+  const failures = await Promise.allSettled(Array.from({ length: 10 }, (_, n) => update(bad(n), db, f.storage, f.options)));
+  assert(failures.every(r => r.status === 'rejected' && r.reason.code === 'invalid-argument'));
+  const quota = db.doc(`businessProfiles/${f.uid}/logoState/quota`);
+  assert.equal((await quota.get()).get('attempts').length, 10);
+  await assert.rejects(update(bad(0), db, f.storage, f.options), e => e.code === 'invalid-argument' && e.message === 'logo-image-rejected');
+  await assert.rejects(update(f.request('eleven'), db, f.storage, f.options), e => e.code === 'resource-exhausted');
+  assert.equal(f.storage.puts, 0);
+  await update(f.request('remove', 'remove'), db, f.storage, f.options);
+  assert.equal((await quota.get()).get('attempts').length, 10);
+  await update(f.request('after-hour'), db, f.storage, { ...f.options, clock: () => new Date(f.now.getTime() + 3600000) });
+  assert.equal((await quota.get()).get('attempts').length, 1);
+});
+
+test('runtime defaults off, validates control, fences a pause during upload and safely resumes the original request', { skip: !enabled }, async t => {
+  assert.deepEqual(await runBusinessLogoMaintenance(null, () => { throw Error('must not create storage'); }), { status: 'disabled', examined: 0 });
+  await assert.rejects(createBusinessLogoRuntime(null, null).update({}), e => e.code === 'failed-precondition');
+  const f = await fixture(t), ref = db.doc('businessLogoMaintenance/current');
+  t.after(() => ref.delete());
+  const runtime = createBusinessLogoRuntime(db, f.storage, f.options);
+  await assert.rejects(runtime.update(f.request()), e => e.code === 'failed-precondition');
+  await ref.set({ schemaVersion: 1, mode: 'active', revision: 1 });
+  f.storage.afterPut = async () => ref.update({ mode: 'paused', revision: 2 });
+  await assert.rejects(runtime.update(f.request()), e => e.code === 'failed-precondition');
+  assert.equal((await f.user.get()).get('businessLogoPath'), undefined);
+  assert.equal((await runtime.maintenance()).status, 'idle');
+  f.storage.afterPut = null; await ref.update({ mode: 'active', revision: 3 });
+  await runtime.update(f.request()); assert.equal(f.storage.puts, 1);
+  const before = (await ref.get()).updateTime;
+  const empty = await runtime.maintenance(); assert.equal(empty.examined, 0);
+  assert(before.isEqual((await ref.get()).updateTime));
+});
+
+test('worker checkpoint survives restart, excludes a concurrent lease and retains review after malformed work', { skip: !enabled }, async t => {
+  const f = await fixture(t), ref = db.doc('businessLogoMaintenance/current');
+  t.after(() => ref.delete());
+  const badRoot = db.doc(`businessProfiles/a-${f.uid}`), bad = badRoot.collection('logoState').doc('current');
+  t.after(() => db.recursiveDelete(badRoot));
+  f.storage.afterPut = async () => { throw Error('storage reply lost'); };
+  await assert.rejects(update(f.request(), db, f.storage, f.options));
+  const late = () => new Date(f.now.getTime() + 7 * 86400000);
+  await bad.set({ cleanupAt: Timestamp.fromDate(late()), pending: { phase: 'broken' } });
+  await ref.set({ schemaVersion: 1, mode: 'active', revision: 1 });
+  // Permit exactly one row, then expire the between-transaction soft budget.
+  let tick = 0;
+  const limited = createBusinessLogoRuntime(db, f.storage, { enabled: true, clock: late, monotonic: () => tick++ < 2 ? 0 : 5001 });
+  const first = await limited.maintenance(); assert.equal(first.examined, 1); assert.equal(first.needsContinuation, true);
+  assert((await ref.get()).get('after'));
+  await ref.update({ owner: 'another', leaseUntil: Timestamp.fromMillis(late().getTime() + 120000) });
+  assert.equal((await createBusinessLogoRuntime(db, f.storage, { enabled: true, clock: late }).maintenance()).status, 'idle');
+  await ref.update({ leaseUntil: Timestamp.fromMillis(0) });
+  const resumed = await createBusinessLogoRuntime(db, f.storage, { enabled: true, clock: late }).maintenance();
+  assert.equal(resumed.status, 'checked'); assert.equal(f.storage.files.size, 0);
+  assert.equal((await ref.get()).get('after'), null); assert.equal((await ref.get()).get('needsReview'), true);
+});
+
+
+test('lease loss during cleanup cannot delete an object or advance the old checkpoint', { skip: !enabled }, async t => {
+  const f = await fixture(t), ref = db.doc('businessLogoMaintenance/current'); t.after(() => ref.delete());
+  f.storage.afterPut = async () => { throw Error('reply lost'); };
+  await assert.rejects(update(f.request(), db, f.storage, f.options));
+  const late = () => new Date(f.now.getTime() + 7 * 86400000);
+  await ref.set({ schemaVersion: 1, mode: 'active', revision: 1 });
+  const inspect = f.storage.inspect;
+  f.storage.inspect = async (...args) => { await ref.update({ owner: 'replacement-worker' }); return inspect(...args); };
+  await assert.rejects(createBusinessLogoRuntime(db, f.storage, { enabled: true, clock: late }).maintenance(), e => e.code === 'aborted');
+  assert.equal(f.storage.files.size, 1); assert.equal((await ref.get()).get('after'), undefined);
+  assert.equal((await ref.get()).get('owner'), 'replacement-worker');
 });

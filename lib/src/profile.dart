@@ -928,8 +928,10 @@ Future<bool> _storeServerBusinessLogo(
       );
     }
     return true;
-  } on FirebaseException catch (e) {
-    debugPrint('Business logo request failed: code=${e.code}');
+  } catch (e) {
+    debugPrint(
+      'Business logo request failed: code=${e is FirebaseException ? e.code : 'local-storage'}',
+    );
     if (context.mounted && FirebaseAuth.instance.currentUser?.uid == uid) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -945,9 +947,9 @@ Future<bool> _storeServerBusinessLogo(
                   onPressed: () async {
                     try {
                       await _businessLogos.retry(uid);
-                    } on FirebaseException catch (retry) {
+                    } catch (retry) {
                       debugPrint(
-                        'Business logo retry failed: code=${retry.code}',
+                        'Business logo retry failed: code=${retry is FirebaseException ? retry.code : 'local-storage'}',
                       );
                     }
                   },

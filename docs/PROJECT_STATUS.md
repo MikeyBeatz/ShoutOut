@@ -6,19 +6,17 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 
 ## Další konkrétní krok
 
-**Schválený místní balík F-03 – Business logo je dokončený**, větev
-`feature/business-logo-local`. [Rozsah, protokol, měření a hranice](plans/BUSINESS_LOGO_SAFETY.md).
-Serverové dekódování PNG/řízení náhrady/úklid a klientský adaptér jsou
-připravené; všechny přepínače a Rules brány zůstávají false, bez wrapperu,
-nasazení nebo živých dat. Cíleně prošlo 5 obrazových/Storage unit testů,
-17 emulátorových testů bez skipů, 42 Flutter testů, analyze/lint/format,
-38 nástrojových testů včetně artefaktů. Zdroj
-`3bcea522167999b9cdf7e8379bb3c837b6c9a45b` má
-[úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387)
-včetně celé klientské/serverové, Rules/archivní/purge/Storage sady a web buildu.
-Před DEV zbývá dořešit recovery po úplném zavření prohlížeče, schválit
-provozní limit/opuštění uploadu a připravit wrapper/worker/indexový plán,
-staré objekty, kompatibilní návrat a konkrétní pilot. Živý F-03 tím není uzavřený.
+**Navazující místní balík F-03 je připravený**, větev
+`feature/business-logo-local`. [Recovery, provozní profil a přesný další plán](plans/BUSINESS_LOGO_RUNTIME_READINESS.md).
+IndexedDB zachová PNG i původní časovaný požadavek, kvóta je 10 nových
+uploadů/hodinu na účet. Samostatný wrapper, údržbový adaptér, klient i Rules
+jsou vypnuté, bez zapojení do aktivních Functions nebo nasazení.
+Cíleně prošlo 21 emulátorových testů a společná klientská sada 53 testů;
+úplné CI nového zdroje se teprve provede. Původní balík 3bcea52 má
+[úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387),
+což nedokládá nové změny. Žádné živé zápisy/inventura, Auth účty, klíče,
+změny plánovačů či prostředků. Následuje CI a teprve konkrétní samostatně
+schválená DEV inventura/přechod; Business milník ani MVP nejsou celé uzavřené.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;
 nepřipravuje se serverové dokazování adresy/přítomnosti firmy.

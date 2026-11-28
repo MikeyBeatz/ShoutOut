@@ -98,6 +98,7 @@ jobs:
         timeout-minutes: 3
         run: |
           dart test --platform chrome test/read_state_store_browser.dart
+          dart test --platform chrome test/business_logo_browser.dart
           node tools/run_read_sync_transport_tests.mjs
 
       - name: Install Firestore Rules test dependencies

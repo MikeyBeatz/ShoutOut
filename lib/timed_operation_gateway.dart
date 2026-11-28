@@ -9,6 +9,39 @@ import 'package:crypto/crypto.dart';
 /// Caller-owned retry binding. Keep this object while an action can be retried;
 /// release it with the pending request. It never retains the request body.
 class TimedOperationAttempt {
+  TimedOperationAttempt({this.persistBinding});
+
+  /// Called before any transport. A durable CAS may return another tab's
+  /// binding for the same immutable payload. Never persists Auth/App Check.
+  final Future<Map<String, dynamic>> Function(Map<String, dynamic>)?
+  persistBinding;
+  Map<String, dynamic> exportBinding() => {
+    'scope': _scope == null ? null : [_scope!.$1, _scope!.$2, _scope!.$3],
+    'fingerprint': _fingerprint,
+    'timedKey': _timedKey,
+  };
+  void restoreBinding(Map<String, dynamic> data) {
+    final s = data['scope'], f = data['fingerprint'], k = data['timedKey'];
+    if (data.length != 3 ||
+        s is! List ||
+        s.length != 3 ||
+        s.any((v) => v is! String || v.isEmpty) ||
+        f is! String ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(f) ||
+        k is! String ||
+        !RegExp(r'^op1_[1-9][0-9]{0,12}_[a-f0-9]{32}$').hasMatch(k)) {
+      throw StateError('Invalid saved operation binding');
+    }
+    final scope = (s[0] as String, s[1] as String, s[2] as String);
+    if ((_scope != null && scope != _scope) ||
+        (_fingerprint != null && f != _fingerprint)) {
+      throw StateError('Saved operation payload changed');
+    }
+    _scope = scope;
+    _fingerprint = f;
+    _timedKey = k;
+  }
+
   (String, String, String)? _scope;
   String? _fingerprint;
   String? _timedKey;
@@ -120,6 +153,9 @@ class TimedOperationGateway {
         );
       }
       attempt._timedKey = 'op1_${seconds}_$nonce';
+    }
+    if (attempt.persistBinding case final persist?) {
+      attempt.restoreBinding(await persist(attempt.exportBinding()));
     }
     if (currentUserId() != userId) throw _accountChanged();
     final request = jsonDecode(frozenPayload) as Map<String, dynamic>;

@@ -4,6 +4,7 @@ import 'interaction_feedback.dart';
 import 'account_deletion.dart';
 import 'account_deletion_attempt.dart';
 import 'read_tracking_controller.dart';
+import 'business_logo_session.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -43,6 +44,7 @@ class AuthGate extends StatelessWidget {
         liveStreams.retainViewer(FirebaseAuth.instance.app.name, user?.uid);
         interactionFeedback.retainViewer(user?.uid);
         readSessions.retainViewer(user?.uid);
+        unawaited(resumeBusinessLogo(user?.uid));
         feedDeltaRuntime?.retainViewer(user?.uid);
         return user;
       }),
@@ -1158,6 +1160,7 @@ class _DeletionRequestGateState extends State<DeletionRequestGate> {
           _pending = document.data;
           if (!document.isFromCache && !document.hasPendingWrites) {
             unawaited(readSessions.eraseAccount(uid));
+            unawaited(erasePendingBusinessLogo(uid));
             feedDeltaRuntime?.eraseAccount(uid);
           }
         } else if (!document.isFromCache && !document.hasPendingWrites) {

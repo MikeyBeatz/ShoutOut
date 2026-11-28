@@ -29,7 +29,8 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('private_reply_deletion_pilot.js'));
     assert(!actual.includes('private_report_removal_pilot.js'));
     assert(!actual.includes('moderation_business_pilot.js'));
-    for (const name of ['business_logo.js', 'business_logo_image.js', 'business_logo_storage.js', 'business_logo_orphans.js']) {
+    for (const name of ['business_logo.js', 'business_logo_image.js', 'business_logo_storage.js', 'business_logo_orphans.js',
+      'business_logo_runtime.js', 'business_logo_host.js', 'business_logo_cleanup_adapter.js']) {
       assert(!actual.includes(name), 'Local logo preparation must not enter an active Function artifact.');
     }
     assert.equal(actual.includes('business_review.js'), entry === 'content.js');
@@ -87,4 +88,13 @@ test('separate prepared B2 host has a complete package without joining current l
   for (const name of ['read_sync_host.js', 'read_sync_runtime.js', 'read_sync.js', 'read_sync_blocks.js', 'callable_security.js']) assert(artifact.files.includes(name));
   assert(!artifact.files.includes('content.js')); assert(!artifact.files.includes('index.js'));
   assert(artifact.files.every(name => !/(?:_lab|\.test)\.js$/.test(name)));
+});
+
+test('inactive logo host has its own complete package and keeps active schedules out', () => {
+  const artifact = prepareFunctionArtifact(root, 'functions-business-logo', 'business_logo_host.js');
+  for (const name of ['business_logo_host.js', 'business_logo_runtime.js', 'business_logo.js', 'business_logo_image.js',
+    'business_logo_storage.js', 'callable_security.js', 'operation_retention.js']) assert(artifact.files.includes(name));
+  assert(!artifact.files.includes('content.js')); assert(!artifact.files.includes('receipt_cleanup_schedule.js'));
+  const configuration = readFileSync(resolve(root, 'functions/business_logo_runtime.js'), 'utf8');
+  assert(configuration.includes('Object.freeze({ enabled: false })'));
 });

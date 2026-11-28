@@ -241,6 +241,7 @@ bool get _useServerBusinessLogo => kIsWeb
 
 final _businessLogos = BusinessLogoGateway(
   currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  store: createBusinessLogoPendingStore(Firebase.app().options.projectId),
   send: (request) => _serverContentOperations.call(
     attempt: request.attempt,
     userId: request.userId,
