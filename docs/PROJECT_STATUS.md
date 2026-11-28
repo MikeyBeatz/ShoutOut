@@ -17,7 +17,7 @@ Firestore/Storage Rules v shoutout-dev-46c81. Skutečné zdroje a hashe Rules
 ověřené, staré revize vybraných Functions odstavené. Web, ostatních 29 Functions,
 prostředky, indexy, joby, klíče ani živé fixture se neměnily.
 
-**Navazuje schválený místní F-04:** [úplná moderační fronta](plans/MODERATION_QUEUE_COMPLETENESS.md).
+**Navazuje schválený DEV přechod F-04:** [úplná moderační fronta](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-implementation).
 Q-01 vlastník rozhodl: globální metadata a důvody, volitelný filtr místa/geohashe;
 archivní tělo a rozhodnutí mají dál dnešní geografická oprávnění. Připravené
 stránky nejvýše 50 případů, atomická projekce a obnovitelné velké rozhodnutí,
@@ -26,9 +26,15 @@ oba klientské vstupy i historie postihů jsou výchozí vypnuté. Zdroj
 [úplné CI 46131153276 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46131153276).
 32/32 nových emulátorových testů bez skipů, 616 Flutter testů, původní
 serverové/Rules/archivní regrese, analýza a DEV debug archive web build prošly.
-Žádné nové nasazení, živá migrace/data ani Auth účty.
-Následuje připravený návrh DEV přechodu; F-03/F-05 nejsou
-součástí tohoto úseku.
+Nově jsou připravené tři skutečné wrappery, řízený DEV operátor se selektivními
+indexy a kontrolou skutečných zdrojů/doběhnutí osmi writerů, kompatibilní
+návrat a pilot 52 případů. Čtecí inventura DEV našla 0 hlášení, 1 původní Shout
+a 3 žádosti o smazání; tyto původní zdroje se nemažou. Společný retenční
+runner v klidu 5 reads/0 writes (přírůstek fronty +2 reads).
+Čeká společný push/úplné CI přesného aktivačního zdroje, pak schválené DEV
+nasazení/převod a web. Žádné nové živé zápisy ani fixture zatím neproběhly;
+pilot založit až při dostupném klientu, ruční test až na konec.
+F-03/F-05 nejsou součástí tohoto úseku.
 
 Další stávající MVP práce: úplnost moderační fronty, důvěryhodné Business
 pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.

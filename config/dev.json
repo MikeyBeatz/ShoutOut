@@ -18,6 +18,7 @@
   "serverContentReportDecisions": true,
   "serverPublicReportRemoval": true,
   "serverContentSanctions": true,
+  "serverModerationQueue": false,
   "serverBusinessReview": true,
   "serverShoutReactions": true,
   "serverCommentReactions": true,

@@ -467,7 +467,8 @@ test('archived report lookup is gated by a strict boolean and App Check', () => 
 });
 
 test('moderation queue requires a strict boolean and the full managed DEV client', () => {
-  assert.equal(actualDev.serverModerationQueue, undefined);
+  assert.equal(actualDev.serverModerationQueue, false);
+  assert.equal(archiveWebConfig(actualDev).serverModerationQueue, true);
   const candidate = { ...actualDev, serverModerationQueue: true, serverContentLifecycle: true };
   assert.doesNotThrow(() => validateConfig(candidate, 'dev'));
   for (const patch of [

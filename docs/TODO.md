@@ -42,12 +42,15 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
 změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
 
-1. Projednat a po konkrétním schválení provést připravený DEV přechod
-   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md).
+1. Dokončit již schválený DEV přechod
+   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-implementation).
    Místní úsek 65c5b0b má úplné CI 46131153276 success; nové cesty jsou
    vypnuté. Q-01 rozhodnuté: globální metadata
    s filtrem města/oblasti/státu/geohashe; oprávnění k tělům a zásahům zachovaná.
-   Nové cesty zůstávají vypnuté, dosavadní DEV se nemění.
+   Připravené jsou wrappery, živý operátor/pilot a kompatibilní návrat;
+   po úplném CI přesného zdroje čtyři indexy, osm stávajících +tři nové
+   Functions, řízený převod/audit a DEV web. Živé zápisy ještě neproběhly.
+   Fixture založit až při dostupném klientu, ruční kontrolu seskupit na konec.
 2. Dokončit zbývající již otevřenou moderaci a Business:
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.

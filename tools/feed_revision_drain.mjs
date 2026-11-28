@@ -6,6 +6,12 @@ export function verifyB4RevisionDrain(projectId, before, after, services, revisi
 export function verifyNewsRevisionDrain(projectId, before, after, services, revisions) {
   return verifyRevisionDrain(projectId, before, after, services, revisions, ['createShout', 'getFeedPage']);
 }
+export const moderationQueueWriterFunctions = Object.freeze(['createContentReport', 'decideContentReports',
+  'removeReportedPublicContent', 'removeReportedPrivateReply', 'sanctionContent',
+  'accountDeletionRequestCreatedDev', 'resumeAccountDeletionJobsDev', 'cleanupOperationReceipts']);
+export function verifyModerationQueueRevisionDrain(projectId, before, after, services, revisions) {
+  return verifyRevisionDrain(projectId, before, after, services, revisions, moderationQueueWriterFunctions);
+}
 function verifyRevisionDrain(projectId, before, after, services, revisions, names) {
   if(projectId!=='shoutout-dev-46c81') throw new Error('b4-drain-dev-required');
   const result=[];

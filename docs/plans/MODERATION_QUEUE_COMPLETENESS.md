@@ -189,9 +189,10 @@ Definice pořadí sdílejí skutečný reader i plán, takže nové řazení nem
 nepozorovaně používat druhý ručně opsaný seznam indexů. Živou inventuru
 a nový digest je nutné před budoucím použitím znovu ověřit.
 
-## Navazující DEV postup k projednání
+## Navazující schválený DEV postup
 
-Tento seznam je návrh dalšího společného úseku, **není souhlas se spuštěním**:
+Vlastník 28.11.2026 schválil celý následující DEV úsek včetně pilotu.
+Živé mutace nadále podléhají úspěšnému úplnému CI přesného zdroje:
 
 1. Připravit skutečné callable wrappery tří výše uvedených obsluh, řízený DEV
    operátor a kompatibilní návratový web. Navržený první DEV profil odpovídá
@@ -223,9 +224,86 @@ Tento seznam je návrh dalšího společného úseku, **není souhlas se spušt�
    Ruční kontrolu seskupit až na konec; žádný nynější ruční test není potřeba.
 
 Produkce, main, nové role, obecná retence, nové Scheduler joby a dosavadní
-pending žádost zůstávají mimo tento navazující návrh. Přesné fixture a
-případné provozní meze musí vlastník schválit před živými zápisy.
+pending žádost zůstávají mimo tento úsek. Pilot je schválen na jeden 24h
+Shout, 50 komentářů, jednu soukromou odpověď a 53 hlášení (52 případů).
+Další fixture ani nové provozní meze tento souhlas nepokrývá.
 
 Místní vývoj probíhá ve větvi `feature/moderation-queue-completeness`.
 Nové zapojení není dosud vydané; [aktuální DEV](../PROJECT_STATUS.md)
 zůstává na dokončené opravě F-01/F-02/F-06.
+
+<a id="dev-implementation"></a>
+
+## Provozní balík F-04 – příprava 28.11.2026
+
+Práce pokračuje ve větvi `feature/moderation-queue-dev`. Tento záznam
+rozlišuje připravený kód a skutečné nasazení; nové živé zápisy zatím neproběhly.
+Čtecí inventura DEV: 0 hlášení všech tří typů, 0 případů/journalů, žádný
+queue control; 1 původní Shout a 3 původní žádosti o smazání. Nejde o souhlas
+s úklidem těchto původních zdrojů. Firestore Standard, europe-west3.
+
+- [Projektová aktivační politika](../../functions/moderation_queue_deployment.js)
+  zapíná společné writery/reaper jen v přesném živém DEV projektu. Místní
+  a produkční běh zůstávají vypnuté. Tři skutečné callable wrappery používají
+  stejný Auth/App Check a managed runtime s archivem a indexovým writerem.
+- [DEV operátor](../../tools/moderation_queue_dev.mjs) má read-only inventuru,
+  neměnný digest plánu a inkarnaci. Mutace vyžadují čistý commit a úplné CI
+  včetně F-04/archivních/sankčních kroků. Začátek vyžaduje READY indexy a
+  shodu čerstvé inventury; nepřepisuje už instalovaný control.
+- Sdílené [transakční jádro](../../functions/moderation_queue_transition_core.js)
+  zachovává původní převod/audit po 50 položkách a 450 zápisech. Původní
+  laboratorní vstup dál odmítá živé SDK. `run` provede nejvýše 32 kroků a
+  mezi transakcemi sleduje měkkých 10 s; checkpoint umožňuje restart.
+- Před adopcí a aktivací [cloudová kontrola](../../tools/moderation_queue_cloud.mjs)
+  stáhne skutečné zdrojové ZIPy všech 11 vybraných Functions a porovná jejich
+  soubory s čistým artefaktem. Vyžaduje nezměněné prostředky/IAM původních
+  Functions, Rules a Scheduler, 100% nový provoz a RETIRED infrastrukturu
+  všech předchozích revizí osmi writerů. Čekání podle hodin důkaz nenahrazuje.
+- [Selektivní indexový nástroj](../../tools/moderation_queue_dev_indexes.mjs)
+  umí jen čtyři schválené POST definice. Nepoužívá mazání, výjimky ani TTL;
+  dokončené operace při restartu neopakuje. Další změna plánu končí odmítnutím.
+- [Release balík](../../tools/moderation_queue_dev_release.mjs) zachovává
+  aktivní archiv/právní verzi i vydanou hru. Aktivní i kompatibilní návratový
+  profil mají úplnou novou frontu, společné writery a úklid. Starý web
+  s prvním limitem 50 není návratovou frontou. Nouzová pauza control blokuje
+  nové obsluhy, nikoli tvorbu projekce ani sedmidenní reaper. Návrat/resume
+  jsou CAS operace s přesnou inkarnací a revizí; opakování ztracené odpovědi
+  je bezpečné. Po změně revize klient obnoví neplatný kurzor od první stránky
+  až po úspěšné odpovědi, původní seznam během chyby ponechá.
+- [Pilot](../../tools/moderation_queue_pilot.mjs) nevytváří Auth ani role,
+  nepřijímá právní souhlasy a neresetuje kvóty. Vyžaduje čtyři existující
+  doložené identity a dostupného klienta. Přesný manifest váže verze profilů,
+  původní zdroje, kontrolní dokumenty a 24h platnost. Syntetické zápisy jdou
+  přes skutečný archiv/index/projekci; nejde o měření běžného callable ani
+  jeho kvóty. Opakování doplní jen chybějící vlastní ID, po vyřízení či
+  odstranění už seed odmítne. Živý pilot ještě není založený.
+- Úklid nejdřív odstaví vlastní kořen skutečným indexovým writerem a odstraní
+  vymezené reporty přes projekční adaptér. Samostatný plán fyzických fixture
+  kontroluje přesné SDK verze, původ archivů a neznámé potomky; mazání je po
+  nejvýše 40 řádcích, s indexovým writerem při odstranění zdroje. Uklidí i
+  vymezené read klíče, ne technická potvrzení/journaly před sedmi dny,
+  skutečné identity, původní obsah či žádosti. Není to obecný retenční purge.
+
+Společný skutečný SDK test plánovaného retenčního runneru:
+v klidu **5 reads /0 writes /3 transakce** (původní 3 +2 queue reads).
+50 prošlých technických journalů bez přítomných případů: **154 reads /50
+writes /3 transakce**, padesátý první zůstane do dalšího běhu. Pauza queue
+reaper nevypíná. Dosavadní fáze zůstávají nejvýše 500 prohlédnutých řádků
+a měkkých 10 s každá; nový reaper nejvýše 50 journalů v jedné transakci.
+Jde o emulátorové operace, nikoli záruku cloudové latence pod 60 s.
+Minutový plánovač stále volá Function 1 440× denně; klidná dodatečná práce
+fronty je 2 880 reads/den. Produkční kapacitu tento profil neurčuje.
+
+Před živými mutacemi: úplné CI tohoto balíku, nový plán/digest, čtyři READY
+indexy, building control, 11 explicitně vybraných Functions, důkaz doběhnutí,
+obnovitelná adopce/audit, aktivace, potom pouze DEV web. Neprovádět hromadný
+`firebase deploy` ani nasazení Rules. Po nasazení ověřit skutečné zdroje,
+anonymní odmítnutí, zachování prostředí a reálný retenční běh. Fixture založit
+až po dostupnosti klienta; živou akceptaci zaznamenat zvlášť.
+
+Místní kontroly tohoto dokončovacího balíku: F-04 emulátorová sada **34/34
+bez skipů**, provozní kontrakty nástroje **6/6**, obálky Functions **2/2**,
+klient fronty **10/10**, Functions lint a Flutter analyze čisté. Vývojové
+nástroje před závěrečným doplněním dvou kontraktů prošly 146/146. Úplné CI
+aktivačního commitu a skutečné nasazení ještě nejsou doložené. Původní
+váhy metrik se nemění; živou akceptaci nepředjímáme.

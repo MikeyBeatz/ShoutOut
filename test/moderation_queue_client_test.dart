@@ -28,6 +28,38 @@ Map<String, dynamic> page(List<int> ids, [int? cursor]) => {
 };
 void main() {
   test(
+    'resume after a control revision refreshes a rejected cursor safely',
+    () async {
+      var calls = 0;
+      final cursors = [];
+      final c = ModerationQueueController(
+        currentUserId: () => 'a',
+        send: (_, p) async {
+          cursors.add(p['cursor']);
+          if (++calls == 1) return page([1], 1);
+          if (calls == 2) {
+            throw FirebaseFunctionsException(
+              code: 'failed-precondition',
+              message: 'Refresh the moderation queue.',
+            );
+          }
+          return page([2]);
+        },
+      );
+      await c.refresh();
+      await c.loadMore();
+      expect(c.items.single.shoutId, 's1');
+      await c.retry();
+      expect(cursors, [
+        null,
+        {'page': 1},
+        null,
+      ]);
+      expect(c.items.single.shoutId, 's2');
+      c.dispose();
+    },
+  );
+  test(
     'existing address results optionally carry validated geographic bounds',
     () {
       expect(

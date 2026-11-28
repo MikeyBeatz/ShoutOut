@@ -36,6 +36,7 @@ import { getLifecycleReportEvidenceOperation } from './content_lifecycle_evidenc
 import { getLifecycleSourcePageOperation } from './content_lifecycle_sources.js';
 import { preparedArchiveIdentityRuntime, createArchiveIdentityHandlers } from './archive_identity_runtime.js';
 import { observeArchiveIdentity as observeArchiveIdentityOperation, archiveIdentityConfiguration } from './archive_identity.js';
+import { createModerationQueueHandlers } from './moderation_queue_runtime.js';
 
 if (getApps().length === 0) initializeApp();
 
@@ -73,6 +74,15 @@ function lifecycleDatabase(expectedAuthor = null) {
   return contentLifecycleConfiguration.enabled || contentLifecycleConfiguration.captureEnabled
     ? createFeedRuntime(db, { getUser: uid => getAuth().getUser(uid) }, { identityRuntime: { ...preparedArchiveIdentityRuntime(db), ...(expectedAuthor ? { expectedAuthor } : {}) } }).database : db;
 }
+
+function moderationQueueHandlers() {
+  const db = getFirestore();
+  const runtime = createFeedRuntime(db, getAuth(), { identityRuntime: preparedArchiveIdentityRuntime(db) });
+  return createModerationQueueHandlers(runtime.database, { indexWriter: runtime.indexWriter });
+}
+export const getModerationCasePage = onCall(identityHostOptions, request => moderationQueueHandlers().page(request));
+export const startModerationCaseDecision = onCall(identityHostOptions, request => moderationQueueHandlers().start(request));
+export const stepModerationCaseDecision = onCall(identityHostOptions, request => moderationQueueHandlers().step(request));
 
 export const getLifecycleSourcePage = onCall({
   ...secureCallableOptions, minInstances: 0, maxInstances: 1, concurrency: 1,

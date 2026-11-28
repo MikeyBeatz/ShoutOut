@@ -9,17 +9,17 @@ export const retentionScheduleOptions = Object.freeze({
   timeoutSeconds: 60, retryCount: 0,
 });
 
-export async function runScheduledRetention(db, { moderationQueueEnabled = moderationQueueConfiguration.enabled } = {}) {
-  if (typeof moderationQueueEnabled !== 'boolean') throw new Error('invalid-moderation-queue-cleanup-option');
+export async function runScheduledRetention(db, { moderationQueueEnabled = moderationQueueConfiguration.enabled, clock = () => new Date() } = {}) {
+  if (typeof moderationQueueEnabled !== 'boolean' || typeof clock !== 'function') throw new Error('invalid-moderation-queue-cleanup-option');
   if (db?.projectId !== 'shoutout-dev-46c81' &&
       !(db?.projectId === 'shoutout-rules-test' && process.env.FIRESTORE_EMULATOR_HOST === '127.0.0.1:8080')) {
     throw new Error('retention-schedule-dev-target-required');
   }
   // Missing/off control is fail-closed. Never fall back to the old receipt runner.
-  const result = await createRetentionRuntime(db, { enabled: true }).run();
+  const result = await createRetentionRuntime(db, { enabled: true, clock }).run();
   if (!moderationQueueEnabled || !['checked', 'interrupted'].includes(result.state)) return result;
   try {
-    const queue = await createModerationQueueHandlers(db, { enabled: true }).maintenance();
+    const queue = await createModerationQueueHandlers(db, { enabled: true, clock }).maintenance();
     return { ...result, moderationQueue: { state: 'checked', ...queue } };
   } catch (error) {
     return { ...result, state: 'interrupted', moderationQueue: { state: 'failed', needsReview: error.code === 'failed-precondition' } };

@@ -4,8 +4,9 @@ import { FieldPath, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { lifecycleBodyHash } from './content_lifecycle.js';
+import { moderationQueueDeploymentProfile } from './moderation_queue_deployment.js';
 
-export const moderationQueueConfiguration = Object.freeze({ enabled: false });
+export const moderationQueueConfiguration = Object.freeze({ enabled: moderationQueueDeploymentProfile().enabled });
 export const moderationQueueBinding = Symbol('moderation-queue-binding');
 export const moderationDecisionBatch = Symbol('moderation-decision-batch');
 export const moderationReportCollections = Object.freeze({ reports: 'shout', commentReports: 'comment', privateReplyReports: 'privateReply' });

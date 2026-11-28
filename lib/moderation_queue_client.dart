@@ -188,6 +188,13 @@ class ModerationQueueController extends ChangeNotifier {
         if (!_current(generation, uid)) return;
         error = e;
         if (e is FirebaseFunctionsException &&
+            e.code == 'failed-precondition' &&
+            e.message == 'Refresh the moderation queue.') {
+          // A control/role revision invalidates the cursor. Keep the rows until
+          // a fresh first page succeeds; retrying that old cursor cannot work.
+          _failedRefresh = true;
+        }
+        if (e is FirebaseFunctionsException &&
             ['unauthenticated', 'permission-denied'].contains(e.code)) {
           items = const [];
           _cursor = null;
