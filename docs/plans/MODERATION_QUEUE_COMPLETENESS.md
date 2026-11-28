@@ -385,11 +385,74 @@ a jedno obnovení CLI přihlášení. Po odstupu a sekvenčním opakování pro�
 změna oprávnění ani obcházení limitu nebyly nutné. Compute API zůstává
 vypnuté, CLI pouze použilo již existující výchozí service account.
 
-**Otevřený poslední krok:** dostupný TestModerator, potom teprve založit
-schválený manifest/fixture 1 Shout +50 komentářů +1 soukromá odpověď
-+53 hlášení; ověřit 50→52, přesné počty, rozhodnutí, filtr a otevřený klient
-při pauze/návratu. Úklid přes vymezené writery a přesné SDK verze včetně
-read klíčů; účtová data, kvóty a 7denní potvrzení zachovat. Živá akceptace
-ani celý mvp-17 zatím nejsou uzavřené. Automatická kontrola ovládání Chrome
-pro tento turn zastavila vstup kvůli neověřené URL; žádné nové připojení
-se nepoužilo k jejímu obejití. Konzolový skript pro pilota není potřeba.
+Před pilotem zůstávalo otevřené založení fixture při dostupném klientu,
+akceptace a vymezený úklid. Výsledek je níže; předchozí prázdné inventury
+jsou stavem po instalaci, nikoli aktuálními výsledky testu. Klientský průchod
+provedl vlastník ručně, bez konzolového skriptu.
+
+<a id="dev-pilot-complete"></a>
+
+## Dokončený DEV pilot a úklid – 28.11.2026
+
+Nasazený zdroj zůstává `9df1b1bddfb4a6766a41c61732e8366a7eceadd6`,
+[úplné CI 46137813905 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46137813905).
+Nový rollout při této akceptaci neproběhl. Plán fixture měl digest
+`fdaebc2b58e0fb130131886fd4b7223116f6ce7b180cdf6ebf9dec3d8af120b8`,
+run `472efc2ac1d16e97`: právě jeden 24h Shout, 50 veřejných komentářů,
+jedna soukromá odpověď, 53 hlášení/52 případů. Vznikly až po potvrzení
+dostupného TestModerator; nové Auth účty, role ani právní přijetí nevznikly.
+
+Vlastník postupně potvrdil tyto klientské průchody:
+
+- Stránky **50 → 52**, připojení bez skoku, konec stránkování, první skupina
+  **2× nahlášeno** a čitelný podklad. Archivní audit skutečně zaznamenal
+  TestModerator /úroveň 3; nejde o náhradní admin průchod.
+- TestModerator schválil Shout: oba reporty `contentApproved`, stejný
+  `decisionOperationId`, jedno technické potvrzení s `caseReportCount=2`.
+  Dále uzavřel komentář 28 (`noAction`) a předal soukromou odpověď
+  (`escalated`, `assignedRole=seniorModerator`). Všechna rozhodnutí mají
+  dokončené vnější potvrzení a správného aktéra.
+- TestAdmin našel předaný případ v Hlášení → Soukromé odpovědi a uzavřel
+  jej (`noAction`). Server zachoval původní předání TestModerator a zaznamenal
+  skutečné dokončení TestAdmin. Po těchto akcích zbývalo 49 otevřených
+  případů/49 reportů; všech 52 zdrojových dokumentů bylo zachovaných.
+- Filtr **CZ** obsahuje fixture, **DE** ji vyloučí; návrat na Celý svět.
+  Kontrolovaná pauza `active 2 → paused 3` vyvolala v otevřené kartě očekávané
+  „Hlášení se nepodařilo načíst“. Po `paused 3 → active 4` vlastník potvrdil
+  úspěšné „Zkusit znovu“ ve stejné kartě bez Ctrl+R i filtr. Zachování
+  neprázdného seznamu při chybě je navíc doložené klientskou regresí;
+  samostatné výslovné živé potvrzení zachování řádků vlastník neposlal.
+
+Živý pilot pokrývá dvě hlášení stejného obsahu a více než 50 případů.
+Skupina nad 50 reportérů, ztracené odpovědi, souběh a všechny role/oblasti
+zůstávají doložené cílenými emulátorovými/klientskými testy; tento pilot
+nenahrazuje celou ruční regresi rolí, postihů ani produkční kapacitu.
+
+Úklid nejprve odstavil vlastní Shout skutečným indexovým/archivním writerem,
+poté odstranil **53 vymezených reportů** přes projekční adaptér.
+Samostatný plán s přesnými SDK verzemi měl digest
+`7fc3d6ad813ff7144c22374e599621ed24ccaccc13bf6d5bd2b97b768fd10393`.
+Odstranil **110 dalších dokumentů**: 52 zdrojů, 52 archivních kopií,
+4 testovací archivní access audity, jeden thread a jednu clearance.
+Read klíče: 0 nalezených/odstraněných. Toto je výslovně schválený úklid
+syntetické fixture, nikoli změna obecné obsahové nebo auditní retence.
+
+Nezávislá SDK kontrola v **13:21:45 UTC** potvrdila 0 zdrojů/reportů/případů
+této fixture, 0 zbývajících členů všech 52 případů, 0 rozpracovaných
+rozhodnutí a nepřítomnost všech 110 naplánovaných dokumentů. Původní
+**1 Shout a 3 účtové žádosti mají nezměněné updateTime**. Všech **8 potvrzení**
+zůstalo včetně updateTime a původních termínů `createdAt +7 dní`;
+žádný reset kvót ani mutace Auth. Control zůstal **active /revize 4**.
+
+Soukromé reprodukční důkazy jsou ve vydávacím checkoutu `build/`:
+`f04-pilot-first-ui-proof.json`, `f04-pilot-moderator-decisions-proof.json`,
+`f04-pilot-admin-proof.json`, `f04-pilot-pause-proof.json`,
+`f04-pilot-resume-proof.json`, `f04-pilot-before-cleanup-proof.json`,
+`f04-pilot-cleanup.json` a `f04-pilot-final-proof.json`.
+Neobsahují přihlašovací údaje a nejsou součástí webového artefaktu.
+
+**F-04 je v DEV uzavřené.** Rules, prostředky, plánovače, produkce/main
+a pevné váhy metrik se neměnily. Evidence doplňuje existující moderaci;
+celé mvp-17 ani `moderation-regression` se tím neuzavírají. Další plánovaná
+práce jsou F-05 (důvěryhodná pobočka), F-03 (současná Business loga),
+geografie a provozní/startovní brány; nový rozsah schválit před implementací.

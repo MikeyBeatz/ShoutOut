@@ -7,10 +7,12 @@ Po [DEV přechodu F-04](../plans/MODERATION_QUEUE_COMPLETENESS.md#dev-rollout-re
 je Hosting **69b6045055062848**, 34 ACTIVE Functions a dva původní minutové joby.
 Web a 11 vybraných Functions mají zdroj **9df1b1bddfb4a6766a41c61732e8366a7eceadd6**,
 úplné CI **46137813905 success**. Čtyři indexy READY, převod/audit prázdné
-fronty hotový, control active revize 2. Skutečné zdroje/IAM/prostředky,
+fronty hotový, control active revize 4. Skutečné zdroje/IAM/prostředky,
 odstavení starých revizí, všech 68 veřejných webových souborů, živé SDK
 dotazy a anonymní 401 nových endpointů ověřené. Přirozené nové běhy údržby
-jsou checked bez needsReview. Klientský pilot 50→52 a úklid čekají, fixture není.
+jsou checked bez needsReview. [Klientský pilot 50→52 a úklid jsou dokončené](../plans/MODERATION_QUEUE_COMPLETENESS.md#dev-pilot-complete):
+TestModerator/TestAdmin, společné rozhodnutí, filtr a pauza/návrat otevřené karty.
+Fixture odstraněná; osm technických potvrzení zůstalo do původních 7 dní.
 Ostatních 23 Functions nezměněných: 21 zdroj 5435855, getFeedPage/getSavedShouts
 zdroj ec371188, revize 00010-nay /00004-biv. Firestore Rules jsou stále
 **8cbacbed-2456-48f7-9a2f-46bb66e8481b**, Storage

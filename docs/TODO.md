@@ -42,19 +42,17 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
 změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
 
-1. Dokončit pouze klientský pilot a úklid
-   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-rollout-results).
-   Zdroj 9df1b1b má úplné CI 46137813905 success; čtyři indexy READY,
-   tři nové +osm aktualizovaných Functions, audit/control active 2 a DEV web
-   jsou skutečně nasazené a automaticky ověřené. Q-01: globální metadata
-   s filtrem města/oblasti/státu/geohashe; oprávnění k tělům a zásahům zachovaná.
-   Zatím nevznikla fixture ani Auth. Teprve při dostupném TestModerator založit
-   schválených 52 případů, ověřit 50→52/počty/rozhodnutí/filtr/pauzu a návrat,
-   potom vymezený úklid. Celá společná regrese moderace zůstává otevřená.
-2. Dokončit zbývající již otevřenou moderaci a Business:
+**F-04 má uzavřený DEV pilot i úklid.**
+[Důkazy a meze akceptace](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-pilot-complete):
+50→52 bez skoku, dvě hlášení jednoho Shoutu, TestModerator/TestAdmin,
+filtr CZ/DE a pauza/návrat otevřené karty; control active 4. Testovací
+obsah odstraněný, původní obsah/žádosti a 8 sedmidenních potvrzení zachované.
+Celá společná regrese moderace zůstává otevřená; pevné váhy se nemění.
+
+1. Dokončit zbývající již otevřenou moderaci a Business:
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.
-3. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;
+2. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;
    poté společný ruční blok mvp-20 a startovní brána mvp-24. Pro 5 000 aktivních
    uživatelů zatím nejsou cloudové důkazy. Ruční testy seskupit až po opravách.
 

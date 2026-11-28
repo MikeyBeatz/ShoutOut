@@ -21,19 +21,24 @@ prostředky, indexy, joby, klíče ani živé fixture se neměnily.
 [Zdroje, indexy, doběhnutí, audit a skutečné běhy](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-rollout-results).
 Zdroj `9df1b1bddfb4a6766a41c61732e8366a7eceadd6` má
 [úplné CI 46137813905 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46137813905).
-Čtyři indexy READY, soukromá projekce/control active revize 2, tři nové
+Čtyři indexy READY, soukromá projekce/control active revize 4, tři nové
 callables a osm aktualizovaných Functions, DEV web. Skutečné zdrojové ZIPy,
 IAM/prostředky a odstavení všech předchozích revizí ověřené. Globální
 metadata/důvody s filtrem místa; těla a zásahy dál chrání původní geografii.
 
-**Zbývá klientský pilot 50→52 a úklid.** Testovací obsah se založí teprve při
-dostupném TestModerator. Zatím 0 reportů/případů, žádné nové fixture/Auth;
-původní 1 Shout a 3 účtové žádosti zachované. Živé SDK dotazy a anonymní
-401 endpointů prošly, přirozené minutové běhy nové údržby jsou checked bez
-needsReview. Není to dosud živé ověření úspěšného klientského Auth/App Check.
-Rules ani plánovače se neměnily; F-03/F-05 nejsou součástí F-04.
+**Klientský pilot F-04 a úklid jsou dokončené.**
+[Ruční akceptace, serverová potvrzení a konečná inventura](plans/MODERATION_QUEUE_COMPLETENESS.md#dev-pilot-complete).
+TestModerator ověřil stránky 50→52 bez skoku, skupinu se dvěma hlášeními,
+schválení, uzavření a předání; TestAdmin dokončil eskalovaný případ.
+Potvrzen filtr CZ/DE a návrat stejné otevřené karty po pauze 3 → active 4.
+Vymezených 53 testovacích hlášení a 110 obsahových/archivních dokumentů
+uklizeno, bez zbývajících případů/členů/rozpracovaných rozhodnutí.
+Původní 1 Shout a 3 účtové žádosti mají nezměněné updateTime; všech 8
+technických potvrzení zachováno do původního sedmidenního termínu.
+Žádné nové Auth; Rules, prostředky a plánovače se neměnily.
+F-03/F-05 a úplná společná regrese nejsou součástí uzavření F-04.
 
-Další stávající MVP práce: přijetí pilotu moderační fronty, důvěryhodné Business
+Další stávající MVP práce: důvěryhodné Business
 pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.
 Nejde o nové produktové odbočky. Společná ruční regrese mvp-20 a rozhodnutí
 mvp-24 zůstávají otevřené; známé vady mají přednost před dalším ručním pilotem.
@@ -54,7 +59,7 @@ mvp-24 zůstávají otevřené; známé vady mají přednost před dalším ruč
 | Storage Rules | fb4848ff-2673-482e-84df-f1c1caa74c9f; shodné s verzovaným storage.rules z ec371188 |
 | Vlastní historie / index | 7c6a1229ced05803498a7f6f9bba7acb1045ea93 / [úplné CI 46065640727 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727); nový publicUntil dotaz funkční |
 | Functions / prostředky | 34 ACTIVE /Node22 /europe-west3; min0/max1, concurrency1, 256 MiB; 31 callables 15 s /3 workery 60 s |
-| Moderační fronta | Control active revize 2; 4 indexy READY, převod/audit 0 reportů, zdroje a doběhnutí ověřené; klientský pilot zatím otevřený |
+| Moderační fronta | Control active revize 4; 4 indexy READY, klientský pilot 50→52/rozhodnutí/filtr/pauza/návrat i úklid dokončené |
 | Plánovače | Dvě ENABLED minutové úlohy cleanupOperationReceipts a resumeAccountDeletionJobsDev; nezměněné |
 | Archiv / právo | Capture/reader/identita/údržba a verze 2026-11-27 zapnuté; skutečné právní přijetí bez automatického potvrzení |
 | Účtový pilot | Oba nové Auth pryč, primární úlohy content-archived, privátní purge scheduled na 26.01.2027 podle původních žádostí |
