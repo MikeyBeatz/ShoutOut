@@ -28,8 +28,9 @@ kontaktní dohledání je omezené na admin/owner.
 
 Celý milník dosud není uzavřený. [Revize 27.11.2026](../operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md)
 potvrdila rozdíl některých privilegovaných přímých čtení při banu F-01,
-neúplnost fronty nad 50 hlášení F-04 a otevřenou volbu Q-01 o regionální
-viditelnosti metadat. Serverová rozhodnutí a přístup k archivnímu tělu mají
+který je po úplném CI [opravený v DEV](../operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
+Neúplnost fronty nad 50 hlášení F-04 a volba Q-01 o regionální viditelnosti
+metadat zůstávají otevřené. Serverová rozhodnutí a přístup k archivnímu tělu mají
 samostatné regionální ochrany. Živé sankční průchody přijaté jako TestAdmin
 nejsou důkazem regionálního moderátora; tam trvají automatické testy a otevřená
 společná ruční regrese.

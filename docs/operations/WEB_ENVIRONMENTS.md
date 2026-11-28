@@ -1,15 +1,17 @@
 # Vývojový a produkční web
 
-## Současný ověřený DEV stav – 27. listopadu 2026
+## Současný ověřený DEV stav – 28. listopadu 2026
 
 Aktuální tabulku vrstev určuje [PROJECT_STATUS](../PROJECT_STATUS.md#posledni-overene-nasazeni).
-Čtecí [souhrnná revize](MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#potvrzený-stav-dev)
-znovu potvrdila Hosting **14a0f588585839e2**, 31 ACTIVE Functions, dva
-minutové joby a Firestore Rules **88a94380-2b88-4f37-8ed9-47dc9ab88a89**.
-Web/29 Functions jsou ze zdroje 5435855, dva účtové workery bd81e98;
-Rules c361526 a vlastní publicUntil index 7c6a122 mají vlastní úspěšné CI.
+Po [opravě F-01/F-02/F-06](MVP_AUTHORITY_READ_FIX_2026-11-28.md#dokončené-dev-nasazení-a-ověření)
+zůstává Hosting **14a0f588585839e2**, 31 ACTIVE Functions a dva minutové joby.
+Web/27 Functions jsou ze zdroje 5435855, dva účtové workery bd81e98;
+getFeedPage/getSavedShouts nově ec371188, úplné CI 46117687063 success,
+revize 00010-nay /00004-biv. Firestore Rules jsou **8cbacbed-2456-48f7-9a2f-46bb66e8481b**,
+Storage **fb4848ff-2673-482e-84df-f1c1caa74c9f**; hashe a oba cloudové zdrojové
+archivy ověřené. PublicUntil index 7c6a122, prostředky a ostatních 29 Functions beze změny.
 Archiv a právní verze 2026-11-27 jsou aktivní, pilot i vymezený úklid uzavřené.
-Při revizi nic nenasazeno; produkce/main se neměnily.
+Oprava nasazena pouze do DEV; bez nových dat/účtů, produkce/main se neměnily.
 
 ## Historické checkpointy DEV
 

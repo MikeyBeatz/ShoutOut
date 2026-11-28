@@ -37,11 +37,14 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 DEV feed a archivní pilot jsou uzavřené; celé MVP, produkce a společná ruční
 regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi neměnily.
 
-1. Dokončit [schválený bezpečnostní úsek F-01/F-02/F-06](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md):
-   místní oprava a cílené testy hotové, nyní společné úplné CI a ověřený DEV
-   přechod dvou čtecích Functions a Rules. Bez nových fixture/účtů/prostředků.
-   Regionální metadata Q-01 se nemění; před další změnou je produktově upřesnit.
-2. Dokončit již otevřenou moderaci a Business: fronta nad 50 hlášení F-04,
+**Navazující oprava F-01/F-02/F-06 je hotová v DEV.**
+[Úplné CI přesného zdroje, skutečné nasazení a jeho meze](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md#dokončené-dev-nasazení-a-ověření).
+Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
+změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
+
+1. Připravit konkrétní úsek úplné moderační fronty F-04. Regionální metadata
+   Q-01 se nemění; před změnou jejich oprávnění je produktově upřesnit.
+2. Dokončit zbývající již otevřenou moderaci a Business:
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.
 3. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;
@@ -51,7 +54,7 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Známé menší otevřené body: tmavý motiv a akce soukromých odpovědí,
 diagnostika code=unknown; chybu jednoho prohlížeče vlastník odložil. Tyto
 nálezy nejsou automaticky schválenou implementací. Žádné nové Auth/fixture
-se pro revizi nevytvářely, produkce/main zůstaly beze změny.
+se pro revizi ani opravu nevytvářely, produkce/main zůstaly beze změny.
 
 Pracovat po [ucelených schválených úsecích](operations/RELEASING.md#development-checkpoints):
 cílené místní kontroly průběžně, společný push/CI na konci celku před

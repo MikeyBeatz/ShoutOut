@@ -1,11 +1,12 @@
 # Serverový a produkční plán webového MVP
 
-Aktuálně 27. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
+Aktuálně 28. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accounts/ARCHIVE_LEGACY_DEV_ASSESSMENT.md#archive-dev-pilot-results).
 [Souhrnná revize](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) je dokončená;
 šest nálezů a otevřené brány jsou v protokolu. Vlastník následně schválil
 [opravu F-01/F-02/F-06](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md), která
-je místně připravená před přesným úplným CI a DEV přechodem. Společná regrese
-zůstává navazující prací. Níže jsou i historické výsledky příprav.
+je hotová po úplném CI ec371188 a ověřeném DEV přechodu dvou čtecích Functions
+a Firestore/Storage Rules. Další návrh je F-04; Q-01 před změnou oprávnění upřesnit.
+Společná regrese zůstává navazující prací. Níže jsou i historické výsledky příprav.
 Produkční aktivace a celková MVP regrese zůstávají otevřené.
 
 <a id="archive-identity-local-integration"></a>

@@ -12,7 +12,7 @@ F-03 (loga), F-04 (fronta), F-05 (pobočky) a Q-01 (regionální metadata)
 nejsou součástí této opravy. Zejména se nezavádí globální nebo regionální
 oprávnění navíc. Produkce a main se nemění.
 
-## Připravené změny
+## Implementované změny
 
 - **F-01 Firestore:** pět cizích get cest (`bans`, `contentRestrictions`,
   `accountDeletionRequests`, `businessApplications`, `businessProfiles`)
@@ -73,12 +73,12 @@ pro deduplikaci, minimální field mask, prázdnou množinu a neplatné identity
 Lint Functions prošel. Poslední změnu Uložených, kompatibilní reader a skutečné
 serverové reakce/oznámení ověřil samostatný běh **32/32 bez skipů**, včetně
 banu vloženého po načtení saved snapshotu. Běhy mají překryv; jejich počty
-se nesčítají jako počet unikátních scénářů. Společné úplné CI přesného zdroje
-se doplní před nasazením.
+se nesčítají jako počet unikátních scénářů. Následné úplné CI a skutečné
+nasazení jsou doložené v závěrečné části tohoto protokolu.
 
 První úplný běh 46116557242 byl řízeně zrušen před nasazením po doplnění
 výše uvedeného ověření identity před control lookupem. Nejde o úspěšné
-finální CI; nasazení vyžaduje success navazujícího přesného commitu.
+finální CI; tuto podmínku následně splnil commit ec371188 v CI 46117687063.
 Konečná podoba této Rules matice znovu prošla místně **15/15 bez skipů**,
 včetně anonymního/neověřeného create a všech níže uvedených útočných variant.
 
@@ -108,7 +108,7 @@ pozitivních scénářů nedokládalo funkční aplikaci. Prototyp pravidel tak
 ověřuje konkrétní hranice; před veřejným vydáním zůstává společná kontrola
 a startovní brána, nikoli tvrzení absolutní bezpečnosti.
 
-**Postup DEV:** po úspěšném úplném CI přesného commitu připravit čistý
+**Schválený postup DEV (provedený níže):** po úspěšném úplném CI přesného commitu připravit čistý
 archivní active artefakt; pouze v `shoutout-dev-46c81` aktualizovat
 `getFeedPage` a `getSavedShouts`, potom materializované Firestore Rules
 s právní verzí 2026-11-27 a Storage Rules. Beze změny prostředků, ostatních
@@ -124,3 +124,51 @@ není automaticky přijatý.
 Zápis a oprava těchto vad nemění pevné váhy ani nepřidává další kredit
 uzavřeným pilotům. Zbylá autorita, celá moderační regrese a produkční brána
 zůstávají ve stupnici otevřené.
+
+## Dokončené DEV nasazení a ověření
+
+**Hotovo 28. listopadu 2026.** Přesný zdroj
+`ec371188b5aa82c04002b17210f11a1b265c317f` má
+[úspěšné úplné CI 46117687063](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46117687063).
+Před nasazením znovu ověřený head SHA, úspěšné těžké CI kroky, čistá pracovní
+kopie a hashe všech souborů připraveného active artefaktu. Starší zrušené CI
+nebylo použité jako podklad vydání.
+
+| Vrstva | Skutečný výsledek v shoutout-dev-46c81 |
+|---|---|
+| getFeedPage | Revize `getfeedpage-00010-nay`, předchozí `00009-fej`; 87 skutečně nahraných zdrojových souborů souhlasí s čistým artefaktem |
+| getSavedShouts | Revize `getsavedshouts-00004-biv`, předchozí `00003-peq`; stejných 87 souborů ověřených proti vlastnímu cloudovému source archivu |
+| Provoz starých revizí | 100 % na nové revizi, bez tagů; všech 9/3 starších revizí má Cloud Run Active = CONDITION_FAILED /RETIRED |
+| Firestore Rules | `8cbacbed-2456-48f7-9a2f-46bb66e8481b`, SHA-256 `5b33f52df1832fd5d14890d0e77a76fb96866830ba8afeaf4bcf2c80a52e97f1` |
+| Storage Rules | `fb4848ff-2673-482e-84df-f1c1caa74c9f`, SHA-256 `d9c230499a65d2b4efb6572ac27c08e78316d4992e46ccf11f657c46cb53102c` |
+| Zachování konfigurace | Ostatních 29 Functions přesně shodných s baseline; vybrané dvě zachovaly CPU, paměť, min/max, concurrency, timeout, service account, ingress, secret bindings/verze i IAM policy |
+| Hosting / plánovače | Hosting stále `14a0f588585839e2`, oba původní minutové joby ENABLED beze změny |
+| Data / jiná prostředí | Žádné nové fixture/Auth účty, žádné aplikační datové zápisy ani migrace; produkce a main beze změny |
+
+Úplné CI mimo jiné potvrdilo **500/500 Rules/transakčních**, **16/16 Storage**,
+**14/14 delta/Chrome**, **38/38 news/pohybových**, **194/194 archivních**,
+**155/155 purge** a **34/34 B2** případů bez skipů v těchto sadách. Prošly také
+ostatní moderační/Business sady, Flutter testy, browserová persistence,
+analýza, lint, 140 tools testů a webový build. Unit běh Functions vykázal
+231 pass /917 integračních skip; přeskočené testy se nepočítají jako spuštěné
+a integrační sady mají výše samostatné skutečné běhy. Sady se překrývají,
+proto se jejich počty nesčítají do jednoho údajného počtu unikátních testů.
+
+Po nasazení uspělo deset skutečných read-only DEV dotazů Home/profil/Business/
+komentáře/staff/vlastní Aktivní/Expirované/Uložené. Všechny byly prázdné:
+nejde o živou zkoušku stránkování velké sady ani přihlášené UI. Oba nasazené
+čtecí endpointy na anonymní platný callable envelope odpověděly
+401/UNAUTHENTICATED. Negativní scénáře banu/pending a správné serverové
+oznámení jsou doložené emulátorem, nikoli nově založeným živým účtem.
+
+Technické podklady v auditní pracovní kopii: `build/authority-ci-proof.json`,
+`build/authority-ci-test-summary.log`, `build/authority-candidate.json`,
+`build/authority-before.json`, `build/authority-after.json`,
+`build/authority-live-query-coverage.json`, `build/authority-endpoints.json`
+a oba deploy logy. Metadata ověřovala zdroje/Rules pouze GET požadavky;
+nezměnila původní žádosti, lhůty, kvóty nebo souhlasy.
+
+**Další navržený úsek:** úplnost moderační fronty F-04, před změnou
+regionálního čtení vyjasnit Q-01. F-03/F-05, geografie, produkční kapacita,
+provozní brána a společná ruční regrese zůstávají otevřené. Tento backendový
+úsek nevyžaduje nový ruční pilot s daty; povinná celková regrese tím uzavřená není.

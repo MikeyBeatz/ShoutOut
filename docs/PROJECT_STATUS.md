@@ -6,15 +6,20 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 
 ## Další konkrétní krok
 
-**Schválená oprava F-01/F-02/F-06 je místně připravená.**
-[Rozsah, testy, náklady a konkrétní DEV postup](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
+**Schválená oprava F-01/F-02/F-06 je hotová a ověřená v DEV.**
+[Rozsah, testy, náklady a skutečné nasazení](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
 Privilegované cizí Firestore gety používají existující eligibleModerator,
 Storage support čtení odmítá aktivní ban, managed oznámení zapisuje server
 a čtení starých pending autorů chrání společný dávkový helper. Vlastní stavové
-čtení a readAt oznámení zachované. Následuje společné úplné CI přesného zdroje,
-potom pouze dvě čtecí Functions a Firestore/Storage Rules v shoutout-dev-46c81.
-Web, prostředky, indexy, joby, klíče ani živé fixture se nemění. Q-01 o regionální
-viditelnosti metadat zůstává bez změny oprávnění k produktovému upřesnění.
+čtení a readAt oznámení zachované. Zdroj ec371188b5aa82c04002b17210f11a1b265c317f
+má úplné CI 46117687063 success; nasazeny pouze dvě čtecí Functions a
+Firestore/Storage Rules v shoutout-dev-46c81. Skutečné zdroje a hashe Rules
+ověřené, staré revize vybraných Functions odstavené. Web, ostatních 29 Functions,
+prostředky, indexy, joby, klíče ani živé fixture se neměnily.
+
+Další navržený úsek je úplnost moderační fronty F-04. Q-01 o regionální
+viditelnosti metadat před změnou oprávnění produktově upřesnit. F-03/F-05
+ani nové produktové volby nejsou součástí dokončené opravy.
 
 Další stávající MVP práce: úplnost moderační fronty, důvěryhodné Business
 pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.
@@ -25,23 +30,24 @@ mvp-24 zůstávají otevřené; známé vady mají přednost před dalším ruč
 
 ## Poslední ověřené nasazení
 
-| Vrstva | Ověřený DEV stav, čtecí kontrola 28.11.2026 před opravou |
+| Vrstva | Ověřený DEV stav, kontrola po opravě 28.11.2026 |
 |---|---|
 | Projekt / site | shoutout-dev-46c81; https://shoutout-dev-46c81.web.app |
-| Web + 29 Functions | 5435855847bc81c76a05f1e6f18d5b68b636367b / [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685) |
+| Web + 27 Functions | 5435855847bc81c76a05f1e6f18d5b68b636367b / [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685); beze změny |
 | Dva účtové workery | bd81e98ddab2b5e0e6f62410e302e9824e547f18 / [úplné CI 46020290663 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46020290663) |
+| getFeedPage / getSavedShouts | ec371188b5aa82c04002b17210f11a1b265c317f / [úplné CI 46117687063 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46117687063); revize 00010-nay /00004-biv, zdroje ověřené |
 | Hosting | 14a0f588585839e2; vydaná hra zachovaná |
-| Firestore Rules | 88a94380-2b88-4f37-8ed9-47dc9ab88a89; c361526adeeec77328a7c1d640b43dd693e970bd / [úplné CI 46043558742 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46043558742) |
-| Storage Rules | e2b2becb-fe6b-4c83-8dc5-a4b2295afba6; shodné s verzovaným storage.rules |
+| Firestore Rules | 8cbacbed-2456-48f7-9a2f-46bb66e8481b; materializovaný active zdroj ec371188, hash ověřený |
+| Storage Rules | fb4848ff-2673-482e-84df-f1c1caa74c9f; shodné s verzovaným storage.rules z ec371188 |
 | Vlastní historie / index | 7c6a1229ced05803498a7f6f9bba7acb1045ea93 / [úplné CI 46065640727 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46065640727); nový publicUntil dotaz funkční |
 | Functions / prostředky | 31 ACTIVE /Node22 /europe-west3; min0/max1, concurrency1, 256 MiB; 28 callables 15 s /3 workery 60 s |
 | Plánovače | Dvě ENABLED minutové úlohy cleanupOperationReceipts a resumeAccountDeletionJobsDev; nezměněné |
 | Archiv / právo | Capture/reader/identita/údržba a verze 2026-11-27 zapnuté; skutečné právní přijetí bez automatického potvrzení |
 | Účtový pilot | Oba nové Auth pryč, primární úlohy content-archived, privátní purge scheduled na 26.01.2027 podle původních žádostí |
-| Jiné prostředí | Revize nic nenasazovala, main/produkce se neměnily; první produkční app release není tímto DEV stavem doložený |
+| Jiné prostředí | Oprava nasazena pouze do DEV; main/produkce se neměnily, první produkční app release není doložený |
 
 Úplné hashe Rules a rozdílné zdroje vrstev jsou v
-[revizním protokolu](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#potvrzený-stav-dev). Před dalším rolloutem
+[protokolu opravy](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md#dokončené-dev-nasazení-a-ověření). Před dalším rolloutem
 znovu ověřit přesný commit, jeho CI, čistý artefakt a cíl podle
 [RELEASING](operations/RELEASING.md). Žádné historické označení „aktuální“
 ve starém checkpointu nemá přednost před touto tabulkou.
@@ -52,9 +58,9 @@ ve starém checkpointu nemá přednost před touto tabulkou.
 
 | Oblast | Potvrzené dokončení | Co ještě zbývá |
 |---|---|---|
-| Feed | B1–B4, přečtení/sync, metadata/cache, číslovka, pohyb a řazení mají [uzavřenou DEV akceptaci](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete). | F-06 pro staré/recovery stavy; společná produkční regrese a kapacita. |
-| Obsahová brána | DEV serverová tvorba, reakce, uložení, hlášení a mazání včetně idempotence. | Zbylé přímé event oznámení F-02 a souřadnice poboček F-05; celý mvp-16 není uzavřený. |
-| Moderace / Business | Rozhodnutí, odstranění, sankce/revokace a zamítnutí/oprava/pozastavení/reaktivace mají serverovou DEV cestu, audit a doložené piloty. | F-01, úplná fronta F-04, Q-01, bezpečná loga F-03 a provozní kritéria. |
+| Feed | B1–B4 mají [uzavřenou DEV akceptaci](plans/feed/B4_DEV_ROLLOUT.md#feed-final-acceptance-complete); čtecí ochrana starých pending autorů F-06 nasazená. | Společná produkční regrese a kapacita; nejasné staré indexové stavy zůstávají bezpečně odmítnuté. |
+| Obsahová brána | DEV serverová tvorba, reakce, uložení, hlášení a mazání včetně idempotence; klientský writer event oznámení F-02 uzavřený. | Souřadnice poboček F-05 a zbylá autorita; celý mvp-16 není uzavřený. |
+| Moderace / Business | Serverová rozhodnutí, sankce/revokace a Business stav mají audit/piloty; F-01 čtení při banu opravené v DEV. | Úplná fronta F-04, Q-01, bezpečná loga F-03 a provozní kritéria; Storage má popsanou hranici dvou autorizačních dokumentů. |
 | Archiv / životnost | Platnost → 7 dní vlastní historie → 60 dní archivu, dohledání admin/ownerem, podklad hlášení po smazání a omezený purge v DEV přijaty. | Produkční aktivace a společná regrese; původní termíny a otevřený povinný úklid respektovat. |
 | Mazání účtu | Příprava/finalizace, Auth, archivace, původní purge a smazání bez přijetí nových podmínek ověřené v DEV. | Produkční brána a dohled nad potřebou ručního řešení; neplést naplánovaný purge s již provedeným. |
 | Geografie | Serverový kód a místní ochrany existují. | enrichShoutGeography není mezi 31 Functions; bezpečný backfill a regionální akceptace mvp-13 otevřené. |
@@ -68,9 +74,10 @@ uzavřené: 16 vymezených dokumentů a tři syntetické cloudové read klíče 
 skutečné kontaktní vazby a termíny zůstaly zachované. První neúplný testovací
 profil opravený dříve; běžná registrace rezervaci přezdívky již vytváří správně.
 
-Aktuální revize znovu ověřila klientské/serverové regrese, protipříklady nad
-přesnými nasazenými Rules a deset skutečných DEV dotazů bez zápisů.
-[Počty, výjimky a protokoly](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#testy-důkazy-a-jejich-meze).
+Revize a navazující oprava ověřily klientské/serverové regrese a protipříklady
+Rules. Po opravě prošlo přesné úplné CI i deset skutečných DEV dotazů bez zápisů;
+oba čtecí endpointy odmítly anonymní požadavek 401/UNAUTHENTICATED.
+[Počty, výjimky a protokoly opravy](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md#dokončené-dev-nasazení-a-ověření).
 Živé dotazy byly prázdné, proto nejsou důkazem stránkování většího živého
 seznamu ani klientského Auth/App Check. Browserový scénář označený skip
 není spuštěný test. Žádný cloudový zátěžový test ani produkční audit neproběhl.
