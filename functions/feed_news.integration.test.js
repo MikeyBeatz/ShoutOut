@@ -14,6 +14,16 @@ import {newsDetectionModel} from './feed_news_detection_model.js';
 const enabled=process.env.FIRESTORE_EMULATOR_HOST==='127.0.0.1:8080';
 const app=enabled?initializeApp({projectId:'shoutout-rules-test'},'feed-news-integration'):null,db=app?getFirestore(app):null;
 after(async()=>{if(app){await db.terminate();await deleteApp(app);}});
+
+test('new publication count excludes a pending legacy author without caching the mutable fence',{skip:!enabled},async t=>{
+ const f=await newsFixture(db,t),page=await f.page();
+ await f.change(80,{createdAt:Timestamp.fromMillis(f.now-5000)},{create:true});
+ assert.equal((await f.news(page.newsCheckpoint)).count,1);
+ const pending=db.doc(`accountDeletionRequests/${f.rows[0].authorId}`);t.after(()=>pending.delete());
+ await pending.set({userId:f.rows[0].authorId,status:'pending'});
+ assert.equal((await f.news(page.newsCheckpoint)).count,0);
+ await pending.delete();assert.equal((await f.news(page.newsCheckpoint)).count,1);
+});
 test('news disabled rejects before database access',async()=>{
  await assert.rejects(getFeedDeltaOperation({auth:{uid:'actor',token:{email:'fixture@example.test',email_verified:true}},app:{appId:'fixture'},data:{format:'delta-v1',mode:'news',expectedUserId:'actor',checkpoint:'x'}},
  {projectId:'shoutout-dev-46c81'},{enabled:true,key:Buffer.alloc(32)}),error=>error.code==='failed-precondition'&&error.message==='Feed news is not enabled.');

@@ -72,3 +72,26 @@ test('a fully filtered first page keeps its continuation to available later book
   assert.deepEqual(second.items.map(item => item.id), f.refs.slice(50).map(ref => ref.id));
   assert.equal(second.next, null);
 });
+
+test('pending legacy authors are excluded without dropping the bookmark continuation or restoring their body', { skip: !enabled }, async t => {
+  const f = await fixture(t), pending = db.doc(`accountDeletionRequests/${f.uid}-author`);
+  f.roots.push(pending); await pending.set({ userId: f.uid + '-author', status: 'pending', privateEmail: 'never-transfer@example.test' });
+  const first = await page(f.request(), db);
+  assert.deepEqual(first.items, []); assert(first.next);
+  assert(!JSON.stringify(first).includes('Full content')); assert(!JSON.stringify(first).includes('privateEmail'));
+  await pending.delete();
+  assert.equal((await page(f.request(first.next), db)).items.length, 5);
+  assert.equal((await page(f.request(), db)).items.length, 50);
+});
+
+test('a caller banned after the saved snapshot is read still cannot receive the response', { skip: !enabled }, async t => {
+  const f = await fixture(t, 1), ban = db.doc(`bans/${f.uid}`); f.roots.push(ban);
+  const guarded = new Proxy(db, { get(target, name) {
+    if (name === 'runTransaction') return async (...args) => {
+      const result = await target.runTransaction(...args);
+      await ban.set({ expiresAt: Timestamp.fromMillis(Date.now() + 86400000) }); return result;
+    };
+    return typeof target[name] === 'function' ? target[name].bind(target) : target[name];
+  } });
+  await assert.rejects(page(f.request(), guarded), { code: 'permission-denied' });
+});

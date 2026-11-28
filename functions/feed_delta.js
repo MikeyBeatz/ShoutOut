@@ -10,6 +10,7 @@ import { createFeedGenerationStore } from './feed_runtime.js';
 import { validateFeedIndexControl } from './feed_index_admin_guard.js';
 import { bodyProjection, bodyDigest } from './feed_body_contract.js';
 import { publicCardState } from './feed_card_state.js';
+import { readPublicAuthorAvailability } from './public_author_availability.js';
 import { distanceKm } from './feed_spatial.js';
 import { readContentHash } from './read_content_identity.js';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
@@ -81,10 +82,9 @@ export async function getFeedDeltaOperation(request, db, { key, enabled = false,
   async function policy(tx, rows) {
     const blocked = await tx.get(db.collection(`users/${uid}/blocked`).limit(200));
     const blockedIds = new Set(blocked.docs.map(doc => doc.id));
-    const authors = [...new Set(rows.map(row => row.authorId))];
-    const profiles = authors.length ? await tx.getAll(...authors.map(id => db.doc(`publicProfiles/${id}`))) : [];
-    const erased = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
-    return row => !blockedIds.has(row.authorId) && !erased.has(row.authorId);
+    const authors = rows.filter(row => !blockedIds.has(row.authorId)).map(row => row.authorId);
+    const { unavailable } = await readPublicAuthorAvailability(tx, db, authors);
+    return row => !blockedIds.has(row.authorId) && !unavailable.has(row.authorId);
   }
   async function finish(context, missing, token = null) {
     const { snapshot, binding, rows, baseline } = context;

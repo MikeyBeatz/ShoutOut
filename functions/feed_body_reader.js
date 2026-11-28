@@ -13,6 +13,7 @@ import { metadataOf } from './feed_block_index.js';
 import { distanceKm } from './feed_spatial.js';
 import { bodyDigest, canonicalBody, validateDescriptors } from './feed_body_contract.js';
 import { feedBodyState, selectionIdentity, validateBodyReadState, publicBodyReadState } from './feed_body_state.js';
+import { readPublicAuthorAvailability } from './public_author_availability.js';
 
 const stale = () => { throw new FeedSessionExpired(); };
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -114,8 +115,8 @@ export function consistentBodyReader(db, { binding, store, request, snapshot, se
     const blockedIds = new Set(blocked.docs.map(doc => doc.id));
     if ([...states.values()].some(state => blockedIds.has(state.authorId))) stale();
     const authors = [...new Set([...states.values()].map(state => state.authorId))];
-    const profiles = authors.length ? await tx.getAll(...authors.map(author => database.doc(`publicProfiles/${author}`))) : [];
-    if (profiles.some(profile => profile.get('accountStatus') === 'deleted')) stale();
+    const { unavailable } = await readPublicAuthorAvailability(tx, database, authors);
+    if (unavailable.size) stale();
   }
   function available(state) {
     const row = state.eligibility;

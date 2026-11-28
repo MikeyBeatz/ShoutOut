@@ -1,18 +1,20 @@
 # ShoutOut – aktuální stav pro navázání práce
 
-Souhrn k 27. listopadu 2026. Kód a konkrétní provozní důkazy mají přednost
+Souhrn k 28. listopadu 2026. Kód a konkrétní provozní důkazy mají přednost
 před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](archive/README.md),
 [výsledek právě dokončené revize](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md).
 
 ## Další konkrétní krok
 
-**Souhrnná revize je hotová; aplikace se při ní neměnila ani nenasazovala.**
-Potvrzené nálezy F-01 až F-06, jejich reprodukce, meze a pořadí oprav jsou
-v [revizním protokolu](operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md#potvrzené-nálezy).
-Nejbližší navržený balík: sjednotit způsobilost privilegovaného čtení při banu,
-uzavřít staré klientské event zápisy oznámení a doplnit ochranu starých pending
-čtecích stavů. Konkrétní implementaci předem schválit; revize ji neprovedla.
-Regionální viditelnost metadat hlášení Q-01 potřebuje produktové upřesnění.
+**Schválená oprava F-01/F-02/F-06 je místně připravená.**
+[Rozsah, testy, náklady a konkrétní DEV postup](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
+Privilegované cizí Firestore gety používají existující eligibleModerator,
+Storage support čtení odmítá aktivní ban, managed oznámení zapisuje server
+a čtení starých pending autorů chrání společný dávkový helper. Vlastní stavové
+čtení a readAt oznámení zachované. Následuje společné úplné CI přesného zdroje,
+potom pouze dvě čtecí Functions a Firestore/Storage Rules v shoutout-dev-46c81.
+Web, prostředky, indexy, joby, klíče ani živé fixture se nemění. Q-01 o regionální
+viditelnosti metadat zůstává bez změny oprávnění k produktovému upřesnění.
 
 Další stávající MVP práce: úplnost moderační fronty, důvěryhodné Business
 pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.
@@ -23,7 +25,7 @@ mvp-24 zůstávají otevřené; známé vady mají přednost před dalším ruč
 
 ## Poslední ověřené nasazení
 
-| Vrstva | Ověřený DEV stav, čtecí kontrola 27.11.2026 |
+| Vrstva | Ověřený DEV stav, čtecí kontrola 28.11.2026 před opravou |
 |---|---|
 | Projekt / site | shoutout-dev-46c81; https://shoutout-dev-46c81.web.app |
 | Web + 29 Functions | 5435855847bc81c76a05f1e6f18d5b68b636367b / [úplné CI 46013597685 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46013597685) |

@@ -5,6 +5,7 @@
 Provedení postupu vyžaduje oprávnění podle RELEASING. Datované staré rollouty jsou důkazy své etapy; před změnou ověřit aktuální prostředí.
 
 - [Souhrnná revize dosavadní práce k MVP – 27.11.2026](MVP_COMPLETED_WORK_REVIEW_2026-11-27.md)
+- [Oprava autority a čtecích ochran F-01/F-02/F-06](MVP_AUTHORITY_READ_FIX_2026-11-28.md)
 - [Nákladové pojistky Firebase a Google Cloud](COST_SAFETY.md)
 - [Firebase Storage – Business loga a obrázky k hlášením chyb](FIREBASE_STORAGE_SETUP.md)
 - [Prezentační web ShoutOut](PRESENTATION_SITE.md)

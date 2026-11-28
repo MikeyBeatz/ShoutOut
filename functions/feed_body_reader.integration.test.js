@@ -149,6 +149,7 @@ test('actual admission and final policy reject missing App Check, legal acceptan
     [async () => f.users.collection('legal').doc('acceptance_2026_07_25').delete(), async () => f.users.collection('legal').doc('acceptance_2026_07_25').set({})],
     [async () => f.db.doc(`bans/${f.uid}`).set({}), async () => f.db.doc(`bans/${f.uid}`).delete()],
     [async () => f.db.doc(`accountDeletionRequests/${f.uid}`).set({ status: 'pending' }), async () => f.db.doc(`accountDeletionRequests/${f.uid}`).delete()],
+    [async () => f.db.doc(`accountDeletionRequests/${row.authorId}`).set({ status: 'pending' }), async () => f.db.doc(`accountDeletionRequests/${row.authorId}`).delete()],
     [async () => f.users.collection('blocked').doc(row.authorId).set({}), async () => f.users.collection('blocked').doc(row.authorId).delete()],
     [async () => f.db.doc(`publicProfiles/${row.authorId}`).set({ schemaVersion: 1, accountStatus: 'deleted' }), async () => f.db.doc(`publicProfiles/${row.authorId}`).set({ nickname: 'Restored fixture' })],
   ];

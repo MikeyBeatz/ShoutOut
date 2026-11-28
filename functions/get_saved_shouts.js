@@ -4,6 +4,7 @@ import { requireEligibleActor } from './callable_security.js';
 import { assertFeedRuntimeTarget } from './feed_index_paths.js';
 import { publicFeedBody } from './get_feed_page.js';
 import { distanceKm } from './feed_spatial.js';
+import { readPublicAuthorAvailability } from './public_author_availability.js';
 
 // The continuation only skips within this actor's own bookmark query. It
 // grants no access, contains no source body and need not be a signed feed
@@ -20,18 +21,21 @@ export async function getSavedShoutsOperation(request, db, { clock = () => new D
         input.after.split('/')[3] === identity.uid)) throw new HttpsError('invalid-argument', 'Invalid saved Shout page.');
   let query = db.collectionGroup('saves').where('userId', '==', identity.uid).orderBy(FieldPath.documentId()).limit(50);
   if (input.after) query = query.startAfter(db.doc(input.after));
-  const page = await query.get(), sources = page.docs.filter(doc => /^shouts\/[^/]+\/saves\/[^/]+$/.test(doc.ref.path) && doc.id === identity.uid);
-  const docs = sources.length ? await db.getAll(...sources.map(doc => doc.ref.parent.parent)) : [];
-  const blocked = new Set((await db.doc(`users/${identity.uid}`).collection('blocked').limit(200).get()).docs.map(doc => doc.id));
-  const authors = [...new Set(docs.map(doc => doc.get('authorId')).filter(id => typeof id === 'string' && id.length && !id.includes('/')))];
-  const deleted = new Set((authors.length ? await db.getAll(...authors.map(id => db.doc(`publicProfiles/${id}`))) : [])
-    .filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
-  const now = clock().getTime();
-  const items = docs.filter(doc => doc.exists && doc.get('status') === 'active' && doc.get('contentPurged') !== true &&
-    doc.get('expiresAt') instanceof Timestamp && doc.get('expiresAt').toMillis() > now &&
-    !blocked.has(doc.get('authorId')) && !deleted.has(doc.get('authorId')))
-    .map(doc => ({ id: doc.id, distanceKm: input.point && Number.isFinite(doc.get('location')?.latitude) && Number.isFinite(doc.get('location')?.longitude)
-      ? distanceKm(input.point, doc.get('location')) : 0, data: publicFeedBody(doc.data()) }));
+  const result = await db.runTransaction(async tx => {
+    const page = await tx.get(query), sources = page.docs.filter(doc => /^shouts\/[^/]+\/saves\/[^/]+$/.test(doc.ref.path) && doc.id === identity.uid);
+    const docs = sources.length ? await tx.getAll(...sources.map(doc => doc.ref.parent.parent)) : [];
+    const blocked = new Set((await tx.get(db.doc(`users/${identity.uid}`).collection('blocked').limit(200))).docs.map(doc => doc.id));
+    const now = clock().getTime();
+    const candidates = docs.filter(doc => doc.exists && doc.get('status') === 'active' && doc.get('contentPurged') !== true &&
+      doc.get('expiresAt') instanceof Timestamp && doc.get('expiresAt').toMillis() > now && !blocked.has(doc.get('authorId')));
+    const { unavailable } = await readPublicAuthorAvailability(tx, db, candidates.map(doc => doc.get('authorId')));
+    const items = candidates.filter(doc => !unavailable.has(doc.get('authorId')))
+      .map(doc => ({ id: doc.id, distanceKm: input.point && Number.isFinite(doc.get('location')?.latitude) && Number.isFinite(doc.get('location')?.longitude)
+        ? distanceKm(input.point, doc.get('location')) : 0, data: publicFeedBody(doc.data()) }));
+    return { version: 1, items, next: page.size === 50 ? page.docs.at(-1).ref.path : null };
+  }, { readOnly: true });
+  // Preserve the current actor check after network waits. Source/author data
+  // above share one snapshot; a new caller ban must still reject the reply.
   await requireEligibleActor({ request, db, now: clock() });
-  return { version: 1, items, next: page.size === 50 ? page.docs.at(-1).ref.path : null };
+  return result;
 }

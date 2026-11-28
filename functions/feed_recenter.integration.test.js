@@ -40,6 +40,22 @@ async function moved(f, page, point, extra = {}) {
   return result;
 }
 
+test('pending legacy author disappears from retained movement state and cannot refill a prior body', { skip: !enabled }, async t => {
+  const f = await newsFixture(db, t, 2), page = await initial(f);
+  const target = await moved(f, page, { latitude: f.point.latitude + .003, longitude: f.point.longitude });
+  const id = page.bodyPage.rows[0].id, pending = db.doc(`accountDeletionRequests/${f.rows[0].authorId}`);
+  t.after(() => pending.delete()); await pending.set({ userId: f.rows[0].authorId, status: 'pending' });
+  const retained = await f.step({ mode: 'movement-state', token: page.bodyPage.token,
+    movementToken: target.bodyPage.movementToken, ids: [id] }, options);
+  assert.deepEqual(retained.rows, []);
+  await assert.rejects(f.step({ mode: 'complete', token: target.bodyPage.token, missing: [id] }, options),
+    error => error.code === 'failed-precondition');
+  try {
+    const next = await moved(f, target, { latitude: f.point.latitude + .004, longitude: f.point.longitude });
+    assert.deepEqual(next.bodyPage.rows, []);
+  } catch (error) { assert.equal(error.code, 'failed-precondition'); }
+});
+
 test('movement is disabled by default; proof, point and account are validated', { skip: !enabled }, async t => {
   const f = await newsFixture(db, t, 2), page = await initial(f);
   const request = { mode: 'recenter', token: page.bodyPage.movementToken, point: f.point, cold: false };

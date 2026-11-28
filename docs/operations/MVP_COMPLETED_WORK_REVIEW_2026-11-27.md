@@ -280,3 +280,7 @@ Rules eskalace.
 Revize doplňuje důkazy do existujících otevřených podúseků. Nemění jejich
 váhy, neoznačuje nalezenou vadu za opravenou a nezapočítává se znovu jako
 hotová ruční regrese. Současné MVP procento se samotným auditem nezvyšuje.
+
+Navazující [schválená oprava F-01/F-02/F-06 z 28. listopadu](MVP_AUTHORITY_READ_FIX_2026-11-28.md)
+má vlastní implementační a nasazovací záznam. Tento původní protokol zachovává
+stav a reprodukce před opravou; ostatní nálezy ani produkční bránu neuzavírá.

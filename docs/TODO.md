@@ -1,6 +1,6 @@
 # ShoutOut – priority a milníky
 
-Aktualizováno 27. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
+Aktualizováno 28. listopadu 2026. Tento přehled určuje pořadí otevřené práce.
 Aktuální kód a ověřené nasazení jsou v [PROJECT_STATUS](PROJECT_STATUS.md),
 podrobné úkoly v [BACKLOG](BACKLOG.md), podmínky serverových milníků v
 [MVP_SERVER_PLAN](MVP_SERVER_PLAN.md). Neobsahuje chronologii rolloutů.
@@ -37,10 +37,10 @@ neznamená ztrátu dokončené práce. Podúseky mají pevné váhy a společnou
 DEV feed a archivní pilot jsou uzavřené; celé MVP, produkce a společná ruční
 regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi neměnily.
 
-1. Předložit společný bezpečnostní úsek F-01/F-02/F-06: způsobilost staff
-   čtení při banu, serverová autorita oznámení a pending autor ve starých
-   čtecích stavech. Nejprve emulátor/klientská kompatibilita, potom přesné CI
-   a DEV. Regionální viditelnost metadat Q-01 před změnou pravidel upřesnit.
+1. Dokončit [schválený bezpečnostní úsek F-01/F-02/F-06](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md):
+   místní oprava a cílené testy hotové, nyní společné úplné CI a ověřený DEV
+   přechod dvou čtecích Functions a Rules. Bez nových fixture/účtů/prostředků.
+   Regionální metadata Q-01 se nemění; před další změnou je produktově upřesnit.
 2. Dokončit již otevřenou moderaci a Business: fronta nad 50 hlášení F-04,
    důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
    Konkrétní poskytovatele, upload a provozní meze schválit před implementací.

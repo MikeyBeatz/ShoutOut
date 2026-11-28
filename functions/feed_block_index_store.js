@@ -11,6 +11,7 @@ import { assertIndexBinding } from './feed_index_paths.js';
 import { portableIndexPage } from './feed_portable_selection.js';
 import { isPurgedShoutContext } from './shout_context.js';
 import { deletedPublicIdentity } from './account_public_identity.js';
+import { readPublicAuthorAvailability } from './public_author_availability.js';
 import { canonical, clone, encodedBytes, metadataOf, lowRated, treeBuilder, verifyNode } from './feed_block_index.js';
 import { distanceKm, geohashBounds, FeedMinHeap } from './feed_spatial.js';
 import { buildingGeneration, generationContentIdentity, generationCardProjection } from './feed_generation_format.js';
@@ -204,9 +205,9 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
       await retentionFence(tx, marker, captured.roots, captured.retention, metrics);
       if (!accountRetention) return;
       const authors = [...new Set(rows.map(row => row.authorId))];
-      const profiles = authors.length ? await tx.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
-      if (metrics) metrics.retentionReadUnits += profiles.length;
-      if (profiles.some(doc => doc.get('accountStatus') === 'deleted')) throw new FeedSessionExpired();
+      const { unavailable, readUnits } = await readPublicAuthorAvailability(tx, db, authors);
+      if (metrics) metrics.retentionReadUnits += readUnits;
+      if (unavailable.size) throw new FeedSessionExpired();
     }, { readOnly: true });
   }
   const views = new WeakMap();
@@ -507,11 +508,10 @@ export function createBlockIndexStore(db, { binding, cache = blockCache(), elaps
     ids.forEach(assertId);
     const docs = ids.length ? await db.getAll(...ids.map(id => source.doc(id))) : [];
     const authors = accountRetention ? [...new Set(docs.filter(doc => doc.exists && !isPurgedShoutContext(doc.data())).map(doc => doc.get('authorId')))] : [];
-    const profiles = authors.length ? await db.getAll(...authors.map(uid => db.doc(`publicProfiles/${uid}`))) : [];
-    const erasedAuthors = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
-    return { sourceReads: docs.length, ...(accountRetention ? { retentionReadUnits: profiles.length } : {}), items: docs.map(doc => {
+    const { unavailable, readUnits } = await readPublicAuthorAvailability(db, db, authors);
+    return { sourceReads: docs.length, ...(accountRetention ? { retentionReadUnits: readUnits } : {}), items: docs.map(doc => {
       const row = doc.exists && !isPurgedShoutContext(doc.data()) ? sourceMetadata({ ...doc.data(), id: doc.id }) : null;
-      return row && !erasedAuthors.has(row.authorId) && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
+      return row && !unavailable.has(row.authorId) && available(row, c, now) ? { id: doc.id, available: true, row } : { id: doc.id, available: false };
     }) };
   }
 

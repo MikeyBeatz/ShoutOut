@@ -275,3 +275,26 @@ test('completion rechecks body version, author deletion, permissions and origina
   f.now += 3600001;
   await assert.rejects(f.step({ mode: 'complete', token: current.bodyPage.token, missing: [id] }), error => error.code === 'failed-precondition');
 });
+
+test('pending legacy author fences warm descriptors, body refill, new cold pages and compatible V1 requests', { skip: !enabled }, async t => {
+  const f = await fixture(t, 2), warm = await f.page(), id = f.rows[0].id;
+  const pending = db.doc(`accountDeletionRequests/${f.rows[0].authorId}`); f.roots.push(pending);
+  await pending.set({ userId: f.rows[0].authorId, status: 'pending', privateEmail: 'not-returned@example.test' });
+  for (const missing of [[], [id]]) {
+    await assert.rejects(f.step({ mode: 'complete', token: warm.bodyPage.token, missing }),
+      error => error.code === 'failed-precondition');
+  }
+  for (const cold of [false, true]) {
+    try {
+      const value = await f.page({ cold });
+      assert.equal(value.bodyPage.rows.length, 0); assert.equal(value.bodyPage.bodies.length, 0);
+    } catch (error) { assert.equal(error.code, 'failed-precondition'); }
+  }
+  const old = f.request({ context: filters }); delete old.data.format;
+  try {
+    const result = await getCompatibleFeedPageOperation(old, db, { key: f.key, enabled: true, clock: () => new Date(f.now) });
+    assert.deepEqual(result.items, []);
+  } catch (error) { assert.equal(error.code, 'failed-precondition'); }
+  await pending.delete();
+  const restored = await f.page({ cold: true }); assert.equal(restored.bodyPage.bodies.length, 2);
+});

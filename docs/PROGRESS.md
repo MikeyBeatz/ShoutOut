@@ -407,7 +407,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | content-private-delete-web-dev: Vlastní soukromé mazání – kompatibilní DEV web | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45096691292) |
 | content-private-delete-dev: Vlastní soukromé mazání – ověřený DEV Rules cutover | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45098775591) |
 | content-private-delete-accept: Vlastní soukromé mazání – živá akceptace DEV | acceptance | ✅ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-dev-complete) |
-| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| content-remaining-authority: Zbývající přímé zápisy, čítače, limity a souřadnice | implementation | ⬜ | [1](../docs/MVP_SERVER_PLAN.md#private-deletion-preparation), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md), [3](../docs/operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md) |
 | content-production-accept: Kompletní produkční akceptace obsahové brány | acceptance | ⬜ | — |
 | moderation-archive-target-code: Auditovaný detail nahlášeného archivovaného komentáře – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
 | moderation-archive-target-check: Auditovaný detail nahlášeného archivovaného komentáře – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_CONTENT_ARCHIVE_PLAN.md) |
@@ -451,7 +451,7 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-business-dev: Business rozhodování – DEV aktivace | deployment | ✅ | [1](../docs/MVP_SERVER_PLAN.md#moderation-business-dev-results), [2](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45375019177), [3](https://github.com/MikeyBeatz/ShoutOut/actions/runs/45424330633), [4](../docs/MVP_SERVER_PLAN.md#business-suspension-ui-repair-results) |
 | moderation-business-accept: Business rozhodování – živá akceptace | acceptance | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md), [2](../docs/MVP_SERVER_PLAN.md#moderation-business-final-client-results) |
 | moderation-business: Business – pravidla ruční kontroly a společná regrese | verification | ⬜ | [1](../docs/reference/BUSINESS_VERIFICATION.md) |
-| moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | [1](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| moderation-regression: Úplná ruční regrese rolí, rozsahů a postihů | acceptance | ⬜ | [1](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md), [2](../docs/operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md) |
 | moderation-production: Produkční aktivace moderace | acceptance | ⬜ | — |
 | business-deletion-fence-code: Ochrana Business aktivace proti návratu smazaného účtu – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
 | business-deletion-fence-check: Ochrana Business aktivace proti návratu smazaného účtu – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
@@ -466,8 +466,8 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | translation-accept: Finální kontrola přetečení, diakritiky a plurálů | acceptance | ⬜ | — |
 | regression-general: Závěrečná ruční regrese běžného účtu | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md), [2](../docs/LAUNCH_READINESS.md#completed-work-review), [3](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
 | regression-business: Závěrečná ruční regrese Business účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
-| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
-| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md) |
+| regression-staff: Závěrečná ruční regrese staff účtu | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md), [3](../docs/operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md) |
+| regression-network: Závěrečná regrese pomalé/přerušované sítě | acceptance | ⬜ | [1](../docs/LAUNCH_READINESS.md#completed-work-review), [2](../docs/operations/MVP_COMPLETED_WORK_REVIEW_2026-11-27.md), [3](../docs/operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md) |
 | legal-operator: Skutečný provozovatel a kontakty podpory | implementation | ⬜ | — |
 | legal-review: Právní kontrola veřejných textů | verification | ⬜ | — |
 | legal-subject-rights: Postup práv subjektů údajů a provozní odpovědnost | acceptance | ⬜ | — |

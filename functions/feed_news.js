@@ -13,6 +13,7 @@ import { scanFeedNews } from './feed_news_scan.js';
 import { verifyNode } from './feed_block_index.js';
 import { admitNewsRead, captureNewsSignals, newsControl } from './feed_news_signals.js';
 import { measureNewsReads } from './feed_news_meter.js';
+import { readPublicAuthorAvailability } from './public_author_availability.js';
 
 const codecFor = key => feedCursorCodec({ key: createHmac('sha256', key).update('shoutout-b4-news-v1').digest() });
 const stamp = value => [value.seconds, value.nanoseconds];
@@ -90,9 +91,8 @@ export async function getFeedNewsOperation(request, db, { key, enabled = false, 
         if (!first.length) return [];
         const blocked = await tx.get(db.collection(`users/${uid}/blocked`).limit(200)), blockedIds = new Set(blocked.docs.map(doc => doc.id));
         const authors = [...new Set(first.map(row => row.authorId))];
-        const profiles = authors.length ? await tx.getAll(...authors.map(id => db.doc(`publicProfiles/${id}`))) : [];
-        const erased = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
-        return first.filter(row => !blockedIds.has(row.authorId) && !erased.has(row.authorId));
+        const { unavailable } = await readPublicAuthorAvailability(tx, db, authors);
+        return first.filter(row => !blockedIds.has(row.authorId) && !unavailable.has(row.authorId));
       } });
   }, { readOnly: true, readTime: captureTime });
   observeMetrics(result.metrics);
@@ -110,12 +110,11 @@ export async function getFeedNewsOperation(request, db, { key, enabled = false, 
       for (const [id, row] of rows) headers.set(id, row);
     }
     const authors = [...new Set(result.rows.map(row => row.authorId))];
-    const profiles = authors.length ? await tx.getAll(...authors.map(id => db.doc(`publicProfiles/${id}`))) : [];
-    const erased = new Set(profiles.filter(doc => doc.get('accountStatus') === 'deleted').map(doc => doc.id));
+    const { unavailable } = await readPublicAuthorAvailability(tx, db, authors);
     const states = result.rows.length ? await tx.getAll(...result.rows.map(row => store.base.collection('publicStates').doc(row.id))) : [];
     result.rows.forEach((old, i) => {
       const row = headers.get(old.id);
-      if (!row || row.selectionVersion !== old.selectionVersion || !eligible(row, now()) || blockedIds.has(row.authorId) || erased.has(row.authorId) ||
+      if (!row || row.selectionVersion !== old.selectionVersion || !eligible(row, now()) || blockedIds.has(row.authorId) || unavailable.has(row.authorId) ||
           !states[i].exists || !after(states[i].createTime, base.snapshot.readTime)) abort();
     });
     return { count: result.rows.length, validUntil: Math.min(decoded.expiresAt, ...result.rows.map(row => row.expiresAt)) };

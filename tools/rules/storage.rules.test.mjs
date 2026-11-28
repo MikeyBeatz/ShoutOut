@@ -78,3 +78,23 @@ test('retired staff cannot read bug screenshots without spending another Firesto
  await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'accountRoles/support'),{role:'administrator',level:5}));
  await assertSucceeds(getBytes(ref(actor('support').storage(),path)));
 });
+
+test('support screenshot reads honor temporary/permanent bans within two bridge documents; own access survives',async()=>{
+ const path='bugReports/reporter/ban-check/screenshot', ownPath='bugReports/support/own/screenshot';
+ await env.withSecurityRulesDisabled(async c=>{
+  await setDoc(doc(c.firestore(),'accountRoles/support'),{role:'administrator',level:5});
+  for(const name of [path,ownPath])await uploadBytes(ref(c.storage(),name),new Uint8Array([1,2,3]),{contentType:'image/png'});
+ });
+ const foreign=()=>getBytes(ref(actor('support').storage(),path));
+ await assertSucceeds(foreign());
+ for(const expiresAt of [new Date(Date.now()+86400000),null,'invalid']){
+  await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'bans/support'),{expiresAt}));
+  await assertFails(foreign());
+  await assertSucceeds(getBytes(ref(actor('support').storage(),ownPath)));
+ }
+ await env.withSecurityRulesDisabled(c=>setDoc(doc(c.firestore(),'bans/support'),{expiresAt:new Date(0)}));
+ await assertSucceeds(foreign());
+ await env.withSecurityRulesDisabled(c=>deleteDoc(doc(c.firestore(),'bans/support')));
+ await assertSucceeds(foreign());
+ await assertFails(getBytes(ref(actor('support',false).storage(),path)));
+});

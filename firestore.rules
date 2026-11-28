@@ -14,6 +14,10 @@ rules_version = '2';
 // creation and reports/commentReports/privateReplyReports creation are written
 // only by Admin callables. Their existing schemas/read/moderation rules below
 // remain valid; legacy validated writes apply only outside that managed state.
+// users/{uid}/notifications: managed event create/update is server-owned;
+// the eligible recipient retains only its own validated readAt update.
+// Foreign staff status/profile reads require eligibleModerator(); own status
+// reads remain available to the banned/pending actor for recovery screens.
 // Private reply deletion is intentionally a separate lifecycle cutover.
 // Moderation authority prototype: sanctions, active bindings, revocations,
 // clearances and content-report decisions become server-owned when the
@@ -627,7 +631,7 @@ service cloud.firestore {
 
     match /contentRestrictions/{userId} {
       allow get: if signedIn() &&
-        (request.auth.uid == userId || isModerator());
+        (request.auth.uid == userId || eligibleModerator());
       allow create, update: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
@@ -774,7 +778,7 @@ service cloud.firestore {
 
     match /bans/{userId} {
       allow get: if signedIn() &&
-        (request.auth.uid == userId || isModerator());
+        (request.auth.uid == userId || eligibleModerator());
       allow create, update: if !managedModerationAuthority() && eligibleModerator() &&
         request.resource.data.keys().hasOnly([
           'userId', 'reason', 'createdAt', 'expiresAt', 'moderatorId',
@@ -843,7 +847,7 @@ service cloud.firestore {
 
     match /accountDeletionRequests/{userId} {
       allow get: if signedIn() &&
-        (request.auth.uid == userId || isModerator());
+        (request.auth.uid == userId || eligibleModerator());
       // Server finalization commits the request only after checking preparation.
       // Lost acknowledgements resume this same request; no client rollback.
       allow create, update, delete, list: if false;
@@ -851,7 +855,7 @@ service cloud.firestore {
 
     match /businessApplications/{userId} {
       allow get: if signedIn() &&
-        (request.auth.uid == userId || isModerator());
+        (request.auth.uid == userId || eligibleModerator());
       allow create: if signedIn() &&
         request.auth.uid == userId &&
         request.auth.token.email is string &&
@@ -990,7 +994,7 @@ service cloud.firestore {
 
     match /businessProfiles/{userId} {
       allow get: if verifiedIdentity() &&
-        (request.auth.uid == userId || isModerator());
+        (request.auth.uid == userId || eligibleModerator());
       allow update: if eligibleUser() &&
         request.auth.uid == userId &&
         isBusinessAccount() &&
@@ -1563,7 +1567,9 @@ service cloud.firestore {
         allow get: if eligibleUser() && request.auth.uid == userId;
         allow list: if eligibleUser() &&
           request.auth.uid == userId && limited(50);
-        allow create: if eligibleUser() && validClientNotification() &&
+        // Managed content events are produced only by the server operation.
+        // Keep recipient read receipts independent of this legacy writer gate.
+        allow create: if !managedFeedProjection() && eligibleUser() && validClientNotification() &&
           request.resource.data.eventCount == 1;
         allow update: if eligibleUser() &&
           (
@@ -1574,7 +1580,7 @@ service cloud.firestore {
               request.resource.data.readAt == request.time
             ) ||
             (
-              validClientNotification() &&
+              !managedFeedProjection() && validClientNotification() &&
               request.resource.data.eventCount ==
                 resource.data.get('eventCount', 0) + 1
             )
