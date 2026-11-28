@@ -8,6 +8,12 @@ sdílí s prezentací. Samostatný je Hosting site aplikace, nikoli další proj
 
 ## Business loga
 
+[F-03 – schválená místní příprava](../plans/BUSINESS_LOGO_SAFETY.md) doplňuje
+serverové dekódování PNG, řízení jedné aktuální verze/jedné náhrady a úklid.
+Klient i kandidátní Rules jsou vypnuté, bez nasazení. Následující body
+popisují dosavadní živý tok; kontrola skutečných pixelů a spolehlivý úklid
+jeho součástí zatím nejsou.
+
 - Aktivní Business účet může uložit vlastní logo na cestu
   `businessLogos/{uid}/logo-{version}.png`. Klient vytváří čtvercové PNG o
   rozměrech 512 × 512 px; Storage Rules přijímají soubor do 2 MiB.

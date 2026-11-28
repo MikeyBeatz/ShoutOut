@@ -13,6 +13,11 @@ bez rozšíření oprávnění k archivnímu obsahu či rozhodnutím.
 Společná regrese zůstává navazující prací. Níže jsou i historické výsledky příprav.
 Produkční aktivace a celková MVP regrese zůstávají otevřené.
 
+Navazuje schválený [místní F-03 – bezpečné Business logo](plans/BUSINESS_LOGO_SAFETY.md):
+serverový PNG/slot/úklid, vypnutý klient a kandidátní Rules, bez nasazení.
+F-05 vlastník upřesnil na svobodný výběr adresy nebo oblasti/města firmou;
+další dokazování adresy či přítomnosti se nevyžaduje a stávající pobočky se nemění.
+
 <a id="archive-identity-local-integration"></a>
 ## Společná místní integrace archivu a kontaktního indexu
 

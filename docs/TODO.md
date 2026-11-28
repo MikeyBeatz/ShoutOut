@@ -50,8 +50,11 @@ obsah odstraněný, původní obsah/žádosti a 8 sedmidenních potvrzení zacho
 Celá společná regrese moderace zůstává otevřená; pevné váhy se nemění.
 
 1. Dokončit zbývající již otevřenou moderaci a Business:
-   důvěryhodné pobočky F-05, současná loga F-03 a geografie mvp-13.
-   Konkrétní poskytovatele, upload a provozní meze schválit před implementací.
+   [schválená místní příprava současných log F-03](plans/BUSINESS_LOGO_SAFETY.md)
+   a geografie mvp-13. Přepínače zůstávají vypnuté; provozní meze a DEV
+   zapojení schválit zvlášť. F-05 je produktově upřesněné: firma si volí
+   přesnou adresu nebo oblast/město sama, bez dalšího ověřování; funkční
+   výběr poboček se nemění.
 2. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;
    poté společný ruční blok mvp-20 a startovní brána mvp-24. Pro 5 000 aktivních
    uživatelů zatím nejsou cloudové důkazy. Ruční testy seskupit až po opravách.

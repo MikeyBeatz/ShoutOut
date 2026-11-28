@@ -6,6 +6,17 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 
 ## Další konkrétní krok
 
+**Probíhá schválený místní F-03 – Business logo**, větev
+`feature/business-logo-local`. [Rozsah, protokol, měření a hranice](plans/BUSINESS_LOGO_SAFETY.md).
+Serverové dekódování PNG/řízení náhrady/úklid a klientský adaptér jsou
+připravené; všechny přepínače a Rules brány zůstávají false, bez wrapperu,
+nasazení nebo živých dat. Cíleně prošlo 5 obrazových/Storage unit testů,
+16 emulátorových testů bez skipů, 42 Flutter testů, analyze/lint/format,
+38 nástrojových testů včetně artefaktů. Úplné CI tohoto zdroje ještě čeká.
+F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
+(i samotné město), bez dalšího ověřování. Současný výběr se nemění;
+nepřipravuje se serverové dokazování adresy/přítomnosti firmy.
+
 **Schválená oprava F-01/F-02/F-06 je hotová a ověřená v DEV.**
 [Rozsah, testy, náklady a skutečné nasazení](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md).
 Privilegované cizí Firestore gety používají existující eligibleModerator,
@@ -36,10 +47,11 @@ uklizeno, bez zbývajících případů/členů/rozpracovaných rozhodnutí.
 Původní 1 Shout a 3 účtové žádosti mají nezměněné updateTime; všech 8
 technických potvrzení zachováno do původního sedmidenního termínu.
 Žádné nové Auth; Rules, prostředky a plánovače se neměnily.
-F-03/F-05 a úplná společná regrese nejsou součástí uzavření F-04.
+F-03 a úplná společná regrese nejsou součástí uzavření F-04;
+produktové upřesnění F-05 je uvedené výše.
 
-Další stávající MVP práce: důvěryhodné Business
-pobočky/loga, geografie, produkční kapacita a provozní/startovní brána.
+Další stávající MVP práce: bezpečné Business logo,
+geografie, produkční kapacita a provozní/startovní brána.
 Nejde o nové produktové odbočky. Společná ruční regrese mvp-20 a rozhodnutí
 mvp-24 zůstávají otevřené; známé vady mají přednost před dalším ručním pilotem.
 

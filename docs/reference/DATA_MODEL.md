@@ -252,10 +252,11 @@ Business Rules a živé dokumenty zatím změněné nejsou.
 | `businessApplications/{uid}` | `countryCode`, `registrationNumber`, `submittedCompanyName`, fakturační adresa, `initialLocationName`, adresa a země provozovny, `initialLocation`, `initialLocationGeohash`, `initialLocationProviderPlaceId`, `contactEmail`, `status`, `submittedAt`; po ruční aktivaci `activatedAt`, `activatedBy`, `activationMethod` | Žádost vzniká ve stavu `pending_email`, po ověření přechází do `checking`. Administrátor nebo owner ji může ručně schválit; vývojový Admin SDK nástroj zvládá jen ověřený `pending_email`. Zamítnutí a pozastavení zatím chybí. |
 | `businessActivationAudits/{id}` | `applicationId`, `administratorId`, `action: activate`, `createdAt` | Neměnný audit ruční aktivace Business účtu z administrátorského rozhraní. |
 | `businessProfiles/{uid}` | `displayName`, `officialName`, `registrationNumber`, `vatId`, `countryCode`, `registryAddress`, `billingCity`, `billingPostalCode`, `billingEmail`, `status`, časová pole | Aktivní firemní profil a společné fakturační údaje. Roli a profil vytváří důvěryhodný administrátorský zápis pod kontrolou Rules nebo vývojový Admin SDK nástroj; běžný klient smí měnit jen vybrané kontaktní a zobrazované údaje. Název pole `registryAddress` neznamená automatické ověření registru. |
-| `businessProfiles/{uid}/locations/{locationId}` | `displayName`, `address`, `active`, `deleted`, `geocodingStatus`, `location`, `geohash`, `providerPlaceId`, `countryCode`, `createdAt`, `updatedAt` | Pobočka/provozovna. Ověřená adresa má `geocodingStatus: verified`; pozastavení mění `active`, odstranění je soft-delete přes `deleted`. |
+| `businessProfiles/{uid}/locations/{locationId}` | `displayName`, `address`, `active`, `deleted`, `geocodingStatus`, `location`, `geohash`, `providerPlaceId`, `countryCode`, `createdAt`, `updatedAt` | Firmou zvolená provozovna/oblast působení, i samotné město. `geocodingStatus: verified` označuje vybraný mapový výsledek, ne serverové dokazování adresy. Pozastavení mění `active`, odstranění je soft-delete přes `deleted`. |
+| `businessProfiles/{uid}/logoState/current` (místně, vypnuté) | `version`, `pending` (operace/fingerprint/inkarnace/cesty/generace/termíny/fáze), `cleanupAt` | Soukromý journal jedné náhrady loga; neobsahuje obrázek, e-mail ani token. [Místní F-03](../plans/BUSINESS_LOGO_SAFETY.md), bez živé aktivace. |
 
 Při Business Shoutu musí `businessLocationId`, zobrazované jméno, bod a geohash
-přesně odpovídat aktivní, nesmazané a ověřené provozovně. Sídlo firmy nikdy
+přesně odpovídat aktivní, nesmazané provozovně s vybranou mapovou polohou. Sídlo firmy nikdy
 automaticky nenahrazuje první provozovnu.
 
 Ruční schválení v administrátorském rozhraní používá deterministické ID první

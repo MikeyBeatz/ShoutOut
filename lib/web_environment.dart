@@ -14,6 +14,14 @@ class WebEnvironment {
       throw StateError('Choose a configured dev or prod web environment.');
     }
     final key = json['appCheckSiteKey'];
+    if (json.containsKey('serverBusinessLogo') &&
+        json['serverBusinessLogo'] is! bool) {
+      throw StateError('serverBusinessLogo must be a boolean.');
+    }
+    serverBusinessLogo = json['serverBusinessLogo'] == true;
+    if (serverBusinessLogo && (name != 'dev' || key == null)) {
+      throw StateError('Server Business logos require checked DEV App Check.');
+    }
     if (json.containsKey('archiveDisclosureEnabled') &&
         json['archiveDisclosureEnabled'] is! bool) {
       throw StateError('archiveDisclosureEnabled must be a boolean.');
@@ -410,6 +418,7 @@ class WebEnvironment {
   late final bool serverPublicReportRemoval;
   late final bool serverContentSanctions;
   late final bool serverBusinessReview;
+  late final bool serverBusinessLogo;
   late final bool serverModerationQueue;
   late final bool serverShoutDeletion;
   late final bool serverAccountDeletionPreparation;

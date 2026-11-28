@@ -235,6 +235,20 @@ final _serverContentOperations = TimedOperationGateway(
   },
 );
 
+bool get _useServerBusinessLogo => kIsWeb
+    ? WebEnvironment.current.serverBusinessLogo
+    : const bool.fromEnvironment('SERVER_BUSINESS_LOGO');
+
+final _businessLogos = BusinessLogoGateway(
+  currentUserId: () => FirebaseAuth.instance.currentUser?.uid,
+  send: (request) => _serverContentOperations.call(
+    attempt: request.attempt,
+    userId: request.userId,
+    operation: 'updateBusinessLogo',
+    payload: request.toPayload(),
+  ),
+);
+
 bool get _useServerModerationQueue => kIsWeb
     ? WebEnvironment.current.serverModerationQueue
     : const bool.fromEnvironment('SERVER_MODERATION_QUEUE');

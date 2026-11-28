@@ -21,6 +21,30 @@ Map<String, dynamic> gatewayFixture() => {
 
 void main() {
   test(
+    'Business logo processing stays off and only accepts checked DEV App Check',
+    () {
+      final config = gatewayFixture();
+      expect(WebEnvironment.fromJson(config).serverBusinessLogo, false);
+      expect(
+        WebEnvironment.fromJson({
+          ...config,
+          'serverBusinessLogo': true,
+        }).serverBusinessLogo,
+        true,
+      );
+      for (final patch in [
+        {'serverBusinessLogo': 'true'},
+        {'serverBusinessLogo': true, 'environment': 'prod'},
+        {'serverBusinessLogo': true, 'appCheckSiteKey': null},
+      ]) {
+        expect(
+          () => WebEnvironment.fromJson({...config, ...patch}),
+          throwsStateError,
+        );
+      }
+    },
+  );
+  test(
     'moderation queue is off and requires the complete managed DEV stack',
     () {
       final config =

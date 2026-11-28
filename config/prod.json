@@ -13,5 +13,6 @@
     "projectId": "shoutout-production-a1b34",
     "authDomain": "shoutout-production-a1b34.firebaseapp.com",
     "storageBucket": "shoutout-production-a1b34.firebasestorage.app"
-  }
+  },
+  "serverBusinessLogo": false
 }

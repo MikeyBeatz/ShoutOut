@@ -29,6 +29,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Local prototype: logo paths/versions are server-owned only after cutover.
+    function managedBusinessLogos() {
+      return false; // business-logo-gate
+    }
+
+    function clientLogoCreate(data) {
+      return !managedBusinessLogos() ||
+        !data.keys().hasAny(['businessLogoPath', 'businessLogoVersion']);
+    }
+
+    function clientLogoUpdate() {
+      return !managedBusinessLogos() ||
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['businessLogoPath', 'businessLogoVersion']);
+    }
+
     function verifiedIdentity() {
       return signedIn() &&
         request.auth.token.email_verified == true &&
@@ -1183,7 +1199,7 @@ service cloud.firestore {
 
     match /publicProfiles/{userId} {
       allow get: if eligibleUser();
-      allow create: if verifiedIdentity() &&
+      allow create: if clientLogoCreate(request.resource.data) && verifiedIdentity() &&
         hasAcceptedLegal() &&
         !hasActiveBan() &&
         !deletionPending() &&
@@ -1198,7 +1214,7 @@ service cloud.firestore {
             ).data.role
           )
         );
-      allow update: if eligibleUser() &&
+      allow update: if clientLogoUpdate() && eligibleUser() &&
         request.auth.uid == userId &&
         resource.data.get('accountStatus', 'active') != 'deleted' &&
         validPublicProfile(userId, request.resource.data) &&
@@ -1210,7 +1226,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if verifiedIdentity() &&
         (request.auth.uid == userId || eligibleModerator());
-      allow create: if verifiedIdentity() &&
+      allow create: if clientLogoCreate(request.resource.data) && verifiedIdentity() &&
         hasAcceptedLegal() &&
         !hasActiveBan() &&
         !deletionPending() &&
@@ -1231,7 +1247,7 @@ service cloud.firestore {
         getAfter(
           /databases/$(database)/documents/nicknames/$(request.resource.data.nicknameLower)
         ).data.uid == request.auth.uid;
-      allow update: if eligibleUser() &&
+      allow update: if clientLogoUpdate() && eligibleUser() &&
         request.auth.uid == userId &&
         (
           (

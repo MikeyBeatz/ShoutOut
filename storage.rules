@@ -2,6 +2,15 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    function managedBusinessLogos() {
+      return false; // business-logo-gate
+    }
+
+    function currentBusinessLogo(userId, fileName) {
+      return !managedBusinessLogos() ||
+        firestore.get(/databases/(default)/documents/publicProfiles/$(userId))
+          .data.get('businessLogoPath', '') == 'businessLogos/' + userId + '/' + fileName;
+    }
     // Role-based paths use the official Storage Rules to Firestore bridge.
     function signedIn() {
       return request.auth != null && request.auth.token.email_verified == true;
@@ -39,13 +48,13 @@ service firebase.storage {
     }
 
     match /businessLogos/{userId}/{fileName} {
-      allow read: if signedIn() && visibleLogoOwner(userId);
-      allow create, update: if businessOwner(userId) &&
+      allow read: if signedIn() && visibleLogoOwner(userId) && currentBusinessLogo(userId, fileName);
+      allow create, update: if !managedBusinessLogos() && businessOwner(userId) &&
         fileName.matches('logo-[0-9]+\\.png') &&
         request.resource.size > 0 &&
         request.resource.size <= 2 * 1024 * 1024 &&
         request.resource.contentType == 'image/png';
-      allow delete: if businessOwner(userId);
+      allow delete: if !managedBusinessLogos() && businessOwner(userId);
     }
 
     match /bugReports/{userId}/{reportId}/screenshot {

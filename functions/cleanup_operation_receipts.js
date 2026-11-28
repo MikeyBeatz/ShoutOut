@@ -1,7 +1,7 @@
 import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { legacyOperationKeysAccepted, operationRetryWindowMillis } from './operation_retention.js';
 
-const actions = new Set(['cleanupLegacyArchiveFixtures', 'createShout', 'createComment', 'createPrivateReply', 'toggleShoutReaction',
+const actions = new Set(['updateBusinessLogo', 'cleanupLegacyArchiveFixtures', 'createShout', 'createComment', 'createPrivateReply', 'toggleShoutReaction',
   'toggleCommentReaction', 'toggleShoutSave', 'createContentReport', 'deleteComment', 'deletePrivateReply', 'deleteShout', 'prepareAccountDeletion', 'removeReportedPrivateReply', 'decideContentReports', 'decideModerationCase', 'removeReportedPublicContent', 'sanctionContent', 'revokeSanction', 'resolveUnavailableContentReports', 'reviewBusinessApplication']);
 
 export function receiptMayBePurged(data, now) {

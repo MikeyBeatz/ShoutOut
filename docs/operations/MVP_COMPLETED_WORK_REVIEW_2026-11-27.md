@@ -123,6 +123,13 @@ zde samostatně reprodukovaná na 51 postizích.
 
 ### F-05 – střední priorita: klient může sám označit souřadnice pobočky za ověřené
 
+**Produktové upřesnění vlastníka 28.11.2026:** firma si smí zvolit přesnou
+adresu nebo oblast působení (i samotné město) bez dalšího dokazování. Funkční
+výběr zůstává; serverové ověřování adresy/přítomnosti se nezavádí. Následující
+reprodukce zůstává historickým faktem, ale podle upřesněného požadavku není
+sama o sobě závadou. `verified` je dosavadní název vybraného mapového výsledku,
+nikoli doklad skutečné provozovny. [Aktuální vymezení](../plans/BUSINESS_LOGO_SAFETY.md).
+
 **Fakt:** Rules vlastnímu Business účtu dovolují uložit pobočku
 s `geocodingStatus: verified`, `location`, `geohash` a textovým
 `providerPlaceId`. [create_shout.js](../../functions/create_shout.js)

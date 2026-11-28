@@ -27,9 +27,12 @@ Oprava kontrastu a Profilu i reaktivace jsou potvrzené uživatelem. Živý pilo
 potvrdil nové odeslání; konkrétní změnu názvu uživatel při tomto průchodu
 neprovedl, proto ji nevydáváme za samostatně živě ověřenou editaci.
 
-Souhrnná revize ponechává otevřené důvěryhodné ověření souřadnic poboček
-a bezpečné ukládání nynějších log (F-05/F-03). Schválení firmy samo o sobě
-neprokazuje autoritu libovolného klientského providerPlaceId.
+Vlastník 28.11. upřesnil F-05: firma si sama volí provozovnu nebo oblast
+působení, včetně samotného města, bez dalšího ověřování adresy či přítomnosti.
+Sídlo je samostatný fakturační údaj. Současný výběr měst funguje a zůstává;
+`geocodingStatus: verified` zde neprokazuje skutečné působení firmy.
+[Bezpečné ukládání současných log F-03](../plans/BUSINESS_LOGO_SAFETY.md)
+má schválenou pouze místní přípravu, bez DEV aktivace.
 
 ## Zásady kontroly
 
@@ -56,7 +59,7 @@ v současném toku nevyžadují.
    skutečného Auth e-mailu a důvod zamítnutí/pozastavení. Oprava zůstane na
    stejném účtu bez Business oprávnění do nového schválení. Audit má pouze
    původní applicationId/administratorId vazby a snímky stavu/verze, nikoli
-   kopie historických identit. Živý přechod ještě neproběhl.
+  kopie historických identit. Tento tok má doložený DEV přechod podle úvodu.
 
 Přidělení a odebrání role zůstává důvěryhodnou operací. Veřejný odznak nesmí
 slibovat právní ověření vlastnictví firmy.
@@ -69,8 +72,9 @@ veřejným názvem a adresou. Shodná adresa sídla a provozovny je povolená, a
 žadatel ji musí zadat nebo potvrdit samostatně. Jeden Business účet může mít
 více poboček pod stejným registračním číslem.
 
-- Současný klient přebírá souřadnice vybraného návrhu Geoapify. Před veřejným
-  vydáním je třeba dokončit důvěryhodnou kontrolu adresy a polohy.
+- Současný klient přebírá souřadnice vybraného návrhu Geoapify. Firma volí
+  přesnou adresu nebo oblast (například město); další dokazování se nevyžaduje.
+  Oblast je pro nynější feed zastoupená vybraným mapovým bodem.
 - Při tvorbě Shoutu se vybírá pobočka; pokud existuje jen jedna, vybere se
   automaticky.
 - Shout nese ID pobočky a neměnný snímek její polohy pro feed a moderaci.

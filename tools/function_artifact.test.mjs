@@ -29,6 +29,9 @@ test('both real artifacts include runtime dependency closure and exclude all lab
     assert(!actual.includes('private_reply_deletion_pilot.js'));
     assert(!actual.includes('private_report_removal_pilot.js'));
     assert(!actual.includes('moderation_business_pilot.js'));
+    for (const name of ['business_logo.js', 'business_logo_image.js', 'business_logo_storage.js', 'business_logo_orphans.js']) {
+      assert(!actual.includes(name), 'Local logo preparation must not enter an active Function artifact.');
+    }
     assert.equal(actual.includes('business_review.js'), entry === 'content.js');
     assert.equal(actual.includes('decide_content_reports.js'), entry === 'content.js');
     assert(!actual.includes('content_report_decision_pilot.js'));

@@ -35,7 +35,7 @@ Oprávnění nadále vynucují serverová pravidla.
 - Veřejná identita autora se načítá z `publicProfiles/{uid}`. Kopie avataru a
   přezdívky v obsahu je pouze historický fallback.
 - Běžný Shout používá polohu zařízení zaokrouhlenou funkcí
-  `publicLocationCoordinate`; Business Shout používá ověřenou polohu pobočky.
+  `publicLocationCoordinate`; Business Shout používá firmou zvolenou mapovou polohu pobočky/oblasti.
 - Business Shout ukládá jako `authorNickname` pouze název vybrané pobočky, její
   ID a značku `businessAuthorFormat: branch`. U starších dokumentů bez značky
   klient při zobrazení odstraní historickou předponu „firma –“, takže není nutná
@@ -180,7 +180,7 @@ dostupnosti.
 - Publikování běžného Shoutu polohu vyžaduje.
 - Do Shoutu se ukládá zaokrouhlený veřejný bod a sedmimístný geohash, ne historie
   pohybu.
-- Business účet musí vybrat aktivní, nesmazanou a ověřenou pobočku. Klient ani
+- Business účet musí vybrat aktivní, nesmazanou pobočku s vybranou mapovou polohou. Klient ani
   pravidla nedovolí přepsat její polohu při publikování.
 - Role 3–6 mohou v pracovním prostoru změnit bod náhledu, ale náhradní poloha
   nesmí ovlivnit publikování ani moderátorský rozsah.

@@ -36,5 +36,6 @@
     "projectId": "shoutout-dev-46c81",
     "authDomain": "shoutout-dev-46c81.firebaseapp.com",
     "storageBucket": "shoutout-dev-46c81.firebasestorage.app"
-  }
+  },
+  "serverBusinessLogo": false
 }

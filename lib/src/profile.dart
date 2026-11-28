@@ -706,7 +706,20 @@ class EditProfilePage extends StatelessWidget {
                                             : null,
                                       ),
                                     );
-                                if (selected == null) return;
+                                if (selected == null || !context.mounted) {
+                                  return;
+                                }
+                                if (_useServerBusinessLogo &&
+                                    profile['businessLogoPath'] != null) {
+                                  await _storeServerBusinessLogo(
+                                    context,
+                                    userId,
+                                    avatar: Map<String, String>.from(
+                                      selected.toFirestore(),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 try {
                                   final db = FirebaseFirestore.instance;
                                   final oldLogoPath =
@@ -832,6 +845,9 @@ class EditProfilePage extends StatelessWidget {
     Map<String, dynamic> profile,
     String nickname,
   ) async {
+    if (_useServerBusinessLogo) {
+      return _storeServerBusinessLogo(context, userId, bytes: bytes);
+    }
     final version = DateTime.now().millisecondsSinceEpoch;
     final path = 'businessLogos/$userId/logo-$version.png';
     final reference = FirebaseStorage.instance.ref(path);
@@ -886,6 +902,61 @@ class EditProfilePage extends StatelessWidget {
       ).showSnackBar(SnackBar(content: Text(businessTr(context, message))));
       return false;
     }
+  }
+}
+
+Future<bool> _storeServerBusinessLogo(
+  BuildContext context,
+  String uid, {
+  Uint8List? bytes,
+  Map<String, String>? avatar,
+}) async {
+  try {
+    await _businessLogos.update(uid, png: bytes, avatar: avatar);
+    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            businessTr(
+              context,
+              bytes == null
+                  ? 'Avatar byl uložen.'
+                  : 'Business logo bylo uložené.',
+            ),
+          ),
+        ),
+      );
+    }
+    return true;
+  } on FirebaseException catch (e) {
+    debugPrint('Business logo request failed: code=${e.code}');
+    if (context.mounted && FirebaseAuth.instance.currentUser?.uid == uid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            businessTr(
+              context,
+              'Logo se nepodařilo uložit. Zkontroluj připojení a zkus to znovu.',
+            ),
+          ),
+          action: _businessLogos.hasPending(uid)
+              ? SnackBarAction(
+                  label: tr(context, 'Zkusit znovu'),
+                  onPressed: () async {
+                    try {
+                      await _businessLogos.retry(uid);
+                    } on FirebaseException catch (retry) {
+                      debugPrint(
+                        'Business logo retry failed: code=${retry.code}',
+                      );
+                    }
+                  },
+                )
+              : null,
+        ),
+      );
+    }
+    return false;
   }
 }
 
