@@ -1569,7 +1569,8 @@ service cloud.firestore {
           request.auth.uid == userId && limited(50);
         // Managed content events are produced only by the server operation.
         // Keep recipient read receipts independent of this legacy writer gate.
-        allow create: if !managedFeedProjection() && eligibleUser() && validClientNotification() &&
+        // Reject anonymous/unverified attempts before any control-document read.
+        allow create: if verifiedIdentity() && !managedFeedProjection() && eligibleUser() && validClientNotification() &&
           request.resource.data.eventCount == 1;
         allow update: if eligibleUser() &&
           (

@@ -29,6 +29,8 @@ oprávnění navíc. Produkce a main se nemění.
   autorizačního dokumentu či serverového downloadu tato oprava nezavádí.
 - **F-02:** při přítomnosti spravovaného feed controlu odmítnout klientský
   create/event update oznámení. Příjemcův update pouze `readAt` zůstává.
+  Anonymní/neověřený create se odmítne před čtením control dokumentu;
+  ověřený managed pokus končí před dražšími validačními čteními události.
   Serverové operace oznámení dál zapisují atomicky. V režimu bez controlu
   zůstává dosavadní validovaná cesta; pauza/rollback se nemaže control dokument.
 - **F-06:** společný dávkový čtecí helper ověřuje veřejný marker a existenci
@@ -74,10 +76,37 @@ banu vloženého po načtení saved snapshotu. Běhy mají překryv; jejich poč
 se nesčítají jako počet unikátních scénářů. Společné úplné CI přesného zdroje
 se doplní před nasazením.
 
+První úplný běh 46116557242 byl řízeně zrušen před nasazením po doplnění
+výše uvedeného ověření identity před control lookupem. Nejde o úspěšné
+finální CI; nasazení vyžaduje success navazujícího přesného commitu.
+Konečná podoba této Rules matice znovu prošla místně **15/15 bez skipů**,
+včetně anonymního/neověřeného create a všech níže uvedených útočných variant.
+
 Testy zahrnují dočasný/trvalý/vadný/prošlý ban, původní i legacy role,
 chybějící profil/právo, vlastní výjimky, podvržení role, cizí Business update,
 raw replay oznámení, pending příjemce, čtení serverového oznámení a zakázané
 změny jeho typu/aktéra/času/počtu/polí. Vše v emulátoru `shoutout-rules-test`.
+
+### Útočná kontrola Rules
+
+| Vektor | Konkrétní scénář v regresi |
+|---|---|
+| Veřejné listování | Anonymní dotaz na Business žádosti |
+| Neoprávněné čtení/zápis | Pět cizích staff get cest v neplatném stavu a cizí Business update |
+| Obejití přes update | Serverové oznámení přepsané příjemcem mimo jediné readAt |
+| Podvržení vlastníka při create | Vlastní udělení role a cizí actorId oznámení |
+| Podvržení vlastníka při update | Změna actorId uloženého serverového oznámení |
+| Změna neměnného času | Přepsání createdAt |
+| Typové poškození | Řetězec místo časového readAt |
+| Rozdíl create/update | Neúplný create a odstranění kind z platného serverového dokumentu |
+| Vyčerpání zdrojů | Velký actorNickname / nadbytečný text mimo povolený update; staticky také auth před control lookupem |
+| Chybějící povinná pole | Neúplné oznámení a deleteField(kind) |
+
+Povolené protějšky: způsobilá současná/legacy role, prošlý ban, vlastní
+stavové gety a příjemcovo readAt. Samotné zamítnutí útoku by bez těchto
+pozitivních scénářů nedokládalo funkční aplikaci. Prototyp pravidel tak
+ověřuje konkrétní hranice; před veřejným vydáním zůstává společná kontrola
+a startovní brána, nikoli tvrzení absolutní bezpečnosti.
 
 **Postup DEV:** po úspěšném úplném CI přesného commitu připravit čistý
 archivní active artefakt; pouze v `shoutout-dev-46c81` aktualizovat

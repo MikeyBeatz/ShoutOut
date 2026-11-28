@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { before, after, beforeEach, test } from 'node:test';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
-import { doc, getDocFromServer, setDoc, updateDoc, deleteDoc, collection, query, limit, getDocs,
+import { doc, getDocFromServer, setDoc, updateDoc, deleteDoc, deleteField, collection, query, limit, getDocs,
   writeBatch, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { archiveReleaseConfiguration } from '../archive_dev_release.mjs';
 
@@ -88,12 +88,17 @@ async function notices() {
 }
 test('managed mode denies raw event creation/replay for ordinary and pending recipients', async () => {
   const notice = await notices(), db = actor('writer');
+  await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(), 'users/recipient/notifications/reaction_like_audit'), notice));
+  await assertFails(setDoc(doc(actor('writer', false), 'users/recipient/notifications/reaction_like_audit'), notice));
   const attempt = () => {
     const batch = writeBatch(db);
     batch.set(doc(db, 'rateLimits/writer/actions/interaction'), { lastAt: serverTimestamp(), windowStartedAt: serverTimestamp(), lastEventId: 'shoutReaction_audit', count: 1 });
     batch.set(doc(db, 'users/recipient/notifications/reaction_like_audit'), notice); return batch.commit();
   };
   await assertFails(attempt());
+  for (const data of [{ ...notice, actorId: 'recipient' }, { readAt: serverTimestamp() }]) {
+    await assertFails(setDoc(doc(db, 'users/recipient/notifications/reaction_like_audit'), data));
+  }
   await seed([['accountDeletionRequests/recipient', { userId: 'recipient', status: 'pending' }]]);
   await assertFails(attempt());
 });
@@ -104,7 +109,8 @@ test('server notifications remain readable and only their eligible recipient mar
   const own = doc(actor('recipient'), path);
   await assertSucceeds(getDocFromServer(own)); await assertSucceeds(updateDoc(own, { readAt: serverTimestamp() }));
   for (const changes of [{ eventCount: 2 }, { actorId: 'recipient' }, { createdAt: serverTimestamp() },
-    { readAt: 'wrong-type' }, { readAt: serverTimestamp(), text: 'x'.repeat(100000) }]) {
+    { readAt: 'wrong-type' }, { kind: deleteField() }, { actorNickname: 'x'.repeat(100000) },
+    { readAt: serverTimestamp(), text: 'x'.repeat(100000) }]) {
     await assertFails(updateDoc(own, changes));
   }
   await assertFails(updateDoc(doc(actor('writer'), path), { readAt: serverTimestamp() }));
