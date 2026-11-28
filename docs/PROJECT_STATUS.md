@@ -15,10 +15,17 @@ Zdroj **e63837d904e16d961a8cfeaa5adb00ac477b92c4** má
 [úspěšné úplné CI 46164824318](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46164824318),
 včetně celé dosavadní regrese a web buildu. Cíleně prošlo 21 emulátorových,
 54 klientských, 2 Chrome IndexedDB a 150 nástrojových testů, analyze/lint/format.
-Žádné živé zápisy/inventura, Auth účty, klíče, změny plánovačů či prostředků.
-Následuje samostatně schválená čtecí DEV inventura a přesný přechod s rozpočtem
-společné úlohy, indexem, návratem a pilotem. Business milník ani MVP tím
-nejsou celé uzavřené. Předávací stav: `build/business-logo-handoff.json`.
+**Navazující čtecí DEV inventura je dokončená**, bez cloudových zápisů.
+[Výsledky a připravený společný přechod](plans/BUSINESS_LOGO_RUNTIME_READINESS.md#dev-read-only-inventory):
+0 logo referencí/objektů, žádný nový control, 1 cílený indexový návrh bez TTL;
+34 Functions, 2 původní minutové úlohy a vydaný web/Rules beze změny.
+Vzorek 50 běhů údržby: 50×200, medián 0,285 s, maximum 0,451 s; nejde o plnou zátěž.
+TestBusiness je připravený pro pilot bez nového Auth účtu nebo Shoutu.
+[Společný DEV návrh](plans/BUSINESS_LOGO_RUNTIME_READINESS.md#dev-rollout-proposal)
+čeká na nový souhlas: nové zapojení společného rozpočtu, 1 nová +1 stávající
+Function, 1 index, control, Rules/web a nejvýše 2 syntetická loga s návratem
+původního avataru. Zatím žádné nasazení, nové role, klíče, Auth ani fixture.
+Business milník/MVP nejsou celé uzavřené; předávací stav `build/business-logo-handoff.json`.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;
 nepřipravuje se serverové dokazování adresy/přítomnosti firmy.
