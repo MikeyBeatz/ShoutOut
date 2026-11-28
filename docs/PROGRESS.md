@@ -455,11 +455,11 @@ aplikační/serverová sada s webovým buildem. Tato změna nic nenasazuje.
 | moderation-production: Produkční aktivace moderace | acceptance | ⬜ | — |
 | business-deletion-fence-code: Ochrana Business aktivace proti návratu smazaného účtu – implementace | implementation | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
 | business-deletion-fence-check: Ochrana Business aktivace proti návratu smazaného účtu – automatické ověření | verification | ✅ | [1](../docs/plans/accounts/ACCOUNT_PUBLIC_IDENTITY_PLAN.md) |
-| business-endtoend: Dopracovat všechna zbývající Business kritéria | implementation | ⬜ | [1](../docs/plans/BUSINESS_LOGO_SAFETY.md) |
+| business-endtoend: Dopracovat všechna zbývající Business kritéria | implementation | ⬜ | [1](../docs/plans/BUSINESS_LOGO_SAFETY.md), [2](../functions/business_logo.js), [3](../functions/business_logo.integration.test.js), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387) |
 | business-endtoend-accept: Živá akceptace celého Business toku | acceptance | ⬜ | — |
 | business-promo-limit-code: Serverový limit současně aktivního firemního promo obsahu – implementace | implementation | ⬜ | — |
 | business-promo-limit-check: Serverový limit současně aktivního firemního promo obsahu – automatické ověření | verification | ⬜ | — |
-| business-authority-final: Úplná serverová oprávnění a produkční akceptace bezplatných funkcí | acceptance | ⬜ | [1](../docs/plans/BUSINESS_LOGO_SAFETY.md) |
+| business-authority-final: Úplná serverová oprávnění a produkční akceptace bezplatných funkcí | acceptance | ⬜ | [1](../docs/plans/BUSINESS_LOGO_SAFETY.md), [2](../functions/business_logo.js), [3](../functions/business_logo.integration.test.js), [4](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387) |
 | translation-full-audit: Audit všech sedmi jazyků a všech obrazovek | verification | ⬜ | — |
 | accessibility-audit: Audit přístupnosti webu | verification | ⬜ | — |
 | web-layout-accept: Mobilní/desktopové rozložení a vizuální regrese | acceptance | ⬜ | [1](../docs/operations/CONSOLE_WARNINGS.md#category-font-dev-rollout), [2](../tools/diagnostics/font_warning_probe.dart) |

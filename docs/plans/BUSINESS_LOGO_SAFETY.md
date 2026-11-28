@@ -145,8 +145,19 @@ Místně prošlo **5/5** unit testů obrazu/Storage adaptéru, **17/17**
 Firestore/Storage emulátorových testů bez skipů, **42/42** Flutter testů
 včetně původního editoru a konfigurace, Flutter analyze, formát a Functions
 lint. Nástrojová sada webového prostředí/artefaktů **38/38**; doplněná
-kontrola neaktivního modulového grafu znovu **3/3**. Úplné CI není tímto
-místním výsledkem nahrazené a jeho stav se doplní po pushi.
+kontrola neaktivního modulového grafu znovu **3/3**. Retenční okraj doplňuje
+samostatná cílená regrese. Opravený zdroj
+**3bcea522167999b9cdf7e8379bb3c837b6c9a45b** má
+[úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387):
+celá klientská/serverová sada, všechny Rules/archivní/purge/Storage kroky,
+nových 17 emulátorových testů a web build. První běh 46153656328 byl
+záměrně zrušen po nalezení a opravě předání publikovaných souborů účtovému
+purge; nepoužívá se jako úspěšný důkaz.
+
+Příprava je tímto místně uzavřená, ne živě aktivovaná. Důkazy doplňují
+otevřené `business-endtoend` a `business-authority-final`; celé jejich
+podmínky ani produkce ještě splněné nejsou. Pevné váhy se nezměnily a
+nevznikají zpětné body jen za přejmenování nálezu F-05.
 
 Do zámku přibyl pouze `sharp` a jeho platformní závislosti; verze
 dosavadních balíčků se nezměnily. Audit produkčních závislostí hlásí

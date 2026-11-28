@@ -50,9 +50,11 @@ obsah odstraněný, původní obsah/žádosti a 8 sedmidenních potvrzení zacho
 Celá společná regrese moderace zůstává otevřená; pevné váhy se nemění.
 
 1. Dokončit zbývající již otevřenou moderaci a Business:
-   [schválená místní příprava současných log F-03](plans/BUSINESS_LOGO_SAFETY.md)
-   a geografie mvp-13. Přepínače zůstávají vypnuté; provozní meze a DEV
-   zapojení schválit zvlášť. F-05 je produktově upřesněné: firma si volí
+   [místní příprava současných log F-03 je hotová](plans/BUSINESS_LOGO_SAFETY.md)
+   po úplném CI 46153914387 zdroje 3bcea52. Přepínače zůstávají vypnuté;
+   navazuje recovery prohlížeče a konkrétní provozní/DEV plán, odděleně
+   geografie mvp-13. Provozní meze a DEV zapojení schválit zvlášť.
+   F-05 je produktově upřesněné: firma si volí
    přesnou adresu nebo oblast/město sama, bez dalšího ověřování; funkční
    výběr poboček se nemění.
 2. Současný kapacitní model a provozní pojistky, právní/UX/překladové minimum;

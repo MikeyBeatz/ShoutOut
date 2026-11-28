@@ -6,13 +6,19 @@ před historickým plánem. [Priority](TODO.md), [úplné starší checkpointy](
 
 ## Další konkrétní krok
 
-**Probíhá schválený místní F-03 – Business logo**, větev
+**Schválený místní balík F-03 – Business logo je dokončený**, větev
 `feature/business-logo-local`. [Rozsah, protokol, měření a hranice](plans/BUSINESS_LOGO_SAFETY.md).
 Serverové dekódování PNG/řízení náhrady/úklid a klientský adaptér jsou
 připravené; všechny přepínače a Rules brány zůstávají false, bez wrapperu,
 nasazení nebo živých dat. Cíleně prošlo 5 obrazových/Storage unit testů,
 17 emulátorových testů bez skipů, 42 Flutter testů, analyze/lint/format,
-38 nástrojových testů včetně artefaktů. Úplné CI tohoto zdroje ještě čeká.
+38 nástrojových testů včetně artefaktů. Zdroj
+`3bcea522167999b9cdf7e8379bb3c837b6c9a45b` má
+[úspěšné úplné CI 46153914387](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46153914387)
+včetně celé klientské/serverové, Rules/archivní/purge/Storage sady a web buildu.
+Před DEV zbývá dořešit recovery po úplném zavření prohlížeče, schválit
+provozní limit/opuštění uploadu a připravit wrapper/worker/indexový plán,
+staré objekty, kompatibilní návrat a konkrétní pilot. Živý F-03 tím není uzavřený.
 F-05 vlastník upřesnil: firma si volí provozovnu nebo oblast působení
 (i samotné město), bez dalšího ověřování. Současný výběr se nemění;
 nepřipravuje se serverové dokazování adresy/přítomnosti firmy.
