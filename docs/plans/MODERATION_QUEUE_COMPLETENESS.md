@@ -47,8 +47,11 @@ Pauza nesmí otevřít starou cestu ani zastavit povinné retenční smazání.
   filtrační tokeny. Retenčně nepřístupný reprezentant nezpřístupní důvod.
   Povinné fyzické odstranění hlášení atomicky opravuje i počty/hranice.
 - Reader ověří Auth/App Check, aktuální způsobilost/roli a aktivní control.
-  V jedné transakci vybere nejvýše 50 hlaviček a malé maskované podklady,
-  nikdy plná těla. Kontroly účtových termínů jsou společné a dávkované.
+  V jedné transakci vybere nejvýše 50 hlaviček a malé maskované podklady.
+  Spravovaný obsahový archiv nevyžaduje plná těla. Výjimečný doložený starý
+  účtový formát používá původní ověřovač podkladu, který může na serveru
+  načíst tělo kvůli jeho původu a termínu; klientovi je nikdy nevrací.
+  Kontroly účtových termínů jsou společné a dávkované.
   Prázdná nefinální stránka může pokračovat, takže hraniční geografický filtr
   ani odložený fyzický úklid nezahodí zbytek seznamu.
 - Kurzory váže projekt databáze, účet, aktuální role, inkarnace/revize control,
@@ -136,12 +139,27 @@ Pokryté jsou přes 50 případů, 120 hlášení jednoho cíle, souběh, restar
 ztracená odpověď, změna role/oblasti, jediné provedení účinku, příchozí hlášení,
 archivní původ, částečná retence, ztráta rodičovského kontextu a rollback.
 
-Klientské cílené testy **15/15**, kompletní Flutter sada před posledním
-doplněním dvou regresí **614/614**, analýza bez nálezů. Functions jednotkové
-kontroly: **237 pass /944 skip /0 fail**; vynechané emulátorové případy
+Klientské cílené testy **15/15**, kompletní Flutter sada v CI **616/616**,
+analýza bez nálezů. Functions jednotkové kontroly v CI:
+**237 pass /945 skip /0 fail**; vynechané emulátorové případy
 nejsou vydávané za spuštěné, jejich matice má vlastní CI kroky.
-Nástroje/geo/retence/balíčky **48/48**, lint Functions bez chyb.
-Úplné CI přesného finálního zdroje zbývá před dokončením tohoto checkpointu.
+Nástroje/geo/retence/balíčky místně **48/48**, lint Functions bez chyb;
+úplná CI sada vývojových nástrojů **142/142**.
+
+**Úplné CI 46131153276 success** pro přesný zdroj
+`65c5b0b9ed7987039b054248f17db2b08a6b4306`:
+[běh a všechny kroky](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46131153276).
+Prošly i původní Rules/serverové transakce (500/500), archiv (194/194),
+nová fronta (32/32), původní rozhodnutí/sankce, B2, účtový purge (156/156),
+Storage (16/16), browserové kontroly, analýza/formát a DEV debug archive
+webové sestavení. Jednotlivé matice mohou opakovat stejný kód, proto je
+nesčítáme do údajně unikátního počtu scénářů. Nejde o živý Auth/App Check pilot,
+produkční build, kapacitní zkoušku ani živou migraci.
+
+Evidence stávajících příslušných úseků v progress.json aktualizována, pevné
+váhy a hotové fáze zachovány. Nová DEV aktivace a úplná ruční regrese se
+nezapočítávají jako hotové; MVP zůstává 62,26 %. Oprava dříve započteného
+kritéria nepřidává stejnou implementační váhu podruhé.
 
 ### Naměřené operace
 
@@ -187,6 +205,10 @@ Tento seznam je návrh dalšího společného úseku, **není souhlas se spušt�
    sanctionContent; dva účtové workery a cleanupOperationReceipts. Prostředky
    a stávající minutové plánovače neměnit. Zahrnout ověřené balíčky, přesné
    zdroje a prokázané doběhnutí původních revizí před živým převodem.
+   Aktivovaný prázdný reaper přidá podle připraveného kódu jednu control
+   a jednu prázdnou query operaci za běh; stávající interval zůstane minuta.
+   Před zapnutím změřit celé spojení s dosavadním retenčním runnerem a
+   ověřit časový rozpočet, nejen jeho samostatné části.
 4. Převzít všechny doložené pending reporty po nejvýše 50, auditovat počty,
    členství a hranice. Chybějící důkaz či nedoběhnutý writer přechod zastaví.
    Potom aktivovat reader a nový web. Přímý přístup k soukromé projekci dál

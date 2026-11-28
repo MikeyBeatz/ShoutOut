@@ -5,7 +5,8 @@ Aktuálně 28. listopadu: [DEV archivní pilot a úklid uzavřené](plans/accoun
 šest nálezů a otevřené brány jsou v protokolu. Vlastník následně schválil
 [opravu F-01/F-02/F-06](operations/MVP_AUTHORITY_READ_FIX_2026-11-28.md), která
 je hotová po úplném CI ec371188 a ověřeném DEV přechodu dvou čtecích Functions
-a Firestore/Storage Rules. Nyní probíhá schválený místní [F-04](plans/MODERATION_QUEUE_COMPLETENESS.md);
+a Firestore/Storage Rules. Schválený místní [F-04](plans/MODERATION_QUEUE_COMPLETENESS.md)
+je dokončený: zdroj 65c5b0b, úplné CI 46131153276 success, bez aktivace či nasazení;
 Q-01 je rozhodnuté: globální metadata a důvody s geografickými filtry,
 bez rozšíření oprávnění k archivnímu obsahu či rozhodnutím.
 Společná regrese zůstává navazující prací. Níže jsou i historické výsledky příprav.

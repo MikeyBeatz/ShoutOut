@@ -42,8 +42,10 @@ regrese zůstávají otevřené. Aplikace ani živé prostředí se při revizi 
 Pouze dvě čtecí Functions a Firestore/Storage Rules; žádné nové fixture/účty,
 změny webu, prostředků či plánovačů. Celé otevřené milníky tím uzavřené nejsou.
 
-1. Dokončit společné úplné CI schválené [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md)
-   (místní kontroly prošly) a předložit připravený DEV přechod. Q-01 rozhodnuté: globální metadata
+1. Projednat a po konkrétním schválení provést připravený DEV přechod
+   [moderační fronty F-04](plans/MODERATION_QUEUE_COMPLETENESS.md).
+   Místní úsek 65c5b0b má úplné CI 46131153276 success; nové cesty jsou
+   vypnuté. Q-01 rozhodnuté: globální metadata
    s filtrem města/oblasti/státu/geohashe; oprávnění k tělům a zásahům zachovaná.
    Nové cesty zůstávají vypnuté, dosavadní DEV se nemění.
 2. Dokončit zbývající již otevřenou moderaci a Business:

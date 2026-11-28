@@ -21,10 +21,13 @@ prostředky, indexy, joby, klíče ani živé fixture se neměnily.
 Q-01 vlastník rozhodl: globální metadata a důvody, volitelný filtr místa/geohashe;
 archivní tělo a rozhodnutí mají dál dnešní geografická oprávnění. Připravené
 stránky nejvýše 50 případů, atomická projekce a obnovitelné velké rozhodnutí,
-oba klientské vstupy i historie postihů jsou výchozí vypnuté. Místní sada
-32/32 bez skipů, skutečný účtový purge, klientské testy a analýza prošly;
-zbývá společné úplné CI. Žádné nové nasazení, živá migrace/data ani Auth účty.
-Po CI následuje připravený návrh DEV přechodu; F-03/F-05 nejsou
+oba klientské vstupy i historie postihů jsou výchozí vypnuté. Zdroj
+65c5b0b9ed7987039b054248f17db2b08a6b4306 má
+[úplné CI 46131153276 success](https://github.com/MikeyBeatz/ShoutOut/actions/runs/46131153276).
+32/32 nových emulátorových testů bez skipů, 616 Flutter testů, původní
+serverové/Rules/archivní regrese, analýza a DEV debug archive web build prošly.
+Žádné nové nasazení, živá migrace/data ani Auth účty.
+Následuje připravený návrh DEV přechodu; F-03/F-05 nejsou
 součástí tohoto úseku.
 
 Další stávající MVP práce: úplnost moderační fronty, důvěryhodné Business
